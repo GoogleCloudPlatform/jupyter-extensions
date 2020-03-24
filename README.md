@@ -3,6 +3,10 @@
 This repository provides a [ContentsManager](https://jupyter-notebook.readthedocs.io/en/stable/extending/contents.html)
 for Jupyter that stores notebook files in [Google Cloud Storage](https://cloud.google.com/storage).
 
+## Disclaimer
+
+This is not an officially supported Google product.
+
 ## Prerequisites
 
 You must have the GCS Python client library installed. You can
