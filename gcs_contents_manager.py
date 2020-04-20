@@ -78,6 +78,9 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
     checkpoint_id = 'checkpoint'
     blob = self.checkpoint_blob(checkpoint_id, path, create_if_missing=True)
     content_type = 'text/plain' if format == 'text' else 'application/octet-stream'
+    # GCS doesn't allow specifying the key version, so drop it if present
+    if blob.kms_key_name:
+        blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$', blob.kms_key_name)[0]
     blob.upload_from_string(content, content_type=content_type)
     return {
       'id': checkpoint_id,
@@ -373,6 +376,10 @@ class GCSContentsManager(ContentsManager):
       contents = model['content']
       if model['type'] == 'notebook':
         contents = nbformat.writes(nbformat.from_dict(contents))
+
+      # GCS doesn't allow specifying the key version, so drop it if present
+      if blob.kms_key_name:
+          blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$', blob.kms_key_name)[0]
 
       blob.upload_from_string(contents, content_type=content_type)
       return self.get(path, type=model['type'], content=False)
