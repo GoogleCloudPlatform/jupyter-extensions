@@ -65,7 +65,7 @@ from notebook.services.contents.filemanager import FileContentsManager
 from notebook.services.contents.manager import ContentsManager
 from notebook.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin
 from tornado.web import HTTPError
-from traitlets import Unicode, default, observe
+from traitlets import Unicode, default
 
 from google.cloud import storage
 
