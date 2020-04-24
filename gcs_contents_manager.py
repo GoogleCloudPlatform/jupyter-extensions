@@ -24,27 +24,48 @@
 # Usage: Add the following lines to your Jupyter config file
 # (e.g. jupyter_notebook_config.py):
 #
-#   from gcs_contents_manager import GCSContentsManager
-#   c.NotebookApp.contents_manager_class = GCSContentsManager
+#   from gcs_contents_manager import CombinedContentsManager, GCSContentsManager
+#   c.NotebookApp.contents_manager_class = CombinedContentsManager
 #   c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
 #   c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
+#   c.GCSContentsManager.project = '${NOTEBOOK_BUCKET_PROJECT}'
+#   c.FileContentsManager.root_dir = '${LOCAL_DISK_NOTEBOOK_DIR}'
 #
 # For '${NOTEBOOK_BUCKET}' specify the name of the GCS bucket where
 # you want to store your notebooks, and for '${NOTEBOOK_PATH}',
 # specify the name of the directory within that bucket that will be
-# treated as your root directory by Jupyter.
+# treated as your root directory by Jupyter. For
+# '${NOTEBOOK_BUCKET_PROJECT}', specify the ID of the GCP project
+# that owns the GCS bucket.
+#
+# If you run JupyterLab with widgets that assume the current file
+# browser path is a location on your local disk (e.g. the
+# jupyterlab-git extension), then you will also need to set up a
+# link somewhere on your local disk for those widgets to use.
+#
+# For example, you could run the following:
+#
+#   mkdir -p ~/.jupyter/symlinks_for_jupyterlab_widgets
+#   ln -s ${LOCAL_DISK_NOTEBOOK_DIR} ~/.jupyter/symlinks_for_jupyterlab_widgets/Local\ Disk
+#
+# And then add the following snippet to your Jupyter config:
+#
+#   c.CombinedContentsManager.root_dir = '~/.jupyter/symlinks_for_jupyterlab_widgets'
 
 import base64
+import errno
 import json
 import logging
 import mimetypes
 import posixpath
 
 import nbformat
+from notebook.services.contents.filecheckpoints import GenericFileCheckpoints
+from notebook.services.contents.filemanager import FileContentsManager
 from notebook.services.contents.manager import ContentsManager
 from notebook.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin
 from tornado.web import HTTPError
-from traitlets import Unicode, default
+from traitlets import Unicode, default, observe
 
 from google.cloud import storage
 
@@ -421,3 +442,262 @@ class GCSContentsManager(ContentsManager):
       raise err
     except Exception as ex:
       raise HTTPError(500, 'Internal server error: {}'.format(str(ex)))
+
+
+class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
+
+  def __init__(self, content_managers):
+    self._content_managers = content_managers
+
+  def _checkpoint_manager_for_path(self, path):
+    path = path or ''
+    path = path.strip('/')
+    for path_prefix in self._content_managers:
+      if path == path_prefix or path.startswith(path_prefix+'/'):
+        relative_path = path[len(path_prefix):]
+        return self._content_managers[path_prefix].checkpoints, relative_path
+    return None, path
+
+  def checkpoint_path(self, checkpoint_id, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.checkpoint_path(checkpoint_id, relative_path)
+
+  def checkpoint_blob(self, checkpoint_id, path, create_if_missing=False):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.checkpoint_blob(
+        checkpoint_id, relative_path, create_if_missing=create_if_missing)
+
+  def create_file_checkpoint(self, content, format, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.create_file_checkpoint(content, format, relative_path)
+
+  def create_notebook_checkpoint(self, nb, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
+
+  def get_file_checkpoint(self, checkpoint_id, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.get_file_checkpoint(checkpoint_id, relative_path)
+
+  def get_notebook_checkpoint(self, checkpoint_id, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.get_notebook_checkpoint(checkpoint_id, relative_path)
+
+  def delete_checkpoint(self, checkpoint_id, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
+
+  def list_checkpoints(self, path):
+    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
+    return checkpoint_manager.list_checkpoints(relative_path)
+
+  def rename_checkpoint(self, checkpoint_id, old_path, new_path):
+    checkpoint_manager, old_relative_path = self._checkpoint_manager_for_path(old_path)
+    if not checkpoint_manager:
+      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(old_path))
+    new_checkpoint_manager, new_relative_path = self._checkpoint_manager_for_path(new_path)
+    if new_checkpoint_manager != checkpoint_manager:
+      raise HTTPError(500, 'Unsupported rename: {}->{}'.format(old_path, new_path))
+    return checkpoint_manager.rename_checkpoint(checkpoint_id, old_relative_path, new_relative_path)
+
+
+class CombinedContentsManager(ContentsManager):
+  root_dir = Unicode(config=True)
+
+  @default('checkpoints')
+  def _default_checkpoints(self):
+    return CombinedCheckpointsManager(self._content_managers)
+
+  def __init__(self, **kwargs):
+    print('Creating the combined contents manager...')
+    super(CombinedContentsManager, self).__init__(**kwargs)
+
+    file_cm = FileContentsManager(**kwargs)
+    file_cm.checkpoints = GenericFileCheckpoints(**file_cm.checkpoints_kwargs)
+    gcs_cm = GCSContentsManager(**kwargs)
+    self._content_managers = {
+      'Local Disk': file_cm,
+      'GCS': gcs_cm,
+    }
+
+  def _content_manager(self, path):
+    path = path or ''
+    path = path.strip('/')
+    for path_prefix in self._content_managers:
+      if path == path_prefix or path.startswith(path_prefix+'/'):
+        relative_path = path[len(path_prefix):]
+        return self._content_managers[path_prefix], relative_path, path_prefix
+    return None, path, ''
+
+  def is_hidden(self, path):
+    try:
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if cm:
+        return cm.is_hidden(relative_path)
+      return False
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def file_exists(self, path):
+    try:
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if cm:
+        return cm.file_exists(relative_path)
+      return False
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def dir_exists(self, path):
+    if path in ['', '/']:
+      return True
+    try:
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if cm:
+        return cm.dir_exists(relative_path)
+      return False
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def _make_model_relative(self, model, path_prefix):
+    if 'path' in model:
+      model['path'] = '{}/{}'.format(path_prefix, model['path'])
+    if model.get('type', None) == 'directory':
+      self._make_children_relative(model, path_prefix)
+
+  def _make_children_relative(self, model, path_prefix):
+      children = model.get('content', None)
+      if children:
+        for child in children:
+          self._make_model_relative(child, path_prefix)
+
+  def get(self, path, content=True, type=None, format=None):
+    if path in ['', '/']:
+      dir_obj = {}
+      dir_obj['path'] = ''
+      dir_obj['name'] = ''
+      dir_obj['type'] = 'directory'
+      dir_obj['mimetype'] = None
+      dir_obj['writable'] = False
+      dir_obj['format'] = None
+      dir_obj['content'] = None
+      dir_obj['format'] = 'json'
+      contents = []
+      for path_prefix in self._content_managers:
+        child_obj = self._content_managers[path_prefix].get('', content=False)
+        child_obj['path'] = path_prefix
+        child_obj['name'] = path_prefix
+        child_obj['writable'] = False
+        contents.append(child_obj)
+      dir_obj['content'] = contents
+      dir_obj['created'] = contents[0]['created']
+      dir_obj['last_modified'] = contents[0]['last_modified']
+      return dir_obj
+    try:
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if not cm:
+        raise HTTPError(404, 'Not Found')
+
+      model = cm.get(relative_path, content=content, type=type, format=format)
+      self._make_model_relative(model, path_prefix)
+      return model
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def save(self, model, path):
+    if path in ['', '/']:
+      raise HTTPError(403, 'The top-level directory is read-only')
+    try:
+      self.run_pre_save_hook(model=model, path=path)
+
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if not cm:
+        raise HTTPError(404, 'Not Found')
+      if relative_path in ['', '/']:
+        raise HTTPError(403, 'The top-level directory contents are read-only')
+
+      if 'path' in model:
+        model['path'] = relative_path
+
+      model = cm.save(model, relative_path)
+      if 'path' in model:
+        model['path'] = path
+      return model
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def delete_file(self, path):
+    if path in ['', '/']:
+      raise HTTPError(403, 'The top-level directory is read-only')
+    try:
+      cm, relative_path, path_prefix = self._content_manager(path)
+      if not cm:
+        raise HTTPError(404, 'Not Found')
+      if relative_path in ['', '/']:
+        raise HTTPError(403, 'The top-level directory contents are read-only')
+      return cm.delete_file(relative_path)
+    except OSError as err:
+      # The built-in file contents manager will not attempt to wrap permissions
+      # errors when deleting files if they occur while trying to move the
+      # to-be-deleted file to the trash, because the underlying send2trash
+      # library does not set the errno attribute of the raised OSError.
+      #
+      # To work around this we explicitly catch such errors, check if they
+      # start with the magic text "Permission denied", and then wrap them
+      # in an HTTPError.
+      if str(err).startswith('Permission denied'):
+        raise HTTPError(403, str(err))
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(err.errno, str(err)))
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
+
+  def rename_file(self, old_path, new_path):
+    if old_path in ['', '/']:
+      raise HTTPError(403, 'The top-level directory is read-only')
+    try:
+      old_cm, old_relative_path, _ = self._content_manager(old_path)
+      if not old_cm:
+        raise HTTPError(404, 'Not Found')
+      if old_relative_path in ['', '/']:
+        raise HTTPError(403, 'The top-level directory contents are read-only')
+
+      new_cm, new_relative_path, _ = self._content_manager(new_path)
+      if not new_cm:
+        raise HTTPError(404, 'Not Found')
+      if new_relative_path in ['', '/']:
+        raise HTTPError(403, 'The top-level directory contents are read-only')
+
+      if old_cm != new_cm:
+        raise HTTPError(400, 'Bad Request')
+      return old_cm.rename_file(old_relative_path, new_relative_path)
+    except HTTPError as err:
+      raise err
+    except Exception as ex:
+      raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
