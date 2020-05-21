@@ -58,6 +58,7 @@ import json
 import logging
 import mimetypes
 import posixpath
+import re
 
 import nbformat
 from notebook.services.contents.filecheckpoints import GenericFileCheckpoints
@@ -124,8 +125,8 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
       'type': 'file',
       'content': contents.decode(utf8_encoding),
     }
-    content_obj['format'] = 'text' if content_type == 'text/plain' else 'base64'
-    return content_obj
+    checkpoint_obj['format'] = 'text' if content_type == 'text/plain' else 'base64'
+    return checkpoint_obj
 
   def get_notebook_checkpoint(self, checkpoint_id, path):
     contents, _ = self._checkpoint_contents(checkpoint_id, path)
@@ -133,7 +134,7 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
       'type': 'notebook',
       'content':  nbformat.reads(contents, as_version=4),
     }
-    return content_obj
+    return checkpoint_obj
 
   def delete_checkpoint(self, checkpoint_id, path):
     blob = self.checkpoint_blob(checkpoint_id, path)
@@ -343,7 +344,7 @@ class GCSContentsManager(ContentsManager):
         if first_slash < 0:
           child_path = posixpath.join(normalized_path, suffix)
           add_child(suffix,
-                    self._blob_model(child_path, b),
+                    self._blob_model(child_path, b, content=False),
                     override_existing=True)
         else:
           subdir = suffix[0:first_slash]
