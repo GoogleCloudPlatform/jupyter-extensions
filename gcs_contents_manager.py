@@ -464,64 +464,46 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
       if path == path_prefix or path.startswith(path_prefix+'/'):
         relative_path = path[len(path_prefix):]
         return self._content_managers[path_prefix].checkpoints, relative_path
-    return None, path
+    raise HTTPError(400, 'Unsupported checkpoint path: {}'.format(path))
 
   def checkpoint_path(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.checkpoint_path(checkpoint_id, relative_path)
 
   def checkpoint_blob(self, checkpoint_id, path, create_if_missing=False):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.checkpoint_blob(
         checkpoint_id, relative_path, create_if_missing=create_if_missing)
 
   def create_file_checkpoint(self, content, format, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.create_file_checkpoint(content, format, relative_path)
 
   def create_notebook_checkpoint(self, nb, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
 
   def get_file_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.get_file_checkpoint(checkpoint_id, relative_path)
 
   def get_notebook_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.get_notebook_checkpoint(checkpoint_id, relative_path)
 
   def delete_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
 
   def list_checkpoints(self, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(path))
     return checkpoint_manager.list_checkpoints(relative_path)
 
   def rename_checkpoint(self, checkpoint_id, old_path, new_path):
     checkpoint_manager, old_relative_path = self._checkpoint_manager_for_path(old_path)
-    if not checkpoint_manager:
-      raise HTTPError(500, 'Unsupported checkpoint path: {}'.format(old_path))
     new_checkpoint_manager, new_relative_path = self._checkpoint_manager_for_path(new_path)
     if new_checkpoint_manager != checkpoint_manager:
-      raise HTTPError(500, 'Unsupported rename: {}->{}'.format(old_path, new_path))
+      raise HTTPError(400, 'Unsupported rename across file systems: {}->{}'.format(old_path, new_path))
     return checkpoint_manager.rename_checkpoint(checkpoint_id, old_relative_path, new_relative_path)
 
 
