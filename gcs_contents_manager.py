@@ -526,7 +526,7 @@ class CombinedContentsManager(ContentsManager):
       'GCS': gcs_cm,
     }
 
-  def _content_manager(self, path):
+  def _content_manager_for_path(self, path):
     path = path or ''
     path = path.strip('/')
     for path_prefix in self._content_managers:
@@ -537,7 +537,7 @@ class CombinedContentsManager(ContentsManager):
 
   def is_hidden(self, path):
     try:
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if cm:
         return cm.is_hidden(relative_path)
       return False
@@ -548,7 +548,7 @@ class CombinedContentsManager(ContentsManager):
 
   def file_exists(self, path):
     try:
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if cm:
         return cm.file_exists(relative_path)
       return False
@@ -561,7 +561,7 @@ class CombinedContentsManager(ContentsManager):
     if path in ['', '/']:
       return True
     try:
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if cm:
         return cm.dir_exists(relative_path)
       return False
@@ -605,7 +605,7 @@ class CombinedContentsManager(ContentsManager):
       dir_obj['last_modified'] = contents[0]['last_modified']
       return dir_obj
     try:
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if not cm:
         raise HTTPError(404, 'Not Found')
 
@@ -623,7 +623,7 @@ class CombinedContentsManager(ContentsManager):
     try:
       self.run_pre_save_hook(model=model, path=path)
 
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if not cm:
         raise HTTPError(404, 'Not Found')
       if relative_path in ['', '/']:
@@ -645,7 +645,7 @@ class CombinedContentsManager(ContentsManager):
     if path in ['', '/']:
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
-      cm, relative_path, path_prefix = self._content_manager(path)
+      cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if not cm:
         raise HTTPError(404, 'Not Found')
       if relative_path in ['', '/']:
@@ -672,13 +672,13 @@ class CombinedContentsManager(ContentsManager):
     if old_path in ['', '/']:
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
-      old_cm, old_relative_path, _ = self._content_manager(old_path)
+      old_cm, old_relative_path, _ = self._content_manager_for_path(old_path)
       if not old_cm:
         raise HTTPError(404, 'Not Found')
       if old_relative_path in ['', '/']:
         raise HTTPError(403, 'The top-level directory contents are read-only')
 
-      new_cm, new_relative_path, _ = self._content_manager(new_path)
+      new_cm, new_relative_path, _ = self._content_manager_for_path(new_path)
       if not new_cm:
         raise HTTPError(404, 'Not Found')
       if new_relative_path in ['', '/']:
