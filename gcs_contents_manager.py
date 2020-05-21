@@ -669,7 +669,7 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
   def rename_file(self, old_path, new_path):
-    if old_path in ['', '/']:
+    if (old_path in ['', '/']) or (new_path in ['', '/']):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
       old_cm, old_relative_path, _ = self._content_manager_for_path(old_path)
