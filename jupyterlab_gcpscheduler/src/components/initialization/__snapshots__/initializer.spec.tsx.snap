@@ -1,0 +1,665 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Initializer Fails to create resource 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <CheckboxInput
+      checked={true}
+      disabled={false}
+      label="Enable Recurring Scheduled Runs?"
+      name="enableRecurring"
+      onChange={[Function]}
+      title="If checked, jobs can be created to run on a recurring schedule"
+    />
+    <ServiceStatuses
+      isActivating={false}
+      serviceStatuses={
+        Array [
+          Object {
+            "enabled": true,
+            "service": Object {
+              "documentation": "https://cloud.google.com/storage/",
+              "endpoint": "storage-api.googleapis.com",
+              "isOptional": false,
+              "name": "Cloud Storage API",
+            },
+          },
+          Object {
+            "enabled": true,
+            "service": Object {
+              "documentation": "https://cloud.google.com/ai-platform/",
+              "endpoint": "ml.googleapis.com",
+              "isOptional": false,
+              "name": "AI Platform Training API",
+            },
+          },
+          Object {
+            "enabled": true,
+            "service": Object {
+              "documentation": "https://cloud.google.com/scheduler",
+              "endpoint": "cloudscheduler.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Scheduler API",
+            },
+          },
+          Object {
+            "enabled": true,
+            "service": Object {
+              "documentation": "https://cloud.google.com/functions/",
+              "endpoint": "cloudfunctions.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Functions API",
+            },
+          },
+        ]
+      }
+    />
+    <ResourceStatuses
+      bucketCreationError="Could not create bucket: Unable to create Cloud Storage bucket"
+      isCreatingBucket={false}
+      isDeployingFunction={false}
+      projectState={
+        Object {
+          "allServicesEnabled": true,
+          "canSubmitImmediateJobs": false,
+          "canSubmitScheduledJobs": false,
+          "hasCloudFunction": true,
+          "hasGcsBucket": false,
+          "projectId": "test-project",
+          "requiredServicesEnabled": false,
+          "schedulerRegion": "",
+          "serviceStatuses": Array [
+            Object {
+              "enabled": true,
+              "service": Object {
+                "documentation": "https://cloud.google.com/storage/",
+                "endpoint": "storage-api.googleapis.com",
+                "isOptional": false,
+                "name": "Cloud Storage API",
+              },
+            },
+            Object {
+              "enabled": true,
+              "service": Object {
+                "documentation": "https://cloud.google.com/ai-platform/",
+                "endpoint": "ml.googleapis.com",
+                "isOptional": false,
+                "name": "AI Platform Training API",
+              },
+            },
+            Object {
+              "enabled": true,
+              "service": Object {
+                "documentation": "https://cloud.google.com/scheduler",
+                "endpoint": "cloudscheduler.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": true,
+              "service": Object {
+                "documentation": "https://cloud.google.com/functions/",
+                "endpoint": "cloudfunctions.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Functions API",
+              },
+            },
+          ],
+        }
+      }
+      showCloudFunction={true}
+    />
+    <p>
+      Click the Initialize button to finish configuring
+       test-project
+      .
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Check Again"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Fails to enable services 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <CheckboxInput
+      checked={true}
+      disabled={false}
+      label="Enable Recurring Scheduled Runs?"
+      name="enableRecurring"
+      onChange={[Function]}
+      title="If checked, jobs can be created to run on a recurring schedule"
+    />
+    <ServiceStatuses
+      activationError="Could not enable services: Unable to enable necessary GCP APIs"
+      isActivating={false}
+      serviceStatuses={
+        Array [
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/storage/",
+              "endpoint": "storage-api.googleapis.com",
+              "isOptional": false,
+              "name": "Cloud Storage API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/ai-platform/",
+              "endpoint": "ml.googleapis.com",
+              "isOptional": false,
+              "name": "AI Platform Training API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/scheduler",
+              "endpoint": "cloudscheduler.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Scheduler API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/functions/",
+              "endpoint": "cloudfunctions.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Functions API",
+            },
+          },
+        ]
+      }
+    />
+    <ResourceStatuses
+      isCreatingBucket={false}
+      isDeployingFunction={false}
+      projectState={
+        Object {
+          "allServicesEnabled": false,
+          "canSubmitImmediateJobs": false,
+          "canSubmitScheduledJobs": false,
+          "hasCloudFunction": false,
+          "hasGcsBucket": false,
+          "projectId": "test-project",
+          "requiredServicesEnabled": false,
+          "schedulerRegion": "",
+          "serviceStatuses": Array [
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/storage/",
+                "endpoint": "storage-api.googleapis.com",
+                "isOptional": false,
+                "name": "Cloud Storage API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/ai-platform/",
+                "endpoint": "ml.googleapis.com",
+                "isOptional": false,
+                "name": "AI Platform Training API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/scheduler",
+                "endpoint": "cloudscheduler.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/functions/",
+                "endpoint": "cloudfunctions.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Functions API",
+              },
+            },
+          ],
+        }
+      }
+      showCloudFunction={true}
+    />
+    <p>
+      Click the Initialize button to finish configuring
+       test-project
+      .
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Check Again"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with app engine content 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <AppEngineCreator
+      projectId="test-project"
+    />
+    <p>
+      Click the Check Again button after you have completed the steps listed above.
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Check Again"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with app engine content: After recheck 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <AppEngineCreator
+      projectId="test-project"
+    />
+    <p>
+      Click the Check Again button after you have completed the steps listed above.
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Check Again"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with app engine content: Rechecking 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <Message
+    asActivity={true}
+    asError={false}
+    text="Validating project configuration..."
+  />
+</div>
+`;
+
+exports[`Initializer Renders with error if project state cannot be determined 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <Message
+    asActivity={false}
+    asError={true}
+    text="No project found: Unable to determine project status"
+  />
+</div>
+`;
+
+exports[`Initializer Renders with initialization content 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <CheckboxInput
+      checked={true}
+      disabled={false}
+      label="Enable Recurring Scheduled Runs?"
+      name="enableRecurring"
+      onChange={[Function]}
+      title="If checked, jobs can be created to run on a recurring schedule"
+    />
+    <ServiceStatuses
+      isActivating={false}
+      serviceStatuses={
+        Array [
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/storage/",
+              "endpoint": "storage-api.googleapis.com",
+              "isOptional": false,
+              "name": "Cloud Storage API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/ai-platform/",
+              "endpoint": "ml.googleapis.com",
+              "isOptional": false,
+              "name": "AI Platform Training API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/scheduler",
+              "endpoint": "cloudscheduler.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Scheduler API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/functions/",
+              "endpoint": "cloudfunctions.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Functions API",
+            },
+          },
+        ]
+      }
+    />
+    <ResourceStatuses
+      isCreatingBucket={false}
+      isDeployingFunction={false}
+      projectState={
+        Object {
+          "allServicesEnabled": false,
+          "canSubmitImmediateJobs": false,
+          "canSubmitScheduledJobs": false,
+          "hasCloudFunction": false,
+          "hasGcsBucket": false,
+          "projectId": "test-project",
+          "requiredServicesEnabled": false,
+          "schedulerRegion": "",
+          "serviceStatuses": Array [
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/storage/",
+                "endpoint": "storage-api.googleapis.com",
+                "isOptional": false,
+                "name": "Cloud Storage API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/ai-platform/",
+                "endpoint": "ml.googleapis.com",
+                "isOptional": false,
+                "name": "AI Platform Training API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/scheduler",
+                "endpoint": "cloudscheduler.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/functions/",
+                "endpoint": "cloudfunctions.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Functions API",
+              },
+            },
+          ],
+        }
+      }
+      showCloudFunction={true}
+    />
+    <p>
+      Click the Initialize button to finish configuring
+       test-project
+      .
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Initialize"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with initialization content for immediate runs only 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <CheckboxInput
+      checked={false}
+      disabled={false}
+      label="Enable Recurring Scheduled Runs?"
+      name="enableRecurring"
+      onChange={[Function]}
+      title="If checked, jobs can be created to run on a recurring schedule"
+    />
+    <ServiceStatuses
+      isActivating={false}
+      serviceStatuses={
+        Array [
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/storage/",
+              "endpoint": "storage-api.googleapis.com",
+              "isOptional": false,
+              "name": "Cloud Storage API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
+              "documentation": "https://cloud.google.com/ai-platform/",
+              "endpoint": "ml.googleapis.com",
+              "isOptional": false,
+              "name": "AI Platform Training API",
+            },
+          },
+        ]
+      }
+    />
+    <ResourceStatuses
+      isCreatingBucket={false}
+      isDeployingFunction={false}
+      projectState={
+        Object {
+          "allServicesEnabled": false,
+          "canSubmitImmediateJobs": false,
+          "canSubmitScheduledJobs": false,
+          "hasCloudFunction": false,
+          "hasGcsBucket": false,
+          "projectId": "test-project",
+          "requiredServicesEnabled": false,
+          "schedulerRegion": "",
+          "serviceStatuses": Array [
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/storage/",
+                "endpoint": "storage-api.googleapis.com",
+                "isOptional": false,
+                "name": "Cloud Storage API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/ai-platform/",
+                "endpoint": "ml.googleapis.com",
+                "isOptional": false,
+                "name": "AI Platform Training API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/scheduler",
+                "endpoint": "cloudscheduler.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/functions/",
+                "endpoint": "cloudfunctions.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Functions API",
+              },
+            },
+          ],
+        }
+      }
+      showCloudFunction={false}
+    />
+    <p>
+      Click the Initialize button to finish configuring
+       test-project
+      .
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Initialize"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with ready message 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <Message
+      asActivity={false}
+      asError={false}
+      text="Project test-project is ready"
+    />
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="OK"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;
+
+exports[`Initializer Renders with validating message 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <Message
+    asActivity={true}
+    asError={false}
+    text="Validating project configuration..."
+  />
+</div>
+`;
+
+exports[`Initializer Runs initialization sequence: Shows AppEngine creator 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p>
+    Run a notebook from start to finish immediately or on a recurring schedule. The executed notebook output will be saved in a Cloud Storage bucket and viewable from a dashboard. Using this feature will incur additional charges. By clicking Initialize, you are agreeing to the terms of service for the APIs and services listed below.
+  </p>
+  <div>
+    <AppEngineCreator
+      projectId="test-project"
+    />
+    <p>
+      Click the Check Again button after you have completed the steps listed above.
+    </p>
+    <ActionBar
+      onDialogClose={[MockFunction]}
+    >
+      <SubmitButton
+        actionPending={false}
+        onClick={[Function]}
+        text="Check Again"
+      />
+    </ActionBar>
+  </div>
+</div>
+`;

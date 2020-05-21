@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CronScheduleBuilder Renders without error 1`] = `
+<div>
+  <TextInput
+    hasError={true}
+    label="Schedule"
+    name="schedule"
+    onChange={[Function]}
+    value=""
+  />
+  <FieldError
+    message="Frequency is required"
+  />
+  <p
+    className="noTopMargin_felu21j"
+  >
+    Schedule is specified using unix-cron format. You can define a schedule so that your job runs multiple times a day, or runs on specific days and months.
+    <LearnMoreLink
+      href="https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules"
+    />
+  </p>
+</div>
+`;
