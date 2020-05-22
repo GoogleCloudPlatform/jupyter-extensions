@@ -533,27 +533,29 @@ class CombinedContentsManager(ContentsManager):
       if path == path_prefix or path.startswith(path_prefix+'/'):
         relative_path = path[len(path_prefix):]
         return self._content_managers[path_prefix], relative_path, path_prefix
-    return None, path, ''
+    raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
 
   def is_hidden(self, path):
     try:
-      cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if cm:
-        return cm.is_hidden(relative_path)
-      return False
+      cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
+      return cm.is_hidden(relative_path)
     except HTTPError as err:
-      raise err
+      if err.status_code == 404:
+        return False
+      else:
+        raise err
     except Exception as ex:
       raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
   def file_exists(self, path):
     try:
-      cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if cm:
-        return cm.file_exists(relative_path)
-      return False
+      cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
+      return cm.file_exists(relative_path)
     except HTTPError as err:
-      raise err
+      if err.status_code == 404:
+        return False
+      else:
+        raise err
     except Exception as ex:
       raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
@@ -561,12 +563,13 @@ class CombinedContentsManager(ContentsManager):
     if path in ['', '/']:
       return True
     try:
-      cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if cm:
-        return cm.dir_exists(relative_path)
-      return False
+      cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
+      return cm.dir_exists(relative_path)
     except HTTPError as err:
-      raise err
+      if err.status_code == 404:
+        return False
+      else:
+        raise err
     except Exception as ex:
       raise HTTPError(500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
@@ -606,9 +609,6 @@ class CombinedContentsManager(ContentsManager):
       return dir_obj
     try:
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if not cm:
-        raise HTTPError(404, 'Not Found')
-
       model = cm.get(relative_path, content=content, type=type, format=format)
       self._make_model_relative(model, path_prefix)
       return model
@@ -624,8 +624,6 @@ class CombinedContentsManager(ContentsManager):
       self.run_pre_save_hook(model=model, path=path)
 
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if not cm:
-        raise HTTPError(404, 'Not Found')
       if relative_path in ['', '/']:
         raise HTTPError(403, 'The top-level directory contents are read-only')
 
@@ -646,8 +644,6 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if not cm:
-        raise HTTPError(404, 'Not Found')
       if relative_path in ['', '/']:
         raise HTTPError(403, 'The top-level directory contents are read-only')
       return cm.delete_file(relative_path)
@@ -673,19 +669,15 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
       old_cm, old_relative_path, _ = self._content_manager_for_path(old_path)
-      if not old_cm:
-        raise HTTPError(404, 'Not Found')
       if old_relative_path in ['', '/']:
         raise HTTPError(403, 'The top-level directory contents are read-only')
 
       new_cm, new_relative_path, _ = self._content_manager_for_path(new_path)
-      if not new_cm:
-        raise HTTPError(404, 'Not Found')
       if new_relative_path in ['', '/']:
         raise HTTPError(403, 'The top-level directory contents are read-only')
 
       if old_cm != new_cm:
-        raise HTTPError(400, 'Bad Request')
+        raise HTTPError(400, 'Unsupported rename across file systems')
       return old_cm.rename_file(old_relative_path, new_relative_path)
     except HTTPError as err:
       raise err
