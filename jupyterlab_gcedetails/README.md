@@ -69,24 +69,3 @@ To run end-to-end tests, perform the following steps.
    export INSTANCE=<instance>
    npm run e2e-test
    ```
-
-## Releasing
-
-The following steps are to be followed when releasing a new version of the
-extension.
-
-1. Update version references in [package.json](package.json) and
-   [jupyterlab_gcedetails/version.py](./jupyterlab_gcedetails/version.py).
-2. Ensure all changes are submitted for review and committed to the remote repository.
-3. Create a new tag number for the version.
-   - `git tag vx.x.x -m "vx.x.x release"` where x.x.x is the version number.
-4. Push the tag to the remote repository.
-   - `git push origin vx.x.x` where x.x.x is the version number.
-5. Submit the Cloud Build process to build the extension, package it as a tarball,
-   and make it publicly available for installation from GCS.
-   - ```
-      gcloud --project deeplearning-platform-ui builds submit \
-        --config cloudbuild-release.yaml
-     ```
-6. Verify that `jupyterlab_gcedetails-x.x.x.tar.gz` and `jupyterlab_gcedetails-latest.tar.gz`
-   are updated in the [gs://deeplearning-platform-ui-public](https://console.cloud.google.com/storage/browser/deeplearning-platform-ui-public?project=deeplearning-platform-ui) GCS bucket.
