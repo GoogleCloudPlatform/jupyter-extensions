@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
-import { COLORS, css } from '../../styles';
+import { COLORS, css } from 'jupyter-extensions-shared';
 
 interface Props {
   actionPending: boolean;

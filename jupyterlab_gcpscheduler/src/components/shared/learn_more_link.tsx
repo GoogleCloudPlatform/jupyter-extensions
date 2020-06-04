@@ -20,7 +20,7 @@ import { Launch } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core';
 import { classes, stylesheet } from 'typestyle';
 
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 
 interface Props {
   href: string;

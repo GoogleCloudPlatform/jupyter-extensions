@@ -22,7 +22,7 @@ import { classes, stylesheet } from 'typestyle';
 
 import { AI_PLATFORM_LINK } from '../data';
 import { AiPlatformJob } from '../service/gcp';
-import { css } from '../styles';
+import { css } from 'jupyter-extensions-shared';
 import { IconButtonMenu, SmallMenuItem } from './shared/icon_button_menu';
 import { GrayPending, GreenCheck, RedClose } from './shared/status_icons';
 

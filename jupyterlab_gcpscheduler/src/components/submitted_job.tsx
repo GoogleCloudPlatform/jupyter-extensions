@@ -27,7 +27,7 @@ import {
   SCHEDULER_LINK,
 } from '../data';
 import { RunNotebookRequest } from '../service/gcp';
-import { COLORS, css } from '../styles';
+import { COLORS, css } from 'jupyter-extensions-shared';
 import { OnDialogClose } from './dialog';
 import { ActionBar } from './shared/action_bar';
 import { LearnMoreLink } from './shared/learn_more_link';

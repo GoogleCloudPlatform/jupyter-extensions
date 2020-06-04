@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { style } from 'typestyle';
 
-import { COLORS } from '../../styles';
+import { COLORS } from 'jupyter-extensions-shared';
 
 interface FieldErrorProps {
   message?: string;

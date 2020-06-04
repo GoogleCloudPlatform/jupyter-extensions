@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 import { LearnMoreLink } from '../shared/learn_more_link';
 
 interface Props {

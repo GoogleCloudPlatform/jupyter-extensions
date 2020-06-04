@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
 
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 
 interface TextInputProps {
   disabled?: boolean;

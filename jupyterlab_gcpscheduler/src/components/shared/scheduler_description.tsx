@@ -17,7 +17,7 @@
 import * as React from 'react';
 
 import { LearnMoreLink } from './learn_more_link';
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 
 const DESCRIPTION = `Schedule and run this Notebook from start to finish
 at the specified frequency. The executed Notebook will be saved to a

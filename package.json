@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "name": "jupyter-extensions",
+  "version": "1.0.0",
+  "description": "Synthetic parent project for Google-developed Jupyter(Lab) extensions",
+  "scripts": {
+    "bootstrap": "lerna bootstrap --hoist",
+    "build": "lerna run build --parallel",
+    "clean": "lerna run clean --parallel",
+    "pack": "lerna exec npm pack --parallel",
+    "test": "lerna run test --parallel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GoogleCloudPlatform/jupyter-extensions.git"
+  },
+  "author": "Google",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/GoogleCloudPlatform/jupyter-extensions/issues"
+  },
+  "homepage": "https://github.com/GoogleCloudPlatform/jupyter-extensions#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "lerna": "^3.22.0",
+    "prettier": "^1.19.1",
+    "typescript": "^3.8.3"
+  }
+}

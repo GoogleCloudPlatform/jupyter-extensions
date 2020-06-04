@@ -18,7 +18,7 @@ import * as React from 'react';
 
 import { CLOUD_FUNCTION_REGION } from '../../data';
 import { ProjectState, ProjectStateService } from '../../service/project_state';
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 import { OnDialogClose, OnInitialized } from '../dialog';
 import { ActionBar } from '../shared/action_bar';
 import { Message } from '../shared/message';

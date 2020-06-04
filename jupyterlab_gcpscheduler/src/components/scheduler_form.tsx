@@ -21,7 +21,7 @@ import * as React from 'react';
 
 import { GcpService, RunNotebookRequest } from '../service/gcp';
 import { GetPermissionsResponse } from '../service/project_state';
-import { css } from '../styles';
+import { css } from 'jupyter-extensions-shared';
 import { GcpSettings, OnDialogClose } from './dialog';
 import { ScheduleBuilder } from './schedule_builder/schedule_builder';
 import { ActionBar } from './shared/action_bar';

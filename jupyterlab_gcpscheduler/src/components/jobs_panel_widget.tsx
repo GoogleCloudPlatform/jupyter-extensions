@@ -23,7 +23,7 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { GcpService, ListAiPlatformJobsResponse } from '../service/gcp';
-import { BASE_FONT, COLORS } from '../styles';
+import { BASE_FONT, COLORS } from 'jupyter-extensions-shared';
 import { JobListItem } from './job_list_item';
 import { Message } from './shared/message';
 

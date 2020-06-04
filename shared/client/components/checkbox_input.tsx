@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-  ],
-  extends: [
-    'eslint:recommended',
-    'plugin:prettier/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended'
-  ],
-  rules: {
-    '@typescript-eslint/explicit-function-return-type': 'off',
-  }
+import * as csstips from 'csstips';
+import * as React from 'react';
+import { style } from 'typestyle';
+
+interface CheckboxInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+}
+
+const containerStyle = style({
+  ...csstips.horizontal,
+  ...csstips.center,
+});
+
+/** Funtional Component for Checkbox input fields */
+export function CheckboxInput(props: CheckboxInputProps) {
+  const { label, ...inputProps } = props;
+  return (
+    <div className={containerStyle}>
+      <input type="checkbox" {...inputProps} />
+      {label && <span>{label}</span>}
+    </div>
+  );
 }
