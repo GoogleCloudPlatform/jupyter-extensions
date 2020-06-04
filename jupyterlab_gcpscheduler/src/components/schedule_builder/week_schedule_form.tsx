@@ -17,7 +17,7 @@
 import * as React from 'react';
 
 import { DAYS_OF_WEEK, FREQUENCY_TYPES } from '../../data';
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 import { CheckboxInput } from '../shared/checkbox_input';
 import { FieldError } from '../shared/field_error';
 import { SelectInput } from '../shared/select_input';

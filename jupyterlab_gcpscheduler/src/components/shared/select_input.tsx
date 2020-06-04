@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { Option } from '../../data';
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 
 interface SelectInputProps {
   label?: string;

@@ -105,7 +105,7 @@ export class ClientTransportService implements TransportService {
 
   async submit<T>(request: ApiRequest): Promise<ApiResponse<T>> {
     await this.initializeClient();
-    return gapi.client.request<T>(request);
+    return gapi.client.request(request);
   }
 
   private async _authenticateClient(): Promise<void> {

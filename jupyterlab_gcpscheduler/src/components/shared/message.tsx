@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 import { Progress } from './progress';
 import { RedError, BlueInfo } from './status_icons';
 

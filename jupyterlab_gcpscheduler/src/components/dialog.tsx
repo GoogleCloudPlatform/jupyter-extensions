@@ -28,7 +28,7 @@ import {
   ProjectStateService,
   ProjectState,
 } from '../service/project_state';
-import { BASE_FONT, COLORS, css } from '../styles';
+import { BASE_FONT, COLORS, css } from 'jupyter-extensions-shared';
 import { Initializer } from './initialization/initializer';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './shared/action_bar';

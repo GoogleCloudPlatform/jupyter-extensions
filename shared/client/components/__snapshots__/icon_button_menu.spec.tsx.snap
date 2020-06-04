@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IconButtonMenu Renders menu items 1`] = `
+<span>
+  <WithStyles(WithStyles(IconButton))
+    onClick={[Function]}
+  >
+    <pure(MoreVertIcon) />
+  </WithStyles(WithStyles(IconButton))>
+  <WithStyles(Menu)
+    onClose={[Function]}
+    open={false}
+  >
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 1
+    </WithStyles(MenuItem)>
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 2
+    </WithStyles(MenuItem)>
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 3
+    </WithStyles(MenuItem)>
+  </WithStyles(Menu)>
+</span>
+`;
+
+exports[`IconButtonMenu Renders with provided icon 1`] = `
+<span>
+  <WithStyles(WithStyles(IconButton))
+    onClick={[Function]}
+  >
+    <pure(AddIcon) />
+  </WithStyles(WithStyles(IconButton))>
+  <WithStyles(Menu)
+    onClose={[Function]}
+    open={false}
+  >
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 1
+    </WithStyles(MenuItem)>
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 2
+    </WithStyles(MenuItem)>
+    <WithStyles(MenuItem)
+      onClick={[Function]}
+    >
+      Item 3
+    </WithStyles(MenuItem)>
+  </WithStyles(Menu)>
+</span>
+`;

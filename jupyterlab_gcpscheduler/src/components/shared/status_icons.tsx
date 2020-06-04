@@ -17,7 +17,7 @@
 import { withStyles } from '@material-ui/core';
 import { Check, Close, Refresh, Info } from '@material-ui/icons';
 
-import { COLORS } from '../../styles';
+import { COLORS } from 'jupyter-extensions-shared';
 
 /** Green check icon */
 export const GreenCheck = withStyles({

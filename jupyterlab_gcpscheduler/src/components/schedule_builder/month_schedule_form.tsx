@@ -17,7 +17,7 @@
 import * as React from 'react';
 
 import { FREQUENCY_TYPES, MONTH_FREQUENCIES } from '../../data';
-import { css } from '../../styles';
+import { css } from 'jupyter-extensions-shared';
 import { SelectInput } from '../shared/select_input';
 import { TextInput } from '../shared/text_input';
 import { CheckValidation } from '../shared/validation_error';
