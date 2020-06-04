@@ -5,8 +5,8 @@
   "description": "Synthetic parent project for Google-developed Jupyter(Lab) extensions",
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "build": "lerna run build --parallel",
-    "clean": "lerna run clean --parallel",
+    "build": "lerna run build --stream --sort",
+    "clean": "lerna clean --yes && lerna run clean --parallel",
     "pack": "lerna exec npm pack --parallel",
     "test": "lerna run test --parallel"
   },

@@ -16,6 +16,7 @@
 
 import { withStyles } from '@material-ui/core';
 import { CheckCircle } from '@material-ui/icons';
+import { COLORS, css, LearnMoreLink } from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
@@ -27,10 +28,8 @@ import {
   SCHEDULER_LINK,
 } from '../data';
 import { RunNotebookRequest } from '../service/gcp';
-import { COLORS, css } from 'jupyter-extensions-shared';
 import { OnDialogClose } from './dialog';
-import { ActionBar } from './shared/action_bar';
-import { LearnMoreLink } from './shared/learn_more_link';
+import { ActionBar } from './action_bar';
 
 interface Props {
   onFormReset: () => void;

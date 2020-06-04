@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
+import {
+  css,
+  Message,
+  SubmitButton,
+  CheckboxInput,
+  GreenCheck,
+  RedClose,
+} from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 
 import { CLOUD_FUNCTION_REGION } from '../../data';
 import { ProjectState, ProjectStateService } from '../../service/project_state';
-import { css } from 'jupyter-extensions-shared';
 import { OnDialogClose, OnInitialized } from '../dialog';
-import { ActionBar } from '../shared/action_bar';
-import { Message } from '../shared/message';
-import { SubmitButton } from '../shared/submit_button';
+import { ActionBar } from '../action_bar';
 import { AppEngineCreator } from './appengine_creator';
 import { ResourceStatuses } from './resource_statuses';
 import { ServiceStatuses } from './service_statuses';
-import { CheckboxInput } from '../shared/checkbox_input';
-import { GreenCheck, RedClose } from '../shared/status_icons';
 
 /** Function to return a status icon */
 export function getIconForState(enabled: boolean): JSX.Element {

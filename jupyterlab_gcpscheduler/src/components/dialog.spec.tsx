@@ -18,6 +18,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { Dialog } from '@material-ui/core';
 import { shallow } from 'enzyme';
+import { IconButtonMenu } from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 
 import { GcpService } from '../service/gcp';
@@ -29,9 +30,8 @@ import {
   ServerProxyTransportService,
   TransportService,
 } from '../service/transport';
-import { IconButtonMenu } from './shared/icon_button_menu';
 import { ProjectStateService, ProjectState } from '../service/project_state';
-import { ActionBar } from './shared/action_bar';
+import { ActionBar } from './action_bar';
 import { Initializer } from './initialization/initializer';
 import { BUCKET_NAME_SUFFIX } from '../data';
 

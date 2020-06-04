@@ -18,6 +18,15 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { Dialog } from '@material-ui/core';
 import * as csstips from 'csstips';
+import {
+  BASE_FONT,
+  COLORS,
+  css,
+  IconButtonMenu,
+  MenuCloseHandler,
+  SmallMenuItem,
+  Message,
+} from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
@@ -28,16 +37,9 @@ import {
   ProjectStateService,
   ProjectState,
 } from '../service/project_state';
-import { BASE_FONT, COLORS, css } from 'jupyter-extensions-shared';
 import { Initializer } from './initialization/initializer';
 import { SchedulerForm } from './scheduler_form';
-import { ActionBar } from './shared/action_bar';
-import {
-  IconButtonMenu,
-  MenuCloseHandler,
-  SmallMenuItem,
-} from './shared/icon_button_menu';
-import { Message } from './shared/message';
+import { ActionBar } from './action_bar';
 
 import {
   ClientTransportService,

@@ -5,8 +5,6 @@
     "declaration": true,
     "esModuleInterop": true,
     "incremental": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
     "jsx": "react",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -15,6 +13,6 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "target": "es2015",
-  },
+    "target": "es2015"
+  }
 }

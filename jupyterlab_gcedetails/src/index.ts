@@ -38,4 +38,5 @@ const gceDetails: JupyterFrontEndPlugin<void> = {
   },
 };
 
+console.log(CLOUD_CONSOLE);
 export default gceDetails;

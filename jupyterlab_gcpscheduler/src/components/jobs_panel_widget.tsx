@@ -15,17 +15,16 @@
  */
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { LinearProgress, IconButton, withStyles } from '@material-ui/core';
+import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
-
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
+import { BASE_FONT, COLORS, Message } from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+
 import { GcpService, ListAiPlatformJobsResponse } from '../service/gcp';
-import { BASE_FONT, COLORS } from 'jupyter-extensions-shared';
 import { JobListItem } from './job_list_item';
-import { Message } from './shared/message';
 
 interface Props {
   isVisible: boolean;

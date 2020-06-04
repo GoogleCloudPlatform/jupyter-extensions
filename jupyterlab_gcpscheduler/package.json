@@ -44,8 +44,8 @@
     "@phosphor/widgets": "^1.9.3",
     "csstips": "^1.2.0",
     "formik": "^1.5.8",
-    "gcp-jupyterlab-extensions-shared": "^1.0.0",
-    "typestyle": "^2.0.4"
+    "gcp-jupyterlab-shared": "^1.0.0",
+    "typestyle": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
