@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppEngineCreator Renders 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    In order to use Cloud Scheduler, your project must contain an App Engine app that is located in one of the supported regions
+    <LearnMoreLink
+      href="https://cloud.google.com/scheduler/docs/#supported_regions"
+    />
+    . This is a one-time setup that must be completed by a Project Owner. There are two ways to create the App Engine app:
+  </p>
+  <ol>
+    <li
+      className="li_f141vg9d"
+    >
+      Use the
+      <LearnMoreLink
+        href="https://console.cloud.google.com/appengine/start?project=test-project"
+        text="Google Cloud Platform Console UI"
+      />
+    </li>
+    <li
+      className="li_f141vg9d"
+    >
+      Run the following command in a terminal or in
+      <LearnMoreLink
+        href="https://ssh.cloud.google.com/cloudshell/editor"
+        text="Google Cloud Shell"
+      />
+      :
+      <code
+        className="code_f1cf70vf"
+      >
+        gcloud --project 
+        test-project
+         app create
+      </code>
+    </li>
+  </ol>
+</div>
+`;

@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ResourceStatuses Renders needing both resources 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    The following resources must exist:
+  </p>
+  <div
+    className="serviceStatuses_fk872kw"
+  >
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      A
+      <LearnMoreLink
+        href="https://cloud.google.com/storage/"
+        text="Cloud Storage Bucket"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      An 
+      <LearnMoreLink
+        href="https://cloud.google.com/functions/docs/calling/http"
+        text="HTTP-triggered Cloud Function"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResourceStatuses Renders with GCS bucket only 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    The following resources must exist:
+  </p>
+  <div
+    className="serviceStatuses_fk872kw"
+  >
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      A
+      <LearnMoreLink
+        href="https://cloud.google.com/storage/"
+        text="Cloud Storage Bucket"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResourceStatuses Renders with both resources 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    The following resources must exist:
+  </p>
+  <div
+    className="serviceStatuses_fk872kw"
+  >
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CheckIcon)) />
+      A
+      <LearnMoreLink
+        href="https://cloud.google.com/storage/"
+        text="Cloud Storage Bucket"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CheckIcon)) />
+      An 
+      <LearnMoreLink
+        href="https://cloud.google.com/functions/docs/calling/http"
+        text="HTTP-triggered Cloud Function"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResourceStatuses Renders with errors 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    The following resources must exist:
+  </p>
+  <div
+    className="serviceStatuses_fk872kw"
+  >
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      A
+      <LearnMoreLink
+        href="https://cloud.google.com/storage/"
+        text="Cloud Storage Bucket"
+      />
+    </div>
+    <Message
+      asActivity={false}
+      asError={true}
+      text="Unable to create bucket"
+    />
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      An 
+      <LearnMoreLink
+        href="https://cloud.google.com/functions/docs/calling/http"
+        text="HTTP-triggered Cloud Function"
+      />
+    </div>
+    <Message
+      asActivity={false}
+      asError={true}
+      text="Unable to deploy function"
+    />
+  </div>
+</div>
+`;
+
+exports[`ResourceStatuses Renders with pending operations 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <p
+    className="paragraph_f1nzr65k"
+  >
+    The following resources must exist:
+  </p>
+  <div
+    className="serviceStatuses_fk872kw"
+  >
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      A
+      <LearnMoreLink
+        href="https://cloud.google.com/storage/"
+        text="Cloud Storage Bucket"
+      />
+    </div>
+    <Message
+      asActivity={true}
+      asError={false}
+      text="Creating Cloud Storage bucket gs://test-project-scheduled-notebooks..."
+    />
+    <div
+      className="serviceStatusItem_f7gbs7g"
+    >
+      <WithStyles(pure(CloseIcon)) />
+      An 
+      <LearnMoreLink
+        href="https://cloud.google.com/functions/docs/calling/http"
+        text="HTTP-triggered Cloud Function"
+      />
+    </div>
+    <Message
+      asActivity={true}
+      asError={false}
+      text="Deploying Cloud Function. This may take a few minutes..."
+    />
+  </div>
+</div>
+`;

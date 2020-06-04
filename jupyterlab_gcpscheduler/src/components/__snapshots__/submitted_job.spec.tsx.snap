@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SubmittedJob Renders for immediate job 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <div
+    className="row_f17j33oz message_ftgw0r2"
+  >
+    <WithStyles(pure(CheckCircleIcon)) />
+    <span>
+      Notebook run successfully scheduled!
+    </span>
+  </div>
+  <dl
+    className="dl_f1xmw2no"
+  >
+    <div>
+      <dt>
+        Notebook:
+      </dt>
+      <dd>
+        <LearnMoreLink
+          href="https://console.cloud.google.com/storage/browser/test-project/test_job_1234?project=test-project"
+          text="test_job_1234.ipynb"
+        />
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Run name:
+      </dt>
+      <dd>
+        test_job_1234
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Region:
+      </dt>
+      <dd>
+        us-east1 (South Carolina)
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Scale tier:
+      </dt>
+      <dd>
+        CUSTOM
+         - 
+        Custom machine type configuration
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Container:
+      </dt>
+      <dd>
+        gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Type:
+      </dt>
+      <dd>
+        Single run
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Job:
+      </dt>
+      <dd>
+        <LearnMoreLink
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          text="View in Cloud Console"
+        />
+      </dd>
+    </div>
+  </dl>
+  <ActionBar
+    closeLabel="Done"
+    onDialogClose={[MockFunction]}
+  >
+    <button
+      className="button_fyf4elf"
+      onClick={[MockFunction]}
+      type="button"
+    >
+      Submit another job
+    </button>
+  </ActionBar>
+</div>
+`;
+
+exports[`SubmittedJob Renders for scheduled job 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <div
+    className="row_f17j33oz message_ftgw0r2"
+  >
+    <WithStyles(pure(CheckCircleIcon)) />
+    <span>
+      Notebook run successfully scheduled!
+    </span>
+  </div>
+  <dl
+    className="dl_f1xmw2no"
+  >
+    <div>
+      <dt>
+        Notebook:
+      </dt>
+      <dd>
+        <LearnMoreLink
+          href="https://console.cloud.google.com/storage/browser/test-project/test_job_1234?project=test-project"
+          text="test_job_1234.ipynb"
+        />
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Run name:
+      </dt>
+      <dd>
+        test_job_1234
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Region:
+      </dt>
+      <dd>
+        us-east1 (South Carolina)
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Scale tier:
+      </dt>
+      <dd>
+        CUSTOM
+         - 
+        Custom machine type configuration
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Container:
+      </dt>
+      <dd>
+        gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Type:
+      </dt>
+      <dd>
+        Recurring run
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Schedule:
+      </dt>
+      <dd>
+        0 15 * * *
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Job:
+      </dt>
+      <dd>
+        <LearnMoreLink
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          text="View in Cloud Console"
+        />
+      </dd>
+    </div>
+  </dl>
+  <ActionBar
+    closeLabel="Done"
+    onDialogClose={[MockFunction]}
+  >
+    <button
+      className="button_fyf4elf"
+      onClick={[MockFunction]}
+      type="button"
+    >
+      Submit another job
+    </button>
+  </ActionBar>
+</div>
+`;

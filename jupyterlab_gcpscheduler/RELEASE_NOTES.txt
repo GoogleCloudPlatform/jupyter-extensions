@@ -1,0 +1,29 @@
+                GCP Notebooks Scheduler Extension Release Notes
+
+v1.0.0 - 05/14/2020
+================================================================================
+- Adds distinctive labeling between recurring and immediately scheduled jobs
+  which allows both to be shown in Cloud Console.
+- Provides a user-friendly schedule builder for recurring jobs in addition to
+  the full cron-formatted input.
+- Adds a side-panel view for displaying information and providing links to
+  previously submitted jobs.
+- Refactors project initialization to simplify the number of screens and user
+  actions. Additionally, users can determine if they wish to enable support for
+  recurring jobs or not.
+
+v0.9.7 - 04/08/2020
+================================================================================
+- Adds IAM checks and prevents submission if missing permissions are found
+- Adds action to reset configuration setings
+- Persist form values in settings for reuse on next submission
+- Removes BASIC_TPU scale tier which was not working and adds STANDARD_1 and
+  PREMIUM_1 options from
+  https://cloud.google.com/ml-engine/docs/machine-types#scale_tiers.
+- Updates to latest container image versions (Tensorflow 2.1, PyTorch 1.4)
+- Improved post-submission screen with additional job details
+- Removes non-compliant characters from job ID inferred from notebook name
+
+v0.9.6 - 12/12/2019
+================================================================================
+- Initial early access preview release

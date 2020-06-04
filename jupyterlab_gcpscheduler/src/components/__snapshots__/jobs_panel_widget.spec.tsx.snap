@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f10v7dh6"
+    >
+      AI Platform Notebook Jobs
+    </header>
+    <WithStyles(WithStyles(IconButton))
+      onClick={[Function]}
+      title="Refresh Jobs"
+    >
+      <WithStyles(pure(RefreshIcon)) />
+    </WithStyles(WithStyles(IconButton))>
+  </div>
+  <ul
+    className="list_fqi18ru"
+  />
+</div>
+`;
+
+exports[`GcpScheduledJobsPanel Shows error if jobs cannot be retrieved 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f10v7dh6"
+    >
+      AI Platform Notebook Jobs
+    </header>
+    <WithStyles(WithStyles(IconButton))
+      onClick={[Function]}
+      title="Refresh Jobs"
+    >
+      <WithStyles(pure(RefreshIcon)) />
+    </WithStyles(WithStyles(IconButton))>
+  </div>
+  <Message
+    asError={true}
+    text="Cannot retrieve jobs: Unable to retrieve Jobs"
+  />
+</div>
+`;
+
+exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f10v7dh6"
+    >
+      AI Platform Notebook Jobs
+    </header>
+    <WithStyles(WithStyles(IconButton))
+      onClick={[Function]}
+      title="Refresh Jobs"
+    >
+      <WithStyles(pure(RefreshIcon)) />
+    </WithStyles(WithStyles(IconButton))>
+  </div>
+  <Message
+    asError={true}
+    text="No project: Unable to determine GCP project"
+  />
+</div>
+`;
+
+exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f10v7dh6"
+    >
+      AI Platform Notebook Jobs
+    </header>
+    <WithStyles(WithStyles(IconButton))
+      onClick={[Function]}
+      title="Refresh Jobs"
+    >
+      <WithStyles(pure(RefreshIcon)) />
+    </WithStyles(WithStyles(IconButton))>
+  </div>
+  <ul
+    className="list_fqi18ru"
+  >
+    <JobListItem
+      job={
+        Object {
+          "createTime": "2020-05-01T19:00:07Z",
+          "endTime": "2020-05-01T19:09:42Z",
+          "jobId": "notebook_job1_abcxyz",
+          "labels": Object {
+            "job_type": "jupyterlab_scheduled_notebook",
+            "scheduler_job_name": "notebook_job1",
+          },
+          "startTime": "2020-05-01T19:04:08Z",
+          "state": "SUCCEEDED",
+          "trainingInput": Object {
+            "args": Array [
+              "nbexecutor",
+              "--input-notebook",
+              "gs://test-project/notebook_job1/nb.ipynb",
+              "--output-notebook",
+              "gs://test-project/notebook_job1/job1.ipynb",
+            ],
+            "masterConfig": Object {
+              "imageUri": "gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest",
+            },
+            "region": "us-central1",
+          },
+          "trainingOutput": Object {
+            "consumedMLUnits": 0.06,
+          },
+        }
+      }
+      key="notebook_job1_abcxyz"
+    />
+    <JobListItem
+      job={
+        Object {
+          "createTime": "2020-05-01T19:00:07Z",
+          "endTime": "2020-05-01T19:09:42Z",
+          "jobId": "notebook_job2_fghijk",
+          "labels": Object {
+            "job_type": "jupyterlab_scheduled_notebook",
+            "scheduler_job_name": "notebook_job1",
+          },
+          "startTime": "2020-05-01T19:04:08Z",
+          "state": "SUCCEEDED",
+          "trainingInput": Object {
+            "args": Array [
+              "nbexecutor",
+              "--input-notebook",
+              "gs://test-project/notebook_job1/nb.ipynb",
+              "--output-notebook",
+              "gs://test-project/notebook_job1/job1.ipynb",
+            ],
+            "masterConfig": Object {
+              "imageUri": "gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest",
+            },
+            "region": "us-central1",
+          },
+          "trainingOutput": Object {
+            "consumedMLUnits": 0.06,
+          },
+        }
+      }
+      key="notebook_job2_fghijk"
+    />
+  </ul>
+</div>
+`;
+
+exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f10v7dh6"
+    >
+      AI Platform Notebook Jobs
+    </header>
+    <WithStyles(WithStyles(IconButton))
+      onClick={[Function]}
+      title="Refresh Jobs"
+    >
+      <WithStyles(pure(RefreshIcon)) />
+    </WithStyles(WithStyles(IconButton))>
+  </div>
+  <WithStyles(LinearProgress) />
+</div>
+`;

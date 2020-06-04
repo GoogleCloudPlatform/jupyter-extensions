@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JobListItem Renders for failed job 1`] = `
+<li
+  className="item_f7pj24d"
+>
+  <div
+    title="Status: FAILED"
+  >
+    <WithStyles(pure(CloseIcon)) />
+  </div>
+  <div
+    className="details_f1grbse3"
+  >
+    <div>
+      <a
+        className="link_fg3laeu jobLink_f2antnr"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        target="_blank"
+        title="View AI Platform Job"
+      >
+        notebook job1
+      </a>
+    </div>
+    <div>
+      <span
+        className="jobTime_fueeqh8"
+      >
+        5/1/2020, 3:09:42 PM
+      </span>
+    </div>
+  </div>
+  <div />
+</li>
+`;
+
+exports[`JobListItem Renders for running job 1`] = `
+<li
+  className="item_f7pj24d"
+>
+  <div
+    title="Status: RUNNING"
+  >
+    <WithStyles(pure(RefreshIcon)) />
+  </div>
+  <div
+    className="details_f1grbse3"
+  >
+    <div>
+      <a
+        className="link_fg3laeu jobLink_f2antnr"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        target="_blank"
+        title="View AI Platform Job"
+      >
+        notebook job1
+      </a>
+    </div>
+    <div>
+      <span
+        className="jobTime_fueeqh8"
+      >
+        5/1/2020, 3:09:42 PM
+      </span>
+    </div>
+  </div>
+  <div />
+</li>
+`;
+
+exports[`JobListItem Renders for successful job 1`] = `
+<li
+  className="item_f7pj24d"
+>
+  <div
+    title="Status: SUCCEEDED"
+  >
+    <WithStyles(pure(CheckIcon)) />
+  </div>
+  <div
+    className="details_f1grbse3"
+  >
+    <div>
+      <a
+        className="link_fg3laeu jobLink_f2antnr"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        target="_blank"
+        title="View AI Platform Job"
+      >
+        notebook job1
+      </a>
+    </div>
+    <div>
+      <span
+        className="jobTime_fueeqh8"
+      >
+        5/1/2020, 3:09:42 PM
+      </span>
+    </div>
+  </div>
+  <div>
+    <IconButtonMenu
+      icon={<WithStyles(pure(MoreVertIcon)) />}
+      menuItems={[Function]}
+    />
+  </div>
+</li>
+`;
