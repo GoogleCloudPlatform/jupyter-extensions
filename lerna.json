@@ -1,8 +1,8 @@
 {
   "packages": [
+    "shared/client/",
     "jupyterlab_gcedetails/",
-    "jupyterlab_gcpscheduler/",
-    "shared/client/"
+    "jupyterlab_gcpscheduler/"
   ],
   "version": "independent"
 }

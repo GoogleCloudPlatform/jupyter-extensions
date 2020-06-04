@@ -17,22 +17,24 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { FormikBag, FormikProps, withFormik } from 'formik';
+import {
+  css,
+  FieldError,
+  LearnMoreLink,
+  Message,
+  SelectInput,
+  SubmitButton,
+  TextInput,
+  ToggleSwitch,
+} from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 
 import { GcpService, RunNotebookRequest } from '../service/gcp';
 import { GetPermissionsResponse } from '../service/project_state';
-import { css } from 'jupyter-extensions-shared';
 import { GcpSettings, OnDialogClose } from './dialog';
 import { ScheduleBuilder } from './schedule_builder/schedule_builder';
-import { ActionBar } from './shared/action_bar';
-import { FieldError } from './shared/field_error';
-import { LearnMoreLink } from './shared/learn_more_link';
-import { Message } from './shared/message';
-import { SchedulerDescription } from './shared/scheduler_description';
-import { SelectInput } from './shared/select_input';
-import { SubmitButton } from './shared/submit_button';
-import { TextInput } from './shared/text_input';
-import { ToggleSwitch } from './shared/toggle_switch_input';
+import { ActionBar } from './action_bar';
+import { SchedulerDescription } from './scheduler_description';
 import { SubmittedJob } from './submitted_job';
 
 import {

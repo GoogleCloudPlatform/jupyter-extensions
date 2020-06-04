@@ -1,11 +1,11 @@
 {
   "name": "gcp-jupyterlab-extensions-shared",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared libraries for JupyterLab extensions",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
-    "lib/"
+    "lib/**/*.{d.ts,js}"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
@@ -30,7 +30,7 @@
     "@material-ui/core": "^3.9.4",
     "@material-ui/icons": "^3.0.2",
     "csstips": "^1.2.0",
-    "typestyle": "^2.0.4",
+    "typestyle": "^2.1.0",
     "react": "~16.8.4",
     "react-dom": "~16.8.4"
   },

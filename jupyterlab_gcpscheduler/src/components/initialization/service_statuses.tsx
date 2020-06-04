@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
+import { css, LearnMoreLink, Message } from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 
 import { ServiceStatus } from '../../service/project_state';
-import { css } from 'jupyter-extensions-shared';
-import { LearnMoreLink } from '../shared/learn_more_link';
-import { Message } from '../shared/message';
 import { getIconForState } from './initializer';
 
 interface Props {

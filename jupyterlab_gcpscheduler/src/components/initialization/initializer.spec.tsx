@@ -15,12 +15,11 @@
  */
 
 import { shallow } from 'enzyme';
+import { CheckboxInput, SubmitButton } from 'gcp-jupyterlab-extensions-shared';
 import * as React from 'react';
 
 import { ProjectState, ProjectStateService } from '../../service/project_state';
 import { getProjectState } from '../../test_helpers';
-import { CheckboxInput } from '../shared/checkbox_input';
-import { SubmitButton } from '../shared/submit_button';
 import { Initializer } from './initializer';
 
 describe('Initializer', () => {
