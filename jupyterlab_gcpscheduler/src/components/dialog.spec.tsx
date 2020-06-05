@@ -18,7 +18,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { Dialog } from '@material-ui/core';
 import { shallow } from 'enzyme';
-import { IconButtonMenu } from 'gcp-jupyterlab-extensions-shared';
+import { IconButtonMenu } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { GcpService } from '../service/gcp';

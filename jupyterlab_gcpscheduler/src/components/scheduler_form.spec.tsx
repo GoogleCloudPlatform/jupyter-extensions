@@ -17,7 +17,7 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { mount, shallow } from 'enzyme';
-import { Message, ToggleSwitch } from 'gcp-jupyterlab-extensions-shared';
+import { Message, ToggleSwitch } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import {

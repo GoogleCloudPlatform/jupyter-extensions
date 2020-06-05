@@ -24,7 +24,7 @@ import {
   GrayPending,
   GreenCheck,
   RedClose,
-} from 'gcp-jupyterlab-extensions-shared';
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { css, LearnMoreLink, Message } from 'gcp-jupyterlab-extensions-shared';
+import { css, LearnMoreLink, Message } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { ServiceStatus } from '../../service/project_state';
