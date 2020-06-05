@@ -15,7 +15,7 @@
  */
 
 import { shallow } from 'enzyme';
-import { CheckboxInput, SubmitButton } from 'gcp-jupyterlab-extensions-shared';
+import { CheckboxInput, SubmitButton } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { ProjectState, ProjectStateService } from '../../service/project_state';

@@ -18,7 +18,7 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
 
-import { css } from 'gcp-jupyterlab-extensions-shared';
+import { css } from 'gcp-jupyterlab-shared';
 import { OnDialogClose } from './dialog';
 
 interface Props {

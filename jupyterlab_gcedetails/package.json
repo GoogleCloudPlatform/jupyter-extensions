@@ -20,14 +20,14 @@
     "build": "tsc -p tsconfig.prod.json",
     "clean": "rimraf lib *tsbuildinfo",
     "e2e-test": "jest -c jest-puppeteer.config.js",
-    "prepack": "npm run clean && npm run build",
+    "install-extension": "jupyter labextension install . --no-build",
     "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
-    "start": "concurrently -k -p \"[{name}]\" -n \"Typescript,JupyterLab\" -c \"green.bold,yellow.bold\" \"npm run watch\" \"jupyter lab --watch\"",
-    "devserver": "nodemon -w jupyterlab_gcedetails -e \".py\" -x \"jupyter lab --no-browser\"",
+    "pretest": "npm run lint",
+    "prepack": "npm run clean && npm run build",
     "test": "jest --coverage",
     "test-watch": "jest --watch",
-    "watch": "tsc -w"
+    "watch": "tsc -w -b"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.2.1",

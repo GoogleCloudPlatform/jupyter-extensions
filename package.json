@@ -8,7 +8,8 @@
     "build": "lerna run build --stream --sort",
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "pack": "lerna exec npm pack --parallel",
-    "test": "lerna run test --parallel"
+    "test": "lerna run test --parallel",
+    "watch": "lerna run watch --parallel"
   },
   "repository": {
     "type": "git",

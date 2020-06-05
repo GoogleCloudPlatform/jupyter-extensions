@@ -20,7 +20,7 @@ import {
   SelectInput,
   TextInput,
   CheckValidation,
-} from 'gcp-jupyterlab-extensions-shared';
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { DAYS_OF_WEEK, FREQUENCY_TYPES } from '../../data';

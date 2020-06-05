@@ -18,7 +18,7 @@ import {
   SelectInput,
   TextInput,
   CheckValidation,
-} from 'gcp-jupyterlab-extensions-shared';
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { FREQUENCY_TYPES, MONTH_FREQUENCIES } from '../../data';

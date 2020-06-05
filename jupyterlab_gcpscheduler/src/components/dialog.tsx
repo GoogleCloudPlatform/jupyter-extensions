@@ -26,7 +26,7 @@ import {
   MenuCloseHandler,
   SmallMenuItem,
   Message,
-} from 'gcp-jupyterlab-extensions-shared';
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 

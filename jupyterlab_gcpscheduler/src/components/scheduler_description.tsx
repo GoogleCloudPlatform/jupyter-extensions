@@ -15,7 +15,7 @@
  */
 
 import * as React from 'react';
-import { css, LearnMoreLink } from 'gcp-jupyterlab-extensions-shared';
+import { css, LearnMoreLink } from 'gcp-jupyterlab-shared';
 
 const DESCRIPTION = `Schedule and run this Notebook from start to finish
 at the specified frequency. The executed Notebook will be saved to a

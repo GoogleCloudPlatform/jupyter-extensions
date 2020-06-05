@@ -75,7 +75,7 @@ async function activateScheduler(
   console.debug('Activating GCP Notebook Scheduler Extension');
   const schedulerContext = new GcpSchedulerContext();
   const settings = await settingRegistry.load(
-    'jupyterlab_gcpscheduler:gcpsettings'
+    'jupyterlab_gcpscheduler:gcpsettings  '
   );
   const projectId = settings.get('projectId').composite;
   const transportService = new ServerProxyTransportService();
