@@ -20,14 +20,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "clean": "rimraf lib *tsbuildinfo",
-    "install-extension": "jupyter labextension install . --no-build",
+    "install-extension": "./dev-install.sh",
     "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
     "test": "jest --coverage",
     "test-watch": "jest --watch",
-    "watch": "tsc -w -b"
+    "watch": "tsc -b -w"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.2.1",
