@@ -6,7 +6,9 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
     "build": "lerna run build --stream --sort",
+    "devserver": "nodemon -e \".py\" -x \"jupyter lab --watch --no-browser\"",
     "clean": "lerna clean --yes && lerna run clean --parallel",
+    "link": "lerna run link --stream",
     "pack": "lerna exec npm pack --parallel",
     "test": "lerna run test --parallel",
     "watch": "lerna run watch --parallel"
@@ -28,6 +30,7 @@
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "lerna": "^3.22.0",
+    "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "typescript": "^3.8.3"
   }

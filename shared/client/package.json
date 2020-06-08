@@ -10,12 +10,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "clean": "rimraf lib *tsbuildinfo",
+    "link": "jupyter labextension link --log-level=INFO",
     "lint-warnings": "eslint \"**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
     "prepack": "npm run clean && npm run build",
     "test": "jest --coverage",
     "test-watch": "jest --watch",
-    "watch": "tsc -w -b"
+    "watch": "tsc -b -w"
   },
   "repository": {
     "type": "git",
