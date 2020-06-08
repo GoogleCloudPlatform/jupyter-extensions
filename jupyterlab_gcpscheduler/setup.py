@@ -14,31 +14,42 @@
 
 import os
 
-from setuptools import setup
+from setuptools import find_packages, setup
+
+with open("README.md") as f:
+  long_description = f.read()
+
+version = None
+with open(os.path.join(os.getcwd(), "jupyterlab_gcpscheduler",
+                       "version.py")) as f:
+  for l in f:
+    if l.startswith("VERSION"):
+      version = l.rstrip().split(" = ")[1].replace("'", "")
+
+if not version:
+  raise RuntimeError("Unable to determine version")
+
+npm_package = "jupyterlab_gcpscheduler-{}.tgz".format(version)
+if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
+  raise FileNotFoundError("Cannot find NPM package. Did you run `npm pack`?")
 
 data_files = [
-    ("share/jupyter/lab/extensions", ("jupyterlab_gcpscheduler-1.0.0.tgz",)),
+    ("share/jupyter/lab/extensions", (npm_package,)),
     ("etc/jupyter/jupyter_notebook_config.d",
      ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gcpscheduler.json",
      )),
 ]
 
-with open("README.md", "r") as fh:
-  long_description = fh.read()
-
-if not os.path.exists(
-    os.path.join(os.getcwd(), "jupyterlab_gcpscheduler-1.0.0.tgz")):
-  raise FileNotFoundError("Cannot find NPM package. Did you run `npm pack`?")
-
 setup(
     name="jupyterlab_gcpscheduler",
-    version="1.0.0",
+    version=version,
     description="GCP Notebooks Scheduler Extension",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GoogleCloudPlatform/jupyter-extensions",
     data_files=data_files,
     license="Apache License 2.0",
+    packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
         "google-auth>=1.6.3",

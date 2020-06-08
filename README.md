@@ -32,8 +32,8 @@ development environment.
 
 1. Run `npm watch` to start the TypeScript compiler in watch mode.
 
-1. In a seperate terminal, `cd` to the root of the repository, run
-   `pipenv shell` and then `npm run devserver`. This will start JupyterLab in
-   watch mode to pick up any changes to either the TypeScript or Python code.
+1. In a seperate terminal, run `pipenv shell` and then `npm run devserver`.
+   This will start JupyterLab in watch mode to pick up any changes to either the
+   TypeScript or Python code.
 
 You can then open JupyterLab at one of the links shown in the logging output.
