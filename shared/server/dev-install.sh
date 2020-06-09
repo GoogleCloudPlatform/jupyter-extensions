@@ -1,4 +1,3 @@
-#!/bin/sh
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +14,6 @@
 
 #!/bin/bash
 
-if [[ $1 = 'coverage' ]] ; then
-  coverage run --source jupyterlab_gcpscheduler -m unittest discover -p '*_test.py'
-  coverage report
-else
-  python -m unittest discover -p '*_test.py'
-fi
+pip install -e .
+cp -v jupyter-config/jupyter_notebook_config.d/gcp_jupyterlab_shared.json \
+  `pipenv --venv`/etc/jupyter/jupyter_notebook_config.d/

@@ -1,4 +1,3 @@
-#!/bin/sh
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@
 #!/bin/bash
 
 if [[ $1 = 'coverage' ]] ; then
-  coverage run --source jupyterlab_gcpscheduler -m unittest discover -p '*_test.py'
+  coverage run --source gcp_jupyterlab_shared -m unittest discover -p '*_test.py'
   coverage report
 else
   python -m unittest discover -p '*_test.py'
