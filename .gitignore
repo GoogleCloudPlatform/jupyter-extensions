@@ -81,3 +81,6 @@ __pycache__
 *.egg-info
 .ipynb_checkpoints/
 *.ipynb
+
+# TypeScript Build Info
+*.tsbuildinfo

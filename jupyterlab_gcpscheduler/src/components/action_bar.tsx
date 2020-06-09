@@ -18,8 +18,8 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
 
-import { css } from '../../styles';
-import { OnDialogClose } from '../dialog';
+import { css } from 'gcp-jupyterlab-shared';
+import { OnDialogClose } from './dialog';
 
 interface Props {
   children?: React.ReactNode;

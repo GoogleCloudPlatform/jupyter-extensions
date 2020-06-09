@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {
+  css,
+  SelectInput,
+  TextInput,
+  CheckValidation,
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { FREQUENCY_TYPES, MONTH_FREQUENCIES } from '../../data';
-import { css } from '../../styles';
-import { SelectInput } from '../shared/select_input';
-import { TextInput } from '../shared/text_input';
-import { CheckValidation } from '../shared/validation_error';
 import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
 
 interface SubFormState {

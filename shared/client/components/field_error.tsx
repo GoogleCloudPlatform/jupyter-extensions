@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-  ],
-  extends: [
-    'eslint:recommended',
-    'plugin:prettier/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended'
-  ],
-  rules: {
-    '@typescript-eslint/explicit-function-return-type': 'off',
-  }
+import * as React from 'react';
+import { style } from 'typestyle';
+
+import { COLORS } from '../styles';
+
+interface FieldErrorProps {
+  message?: string;
+}
+
+const error = style({
+  color: COLORS.red,
+  paddingBottom: '10px',
+});
+
+/** Funtional Component for select fields */
+// tslint:disable-next-line:enforce-name-casing
+export function FieldError(props: FieldErrorProps) {
+  const { message } = props;
+  return message ? <div className={error}>{message}</div> : null;
 }

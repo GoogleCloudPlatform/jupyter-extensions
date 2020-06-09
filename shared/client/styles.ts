@@ -20,8 +20,7 @@
  * https://github.com/jupyterlab/jupyterlab/blob/master/packages/theme-light-extension/style/variables.css
  */
 import * as csstips from 'csstips';
-import { cssRaw, stylesheet } from 'typestyle';
-import { CSSProperties } from 'typestyle/lib/types';
+import { cssRaw, stylesheet, types } from 'typestyle';
 
 // Imports Roboto 400 and 500 weight
 cssRaw(
@@ -42,7 +41,7 @@ export const COLORS = {
 };
 
 /** Base extension font style */
-export const BASE_FONT: CSSProperties = {
+export const BASE_FONT: types.CSSProperties = {
   color: COLORS.base,
   fontFamily: ROBOTO_FONT,
   fontSize: 'var(--jp-ui-font-size1, 13px)',

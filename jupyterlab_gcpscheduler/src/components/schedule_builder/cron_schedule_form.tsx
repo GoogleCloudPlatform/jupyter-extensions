@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  css,
+  FieldError,
+  LearnMoreLink,
+  TextInput,
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
-import { css } from '../../styles';
-import { FieldError } from '../shared/field_error';
-import { LearnMoreLink } from '../shared/learn_more_link';
-import { TextInput } from '../shared/text_input';
 import { OnScheduleChange } from './schedule_builder';
 
 const SCHEDULE_LINK =

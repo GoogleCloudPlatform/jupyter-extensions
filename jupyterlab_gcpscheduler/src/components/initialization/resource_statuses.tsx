@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import { css, LearnMoreLink, Message } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import { BUCKET_NAME_SUFFIX } from '../../data';
 import { ProjectState } from '../../service/project_state';
-import { css } from '../../styles';
-import { LearnMoreLink } from '../shared/learn_more_link';
-import { Message } from '../shared/message';
 import { getIconForState } from './initializer';
 
 interface Props {

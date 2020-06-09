@@ -15,35 +15,32 @@
  */
 
 import * as React from 'react';
-import { classes } from 'typestyle';
+import { Option } from '../utils';
+import { css } from '../styles';
 
-import { css } from '../../styles';
-
-interface TextInputProps {
-  disabled?: boolean;
-  type?: string;
-  min?: string;
-  max?: string;
+interface SelectInputProps {
   label?: string;
   name?: string;
   value?: string;
-  placeholder?: string;
-  hasError?: boolean;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  options?: Option[];
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-/** Funtional Component for text input fields */
+/** Funtional Component for select fields */
 // tslint:disable-next-line:enforce-name-casing
-export function TextInput(props: TextInputProps) {
-  const { label, hasError, ...inputProps } = props;
-
+export function SelectInput(props: SelectInputProps) {
+  const { label, options, ...inputProps } = props;
   return (
-    <div className={classes(css.inputContainer, hasError && 'error')}>
+    <div className={css.inputContainer}>
       {label && <label>{label}</label>}
-      <input
-        className={classes(css.input, hasError && 'error')}
-        {...inputProps}
-      />
+      <select className={css.input} {...inputProps}>
+        {options &&
+          options.map((o, i) => (
+            <option key={i} value={o.value}>
+              {o.text}
+            </option>
+          ))}
+      </select>
     </div>
   );
 }

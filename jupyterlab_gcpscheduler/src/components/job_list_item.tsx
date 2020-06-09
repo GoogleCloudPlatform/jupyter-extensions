@@ -17,14 +17,19 @@
 import { withStyles } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import * as csstips from 'csstips';
+import {
+  css,
+  IconButtonMenu,
+  SmallMenuItem,
+  GrayPending,
+  GreenCheck,
+  RedClose,
+} from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
 import { AI_PLATFORM_LINK } from '../data';
 import { AiPlatformJob } from '../service/gcp';
-import { css } from '../styles';
-import { IconButtonMenu, SmallMenuItem } from './shared/icon_button_menu';
-import { GrayPending, GreenCheck, RedClose } from './shared/status_icons';
 
 interface Props {
   job: AiPlatformJob;

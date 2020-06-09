@@ -17,6 +17,7 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { mount, shallow } from 'enzyme';
+import { Message, ToggleSwitch } from 'gcp-jupyterlab-shared';
 import * as React from 'react';
 
 import {
@@ -31,7 +32,6 @@ import {
 import { GcpService, RunNotebookRequest } from '../service/gcp';
 import { GetPermissionsResponse } from '../service/project_state';
 import { SchedulerForm, InnerSchedulerForm } from './scheduler_form';
-import { Message } from './shared/message';
 import { SubmittedJob } from './submitted_job';
 
 import {
@@ -41,7 +41,6 @@ import {
   simulateCheckBoxChange,
   simulateFieldChange,
 } from '../test_helpers';
-import { ToggleSwitch } from './shared/toggle_switch_input';
 import { GcpSettings } from './dialog';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
