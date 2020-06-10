@@ -2,6 +2,7 @@
   "packages": [
     "shared/client/",
     "jupyterlab_gcedetails/",
+    "jupyterlab_gcsfilebrowser/",
     "jupyterlab_gcpscheduler/"
   ],
   "version": "independent"

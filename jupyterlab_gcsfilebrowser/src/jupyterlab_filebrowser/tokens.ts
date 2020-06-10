@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {WidgetTracker} from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import {IStateDB} from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
-import {Token} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {GCSFileBrowser} from './browser';
+import { GCSFileBrowser } from './browser';
 
 /* tslint:disable */
 /**

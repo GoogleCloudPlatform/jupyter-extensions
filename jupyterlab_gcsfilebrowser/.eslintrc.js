@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const esLintConfig = require('../.eslintrc');
 
-import * as Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+esLintConfig.rules = {
+  ...esLintConfig.rules,
+  '@typescript-eslint/no-namespace': 'off',
+  '@typescript-eslint/interface-name-prefix': 'off',
+  '@typescript-eslint/no-use-before-define': 'off',
+  '@typescript-eslint/camelcase': 'off',
+  'no-case-declarations': 'off',
+  'no-inner-declarations': 'off',
+}
 
-Enzyme.configure({
-  adapter: new Adapter(),
-});
+module.exports = esLintConfig;

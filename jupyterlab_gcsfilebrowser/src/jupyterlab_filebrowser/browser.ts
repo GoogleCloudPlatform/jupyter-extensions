@@ -1,23 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {showErrorMessage, Toolbar, ToolbarButton} from '@jupyterlab/apputils';
+import { showErrorMessage, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import {IDocumentManager} from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import {Contents, ServerConnection} from '@jupyterlab/services';
+import { Contents, ServerConnection } from '@jupyterlab/services';
 
-import {IIterator} from '@phosphor/algorithm';
+import { IIterator } from '@phosphor/algorithm';
 
-import {PanelLayout, Widget} from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import {BreadCrumbs} from './crumbs';
+import { BreadCrumbs } from './crumbs';
 
-import {DirListing} from './listing';
+import { DirListing } from './listing';
 
-import {GCSFileBrowserModel} from './model';
+import { GCSFileBrowserModel } from './model';
 
-import {Uploader} from './upload';
+import { Uploader } from './upload';
 
 /**
  * The class name added to file browsers.
@@ -62,39 +62,39 @@ export class GCSFileBrowser extends Widget {
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
-    this._crumbs = new BreadCrumbs({model});
+    this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
 
     this._directoryPending = false;
-    let newFolder = new ToolbarButton({
+    const newFolder = new ToolbarButton({
       iconClassName: 'jp-NewFolderIcon',
       onClick: () => {
         this.createNewDirectory();
       },
-      tooltip: 'New Folder'
+      tooltip: 'New Folder',
     });
 
-    let uploader = new Uploader({model});
+    const uploader = new Uploader({ model });
 
-    let refresher = new ToolbarButton({
+    const refresher = new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
         void model.refresh();
       },
-      tooltip: 'Refresh File List'
+      tooltip: 'Refresh File List',
     });
 
     this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
-    this._listing = new DirListing({model, renderer});
+    this._listing = new DirListing({ model, renderer });
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
     this._listing.addClass(LISTING_CLASS);
 
-    let layout = new PanelLayout();
+    const layout = new PanelLayout();
     layout.addWidget(this.toolbar);
     layout.addWidget(this._crumbs);
     layout.addWidget(this._listing);
@@ -183,7 +183,7 @@ export class GCSFileBrowser extends Widget {
     void this._manager
       .newUntitled({
         path: this.model.path,
-        type: 'directory'
+        type: 'directory',
       })
       .then(async model => {
         await this._listing.selectItemByName(model.name);

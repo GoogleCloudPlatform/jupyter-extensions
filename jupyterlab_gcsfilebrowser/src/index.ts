@@ -4,16 +4,16 @@ import '../style/index.css';
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
-import {IDocumentManager} from '@jupyterlab/docmanager';
-import {IGCSFileBrowserFactory} from './jupyterlab_filebrowser/tokens';
-import {GCSDrive} from './contents';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IGCSFileBrowserFactory } from './jupyterlab_filebrowser/tokens';
+import { GCSDrive } from './contents';
 
-import {IStatusBar} from '@jupyterlab/statusbar';
+import { IStatusBar } from '@jupyterlab/statusbar';
 
-import {IFileBrowserFactory} from "@jupyterlab/filebrowser";
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import {
   Clipboard,
@@ -22,25 +22,23 @@ import {
   WidgetTracker,
 } from '@jupyterlab/apputils';
 
-import {
-  IStateDB,
-} from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
-import {CommandRegistry} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {Launcher} from '@jupyterlab/launcher';
+import { Launcher } from '@jupyterlab/launcher';
 
-import {GCSFileBrowser} from './jupyterlab_filebrowser/browser';
-import {GCSFileBrowserModel} from './jupyterlab_filebrowser/model';
+import { GCSFileBrowser } from './jupyterlab_filebrowser/browser';
+import { GCSFileBrowserModel } from './jupyterlab_filebrowser/model';
 
-import {FileUploadStatus} from './jupyterlab_filebrowser/uploadstatus';
+import { FileUploadStatus } from './jupyterlab_filebrowser/uploadstatus';
 
-import {IIconRegistry} from '@jupyterlab/ui-components';
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
-import {map, toArray} from '@phosphor/algorithm';
-import {Widget, PanelLayout} from '@phosphor/widgets';
-import {h, VirtualDOM} from "@phosphor/virtualdom";
-import {stylesheet} from 'typestyle';
+import { map, toArray } from '@phosphor/algorithm';
+import { Widget, PanelLayout } from '@phosphor/widgets';
+import { h, VirtualDOM } from '@phosphor/virtualdom';
+import { stylesheet } from 'typestyle';
 
 const NAMESPACE = 'gcsfilebrowser';
 const GCS_URI_PREFIX = 'gs://';
@@ -61,14 +59,11 @@ const localStyles = stylesheet({
 class GCSBrowserWidget extends Widget {
   constructor(browser: GCSFileBrowser) {
     super();
-    this.addClass("jp-GCSBrowser");
+    this.addClass('jp-GCSBrowser');
     this.layout = new PanelLayout();
     const header = new Widget({
       node: VirtualDOM.realize(
-        h.div(
-          {className: localStyles.header},
-          "Google Cloud Storage"
-        )
+        h.div({ className: localStyles.header }, 'Google Cloud Storage')
       ),
     });
 
@@ -76,7 +71,6 @@ class GCSBrowserWidget extends Widget {
     (this.layout as PanelLayout).addWidget(browser);
   }
 }
-
 
 async function activateGCSFileBrowser(
   app: JupyterFrontEnd,
@@ -89,15 +83,15 @@ async function activateGCSFileBrowser(
   manager.services.contents.addDrive(drive);
 
   const browser = factory.createFileBrowser(NAMESPACE, {
-    driveName: drive.name
+    driveName: drive.name,
   });
 
   factory_browser.createFileBrowser(NAMESPACE, {
-    driveName: drive.name
+    driveName: drive.name,
   });
 
   browser.model.addGCSDrive(drive);
-  const mybrowser = new GCSBrowserWidget(browser)
+  const mybrowser = new GCSBrowserWidget(browser);
   mybrowser.addClass('jp-GCSFilebrowser');
 
   mybrowser.title.iconClass = 'jp-GCSFilebrowserIcon jp-SideBar-tabIcon';
@@ -105,7 +99,7 @@ async function activateGCSFileBrowser(
   mybrowser.id = 'gcs-filebrowser-widget';
 
   restorer.add(mybrowser, NAMESPACE);
-  app.shell.add(mybrowser, 'left', {rank: 100});
+  app.shell.add(mybrowser, 'left', { rank: 100 });
 
   addCommands(app, factory);
 }
@@ -128,7 +122,7 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
       return;
     }
     const item = new FileUploadStatus({
-      tracker: browser.tracker
+      tracker: browser.tracker,
     });
 
     statusBar.registerStatusItem(
@@ -139,10 +133,10 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
         isActive: () => {
           return !!item.model && item.model.items.length > 0;
         },
-        activeStateChanged: item.model.stateChanged
+        activeStateChanged: item.model.stateChanged,
       }
     );
-  }
+  },
 };
 
 /**
@@ -161,14 +155,9 @@ namespace CommandIDs {
   export const createNewDirectory = 'gcsfilebrowser:create-new-directory';
 }
 
-
-function addCommands(
-  app: JupyterFrontEnd,
-  factory: IGCSFileBrowserFactory
-) {
-
-  const {docRegistry: registry, commands} = app;
-  const {tracker} = factory;
+function addCommands(app: JupyterFrontEnd, factory: IGCSFileBrowserFactory) {
+  const { docRegistry: registry, commands } = app;
+  const { tracker } = factory;
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
@@ -179,7 +168,7 @@ function addCommands(
         return;
       }
 
-      const {contents} = widget.model.manager.services;
+      const { contents } = widget.model.manager.services;
       return Promise.all(
         toArray(
           map(widget.selectedItems(), item => {
@@ -190,7 +179,7 @@ function addCommands(
 
             return commands.execute('docmanager:open', {
               factory: factory,
-              path: item.path
+              path: item.path,
             });
           })
         )
@@ -213,7 +202,7 @@ function addCommands(
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.copy, {
@@ -226,7 +215,7 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.duplicate, {
@@ -238,7 +227,7 @@ function addCommands(
       }
     },
     iconClass: 'jp-MaterialIcon jp-CopyIcon',
-    label: 'Duplicate'
+    label: 'Duplicate',
   });
 
   commands.addCommand(CommandIDs.cut, {
@@ -250,7 +239,7 @@ function addCommands(
       }
     },
     iconClass: 'jp-MaterialIcon jp-CutIcon',
-    label: 'Cut'
+    label: 'Cut',
   });
 
   commands.addCommand(CommandIDs.paste, {
@@ -263,7 +252,7 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.rename, {
@@ -276,7 +265,7 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.del, {
@@ -289,7 +278,7 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.copyGCSURI, {
@@ -306,7 +295,7 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy GCS URI (gs://)',
-    mnemonic: 0
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.download, {
@@ -318,7 +307,7 @@ function addCommands(
       }
     },
     iconClass: 'jp-MaterialIcon jp-DownloadIcon',
-    label: 'Download'
+    label: 'Download',
   });
 
   commands.addCommand(CommandIDs.createNewDirectory, {
@@ -330,7 +319,7 @@ function addCommands(
       }
     },
     iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
-    label: 'New Folder'
+    label: 'New Folder',
   });
 
   // matches anywhere on filebrowser
@@ -343,54 +332,53 @@ function addCommands(
   app.contextMenu.addItem({
     command: CommandIDs.open,
     selector: selectorItem,
-    rank: 1
+    rank: 1,
   });
   app.contextMenu.addItem({
     command: CommandIDs.cut,
     selector: selectorItem,
-    rank: 2
+    rank: 2,
   });
   app.contextMenu.addItem({
     command: CommandIDs.copy,
     selector: selectorNotDir,
-    rank: 3
+    rank: 3,
   });
   app.contextMenu.addItem({
     command: CommandIDs.duplicate,
     selector: selectorNotDir,
-    rank: 4
+    rank: 4,
   });
   app.contextMenu.addItem({
     command: CommandIDs.createNewDirectory,
     selector: selectorContent,
-    rank: 5
+    rank: 5,
   });
   app.contextMenu.addItem({
     command: CommandIDs.paste,
     selector: selectorContent,
-    rank: 6
+    rank: 6,
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyGCSURI,
     selector: selectorNotDir,
-    rank: 7
+    rank: 7,
   });
   app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: selectorItem,
-    rank: 8
+    rank: 8,
   });
   app.contextMenu.addItem({
     command: CommandIDs.del,
     selector: selectorItem,
-    rank: 9
+    rank: 9,
   });
   app.contextMenu.addItem({
     command: CommandIDs.download,
     selector: selectorNotDir,
-    rank: 10
+    rank: 10,
   });
-
 }
 
 /**
@@ -402,13 +390,11 @@ const GCSFileBrowserPlugin: JupyterFrontEndPlugin<void> = {
     IDocumentManager,
     IFileBrowserFactory,
     IGCSFileBrowserFactory,
-    ILayoutRestorer
+    ILayoutRestorer,
   ],
   activate: activateGCSFileBrowser,
-  autoStart: true
+  autoStart: true,
 };
-
-
 
 /**
  * Activate the file browser factory provider.
@@ -419,8 +405,8 @@ function activateFactory(
   docManager: IDocumentManager,
   state: IStateDB
 ): IGCSFileBrowserFactory {
-  const {commands} = app;
-  const tracker = new WidgetTracker<GCSFileBrowser>({namespace: NAMESPACE});
+  const { commands } = app;
+  const tracker = new WidgetTracker<GCSFileBrowser>({ namespace: NAMESPACE });
   const createFileBrowser = (
     id: string,
     options: IGCSFileBrowserFactory.IOptions = {}
@@ -430,20 +416,20 @@ function activateFactory(
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
-      state: options.state === null ? null : options.state || state
+      state: options.state === null ? null : options.state || state,
     });
     const widget = new GCSFileBrowser({
       id,
-      model
+      model,
     });
 
     // Add a launcher toolbar item.
-    let launcher = new ToolbarButton({
+    const launcher = new ToolbarButton({
       iconClassName: 'jp-AddIcon',
       onClick: () => {
         return Private.createLauncher(commands, widget);
       },
-      tooltip: 'New Launcher'
+      tooltip: 'New Launcher',
     });
     widget.toolbar.insertItem(0, 'launch', launcher);
 
@@ -453,9 +439,8 @@ function activateFactory(
     return widget;
   };
 
-  return {createFileBrowser, tracker};
+  return { createFileBrowser, tracker };
 }
-
 
 /**
  * The default file browser factory provider.
@@ -464,7 +449,7 @@ const factory: JupyterFrontEndPlugin<IGCSFileBrowserFactory> = {
   activate: activateFactory,
   id: 'gcsfilebrowser-extension:factory',
   provides: IGCSFileBrowserFactory,
-  requires: [IIconRegistry, IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager, IStateDB],
 };
 
 /**
@@ -478,10 +463,10 @@ namespace Private {
     commands: CommandRegistry,
     browser: GCSFileBrowser
   ): Promise<MainAreaWidget<Launcher>> {
-    const {model} = browser;
+    const { model } = browser;
 
     return commands
-      .execute('launcher:create', {cwd: model.path})
+      .execute('launcher:create', { cwd: model.path })
       .then((launcher: MainAreaWidget<Launcher>) => {
         model.pathChanged.connect(() => {
           launcher.content.cwd = model.path;
@@ -494,9 +479,5 @@ namespace Private {
 /**
  * Export the plugin as default.
  */
-export default [
-  factory,
-  GCSFileBrowserPlugin,
-  fileUploadStatus,
-];
+export default [factory, GCSFileBrowserPlugin, fileUploadStatus];
 export * from './jupyterlab_filebrowser/tokens';
