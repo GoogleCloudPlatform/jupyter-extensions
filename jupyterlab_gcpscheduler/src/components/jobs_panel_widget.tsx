@@ -118,7 +118,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     } else {
       content = (
         <ul className={localStyles.list}>
-          {jobs.jobs.map((j) => (
+          {jobs.jobs.map(j => (
             <JobListItem key={j.jobId} job={j} projectId={projectId} />
           ))}
         </ul>

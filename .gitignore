@@ -73,6 +73,7 @@ venv/
 
 # Plugin binary
 lib/
+*.pyc
 
 # Python package stuff
 build/

@@ -57,7 +57,7 @@ namespace FileUploadComponent {
 /**
  * The time for which to show the "Complete!" message after uploading.
  */
-const UPLOAD_COMPLETE_MESSAGE_MILLIS: number = 2000;
+const UPLOAD_COMPLETE_MESSAGE_MILLIS = 2000;
 
 /**
  * Status bar item to display file upload progress.
@@ -169,7 +169,7 @@ export namespace FileUploadStatus {
         this._items.push({
           path: uploads.newValue.path,
           progress: uploads.newValue.progress * 100,
-          complete: false
+          complete: false,
         });
       } else if (uploads.name === 'update') {
         const idx = ArrayExt.findFirstIndex(

@@ -1,25 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {ArrayExt} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {Message} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {IDragEvent} from '@phosphor/dragdrop';
+import { IDragEvent } from '@phosphor/dragdrop';
 
-import {ElementExt} from '@phosphor/domutils';
+import { ElementExt } from '@phosphor/domutils';
 
-import {Widget} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {DOMUtils, showErrorMessage} from '@jupyterlab/apputils';
+import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import {PathExt, PageConfig} from '@jupyterlab/coreutils';
+import { PathExt, PageConfig } from '@jupyterlab/coreutils';
 
-import {renameFile} from '@jupyterlab/docmanager';
+import { renameFile } from '@jupyterlab/docmanager';
 
-import {defaultIconRegistry} from '@jupyterlab/ui-components';
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
-import {GCSFileBrowserModel} from './model';
+import { GCSFileBrowserModel } from './model';
 
 /**
  * The class name added to material icons
@@ -123,7 +123,7 @@ export class BreadCrumbs extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.update();
-    let node = this.node;
+    const node = this.node;
     node.addEventListener('click', this);
     node.addEventListener('p-dragenter', this);
     node.addEventListener('p-dragleave', this);
@@ -136,7 +136,7 @@ export class BreadCrumbs extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     super.onBeforeDetach(msg);
-    let node = this.node;
+    const node = this.node;
     node.removeEventListener('click', this);
     node.removeEventListener('p-dragenter', this);
     node.removeEventListener('p-dragleave', this);
@@ -170,7 +170,7 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_HOME_CLASS)
       ) {
-        let index = ArrayExt.findFirstIndex(
+        const index = ArrayExt.findFirstIndex(
           this._crumbs,
           value => value === node
         );
@@ -192,7 +192,7 @@ export class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
-      let index = ArrayExt.findFirstIndex(this._crumbs, node =>
+      const index = ArrayExt.findFirstIndex(this._crumbs, node =>
         ElementExt.hitTest(node, event.clientX, event.clientY)
       );
       if (index !== -1) {
@@ -211,7 +211,7 @@ export class BreadCrumbs extends Widget {
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
+    const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
@@ -224,11 +224,11 @@ export class BreadCrumbs extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
-    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
+    const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
-    let index = ArrayExt.findFirstIndex(this._crumbs, node =>
+    const index = ArrayExt.findFirstIndex(this._crumbs, node =>
       ElementExt.hitTest(node, event.clientX, event.clientY)
     );
     if (index !== -1) {
@@ -261,7 +261,10 @@ export class BreadCrumbs extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = ArrayExt.findFirstIndex(this._crumbs, node => node === target);
+    const index = ArrayExt.findFirstIndex(
+      this._crumbs,
+      node => node === target
+    );
     if (index === -1) {
       return;
     }
@@ -271,12 +274,12 @@ export class BreadCrumbs extends Widget {
     const manager = model.manager;
 
     // Move all of the items.
-    let promises: Promise<any>[] = [];
-    let oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (let oldPath of oldPaths) {
-      let localOldPath = manager.services.contents.localPath(oldPath);
-      let name = PathExt.basename(localOldPath);
-      let newPath = PathExt.join(path, name);
+    const promises: Promise<any>[] = [];
+    const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    for (const oldPath of oldPaths) {
+      const localOldPath = manager.services.contents.localPath(oldPath);
+      const name = PathExt.basename(localOldPath);
+      const newPath = PathExt.join(path, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
@@ -315,7 +318,7 @@ namespace Private {
     Home,
     Ellipsis,
     Parent,
-    Current
+    Current,
   }
 
   /**
@@ -326,19 +329,19 @@ namespace Private {
     separators: ReadonlyArray<HTMLElement>,
     path: string
   ) {
-    let node = breadcrumbs[0].parentNode as HTMLElement;
+    const node = breadcrumbs[0].parentNode as HTMLElement;
 
     // Remove all but the home node.
-    let firstChild = node.firstChild as HTMLElement;
+    const firstChild = node.firstChild as HTMLElement;
     while (firstChild && firstChild.nextSibling) {
       node.removeChild(firstChild.nextSibling);
     }
     node.appendChild(separators[0]);
 
-    let parts = path.split('/');
+    const parts = path.split('/');
     if (parts.length > 2) {
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
-      let grandParent = parts.slice(0, parts.length - 2).join('/');
+      const grandParent = parts.slice(0, parts.length - 2).join('/');
       breadcrumbs[Crumb.Ellipsis].title = grandParent;
       node.appendChild(separators[1]);
     }
@@ -347,7 +350,7 @@ namespace Private {
       if (parts.length >= 2) {
         breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
         node.appendChild(breadcrumbs[Crumb.Parent]);
-        let parent = parts.slice(0, parts.length - 1).join('/');
+        const parent = parts.slice(0, parts.length - 1).join('/');
         breadcrumbs[Crumb.Parent].title = parent;
         node.appendChild(separators[2]);
       }
@@ -362,20 +365,20 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    let home = document.createElement('span');
+    const home = document.createElement('span');
     defaultIconRegistry.icon({
       name: BREADCRUMB_HOME,
       className: BREADCRUMB_HOME_CLASS,
       container: home,
-      kind: 'breadCrumb'
+      kind: 'breadCrumb',
     });
     home.title = PageConfig.getOption('serverRoot') || 'Jupyter Server Root';
-    let ellipsis = document.createElement('span');
+    const ellipsis = document.createElement('span');
     ellipsis.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
-    let parent = document.createElement('span');
+    const parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
-    let current = document.createElement('span');
+    const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
     return [home, ellipsis, parent, current];
   }
@@ -384,14 +387,14 @@ namespace Private {
    * Create the breadcrumb separator nodes.
    */
   export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
-    let items: HTMLElement[] = [];
+    const items: HTMLElement[] = [];
     // The maximum number of directories that will be shown in the crumbs
     const MAX_DIRECTORIES = 2;
 
     // Make separators for after each directory, one at the beginning, and one
     // after a possible ellipsis.
     for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
-      let item = document.createElement('span');
+      const item = document.createElement('span');
       item.textContent = '/';
       items.push(item);
     }

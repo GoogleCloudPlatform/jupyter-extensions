@@ -28,9 +28,14 @@ development environment.
 
 1. `cd` into the folder of the extension you plan to develop and run
    `npm run install-extension`. This installs the extension in the
-   JupyterLab environment in development mode.
+   JupyterLab environment in development mode. Afterwards, `cd` back to the root
+   of the repository.
 
-1. Run `npm watch` to start the TypeScript compiler in watch mode.
+1. Run `npm run watch` to start the TypeScript compiler in watch mode. This will
+   watch for changes in any of the TypeScript sources.
+
+   - Alternatively, you can run the `npm run watch` command only in the packages
+     you are working in.
 
 1. In a seperate terminal, run `pipenv shell` and then `npm run devserver`.
    This will start JupyterLab in watch mode to pick up any changes to either the

@@ -1,18 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {toArray} from '@phosphor/algorithm';
-import {PanelLayout, Widget} from '@phosphor/widgets';
-import {PathExt} from '@jupyterlab/coreutils';
+import { toArray } from '@phosphor/algorithm';
+import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {Dialog} from '@jupyterlab/apputils';
-import {IDocumentManager} from '@jupyterlab/docmanager';
-import {Contents} from '@jupyterlab/services';
-import {IIconRegistry} from '@jupyterlab/ui-components';
+import { Dialog } from '@jupyterlab/apputils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { Contents } from '@jupyterlab/services';
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
-import {GCSFileBrowser} from './browser';
-import {FilterFileBrowserModel} from './model';
-import {IGCSFileBrowserFactory} from './tokens';
+import { GCSFileBrowser } from './browser';
+import { FilterFileBrowserModel } from './model';
+import { IGCSFileBrowserFactory } from './tokens';
 
 /**
  * The class name added to open file dialog
@@ -28,13 +28,13 @@ export namespace FileDialog {
    */
   export interface IDirectoryOptions
     extends Partial<
-    Pick<
-      Dialog.IOptions<Promise<Contents.IModel[]>>,
-      Exclude<
-        keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-        'body' | 'buttons' | 'defaultButton'
+      Pick<
+        Dialog.IOptions<Promise<Contents.IModel[]>>,
+        Exclude<
+          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+          'body' | 'buttons' | 'defaultButton'
+        >
       >
-    >
     > {
     /**
      * An icon registry instance.
@@ -70,13 +70,13 @@ export namespace FileDialog {
   export function getOpenFiles(
     options: IFileOptions
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
-    let dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
+    const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
       buttons: [
         Dialog.cancelButton(),
         Dialog.okButton({
-          label: 'Select'
-        })
+          label: 'Select',
+        }),
       ],
       focusNodeSelector: options.focusNodeSelector,
       host: options.host,
@@ -85,9 +85,9 @@ export namespace FileDialog {
         options.iconRegistry,
         options.manager,
         options.filter
-      )
+      ),
     };
-    let dialog = new Dialog(dialogOptions);
+    const dialog = new Dialog(dialogOptions);
     return dialog.launch();
   }
 
@@ -106,7 +106,7 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => false
+      filter: model => false,
     });
   }
 }
@@ -132,7 +132,7 @@ class OpenDialog extends Widget
     );
 
     // Build the sub widgets
-    let layout = new PanelLayout();
+    const layout = new PanelLayout();
     layout.addWidget(this._browser);
 
     // Set Widget content
@@ -156,8 +156,8 @@ class OpenDialog extends Widget
           created: 'unknown',
           last_modified: 'unknown',
           mimetype: 'text/plain',
-          format: 'text'
-        }
+          format: 'text',
+        },
       ];
     } else {
       return selection;
@@ -204,11 +204,11 @@ namespace Private {
       manager,
       filter,
       driveName: options.driveName,
-      refreshInterval: options.refreshInterval
+      refreshInterval: options.refreshInterval,
     });
     const widget = new GCSFileBrowser({
       id,
-      model
+      model,
     });
 
     return widget;

@@ -1,21 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {showDialog, Dialog} from '@jupyterlab/apputils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 import {
   IChangedArgs,
   IStateDB,
   PathExt,
   PageConfig,
-  Poll
+  Poll,
 } from '@jupyterlab/coreutils';
 
-import {IDocumentManager, shouldOverwrite} from '@jupyterlab/docmanager';
+import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
-import {Contents, Kernel, Session} from '@jupyterlab/services';
+import { Contents, Kernel, Session } from '@jupyterlab/services';
 
-import {IIconRegistry} from '@jupyterlab/ui-components';
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayIterator,
@@ -24,16 +24,16 @@ import {
   IIterator,
   IterableOrArrayLike,
   ArrayExt,
-  filter
+  filter,
 } from '@phosphor/algorithm';
 
-import {PromiseDelegate, ReadonlyJSONObject} from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {IDisposable} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {ISignal, Signal} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {GCSDrive} from '../contents';
+import { GCSDrive } from '../contents';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -76,7 +76,7 @@ export class GCSFileBrowserModel implements IDisposable {
     this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
-    let rootPath = this._driveName ? this._driveName + ':' : '';
+    const rootPath = this._driveName ? this._driveName + ':' : '';
     this._model = {
       path: rootPath,
       name: PathExt.basename(rootPath),
@@ -86,12 +86,12 @@ export class GCSFileBrowserModel implements IDisposable {
       created: 'unknown',
       last_modified: 'unknown',
       mimetype: 'text/plain',
-      format: 'text'
+      format: 'text',
     };
     this._state = options.state || null;
     const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
-    const {services} = options.manager;
+    const { services } = options.manager;
     services.contents.fileChanged.connect(this._onFileChanged, this);
     services.sessions.runningChanged.connect(this._onRunningChanged, this);
 
@@ -109,9 +109,9 @@ export class GCSFileBrowserModel implements IDisposable {
       frequency: {
         interval: refreshInterval,
         backoff: true,
-        max: 300 * 1000
+        max: 300 * 1000,
       },
-      standby: 'when-hidden'
+      standby: 'when-hidden',
     });
   }
 
@@ -252,15 +252,16 @@ export class GCSFileBrowserModel implements IDisposable {
    */
   async cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
-      let postPend = ''
+      let postPend = '';
       if (newValue.length > 1 && newValue[newValue.length - 1] === '/') {
         postPend = '/';
       }
-      newValue = Private.normalizePath(
-        this.manager.services.contents,
-        this._model.path,
-        newValue
-      ) + postPend;
+      newValue =
+        Private.normalizePath(
+          this.manager.services.contents,
+          this._model.path,
+          newValue
+        ) + postPend;
     } else {
       newValue = this._pendingPath || this._model.path;
     }
@@ -272,13 +273,13 @@ export class GCSFileBrowserModel implements IDisposable {
       // Otherwise wait for the pending request to complete before continuing.
       await this._pending;
     }
-    let oldValue = this.path;
-    let options: Contents.IFetchOptions = {content: true};
+    const oldValue = this.path;
+    const options: Contents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
     if (oldValue !== newValue) {
       this._sessions.length = 0;
     }
-    let handleContents = (contents: any) => {
+    const handleContents = (contents: any) => {
       if (this.isDisposed) {
         return;
       }
@@ -289,19 +290,19 @@ export class GCSFileBrowserModel implements IDisposable {
         // If there is a state database and a unique key, save the new path.
         // We don't need to wait on the save to continue.
         if (this._state && this._key) {
-          void this._state.save(this._key, {path: newValue});
+          void this._state.save(this._key, { path: newValue });
         }
 
         this._pathChanged.emit({
           name: 'path',
           oldValue,
-          newValue
+          newValue,
         });
       }
       this._onRunningChanged(services.sessions, services.sessions.running());
       this._refreshed.emit(void 0);
-    }
-    let handleError = (error: any) => {
+    };
+    const handleError = (error: any) => {
       this._pendingPath = null;
       this._pending = null;
       if (error.response && error.response.status === 404) {
@@ -314,7 +315,7 @@ export class GCSFileBrowserModel implements IDisposable {
       }
     };
 
-    let services = this.manager.services;
+    const services = this.manager.services;
     if (newValue === '') {
       newValue = this._driveName ? this._driveName + ':' : '';
     }
@@ -325,40 +326,40 @@ export class GCSFileBrowserModel implements IDisposable {
   }
 
   getGCSDriveContents(newValue: string, options: Contents.IFetchOptions) {
-    let driveName = this.manager.services.contents.driveName(newValue);
+    const driveName = this.manager.services.contents.driveName(newValue);
     let drive = this._additionalDrives.get(driveName);
     if (drive === undefined && this._additionalDrives.size) {
       drive = this._additionalDrives.values().next().value;
     }
 
-    let postPend = ''
+    let postPend = '';
     if (newValue.length > 1 && newValue[newValue.length - 1] === '/') {
       postPend = '/';
     }
-    let localPath = this.manager.services.contents.localPath(newValue) + postPend;
+    const localPath =
+      this.manager.services.contents.localPath(newValue) + postPend;
 
     return drive.get(localPath, options).then(contentsModel => {
-      let listing: Contents.IModel[] = [];
+      const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
         each(contentsModel.content, (item: Contents.IModel) => {
           listing.push({
             ...item,
-            path: this._toGlobalPath(drive, item.path)
+            path: this._toGlobalPath(drive, item.path),
           } as Contents.IModel);
         });
         return {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),
-          content: listing
+          content: listing,
         } as Contents.IModel;
       } else {
         return {
           ...contentsModel,
-          path: this._toGlobalPath(drive, localPath)
+          path: this._toGlobalPath(drive, localPath),
         } as Contents.IModel;
       }
     });
-
   }
 
   addGCSDrive(drive: GCSDrive) {
@@ -391,7 +392,7 @@ export class GCSFileBrowserModel implements IDisposable {
    */
   async download(path: string): Promise<void> {
     const url = await this.manager.services.contents.getDownloadUrl(path);
-    let element = document.createElement('a');
+    const element = document.createElement('a');
     element.href = url;
     element.download = '';
     element.target = '_blank';
@@ -460,16 +461,15 @@ export class GCSFileBrowserModel implements IDisposable {
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     // Cannot upload to the root directory which contains a list of buckets
-    if (this._model.path.endsWith(":") || this._model.path.endsWith(":/")) {
-      let msg = `Cannot upload file to root GCS directory. You must first open a GCS bucket directory in order to upload.`;
+    if (this._model.path.endsWith(':') || this._model.path.endsWith(':/')) {
+      const msg = `Cannot upload file to root GCS directory. You must first open a GCS bucket directory in order to upload.`;
       console.warn(msg);
       throw msg;
     }
 
     if (largeFile && !supportsChunked) {
-      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
-        file.name
-        }`;
+      const msg = `Cannot upload file (>${LARGE_FILE_SIZE /
+        (1024 * 1024)} MB). ${file.name}`;
       console.warn(msg);
       throw msg;
     }
@@ -493,12 +493,12 @@ export class GCSFileBrowserModel implements IDisposable {
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
-    const {button} = await showDialog({
+    const { button } = await showDialog({
       title: 'Large file size warning',
       body: `The file size is ${Math.round(
         file.size / (1024 * 1024)
       )} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Upload'})]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Upload' })],
     });
     return button.accept;
   }
@@ -513,16 +513,16 @@ export class GCSFileBrowserModel implements IDisposable {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
-    let name = file.name;
-    let type: Contents.ContentType = 'file';
-    let format: Contents.FileFormat = 'base64';
+    const name = file.name;
+    const type: Contents.ContentType = 'file';
+    const format: Contents.FileFormat = 'base64';
 
     const uploadInner = async (
       blob: Blob,
       chunk?: number
     ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.readAsDataURL(blob);
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
@@ -534,12 +534,12 @@ export class GCSFileBrowserModel implements IDisposable {
       // remove header https://stackoverflow.com/a/24289420/907060
       const content = (reader.result as string).split(',')[1];
 
-      let model: Partial<Contents.IModel> = {
+      const model: Partial<Contents.IModel> = {
         type,
         format,
         name,
         chunk,
-        content
+        content,
       };
       return await this.manager.services.contents.save(path, model);
     };
@@ -557,11 +557,11 @@ export class GCSFileBrowserModel implements IDisposable {
 
     let finalModel: Contents.IModel;
 
-    let upload = {path, progress: 0};
+    let upload = { path, progress: 0 };
     this._uploadChanged.emit({
       name: 'start',
       newValue: upload,
-      oldValue: null
+      oldValue: null,
     });
 
     for (let start = 0; !finalModel; start += CHUNK_SIZE) {
@@ -569,13 +569,13 @@ export class GCSFileBrowserModel implements IDisposable {
       const lastChunk = end >= file.size;
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
-      const newUpload = {path, progress: start / file.size};
+      const newUpload = { path, progress: start / file.size };
       this._uploads.splice(this._uploads.indexOf(upload));
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
         name: 'update',
         newValue: newUpload,
-        oldValue: upload
+        oldValue: upload,
       });
       upload = newUpload;
 
@@ -590,7 +590,7 @@ export class GCSFileBrowserModel implements IDisposable {
         this._uploadChanged.emit({
           name: 'failure',
           newValue: upload,
-          oldValue: null
+          oldValue: null,
         });
 
         throw err;
@@ -605,7 +605,7 @@ export class GCSFileBrowserModel implements IDisposable {
     this._uploadChanged.emit({
       name: 'finish',
       newValue: null,
-      oldValue: upload
+      oldValue: upload,
     });
 
     return finalModel;
@@ -632,7 +632,7 @@ export class GCSFileBrowserModel implements IDisposable {
       created: contents.created,
       last_modified: contents.last_modified,
       mimetype: contents.mimetype,
-      format: contents.format
+      format: contents.format,
     };
     this._items = contents.content;
     this._paths.clear();
@@ -659,15 +659,15 @@ export class GCSFileBrowserModel implements IDisposable {
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
-    let path = this._model.path;
-    let {sessions} = this.manager.services;
-    let {oldValue, newValue} = change;
-    let value =
+    const path = this._model.path;
+    const { sessions } = this.manager.services;
+    const { oldValue, newValue } = change;
+    const value =
       oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-          ? newValue
-          : undefined;
+        ? newValue
+        : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -693,7 +693,7 @@ export class GCSFileBrowserModel implements IDisposable {
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
-  private _key: string = '';
+  private _key = '';
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
   private _paths = new Set<string>();
