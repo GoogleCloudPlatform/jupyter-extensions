@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "jupyterlab_gcedetails",
   "version": "0.1.0",
   "description": "Google Compute Engine Instance Details extension",
@@ -21,7 +22,7 @@
     "build-python": "npm pack && python setup.py sdist bdist_wheel",
     "clean": "rimraf build dist lib *tsbuildinfo *tgz",
     "e2e-test": "jest -c jest-puppeteer.config.js",
-    "install-extension": "./dev-install.sh",
+    "install-extension": "../dev-install.sh",
     "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
