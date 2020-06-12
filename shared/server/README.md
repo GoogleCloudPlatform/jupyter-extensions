@@ -22,7 +22,8 @@ This module exposes two routes:
 
 Follow the [instructions](../#Development) from the root of the repository.
 
-Install this package in editable mode by running the `dev-install.sh` script.
+Install this package in editable mode by `cd`-ing into this directory
+and running the `../dev-install.sh` script.
 
 When developing locally, in order to access a metadata server running on GCE VM,
 you will need to issue the following command to set up port forwarding.
