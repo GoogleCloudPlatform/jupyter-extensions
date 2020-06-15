@@ -20,6 +20,7 @@ import google.auth
 from google.auth.exceptions import GoogleAuthError
 from google.auth.transport.requests import Request
 from notebook.base.handlers import APIHandler, app_log
+from tornado import web
 from tornado.httpclient import AsyncHTTPClient, HTTPClientError, HTTPRequest
 
 from . import VERSION
@@ -86,6 +87,7 @@ class AuthProvider:
 class MetadataHandler(APIHandler):
   """Returns parts of the GCE Metadata."""
 
+  @web.authenticated
   async def get(self):
     try:
       metadata = await get_metadata()
@@ -164,18 +166,22 @@ class ProxyHandler(APIHandler):
       self.set_status(e.code)
       self.finish(e.response.body)
 
+  @web.authenticated
   async def get(self, base64_url):
     """Proxies the HTTP GET request."""
     await self._make_request(base64_url)
 
+  @web.authenticated
   async def delete(self, base64_url):
     """Proxies the HTTP DELETE request."""
     await self._make_request(base64_url, 'DELETE')
 
+  @web.authenticated
   async def post(self, base64_url):
     """Proxies the HTTP POST request."""
     await self._make_request(base64_url, 'POST', self.request.body)
 
+  @web.authenticated
   async def put(self, base64_url):
     """Proxies the HTTP PUT request."""
     await self._make_request(base64_url, 'PUT', self.request.body)
