@@ -1,5 +1,5 @@
 from notebook.utils import url_path_join
-from jupyterlab_comments.handlers import HelloWorldHandler, ListCommentsHandler, AddCommentHandler, PreviousNamesHandler
+from jupyterlab_comments.handlers import HelloWorldHandler, DetachedCommentsHandler, VerifyInsideRepoHandler
 
 def load_jupyter_server_extension(nb_server_app):
     """
@@ -13,12 +13,10 @@ def load_jupyter_server_extension(nb_server_app):
     host_pattern = '.*$'
     base_url = web_app.settings['base_url']
     hello_route_pattern = url_path_join(base_url, '/hello')
-    add_comment_route_pattern = url_path_join(base_url, '/add')
-    list_comments_route_pattern = url_path_join(base_url, '/comments')
-    previous_names_route_pattern = url_path_join(base_url, '/names')
+    detached_comments_route_pattern = url_path_join(base_url, '/detachedComments')
+    verify_repo_route_pattern = url_path_join(base_url, '/verifyRepo')
     web_app.add_handlers(host_pattern, [
         (hello_route_pattern, HelloWorldHandler),
-        (add_comment_route_pattern, AddCommentHandler),
-        (list_comments_route_pattern, ListCommentsHandler),
-        (previous_names_route_pattern, PreviousNamesHandler),
+        (detached_comments_route_pattern, DetachedCommentsHandler),
+        (verify_repo_route_pattern, VerifyInsideRepoHandler),
         ])

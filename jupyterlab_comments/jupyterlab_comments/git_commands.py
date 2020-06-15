@@ -1,57 +1,71 @@
 import subprocess
 import json
-
-def run(*args):
-	return subprocess.check_output(['git'] + list(args))
-
-def status():
-	status = run('status').decode('utf-8')
-	print(type(status))
-	print(status)
-
-def appraise_pull():
-	run('appraise', 'pull', remote)
-
-#Return true if the current directory is a git repo
-def inside_git_repo():
-	return_code = subprocess.check_call(['git', 'rev-parse'])
-	return return_code == 0
-
-def get_all_comments(file_path, remote):
-	comments = []
-	prev_names = []
-	for name in prev_names:
-		comments_list = get_comments_for_path(name)
+from traitlets.config.configurable import Configurable
+from traitlets import Int, Float, Unicode, Bool
 
 
-"""
-Behavior for git appraise show -d -json <file_path>:
-'-d' flag gets detached comments for the provided file path
-'-json' flag formats output as json (returns null if no comments attached to the file)
-if the file doesn't exist, it just returns that there are no comments attached to the file
+class Git(Configurable):
+    """
+    Remote repository should be configured by the
+    user in their Jupyter config file. Default remote is 'origin'
+    """
+    remote = Unicode(u'origin', config=True)
 
-Behavior for git appraise comment -d -m "The comment" -f <file_path>
-If the file doesn't exist, it gives you an error
+    def run(self, *args):
+        try:
+            return subprocess.check_output(['git'] + list(args))
+        except subprocess.CalledProcessError as e:
+            print("Error invoking git command")
+            print(e.output)
 
-Use 'git appraise push' to publish comments to remote repo
+    def status(self):
+        status = self.run('status').decode('utf-8')
+        return status
 
-File paths are relative to the root of the github repo, not relative to the repository the command is made from
-"""
-def get_comments_for_path(file_path):
-	comments_json = run('appraise', 'show', '-d', 'json', file_path)
-	
+    def appraise_pull(self):
+        self.run('appraise', 'pull', self.remote)
 
-def add_comment(file_path):
-	pass
+    # Return true if the current directory is a git repository
+    def inside_git_repo(self):
+        try:
+            return_code = subprocess.check_call(['git', 'rev-parse'])
+            return return_code == 0
+        except Exception as e:
+            print("Error invoking git command")
+            print(e.output)
 
-def get_previous_names(file_path):
-	#git log --follow --name-only --pretty=format:"" ${FILENAME}
-	names_string = run('log', '--follow', '--name-only', '--pretty=format:""', file_path)
-	names_list = []
-	return names_list
+    """
+    Returns a JSON list where each object corresponds to a commment
+    on the given file_path
+    Keys of objects returned: timestamp, author, location, description
+    """
+    def get_comments_for_path(self, file_path):
+        if self.inside_git_repo():
+            #self.appraise_pull() #pull new comments from remote repo
+            comments_string = self.run('appraise', 'show', '-d', '-json', file_path)
+            comments_json = json.loads(comments_string)
+            comments_list = []
+            if comments_json is not None:
+                for comment_obj in comments_json:
+                    comments_list.append(comment_obj['comment'])
+            return comments_list
+        else:
+            #TODO: notify user that they are not connected to a Git repo
+            pass
 
 
-def test():
-	print('Testing git commands invoked using python')
-	#status()
-	#print(inside_git_repo())
+    def get_code_review_comments(self, file_path):
+        """
+        1. Use 'git appraise pull' to fetch new comments attached to
+        the current code review
+        2. Use 'git appraise show' to get the comments JSON object
+        3. Parse and return comments
+        """
+        pass
+
+    def add_comment(self, file_path):
+        pass
+
+    def get_previous_names(self, file_path):
+        # names_string = run('log', '--follow', '--name-only', '--pretty=format:""', file_path)
+        pass

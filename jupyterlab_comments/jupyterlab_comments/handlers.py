@@ -1,7 +1,8 @@
 from notebook.base.handlers import APIHandler
-from jupyterlab_comments.handlers import *
-
-
+from jupyterlab_comments.git_commands import Git
+import json
+git = Git() #global instance of connection to git commands
+#used to test the connection to the server
 class HelloWorldHandler(APIHandler):
     def get(self):
         self.finish('Hello, world!')
@@ -9,16 +10,31 @@ class HelloWorldHandler(APIHandler):
 class PreviousNamesHandler(APIHandler):
     def get(self):
     	file_path = self.get_argument('path')
-    	self.finish('Load previous names for file: ' + str(file_path))
+    	self.finish('Load previous names for a file (unimplemented)')
 
-
-class ListCommentsHandler(APIHandler):
+class ReviewCommentsHandler(APIHandler):
     def get(self):
     	file_path = self.get_argument('path')
-    	self.finish('List comments for file: ' + str(file_path))
+    	self.finish('List review comments for a file (unimplemented)')
+
+
+class DetachedCommentsHandler(APIHandler):
+    def get(self):
+        file_path = self.get_argument('path') #Requires file path as an argument
+        comments = git.get_comments_for_path(file_path)
+        self.finish(json.dumps(comments))
+
 
 class AddCommentHandler(APIHandler):
     def post(self):
     	file_path = self.get_argument('path')
     	comment = self.get_argument('comment')
-    	self.finish('Add comment for file: ' + str(file_path) + ' -- ' + str(comment))
+    	self.finish('Add a detached comment for a specific file (unimplemented)')
+
+class VerifyInsideRepoHandler(APIHandler):
+    def get(self):
+        git = Git()
+        if git.inside_git_repo():
+            self.finish("Current directory is a git repository.")
+        else:
+            self.finish("Current directory is NOT a git repository.")
