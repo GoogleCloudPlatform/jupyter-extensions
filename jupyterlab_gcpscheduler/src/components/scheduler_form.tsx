@@ -128,8 +128,8 @@ export class InnerSchedulerForm extends React.Component<
 
     this.missingPermissions = this.props.permissions.toExecute;
     this.acceleratorTypeOptions = getAcceleratorTypes(
-            this.props.values.masterType
-          );
+      this.props.values.masterType
+    );
     this.state = { useAdvancedScheduler: false };
     this._onScaleTierChanged = this._onScaleTierChanged.bind(this);
     this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
@@ -310,7 +310,7 @@ export class InnerSchedulerForm extends React.Component<
   }
 
   private _onMasterTypeChanged(e: React.ChangeEvent<HTMLSelectElement>) {
-        this.acceleratorTypeOptions = getAcceleratorTypes(e.target.value);
+    this.acceleratorTypeOptions = getAcceleratorTypes(e.target.value);
     const { handleChange, setFieldValue } = this.props;
     setFieldValue(
       'acceleratorType',
@@ -318,35 +318,35 @@ export class InnerSchedulerForm extends React.Component<
       false
     );
     setFieldValue(
-            'acceleratorCount',
-            e.target.value === '' ? '' : ACCELERATOR_COUNTS_1_2_4_8[0].value,
-            false
-          );
-      
-          handleChange(e);
-        }
-      
-        private _onScaleTierChanged(e: React.ChangeEvent<HTMLSelectElement>) {
-          const { handleChange, setFieldValue } = this.props;
-          const isCustom = e.target.value === CUSTOM;
-          if (isCustom) {
-            this.acceleratorTypeOptions = getAcceleratorTypes(
-              MASTER_TYPES[0].value as string
-            );
-          }
-      
-          setFieldValue('masterType', isCustom ? MASTER_TYPES[0].value : '', false);
-          setFieldValue(
-            'acceleratorType',
-            isCustom ? this.acceleratorTypeOptions[0].value : '',
-            false
-          );
-          setFieldValue(
-            'acceleratorCount',
-            isCustom ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '',
-            false
-          );
-      
+      'acceleratorCount',
+      e.target.value === '' ? '' : ACCELERATOR_COUNTS_1_2_4_8[0].value,
+      false
+    );
+
+    handleChange(e);
+  }
+
+  private _onScaleTierChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+    const { handleChange, setFieldValue } = this.props;
+    const isCustom = e.target.value === CUSTOM;
+    if (isCustom) {
+      this.acceleratorTypeOptions = getAcceleratorTypes(
+        MASTER_TYPES[0].value as string
+      );
+    }
+
+    setFieldValue('masterType', isCustom ? MASTER_TYPES[0].value : '', false);
+    setFieldValue(
+      'acceleratorType',
+      isCustom ? this.acceleratorTypeOptions[0].value : '',
+      false
+    );
+    setFieldValue(
+      'acceleratorCount',
+      isCustom ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '',
+      false
+    );
+
     handleChange(e);
   }
 
@@ -394,15 +394,12 @@ function updateSettingsFromRequest(
   if (settings.get('masterType').composite !== request.masterType) {
     promises.push(settings.set('masterType', request.masterType));
   }
-  if ( settings.get('acceleratorType').composite !== request.acceleratorType
-      ) {
-        promises.push(settings.set('acceleratorType', request.acceleratorType));
-      }
-      if (
-        settings.get('acceleratorCount').composite !== request.acceleratorCount
-      ) {
-        promises.push(settings.set('acceleratorCount', request.acceleratorCount));
-      }
+  if (settings.get('acceleratorType').composite !== request.acceleratorType) {
+    promises.push(settings.set('acceleratorType', request.acceleratorType));
+  }
+  if (settings.get('acceleratorCount').composite !== request.acceleratorCount) {
+    promises.push(settings.set('acceleratorCount', request.acceleratorCount));
+  }
   if (settings.get('containerImage').composite !== request.imageUri) {
     promises.push(settings.set('containerImage', request.imageUri));
   }

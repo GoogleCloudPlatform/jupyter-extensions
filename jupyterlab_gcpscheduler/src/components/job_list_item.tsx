@@ -148,13 +148,13 @@ export function JobListItem(props: Props) {
                   View
                 </a>
               </SmallMenuItem>,
-               <SmallMenuItem
-                               id="import"
-                               key="importNotebook"
-                               onClick={() => gcpService.importNotebook(gcsFile)}
-                             >
-                               Import
-                             </SmallMenuItem>,
+              <SmallMenuItem
+                id="import"
+                key="importNotebook"
+                onClick={() => gcpService.importNotebook(gcsFile)}
+              >
+                Import
+              </SmallMenuItem>,
               <SmallMenuItem key="getNotebookPath" onClick={menuCloseHandler}>
                 <a
                   className={localStyles.menuLink}

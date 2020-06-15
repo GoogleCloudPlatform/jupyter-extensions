@@ -54,6 +54,30 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     </div>
     <div>
       <dt>
+        Master type:
+      </dt>
+      <dd>
+        4 CPUs, 15 GB RAM
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Accelerator type:
+      </dt>
+      <dd>
+        NVIDIA Tesla K80
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Accelerator count:
+      </dt>
+      <dd>
+        1
+      </dd>
+    </div>
+    <div>
+      <dt>
         Container:
       </dt>
       <dd>
@@ -145,6 +169,30 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
         CUSTOM
          - 
         Custom machine type configuration
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Master type:
+      </dt>
+      <dd>
+        4 CPUs, 15 GB RAM
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Accelerator type:
+      </dt>
+      <dd>
+        NVIDIA Tesla K80
+      </dd>
+    </div>
+    <div>
+      <dt>
+        Accelerator count:
+      </dt>
+      <dd>
+        1
       </dd>
     </div>
     <div>

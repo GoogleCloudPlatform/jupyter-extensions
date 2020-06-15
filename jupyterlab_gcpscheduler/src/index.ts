@@ -86,10 +86,10 @@ async function activateScheduler(
     projectId ? projectId.toString() : null
   );
   const gcpService = new GcpService(
-        transportService,
-        projectStateService,
-        documentManager
-      );
+    transportService,
+    projectStateService,
+    documentManager
+  );
   const schedulerWidget = new GcpSchedulerWidget(
     projectStateService,
     gcpService,

@@ -121,11 +121,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         <ul className={localStyles.list}>
           {jobs.jobs.map(j => (
             <JobListItem
-                     gcpService={gcpService}
-                          key={j.jobId}
-                          job={j}
-                          projectId={projectId}
-                        />
+              gcpService={gcpService}
+              key={j.jobId}
+              job={j}
+              projectId={projectId}
+            />
           ))}
         </ul>
       );

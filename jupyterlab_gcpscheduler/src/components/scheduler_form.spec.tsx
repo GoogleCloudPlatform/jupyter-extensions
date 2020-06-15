@@ -109,11 +109,11 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     expect(schedulerForm.find('select[name="masterType"]')).toHaveLength(0);
     expect(schedulerForm.find('select[name="acceleratorType"]')).toHaveLength(
-            0
-          );
-          expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
-            0
-          );
+      0
+    );
+    expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
+      0
+    );
     simulateFieldChange(
       schedulerForm,
       'select[name="scaleTier"]',
@@ -122,37 +122,37 @@ describe('SchedulerForm', () => {
     );
 
     expect(schedulerForm.find('select[name="masterType"]')).toHaveLength(1);
-        expect(schedulerForm.find('select[name="acceleratorType"]')).toHaveLength(
-            1
-          );
-          expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
-            1
-          );
-        });
-      
-        it('Updates available Accelerator Types based on selected Master Type', async () => {
-          const schedulerForm = mount(<SchedulerForm {...mockProps} />);
-          simulateFieldChange(
-            schedulerForm,
-            'select[name="scaleTier"]',
-            'scaleTier',
-            CUSTOM
-          );
-      
-          expect(
-            schedulerForm.find('select[name="acceleratorType"]').find('option')
-          ).toHaveLength(5);
-      
-          simulateFieldChange(
-            schedulerForm,
-            'select[name="masterType"]',
-            'masterType',
-            'n1-standard-64'
-          );
-      
-          expect(
-            schedulerForm.find('select[name="acceleratorType"]').find('option')
-          ).toHaveLength(3);
+    expect(schedulerForm.find('select[name="acceleratorType"]')).toHaveLength(
+      1
+    );
+    expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
+      1
+    );
+  });
+
+  it('Updates available Accelerator Types based on selected Master Type', async () => {
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="scaleTier"]',
+      'scaleTier',
+      CUSTOM
+    );
+
+    expect(
+      schedulerForm.find('select[name="acceleratorType"]').find('option')
+    ).toHaveLength(5);
+
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="masterType"]',
+      'masterType',
+      'n1-standard-64'
+    );
+
+    expect(
+      schedulerForm.find('select[name="acceleratorType"]').find('option')
+    ).toHaveLength(3);
   });
 
   it('Toggles Schedule visibility based on Frequency', async () => {
@@ -311,7 +311,7 @@ describe('SchedulerForm', () => {
       region: 'us-central1',
       scaleTier: 'BASIC',
       masterType: '',
-            acceleratorCount: '',
+      acceleratorCount: '',
       acceleratorType: '',
       scheduleType: 'recurring',
       schedule: '00 14 */1 * *',
@@ -546,126 +546,125 @@ describe('SchedulerForm', () => {
     ).toEqual([SCHEDULE_TYPES[0]]);
   });
 
-    it('Updates settings accordingly when new values are empty', async () => {
-        const uploadNotebookPromise = triggeredResolver();
-        const runNotebookPromise = triggeredResolver({ jobId: 'aiplatform_job_1' });
-    
-        mockNotebookContents.mockReturnValue(notebookContents);
-        mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
-        mockRunNotebook.mockReturnValue(runNotebookPromise.promise);
-        mockSettingsGet
-          .mockReturnValueOnce({ composite: 'us-central1' })
-          .mockReturnValueOnce({ composite: 'CUSTOM' })
-          .mockReturnValueOnce({ composite: 'n1-standard-4' })
-          .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
-          .mockReturnValueOnce({ composite: '1' })
-          .mockReturnValueOnce({
-            composite: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
-          });
-    
-        const props = {
-          ...mockProps,
-          gcpSettings: {
-            projectId: TEST_PROJECT,
-            gcsBucket: gcsBucket,
-            schedulerRegion: 'us-central1',
-            scaleTier: 'CUSTOM',
-            masterType: 'n1-standard-4',
-            acceleratorType: 'NVIDIA_TESLA_K80',
-            acceleratorCount: '1',
-          },
-        };
-        const schedulerForm = mount(<SchedulerForm {...props} />);
-    
-        simulateFieldChange(
-          schedulerForm,
-          'input[name="jobId"]',
-          'jobId',
-          'test_immediate_job'
-        );
-    
-        simulateFieldChange(
-          schedulerForm,
-          'select[name="scaleTier"]',
-          'scaleTier',
-          'BASIC'
-        );
-    
-        // Submit the form and wait for an immediate promise to flush other promises
-        schedulerForm.find('SubmitButton button').simulate('click');
-        await immediatePromise();
-        schedulerForm.update();
-        expect(
-          schedulerForm.contains(
-            <Message
-              asActivity={true}
-              asError={false}
-              text={
-                'Uploading Test Notebook.ipynb to gs://test-project/test_immediate_job/Test Notebook.ipynb'
-              }
-            />
-          )
-        ).toBe(true);
-    
-        uploadNotebookPromise.resolve();
-        await uploadNotebookPromise.promise;
-        schedulerForm.update();
-        expect(
-          schedulerForm.contains(
-            <Message
-              asError={false}
-              asActivity={true}
-              text={'Submitting Job to AI Platform'}
-            />
-          )
-        ).toBe(true);
-    
-        runNotebookPromise.resolve();
-        await runNotebookPromise.promise;
-        schedulerForm.update();
-    
-        const gcsPath = `${gcsBucket}/test_immediate_job/${notebookName}`;
-        expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
-          notebookContents,
-          gcsPath
-        );
-        const aiPlatformRequest: RunNotebookRequest = {
-          jobId: 'test_immediate_job',
-          imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
-          inputNotebookGcsPath: gcsPath,
-          masterType: '',
-          outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
-          scaleTier: 'BASIC',
-          region: 'us-central1',
-          acceleratorType: '',
-          acceleratorCount: '',
-        };
-        expect(mockGcpService.runNotebook).toHaveBeenCalledWith(aiPlatformRequest);
-        expect(mockSettings.set).toHaveBeenCalledWith(
-          'scaleTier',
-          aiPlatformRequest.scaleTier
-        );
-        expect(mockSettings.set).toHaveBeenCalledWith(
-          'masterType',
-          aiPlatformRequest.masterType
-        );
-        expect(mockSettings.set).toHaveBeenCalledWith(
-          'acceleratorType',
-          aiPlatformRequest.acceleratorType
-        );
-        expect(mockSettings.set).toHaveBeenCalledWith(
-          'acceleratorCount',
-          aiPlatformRequest.acceleratorCount
-        );
-        expect(schedulerForm.find('form').exists()).toBe(false);
-    
-        const submittedJob = schedulerForm.find(SubmittedJob);
-        expect(submittedJob.exists()).toBe(true);
-        expect(submittedJob.prop('request')).toEqual(aiPlatformRequest);
-        expect(submittedJob.prop('schedule')).toBeUndefined();
-        expect(submittedJob.prop('projectId')).toBe(TEST_PROJECT);
+  it('Updates settings accordingly when new values are empty', async () => {
+    const uploadNotebookPromise = triggeredResolver();
+    const runNotebookPromise = triggeredResolver({ jobId: 'aiplatform_job_1' });
+
+    mockNotebookContents.mockReturnValue(notebookContents);
+    mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
+    mockRunNotebook.mockReturnValue(runNotebookPromise.promise);
+    mockSettingsGet
+      .mockReturnValueOnce({ composite: 'us-central1' })
+      .mockReturnValueOnce({ composite: 'CUSTOM' })
+      .mockReturnValueOnce({ composite: 'n1-standard-4' })
+      .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
+      .mockReturnValueOnce({ composite: '1' })
+      .mockReturnValueOnce({
+        composite: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       });
-    
+
+    const props = {
+      ...mockProps,
+      gcpSettings: {
+        projectId: TEST_PROJECT,
+        gcsBucket: gcsBucket,
+        schedulerRegion: 'us-central1',
+        scaleTier: 'CUSTOM',
+        masterType: 'n1-standard-4',
+        acceleratorType: 'NVIDIA_TESLA_K80',
+        acceleratorCount: '1',
+      },
+    };
+    const schedulerForm = mount(<SchedulerForm {...props} />);
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="jobId"]',
+      'jobId',
+      'test_immediate_job'
+    );
+
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="scaleTier"]',
+      'scaleTier',
+      'BASIC'
+    );
+
+    // Submit the form and wait for an immediate promise to flush other promises
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    schedulerForm.update();
+    expect(
+      schedulerForm.contains(
+        <Message
+          asActivity={true}
+          asError={false}
+          text={
+            'Uploading Test Notebook.ipynb to gs://test-project/test_immediate_job/Test Notebook.ipynb'
+          }
+        />
+      )
+    ).toBe(true);
+
+    uploadNotebookPromise.resolve();
+    await uploadNotebookPromise.promise;
+    schedulerForm.update();
+    expect(
+      schedulerForm.contains(
+        <Message
+          asError={false}
+          asActivity={true}
+          text={'Submitting Job to AI Platform'}
+        />
+      )
+    ).toBe(true);
+
+    runNotebookPromise.resolve();
+    await runNotebookPromise.promise;
+    schedulerForm.update();
+
+    const gcsPath = `${gcsBucket}/test_immediate_job/${notebookName}`;
+    expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
+      notebookContents,
+      gcsPath
+    );
+    const aiPlatformRequest: RunNotebookRequest = {
+      jobId: 'test_immediate_job',
+      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      inputNotebookGcsPath: gcsPath,
+      masterType: '',
+      outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
+      scaleTier: 'BASIC',
+      region: 'us-central1',
+      acceleratorType: '',
+      acceleratorCount: '',
+    };
+    expect(mockGcpService.runNotebook).toHaveBeenCalledWith(aiPlatformRequest);
+    expect(mockSettings.set).toHaveBeenCalledWith(
+      'scaleTier',
+      aiPlatformRequest.scaleTier
+    );
+    expect(mockSettings.set).toHaveBeenCalledWith(
+      'masterType',
+      aiPlatformRequest.masterType
+    );
+    expect(mockSettings.set).toHaveBeenCalledWith(
+      'acceleratorType',
+      aiPlatformRequest.acceleratorType
+    );
+    expect(mockSettings.set).toHaveBeenCalledWith(
+      'acceleratorCount',
+      aiPlatformRequest.acceleratorCount
+    );
+    expect(schedulerForm.find('form').exists()).toBe(false);
+
+    const submittedJob = schedulerForm.find(SubmittedJob);
+    expect(submittedJob.exists()).toBe(true);
+    expect(submittedJob.prop('request')).toEqual(aiPlatformRequest);
+    expect(submittedJob.prop('schedule')).toBeUndefined();
+    expect(submittedJob.prop('projectId')).toBe(TEST_PROJECT);
+  });
 
   it('Submits an immediate job to AI Platform', async () => {
     const uploadNotebookPromise = triggeredResolver();
@@ -674,29 +673,20 @@ describe('SchedulerForm', () => {
     mockNotebookContents.mockReturnValue(notebookContents);
     mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
     mockRunNotebook.mockReturnValue(runNotebookPromise.promise);
-    mockSettingsGet
-    .mockReturnValueOnce({ composite: 'us-central1' })
-    .mockReturnValueOnce({ composite: 'CUSTOM' })
-    .mockReturnValueOnce({ composite: 'n1-standard-4' })
-    .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
-    .mockReturnValueOnce({ composite: '1' })
-    .mockReturnValueOnce({
-      composite: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
-    });
 
-  const props = {
-    ...mockProps,
-    gcpSettings: {
-      projectId: TEST_PROJECT,
-      gcsBucket: gcsBucket,
-      schedulerRegion: 'us-central1',
-      scaleTier: 'CUSTOM',
-      masterType: 'n1-standard-4',
-      acceleratorType: 'NVIDIA_TESLA_K80',
-      acceleratorCount: '1',
-    },
-  };
-  const schedulerForm = mount(<SchedulerForm {...props} />);
+    const props = {
+      ...mockProps,
+      gcpSettings: {
+        projectId: TEST_PROJECT,
+        gcsBucket: gcsBucket,
+        schedulerRegion: 'us-central1',
+        scaleTier: 'CUSTOM',
+        masterType: 'n1-standard-4',
+        acceleratorType: 'NVIDIA_TESLA_K80',
+        acceleratorCount: '1',
+      },
+    };
+    const schedulerForm = mount(<SchedulerForm {...props} />);
 
     simulateFieldChange(
       schedulerForm,
@@ -764,11 +754,11 @@ describe('SchedulerForm', () => {
       aiPlatformRequest.scaleTier
     );
     expect(mockSettings.set).toHaveBeenCalledWith(
-            'masterType',
-            aiPlatformRequest.masterType
-          );
+      'masterType',
+      aiPlatformRequest.masterType
+    );
     expect(mockSettings.set).toHaveBeenCalledWith(
-            'acceleratorType',
+      'acceleratorType',
       aiPlatformRequest.acceleratorType
     );
     expect(mockSettings.set).toHaveBeenCalledWith(
@@ -830,19 +820,19 @@ describe('SchedulerForm', () => {
       schedulerForm,
       'select[name="masterType"]',
       'masterType',
-            'n1-standard-16'
-          );
-          simulateFieldChange(
-            schedulerForm,
-            'select[name="acceleratorType"]',
-            'acceleratorType',
-            'NVIDIA_TESLA_K80'
-          );
-          simulateFieldChange(
-            schedulerForm,
-            'select[name="acceleratorCount"]',
-            'acceleratorCount',
-            '1'
+      'n1-standard-16'
+    );
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="acceleratorType"]',
+      'acceleratorType',
+      'NVIDIA_TESLA_K80'
+    );
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="acceleratorCount"]',
+      'acceleratorCount',
+      '1'
     );
     simulateFieldChange(
       schedulerForm,

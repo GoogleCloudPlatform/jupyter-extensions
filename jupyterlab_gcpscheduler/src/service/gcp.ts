@@ -18,12 +18,12 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 import {
-    CLOUD_FUNCTION_NAME,
-    CLOUD_FUNCTION_REGION,
-    GET,
-    POST,
-    IMPORT_DIRECTORY,
-  } from '../data';
+  CLOUD_FUNCTION_NAME,
+  CLOUD_FUNCTION_REGION,
+  GET,
+  POST,
+  IMPORT_DIRECTORY,
+} from '../data';
 import { ProjectStateService } from './project_state';
 import { handleApiError, TransportService } from './transport';
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -123,7 +123,7 @@ export class GcpService {
     }
   }
 
-    /**
+  /**
    * Downloads the notebook located at the gcsPath provided and retrieves the file name from the
    * JSON. Creates a new import directory and attempts to rename it, if it fails then creates
    * the notebook in the already-existing directory and deletes the new directory.
@@ -163,7 +163,6 @@ export class GcpService {
     widget.model.fromString(contents);
     return widget;
   }
-
 
   async downloadNotebook(gcsPath: string): Promise<string> {
     try {
@@ -328,13 +327,13 @@ export class GcpService {
           '--output-notebook',
           request.outputNotebookGcsPath,
         ],
-                masterConfig: {
-                    imageUri: request.imageUri,
-                    acceleratorConfig: {
-                      count: request.acceleratorCount || undefined,
-                      type: request.acceleratorType || undefined,
-                    },
-                  },
+        masterConfig: {
+          imageUri: request.imageUri,
+          acceleratorConfig: {
+            count: request.acceleratorCount || undefined,
+            type: request.acceleratorType || undefined,
+          },
+        },
         masterType: request.masterType || undefined,
         region: request.region,
         scaleTier: request.scaleTier,

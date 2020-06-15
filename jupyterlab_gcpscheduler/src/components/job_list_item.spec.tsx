@@ -40,27 +40,26 @@ describe('JobListItem', () => {
     Date.prototype.toLocaleString = toLocaleString;
   });
 
-    it('Calls GcpService on Import', () => {
-        const jobListItem = shallow(
-          <JobListItem
-            gcpService={mockGcpService}
-            projectId={TEST_PROJECT}
-            job={getAiPlatformJob()}
-          />
-        );
-    
-        jobListItem
-          .find(IconButtonMenu)
-          .dive()
-          .findWhere(w => w.text() === 'Import')
-          .parent()
-          .simulate('click');
-    
-        expect(mockGcpService.importNotebook).toHaveBeenCalledWith(
-          'test-project/notebook_job1/job1.ipynb'
-        );
-      });
-    
+  it('Calls GcpService on Import', () => {
+    const jobListItem = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getAiPlatformJob()}
+      />
+    );
+
+    jobListItem
+      .find(IconButtonMenu)
+      .dive()
+      .findWhere(w => w.text() === 'Import')
+      .parent()
+      .simulate('click');
+
+    expect(mockGcpService.importNotebook).toHaveBeenCalledWith(
+      'test-project/notebook_job1/job1.ipynb'
+    );
+  });
 
   it('Renders for successful job', () => {
     const component = shallow(

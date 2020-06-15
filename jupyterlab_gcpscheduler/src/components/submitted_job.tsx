@@ -26,7 +26,7 @@ import {
   SCALE_TIERS,
   GCS_LINK,
   SCHEDULER_LINK,
-    MASTER_TYPES,
+  MASTER_TYPES,
   CUSTOM,
   ACCELERATOR_TYPES,
 } from '../data';
@@ -127,7 +127,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
               {scaleTier.value} - {scaleTier.text}
             </dd>
           </div>
-                    {scaleTier.value === CUSTOM && (
+          {scaleTier.value === CUSTOM && (
             <React.Fragment>
               <div>
                 <dt>Master type:</dt>

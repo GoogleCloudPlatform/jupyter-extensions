@@ -32,7 +32,7 @@ describe('GcpService', () => {
   const mockRename = jest.fn();
   const mockDeleteFile = jest.fn();
   const mockFromString = jest.fn();
-  
+
   const mockNotebook = {
     model: ({
       fromString: mockFromString,
@@ -43,7 +43,7 @@ describe('GcpService', () => {
     projectId: Promise.resolve(TEST_PROJECT),
   } as ProjectStateService;
   const mockDocumentManager = ({
-   newUntitled: mockNewUntitled,
+    newUntitled: mockNewUntitled,
     rename: mockRename,
     deleteFile: mockDeleteFile,
     createNew: mockCreateNew,
@@ -53,7 +53,7 @@ describe('GcpService', () => {
     mockProjectState,
     mockDocumentManager
   );
-  
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
@@ -76,8 +76,8 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         headers: { 'Content-Type': 'application/json' },
         params: { name: 'notebook.json', uploadType: 'media' },
-        path: 
-        'https://www.googleapis.com/upload/storage/v1/b/fake-bucket/o',
+        path:
+          'https://storage.googleapis.com/upload/storage/v1/b/fake-bucket/o',
         method: 'POST',
         body: fakeContents,
       });
@@ -106,107 +106,105 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         headers: { 'Content-Type': 'application/json' },
         params: { name: 'notebook.json', uploadType: 'media' },
-        path: 
-        'https://www.googleapis.com/upload/storage/v1/b/fake-bucket/o',
+        path:
+          'https://storage.googleapis.com/upload/storage/v1/b/fake-bucket/o',
         method: 'POST',
         body: fakeContents,
       });
     });
-  
 
-      it('Imports a Notebook and creates a new directory', async () => {
-          mockSubmit.mockReturnValue(
-            asApiResponse({ contents: '{"content1":"test","content2":22}' })
-          );
-          mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
-          mockRename.mockResolvedValue({ path: 'newpath' } as Contents.IModel);
-          mockCreateNew.mockReturnValue(mockNotebook);
-    
-          await gcpService.importNotebook(
-            'gs://fake-bucket/intermediate path/notebook.json'
-          );
-    
-          expect(mockSubmit).toHaveBeenCalledWith({
-            params: { alt: 'media' },
-            path:
-              'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
-          });
-          expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
-          expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
-          expect(mockDeleteFile).not.toHaveBeenCalled();
-          expect(mockFromString).toHaveBeenCalledWith(
-            '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
-          );
-        });
-    
-        it('Imports a Notebook into an already existing directory', async () => {
-          mockSubmit.mockReturnValue(
-            asApiResponse({ contents: '{"content1":"test","content2":22}' })
-          );
-          mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
-          const error = { message: '409' };
-          mockRename.mockRejectedValue(error);
-          mockCreateNew.mockReturnValue(mockNotebook);
-    
-          await gcpService.importNotebook(
-            'gs://fake-bucket/intermediate path/notebook.json'
-          );
-    
-          expect(mockSubmit).toHaveBeenCalledWith({
-            params: { alt: 'media' },
-            path:
-              'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
-          });
-          expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
-          expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
-          expect(mockDeleteFile).toHaveBeenCalledWith('path');
-          expect(mockFromString).toHaveBeenCalledWith(
-            '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
-          );
-        });
-    
+    it('Imports a Notebook and creates a new directory', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: '{"content1":"test","content2":22}' })
+      );
+      mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
+      mockRename.mockResolvedValue({ path: 'newpath' } as Contents.IModel);
+      mockCreateNew.mockReturnValue(mockNotebook);
 
-  it('Downloads a Notebook', async () => {
-    mockSubmit.mockReturnValue(
-      asApiResponse({ contents: 'fake Notebook content' })
-    );
-    const downloaded = await gcpService.downloadNotebook(
-      'gs://fake-bucket/intermediate path/notebook.json'
-    );
-
-    expect(downloaded).toEqual('{"contents":"fake Notebook content"}');
-    expect(mockSubmit).toHaveBeenCalledWith({
-      params: { alt: 'media' },
-      path:
-        'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
-    });
-  });
-
-  it('Throws an error when downloading a Notebook', async () => {
-    const error = {
-      error: {
-        code: 404,
-        status: 'RESOURCE_NOT_FOUND',
-        message: 'Could not find Notebook',
-      },
-    };
-    mockSubmit.mockRejectedValue(asApiResponse(error));
-
-    expect.assertions(2);
-    try {
-      await gcpService.downloadNotebook(
+      await gcpService.importNotebook(
         'gs://fake-bucket/intermediate path/notebook.json'
       );
-    } catch (err) {
-      expect(err).toEqual('RESOURCE_NOT_FOUND: Could not find Notebook');
-    }
-    expect(mockSubmit).toHaveBeenCalledWith({
-      params: { alt: 'media' },
-      path:
-        'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+      expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
+      expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
+      expect(mockDeleteFile).not.toHaveBeenCalled();
+      expect(mockFromString).toHaveBeenCalledWith(
+        '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
+      );
+    });
+
+    it('Imports a Notebook into an already existing directory', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: '{"content1":"test","content2":22}' })
+      );
+      mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
+      const error = { message: '409' };
+      mockRename.mockRejectedValue(error);
+      mockCreateNew.mockReturnValue(mockNotebook);
+
+      await gcpService.importNotebook(
+        'gs://fake-bucket/intermediate path/notebook.json'
+      );
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+      expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
+      expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
+      expect(mockDeleteFile).toHaveBeenCalledWith('path');
+      expect(mockFromString).toHaveBeenCalledWith(
+        '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
+      );
+    });
+
+    it('Downloads a Notebook', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: 'fake Notebook content' })
+      );
+      const downloaded = await gcpService.downloadNotebook(
+        'gs://fake-bucket/intermediate path/notebook.json'
+      );
+
+      expect(downloaded).toEqual('{"contents":"fake Notebook content"}');
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+    });
+
+    it('Throws an error when downloading a Notebook', async () => {
+      const error = {
+        error: {
+          code: 404,
+          status: 'RESOURCE_NOT_FOUND',
+          message: 'Could not find Notebook',
+        },
+      };
+      mockSubmit.mockRejectedValue(asApiResponse(error));
+
+      expect.assertions(2);
+      try {
+        await gcpService.downloadNotebook(
+          'gs://fake-bucket/intermediate path/notebook.json'
+        );
+      } catch (err) {
+        expect(err).toEqual('RESOURCE_NOT_FOUND: Could not find Notebook');
+      }
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
     });
   });
-});
 
   describe('Notebooks', () => {
     const runNotebookRequest: RunNotebookRequest = {
