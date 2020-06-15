@@ -5,9 +5,9 @@ exports[`JobListItem Renders for failed job 1`] = `
   className="item_f7pj24d"
 >
   <div
-    title="Status: FAILED"
+    title="Status: SUCCEEDED"
   >
-    <WithStyles(pure(CloseIcon)) />
+    <WithStyles(pure(CheckIcon)) />
   </div>
   <div
     className="details_f1grbse3"
@@ -30,7 +30,12 @@ exports[`JobListItem Renders for failed job 1`] = `
       </span>
     </div>
   </div>
-  <div />
+  <div>
+    <IconButtonMenu
+      icon={<WithStyles(pure(MoreVertIcon)) />}
+      menuItems={[Function]}
+    />
+  </div>
 </li>
 `;
 
@@ -39,9 +44,9 @@ exports[`JobListItem Renders for running job 1`] = `
   className="item_f7pj24d"
 >
   <div
-    title="Status: RUNNING"
+    title="Status: SUCCEEDED"
   >
-    <WithStyles(pure(RefreshIcon)) />
+    <WithStyles(pure(CheckIcon)) />
   </div>
   <div
     className="details_f1grbse3"
@@ -64,7 +69,12 @@ exports[`JobListItem Renders for running job 1`] = `
       </span>
     </div>
   </div>
-  <div />
+  <div>
+    <IconButtonMenu
+      icon={<WithStyles(pure(MoreVertIcon)) />}
+      menuItems={[Function]}
+    />
+  </div>
 </li>
 `;
 

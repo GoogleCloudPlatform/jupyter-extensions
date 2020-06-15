@@ -46,6 +46,9 @@ import {
   SCHEDULE_TYPES,
   SINGLE,
   RECURRING,
+  getAcceleratorTypes,
+  ACCELERATOR_COUNTS_1_2_4_8,
+  Option,
 } from '../data';
 
 type Error = { [key: string]: string };
@@ -78,6 +81,8 @@ interface SchedulerFormValues {
   imageUri: string;
   scheduleType: string;
   schedule?: string;
+  acceleratorType?: string;
+  acceleratorCount?: string;
 }
 
 interface ScheduleBuilderState {
@@ -116,14 +121,19 @@ export class InnerSchedulerForm extends React.Component<
   ScheduleBuilderState
 > {
   private missingPermissions: string[];
+  private acceleratorTypeOptions: Option[];
 
   constructor(props: SchedulerFormProps) {
     super(props);
 
     this.missingPermissions = this.props.permissions.toExecute;
+    this.acceleratorTypeOptions = getAcceleratorTypes(
+      this.props.values.masterType
+    );
     this.state = { useAdvancedScheduler: false };
     this._onScaleTierChanged = this._onScaleTierChanged.bind(this);
     this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
+    this._onMasterTypeChanged = this._onMasterTypeChanged.bind(this);
     this._onFormReset = this._onFormReset.bind(this);
     this.updateCronSchedule = this.updateCronSchedule.bind(this);
   }
@@ -203,8 +213,30 @@ export class InnerSchedulerForm extends React.Component<
             name="masterType"
             value={values.masterType}
             options={MASTER_TYPES}
-            onChange={handleChange}
+            onChange={this._onMasterTypeChanged}
           />
+        )}
+        {values.scaleTier === CUSTOM && (
+          <div className={css.scheduleBuilderRow}>
+            <div className={css.flex1}>
+              <SelectInput
+                label="Accelerator type"
+                name="acceleratorType"
+                value={values.acceleratorType}
+                options={this.acceleratorTypeOptions}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={css.flex1}>
+              <SelectInput
+                label="Accelerator count"
+                name="acceleratorCount"
+                value={values.acceleratorCount}
+                options={ACCELERATOR_COUNTS_1_2_4_8}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
         )}
         <SelectInput
           label="Container"
@@ -277,13 +309,44 @@ export class InnerSchedulerForm extends React.Component<
     );
   }
 
-  private _onScaleTierChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+  private _onMasterTypeChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+    this.acceleratorTypeOptions = getAcceleratorTypes(e.target.value);
     const { handleChange, setFieldValue } = this.props;
     setFieldValue(
-      'masterType',
-      e.target.value === CUSTOM ? MASTER_TYPES[0].value : '',
+      'acceleratorType',
+      e.target.value === '' ? '' : this.acceleratorTypeOptions[0].value,
       false
     );
+    setFieldValue(
+      'acceleratorCount',
+      e.target.value === '' ? '' : ACCELERATOR_COUNTS_1_2_4_8[0].value,
+      false
+    );
+
+    handleChange(e);
+  }
+
+  private _onScaleTierChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+    const { handleChange, setFieldValue } = this.props;
+    const isCustom = e.target.value === CUSTOM;
+    if (isCustom) {
+      this.acceleratorTypeOptions = getAcceleratorTypes(
+        MASTER_TYPES[0].value as string
+      );
+    }
+
+    setFieldValue('masterType', isCustom ? MASTER_TYPES[0].value : '', false);
+    setFieldValue(
+      'acceleratorType',
+      isCustom ? this.acceleratorTypeOptions[0].value : '',
+      false
+    );
+    setFieldValue(
+      'acceleratorCount',
+      isCustom ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '',
+      false
+    );
+
     handleChange(e);
   }
 
@@ -328,6 +391,15 @@ function updateSettingsFromRequest(
   if (settings.get('scaleTier').composite !== request.scaleTier) {
     promises.push(settings.set('scaleTier', request.scaleTier));
   }
+  if (settings.get('masterType').composite !== request.masterType) {
+    promises.push(settings.set('masterType', request.masterType));
+  }
+  if (settings.get('acceleratorType').composite !== request.acceleratorType) {
+    promises.push(settings.set('acceleratorType', request.acceleratorType));
+  }
+  if (settings.get('acceleratorCount').composite !== request.acceleratorCount) {
+    promises.push(settings.set('acceleratorCount', request.acceleratorCount));
+  }
   if (settings.get('containerImage').composite !== request.imageUri) {
     promises.push(settings.set('containerImage', request.imageUri));
   }
@@ -349,6 +421,8 @@ async function submit(
     scheduleType,
     region,
     schedule,
+    acceleratorType,
+    acceleratorCount,
   } = values;
   const {
     gcpService,
@@ -370,6 +444,8 @@ async function submit(
     outputNotebookGcsPath,
     scaleTier,
     region,
+    acceleratorType,
+    acceleratorCount,
   };
   const status: Status = {
     asError: false,
@@ -422,7 +498,9 @@ function mapPropsToValues(props: Props) {
       props.gcpSettings.containerImage || String(CONTAINER_IMAGES[0].value),
     region: props.gcpSettings.jobRegion || String(REGIONS[0].value),
     scaleTier: props.gcpSettings.scaleTier || String(SCALE_TIERS[0].value),
-    masterType: '',
+    masterType: props.gcpSettings.masterType || '',
+    acceleratorType: props.gcpSettings.acceleratorType || '',
+    acceleratorCount: props.gcpSettings.acceleratorCount || '',
     scheduleType: SINGLE,
     schedule: '',
   };

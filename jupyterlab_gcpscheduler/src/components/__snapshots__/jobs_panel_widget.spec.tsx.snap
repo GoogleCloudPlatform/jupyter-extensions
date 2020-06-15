@@ -100,6 +100,22 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
     className="list_fqi18ru"
   >
     <JobListItem
+      gcpService={
+        Object {
+          "listNotebookJobs": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+          "projectId": Promise {},
+        }
+      }
       job={
         Object {
           "createTime": "2020-05-01T19:00:07Z",
@@ -132,6 +148,22 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
       key="notebook_job1_abcxyz"
     />
     <JobListItem
+      gcpService={
+        Object {
+          "listNotebookJobs": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+          "projectId": Promise {},
+        }
+      }
       job={
         Object {
           "createTime": "2020-05-01T19:00:07Z",

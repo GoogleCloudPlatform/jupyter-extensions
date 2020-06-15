@@ -23,6 +23,7 @@ import {
 } from '@jupyterlab/application';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { toArray } from '@phosphor/algorithm';
@@ -70,7 +71,8 @@ class SchedulerButtonExtension
 
 async function activateScheduler(
   app: JupyterFrontEnd,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  documentManager: IDocumentManager
 ) {
   console.debug('Activating GCP Notebook Scheduler Extension');
   const schedulerContext = new GcpSchedulerContext();
@@ -83,7 +85,11 @@ async function activateScheduler(
     transportService,
     projectId ? projectId.toString() : null
   );
-  const gcpService = new GcpService(transportService, projectStateService);
+  const gcpService = new GcpService(
+    transportService,
+    projectStateService,
+    documentManager
+  );
   const schedulerWidget = new GcpSchedulerWidget(
     projectStateService,
     gcpService,
@@ -109,7 +115,7 @@ const schedulerPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateScheduler,
   autoStart: true,
   id: 'gcpscheduler:button',
-  requires: [ISettingRegistry],
+  requires: [ISettingRegistry, IDocumentManager],
 };
 
 /**

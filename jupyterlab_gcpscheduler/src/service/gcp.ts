@@ -17,9 +17,17 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 
-import { CLOUD_FUNCTION_NAME, CLOUD_FUNCTION_REGION, GET, POST } from '../data';
+import {
+  CLOUD_FUNCTION_NAME,
+  CLOUD_FUNCTION_REGION,
+  GET,
+  POST,
+  IMPORT_DIRECTORY,
+} from '../data';
 import { ProjectStateService } from './project_state';
 import { handleApiError, TransportService } from './transport';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { Notebook } from '@jupyterlab/notebook';
 
 const SERVICE_ACCOUNT_DOMAIN = 'appspot.gserviceaccount.com';
 const IMMEDIATE_JOB_INDICATOR = 'jupyterlab_immediate_notebook';
@@ -52,6 +60,8 @@ export interface RunNotebookRequest {
   outputNotebookGcsPath: string;
   scaleTier: string;
   region: string;
+  acceleratorType: string;
+  acceleratorCount: string;
 }
 
 /** List of Jobs returned from AI Platform. */
@@ -64,8 +74,8 @@ type StorageObject = gapi.client.storage.Object;
 
 const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 const CLOUD_SCHEDULER = 'https://cloudscheduler.googleapis.com/v1';
-const STORAGE_UPLOAD = 'https://www.googleapis.com/upload/storage/v1';
-
+const STORAGE_DOWNLOAD = 'https://storage.googleapis.com/storage/v1';
+const STORAGE_UPLOAD = 'https://storage.googleapis.com/upload/storage/v1';
 /**
  * Class to interact with GCP services.
  */
@@ -75,7 +85,8 @@ export class GcpService {
 
   constructor(
     private _transportService: TransportService,
-    private _projectStateService: ProjectStateService
+    private _projectStateService: ProjectStateService,
+    private _documentManager: IDocumentManager
   ) {}
 
   get projectId() {
@@ -94,23 +105,79 @@ export class GcpService {
     gcsPath: string
   ): Promise<StorageObject> {
     try {
-      if (gcsPath.startsWith('gs://')) {
-        gcsPath = gcsPath.slice(5);
-      }
-      const pathParts = gcsPath.split('/');
+      const { bucket, object } = this._getGcsPathParts(gcsPath);
       const response = await this._transportService.submit<StorageObject>({
-        path: `${STORAGE_UPLOAD}/b/${pathParts[0]}/o`,
+        path: `${STORAGE_UPLOAD}/b/${bucket}/o`,
         method: POST,
         headers: { 'Content-Type': 'application/json' },
         body: notebookContents,
         params: {
-          name: pathParts.slice(1).join('/'),
+          name: object,
           uploadType: 'media',
         },
       });
       return response.result;
     } catch (err) {
       console.error(`Unable to upload Notebook contents to ${gcsPath}`);
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Downloads the notebook located at the gcsPath provided and retrieves the file name from the
+   * JSON. Creates a new import directory and attempts to rename it, if it fails then creates
+   * the notebook in the already-existing directory and deletes the new directory.
+   *
+   * @param gcsPath Path to the notebook we want to create.
+   */
+  async importNotebook(gcsPath: string): Promise<Notebook> {
+    const contents = await this.downloadNotebook(gcsPath);
+
+    const retrievedName = JSON.parse(contents)
+      .metadata?.papermill?.input_path?.split('/')
+      .slice(-1)[0];
+    const fileName = retrievedName ? retrievedName : 'untitled.ipynb';
+
+    const newDirectory = await this._documentManager.newUntitled({
+      type: 'directory',
+    });
+
+    try {
+      await this._documentManager.rename(newDirectory.path, IMPORT_DIRECTORY);
+    } catch (err) {
+      // Expect a 409 error if directory exists. Otherwise throw the error
+      if (err.message.indexOf('409') === -1) {
+        throw err;
+      }
+      this._documentManager.deleteFile(newDirectory.path);
+    }
+
+    return this.createNotebook(fileName, contents);
+  }
+
+  private createNotebook(fileName: string, contents: string): Notebook {
+    const widget = this._documentManager.createNew(
+      IMPORT_DIRECTORY + fileName,
+      'Notebook'
+    ) as Notebook;
+    widget.model.fromString(contents);
+    return widget;
+  }
+
+  async downloadNotebook(gcsPath: string): Promise<string> {
+    try {
+      const { bucket, object } = this._getGcsPathParts(gcsPath);
+      const response = await this._transportService.submit<string>({
+        path: `${STORAGE_DOWNLOAD}/b/${bucket}/o/${encodeURIComponent(object)}`,
+        params: {
+          alt: 'media',
+        },
+      });
+      return typeof response.result === 'string'
+        ? response.result
+        : JSON.stringify(response.result);
+    } catch (err) {
+      console.error(`Unable to download Notebook contents at ${gcsPath}`);
       handleApiError(err);
     }
   }
@@ -260,11 +327,30 @@ export class GcpService {
           '--output-notebook',
           request.outputNotebookGcsPath,
         ],
-        masterConfig: { imageUri: request.imageUri },
+        masterConfig: {
+          imageUri: request.imageUri,
+          acceleratorConfig: {
+            count: request.acceleratorCount || undefined,
+            type: request.acceleratorType || undefined,
+          },
+        },
         masterType: request.masterType || undefined,
         region: request.region,
         scaleTier: request.scaleTier,
       },
     } as AiPlatformJob;
+  }
+
+  private _getGcsPathParts(
+    gcsPath: string
+  ): { bucket: string; object: string } {
+    if (gcsPath.startsWith('gs://')) {
+      gcsPath = gcsPath.slice(5);
+    }
+    const pathParts = gcsPath.split('/');
+    return {
+      bucket: pathParts[0],
+      object: pathParts.slice(1).join('/'),
+    };
   }
 }

@@ -16,19 +16,43 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
-
-import { CLOUD_FUNCTION_REGION } from '../data';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
 import { GcpService, RunNotebookRequest } from './gcp';
 import { TEST_PROJECT, asApiResponse } from '../test_helpers';
 import { ProjectStateService } from './project_state';
+import { Contents } from '@jupyterlab/services';
+import { INotebookModel, Notebook } from '@jupyterlab/notebook';
 
 describe('GcpService', () => {
   const mockSubmit = jest.fn();
   const mockMakeRequest = jest.fn();
+  const mockNewUntitled = jest.fn();
+  const mockCreateNew = jest.fn();
+  const mockRename = jest.fn();
+  const mockDeleteFile = jest.fn();
+  const mockFromString = jest.fn();
+
+  const mockNotebook = {
+    model: ({
+      fromString: mockFromString,
+    } as unknown) as INotebookModel,
+  } as Notebook;
+
   const mockProjectState = {
     projectId: Promise.resolve(TEST_PROJECT),
   } as ProjectStateService;
-  const gcpService = new GcpService({ submit: mockSubmit }, mockProjectState);
+  const mockDocumentManager = ({
+    newUntitled: mockNewUntitled,
+    rename: mockRename,
+    deleteFile: mockDeleteFile,
+    createNew: mockCreateNew,
+  } as unknown) as IDocumentManager;
+  const gcpService = new GcpService(
+    { submit: mockSubmit },
+    mockProjectState,
+    mockDocumentManager
+  );
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -52,7 +76,8 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         headers: { 'Content-Type': 'application/json' },
         params: { name: 'notebook.json', uploadType: 'media' },
-        path: 'https://www.googleapis.com/upload/storage/v1/b/fake-bucket/o',
+        path:
+          'https://storage.googleapis.com/upload/storage/v1/b/fake-bucket/o',
         method: 'POST',
         body: fakeContents,
       });
@@ -81,9 +106,102 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         headers: { 'Content-Type': 'application/json' },
         params: { name: 'notebook.json', uploadType: 'media' },
-        path: 'https://www.googleapis.com/upload/storage/v1/b/fake-bucket/o',
+        path:
+          'https://storage.googleapis.com/upload/storage/v1/b/fake-bucket/o',
         method: 'POST',
         body: fakeContents,
+      });
+    });
+
+    it('Imports a Notebook and creates a new directory', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: '{"content1":"test","content2":22}' })
+      );
+      mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
+      mockRename.mockResolvedValue({ path: 'newpath' } as Contents.IModel);
+      mockCreateNew.mockReturnValue(mockNotebook);
+
+      await gcpService.importNotebook(
+        'gs://fake-bucket/intermediate path/notebook.json'
+      );
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+      expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
+      expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
+      expect(mockDeleteFile).not.toHaveBeenCalled();
+      expect(mockFromString).toHaveBeenCalledWith(
+        '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
+      );
+    });
+
+    it('Imports a Notebook into an already existing directory', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: '{"content1":"test","content2":22}' })
+      );
+      mockNewUntitled.mockResolvedValue({ path: 'path' } as Contents.IModel);
+      const error = { message: '409' };
+      mockRename.mockRejectedValue(error);
+      mockCreateNew.mockReturnValue(mockNotebook);
+
+      await gcpService.importNotebook(
+        'gs://fake-bucket/intermediate path/notebook.json'
+      );
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+      expect(mockNewUntitled).toHaveBeenCalledWith({ type: 'directory' });
+      expect(mockRename).toHaveBeenCalledWith('path', IMPORT_DIRECTORY);
+      expect(mockDeleteFile).toHaveBeenCalledWith('path');
+      expect(mockFromString).toHaveBeenCalledWith(
+        '{"contents":"{\\"content1\\":\\"test\\",\\"content2\\":22}"}'
+      );
+    });
+
+    it('Downloads a Notebook', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ contents: 'fake Notebook content' })
+      );
+      const downloaded = await gcpService.downloadNotebook(
+        'gs://fake-bucket/intermediate path/notebook.json'
+      );
+
+      expect(downloaded).toEqual('{"contents":"fake Notebook content"}');
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
+      });
+    });
+
+    it('Throws an error when downloading a Notebook', async () => {
+      const error = {
+        error: {
+          code: 404,
+          status: 'RESOURCE_NOT_FOUND',
+          message: 'Could not find Notebook',
+        },
+      };
+      mockSubmit.mockRejectedValue(asApiResponse(error));
+
+      expect.assertions(2);
+      try {
+        await gcpService.downloadNotebook(
+          'gs://fake-bucket/intermediate path/notebook.json'
+        );
+      } catch (err) {
+        expect(err).toEqual('RESOURCE_NOT_FOUND: Could not find Notebook');
+      }
+      expect(mockSubmit).toHaveBeenCalledWith({
+        params: { alt: 'media' },
+        path:
+          'https://storage.googleapis.com/storage/v1/b/fake-bucket/o/intermediate%20path%2Fnotebook.json',
       });
     });
   });
@@ -97,6 +215,8 @@ describe('GcpService', () => {
       outputNotebookGcsPath: 'gs://test-bucket/test_nb-out.ipynb',
       region: 'us-east1',
       scaleTier: 'STANDARD_1',
+      acceleratorType: '',
+      acceleratorCount: '',
     };
 
     const aiPlatformJobBody: gapi.client.ml.GoogleCloudMlV1__Job = {
@@ -112,6 +232,7 @@ describe('GcpService', () => {
         ],
         masterConfig: {
           imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
+          acceleratorConfig: {},
         },
         region: 'us-east1',
         scaleTier: 'STANDARD_1',
