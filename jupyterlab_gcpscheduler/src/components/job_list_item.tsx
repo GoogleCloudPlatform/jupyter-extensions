@@ -29,11 +29,12 @@ import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
 import { AI_PLATFORM_LINK } from '../data';
-import { AiPlatformJob } from '../service/gcp';
+import { AiPlatformJob, GcpService } from '../service/gcp';
 
 interface Props {
   job: AiPlatformJob;
   projectId: string;
+  gcpService: GcpService;
 }
 
 const localStyles = stylesheet({
@@ -91,7 +92,7 @@ function getIconForJobState(state: string): JSX.Element {
 
 /** Notebook job list item */
 export function JobListItem(props: Props) {
-  const { job, projectId } = props;
+  const { gcpService, job, projectId } = props;
   const endTime = new Date(job.endTime || job.createTime);
 
   const gcsFile =
@@ -147,6 +148,13 @@ export function JobListItem(props: Props) {
                   View
                 </a>
               </SmallMenuItem>,
+               <SmallMenuItem
+                               id="import"
+                               key="importNotebook"
+                               onClick={() => gcpService.importNotebook(gcsFile)}
+                             >
+                               Import
+                             </SmallMenuItem>,
               <SmallMenuItem key="getNotebookPath" onClick={menuCloseHandler}>
                 <a
                   className={localStyles.menuLink}

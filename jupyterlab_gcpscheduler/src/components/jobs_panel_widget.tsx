@@ -110,6 +110,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
 
   render() {
     const { error, jobs, isLoading, projectId } = this.state;
+    const gcpService = this.props.gcpService;
     let content: JSX.Element;
     if (isLoading) {
       content = <LinearProgress />;
@@ -119,7 +120,12 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       content = (
         <ul className={localStyles.list}>
           {jobs.jobs.map(j => (
-            <JobListItem key={j.jobId} job={j} projectId={projectId} />
+            <JobListItem
+                     gcpService={gcpService}
+                          key={j.jobId}
+                          job={j}
+                          projectId={projectId}
+                        />
           ))}
         </ul>
       );

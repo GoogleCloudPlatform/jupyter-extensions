@@ -148,32 +148,80 @@ export const SCALE_TIERS: Option[] = [
  * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
  */
 export const MASTER_TYPES: Option[] = [
-  { value: 'standard', text: '4 CPUs, 15 GB RAM, No Accelerators' },
-  { value: 'large_model', text: '8 CPUs, 52 GB RAM, No Accelerators' },
-  { value: 'complex_model_s', text: '8 CPUs, 7.2 GB RAM, No Accelerators' },
-  { value: 'complex_model_m', text: '16 CPUs, 14.4 GB RAM, No Accelerators' },
-  { value: 'complex_model_l', text: '32 CPUs, 28.8 GB RAM, No Accelerators' },
-  { value: 'standard_gpu', text: '8 CPUs, 30 GB RAM, 1 NVIDIA Tesla K80 GPU' },
-  {
-    value: 'complex_model_m_gpu',
-    text: '4 CPUs, 15 GB RAM, 4 NVIDIA Tesla K80 GPUs',
-  },
-  {
-    value: 'complex_model_l_gpu',
-    text: '4 CPUs, 15 GB RAM, 8 NVIDIA Tesla K80 GPUs',
-  },
-  {
-    value: 'standard_p100',
-    text: '8 CPUs, 30 GB RAM, 1 NVIDIA Tesla P100 GPU',
-  },
-  {
-    value: 'complex_model_m_p100',
-    text: '4 CPUs, 15 GB RAM, 4 NVIDIA Tesla K80 GPUs',
-  },
-  {
-    value: 'complex_model_l_gpu',
-    text: '4 CPUs, 15 GB RAM, 8 NVIDIA Tesla K80 GPUs',
-  },
+  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
+  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
+  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
+  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
+  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
+  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
+
+  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
+  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
+  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
+  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
+  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
+
+  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
+  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
+  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
+  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
+];
+/**
+ * AI Platform Accelerator types.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ */
+export const ACCELERATOR_TYPES: Option[] = [
+  { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
+  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
+  { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
+  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
+  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+];
+
+/**
+ * AI Platform Accelerator types for particular machine types that only
+ * provide a limited amount.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ */
+export const ACCELERATOR_TYPES_REDUCED: Option[] = [
+  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
+  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
+  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+];
+
+const MASTER_TYPES_REDUCED: Set<string> = new Set([
+  'n1-standard-64',
+  'n1-standard-96',
+  'n1-highmem-64',
+  'n1-highmem-96',
+  'n1-highcpu-96',
+]);
+
+/**
+ * Returns the valid accelerator types given a masterType. Returns empty array
+ * if masterType is falsy.
+ */
+export function getAcceleratorTypes(masterType: string): Option[] {
+  if (masterType) {
+    if (MASTER_TYPES_REDUCED.has(masterType)) {
+      return ACCELERATOR_TYPES_REDUCED;
+    }
+    return ACCELERATOR_TYPES;
+  }
+  return [];
+}
+
+/**
+ * AI Platform Accelerator counts.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus
+ */
+export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
+  { value: '1', text: '1' },
+  { value: '2', text: '2' },
+  { value: '4', text: '4' },
+  { value: '8', text: '8' },
 ];
 
 /**
@@ -290,3 +338,6 @@ export const GCS_LINK = `${CLOUD_CONSOLE}/storage/browser`;
 
 /** Link to Scheduled Runs page */
 export const SCHEDULER_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/scheduled-runs`;
+
+/** Notebook jobs directory that notebooks will be imported to. */
+export const IMPORT_DIRECTORY = 'imported_notebook_jobs/';

@@ -71,6 +71,9 @@ export interface GcpSettings {
   schedulerRegion: string;
   jobRegion?: string;
   scaleTier?: string;
+  masterType?: string;
+  acceleratorType?: string;
+  acceleratorCount?: string;
   containerImage?: string;
   oAuthClientId?: string;
 }

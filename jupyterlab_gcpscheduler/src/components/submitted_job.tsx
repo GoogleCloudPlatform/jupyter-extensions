@@ -26,6 +26,9 @@ import {
   SCALE_TIERS,
   GCS_LINK,
   SCHEDULER_LINK,
+    MASTER_TYPES,
+  CUSTOM,
+  ACCELERATOR_TYPES,
 } from '../data';
 import { RunNotebookRequest } from '../service/gcp';
 import { OnDialogClose } from './dialog';
@@ -88,6 +91,11 @@ export class SubmittedJob extends React.Component<Props, {}> {
     const projectParam = `project=${projectId}`;
     const region = findOptionByValue(REGIONS, request.region);
     const scaleTier = findOptionByValue(SCALE_TIERS, request.scaleTier);
+    const masterType = findOptionByValue(MASTER_TYPES, request.masterType);
+    const acceleratorType = findOptionByValue(
+      ACCELERATOR_TYPES,
+      request.acceleratorType
+    );
     const gcsInformation = this.getGcsInformation(request.inputNotebookGcsPath);
     const gcsLink = `${GCS_LINK}/${gcsInformation.link}?${projectParam}`;
     const isRecurring = !!schedule;
@@ -119,6 +127,22 @@ export class SubmittedJob extends React.Component<Props, {}> {
               {scaleTier.value} - {scaleTier.text}
             </dd>
           </div>
+                    {scaleTier.value === CUSTOM && (
+            <React.Fragment>
+              <div>
+                <dt>Master type:</dt>
+                <dd>{masterType.text}</dd>
+              </div>
+              <div>
+                <dt>Accelerator type:</dt>
+                <dd>{acceleratorType.text}</dd>
+              </div>
+              <div>
+                <dt>Accelerator count:</dt>
+                <dd>{request.acceleratorCount}</dd>
+              </div>
+            </React.Fragment>
+          )}
           <div>
             <dt>Container:</dt>
             <dd>{request.imageUri}</dd>

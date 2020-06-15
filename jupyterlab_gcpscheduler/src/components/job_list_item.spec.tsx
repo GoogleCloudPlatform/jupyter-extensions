@@ -19,10 +19,17 @@ import * as React from 'react';
 
 import { JobListItem } from './job_list_item';
 import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
+import { GcpService } from '../service/gcp';
+import { IconButtonMenu } from 'gcp-jupyterlab-shared';
 
 const toLocaleString = Date.prototype.toLocaleString;
 
 describe('JobListItem', () => {
+  const mockImportNotebook = jest.fn();
+  const mockGcpService = ({
+    importNotebook: mockImportNotebook,
+  } as unknown) as GcpService;
+
   beforeEach(() => {
     Date.prototype.toLocaleString = jest
       .fn()
@@ -33,9 +40,35 @@ describe('JobListItem', () => {
     Date.prototype.toLocaleString = toLocaleString;
   });
 
+    it('Calls GcpService on Import', () => {
+        const jobListItem = shallow(
+          <JobListItem
+            gcpService={mockGcpService}
+            projectId={TEST_PROJECT}
+            job={getAiPlatformJob()}
+          />
+        );
+    
+        jobListItem
+          .find(IconButtonMenu)
+          .dive()
+          .findWhere(w => w.text() === 'Import')
+          .parent()
+          .simulate('click');
+    
+        expect(mockGcpService.importNotebook).toHaveBeenCalledWith(
+          'test-project/notebook_job1/job1.ipynb'
+        );
+      });
+    
+
   it('Renders for successful job', () => {
     const component = shallow(
-      <JobListItem projectId={TEST_PROJECT} job={getAiPlatformJob()} />
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getAiPlatformJob()}
+      />
     );
     expect(component).toMatchSnapshot();
   });
@@ -44,7 +77,11 @@ describe('JobListItem', () => {
     const job = getAiPlatformJob();
     job.state = 'FAILED';
     const component = shallow(
-      <JobListItem projectId={TEST_PROJECT} job={job} />
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getAiPlatformJob()}
+      />
     );
     expect(component).toMatchSnapshot();
   });
@@ -53,7 +90,11 @@ describe('JobListItem', () => {
     const job = getAiPlatformJob();
     job.state = 'RUNNING';
     const component = shallow(
-      <JobListItem projectId={TEST_PROJECT} job={job} />
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getAiPlatformJob()}
+      />
     );
     expect(component).toMatchSnapshot();
   });

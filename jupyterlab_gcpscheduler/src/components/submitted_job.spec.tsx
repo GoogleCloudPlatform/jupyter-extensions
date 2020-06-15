@@ -30,10 +30,12 @@ describe('SubmittedJob', () => {
     jobId: 'test_job_1234',
     imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest',
     inputNotebookGcsPath: `${gcsBucket}/test_job_1234/test_job_1234.ipynb`,
-    masterType: 'complex_model_m_gpu',
+    masterType: 'n1-standard-4',
     outputNotebookGcsPath: `${gcsBucket}/test_job/test_job.ipynb`,
     scaleTier: 'CUSTOM',
     region: 'us-east1',
+    acceleratorType: 'NVIDIA_TESLA_K80',
+    acceleratorCount: '1',
   };
   const mockProps = {
     onDialogClose: mockDialogClose,
