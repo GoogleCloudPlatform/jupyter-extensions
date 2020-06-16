@@ -84,10 +84,18 @@ class AuthProvider:
     return cls._instance
 
 
-class MetadataHandler(APIHandler):
+class BaseHandler(APIHandler):
+  """Base class for all API handlers requires a logged-in user."""
+
+  def prepare(self):
+    if not self.get_current_user():
+      raise web.HTTPError(403)
+    return super().prepare()
+
+
+class MetadataHandler(BaseHandler):
   """Returns parts of the GCE Metadata."""
 
-  @web.authenticated
   async def get(self):
     try:
       metadata = await get_metadata()
@@ -120,7 +128,7 @@ class MetadataHandler(APIHandler):
       self.set_status(500, msg)
 
 
-class ProxyHandler(APIHandler):
+class ProxyHandler(BaseHandler):
   """Attaches authentication credential and forwards GCP requests."""
 
   async def _make_request(self, base64_url, method='GET', body=None):
@@ -166,22 +174,18 @@ class ProxyHandler(APIHandler):
       self.set_status(e.code)
       self.finish(e.response.body)
 
-  @web.authenticated
   async def get(self, base64_url):
     """Proxies the HTTP GET request."""
     await self._make_request(base64_url)
 
-  @web.authenticated
   async def delete(self, base64_url):
     """Proxies the HTTP DELETE request."""
     await self._make_request(base64_url, 'DELETE')
 
-  @web.authenticated
   async def post(self, base64_url):
     """Proxies the HTTP POST request."""
     await self._make_request(base64_url, 'POST', self.request.body)
 
-  @web.authenticated
   async def put(self, base64_url):
     """Proxies the HTTP PUT request."""
     await self._make_request(base64_url, 'PUT', self.request.body)
