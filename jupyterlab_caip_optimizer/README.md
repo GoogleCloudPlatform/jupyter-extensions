@@ -1,4 +1,4 @@
-# Google Cloud Platform AI Optimizer Extension Extension
+# Google Cloud Platform AI Optimizer Extension
 
 JupyterLab extension project
 
