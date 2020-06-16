@@ -2,10 +2,6 @@ from notebook.base.handlers import APIHandler
 from jupyterlab_comments.git_commands import Git
 import json
 git = Git() #global instance of connection to git commands
-#used to test the connection to the server
-class HelloWorldHandler(APIHandler):
-    def get(self):
-        self.finish('Hello, world!')
 
 class PreviousNamesHandler(APIHandler):
     def get(self):
