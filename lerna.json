@@ -3,7 +3,8 @@
     "shared/client/",
     "jupyterlab_gcedetails/",
     "jupyterlab_gcsfilebrowser/",
-    "jupyterlab_gcpscheduler/"
+    "jupyterlab_gcpscheduler/",
+    "jupyterlab_caip_optimizer/"
   ],
   "version": "independent"
 }
