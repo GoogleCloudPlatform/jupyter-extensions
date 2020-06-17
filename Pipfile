@@ -7,7 +7,7 @@ name = "pypi"
 python_version = "3.7"
 
 [packages]
-jupyterlab = "==1.2.15" # https://github.com/jupyterlab/jupyterlab/issues/8515
+jupyterlab = "==1.2.15"
 
 [dev-packages]
-
+coverage = "*"

@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-pip install .
-pip install coverage
-coverage run --source jupyterlab_gcedetails \
-  -m tornado.testing jupyterlab_gcedetails.handlers_test
-coverage report
+
+if [[ $1 = 'coverage' ]] ; then
+  coverage run --source . -m unittest discover -p '*_test.py'
+  coverage report
+else
+  python -m unittest discover -p '*_test.py'
+fi

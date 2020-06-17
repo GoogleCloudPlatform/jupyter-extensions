@@ -1,0 +1,7 @@
+{
+  "NotebookApp": {
+    "nbserver_extensions": {
+      "gcp_jupyterlab_shared": true
+    }
+  }
+}
