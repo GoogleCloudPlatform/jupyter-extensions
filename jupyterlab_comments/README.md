@@ -54,7 +54,6 @@ jupyter labextension uninstall jupyterlab-comments
 ### Usage
 Add the following lines to your Jupyter config file (e.g. jupyter_notebook_config.py):
 ```bash
-from git_commands import Git
 c.Git.remote = '${NAME_OF_REMOTE_REPOSITORY}'
 ```
 (The name of the remote repository defaults to 'origin' if no value is configured)
