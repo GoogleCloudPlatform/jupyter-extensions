@@ -16,7 +16,7 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { TEST_PROJECT, asFetchResponse, asApiResponse } from '../test_helpers';
+import { TEST_PROJECT, asFetchResponse, asApiResponse } from './test_helpers';
 import {
   ApiRequest,
   ServerProxyTransportService,

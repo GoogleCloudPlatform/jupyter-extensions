@@ -44,7 +44,7 @@ import { ActionBar } from './action_bar';
 import {
   ClientTransportService,
   ServerProxyTransportService,
-} from '../service/transport';
+} from 'gcp-jupyterlab-shared';
 
 /** Information provided to the GcpSchedulerWidget */
 export interface LaunchSchedulerRequest {
