@@ -1,8 +1,8 @@
-import { combineReducers } from 'redux';
+import { combineReducers, Reducer } from 'redux';
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-const rootReducer = combineReducers({});
+const rootReducer: Reducer = combineReducers({});
 
 export const store = configureStore({
   reducer: rootReducer,
