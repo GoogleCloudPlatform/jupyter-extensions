@@ -1,61 +1,22 @@
 # Google Cloud Platform AI Optimizer Extension
 
-JupyterLab extension project
+`jupyterlab_caip_optimizer` - Provides a pleasant interface for using Google's black-box optimization service called [AI Platform Optimizer](https://cloud.google.com/ai-platform/optimizer/docs/overview).
 
-## Prerequisites
-
-* Python 3.5+
-* [JupyterLab](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html)
-* [Virtualenv](https://virtualenv.pypa.io/en/latest/) (Recommended for local development)
-* [NPM](https://nodejs.org/en/) (For local development)
-
-## GCP Installation
-
-This should work on Google Cloud Deep Learning VM M19+.
-
-### Install Google Cloud Deep Learning VM from local
-
-Use the [deploy.sh](./deploy.sh) script to build the extension locally, upload, and
-install on a DLVM over SSH using the instance name. Requires gcloud from the Google Cloud SDK to be [installed](https://cloud.google.com/sdk/install).
-
-```bash
-./deploy.sh ${INSTANCE_NAME?}
-```
-### Manually install from local
-
-```bash
-# Build the Python source distribution package
-local$ python setup.py sdist
-
-# Copy the dist/jupyterlab_caip_optimizer-x.x.x.tar.gz archive to the JupyterLab
-# server
-
-# Install the Python package
-server$ sudo pip3 install jupyterlab_caip_optimizer-x.x.x.tar.gz
-# Force Jupyter to rebuild the front-end packages
-server$ sudo jupyter lab build
-server$ sudo service jupyter restart
-```
+End-user documentation can be found at https://cloud.google.com/ai-platform/optimizer/docs/overview
 
 ## Development
 
-For a development install (requires npm version 4 or later), do the following in the repository directory:
+1. Follow the [instructions](../#Development) from the root of the repository.
 
-You will need to have Python3, virtualenv, and npm installed.
+### gcloud authorization
 
-```bash
-# Create a Python 3 virtualenv and install jupyterlab and the project in edit mode
-virtualenv -p python3 venv
-source venv/bin/activate
-# Install the version of jupyterlab used by DLVM images
-pip install jupyterlab==1.2.6
-pip install .
+The extension uses the machine's
+[Application Default Credentials](https://cloud.google.com/docs/authentication/production).
+Locally, you can set this using the gcloud command. First, set the gcloud tool's
+`project` configuration to the project you wish to use for development.
 
-# Install the npm package and the extension
-npm install
-jupyter labextension install .
+`gcloud config set project <project-id>`
 
-# Now, run npm start which starts the Typescript compiler in watch mode on the
-# extension directory as well as the JupyterLab server
-npm start
-```
+Then, issue the `gcloud auth application-default login` command to store the
+credential. You may need to repeat this procedure daily on a Google-owned
+machine.
