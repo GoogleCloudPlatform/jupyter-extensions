@@ -26,5 +26,8 @@ export * from './components/submit_button';
 export * from './components/text_input';
 export * from './components/toggle_switch_input';
 export * from './components/validation_error';
+export * from './service/transport';
+export * from './service/test_helpers';
+export * from './service/data';
 export * from './utils';
 export * from './styles';

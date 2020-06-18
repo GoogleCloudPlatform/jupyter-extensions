@@ -17,13 +17,16 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 
-import { handleApiError, TransportService } from './transport';
+import {
+  handleApiError,
+  TransportService,
+  POST,
+  GET,
+} from 'gcp-jupyterlab-shared';
 import {
   CLOUD_FUNCTION_NAME,
   CLOUD_FUNCTION_REGION,
   BUCKET_NAME_SUFFIX,
-  POST,
-  GET,
   removeFromList,
   CLOUD_FUNCTION_ARCHIVE,
 } from '../data';

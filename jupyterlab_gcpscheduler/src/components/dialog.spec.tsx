@@ -29,7 +29,7 @@ import {
   ClientTransportService,
   ServerProxyTransportService,
   TransportService,
-} from '../service/transport';
+} from 'gcp-jupyterlab-shared';
 import { ProjectStateService, ProjectState } from '../service/project_state';
 import { ActionBar } from './action_bar';
 import { Initializer } from './initialization/initializer';
