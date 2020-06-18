@@ -24,30 +24,12 @@ def load_jupyter_server_extension(nb_server_app):
       [
           # TODO(cbwilkes): Add auth checking if needed.
           # (url_path_join(gcp_v1_endpoint, auth'), AuthHandler)
-          (url_path_join(gcp_v1_endpoint, 'files') + '(.*)', GCSHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'upload',
-          ) + '(.*)', UploadHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'delete',
-          ) + '(.*)', DeleteHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'move',
-          ) + '(.*)', MoveHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'copy',
-          ) + '(.*)', CopyHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'new',
-          ) + '(.*)', NewHandler),
-          (url_path_join(
-              gcp_v1_endpoint,
-              'checkpoint',
-          ) + '(.*)', CheckpointHandler),
+          (url_path_join(gcp_v1_endpoint, 'files(.*)'), GCSHandler),
+          (url_path_join(gcp_v1_endpoint, 'upload(.*)'), UploadHandler),
+          (url_path_join(gcp_v1_endpoint, 'delete(.*)'), DeleteHandler),
+          (url_path_join(gcp_v1_endpoint, 'move(.*)'), MoveHandler),
+          (url_path_join(gcp_v1_endpoint, 'copy(.*)'), CopyHandler),
+          (url_path_join(gcp_v1_endpoint, 'new(.*)'), NewHandler),
+          (url_path_join(gcp_v1_endpoint, 'checkpoint(.*)'), CheckpointHandler),
           ('/nbconvert/(.*)/GCS%3A(.*)', GCSNbConvert),
       ])
