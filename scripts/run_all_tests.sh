@@ -28,11 +28,11 @@ PYTHON_PACKAGES=(
 )
 
 for p in ${PYTHON_PACKAGES[@]} ; do
-  echo "============= Running tests in $p ============="
+  echo "============= Running Python tests in $p ============="
   pushd $p
   $RUN_PYTHON_TESTS coverage
   popd
-  echo "============= Finished tests in $p ============="
+  echo "============= Finished Python tests in $p ============="
   echo
 done
 

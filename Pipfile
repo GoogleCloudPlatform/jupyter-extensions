@@ -11,3 +11,5 @@ jupyterlab = "==1.2.15"
 
 [dev-packages]
 coverage = "*"
+pylint = "*"
+yapf = "*"

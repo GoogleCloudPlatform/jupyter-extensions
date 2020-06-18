@@ -13,12 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Run the lint script first
-$(dirname $0)/lint_python.sh
-
-if [[ $1 = 'coverage' ]] ; then
-  coverage run --source . -m unittest discover -p '*_test.py'
-  coverage report
-else
-  python -m unittest discover -p '*_test.py'
-fi
+yapf -i -r --verbose .
+find . -type f -name "*.py" | xargs pylint --rcfile "$(dirname $0)/../.pylintrc"
