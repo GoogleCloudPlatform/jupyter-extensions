@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "declaration": false,
     "jsx": "react",
     "lib": ["es2015", "dom"],
     "module": "commonjs",
