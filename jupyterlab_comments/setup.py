@@ -19,30 +19,23 @@ from setuptools import find_packages, setup
 with open("README.md") as f:
   long_description = f.read()
 
-version = None
-with open(os.path.join(os.getcwd(), "jupyterlab_gcedetails",
-                       "version.py")) as f:
-  for l in f:
-    if l.startswith("VERSION"):
-      version = l.rstrip().split(" = ")[1].replace("'", "")
+version = "0.1.0"
 
-if not version:
-  raise RuntimeError("Unable to determine version")
-
-npm_package = "jupyterlab_gcedetails-{}.tgz".format(version)
+npm_package = "jupyterlab_comments-{}.tgz".format(version)
 if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
   raise FileNotFoundError("Cannot find NPM package. Did you run `npm pack`?")
 
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
     ("etc/jupyter/jupyter_notebook_config.d",
-     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gcedetails.json",)),
+     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_comments.json",
+     )),
 ]
 
 setup(
-    name="jupyterlab_gcedetails",
+    name="jupyterlab_comments",
     version=version,
-    description="GCP Notebooks Details Extension",
+    description="Collaboration in Git Notebook Extension",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GoogleCloudPlatform/jupyter-extensions",
@@ -52,6 +45,6 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "jupyterlab~=1.2.0",
-        "psutil==5.7.0",
+        "traitlets~=4.3.3",
     ],
 )

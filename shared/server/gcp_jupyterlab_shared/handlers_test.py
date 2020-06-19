@@ -15,16 +15,14 @@
 import asyncio
 import base64
 import json
-import os
-import tempfile
-import tornado.testing
 import unittest
+from unittest.mock import patch, MagicMock
 
+import tornado.testing
 from google.auth.exceptions import RefreshError
 from tornado.web import Application
-from tornado.httpclient import HTTPClientError, HTTPResponse
-from unittest.mock import patch, MagicMock
-from . import VERSION, handlers, test_data
+from tornado.httpclient import HTTPClientError
+from gcp_jupyterlab_shared import VERSION, handlers, test_data
 
 PATH = '/gcp/v1'
 TEST_PROJECT = 'test-project'
@@ -69,7 +67,7 @@ class AuthProviderTest(unittest.TestCase):
     auth_provider = handlers.AuthProvider.get()
     self.assertEqual(TEST_PROJECT, auth_provider.project)
 
-  def test_get_project(self, mock_google_auth):
+  def test_get_header(self, mock_google_auth):
     mock_auth = MagicMock()
     mock_auth.valid = True
     mock_auth.token = 'abc123XYZ'

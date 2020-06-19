@@ -18,13 +18,15 @@ macho impinge found society icicle boast capable sophisticated improve
 high circle
 """.title().split()
 
+
 def generate_data(num):
   return {
-    'words': [{
-      'id': i,
-      'name': ''.join(random.sample(words,3))
-    } for i in range(num)]
+      'words': [{
+          'id': i,
+          'name': ''.join(random.sample(words, 3))
+      } for i in range(num)]
   }
+
 
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
@@ -40,8 +42,4 @@ class ListHandler(APIHandler):
     except Exception as e:
       app_log.exception(str(e))
       self.set_status(500, str(e))
-      self.finish({
-        'error':{
-          'message': str(e)
-          }
-        })
+      self.finish({'error': {'message': str(e)}})

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
-
 
 /**
  * Initialization data for the jupyterlab_comments extension.
@@ -29,8 +27,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension jupyterlab-comments is activated!');
-
-  }
+  },
 };
 
 export default extension;

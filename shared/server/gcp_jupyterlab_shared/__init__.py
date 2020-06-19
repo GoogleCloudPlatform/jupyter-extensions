@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION = '1.0.0'
-
 from notebook.utils import url_path_join
+
+# Needs to be set before handlers since they import VERSION
+VERSION = '1.0.0'
 
 from .handlers import MetadataHandler, ProxyHandler
 

@@ -31,7 +31,7 @@
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
-    "test": "jest --coverage",
+    "test": "jest --coverage --passWithNoTests",
     "test-watch": "jest --watch",
     "watch": "tsc -b -w"
   },

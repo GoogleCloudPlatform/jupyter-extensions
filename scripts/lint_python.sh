@@ -13,12 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file assumes that it will be run from within an extension package folder
-extension=$(grep 'name' package.json -m 1 | cut -d\" -f4)
-echo "Installing ${extension} for local development..."
-
-npm pack
-pip install -e .
-cp -v jupyter-config/jupyter_notebook_config.d/${extension}.json \
-  `pipenv --venv`/etc/jupyter/jupyter_notebook_config.d/
-jupyter labextension install . --no-build
+yapf -i -r --verbose .
+find . -type f -name "*.py" ! -wholename "*node_modules*" | xargs pylint --rcfile "$(dirname $0)/../.pylintrc"

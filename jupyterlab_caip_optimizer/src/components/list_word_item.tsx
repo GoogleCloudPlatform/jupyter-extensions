@@ -41,7 +41,7 @@ const localStyles = stylesheet({
   },
   icon: {
     padding: '0 0 0 5px',
-  }
+  },
 });
 
 const GreenCheck = withStyles({
@@ -84,11 +84,7 @@ export class ListWordItem extends React.Component<Props, {}> {
           </span>
         </div>
         <div>
-          <a
-            className={localStyles.viewLink}
-            href="#"
-            title="View Word"
-          >
+          <a className={localStyles.viewLink} href="#" title="View Word">
             &nbsp;
           </a>
         </div>
@@ -97,11 +93,11 @@ export class ListWordItem extends React.Component<Props, {}> {
   }
 
   private getIconForWord(word: Word): JSX.Element {
-    const regex_green = /^[A-K]/g;
-    const regex_red = /^[S-Z]/g;
-    if (word.word.match(regex_green)) {
+    const regexGreen = /^[A-K]/g;
+    const regexRed = /^[S-Z]/g;
+    if (word.word.match(regexGreen)) {
       return <GreenCheck />;
-    } else if (word.word.match(regex_red)) {
+    } else if (word.word.match(regexRed)) {
       return <RedClose />;
     }
     return <GrayPending />;
