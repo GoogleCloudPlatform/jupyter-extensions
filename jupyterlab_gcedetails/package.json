@@ -53,6 +53,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
+    "eslint": "^6.8.0",
     "expect-puppeteer": "^4.4.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
