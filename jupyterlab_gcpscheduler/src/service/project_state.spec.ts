@@ -18,13 +18,12 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 import { BUCKET_NAME_SUFFIX, CLOUD_FUNCTION_REGION } from '../data';
-import { ApiRequest } from './transport';
 import {
-  getProjectState,
-  TEST_PROJECT,
+  ApiRequest,
   asApiResponse,
   asFetchResponse,
-} from '../test_helpers';
+} from 'gcp-jupyterlab-shared';
+import { getProjectState, TEST_PROJECT } from '../test_helpers';
 import { ProjectStateService } from './project_state';
 
 const _setTimeout = global.setTimeout;

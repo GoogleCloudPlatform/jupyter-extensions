@@ -16,7 +16,7 @@
 
 /** Transport layer for API requests to GCP. */
 import { ServerConnection } from '@jupyterlab/services';
-import { GET } from '../data';
+import { GET } from './data';
 
 /** Request object. */
 export interface ApiRequest {
