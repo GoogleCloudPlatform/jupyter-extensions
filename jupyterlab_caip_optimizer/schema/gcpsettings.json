@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "jupyter.lab.setting-icon-class": "jp-optimizer-icon",
+  "jupyter.lab.setting-icon-label": "Optimizer",
+  "title": "CAIP Optimizer",
+  "description": "Google Cloud Platform AI Optimizer Extension",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "title": "Google Cloud Platform AI Optimizer Extension",
+      "description": "Google Cloud Platform AI Optimizer Jupyter Extension"
+    }
+  }
+}
