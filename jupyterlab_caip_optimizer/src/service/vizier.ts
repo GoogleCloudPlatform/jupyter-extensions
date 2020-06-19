@@ -19,6 +19,8 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import {
     handleApiError,
+    ApiRequest,
+    ApiResponse,
     TransportService,
     GET,
     POST,
@@ -61,11 +63,28 @@ export class VizierService {
     private readonly runtimeUrl = `${this.serverSettings.baseUrl}gcp/v1/runtime`;
 
     constructor(
-        private _transportService: TransportService;
+        private _transportService: TransportService,
+        public projectID: string, // TODO: clarify - right way to get projectID?
+        public location: string // TODO: clarify - right way to get location?
     ) {}
 
     set transportService(transportService: TransportService) {
       this._transportService = transportService;
+    }
+
+    async createStudy(study: Study): Promise<Study> {
+      const body = JSON.stringify(study);
+      try {
+        const response = await this._transportService.submit<Study>({
+          path: `${this.serverSettings.baseUrl}gcp/v1/projects/${this.projectID}/locations/${this.location}/studies`, // TODO: check path. https://ml.googleapis.com/v1/{parent=projects/*/locations/*}/studies
+          method: 'POST',
+          body,
+        });
+        return typeof response.result === 'string' ? response.result : JSON.stringify(response.result);
+      } catch (err) {
+        console.error('Unable to create study');
+        handleApiError(err);
+      }
     }
 
     async defaultAPICall(requestUrl: string): Promise<string> {
