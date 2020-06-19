@@ -13,12 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file assumes that it will be run from within an extension package folder
-extension=$(grep 'name' package.json -m 1 | cut -d\" -f4)
-echo "Installing ${extension} for local development..."
+# This script is meant to be run from the repository root and will not work
+# properly if not.
+set -e
 
-npm pack
-pip install -e .
-cp -v jupyter-config/jupyter_notebook_config.d/${extension}.json \
-  `pipenv --venv`/etc/jupyter/jupyter_notebook_config.d/
-jupyter labextension install . --no-build
+PYTHON_PACKAGES=(
+  jupyter-gcs-contents-manager
+  jupyterlab_gcedetails
+  jupyterlab_gcpscheduler
+  jupyterlab_gcsfilebrowser
+  shared/server
+)
+
+for p in ${PYTHON_PACKAGES[@]} ; do
+  echo "============= Building $p ============="
+  pushd $p
+  [[ -e package.json ]] && npm pack
+  python setup.py sdist
+  popd
+  echo "============= Finished building $p ============="
+  echo
+done
+
+
+
