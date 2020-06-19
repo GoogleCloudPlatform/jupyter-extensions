@@ -13,5 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-yapf -i -r --verbose .
-find . -type f -name "*.py" ! -wholename "*node_modules*" | xargs pylint --rcfile "$(dirname $0)/../.pylintrc"
+PYTHON_PACKAGES=(
+  jupyter-gcs-contents-manager
+  jupyterlab_caip_optimizer
+  jupyterlab_comments
+  jupyterlab_gcedetails
+  jupyterlab_gcpscheduler
+  jupyterlab_gcsfilebrowser
+  shared/server
+)
