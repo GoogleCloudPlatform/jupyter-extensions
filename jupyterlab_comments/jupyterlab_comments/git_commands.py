@@ -47,6 +47,7 @@ class Git(Configurable):
     try:
       return_code = subprocess.check_call(['git', 'rev-parse'],
                                           cwd=current_path)
+      print(return_code)
       return return_code == 0
     except Exception as e:
       print("Error invoking git command")
