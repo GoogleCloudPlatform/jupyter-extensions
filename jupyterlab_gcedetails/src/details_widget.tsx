@@ -16,54 +16,15 @@
 
 import { ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
-import * as csstips from 'csstips';
 import * as React from 'react';
-import { classes, stylesheet } from 'typestyle';
-
-interface MachineType {
-  name: string;
-  description: string;
-}
-
-interface Instance {
-  attributes: {
-    framework: string;
-    title: string;
-    version: string;
-  };
-  cpuPlatform: string;
-  id: number;
-  image: string;
-  machineType: MachineType;
-  name: string;
-  zone: string;
-}
-
-interface Project {
-  numericProjectId: number;
-  projectId: string;
-}
-
-interface Utilization {
-  cpu: number;
-  memory: number;
-}
-
-interface Gpu {
-  name: string;
-  driver_version: string;
-  cuda_version: string;
-  gpu: number;
-  memory: number;
-  temperature: number;
-}
-
-interface Details {
-  instance: Instance;
-  project: Project;
-  utilization: Utilization;
-  gpu: Gpu;
-}
+import { classes } from 'typestyle';
+import { 
+  Details, 
+  STYLES, 
+  MAPPED_ATTRIBUTES, 
+  REFRESHABLE_MAPPED_ATTRIBUTES, 
+} from './data';
+import { DetailsDialogBody } from './components/details_dialog_body';
 
 interface State {
   displayedAttributes: [number, number];
@@ -72,105 +33,7 @@ interface State {
   shouldRefresh: boolean;
 }
 
-interface DetailsDialogProps {
-  details: Details;
-}
-
-interface AttributeMapper {
-  label: string;
-  mapper: (details: Details) => string;
-}
-
-// Displayable attributes
-const MAPPED_ATTRIBUTES: AttributeMapper[] = [
-  { label: 'VM Name', mapper: (details: Details) => details.instance.name },
-  { label: 'Project', mapper: (details: Details) => details.project.projectId },
-  {
-    label: 'Framework',
-    mapper: (details: Details) => details.instance.attributes.framework,
-  },
-  {
-    label: 'Machine Type',
-    mapper: (details: Details) =>
-      `${details.instance.machineType.description} (${details.instance.machineType.name})`,
-  },
-];
-const REFRESHABLE_MAPPED_ATTRIBUTES = [
-  {
-    label: 'CPU Utilization',
-    mapper: (details: Details) => `CPU: ${details.utilization.cpu.toFixed(1)}%`,
-  },
-  {
-    label: 'Memory Utilization',
-    mapper: (details: Details) =>
-      `Memory: ${details.utilization.memory.toFixed(1)}%`,
-  },
-  {
-    label: 'GPU Utilization',
-    mapper: (details: Details) => {
-      if (!details.gpu.name) {
-        return 'No GPUs';
-      }
-      return `GPU: ${details.gpu.name} - ${details.gpu.gpu.toFixed(1)}%`;
-    },
-  },
-];
-
-MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
-
-/* Class names applied to the component. Exported for test selectors. */
-export const STYLES = stylesheet({
-  container: {
-    color: 'var(--jp-ui-font-color1)',
-    cursor: 'pointer',
-    fontFamily: 'var(--jp-ui-font-family)',
-    fontSize: 'var(--jp-ui-font-size1, 13px)',
-    lineHeight: '24px',
-    alignItems: 'center',
-    ...csstips.horizontal,
-  },
-  attribute: {
-    marginRight: '4px',
-  },
-  dt: {
-    display: 'table-cell',
-    fontWeight: 'bold',
-    lineHeight: '20px',
-    padding: '2px',
-    verticalAlign: 'top',
-  },
-  dd: {
-    padding: '2px 2px 2px 24px',
-    verticalAlign: 'top',
-  },
-  icon: {
-    display: 'inline-block',
-    height: '18px',
-    marginRight: '4px',
-    width: '18px',
-  },
-  listRow: {
-    display: 'table-row',
-    boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
-  },
-});
-
 const ICON_CLASS = 'jp-VmStatusIcon';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function DetailsDialogBody(props: DetailsDialogProps) {
-  const { details } = props;
-  return (
-    <dl>
-      {MAPPED_ATTRIBUTES.map(am => (
-        <div className={STYLES.listRow} key={am.label}>
-          <dt className={STYLES.dt}>{am.label}</dt>
-          <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
 
 /** Instance details display widget */
 export class VmDetails extends React.Component<{}, State> {
