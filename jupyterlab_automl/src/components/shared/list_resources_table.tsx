@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
