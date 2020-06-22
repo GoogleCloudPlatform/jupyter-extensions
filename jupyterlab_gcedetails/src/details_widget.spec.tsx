@@ -20,7 +20,8 @@ import { ServerConnection } from '@jupyterlab/services';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { STYLES, VmDetails } from './details_widget';
+import { VmDetails } from './details_widget';
+import { STYLES } from './data';
 import { asFetchResponse, DETAILS_RESPONSE } from './test_helpers';
 
 describe('VmDetails', () => {
