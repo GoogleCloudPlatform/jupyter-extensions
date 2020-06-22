@@ -20,7 +20,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
 import { GcpService, RunNotebookRequest } from './gcp';
 import { TEST_PROJECT } from '../test_helpers';
-import { asApiResponse } from 'gcp-jupyterlab-shared';
+import { asApiResponse } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from './project_state';
 import { Contents } from '@jupyterlab/services';
 import { INotebookModel, Notebook } from '@jupyterlab/notebook';

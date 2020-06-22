@@ -17,7 +17,7 @@ from notebook.utils import url_path_join
 # Needs to be set before handlers since they import VERSION
 VERSION = '1.0.0'
 
-from .handlers import MetadataHandler, ProxyHandler
+from .handlers import MetadataHandler, ProxyHandler, ProjectHandler, RuntimeEnvHandler
 
 __version__ = VERSION
 
@@ -39,5 +39,7 @@ def load_jupyter_server_extension(nb_server_app):
   gcp_v1_endpoint = url_path_join(app.settings['base_url'], 'gcp', 'v1')
   app.add_handlers(host_pattern, [
       (url_path_join(gcp_v1_endpoint, 'metadata'), MetadataHandler),
+      (url_path_join(gcp_v1_endpoint, 'project'), ProjectHandler),
       (url_path_join(gcp_v1_endpoint, 'proxy', '(.+)'), ProxyHandler),
-  ])
+      (url_path_join(gcp_v1_endpoint, 'runtime'), RuntimeEnvHandler),
+      ])

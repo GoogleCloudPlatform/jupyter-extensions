@@ -19,7 +19,7 @@ import {
   FieldError,
   LearnMoreLink,
   TextInput,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { OnScheduleChange } from './schedule_builder';

@@ -26,7 +26,7 @@ import {
   SubmitButton,
   TextInput,
   ToggleSwitch,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { GcpService, RunNotebookRequest } from '../service/gcp';
