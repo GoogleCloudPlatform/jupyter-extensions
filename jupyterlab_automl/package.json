@@ -1,0 +1,100 @@
+{
+  "name": "jupyterlab_automl",
+  "version": "0.0.1",
+  "description": "AutoML extension for JupyterLab",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "license": "Apache",
+  "author": "GCP AI Platform Notebooks Frontend Team",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/*.css",
+    "style/images/*.svg"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GoogleCloudPlatform/jupyter-extensions"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.prod.json",
+    "build-python": "npm pack && python setup.py sdist bdist_wheel",
+    "clean": "rimraf build dist lib *tsbuildinfo *tgz",
+    "e2e-test": "jest -c jest-puppeteer.config.js",
+    "install-extension": "../scripts/dev-install.sh",
+    "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
+    "lint": "npm run lint-warnings -- --quiet",
+    "pretest": "npm run lint",
+    "prepack": "npm run clean && npm run build",
+    "test": "jest --coverage",
+    "test-watch": "jest --watch",
+    "watch": "tsc -b -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^1.0.2",
+    "@jupyterlab/apputils": "^1.0.2",
+    "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/docregistry": "^1.0.2",
+    "@jupyterlab/filebrowser": "^1.0.3",
+    "@jupyterlab/launcher": "^1.0.3",
+    "@jupyterlab/mainmenu": "^1.0.2",
+    "@jupyterlab/notebook": "^1.0.2",
+    "@lumino/signaling": "^1.4.0",
+    "@lumino/widgets": "^1.13.0",
+    "@material-ui/core": "^4.10.1",
+    "@material-ui/icons": "^4.9.1",
+    "@types/base64-js": "^1.2.5",
+    "@types/react": "^16.9.35",
+    "csstips": "^1.2.0",
+    "gcp-jupyterlab-shared": "^1.0.0",
+    "material-table": "^1.61.0",
+    "react-portal": "^4.2.1",
+    "recharts": "^1.8.5",
+    "styled-components": "^5.1.1",
+    "typestyle": "^2.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@jupyterlab/testutils": "^1.2.2",
+    "@types/enzyme": "^3.10.5",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/fs-extra": "^8.1.0",
+    "@types/jest": "^24.9.1",
+    "@types/react": "~16.8.18",
+    "@types/react-dom": "^16.8.4",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "enzyme-to-json": "^3.4.4",
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.3.0",
+    "typescript": "^3.8.3"
+  },
+  "peerDependencies": {
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema",
+    "discovery": {
+      "server": {
+        "base": {
+          "name": "jupyterlab_automl",
+          "managers": [
+            "pip"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.jp-AutoMLIcon {
+  background-image: url('./images/storage_24px.svg');
+  background-size: contain;
+}
+
+.jp-AutoMLIcon-tables {
+  background-image: url('./images/table_chart-24px.svg');
+  background-size: contain;
+}
+
+.jp-AutoMLIcon-image_classification {
+  background-image: url('./images/image-24px.svg');
+  background-size: contain;
+}
+
+.jp-AutoMLIcon-other {
+  background-image: url('./images/storage_24px.svg');
+  background-size: contain;
+}
