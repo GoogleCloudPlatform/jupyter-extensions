@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-import { ApiResponse } from './transport';
+import * as Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 
-export const TEST_PROJECT = 'test-project';
-
-/** Returns a Promise that resolves a JSON response akin to the fetch API */
-export function asFetchResponse(result: any, ok = true): Promise<Response> {
-  return Promise.resolve({
-    ok,
-    json: () => Promise.resolve(result),
-  } as Response);
-}
-
-/** Wraps an object in the shape of a transport API response */
-export function asApiResponse<T>(body: T): ApiResponse<T> {
-  return { result: body };
-}
+Enzyme.configure({
+  adapter: new Adapter(),
+});
