@@ -121,6 +121,7 @@ class AutoMLService:
 
     def _get_dataset_metadata(self, dataset):
         dataset_type = parse_dataset_type(dataset)
+        metadata = ""
         if dataset_type == DatasetType.TBL:
             metadata = {
                 "primary_table_spec_id": dataset.tables_dataset_metadata.primary_table_spec_id,
