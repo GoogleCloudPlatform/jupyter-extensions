@@ -174,19 +174,19 @@ export class ListResourcesTable extends React.PureComponent<Props> {
           }
         }}
         components={{
-          Row:
-            this.props.rowContextMenu !== undefined
-              ? props => (
-                  <ContextMenu
-                    items={this.props.rowContextMenu.map(item => ({
-                      label: item.label,
-                      onClick: () => item.handler(props.data),
-                    }))}
-                  >
-                    <MTableBodyRow {...props}></MTableBodyRow>
-                  </ContextMenu>
-                )
-              : undefined,
+          Row: props =>
+            this.props.rowContextMenu ? (
+              <ContextMenu
+                items={this.props.rowContextMenu.map(item => ({
+                  label: item.label,
+                  onClick: () => item.handler(props.data),
+                }))}
+              >
+                <MTableBodyRow {...props}></MTableBodyRow>
+              </ContextMenu>
+            ) : (
+              <MTableBodyRow {...props}></MTableBodyRow>
+            ),
         }}
       />
     );
