@@ -17,26 +17,34 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
 
-//Send a request to the server
-export function httpGitRequest(url : string, body : Record<string, any>, method : string, fileName : string, currentPath : string) {
-    const setting = ServerConnection.makeSettings();
-    console.log(setting.baseUrl);
-    const fullUrl = URLExt.join(setting.baseUrl, url);
-    console.log(fullUrl);
-    let fullRequest : RequestInit = {
-        body: JSON.string(params),
-        method: method,
-    }
-    fullRequest = {
-        body: JSON.stringify(params),
-    };
 
-    ServerConnection.makeRequest(fullUrl, fullRequest, setting).then(
-        response => {
-          response.json().then(content => {
-            console.log("Returned by url request:");
-            console.log(content);
-        });
-      });
+/*
+Send a request to the server
+Params:
+    handler = name of the handler route as defined in the jupyterlab_comments module
+    method = GET or POST
+    fileName = file path relative to the root of the Jupyter Lab server
+    currentPath = path from home directory to root of Jupyter Lab server
+    body = for a POST request, should contain comments to upload
+
+*/
+export function httpGitRequest(handler : string, method : string, fileName : string, currentPath : string, body? : Record<string, string>) : Promise<Response> {
+    const setting = ServerConnection.makeSettings();
+    const fullUrl = URLExt.join(setting.baseUrl, handler).concat("?", "file_path=", fileName, "&current_path=", currentPath);
+
+    let fullRequest : RequestInit;
+
+    if (!body) {
+        fullRequest = {
+            method: method,
+        };
+    } else {
+        fullRequest = {
+            body: JSON.stringify(body),
+            method: method,
+        };
+    }
+
+    return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 
 }

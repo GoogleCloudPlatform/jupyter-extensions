@@ -16,8 +16,10 @@ from notebook.base.handlers import APIHandler
 from jupyterlab_comments.git_commands import Git
 import traitlets.config
 import json
-git = Git(config=traitlets.config.get_config()
-         )  #global instance of connection to git commands
+from pathlib import Path
+
+home = str(Path.home())
+git = Git(config=traitlets.config.get_config())  #global instance of connection to git commands
 
 
 class PreviousNamesHandler(APIHandler):
@@ -39,6 +41,15 @@ class DetachedCommentsHandler(APIHandler):
   def get(self):
     file_path = self.get_argument('file_path')
     current_path = self.get_argument('current_path')
+
+    if current_path.startswith("~"):
+        """
+        Replace the '~' with the full path to the user's home directory.
+        The modified path is needed as input to a subprocess call (setting
+        the current working directory)
+        TODO: deal with how other OS represent home directory
+        """
+        current_path = "".join([home, current_path[1:]])
     comments = git.get_comments_for_path(file_path, current_path)
     self.finish(json.dumps(comments))
 

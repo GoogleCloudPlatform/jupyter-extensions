@@ -35,6 +35,8 @@ import {
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
+import { PageConfig } from '@jupyterlab/coreutils';
+
 import { httpGitRequest } from './git'
 
 class File {
@@ -52,7 +54,6 @@ class CommentsWidget extends Widget {
     readonly fileName: HTMLHeadingElement;
     readonly file : File;
 
-
     constructor(file : File) {
         super();
         this.file = file;
@@ -67,9 +68,13 @@ class CommentsWidget extends Widget {
 
     async onUpdateRequest(msg: Message): Promise<void> {
         this.fileName.innerText = this.file.filePath;
-        httpGitRequest("testURL");
+        const serverRoot = PageConfig.getOption('serverRoot');
+        const filePath = this.file.filePath;
+        //Fetch detached comments
+        httpGitRequest("detachedComments", "GET", filePath, serverRoot).then(response => response.json().then(content => {
+                console.log("Returned by backend request: " + JSON.stringify(content));
+            }));
     }
-
 }
 
 function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
@@ -100,7 +105,6 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
             if (!widget.isAttached) {
                 app.shell.add(widget, 'right');
             }
-            widget.content.update();
             app.shell.activateById(widget.id);
         }
 
