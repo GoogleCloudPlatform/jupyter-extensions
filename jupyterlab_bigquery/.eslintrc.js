@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const esLintConfig = require('../.eslintrc');
 
-import { ApiResponse } from './transport';
-
-export const TEST_PROJECT = 'test-project';
-
-/** Returns a Promise that resolves a JSON response akin to the fetch API */
-export function asFetchResponse(result: any, ok = true): Promise<Response> {
-  return Promise.resolve({
-    ok,
-    json: () => Promise.resolve(result),
-  } as Response);
+esLintConfig.rules = {
+  ...esLintConfig.rules,
+  '@typescript-eslint/no-namespace': 'off',
+  '@typescript-eslint/interface-name-prefix': 'off',
+  '@typescript-eslint/no-use-before-define': 'off',
+  '@typescript-eslint/camelcase': 'off',
+  'no-case-declarations': 'off',
+  'no-inner-declarations': 'off',
 }
 
-/** Wraps an object in the shape of a transport API response */
-export function asApiResponse<T>(body: T): ApiResponse<T> {
-  return { result: body };
-}
+module.exports = esLintConfig;
