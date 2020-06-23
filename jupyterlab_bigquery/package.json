@@ -26,7 +26,7 @@
     "build-python": "npm pack && python setup.py sdist bdist_wheel",
     "clean": "rimraf build dist lib *tsbuildinfo *tgz",
     "e2e-test": "jest -c jest-puppeteer.config.js",
-    "install-extension": "../dev-install.sh",
+    "install-extension": "../scripts/dev-install.sh",
     "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",

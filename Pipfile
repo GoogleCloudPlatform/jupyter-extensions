@@ -8,6 +8,7 @@ python_version = "3.7"
 
 [packages]
 jupyterlab = "==1.2.15"
+google-cloud-bigquery = "==1.25.0"
 
 [dev-packages]
 coverage = "*"

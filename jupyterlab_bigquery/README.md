@@ -1,6 +1,6 @@
 # JupyterLab BigQuery Extension
 
-JupyterLab extension project
+`jupyterlab_bigquery` - Provides a mechanism to browse, view, interact with, and query BigQuery data from Notebooks.
 
 ## Development
 
