@@ -227,8 +227,18 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               ]}
               data={this.filterResources<Model>(this.state.models)}
               isLoading={this.state.isLoading}
-              height={this.props.height - 88}
+              height={this.props.height - 80}
               width={this.props.width}
+              rowContextMenu={[
+                {
+                  label: 'Delete',
+                  handler: rowData => {
+                    // TODO: Show a confirmation dialog before deleting
+                    ModelService.deleteModel(rowData.id);
+                    this.refresh();
+                  },
+                },
+              ]}
             />
           )}
         </Box>
