@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { ApiResponse } from "./transport";
+import { ApiResponse } from './transport';
 
 export const TEST_PROJECT = 'test-project';
 
 /** Returns a Promise that resolves a JSON response akin to the fetch API */
 export function asFetchResponse(result: any, ok = true): Promise<Response> {
-    return Promise.resolve({
-      ok,
-      json: () => Promise.resolve(result),
-    } as Response);
-  }
-  
-  /** Wraps an object in the shape of a transport API response */
-  export function asApiResponse<T>(body: T): ApiResponse<T> {
-    return { result: body };
-  }
+  return Promise.resolve({
+    ok,
+    json: () => Promise.resolve(result),
+  } as Response);
+}
+
+/** Wraps an object in the shape of a transport API response */
+export function asApiResponse<T>(body: T): ApiResponse<T> {
+  return { result: body };
+}
