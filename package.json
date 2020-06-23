@@ -10,7 +10,7 @@
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "link": "lerna run link --stream",
     "pack": "lerna exec npm pack --parallel",
-    "lint": "lerna run lint --parallel",
+    "lint": "npm run lint-warnings -- --quiet",
     "test": "lerna run test --parallel",
     "watch": "lerna run watch --parallel"
   },
