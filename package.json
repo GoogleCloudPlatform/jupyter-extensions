@@ -19,7 +19,7 @@
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
     "test-python": "../scripts/run_python_tests.sh coverage",
-    "test-watch": "jest --watch",
+    "test-watch": "jest --watch"
   },
   "repository": {
     "type": "git",
