@@ -27,6 +27,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
 
   async componentDidMount() {
     try {
+      // empty
     } catch (err) {
       console.warn('Unexpected error', err);
     }

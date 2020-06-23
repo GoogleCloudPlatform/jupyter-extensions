@@ -4,7 +4,9 @@ interface QueryEditorTabProps {
   isVisible: boolean;
 }
 
-interface QueryEditorTabState {}
+interface QueryEditorTabState {
+  // empty
+}
 
 class QueryEditorTab extends React.Component<
   QueryEditorTabProps,
