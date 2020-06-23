@@ -27,11 +27,11 @@ import {
 
 import {
   Widget
-} from '@lumino/widgets';
+} from '@phosphor/widgets';
 
 import {
   Message
-} from '@lumino/messaging';
+} from '@phosphor/messaging';
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
