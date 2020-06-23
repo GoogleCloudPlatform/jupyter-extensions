@@ -29,8 +29,11 @@ export interface Model {
 export class ListProjectsService {
   async listProjects(num_items: number): Promise<Projects> {
     return new Promise((resolve, reject) => {
-      let serverSettings = ServerConnection.makeSettings();
-      const requestUrl = URLExt.join(serverSettings.baseUrl, 'bigquery/v1/list');
+      const serverSettings = ServerConnection.makeSettings();
+      const requestUrl = URLExt.join(
+        serverSettings.baseUrl,
+        'bigquery/v1/list'
+      );
       const body = { num_items: num_items };
       const requestInit: RequestInit = {
         body: JSON.stringify(body),

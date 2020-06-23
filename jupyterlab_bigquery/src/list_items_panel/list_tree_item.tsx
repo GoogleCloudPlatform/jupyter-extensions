@@ -155,8 +155,8 @@ export class ListDatasetItem extends React.Component<DatasetProps, State> {
           subfields={dataset.tables}
           openDetails={() => {
             console.log('opening dataset details');
-            let service = new DatasetDetailsService();
-            let widgetType = DatasetDetailsWidget;
+            const service = new DatasetDetailsService();
+            const widgetType = DatasetDetailsWidget;
             context.manager.launchWidgetForId(
               dataset.id,
               widgetType,
@@ -192,8 +192,8 @@ export class ListTableItem extends React.Component<TableProps, State> {
           subfields={null}
           openDetails={() => {
             console.log('opening table details');
-            let service = new TableDetailsService();
-            let widgetType = TableDetailsWidget;
+            const service = new TableDetailsService();
+            const widgetType = TableDetailsWidget;
             context.manager.launchWidgetForId(
               table.id,
               widgetType,

@@ -21,7 +21,7 @@ export interface DatasetDetails {
 export class DatasetDetailsService {
   async listDatasetDetails(dataset_id: string): Promise<DatasetDetails> {
     return new Promise((resolve, reject) => {
-      let serverSettings = ServerConnection.makeSettings();
+      const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
         'bigquery/v1/datasetdetails'

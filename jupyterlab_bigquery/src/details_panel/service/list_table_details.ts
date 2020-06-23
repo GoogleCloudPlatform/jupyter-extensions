@@ -25,7 +25,7 @@ export interface TableDetails {
 export class TableDetailsService {
   async listTableDetails(table_id: string): Promise<TableDetails> {
     return new Promise((resolve, reject) => {
-      let serverSettings = ServerConnection.makeSettings();
+      const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
         'bigquery/v1/tabledetails'
