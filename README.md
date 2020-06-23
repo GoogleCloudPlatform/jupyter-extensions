@@ -2,7 +2,7 @@
 
 `jupyterlab_automl` - Provides a JupyterLab interface for using Google's structured data [Cloud AutoML](https://cloud.google.com/automl) services.
 
-End-user documentation can be found [here]https://cloud.google.com/automl-tables/docs/beginners-guide.
+End-user documentation can be found at https://cloud.google.com/automl-tables/docs/beginners-guide.
 
 ## Development
 
