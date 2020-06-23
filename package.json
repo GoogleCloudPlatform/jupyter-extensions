@@ -10,16 +10,8 @@
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "link": "lerna run link --stream",
     "pack": "lerna exec npm pack --parallel",
-    "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
-    "lint": "npm run lint-warnings -- --quiet",
     "test": "lerna run test --parallel",
-    "watch": "lerna run watch --parallel",
-    "build-python": "npm pack && python setup.py sdist bdist_wheel",
-    "install-extension": "../scripts/dev-install.sh",
-    "pretest": "npm run lint",
-    "prepack": "npm run clean && npm run build",
-    "test-python": "../scripts/run_python_tests.sh coverage",
-    "test-watch": "jest --watch"
+    "watch": "lerna run watch --parallel"
   },
   "repository": {
     "type": "git",
