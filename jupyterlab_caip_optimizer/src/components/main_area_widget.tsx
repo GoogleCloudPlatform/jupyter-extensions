@@ -8,6 +8,9 @@ const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
 });
 
+/**
+ * ViewManager acts as the extensions router for various views.
+ */
 export const ViewManager = ({ data }: { data: ViewType }) => {
   // TODO: add custom components
   if (data.view === 'dashboard') {
@@ -21,6 +24,10 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
 
 const WrappedViewManager = connect(mapStateToProps)(ViewManager);
 
+/**
+ * Provides redux store for ViewManager and sub components.
+ * Hooks into redux to maintain that view.isVisible is in sync with component creation/deletion.
+ */
 export class MainAreaWidget extends ReactWidget {
   constructor(private readonly reduxStore: typeof store) {
     super();
