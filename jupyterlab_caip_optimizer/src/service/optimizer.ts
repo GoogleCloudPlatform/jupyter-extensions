@@ -25,40 +25,17 @@ import {
     GET,
     POST,
   } from 'gcp-jupyterlab-shared';
+import { StateDB } from '@jupyterlab/coreutils';
+import { Study } from '../types';
 
 const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
-export interface StudyConfig {
-    // TODO: set interface for study config. below taken from Optimizer documentation
-    // metrics: [
-    //     {
-    //       object (MetricSpec)
-    //     }
-    //   ],
-    //   parameters: [
-    //     {
-    //       object (ParameterSpec)
-    //     }
-    //   ],
-    //   algorithm: enum (Algorithm),
-    //   automatedStoppingConfig: {
-    //     object (AutomatedStoppingConfig)
-    //   }
-}
 
-export interface Study {
-    // TODO: set interface for Study
-    // name: string,
-    // studyConfig: StudyConfig,
-    // state: enum (State),
-    // createTime: string,
-    // inactiveReason: string
-}
 
 /**
- * Class to interact with Vizier
+ * Class to interact with Optimizer
  */
-export class VizierService {
+export class OptimizerService {
     private readonly serverSettings = ServerConnection.defaultSettings;
     private readonly runtimeUrl = `${this.serverSettings.baseUrl}gcp/v1/runtime`;
 
