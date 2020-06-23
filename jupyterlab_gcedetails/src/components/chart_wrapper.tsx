@@ -7,15 +7,10 @@ type ChartProps = {
   dataKey: string;
   title: string;
   titleClass: string;
-  height: number;
-  width: number;
-  stroke: string;
-  fill: string;
-  hideYAxis: boolean;
-  yDomain: number[];
-  horizontalPoints: number[];
-  showHorizontalGrid: boolean;
-  showVerticalGrid: boolean;
+  areaChartProps: {};
+  areaProps: {};
+  cartesianGridProps: {};
+  yAxisProps: {};
 };
 
 export const AreaChartWrapper = ({
@@ -23,32 +18,18 @@ export const AreaChartWrapper = ({
   dataKey,
   title,
   titleClass,
-  height,
-  width,
-  stroke,
-  fill,
-  hideYAxis,
-  yDomain,
-  horizontalPoints,
-  showHorizontalGrid,
-  showVerticalGrid,
+  areaChartProps,
+  areaProps,
+  cartesianGridProps,
+  yAxisProps,
 }: ChartProps) => (
   <span>
     <h1 className={titleClass}>{title}</h1>
-    <AreaChart height={height} width={width} data={data}>
-      <Area
-        stroke={stroke}
-        fill={fill}
-        isAnimationActive={false}
-        dataKey={dataKey}
-      />
+    <AreaChart {...areaChartProps} data={data}>
+      <Area {...areaProps} dataKey={dataKey} />
       <Tooltip />
-      <CartesianGrid
-        horizontalPoints={horizontalPoints}
-        horizontal={showHorizontalGrid}
-        vertical={showVerticalGrid}
-      />
-      <YAxis hide={hideYAxis} domain={yDomain} />
+      <CartesianGrid {...cartesianGridProps} />
+      <YAxis {...yAxisProps} />
     </AreaChart>
   </span>
 );
