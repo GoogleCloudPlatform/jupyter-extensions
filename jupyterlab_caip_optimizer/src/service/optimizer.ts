@@ -26,9 +26,18 @@ import {
   POST,
 } from 'gcp-jupyterlab-shared';
 import { StateDB } from '@jupyterlab/coreutils';
-import { Study, Metadata_full, Metadata_required } from '../types';
+import { Study, MetadataFull, MetadataRequired } from '../types';
 
 const AI_PLATFORM = 'https://ml.googleapis.com/v1';
+
+function zoneToRegion(zone: string): string {
+  const divider = '-';
+  const region = zone
+    .split(divider)
+    .slice(0, 2)
+    .join(divider);
+  return region;
+}
 
 /**
  * Class to interact with Optimizer
@@ -46,52 +55,35 @@ export class OptimizerService {
     this._transportService = transportService;
   }
 
-  async getMetaData(): Promise<Metadata_required> {
+  async getMetaData(): Promise<MetadataRequired> {
     const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
-    const response = await this._transportService.submit<Metadata_full>({
+    const response = await this._transportService.submit<MetadataFull>({
       path: metadata_path,
       method: 'GET',
     });
-    const metadata_response: Metadata_required = {
+    const metadata_response: MetadataRequired = {
       projectId: response.result.project,
       region: zoneToRegion(response.result.zone),
     };
     return metadata_response;
   }
 
-  async createStudy(study: Study, metadata: Metadata_required): Promise<Study> {
+  async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
     const body = JSON.stringify(study);
     const response = await this._transportService.submit<Study>({
-      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
       method: 'POST',
       body,
     });
     return response.result;
   }
 
-  async listStudy(metadata: Metadata_required): Promise<Study[]> {
+  async listStudy(metadata: MetadataRequired): Promise<Study[]> {
     const response = await this._transportService.submit<Study[]>({
       path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
       method: 'GET',
     });
     return response.result;
   }
-
-  async defaultAPICall(requestUrl: string): Promise<string> {
-    try {
-    } catch (err) {
-      console.warn('Unable to process API call');
-      return '';
-    }
-  }
-}
-
-function zoneToRegion(zone: string): string {
-  const divider = '-';
-  const region = zone
-    .split(divider)
-    .slice(0, 2)
-    .join(divider);
-  return region;
 }

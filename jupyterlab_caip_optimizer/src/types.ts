@@ -114,8 +114,7 @@ export interface StudyConfig {
 }
 
 export interface Study {
-  // TODO: set interface for Study
-  name?: string;
+  name: string;
   studyConfig: StudyConfig;
   state?: State; // TODO: check if return enum would match State enum declared here?
   createTime?: string;
@@ -173,7 +172,7 @@ export interface Trial {
   infeasibleReason?: string;
 }
 
-export interface Metadata_full {
+export interface MetadataFull {
   project: string;
   numericProjectId: string;
   framework: string;
@@ -185,7 +184,7 @@ export interface Metadata_full {
   zone: string;
 }
 
-export interface Metadata_required {
+export interface MetadataRequired {
   projectId: string;
   region: string;
 }
