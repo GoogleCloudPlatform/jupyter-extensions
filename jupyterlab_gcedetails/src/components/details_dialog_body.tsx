@@ -16,7 +16,6 @@
 
 import * as React from 'react';
 import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
-import { ResourceUtilizationCharts } from './resource_utilization_charts';
 
 interface Props {
   details: Details;
@@ -33,7 +32,6 @@ export function DetailsDialogBody(props: Props) {
           <dd className={STYLES.dd}>{am.mapper(details)}</dd>
         </div>
       ))}
-      <ResourceUtilizationCharts />
     </dl>
   );
 }
