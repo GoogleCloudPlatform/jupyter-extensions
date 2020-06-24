@@ -27,10 +27,6 @@ import {
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
-// import { PageConfig } from '@jupyterlab/coreutils';
-
-// import { httpGitRequest } from './git'
-
 import { CommentsWidget } from './components/comments_widget'
 
 import { File } from './service/file'
