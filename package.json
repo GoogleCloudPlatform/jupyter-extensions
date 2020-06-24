@@ -33,5 +33,11 @@
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "typescript": "^3.8.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run lint && npm test"
+    }
   }
 }
