@@ -1,7 +1,7 @@
-# Common server extension and packages for JupyterLab extensions
+# Common frontend components, server extension, and packages for GCP JupyterLab extensions
 
-Common package for shared Python server modules to be used across JupyterLab
-extensions.
+Common package for shared frontend components and Python server modules 
+to be used across JupyterLab extensions.
 
 ## Features
 

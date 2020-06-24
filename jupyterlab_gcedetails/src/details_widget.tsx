@@ -18,11 +18,11 @@ import { ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { 
-  Details, 
-  STYLES, 
-  MAPPED_ATTRIBUTES, 
-  REFRESHABLE_MAPPED_ATTRIBUTES, 
+import {
+  Details,
+  STYLES,
+  MAPPED_ATTRIBUTES,
+  REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data';
 import { DetailsDialogBody } from './components/details_dialog_body';
 

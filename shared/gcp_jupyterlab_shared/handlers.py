@@ -30,7 +30,7 @@ METADATA_SERVER = os.environ.get(
     'http://metadata.google.internal') + '/computeMetadata/v1/?recursive=true'
 METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 SCOPE = ('https://www.googleapis.com/auth/cloud-platform',)
-
+FRAMEWORK_ENV_VAR = 'ENV_VERSION_FILE_PATH'
 
 async def get_metadata():
   """Retrieves JSON-formatted metadata from the local metadata server."""
@@ -127,6 +127,16 @@ class MetadataHandler(BaseHandler):
       app_log.exception(msg)
       self.set_status(500, msg)
 
+class ProjectHandler(APIHandler):
+  """Returns the Project ID from the default GCP credential."""
+
+  def get(self):
+    try:
+      self.finish({'project': AuthProvider.get().project})
+    except GoogleAuthError:
+      msg = 'Unable to determine Google Cloud Project'
+      app_log.exception(msg)
+      self.set_status(403, msg)
 
 class ProxyHandler(BaseHandler):
   """Attaches authentication credential and forwards GCP requests."""
@@ -189,3 +199,20 @@ class ProxyHandler(BaseHandler):
   async def put(self, base64_url):
     """Proxies the HTTP PUT request."""
     await self._make_request(base64_url, 'PUT', self.request.body)
+
+class RuntimeEnvHandler(APIHandler):
+  """Handler to obtain runtime environment"""
+
+  def get(self):
+    version = 'unknown'
+    try:
+      env_version = os.environ[FRAMEWORK_ENV_VAR]
+      with open(env_version) as f:
+        version = f.read().rstrip()
+    except KeyError:
+      app_log.warning(
+          'Environment variable {} is not set'.format(FRAMEWORK_ENV_VAR))
+    except OSError:
+      app_log.warning('Unable to read framework version from {}'.format(
+          os.environ[FRAMEWORK_ENV_VAR]))
+    self.finish(version)

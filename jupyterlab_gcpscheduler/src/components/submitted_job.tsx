@@ -16,7 +16,7 @@
 
 import { withStyles } from '@material-ui/core';
 import { CheckCircle } from '@material-ui/icons';
-import { COLORS, css, LearnMoreLink } from 'gcp-jupyterlab-shared';
+import { COLORS, css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 

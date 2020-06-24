@@ -14,11 +14,11 @@
 # limitations under the License.
 
 PYTHON_PACKAGES=(
+  shared
   jupyter-gcs-contents-manager
   jupyterlab_caip_optimizer
   jupyterlab_comments
   jupyterlab_gcedetails
   jupyterlab_gcpscheduler
   jupyterlab_gcsfilebrowser
-  shared/server
 )

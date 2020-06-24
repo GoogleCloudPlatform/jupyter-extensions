@@ -35,7 +35,7 @@ data_files = [
 ]
 
 setup(
-    name="gcp-jupyterlab-shared",
+    name="gcp_jupyterlab_shared",
     version=version,
     description="Shared libraries for JupyterLab extensions",
     long_description=long_description,

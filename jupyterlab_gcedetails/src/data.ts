@@ -18,10 +18,10 @@ import * as csstips from 'csstips';
 import { stylesheet } from 'typestyle';
 
 interface MachineType {
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 }
-  
+
 interface Instance {
   attributes: {
     framework: string;
@@ -30,22 +30,22 @@ interface Instance {
   };
   cpuPlatform: string;
   id: number;
-	image: string;
-	machineType: MachineType;
+  image: string;
+  machineType: MachineType;
   name: string;
   zone: string;
 }
-  
+
 interface Project {
   numericProjectId: number;
   projectId: string;
 }
-  
+
 interface Utilization {
   cpu: number;
   memory: number;
 }
-  
+
 interface Gpu {
   name: string;
   driver_version: string;
@@ -54,14 +54,14 @@ interface Gpu {
   memory: number;
   temperature: number;
 }
-  
+
 export interface Details {
   instance: Instance;
   project: Project;
   utilization: Utilization;
   gpu: Gpu;
 }
-  
+
 interface AttributeMapper {
   label: string;
   mapper: (details: Details) => string;

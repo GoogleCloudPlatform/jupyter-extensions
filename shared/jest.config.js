@@ -22,7 +22,7 @@ module.exports = {
     '\\.(gif|ttf|eot|svg)$': '@jupyterlab/testutils/lib/jest-file-mock.js',
   },
   setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
-  setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>src/setupTests.ts'],
   collectCoverageFrom: ['**/*{ts,tsx}'],
   testPathIgnorePatterns: ['lib/'],
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
