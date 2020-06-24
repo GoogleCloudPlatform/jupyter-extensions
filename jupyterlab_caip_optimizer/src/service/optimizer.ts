@@ -26,7 +26,7 @@ import {
   POST,
 } from 'gcp-jupyterlab-shared';
 import { StateDB } from '@jupyterlab/coreutils';
-import { Study } from '../types';
+import { Study, Metadata_full, Metadata_required } from '../types';
 
 const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
@@ -35,7 +35,6 @@ const AI_PLATFORM = 'https://ml.googleapis.com/v1';
  */
 export class OptimizerService {
   private readonly serverSettings = ServerConnection.defaultSettings;
-  private readonly runtimeUrl = `${this.serverSettings.baseUrl}gcp/v1/runtime`;
 
   constructor(
     private _transportService: TransportService,
@@ -47,34 +46,52 @@ export class OptimizerService {
     this._transportService = transportService;
   }
 
-  async createStudy(study: Study): Promise<Study> {
+  async getMetaData(): Promise<Metadata_required> {
+    const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
+
+    const response = await this._transportService.submit<Metadata_full>({
+      path: metadata_path,
+      method: 'GET',
+    });
+    const metadata_response: Metadata_required = {
+      projectId: response.result.project,
+      region: zoneToRegion(response.result.zone),
+    };
+    return metadata_response;
+  }
+
+  async createStudy(study: Study, metadata: Metadata_required): Promise<Study> {
     const body = JSON.stringify(study);
-    try {
-      const response = await this._transportService.submit<Study>({
-        path: `${this.serverSettings.baseUrl}gcp/v1/projects/${this.projectID}/locations/${this.location}/studies`, // TODO: check path. https://ml.googleapis.com/v1/{parent=projects/*/locations/*}/studies
-        method: 'POST',
-        body,
-      });
-      return typeof response.result === 'string'
-        ? response.result
-        : JSON.stringify(response.result);
-    } catch (err) {
-      console.error('Unable to create study');
-      handleApiError(err);
-    }
+    const response = await this._transportService.submit<Study>({
+      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+      method: 'POST',
+      body,
+    });
+    return response.result;
+  }
+
+  async listStudy(metadata: Metadata_required): Promise<Study[]> {
+    const response = await this._transportService.submit<Study[]>({
+      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+      method: 'GET',
+    });
+    return response.result;
   }
 
   async defaultAPICall(requestUrl: string): Promise<string> {
     try {
-      const response = await ServerConnection.makeRequest(
-        this.runtimeUrl.concat(requestUrl),
-        { method: GET },
-        this.serverSettings
-      );
-      return await response.text();
     } catch (err) {
       console.warn('Unable to process API call');
       return '';
     }
   }
+}
+
+function zoneToRegion(zone: string): string {
+  const divider = '-';
+  const region = zone
+    .split(divider)
+    .slice(0, 2)
+    .join(divider);
+  return region;
 }

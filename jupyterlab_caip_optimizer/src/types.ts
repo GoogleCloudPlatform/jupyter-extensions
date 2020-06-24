@@ -172,3 +172,20 @@ export interface Trial {
   trialInfeasible?: boolean;
   infeasibleReason?: string;
 }
+
+export interface Metadata_full {
+  project: string;
+  numericProjectId: string;
+  framework: string;
+  id: string;
+  name: string;
+  frameworkTitle: string;
+  dlvmImageVersion: string;
+  machineType: string;
+  zone: string;
+}
+
+export interface Metadata_required {
+  projectId: string;
+  region: string;
+}
