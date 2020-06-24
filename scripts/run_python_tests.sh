@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Run the lint script first
+$(dirname $0)/lint_python.sh
 
 if [[ $1 = 'coverage' ]] ; then
   coverage run --source . -m unittest discover -p '*_test.py'

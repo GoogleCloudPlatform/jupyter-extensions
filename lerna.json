@@ -1,11 +1,12 @@
 {
   "packages": [
-    "shared/client/",
+    "shared/",
     "jupyterlab_caip_optimizer/",
     "jupyterlab_comments/",
     "jupyterlab_gcedetails/",
     "jupyterlab_gcpscheduler/",
-    "jupyterlab_gcsfilebrowser/"
+    "jupyterlab_gcsfilebrowser/",
+    "jupyterlab_automl/"
   ],
   "version": "independent"
 }

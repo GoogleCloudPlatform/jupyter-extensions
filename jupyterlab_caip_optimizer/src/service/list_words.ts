@@ -11,14 +11,15 @@ export interface Words {
 }
 
 export class ListWordsService {
-  async listWords(num_items: number): Promise<Words> {
+  async listWords(numItems: number): Promise<Words> {
     return new Promise((resolve, reject) => {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
         'optimizer/v1/list'
       );
-      const body = { num_items: num_items };
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const body = { num_items: numItems };
       const requestInit: RequestInit = {
         body: JSON.stringify(body),
         method: 'POST',

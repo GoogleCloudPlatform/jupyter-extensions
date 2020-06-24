@@ -93,11 +93,11 @@ export class ListWordItem extends React.Component<Props, {}> {
   }
 
   private getIconForWord(word: Word): JSX.Element {
-    const regex_green = /^[A-K]/g;
-    const regex_red = /^[S-Z]/g;
-    if (word.word.match(regex_green)) {
+    const regexGreen = /^[A-K]/g;
+    const regexRed = /^[S-Z]/g;
+    if (word.word.match(regexGreen)) {
       return <GreenCheck />;
-    } else if (word.word.match(regex_red)) {
+    } else if (word.word.match(regexRed)) {
       return <RedClose />;
     }
     return <GrayPending />;

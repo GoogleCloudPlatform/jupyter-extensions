@@ -22,7 +22,7 @@ import {
   ApiRequest,
   asApiResponse,
   asFetchResponse,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import { getProjectState, TEST_PROJECT } from '../test_helpers';
 import { ProjectStateService } from './project_state';
 

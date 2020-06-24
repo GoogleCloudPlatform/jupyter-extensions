@@ -349,10 +349,9 @@ class GCSContentsManager(ContentsManager):
         first_slash = suffix.find('/')
         if first_slash < 0:
           child_path = posixpath.join(normalized_path, suffix)
-          add_child(
-              suffix,
-              self._blob_model(child_path, b, content=False),
-              override_existing=True)
+          add_child(suffix,
+                    self._blob_model(child_path, b, content=False),
+                    override_existing=True)
         else:
           subdir = suffix[0:first_slash]
           if subdir:

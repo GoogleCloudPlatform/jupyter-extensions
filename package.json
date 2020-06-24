@@ -10,6 +10,7 @@
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "link": "lerna run link --stream",
     "pack": "lerna exec npm pack --parallel",
+    "lint": "lerna run lint --parallel",
     "test": "lerna run test --parallel",
     "watch": "lerna run watch --parallel"
   },
@@ -29,6 +30,7 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.5",
     "lerna": "^3.22.0",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",

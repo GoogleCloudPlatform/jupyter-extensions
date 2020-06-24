@@ -54,13 +54,6 @@ export class ListWordsPanel extends React.Component<Props, State> {
     };
   }
 
-  async componentDidMount() {
-    try {
-    } catch (err) {
-      console.warn('Unexpected error', err);
-    }
-  }
-
   componentDidUpdate(prevProps: Props) {
     const isFirstLoad =
       !(this.state.hasLoaded || prevProps.isVisible) && this.props.isVisible;

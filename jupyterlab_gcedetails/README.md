@@ -13,7 +13,8 @@ In order to access the metadata server running on GCE VM, you will need to
 issue the following command to set up port forwarding. This will allow
 requests made locally to port 8889 to be forwarded to a real GCE metadata
 server. Do this in another terminal window since it will create an interactive
-SSH session.
+SSH session. Replace the instance variable in the URL below with the name of an instance 
+that has the configurations you want. It can be found under the notebooks tab in GCP AI Platform. 
 
 `gcloud compute ssh jupyter@${INSTANCE} --ssh-flag "-L 8889:metadata.google.internal:80"`
 
