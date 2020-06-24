@@ -1,13 +1,10 @@
-import * as React from 'react';
 import { Dialog } from '@material-ui/core';
-import {
-  BASE_FONT,
-  COLORS,
-  SubmitButton,
-} from 'gcp-jupyterlab-shared';
-import { ActionBar } from './action_bar'
 import * as csstips from 'csstips';
+import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { BASE_FONT, COLORS } from '../styles';
+import { ActionBar } from './action_bar';
+import { SubmitButton } from './submit_button';
 
 interface Props {
   header?: string;
@@ -43,26 +40,22 @@ const dialogStyle = stylesheet({
 export function DialogComponent(props: Props) {
   return (
     <Dialog open={props.open}>
-      {props.header && 
-        <header className={dialogStyle.header}>
-          {props.header}
-        </header>
-      }
-      {props.children && 
-        <main className={dialogStyle.main}>
-          {props.children}
-        </main>
-      }
+      {props.header && (
+        <header className={dialogStyle.header}>{props.header}</header>
+      )}
+      {props.children && (
+        <main className={dialogStyle.main}>{props.children}</main>
+      )}
       <ActionBar
         onClick={props.onCancel}
-        closeLabel={props.cancelLabel || "Cancel"}
+        closeLabel={props.cancelLabel || 'Cancel'}
       >
         <SubmitButton
           actionPending={false}
           onClick={props.onSubmit}
-          text={props.submitLabel || "Submit"}
+          text={props.submitLabel || 'Submit'}
         />
       </ActionBar>
-    </Dialog >
+    </Dialog>
   );
 }

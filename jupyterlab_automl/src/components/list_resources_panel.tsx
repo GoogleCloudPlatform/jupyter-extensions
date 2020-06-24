@@ -5,8 +5,12 @@ import * as React from 'react';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
 import { Model, ModelService } from '../service/model';
 import { Context } from './automl_widget';
-import { ColumnType, ListResourcesTable } from './shared/list_resources_table';
-import { TextInput, SelectInput } from 'gcp-jupyterlab-shared';
+import {
+  TextInput,
+  SelectInput,
+  ColumnType,
+  ListResourcesTable,
+} from 'gcp-jupyterlab-shared';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
@@ -46,7 +50,7 @@ const ResourceSelect = styled(Box)`
   }
 `;
 
-const styles: { [key: string]: React.CSSProperties } = {
+const styles = {
   toolbar: {
     paddingLeft: 16,
     paddingRight: 16,
@@ -108,7 +112,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     return (
       <>
         <Box height={1} width={1} bgcolor={'white'} borderRadius={0}>
-          <Toolbar variant="dense" style={{ ...styles.toolbar }}>
+          <Toolbar variant="dense" style={styles.toolbar}>
             <ResourceSelect>
               <SelectInput
                 value={this.state.resourceType}

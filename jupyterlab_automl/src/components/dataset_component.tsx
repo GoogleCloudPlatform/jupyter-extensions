@@ -1,21 +1,22 @@
 import { Box, Grid, LinearProgress } from '@material-ui/core';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import * as csstips from 'csstips';
-import * as React from 'react';
-import { stylesheet } from 'typestyle';
+import { ColumnType } from 'gcp-jupyterlab-shared';
 import MaterialTable from 'material-table';
-import { DatasetService, TableSpec, Dataset } from '../service/dataset';
-import { style, ColumnType } from './shared/list_resources_table';
+import * as React from 'react';
 import {
-  BarChart,
   Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
+import { stylesheet } from 'typestyle';
+import { Dataset, DatasetService, TableSpec } from '../service/dataset';
 
 interface DetailPanelProps {
   dataType: string;
@@ -61,6 +62,30 @@ const localStyles = stylesheet({
     fontSize: 'var(--jp-ui-font-size1)',
   },
 });
+
+const style: CSSProperties = {
+  table: {
+    borderRadius: 0,
+    boxShadow: 'none',
+    borderTop: '1px solid var(--jp-border-color2)',
+  },
+  tableCell: {
+    fontSize: 'var(--jp-ui-font-size1)',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    padding: '5px 8px',
+  },
+  headerCell: {
+    fontSize: 'var(--jp-ui-font-size1)',
+    whiteSpace: 'nowrap',
+    padding: '0px 8px',
+  },
+  tableRow: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+};
 
 const columns = [
   {

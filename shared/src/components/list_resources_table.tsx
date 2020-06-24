@@ -100,7 +100,7 @@ interface Props {
   rowContextMenu?: ContextMenuItem[];
 }
 
-export const style: CSSProperties = {
+const style: CSSProperties = {
   table: {
     borderRadius: 0,
     boxShadow: 'none',
