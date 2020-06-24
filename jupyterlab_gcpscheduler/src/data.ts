@@ -17,10 +17,6 @@
 /** Helpers for UI selections */
 const GCR_PREFIX = 'gcr.io/deeplearning-platform-release';
 
-/** Constant for GET requests */
-export const GET = 'GET';
-/** Constant for POST requests */
-export const POST = 'POST';
 /** Custom ScaleTier allows selection of AI Platform Machine type */
 export const CUSTOM = 'CUSTOM';
 /** Indicates a single Notebook run */

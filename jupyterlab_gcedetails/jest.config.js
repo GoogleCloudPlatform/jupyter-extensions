@@ -24,7 +24,7 @@ module.exports = {
   setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
   setupFilesAfterEnv: ['<rootDir>src/setupTests.ts'],
   collectCoverageFrom: ['src/**/*{ts,tsx}'],
-  testPathIgnorePatterns: ['src/e2e/'],
+  testPathIgnorePatterns: ['lib/', 'src/e2e/'],
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {

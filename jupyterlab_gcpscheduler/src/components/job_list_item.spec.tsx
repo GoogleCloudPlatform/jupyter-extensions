@@ -20,7 +20,7 @@ import * as React from 'react';
 import { JobListItem } from './job_list_item';
 import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
 import { GcpService } from '../service/gcp';
-import { IconButtonMenu } from 'gcp-jupyterlab-shared';
+import { IconButtonMenu } from 'gcp_jupyterlab_shared';
 
 const toLocaleString = Date.prototype.toLocaleString;
 

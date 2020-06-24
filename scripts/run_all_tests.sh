@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +15,25 @@
 
 # This script is meant to be run from the repository root and will not work
 # properly if not.
+set -e
 
+SCRIPTS_DIR=$(realpath $(dirname $0))
+RUN_PYTHON_TESTS=$SCRIPTS_DIR/run_python_tests.sh
+
+. $SCRIPTS_DIR/common.sh
+echo ${PYTHON_PACKAGES[@]}
+
+echo "============= Running TypeScript tests ============="
 npm test
-
-RUN_PYTHON_TESTS=$(pwd)/scripts/run_python_tests.sh
-PYTHON_PACKAGES=(
-  jupyter-gcs-contents-manager
-  jupyterlab_gcedetails
-  jupyterlab_gcpscheduler
-  jupyterlab_gcsfilebrowser
-  shared/server
-)
+echo "============= Finished TypeScript tests ============="
+echo
 
 for p in ${PYTHON_PACKAGES[@]} ; do
-  echo "============= Running tests in $p ============="
+  echo "============= Running Python tests in $p ============="
   pushd $p
   $RUN_PYTHON_TESTS coverage
   popd
-  echo "============= Finished tests in $p ============="
+  echo "============= Finished Python tests in $p ============="
   echo
 done
 

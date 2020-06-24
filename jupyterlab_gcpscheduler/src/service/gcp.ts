@@ -20,12 +20,15 @@ import { ServerConnection } from '@jupyterlab/services';
 import {
   CLOUD_FUNCTION_NAME,
   CLOUD_FUNCTION_REGION,
-  GET,
-  POST,
   IMPORT_DIRECTORY,
 } from '../data';
 import { ProjectStateService } from './project_state';
-import { handleApiError, TransportService } from './transport';
+import {
+  handleApiError,
+  TransportService,
+  GET,
+  POST,
+} from 'gcp_jupyterlab_shared';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Notebook } from '@jupyterlab/notebook';
 
