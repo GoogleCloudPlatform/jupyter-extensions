@@ -19,7 +19,7 @@ from traitlets import Int, Float, Unicode, Bool
 
 
 class Git(Configurable):
-  """
+    """
     Remote repository should be configured by the
     user in their Jupyter config file. Default remote is 'origin'
     """
@@ -42,8 +42,10 @@ class Git(Configurable):
   def appraise_pull(self, current_path):
     self.run(current_path, 'appraise', 'pull', self.remote)
 
-  # Return true if the current directory is a git repository
   def inside_git_repo(self, current_path):
+    """
+    Return true if the current directory is a git repository.
+    """
     try:
       return_code = subprocess.check_call(['git', 'rev-parse'],
                                           cwd=current_path)
@@ -53,13 +55,14 @@ class Git(Configurable):
       print("Error invoking git command")
       print(e.output)
 
-  """
-    Returns a JSON list where each object corresponds to a commment
-    on the given file_path
+
+  def get_comments_for_path(self, file_path, current_path):
+    """
+    Returns a JSON list of commments for the given file_path.
+
     Keys of objects returned: timestamp, author, location, description
     """
 
-  def get_comments_for_path(self, file_path, current_path):
     if self.inside_git_repo(current_path):
       #self.appraise_pull(current_path) #pull new comments from remote repo
       comments_string = self.run(current_path, 'appraise', 'show', '-d',
@@ -71,16 +74,10 @@ class Git(Configurable):
           comments_list.append(comment_obj['comment'])
       return comments_list
     else:
-      #TODO: notify user that they are not connected to a Git repo
+      #TODO (mkalil): notify user that they are not connected to a Git repo
       pass
 
   def get_code_review_comments(self, file_path, current_path):
-    """
-        1. Use 'git appraise pull' to fetch new comments attached to
-        the current code review
-        2. Use 'git appraise show' to get the comments JSON object
-        3. Parse and return comments
-        """
     pass
 
   def add_comment(self, file_path, current_path):

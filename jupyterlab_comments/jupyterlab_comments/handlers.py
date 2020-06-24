@@ -47,7 +47,7 @@ class DetachedCommentsHandler(APIHandler):
         Replace the '~' with the full path to the user's home directory.
         The modified path is needed as input to a subprocess call (setting
         the current working directory)
-        TODO: deal with how other OS represent home directory
+        TODO (mkalil): deal with how other OS represent home directory
         """
         current_path = "".join([home, current_path[1:]])
     comments = git.get_comments_for_path(file_path, current_path)
