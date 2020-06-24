@@ -25,57 +25,16 @@ import {
     IDocumentManager,
 } from '@jupyterlab/docmanager';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+// import { PageConfig } from '@jupyterlab/coreutils';
 
-import { httpGitRequest } from './git'
+// import { httpGitRequest } from './git'
 
-class File {
-    readonly filePath:string;
-    readonly comments: any[];
-    constructor(filePath : string) {
-        this.filePath = filePath;
-    }
-}
+import { CommentsWidget } from './components/comments_widget'
 
+import { File } from './service/file'
 
-class CommentsWidget extends Widget {
-
-    readonly comments: HTMLUListElement;
-    readonly fileName: HTMLHeadingElement;
-    readonly file : File;
-
-    constructor(file : File) {
-        super();
-        this.file = file;
-        this.addClass('comments-widget');
-        this.fileName = document.createElement('h1');
-        this.node.appendChild(this.fileName);
-        this.comments = document.createElement('ul');
-        this.node.appendChild(this.comments);
-    }
-
-
-
-    async onUpdateRequest(msg: Message): Promise<void> {
-        this.fileName.innerText = this.file.filePath;
-        const serverRoot = PageConfig.getOption('serverRoot');
-        const filePath = this.file.filePath;
-        //Fetch detached comments
-        httpGitRequest("detachedComments", "GET", filePath, serverRoot).then(response => response.json().then(content => {
-                console.log("Returned by backend request: " + JSON.stringify(content));
-            }));
-    }
-}
 
 function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
   console.log('JupyterLab extension jupyterlab_comments is activated!');
@@ -97,7 +56,7 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
         } else {
             file = new File(currentFile.path);
             content = new CommentsWidget(file);
-            widget = new MainAreaWidget({content});
+            widget = new MainAreaWidget<CommentsWidget>({content});
             widget.id = 'jupyterlab_comments';
             widget.title.label = 'Notebook comments in Git';
             widget.title.closable = true;
