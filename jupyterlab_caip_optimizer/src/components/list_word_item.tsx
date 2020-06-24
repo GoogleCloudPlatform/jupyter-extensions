@@ -41,7 +41,7 @@ const localStyles = stylesheet({
   },
   icon: {
     padding: '0 0 0 5px',
-  }
+  },
 });
 
 const GreenCheck = withStyles({
@@ -84,11 +84,7 @@ export class ListWordItem extends React.Component<Props, {}> {
           </span>
         </div>
         <div>
-          <a
-            className={localStyles.viewLink}
-            href="#"
-            title="View Word"
-          >
+          <a className={localStyles.viewLink} href="#" title="View Word">
             &nbsp;
           </a>
         </div>

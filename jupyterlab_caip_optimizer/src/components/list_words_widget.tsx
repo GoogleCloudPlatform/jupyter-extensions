@@ -8,7 +8,7 @@ import { stylesheet } from 'typestyle';
 import { ListWordsService, Words } from '../service/list_words';
 import { ListWordItem } from './list_word_item';
 
-interface Props  {
+interface Props {
   listWordsService: ListWordsService;
   isVisible: boolean;
 }
@@ -79,7 +79,7 @@ export class ListWordsPanel extends React.Component<Props, State> {
         ) : (
           <ul className={localStyles.list}>
             {words.words.map(w => (
-              <ListWordItem key={w.id} word={w}/>
+              <ListWordItem key={w.id} word={w} />
             ))}
           </ul>
         )}
