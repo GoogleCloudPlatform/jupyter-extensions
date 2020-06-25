@@ -7,9 +7,6 @@ import {
   TableCell,
   TableBody,
   TablePagination,
-  Paper,
-  Tabs,
-  Tab,
 } from '@material-ui/core';
 
 const localStyles = stylesheet({
@@ -27,8 +24,8 @@ const localStyles = stylesheet({
     border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
   pagination: {
-    position: 'fixed',
-    bottom: 0,
+    // position: 'fixed',
+    // bottom: 30,
   },
   tab: {
     textTransform: 'none',
@@ -76,99 +73,52 @@ export const QueryResults = () => {
     setPage(0);
   };
 
-  interface TabPanelProps {
-    children?: React.ReactNode;
-    index: any;
-    value: any;
-  }
-
-  function TabPanel(props: TabPanelProps) {
-    const { children, value, index } = props;
-
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        // id={`simple-tabpanel-${index}`}
-      >
-        {value === index && children}
-      </div>
-    );
-  }
-
   //   const handleFirstPageButtonClick = event => {
   //     onChangePage(event, 0);
   //   };
 
-  const [value, setValue] = React.useState('results');
-
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: string) => {
-    setValue(newValue);
-  };
-
   return (
     <div style={{ flexGrow: 1 }}>
       <div className={localStyles.header}>Query results</div>
-      {/* <AppBar position="static"> */}
-      <Paper>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab
-            disableRipple
-            label="Results"
-            value="results"
-            className={localStyles.tab}
-          />
-          <Tab
-            disableRipple
-            label="Details"
-            value="details"
-            className={localStyles.tab}
-          />
-        </Tabs>
-      </Paper>
-      <TabPanel value={value} index="results">
-        <div>
-          <Table size="small">
-            <TableHead className={localStyles.tableHeader}>
-              <TableRow>
-                {fields.map(field => (
-                  <TableCell>{field}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(row => (
-                  <TableRow key={row.name}>
-                    <TableCell className={localStyles.tableCell}>
-                      {row.calories}
-                    </TableCell>
-                    <TableCell className={localStyles.tableCell}>
-                      {row.fat}
-                    </TableCell>
-                    <TableCell className={localStyles.tableCell}>
-                      {row.carbs}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-          <TablePagination
-            className={localStyles.pagination}
-            rowsPerPageOptions={[10, 30, 50, 100, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
-        </div>
-      </TabPanel>
-      <TabPanel value={value} index="details">
-        Details
-      </TabPanel>
+
+      <div>
+        <Table size="small">
+          <TableHead className={localStyles.tableHeader}>
+            <TableRow>
+              {fields.map(field => (
+                <TableCell>{field}</TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map(row => (
+                <TableRow key={row.name}>
+                  <TableCell className={localStyles.tableCell}>
+                    {row.calories}
+                  </TableCell>
+                  <TableCell className={localStyles.tableCell}>
+                    {row.fat}
+                  </TableCell>
+                  <TableCell className={localStyles.tableCell}>
+                    {row.carbs}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+          className={localStyles.pagination}
+          rowsPerPageOptions={[10, 30, 50, 100, 200]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </div>
     </div>
   );
 };
