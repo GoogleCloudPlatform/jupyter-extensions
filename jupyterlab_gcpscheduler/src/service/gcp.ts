@@ -28,7 +28,7 @@ import {
   TransportService,
   GET,
   POST,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Notebook } from '@jupyterlab/notebook';
 

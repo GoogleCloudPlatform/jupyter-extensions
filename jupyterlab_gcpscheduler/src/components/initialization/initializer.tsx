@@ -21,7 +21,7 @@ import {
   CheckboxInput,
   GreenCheck,
   RedClose,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { CLOUD_FUNCTION_REGION } from '../../data';

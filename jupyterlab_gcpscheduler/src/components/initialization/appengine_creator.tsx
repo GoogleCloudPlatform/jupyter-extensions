@@ -15,7 +15,7 @@
  */
 
 import * as React from 'react';
-import { css, LearnMoreLink } from 'gcp-jupyterlab-shared';
+import { css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { stylesheet } from 'typestyle';
 
 interface Props {
