@@ -19,58 +19,60 @@ import json
 from pathlib import Path
 
 
-git = Git(config=traitlets.config.get_config())  #global instance of connection to git commands
+# global instance of connection to git commands
+git = Git(config=traitlets.config.get_config())
 
 
 class PreviousNamesHandler(APIHandler):
 
-  def get(self):
-    file_path = self.get_argument('file_path')
-    self.finish('Load previous names for a file (unimplemented)')
+    def get(self):
+        file_path = self.get_argument('file_path')
+        self.finish('Load previous names for a file (unimplemented)')
 
 
 class ReviewCommentsHandler(APIHandler):
 
-  def get(self):
-    file_path = self.get_argument('file_path')
-    self.finish('List review comments for a file (unimplemented)')
+    def get(self):
+        file_path = self.get_argument('file_path')
+        self.finish('List review comments for a file (unimplemented)')
 
 
 class DetachedCommentsHandler(APIHandler):
 
-  def get(self):
-    try:
-        file_path = self.get_argument('file_path')
-        current_path = self.get_argument('current_path')
+    def get(self):
+        try:
+            file_path = self.get_argument('file_path')
+            current_path = self.get_argument('current_path')
 
-        if current_path.startswith("~"):
-            """
-            Replace the '~' with the full path to the user's home directory.
-            The modified path is needed as input to a subprocess call (setting
-            the current working directory)
-            TODO (mkalil): deal with how other OS represent home directory
-            """
-            current_path = "".join([str(Path.home()), current_path[1:]])
-        comments = git.get_comments_for_path(file_path, current_path)
-        self.finish(json.dumps(comments))
-    except Exception as e:
-        print("Error fetching detached comments")
-        print(e)
+            if current_path.startswith("~"):
+                """
+                Replace the '~' with the full path to the user's home directory.
+                The modified path is needed as input to a subprocess call (setting
+                the current working directory)
+                TODO (mkalil): deal with how other OS represent home directory
+                """
+                current_path = "".join([str(Path.home()), current_path[1:]])
+            comments = git.get_comments_for_path(file_path, current_path)
+            self.finish(json.dumps(comments))
+        except Exception as e:
+            print("Error fetching detached comments")
+            print(e)
 
 
 class AddCommentHandler(APIHandler):
 
-  def post(self):
-    file_path = self.get_argument('file_path')
-    comment = self.get_argument('comment')
-    self.finish('Add a detached comment for a specific file (unimplemented)')
+    def post(self):
+        file_path = self.get_argument('file_path')
+        comment = self.get_argument('comment')
+        self.finish(
+            'Add a detached comment for a specific file (unimplemented)')
 
 
 class VerifyInsideRepoHandler(APIHandler):
 
-  def get(self):
-    current_path = self.get_argument('current_path')
-    if git.inside_git_repo():
-      self.finish("Current directory is a git repository.")
-    else:
-      self.finish("Current directory is NOT a git repository.")
+    def get(self):
+        current_path = self.get_argument('current_path')
+        if git.inside_git_repo():
+            self.finish("Current directory is a git repository.")
+        else:
+            self.finish("Current directory is NOT a git repository.")
