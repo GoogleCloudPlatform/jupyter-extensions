@@ -10,7 +10,7 @@ import {
   SelectInput,
   ColumnType,
   ListResourcesTable,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';

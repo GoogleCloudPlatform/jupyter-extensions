@@ -1,7 +1,7 @@
 import { Box, Grid, LinearProgress } from '@material-ui/core';
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import * as csstips from 'csstips';
-import { ColumnType } from 'gcp-jupyterlab-shared';
+import { ColumnType } from 'gcp_jupyterlab_shared';
 import MaterialTable from 'material-table';
 import * as React from 'react';
 import {

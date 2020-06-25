@@ -58,6 +58,6 @@ setup(
         "google-cloud-storage>=1.24.1",
         "jupyterlab~=1.2.0",
         "google-cloud-automl",
-        "gcp-jupyterlab-shared"
+        "gcp_jupyterlab_shared"
     ],
 )

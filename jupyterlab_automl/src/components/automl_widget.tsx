@@ -3,7 +3,7 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { WidgetManager } from 'gcp-jupyterlab-shared';
+import { WidgetManager } from 'gcp_jupyterlab_shared';
 import { ListResourcesPanel } from './list_resources_panel';
 
 export interface Context {
