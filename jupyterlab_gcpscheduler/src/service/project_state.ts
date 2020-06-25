@@ -22,7 +22,7 @@ import {
   TransportService,
   POST,
   GET,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import {
   CLOUD_FUNCTION_NAME,
   CLOUD_FUNCTION_REGION,

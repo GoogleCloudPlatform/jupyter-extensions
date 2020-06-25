@@ -19,7 +19,7 @@ import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, Message } from 'gcp-jupyterlab-shared';
+import { BASE_FONT, COLORS, Message } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 

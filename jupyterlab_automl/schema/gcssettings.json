@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "jupyter.lab.setting-icon-class": "jp-AutoMLIcon",
+  "jupyter.lab.setting-icon-label": "AutoML",
+  "title": "AutoML",
+  "description": "AutoML extension for JupterLab",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "title": "AutoML",
+      "description": "AutoML extension for JupterLab"
+    }
+  }
+}

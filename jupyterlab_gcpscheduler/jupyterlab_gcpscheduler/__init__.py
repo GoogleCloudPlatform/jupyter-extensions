@@ -14,7 +14,7 @@
 
 from notebook.utils import url_path_join
 
-from jupyterlab_gcpscheduler.handlers import ProjectHandler, ProxyHandler, RuntimeEnvHandler
+from gcp_jupyterlab_shared.handlers import ProjectHandler, ProxyHandler, RuntimeEnvHandler
 from jupyterlab_gcpscheduler.version import VERSION
 
 __version__ = VERSION

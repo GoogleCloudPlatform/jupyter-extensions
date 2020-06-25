@@ -19,7 +19,7 @@ import {
   SelectInput,
   TextInput,
   CheckValidation,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { FREQUENCY_TYPES } from '../../data';

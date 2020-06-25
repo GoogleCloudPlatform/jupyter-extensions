@@ -26,7 +26,7 @@ import {
   MenuCloseHandler,
   SmallMenuItem,
   Message,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
@@ -44,7 +44,7 @@ import { ActionBar } from './action_bar';
 import {
   ClientTransportService,
   ServerProxyTransportService,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 
 /** Information provided to the GcpSchedulerWidget */
 export interface LaunchSchedulerRequest {

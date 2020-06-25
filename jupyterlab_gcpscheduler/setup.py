@@ -55,5 +55,6 @@ setup(
         "google-auth>=1.6.3",
         "jupyterlab~=1.2.0",
         "requests>=2.22.0",
+        "gcp_jupyterlab_shared>=1.0.0"
     ],
 )
