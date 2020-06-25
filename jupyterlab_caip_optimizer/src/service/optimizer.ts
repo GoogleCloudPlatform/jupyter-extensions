@@ -17,10 +17,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 
-import {
-  TransportService,
-
-} from 'gcp_jupyterlab_shared';
+import { TransportService } from 'gcp_jupyterlab_shared';
 import { Study, MetadataFull, MetadataRequired } from '../types';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
@@ -42,8 +39,6 @@ export class OptimizerService {
 
   constructor(
     private _transportService: TransportService,
-    public projectID: string, // TODO: clarify - right way to get projectID?
-    public location: string // TODO: clarify - right way to get location?
   ) {}
 
   set transportService(transportService: TransportService) {
