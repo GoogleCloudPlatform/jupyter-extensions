@@ -15,7 +15,7 @@ exports[`ResourceStatuses Renders needing both resources 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       A
       <LearnMoreLink
         href="https://cloud.google.com/storage/"
@@ -25,7 +25,7 @@ exports[`ResourceStatuses Renders needing both resources 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       An 
       <LearnMoreLink
         href="https://cloud.google.com/functions/docs/calling/http"
@@ -51,7 +51,7 @@ exports[`ResourceStatuses Renders with GCS bucket only 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       A
       <LearnMoreLink
         href="https://cloud.google.com/storage/"
@@ -77,7 +77,7 @@ exports[`ResourceStatuses Renders with both resources 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CheckIcon)) />
+      <WithStyles(CheckIcon) />
       A
       <LearnMoreLink
         href="https://cloud.google.com/storage/"
@@ -87,7 +87,7 @@ exports[`ResourceStatuses Renders with both resources 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CheckIcon)) />
+      <WithStyles(CheckIcon) />
       An 
       <LearnMoreLink
         href="https://cloud.google.com/functions/docs/calling/http"
@@ -113,7 +113,7 @@ exports[`ResourceStatuses Renders with errors 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       A
       <LearnMoreLink
         href="https://cloud.google.com/storage/"
@@ -128,7 +128,7 @@ exports[`ResourceStatuses Renders with errors 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       An 
       <LearnMoreLink
         href="https://cloud.google.com/functions/docs/calling/http"
@@ -159,7 +159,7 @@ exports[`ResourceStatuses Renders with pending operations 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       A
       <LearnMoreLink
         href="https://cloud.google.com/storage/"
@@ -174,7 +174,7 @@ exports[`ResourceStatuses Renders with pending operations 1`] = `
     <div
       className="serviceStatusItem_f7gbs7g"
     >
-      <WithStyles(pure(CloseIcon)) />
+      <WithStyles(CloseIcon) />
       An 
       <LearnMoreLink
         href="https://cloud.google.com/functions/docs/calling/http"
