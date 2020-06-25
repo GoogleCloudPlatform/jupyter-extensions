@@ -24,13 +24,13 @@ Params:
     handler = name of the handler route as defined in the jupyterlab_comments module
     method = GET or POST
     fileName = file path relative to the root of the Jupyter Lab server
-    currentPath = path from home directory to root of Jupyter Lab server
+    serverRoot = path to the root directory of the Jupyter Lab server
     body = for a POST request, should contain comments to upload
 
 */
-export function httpGitRequest(handler : string, method : string, fileName : string, currentPath : string, body? : Record<string, string>) : Promise<Response> {
+export function httpGitRequest(handler : string, method : string, fileName : string, serverRoot : string, body? : Record<string, string>) : Promise<Response> {
     const setting = ServerConnection.makeSettings();
-    const fullUrl = URLExt.join(setting.baseUrl, handler).concat("?", "file_path=", fileName, "&current_path=", currentPath);
+    const fullUrl = URLExt.join(setting.baseUrl, handler).concat("?", "file_path=", fileName, "&server_root=", serverRoot);
 
     let fullRequest : RequestInit;
 
