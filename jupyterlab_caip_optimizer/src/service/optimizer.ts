@@ -18,17 +18,12 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 import {
-  handleApiError,
-  ApiRequest,
-  ApiResponse,
   TransportService,
-  GET,
-  POST,
+
 } from 'gcp_jupyterlab_shared';
-import { StateDB } from '@jupyterlab/coreutils';
 import { Study, MetadataFull, MetadataRequired } from '../types';
 
-const AI_PLATFORM = 'https://ml.googleapis.com/v1';
+// const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
 function zoneToRegion(zone: string): string {
   const divider = '-';
