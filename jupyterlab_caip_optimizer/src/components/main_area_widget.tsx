@@ -13,12 +13,13 @@ const mapStateToProps = (state: RootState) => ({
  */
 export const ViewManager = ({ data }: { data: ViewType }) => {
   // TODO: add custom components
-  if (data.view === 'dashboard') {
-    return <>Dashboard</>;
-  } else if (data.view === 'createStudy') {
-    return <>Create A Study</>;
-  } else if (data.view === 'studyDetails') {
-    return <>Study ID: {data.studyId}</>;
+  switch (data.view) {
+    case 'dashboard':
+      return <>Dashboard</>;
+    case 'createStudy':
+      return <>Create A Study</>;
+    case 'studyDetails':
+      return <>Study ID: {data.studyId}</>;
   }
 };
 
