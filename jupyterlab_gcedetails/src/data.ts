@@ -145,27 +145,3 @@ export const STYLES = stylesheet({
     marginLeft: '20px',
   },
 });
-
-export const AREA_CHART_BLUE = {
-  stroke: '#15B2D3',
-  fill: '#15B2D3',
-};
-
-export const AREA_CHART_ORANGE = {
-  stroke: '#ff7f01',
-  fill: '#ff7f01',
-};
-
-export const UTILIZATION_CHART_PROPERTIES = {
-  areaChartProps: {
-    height: 75,
-    width: 350,
-  },
-  yAxisProps: {
-    domain: [0, 100],
-  },
-  cartesianGridProps: {
-    horizontalPoints: [25, 50, 75],
-    vertical: false,
-  },
-};

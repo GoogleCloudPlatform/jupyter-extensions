@@ -15,16 +15,16 @@
  */
 
 import { ReactWidget, showDialog } from '@jupyterlab/apputils';
-import { ServerConnection } from '@jupyterlab/services';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { 
-  Details, 
-  STYLES, 
-  MAPPED_ATTRIBUTES, 
-  REFRESHABLE_MAPPED_ATTRIBUTES, 
+import {
+  Details,
+  STYLES,
+  MAPPED_ATTRIBUTES,
+  REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data';
 import { DetailsDialogBody } from './components/details_dialog_body';
+import { ServerWrapper } from './components/server_wrapper';
 
 interface State {
   displayedAttributes: [number, number];
@@ -37,9 +37,9 @@ const ICON_CLASS = 'jp-VmStatusIcon';
 
 /** Instance details display widget */
 export class VmDetails extends React.Component<{}, State> {
-  private readonly serverSettings = ServerConnection.defaultSettings;
-  private readonly detailsUrl = `${this.serverSettings.baseUrl}gcp/v1/details`;
+  private readonly detailsUrl = `gcp/v1/details`;
   private readonly refreshInterval: number;
+  private readonly serverWrapper: ServerWrapper;
 
   constructor(props: {}) {
     super(props);
@@ -48,6 +48,7 @@ export class VmDetails extends React.Component<{}, State> {
       receivedError: false,
       shouldRefresh: false,
     };
+    this.serverWrapper = new ServerWrapper(this.detailsUrl);
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
         this.getAndSetDetailsFromServer();
@@ -81,20 +82,12 @@ export class VmDetails extends React.Component<{}, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    try {
-      const response = await ServerConnection.makeRequest(
-        this.detailsUrl,
-        {},
-        this.serverSettings
-      );
-      if (!response.ok) {
-        this.setState({ receivedError: true });
-        return;
-      }
-      const details = await response.json();
-      this.setState({ details: details as Details });
-    } catch (e) {
+    const details = await this.serverWrapper.get();
+    if (!details.ok) {
       console.warn('Unable to retrieve GCE VM details');
+      this.setState({ receivedError: true });
+    } else {
+      this.setState({ details: details.data as Details });
     }
   }
 

@@ -1,33 +1,53 @@
 import * as React from 'react';
-import { ServerConnection } from '@jupyterlab/services';
+import { ServerWrapper } from './server_wrapper';
 import { AreaChartWrapper } from './chart_wrapper';
-import {
-  Utilization,
-  AREA_CHART_BLUE,
-  AREA_CHART_ORANGE,
-  UTILIZATION_CHART_PROPERTIES,
-  STYLES,
-} from '../data';
+import { Utilization, STYLES } from '../data';
+
+const AREA_CHART_BLUE = {
+  stroke: '#15B2D3',
+  fill: '#15B2D3',
+};
+
+const AREA_CHART_ORANGE = {
+  stroke: '#ff7f01',
+  fill: '#ff7f01',
+};
+
+const UTILIZATION_CHART_PROPERTIES = {
+  areaChartProps: {
+    height: 75,
+    width: 350,
+  },
+  yAxisProps: {
+    domain: [0, 100],
+  },
+  cartesianGridProps: {
+    horizontalPoints: [25, 50, 75],
+    vertical: false,
+  },
+};
+
+interface Props {
+  serverWrapper: ServerWrapper;
+}
 
 interface State {
   data?: Utilization[];
   receivedError: boolean;
 }
 
-export class ResourceUtilizationCharts extends React.Component<{}, State> {
-  private readonly serverSettings = ServerConnection.defaultSettings;
-  private readonly detailsUrl = `${this.serverSettings.baseUrl}gcp/v1/details`;
+export class ResourceUtilizationCharts extends React.Component<Props, State> {
   private readonly refreshInterval: number;
   private readonly NUM_DATA_POINTS = 20;
   private readonly REFRESH_INTERVAL = 1000;
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     const data = [];
     for (let i = 0; i < this.NUM_DATA_POINTS; i++) {
       data.push({ cpu: 0, memory: 0 });
     }
     this.state = {
-      data: data,
+      data,
       receivedError: false,
     };
     this.refreshInterval = window.setInterval(() => {
@@ -69,23 +89,14 @@ export class ResourceUtilizationCharts extends React.Component<{}, State> {
   }
 
   private async pollUtilizationData() {
-    try {
-      const response = await ServerConnection.makeRequest(
-        this.detailsUrl,
-        {},
-        this.serverSettings
-      );
-      if (!response.ok) {
-        this.setState({ receivedError: true });
-        return;
-      }
-      const details = await response.json();
-      const data = this.state.data.slice(1);
-      data.push(details.utilization);
-      this.setState({ data: data });
-    } catch (e) {
+    const details = await this.props.serverWrapper.get();
+    if (!details.ok) {
       console.warn('Unable to retrieve GCE VM details');
-      console.log(e);
+      this.setState({ receivedError: true });
+    } else {
+      const data = this.state.data.slice(1);
+      data.push(details.data.utilization);
+      this.setState({ data });
     }
   }
 }
