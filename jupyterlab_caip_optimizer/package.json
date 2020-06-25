@@ -58,6 +58,7 @@
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
     "typestyle": "^2.0.4",
+    "gcp_jupyterlab_shared": "^1.0.1",
     "yaml": "^1.7.2"
   },
   "devDependencies": {
