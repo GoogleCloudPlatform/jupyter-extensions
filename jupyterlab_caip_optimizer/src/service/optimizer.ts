@@ -24,7 +24,7 @@ import {
   TransportService,
   GET,
   POST,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import { StateDB } from '@jupyterlab/coreutils';
 import { Study, MetadataFull, MetadataRequired } from '../types';
 
