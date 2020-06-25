@@ -94,7 +94,6 @@ export class ListItemsPanel extends React.Component<Props, State> {
             <Button
               color="primary"
               size="small"
-              mini
               variant="contained"
               className={localStyles.editQueryButton}
               onClick={() => {
