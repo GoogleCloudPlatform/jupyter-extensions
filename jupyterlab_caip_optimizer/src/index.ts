@@ -8,12 +8,15 @@ import {
 
 import { ListWordsWidget } from './components/list_words_widget';
 import { ListWordsService } from './service/list_words';
+import { store } from './store/store';
+import { fetchStudies } from './store/studies';
 
 async function activate(app: JupyterFrontEnd) {
   const listWordsService = new ListWordsService();
   const listWidget = new ListWordsWidget(listWordsService);
   listWidget.addClass('optimizer');
   app.shell.add(listWidget, 'left', { rank: 100 });
+  store.dispatch(fetchStudies());
 }
 
 /**
