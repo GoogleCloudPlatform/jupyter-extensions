@@ -16,7 +16,6 @@ export class TableDetailsWidget extends ReactWidget {
     private readonly name: string
   ) {
     super();
-    console.log('dataset id: ', this.dataset_id);
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
     this.title.caption = `Dataset Details for ${this.dataset_id}`;
     this.title.label = this.name;
