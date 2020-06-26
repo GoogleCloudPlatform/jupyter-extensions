@@ -1,29 +1,22 @@
 import { createAsyncSlice, AsyncState } from './async_slice';
 
 describe('async slice reducer', () => {
-  let genericSlice: ReturnType<typeof createAsyncSlice>;
-
-  beforeEach(() => {
-    genericSlice = createAsyncSlice({
-      name: 'generic',
-      initialState: {
-        loading: false,
-        error: null,
-        data: undefined,
-      },
-      reducers: {},
-    });
+  const genericSlice = createAsyncSlice({
+    name: 'generic',
+    initialState: {
+      loading: false,
+      error: null,
+      data: undefined,
+    },
+    reducers: {},
   });
 
   describe('start', () => {
-    let initialState: AsyncState<unknown>;
-    beforeEach(() => {
-      initialState = {
-        loading: false,
-        error: 'AHHH error',
-        data: 'DATA',
-      };
-    });
+    const initialState: AsyncState<unknown> = {
+      loading: false,
+      error: 'AHHH error',
+      data: 'DATA',
+    };
     it('starts loading', () => {
       const newState = genericSlice.reducer(
         initialState,
@@ -48,14 +41,11 @@ describe('async slice reducer', () => {
   });
 
   describe('success', () => {
-    let initialState: AsyncState<unknown>;
-    beforeEach(() => {
-      initialState = {
-        loading: true,
-        error: 'AHHH error',
-        data: undefined,
-      };
-    });
+    const initialState: AsyncState<unknown> = {
+      loading: true,
+      error: 'AHHH error',
+      data: undefined,
+    };
     it('stops loading', () => {
       const newState = genericSlice.reducer(
         initialState,
@@ -79,14 +69,11 @@ describe('async slice reducer', () => {
     });
   });
   describe('error', () => {
-    let initialState: AsyncState<unknown>;
-    beforeEach(() => {
-      initialState = {
-        loading: true,
-        error: null,
-        data: ['data'],
-      };
-    });
+    const initialState: AsyncState<unknown> = {
+      loading: true,
+      error: null,
+      data: ['data'],
+    };
     it('stops loading', () => {
       const newState = genericSlice.reducer(
         initialState,
