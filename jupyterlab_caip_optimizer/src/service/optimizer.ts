@@ -61,7 +61,7 @@ export class OptimizerService {
     const body = JSON.stringify(study);
     const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
     const response = await this._transportService.submit<Study>({
-      path: `${this.serverSettings.baseUrl}gcp/v1/proxy/${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
+      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
       method: 'POST',
       body,
     });
@@ -71,7 +71,7 @@ export class OptimizerService {
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
     const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
     const response = await this._transportService.submit<Study[]>({
-      path: `${this.serverSettings.baseUrl}gcp/v1/proxy/${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
       method: 'GET',
     });
     return response.result;
