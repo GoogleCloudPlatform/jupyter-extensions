@@ -36,7 +36,8 @@
     "typestyle": "^2.1.0",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
-    "material-table": "^1.61.0"
+    "date-fns": "^2.14.0",
+    "material-table": "^1.62.0"
   },
   "devDependencies": {
     "@types/jest": "^24.9.1",
