@@ -37,9 +37,7 @@ function zoneToRegion(zone: string): string {
 export class OptimizerService {
   private readonly serverSettings = ServerConnection.defaultSettings;
 
-  constructor(
-    private _transportService: TransportService,
-  ) {}
+  constructor(private _transportService: TransportService) {}
 
   set transportService(transportService: TransportService) {
     this._transportService = transportService;
@@ -61,8 +59,9 @@ export class OptimizerService {
 
   async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
     const body = JSON.stringify(study);
+    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
     const response = await this._transportService.submit<Study>({
-      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
+      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
       method: 'POST',
       body,
     });
@@ -70,8 +69,9 @@ export class OptimizerService {
   }
 
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
+    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
     const response = await this._transportService.submit<Study[]>({
-      path: `${this.serverSettings.baseUrl}gcp/v1/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
       method: 'GET',
     });
     return response.result;
