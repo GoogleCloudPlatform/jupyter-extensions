@@ -22,20 +22,22 @@ from google.cloud import bigquery
 from jupyterlab_bigquery.version import VERSION
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
-client = bigquery.Client()
-# resourceClient = resource_manager.Client()
 
 
-def list_projects():
+def create_bigquery_client():
+  return bigquery.Client()
+
+
+def list_projects(client):
   project = client.project
   projects_list = [{
       'id': format(project),
-      'datasets': list_datasets(),
+      'datasets': list_datasets(client, project),
   }]
   return {'projects': projects_list}
 
 
-def list_datasets():
+def list_datasets(client, project):
   datasets = list(client.list_datasets())
 
   datasetsList = []
@@ -46,13 +48,13 @@ def list_datasets():
     datasetsList.append({
         'id': '{}.{}'.format(dataset.project, dataset.dataset_id),
         'name': dataset.dataset_id,
-        'tables': list_tables(currDataset),
-        'models': list_models(currDataset),
+        'tables': list_tables(client, currDataset),
+        'models': list_models(client, currDataset),
     })
   return datasetsList
 
 
-def list_tables(dataset):
+def list_tables(client, dataset):
   tables = list(client.list_tables(dataset))
 
   return [{
@@ -61,14 +63,14 @@ def list_tables(dataset):
   } for table in tables]
 
 
-def list_models(dataset):
+def list_models(client, dataset):
   models = list(client.list_models(dataset))
   return [{
       'id': format(model.model_id),
   } for model in models]
 
 
-def get_dataset_details(dataset_id):
+def get_dataset_details(client, dataset_id):
   dataset = client.get_dataset(dataset_id)
   return {
       'details': {
@@ -86,7 +88,7 @@ def get_dataset_details(dataset_id):
   }
 
 
-def get_table_details(table_id):
+def get_table_details(client, table_id):
   table = client.get_table(table_id)
   return {
       'details': {
@@ -132,12 +134,12 @@ def make_query(request_body):
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
   bigquery_client = None
-  parent = None
 
   @gen.coroutine
   def post(self, *args, **kwargs):
     try:
-      self.finish(list_projects())
+      self.bigquery_client = create_bigquery_client()
+      self.finish(list_projects(self.bigquery_client))
 
     except Exception as e:
       app_log.exception(str(e))
@@ -151,13 +153,15 @@ class ListHandler(APIHandler):
 
 class DatasetDetailsHandler(APIHandler):
   """Handles requests for dataset metadata."""
+  bigquery_client = None
 
   @gen.coroutine
   def post(self, *args, **kwargs):
     try:
+      self.bigquery_client = create_bigquery_client()
       post_body = self.get_json_body()
 
-      self.finish(get_dataset_details(post_body['datasetId']))
+      self.finish(get_dataset_details(self.bigquery_client, post_body['datasetId']))
 
     except Exception as e:
       app_log.exception(str(e))
@@ -171,11 +175,14 @@ class DatasetDetailsHandler(APIHandler):
 
 class TableDetailsHandler(APIHandler):
   """Handles requests for table metadata."""
+  bigquery_client = None
+  
   def post(self, *args, **kwargs):
     try:
+      self.bigquery_client = create_bigquery_client()
       post_body = self.get_json_body()
 
-      self.finish(get_table_details(post_body['tableId']))
+      self.finish(get_table_details(self.bigquery_client, post_body['tableId']))
 
     except Exception as e:
       app_log.exception(str(e))
