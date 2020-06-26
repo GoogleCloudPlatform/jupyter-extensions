@@ -23,42 +23,57 @@ interface Props {
   children: React.ReactNode;
 }
 
+interface State {
+  anchorEl: null | HTMLElement;
+}
+
 const GRAPH_ICON_CLASS = 'jp-UtilizationGraphsIcon';
 
-export function WidgetPopup(props: Props) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+export class WidgetPopup extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      anchorEl: null
+    };
+  }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
+  render() {
+    const { anchorEl } = this.state;
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'widget-popper' : undefined;
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+      this.setState({ 
+        anchorEl: this.state.anchorEl ? null : event.currentTarget 
+      });
+    };
 
-  return (
-    <React.Fragment>
-      <span
-        className={classes(
-          GRAPH_ICON_CLASS,
-          STYLES.icon,
-          STYLES.interactiveHover
-        )}
-        title="Show resource utilization"
-        onClick={handleClick}
-      ></span>
-      <Popper
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        placement={'top-start'}
-        transition
-      >
-        {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={350}>
-            <Paper>{props.children}</Paper>
-          </Fade>
-        )}
-      </Popper>
-    </React.Fragment>
-  );
+    const open = Boolean(anchorEl);
+    const id = open ? 'widget-popper' : undefined;
+
+    return (
+      <React.Fragment>
+        <span
+          className={classes(
+            GRAPH_ICON_CLASS,
+            STYLES.icon,
+            STYLES.interactiveHover
+          )}
+          title="Show resource utilization"
+          onClick={handleClick}
+        ></span>
+        <Popper
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          placement={'top-start'}
+          transition
+        >
+          {({ TransitionProps }) => (
+            <Fade {...TransitionProps} timeout={350}>
+              <Paper>{this.props.children}</Paper>
+            </Fade>
+          )}
+        </Popper>
+      </React.Fragment>
+    );
+  }
 }
