@@ -97,9 +97,9 @@ export class ListItemsPanel extends React.Component<Props, State> {
               variant="contained"
               className={localStyles.editQueryButton}
               onClick={() => {
-                this.props.context.manager.launchWidgetForId(
-                  QueryEditorTabWidget.id,
-                  QueryEditorTabWidget
+                this.props.context.manager.launchWidget(
+                  QueryEditorTabWidget,
+                  'main'
                 );
               }}
             >

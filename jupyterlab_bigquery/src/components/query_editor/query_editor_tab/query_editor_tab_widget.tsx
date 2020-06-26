@@ -1,9 +1,10 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import QueryEditorTab from './query_editor_tab';
-import { QueryResults } from './query_editor_results';
+import QueryResults from './query_editor_results';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { ReduxReactWidget } from '../../../utils/ReduxReactWidget';
 
 const localStyles = stylesheet({
   panel: {
@@ -15,8 +16,8 @@ const localStyles = stylesheet({
   },
 });
 
-export class QueryEditorTabWidget extends ReactWidget {
-  static readonly id = 'query-editor-tab';
+export class QueryEditorTabWidget extends ReduxReactWidget {
+  id = 'query-editor-tab';
   private visibleSignal = new Signal<QueryEditorTabWidget, boolean>(this);
 
   constructor() {
@@ -33,7 +34,7 @@ export class QueryEditorTabWidget extends ReactWidget {
     this.visibleSignal.emit(true);
   }
 
-  render() {
+  renderReact() {
     return (
       <UseSignal signal={this.visibleSignal}>
         {(_, isVisible) => {

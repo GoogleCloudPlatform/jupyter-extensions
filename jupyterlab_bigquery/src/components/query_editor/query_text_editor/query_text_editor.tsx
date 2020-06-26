@@ -1,5 +1,7 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
+import { connect } from 'react-redux';
+import { updateQueryResult } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
@@ -9,6 +11,10 @@ import { QueryService, QueryResult } from './service/query';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
+}
+
+interface QueryTextEditorProps {
+  updateQueryResult: any;
 }
 
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
@@ -26,11 +32,14 @@ enum ButtonStates {
   ERROR,
 }
 
-class QueryTextEditor extends React.Component<{}, QueryTextEditorState> {
+class QueryTextEditor extends React.Component<
+  QueryTextEditorProps,
+  QueryTextEditorState
+> {
   queryService: QueryService;
   editor: editor.IStandaloneCodeEditor;
 
-  constructor(props: {}) {
+  constructor(props) {
     super(props);
     this.state = {
       buttonState: ButtonStates.READY,
@@ -44,8 +53,8 @@ class QueryTextEditor extends React.Component<{}, QueryTextEditorState> {
     this.queryService
       .query(query)
       .then((res: QueryResult) => {
-        console.log(res);
         //TODO: handle success
+        this.props.updateQueryResult(res);
       })
       .catch(err => {
         //TODO: Handle fail query
@@ -81,4 +90,10 @@ class QueryTextEditor extends React.Component<{}, QueryTextEditorState> {
   }
 }
 
-export default QueryTextEditor;
+const mapStateToProps = _ => {
+  return {};
+};
+
+const mapDispatchToProps = { updateQueryResult };
+
+export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);

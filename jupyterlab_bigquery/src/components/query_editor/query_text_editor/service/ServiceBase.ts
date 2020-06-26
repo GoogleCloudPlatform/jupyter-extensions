@@ -4,7 +4,7 @@
  * TODO: Add cache.
  */
 class ServiceBase {
-  static instance: ServiceBase;
+  private static instance: ServiceBase;
 
   constructor() {
     // eslint-disable-next-line no-extra-boolean-cast
