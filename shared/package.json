@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "clean": "rimraf lib *tsbuildinfo",
+    "install-shared": "../scripts/shared-install.sh",
     "link": "jupyter labextension link --log-level=INFO",
     "lint-warnings": "eslint \"**/*.{ts,tsx}\" --fix --quiet",
     "lint": "npm run lint-warnings -- --quiet",
