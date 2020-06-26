@@ -12,89 +12,73 @@ describe('async slice reducer', () => {
   });
 
   describe('start', () => {
+    let newState: AsyncState<unknown>;
     const initialState: AsyncState<unknown> = {
       loading: false,
       error: 'AHHH error',
       data: 'DATA',
     };
-    it('starts loading', () => {
-      const newState = genericSlice.reducer(
+    beforeEach(() => {
+      newState = genericSlice.reducer(
         initialState,
         genericSlice.actions.start()
       );
+    });
+    it('starts loading', () => {
       expect(newState.loading).toBe(true);
     });
     it('does not change existing data', () => {
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.start()
-      );
       expect(newState.data).toEqual(initialState.data);
     });
     it('does not change existing error', () => {
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.start()
-      );
       expect(newState.error).toEqual(initialState.error);
     });
   });
 
   describe('success', () => {
+    let newState: AsyncState<unknown>;
     const initialState: AsyncState<unknown> = {
       loading: true,
       error: 'AHHH error',
       data: undefined,
     };
-    it('stops loading', () => {
-      const newState = genericSlice.reducer(
+    beforeEach(() => {
+      newState = genericSlice.reducer(
         initialState,
         genericSlice.actions.success('data')
       );
+    });
+    it('stops loading', () => {
       expect(newState.loading).toBe(false);
     });
     it('sets data', () => {
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.success('data')
-      );
       expect(newState.data).toEqual('data');
     });
     it('removes error', () => {
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.success('data')
-      );
       expect(newState.error).toBeNull();
     });
   });
   describe('error', () => {
+    let newState: AsyncState<unknown>;
     const initialState: AsyncState<unknown> = {
       loading: true,
       error: null,
       data: ['data'],
     };
-    it('stops loading', () => {
-      const newState = genericSlice.reducer(
+    beforeEach(() => {
+      newState = genericSlice.reducer(
         initialState,
         genericSlice.actions.error('ERROR! FIRE')
       );
+    });
+    it('stops loading', () => {
       expect(newState.loading).toBe(false);
     });
     it('does not change existing data', () => {
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.error('ERROR! FIRE')
-      );
       expect(newState.data).toEqual(initialState.data);
     });
     it('sets the error message', () => {
-      const errorMessage = 'ERROR! FIRE';
-      const newState = genericSlice.reducer(
-        initialState,
-        genericSlice.actions.error(errorMessage)
-      );
-      expect(newState.error).toEqual(errorMessage);
+      expect(newState.error).toEqual('ERROR! FIRE');
     });
   });
 });
