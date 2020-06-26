@@ -20,6 +20,12 @@ interface QueryTextEditorProps {
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   lineNumbers: 'on',
   automaticLayout: true,
+  formatOnType: true,
+  formatOnPaste: true,
+  wordWrapColumn: 80,
+  wordWrap: 'bounded',
+  wrappingIndent: 'same',
+  wrappingStrategy: 'advanced',
 };
 
 const styleSheet = stylesheet({
@@ -73,7 +79,9 @@ class QueryTextEditor extends React.Component<
           height="40vh"
           theme={'light'}
           language={'sql'}
-          value={'// type your code...'}
+          value={
+            'SELECT * FROM `jupyterlab-interns-sandbox.covid19_public_forecasts.county_14d` LIMIT 10'
+          }
           editorDidMount={this.handleEditorDidMount.bind(this)}
           options={SQL_EDITOR_OPTIONS}
         />
