@@ -26,6 +26,9 @@ import {
 import { DetailsDialogBody } from './components/details_dialog_body';
 import { ServerWrapper } from './components/server_wrapper';
 
+interface Props {
+  detailsServer: ServerWrapper;
+}
 interface State {
   displayedAttributes: [number, number];
   details?: Details;
@@ -36,19 +39,16 @@ interface State {
 const ICON_CLASS = 'jp-VmStatusIcon';
 
 /** Instance details display widget */
-export class VmDetails extends React.Component<{}, State> {
-  private readonly detailsUrl = `gcp/v1/details`;
+export class VmDetails extends React.Component<Props, State> {
   private readonly refreshInterval: number;
-  private readonly serverWrapper: ServerWrapper;
 
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       displayedAttributes: [0, 1],
       receivedError: false,
       shouldRefresh: false,
     };
-    this.serverWrapper = new ServerWrapper(this.detailsUrl);
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
         this.getAndSetDetailsFromServer();
@@ -82,7 +82,7 @@ export class VmDetails extends React.Component<{}, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    const details = await this.serverWrapper.get();
+    const details = await this.props.detailsServer.get();
     if (!details.ok) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
@@ -148,7 +148,9 @@ export class VmDetails extends React.Component<{}, State> {
 
 /** Top-level widget exposed to JupyterLab for showing VM details. */
 export class VmDetailsWidget extends ReactWidget {
+  private readonly detailsUrl = `gcp/v1/details`;
+  private readonly detailsServer = new ServerWrapper(this.detailsUrl);
   render() {
-    return <VmDetails />;
+    return <VmDetails detailsServer={this.detailsServer} />;
   }
 }
