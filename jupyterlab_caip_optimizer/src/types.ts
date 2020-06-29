@@ -12,26 +12,20 @@ export interface MetricSpec {
   metric: string;
 }
 
-export enum GoalType {
-  GOAL_TYPE_UNSPECIFIED,
-  MAXIMIZE,
-  MINIMIZE,
-}
+export type GoalType = 'GOAL_TYPE_UNSPECIFIED' | 'MAXIMIZE' | 'MINIMIZE';
 
-export enum ParameterType {
-  PARAMETER_TYPE_UNSPECIFIED,
-  DOUBLE,
-  INTEGER,
-  CATEGORICAL,
-  DISCRETE,
-}
+export type ParameterType =
+  | 'PARAMETER_TYPE_UNSPECIFIED'
+  | 'DOUBLE'
+  | 'INTEGER'
+  | 'CATEGORICAL'
+  | 'DISCRETE';
 
-export enum ScaleType {
-  SCALE_TYPE_UNSPECIFIED,
-  UNIT_LINEAR_SCALE,
-  UNIT_LOG_SCALE,
-  UNIT_REVERSE_LOG_SCALE,
-}
+export type ScaleType =
+  | 'SCALE_TYPE_UNSPECIFIED'
+  | 'UNIT_LINEAR_SCALE'
+  | 'UNIT_LOG_SCALE'
+  | 'UNIT_REVERSE_LOG_SCALE';
 
 export interface DoubleValueSpec {
   minValue: number;
@@ -95,6 +89,7 @@ export type ParameterSpec = ParameterSpecBase &
     | {
         parentCategoricalValues: MatchingParentCategoricalValueSpec;
       }
+    | {}
   );
 
 export interface DecayCurveAutomatedStoppingConfig {
