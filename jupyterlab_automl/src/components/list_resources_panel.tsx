@@ -10,6 +10,7 @@ import {
   SelectInput,
   ColumnType,
   ListResourcesTable,
+  DialogComponent,
 } from 'gcp_jupyterlab_shared';
 import styled from 'styled-components';
 import { debounce } from '../util';
@@ -34,6 +35,9 @@ interface State {
   models: Model[];
   resourceType: ResourceType;
   searchString: string;
+  deleteDialog: boolean;
+  deleteSubmit: () => void;
+  deleteString: string;
 }
 
 const FullWidthInput = styled(Box)`
@@ -81,6 +85,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       models: [],
       resourceType: ResourceType.Dataset,
       searchString: '',
+      deleteDialog: false,
+      deleteSubmit: null,
+      deleteString: '',
     };
   }
 
@@ -202,9 +209,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 {
                   label: 'Delete',
                   handler: rowData => {
-                    // TODO: Show a confirmation dialog before deleting
-                    DatasetService.deleteDataset(rowData.id);
-                    this.refresh();
+                    this.deleteConfirm(rowData);
                   },
                 },
               ]}
@@ -237,18 +242,55 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 {
                   label: 'Delete',
                   handler: rowData => {
-                    // TODO: Show a confirmation dialog before deleting
-                    ModelService.deleteModel(rowData.id);
-                    this.refresh();
+                    this.deleteConfirm(rowData);
                   },
                 },
               ]}
             />
           )}
+          <DialogComponent
+            open={this.state.deleteDialog}
+            header={`Are you sure you want to delete ${this.state.deleteString}?`}
+            onCancel={this.toggleDelete}
+            onClose={this.toggleDelete}
+            onSubmit={this.state.deleteSubmit}
+          />
         </Box>
       </>
     );
   }
+
+  private deleteConfirm = rowData => {
+    this.setState({ deleteString: rowData.displayName });
+    if (this.state.resourceType === ResourceType.Dataset) {
+      this.setState({
+        deleteSubmit: () => {
+          DatasetService.deleteDataset(rowData.id);
+          this.refresh();
+          this.toggleDelete();
+        },
+      });
+    } else if (this.state.resourceType === ResourceType.Model) {
+      this.setState({
+        deleteSubmit: () => {
+          ModelService.deleteModel(rowData.id);
+          this.refresh();
+          this.toggleDelete();
+        },
+      });
+    } else {
+      this.setState({
+        deleteSubmit: null,
+      });
+    }
+    this.toggleDelete();
+  };
+
+  private toggleDelete = () => {
+    this.setState({
+      deleteDialog: !this.state.deleteDialog,
+    });
+  };
 
   private iconForDatasetType(datasetType: DatasetType) {
     const icons: { [key in DatasetType]: any } = {
