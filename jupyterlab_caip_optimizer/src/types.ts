@@ -95,6 +95,7 @@ export type ParameterSpec = ParameterSpecBase &
     | {
         parentCategoricalValues: MatchingParentCategoricalValueSpec;
       }
+    | {}
   );
 
 export interface DecayCurveAutomatedStoppingConfig {
