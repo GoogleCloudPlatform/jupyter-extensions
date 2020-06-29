@@ -53,7 +53,6 @@ const localStyles = stylesheet({
   },
   list: {
     margin: '0',
-    // overflowY: 'scroll',
     padding: '0',
     ...csstips.flex,
   },
