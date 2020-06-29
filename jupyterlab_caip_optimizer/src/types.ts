@@ -1,3 +1,12 @@
+// Internal
+
+export interface AsyncState<T> {
+  loading: boolean;
+  error?: string;
+  data?: T;
+}
+
+// Optimizer API
 export interface MetricSpec {
   goal: GoalType;
   metric: string;

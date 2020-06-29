@@ -8,6 +8,10 @@ for the Jupyter and JupyterLab environments.
 The following steps only need to be completed once to setup your initial
 development environment.
 
+**Note**: If at any point you want to go through these steps on a fresh
+JupyterLab environment, you can run `pipenv --rm` to remove the virtual
+environment.
+
 1. Clone this repository.
 
    - `git clone git@github.com:GoogleCloudPlatform/jupyter-extensions.git`
@@ -29,12 +33,17 @@ development environment.
 1. Run `pipenv shell` to activate the virtual Python environment with the
    necessary dependencies installed.
 
+1. Run `cd shared/` and then `npm run install-shared` to install the shared
+   package.
+
 1. Run `npm run link` to link the [gcp-jupyterlab-shared](./shared/client)
    package into the JupyterLab environment.
 
    - This allows local development on the common frontend components library
      to be used in other extensions without needing to publish and re-install
      updated versions of the packages.
+   - If you are having trouble running this command, try restarting these
+     steps on a new JupyterLab environment (see Note above).
 
 1. `cd` into the folder of the extension you plan to develop and run
    `npm run install-extension`. This installs the extension in the

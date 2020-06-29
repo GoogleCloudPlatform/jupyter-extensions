@@ -7,7 +7,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
   <div
     className="row_f17j33oz message_ftgw0r2"
   >
-    <WithStyles(pure(CheckCircleIcon)) />
+    <WithStyles(CheckCircleIcon) />
     <span>
       Notebook run successfully scheduled!
     </span>
@@ -126,7 +126,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
   <div
     className="row_f17j33oz message_ftgw0r2"
   >
-    <WithStyles(pure(CheckCircleIcon)) />
+    <WithStyles(CheckCircleIcon) />
     <span>
       Notebook run successfully scheduled!
     </span>
