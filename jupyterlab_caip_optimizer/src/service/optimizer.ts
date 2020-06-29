@@ -43,6 +43,12 @@ export class OptimizerService {
     this._transportService = transportService;
   }
 
+  private serializeStudy(study: Study): Study {
+    // projects/project-name/locations/us-central1/studies/study-name -> study-name
+    const name = study.name.split('/').pop();
+    return { ...study, name };
+  }
+
   async getMetaData(): Promise<MetadataRequired> {
     const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
@@ -72,10 +78,10 @@ export class OptimizerService {
 
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
     const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-    const response = await this._transportService.submit<Study[]>({
+    const response = await this._transportService.submit<{ studies: Study[] }>({
       path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
       method: 'GET',
     });
-    return response.result;
+    return response.result.studies.map(this.serializeStudy);
   }
 }
