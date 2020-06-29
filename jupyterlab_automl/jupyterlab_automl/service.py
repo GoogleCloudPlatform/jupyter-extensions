@@ -8,6 +8,8 @@ from google.cloud import automl_v1beta1
 
 from gcp_jupyterlab_shared.handlers import AuthProvider
 
+from googleapiclient.discovery import build
+
 
 def parse_dataset_type(dataset):
     for dt in DatasetType:
@@ -62,6 +64,26 @@ class Days(Enum):
 class ChartInfo(Enum):
     name = "name"
     amount = "Number of Instances"
+
+
+class ManagementService:
+    """Provides an authenicated Service Management Client"""
+
+    _instance = None
+
+    @classmethod
+    def get(cls):
+        if not cls._instance:
+            cls._instance = ManagementService()
+        return cls._instance
+
+    def get_managed_services(self):
+        consumerId = 'project:' + AuthProvider.get().project
+        request = build('servicemanagement', 'v1').services().list(consumerId=consumerId)
+        return request.execute()
+
+    def get_project(self):
+        return AuthProvider.get().project
 
 
 class AutoMLService:

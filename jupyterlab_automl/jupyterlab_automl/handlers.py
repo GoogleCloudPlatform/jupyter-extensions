@@ -6,7 +6,7 @@ import json
 import tornado.gen as gen
 from notebook.base.handlers import APIHandler, app_log
 
-from jupyterlab_automl.service import AutoMLService
+from jupyterlab_automl.service import AutoMLService, ManagementService
 
 handlers = {}
 
@@ -74,3 +74,13 @@ def _delete_dataset(args):
 def _delete_model(args):
     AutoMLService.get().client.delete_model(args["modelId"])
     return {"success": True}
+
+
+@_handler("GET", "managedServices")
+def _table_info(args):
+    return ManagementService.get().get_managed_services()
+
+
+@_handler("GET", "project")
+def _table_info(args):
+    return ManagementService.get().get_project()
