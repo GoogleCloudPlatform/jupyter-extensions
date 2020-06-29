@@ -1,7 +1,7 @@
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import rootReducer from '../reducers';
+import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
 import { ReduxReactWidget } from './ReduxReactWidget';
 
