@@ -12,20 +12,26 @@ export interface MetricSpec {
   metric: string;
 }
 
-export type GoalType = 'GOAL_TYPE_UNSPECIFIED' | 'MAXIMIZE' | 'MINIMIZE';
+export enum GoalType {
+  GOAL_TYPE_UNSPECIFIED = 'GOAL_TYPE_UNSPECIFIED',
+  MAXIMIZE = 'MAXIMIZE',
+  MINIMIZE = 'MINIMIZE',
+}
 
-export type ParameterType =
-  | 'PARAMETER_TYPE_UNSPECIFIED'
-  | 'DOUBLE'
-  | 'INTEGER'
-  | 'CATEGORICAL'
-  | 'DISCRETE';
+export enum ParameterType {
+  PARAMETER_TYPE_UNSPECIFIED = 'PARAMETER_TYPE_UNSPECIFIED',
+  DOUBLE = 'DOUBLE',
+  INTEGER = 'INTEGER',
+  CATEGORICAL = 'CATEGORICAL',
+  DISCRETE = 'DISCRETE',
+}
 
-export type ScaleType =
-  | 'SCALE_TYPE_UNSPECIFIED'
-  | 'UNIT_LINEAR_SCALE'
-  | 'UNIT_LOG_SCALE'
-  | 'UNIT_REVERSE_LOG_SCALE';
+export enum ScaleType {
+  SCALE_TYPE_UNSPECIFIED = 'SCALE_TYPE_UNSPECIFIED',
+  UNIT_LINEAR_SCALE = 'UNIT_LINEAR_SCALE',
+  UNIT_LOG_SCALE = 'UNIT_LOG_SCALE',
+  UNIT_REVERSE_LOG_SCALE = 'UNIT_REVERSE_LOG_SCALE',
+}
 
 export interface DoubleValueSpec {
   minValue: number;
