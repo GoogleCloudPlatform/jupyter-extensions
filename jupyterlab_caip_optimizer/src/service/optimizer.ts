@@ -61,7 +61,9 @@ export class OptimizerService {
     const body = JSON.stringify(study);
     const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
     const response = await this._transportService.submit<Study>({
-      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies?study_id=${study.name}`,
+      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+        metadata.region
+      }/studies?study_id=${encodeURI(study.name)}`,
       method: 'POST',
       body,
     });

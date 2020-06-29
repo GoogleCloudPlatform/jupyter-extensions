@@ -13,24 +13,24 @@ export interface MetricSpec {
 }
 
 export enum GoalType {
-  GOAL_TYPE_UNSPECIFIED,
-  MAXIMIZE,
-  MINIMIZE,
+  GOAL_TYPE_UNSPECIFIED = 'GOAL_TYPE_UNSPECIFIED',
+  MAXIMIZE = 'MAXIMIZE',
+  MINIMIZE = 'MINIMIZE',
 }
 
 export enum ParameterType {
-  PARAMETER_TYPE_UNSPECIFIED,
-  DOUBLE,
-  INTEGER,
-  CATEGORICAL,
-  DISCRETE,
+  PARAMETER_TYPE_UNSPECIFIED = 'PARAMETER_TYPE_UNSPECIFIED',
+  DOUBLE = 'DOUBLE',
+  INTEGER = 'INTEGER',
+  CATEGORICAL = 'CATEGORICAL',
+  DISCRETE = 'DISCRETE',
 }
 
 export enum ScaleType {
-  SCALE_TYPE_UNSPECIFIED,
-  UNIT_LINEAR_SCALE,
-  UNIT_LOG_SCALE,
-  UNIT_REVERSE_LOG_SCALE,
+  SCALE_TYPE_UNSPECIFIED = 'SCALE_TYPE_UNSPECIFIED',
+  UNIT_LINEAR_SCALE = 'UNIT_LINEAR_SCALE',
+  UNIT_LOG_SCALE = 'UNIT_LOG_SCALE',
+  UNIT_REVERSE_LOG_SCALE = 'UNIT_REVERSE_LOG_SCALE',
 }
 
 export interface DoubleValueSpec {
@@ -95,6 +95,7 @@ export type ParameterSpec = ParameterSpecBase &
     | {
         parentCategoricalValues: MatchingParentCategoricalValueSpec;
       }
+    | {}
   );
 
 export interface DecayCurveAutomatedStoppingConfig {
