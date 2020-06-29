@@ -57,7 +57,8 @@ class DetachedCommentsHandler(APIHandler):
             else:
                 #TODO (mkalil) : notify the user that the file is not inside a git repository
                 print("Error: file is not inside a git repository")
-                self.finish()
+
+                self.finish(json.dumps({"error_message": "Error: file is not inside a git repository"}))
 
 
 

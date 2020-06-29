@@ -25,10 +25,6 @@ import {
     IDocumentManager,
 } from '@jupyterlab/docmanager';
 
-import {
-    INotebookTracker
-} from '@jupyterlab/notebook';
-
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
 import { CommentsWidget } from './components/comments_widget'
@@ -36,7 +32,7 @@ import { CommentsWidget } from './components/comments_widget'
 import { File } from './service/file'
 
 
-function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager, notebooks: INotebookTracker) {
+function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
   console.log('JupyterLab extension jupyterlab_comments is activated!');
 
   let widget : MainAreaWidget<CommentsWidget>;
@@ -89,7 +85,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-comments',
   autoStart: true,
   activate: activate,
-  requires: [ILabShell, ICommandPalette, IDocumentManager, INotebookTracker],
+  requires: [ILabShell, ICommandPalette, IDocumentManager],
 };
 
 export default extension;

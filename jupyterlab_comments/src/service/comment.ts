@@ -11,4 +11,7 @@ export interface Comment {
     text: any,
     timestamp: any,
     range: any,
+    hash: any,
+    children?: any;
+    parent?: any,
 }
