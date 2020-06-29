@@ -2,10 +2,10 @@
   "name": "gcp_jupyterlab_shared",
   "version": "1.0.1",
   "description": "Shared libraries for JupyterLab extensions",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
-    "lib/src/**/*.{d.ts,js}"
+    "lib/**/*.{d.ts,js}"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
@@ -30,15 +30,15 @@
   },
   "homepage": "https://github.com/GoogleCloudPlatform/jupyter-extensions#readme",
   "dependencies": {
+    "@jupyterlab/services": "^4.2.2",
     "@material-ui/core": "^4.10.1",
     "@material-ui/icons": "^4.9.1",
-    "@jupyterlab/services": "^4.2.2",
     "csstips": "^1.2.0",
-    "typestyle": "^2.1.0",
+    "date-fns": "^2.14.0",
+    "material-table": "^1.62.0",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
-    "date-fns": "^2.14.0",
-    "material-table": "^1.62.0"
+    "typestyle": "^2.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.9.1",
