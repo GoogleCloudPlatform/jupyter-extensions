@@ -25,6 +25,10 @@ import {
     IDocumentManager,
 } from '@jupyterlab/docmanager';
 
+import {
+    INotebookTracker
+} from '@jupyterlab/notebook';
+
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
 import { CommentsWidget } from './components/comments_widget'
@@ -32,7 +36,7 @@ import { CommentsWidget } from './components/comments_widget'
 import { File } from './service/file'
 
 
-function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
+function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager, notebooks: INotebookTracker) {
   console.log('JupyterLab extension jupyterlab_comments is activated!');
 
   let widget : MainAreaWidget<CommentsWidget>;
@@ -46,16 +50,24 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
     execute: () => {
         var currWidget = labShell.currentWidget;
         var currentFile = docManager.contextForWidget(currWidget);
+
         if (currentFile === undefined) {
             //Don't activate the widget if there is no file open
             console.log("No open files to display comments for.");
         } else {
-            file = new File(currentFile.path);
-            content = new CommentsWidget(file);
-            widget = new MainAreaWidget<CommentsWidget>({content});
-            widget.id = 'jupyterlab_comments';
-            widget.title.label = 'Notebook comments in Git';
-            widget.title.closable = true;
+            if (!widget || widget.isDisposed) {
+              const context = {
+                app: app,
+                labShell: labShell,
+                docManager: docManager,
+              };
+              file = new File(currentFile.path);
+              content = new CommentsWidget(file, context);
+              widget = new MainAreaWidget<CommentsWidget>({content});
+              widget.id = 'jupyterlab_comments';
+              widget.title.label = 'Notebook comments in Git';
+              widget.title.closable = true;
+            }
 
             if (!widget.isAttached) {
                 app.shell.add(widget, 'right');
@@ -77,7 +89,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-comments',
   autoStart: true,
   activate: activate,
-  requires: [ILabShell, ICommandPalette, IDocumentManager],
+  requires: [ILabShell, ICommandPalette, IDocumentManager, INotebookTracker],
 };
 
 export default extension;

@@ -1,18 +1,35 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { File } from '../service/file'
+import { DetachedComment } from '../service/comment'
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest } from '../git'
 import { stylesheet } from 'typestyle';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Divider from '@material-ui/core/Divider';
+import { JupyterFrontEnd, ILabShell } from '@jupyterlab/application';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 interface Props {
   file: File,
+  context: Context,
 }
 
 interface State {
-  detachedComments: object[],
+  detachedComments: DetachedComment[],
   reviewComments: object[],
   fileName: string,
+}
+
+export interface Context {
+  app: JupyterFrontEnd,
+  labShell: ILabShell,
+  docManager: IDocumentManager,
+
 }
 
 const localStyles = stylesheet({
@@ -24,6 +41,9 @@ const localStyles = stylesheet({
     margin: 0,
     padding: '8px 12px',
     textTransform: 'uppercase',
+  },
+  root: {
+    backgroundColor: 'white',
   },
 });
 
@@ -51,13 +71,21 @@ export class CommentsComponent extends React.Component<Props, State> {
   }
 
   render() {
-    const commentsList = this.state.detachedComments.map((commentJSON) =>
-        <li key={commentJSON["timestamp"]}> {commentJSON["description"]}</li>
+    const commentsList = this.state.detachedComments.map((comment) =>
+        <div>
+        <ListItem button>
+          <ListItemText primary= {comment.text} />
+        </ListItem>
+        <Divider variant="inset" component="li"/>
+        </div>
       );
     return (
-      <div>
-        <header className={localStyles.header}> Comments for {this.state.fileName} </header>
-        <ul>{commentsList}</ul>
+      <div className = {localStyles.root}>
+        <CssBaseline />
+          <Typography color="primary" variant="h5" gutterBottom>
+              Comments for {this.state.fileName}
+          </Typography>
+        <List>{commentsList}</List>
       </div>
 
 
@@ -68,11 +96,31 @@ export class CommentsComponent extends React.Component<Props, State> {
     const serverRoot = PageConfig.getOption('serverRoot');
     const filePath = this.props.file.filePath;
     //Fetch detached comments
-    httpGitRequest("detachedComments", "GET", filePath, serverRoot).then(response => response.json().then(comments => {
-          comments.forEach(function(comment) {
-            console.log(comment);
-          });
-          this.setState({detachedComments : comments});
+    httpGitRequest("detachedComments", "GET", filePath, serverRoot).then(response => response.json().then(data => {
+          if (data) {
+            let comments : Array<DetachedComment> = new Array<DetachedComment>();
+            data.forEach(function(obj) {
+              console.log(obj);
+              const content = obj.comment;
+              const hash = obj.hash;
+              const children = obj.children;
+              let comment : DetachedComment = {
+                author: content.author,
+                text: content.description,
+                timestamp: content.timestamp,
+                range: content.location.range,
+                hash: hash,
+              };
+              if (children) {
+                comment.children = children;
+              }
+              if (content.parent) {
+                comment.parent = parent;
+              }
+              comments.push(comment);
+            });
+            this.setState({detachedComments : comments});
+          }
 
     }));
   }
@@ -80,13 +128,19 @@ export class CommentsComponent extends React.Component<Props, State> {
 }
 
 export class CommentsWidget extends ReactWidget {
-  constructor(readonly file : File) {
+  constructor(private file : File, private context : Context) {
     super();
     this.addClass('comments-widget');
+    //Track when the user switches to viewing a different file
+    context.labShell.currentChanged.connect(() => {
+        if (context.docManager.contextForWidget(context.labShell.currentWidget)) {
+          console.log("User has switched tabs to a different file");
+        }
+     });
   }
 
   render() {
-    return <CommentsComponent file={this.file} />;
+    return <CommentsComponent file = {this.file} context = {this.context} />;
   }
 
 
