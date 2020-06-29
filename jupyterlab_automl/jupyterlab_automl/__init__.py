@@ -1,12 +1,6 @@
 from notebook.utils import url_path_join
 
-from jupyterlab_automl.handlers import (
-    DeleteDataset,
-    DeleteModel,
-    ListDatasets,
-    ListModels,
-    ListTableInfo,
-)
+from jupyterlab_automl.handlers import handlers
 from jupyterlab_automl.version import VERSION
 
 __version__ = VERSION
@@ -28,12 +22,7 @@ def load_jupyter_server_extension(nb_server_app):
     app.add_handlers(
         host_pattern,
         [
-            # TODO(cbwilkes): Add auth checking if needed.
-            # (url_path_join(gcp_v1_endpoint, auth'), AuthHandler)
-            (url_path_join(gcp_v1_endpoint, "datasets") + "(.*)", ListDatasets),
-            (url_path_join(gcp_v1_endpoint, "models") + "(.*)", ListModels),
-            (url_path_join(gcp_v1_endpoint, "tableInfo") + "(.*)", ListTableInfo),
-            (url_path_join(gcp_v1_endpoint, "deleteDataset") + "(.*)", DeleteDataset),
-            (url_path_join(gcp_v1_endpoint, "deleteModel") + "(.*)", DeleteModel),
+            (url_path_join(gcp_v1_endpoint, k) + "(.*)", v)
+            for (k, v) in handlers.items()
         ],
     )

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+export * from './components/action_bar';
 export * from './components/checkbox_input';
+export * from './components/context_menu';
+export * from './components/dialog';
 export * from './components/field_error';
 export * from './components/icon_button_menu';
 export * from './components/learn_more_link';
+export * from './components/list_resources_table';
 export * from './components/message';
 export * from './components/progress';
 export * from './components/select_input';
@@ -29,5 +33,6 @@ export * from './components/validation_error';
 export * from './service/transport';
 export * from './service/test_helpers';
 export * from './service/data';
+export * from './service/widget_manager';
 export * from './utils';
 export * from './styles';

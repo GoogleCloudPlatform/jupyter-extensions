@@ -109,7 +109,7 @@ MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
-    cursor: 'pointer',
+
     fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size1, 13px)',
     lineHeight: '24px',
@@ -118,6 +118,13 @@ export const STYLES = stylesheet({
   },
   attribute: {
     marginRight: '4px',
+  },
+  interactiveHover: {
+    $nest: {
+      '&:hover': {
+        backgroundColor: '#8a8a8a',
+      },
+    },
   },
   dt: {
     display: 'table-cell',

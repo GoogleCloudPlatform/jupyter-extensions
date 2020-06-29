@@ -68,14 +68,21 @@ export class VmDetails extends React.Component<{}, State> {
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
+
     return (
       <span className={STYLES.container}>
         <span
-          className={classes(STYLES.icon, ICON_CLASS)}
+          className={classes(
+            STYLES.icon,
+            ICON_CLASS,
+            STYLES.interactiveHover
+          )}
           title="Show all details"
           onClick={() => this.showDialog()}
         ></span>
-        {details ? this.getDisplayedDetails(details) : noDetailsMessage}
+        <span className={classes(STYLES.interactiveHover)}>
+          {details ? this.getDisplayedDetails(details) : noDetailsMessage}
+        </span>
       </span>
     );
   }

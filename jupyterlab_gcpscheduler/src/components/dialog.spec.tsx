@@ -273,7 +273,7 @@ describe('SchedulerDialog', () => {
       .find(IconButtonMenu)
       .dive()
       .findWhere(w => w.text() === 'Reset configuration')
-      .parent()
+      .first()
       .simulate('click');
     expect(settings.save).toHaveBeenCalledWith('{}');
   });

@@ -2,9 +2,11 @@ import { combineReducers } from 'redux';
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 import { studiesSlice } from './studies';
+import { viewSlice } from './view';
 
 const rootReducer = combineReducers({
   studies: studiesSlice.reducer,
+  view: viewSlice.reducer,
 });
 
 export const store = configureStore({
