@@ -17,7 +17,6 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
 
-
 /*
 Send a request to the server
 Params:
@@ -28,23 +27,34 @@ Params:
     body = for a POST request, should contain comments to upload
 
 */
-export function httpGitRequest(handler : string, method : string, fileName : string, serverRoot : string, body? : Record<string, string>) : Promise<Response> {
-    const setting = ServerConnection.makeSettings();
-    const fullUrl = URLExt.join(setting.baseUrl, handler).concat("?", "file_path=", fileName, "&server_root=", serverRoot);
+export function httpGitRequest(
+  handler: string,
+  method: string,
+  fileName: string,
+  serverRoot: string,
+  body?: Record<string, string>
+): Promise<Response> {
+  const setting = ServerConnection.makeSettings();
+  const fullUrl = URLExt.join(setting.baseUrl, handler).concat(
+    '?',
+    'file_path=',
+    fileName,
+    '&server_root=',
+    serverRoot
+  );
 
-    let fullRequest : RequestInit;
+  let fullRequest: RequestInit;
 
-    if (!body) {
-        fullRequest = {
-            method: method,
-        };
-    } else {
-        fullRequest = {
-            body: JSON.stringify(body),
-            method: method,
-        };
-    }
+  if (!body) {
+    fullRequest = {
+      method: method,
+    };
+  } else {
+    fullRequest = {
+      body: JSON.stringify(body),
+      method: method,
+    };
+  }
 
-    return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
-
+  return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 }
