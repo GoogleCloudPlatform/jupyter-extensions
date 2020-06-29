@@ -334,12 +334,20 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   }
 
   private async getDatasets() {
-    const datasets = await DatasetService.listDatasets();
-    this.setState({ datasets: datasets });
+    try {
+      const datasets = await DatasetService.listDatasets();
+      this.setState({ datasets: datasets });
+    } catch (e) {
+      console.log('Failed to load dataset resource.');
+    }
   }
 
   private async getModels() {
-    const models = await ModelService.listModels();
-    this.setState({ models: models });
+    try {
+      const models = await ModelService.listModels();
+      this.setState({ models: models });
+    } catch (e) {
+      console.log('Failed to load models resource.');
+    }
   }
 }
