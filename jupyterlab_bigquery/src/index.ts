@@ -8,10 +8,10 @@ import {
 
 import { ListItemsWidget } from './components/list_items_panel/list_tree_item_widget';
 import { ListProjectsService } from './components/list_items_panel/service/list_items';
-import { WidgetManager } from './utils/widget_manager';
+import { WidgetManager } from './utils/widgetManager/widget_manager';
 
 async function activate(app: JupyterFrontEnd) {
-  const manager = new WidgetManager(app);
+  const manager = WidgetManager.getInstance(app);
   const context = { app: app, manager: manager };
   const listProjectsService = new ListProjectsService();
   const listWidget = new ListItemsWidget(listProjectsService, context);

@@ -8,7 +8,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ListProjectsService, Projects } from './service/list_items';
 import { ListProjectItem } from './list_tree_item';
-import { WidgetManager } from '../../utils/widget_manager';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 
 interface Props {

@@ -1,13 +1,18 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
 import { connect } from 'react-redux';
-import { updateQueryResult } from '../../../reducers/queryEditorTabSlice';
+import {
+  updateQueryResult,
+  resetQueryResult,
+} from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Button } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
-import { QueryService, QueryResult } from './service/query';
+import { QueryService } from './service/query';
+import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
+import PagedJob from '../../../utils/pagedAPI/pagedJob';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
@@ -15,6 +20,17 @@ interface QueryTextEditorState {
 
 interface QueryTextEditorProps {
   updateQueryResult: any;
+  resetQueryResult: any;
+}
+
+interface QueryResponseType {
+  content: string;
+  labels: string;
+}
+
+interface QueryRequestBodyType {
+  query: string;
+  jobConfig: {};
 }
 
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
@@ -44,6 +60,9 @@ class QueryTextEditor extends React.Component<
 > {
   queryService: QueryService;
   editor: editor.IStandaloneCodeEditor;
+  job: PagedJob<QueryRequestBodyType, QueryResponseType> = null;
+
+  pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
   constructor(props) {
     super(props);
@@ -51,20 +70,27 @@ class QueryTextEditor extends React.Component<
       buttonState: ButtonStates.READY,
     };
     this.queryService = new QueryService();
+
+    this.pagedQueryService = new PagedService('query');
   }
 
   async handleSubmit() {
+    this.props.resetQueryResult();
     const query = this.editor.getValue();
 
-    this.queryService
-      .query(query)
-      .then((res: QueryResult) => {
-        //TODO: handle success
-        this.props.updateQueryResult(res);
-      })
-      .catch(err => {
-        //TODO: Handle fail query
-      });
+    this.job = this.pagedQueryService.request(
+      { query, jobConfig: {} },
+      (state, _, response) => {
+        if (state === JobState.Pending) {
+          Object.keys(response).map(key => {
+            response[key] = JSON.parse(response[key]);
+          });
+
+          this.props.updateQueryResult(response);
+        }
+      },
+      2000
+    );
   }
 
   handleEditorDidMount(_, editor) {
@@ -102,6 +128,6 @@ const mapStateToProps = _ => {
   return {};
 };
 
-const mapDispatchToProps = { updateQueryResult };
+const mapDispatchToProps = { updateQueryResult, resetQueryResult };
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);

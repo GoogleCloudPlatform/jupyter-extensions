@@ -3,7 +3,7 @@ import { Signal } from '@phosphor/signaling';
 import QueryEditorTab from './query_editor_tab';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { ReduxReactWidget } from '../../../utils/ReduxReactWidget';
+import { ReduxReactWidget } from '../../../utils/widgetManager/redux_react_widget';
 
 const localStyles = stylesheet({
   panel: {
