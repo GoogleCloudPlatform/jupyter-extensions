@@ -1,13 +1,15 @@
+"""Testing handlers for AutoML extension backend"""
+
 import inspect
 import unittest
-from unittest.mock import MagicMock, Mock, patch
-
+from unittest.mock import MagicMock
 from notebook.base.handlers import APIHandler
-
 from jupyterlab_automl.handlers import _handler, handlers
 
 
 class TestHandlers(unittest.TestCase):
+    """Testing the AutoML extension handlers"""
+
     def testHandlerDecorator(self):
         func = MagicMock()
 

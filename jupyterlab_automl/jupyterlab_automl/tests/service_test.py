@@ -1,12 +1,14 @@
+"""Testing services for AutoML extension backend"""
+
 import unittest
-from unittest.mock import Mock, MagicMock, patch
-
+from unittest.mock import Mock, MagicMock
 from jupyterlab_automl import service
-
 from google.cloud.aiplatform_v1alpha1.types import Dataset, ListDatasetsResponse
 
 
 class TestAutoMLExtension(unittest.TestCase):
+    """Testing the AutoML extension services"""
+
     def testListDatasets(self):
         time1 = {"seconds": 0, "nanos": 0}
         time2 = {"seconds": 1, "nanos": 1000000000}

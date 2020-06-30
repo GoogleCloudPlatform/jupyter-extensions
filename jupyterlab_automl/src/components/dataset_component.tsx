@@ -16,7 +16,7 @@ import {
   YAxis,
 } from 'recharts';
 import { stylesheet } from 'typestyle';
-import { Dataset, DatasetService, TableSpec } from '../service/dataset';
+import { Dataset, TableSpec } from '../service/dataset';
 
 interface DetailPanelProps {
   dataType: string;
@@ -505,9 +505,7 @@ export class DatasetComponent extends React.Component<Props, State> {
   private async getTableDetails() {
     try {
       this.setState({ isLoading: true });
-      const tableSpecs = await DatasetService.listTableSpecs(
-        this.props.dataset.id
-      );
+      const tableSpecs = [];
       this.setState({ hasLoaded: true, tableSpecs: tableSpecs });
     } catch (err) {
       console.warn('Error retrieving table details', err);

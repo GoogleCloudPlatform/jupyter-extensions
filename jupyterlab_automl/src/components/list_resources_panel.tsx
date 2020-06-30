@@ -215,8 +215,8 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   title: 'Name',
                 },
                 {
-                  title: 'Dataset',
-                  field: 'datasetId',
+                  title: 'Pipeline',
+                  field: 'pipelineId',
                   minShowWidth: breakpoints[1],
                 },
                 {

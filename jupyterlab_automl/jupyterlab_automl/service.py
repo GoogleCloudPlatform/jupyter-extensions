@@ -1,13 +1,10 @@
 """Services for AutoML extension backend"""
 
-import math
-from collections import defaultdict
 from enum import Enum
-
 from google.cloud import aiplatform_v1alpha1
+from google.protobuf import json_format
 from gcp_jupyterlab_shared.handlers import AuthProvider
 from googleapiclient.discovery import build
-from google.protobuf import json_format
 
 
 def parse_dataset_type(dataset):
@@ -38,10 +35,9 @@ class ManagementService:
         return cls._instance
 
     def get_managed_services(self):
-        consumerId = "project:" + AuthProvider.get().project
-        request = (
-            build("servicemanagement", "v1").services().list(consumerId=consumerId)
-        )
+        consumer_id = "project:" + AuthProvider.get().project
+        service = build("servicemanagement", "v1").services()
+        request = service.list(consumerId=consumer_id)
         return request.execute()
 
     def get_project(self):
@@ -55,10 +51,14 @@ class AutoMLService:
 
     def __init__(self):
         self._dataset_client = aiplatform_v1alpha1.DatasetServiceClient(
-            client_options={"api_endpoint": "us-central1-aiplatform.googleapis.com"}
+            client_options={
+                "api_endpoint": "us-central1-aiplatform.googleapis.com"
+            }
         )
         self._model_client = aiplatform_v1alpha1.ModelServiceClient(
-            client_options={"api_endpoint": "us-central1-aiplatform.googleapis.com"}
+            client_options={
+                "api_endpoint": "us-central1-aiplatform.googleapis.com"
+            }
         )
         self._parent = (
             "projects/" + AuthProvider.get().project + "/locations/us-central1"
@@ -80,7 +80,23 @@ class AutoMLService:
 
     def get_models(self):
         models = self._model_client.list_models(parent=self._parent).models
-        return {"models": [{"id": model.name,} for model in models]}
+        return {
+            "models": [
+                {
+                    "id": model.name,
+                    "displayName": model.display_name,
+                    "pipelineId": model.training_pipeline,
+                    "createTime": model.create_time.strftime(
+                        "%m/%d/%Y, %H:%M:%S"
+                    ),
+                    "updateTime": model.update_time.strftime(
+                        "%m/%d/%Y, %H:%M:%S"
+                    ),
+                    "etag": model.etag,
+                }
+                for model in models
+            ]
+        }
 
     def get_datasets(self):
         datasets = []
@@ -99,7 +115,9 @@ class AutoMLService:
                         ),
                         "datasetType": dataset_type.value,
                         "etag": dataset.etag,
-                        "metadata": json_format.MessageToDict(dataset._pb.metadata),
+                        "metadata": json_format.MessageToDict(
+                            dataset._pb.metadata
+                        ),
                     }
                 )
         return {"datasets": datasets}
