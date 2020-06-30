@@ -16,20 +16,21 @@
 
 jest.mock('@jupyterlab/apputils');
 import { showDialog, ReactWidget } from '@jupyterlab/apputils';
-import { ServerConnection } from '@jupyterlab/services';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { VmDetails } from './details_widget';
 import { STYLES } from './data';
-import { asFetchResponse, DETAILS_RESPONSE } from './test_helpers';
+import { ServerWrapper } from './components/server_wrapper';
+import { DETAILS_RESPONSE } from './test_helpers';
 
 describe('VmDetails', () => {
-  const mockMakeRequest = jest.fn();
+  const mockGetUtilizationData = jest.fn();
+  const mockServerWrapper = ({
+    getUtilizationData: mockGetUtilizationData,
+  } as unknown) as ServerWrapper;
 
   beforeEach(() => {
-    ServerConnection.makeRequest = mockMakeRequest;
-
     jest.resetAllMocks();
     jest.useFakeTimers();
   });
@@ -39,26 +40,23 @@ describe('VmDetails', () => {
   });
 
   it('Renders with details', async () => {
-    const detailsResponse = Promise.resolve(JSON.parse(DETAILS_RESPONSE));
-    const outerPromise = asFetchResponse(detailsResponse);
-    mockMakeRequest.mockReturnValue(outerPromise);
-
-    const vmDetails = shallow(<VmDetails />);
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
+    const resolveValue = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
     expect(vmDetails).toMatchSnapshot('Retrieving');
-    await Promise.all([outerPromise, detailsResponse]);
+    await resolveValue;
 
     expect(vmDetails).toMatchSnapshot('Details');
-    expect(mockMakeRequest).toHaveBeenCalledTimes(1);
-    expect(mockMakeRequest.mock.calls[0][0]).toMatch('/gcp/v1/details');
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
   });
 
   it('Renders with error', async () => {
-    const errorResponse = asFetchResponse(null, false);
-    mockMakeRequest.mockReturnValue(errorResponse);
+    mockGetUtilizationData.mockImplementation(() => {
+      throw new Error();
+    });
 
-    const vmDetails = shallow(<VmDetails />);
-    expect(vmDetails).toMatchSnapshot('Retrieving');
-    await errorResponse;
+    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
 
     expect(vmDetails).toMatchSnapshot('Received Error');
     vmDetails.find(`span.${STYLES.icon}`).simulate('click');
@@ -69,12 +67,11 @@ describe('VmDetails', () => {
   });
 
   it('Opens dialog when icon is clicked', async () => {
-    const detailsResponse = Promise.resolve(JSON.parse(DETAILS_RESPONSE));
-    const outerPromise = asFetchResponse(detailsResponse);
-    mockMakeRequest.mockReturnValue(outerPromise);
-
-    const vmDetails = shallow(<VmDetails />);
-    await Promise.all([outerPromise, detailsResponse]);
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
+    const resolveValue = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    await resolveValue;
 
     vmDetails.find(`span.${STYLES.icon}`).simulate('click');
     expect(showDialog).toHaveBeenCalled();
@@ -82,12 +79,11 @@ describe('VmDetails', () => {
   });
 
   it('Cycles through attributes when clicked', async () => {
-    const detailsResponse = Promise.resolve(JSON.parse(DETAILS_RESPONSE));
-    const outerPromise = asFetchResponse(detailsResponse);
-    mockMakeRequest.mockReturnValue(outerPromise);
-
-    const vmDetails = shallow(<VmDetails />);
-    await Promise.all([outerPromise, detailsResponse]);
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
+    const resolveValue = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    await resolveValue;
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.length).toBe(2);
@@ -118,14 +114,13 @@ describe('VmDetails', () => {
   });
 
   it('Auto-refreshes when resource utilization are displayed', async () => {
-    const detailsResponse = Promise.resolve(JSON.parse(DETAILS_RESPONSE));
-    const outerPromise = asFetchResponse(detailsResponse);
-    mockMakeRequest.mockReturnValue(outerPromise);
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
+    const resolveValue = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    await resolveValue;
 
-    const vmDetails = shallow(<VmDetails />);
-    await Promise.all([outerPromise, detailsResponse]);
-
-    expect(mockMakeRequest).toHaveBeenCalledTimes(1);
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     // Click four times to move to CPU usage
     for (let i = 0; i < 4; i++) {
       vmDetails
@@ -139,14 +134,14 @@ describe('VmDetails', () => {
     expect(attributes.last().text()).toBe('Memory: 16.0%');
 
     jest.advanceTimersToNextTimer();
-    expect(mockMakeRequest).toHaveBeenCalledTimes(2);
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(2);
 
     attributes.first().simulate('click');
     attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.first().text()).toBe('Memory: 16.0% | ');
     expect(attributes.last().text()).toBe('GPU: Tesla K80 - 100.0%');
     jest.advanceTimersToNextTimer();
-    expect(mockMakeRequest).toHaveBeenCalledTimes(3);
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(3);
 
     // Click twice and timer should not refresh data again
     attributes.first().simulate('click');
@@ -155,6 +150,6 @@ describe('VmDetails', () => {
     expect(attributes.first().text()).toBe('pytorch | ');
     expect(attributes.last().text()).toBe('test-project');
     jest.advanceTimersToNextTimer();
-    expect(mockMakeRequest).toHaveBeenCalledTimes(3);
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(3);
   });
 });

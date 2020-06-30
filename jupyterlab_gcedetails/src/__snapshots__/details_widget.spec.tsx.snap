@@ -66,20 +66,3 @@ exports[`VmDetails Renders with error: Received Error 1`] = `
   </span>
 </span>
 `;
-
-exports[`VmDetails Renders with error: Retrieving 1`] = `
-<span
-  className="container_f20cyc7"
->
-  <span
-    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
-    onClick={[Function]}
-    title="Show all details"
-  />
-  <span
-    className="interactiveHover_feuq7k1"
-  >
-    Retrieving VM Details...
-  </span>
-</span>
-`;
