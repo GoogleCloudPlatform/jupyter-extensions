@@ -1,6 +1,6 @@
 # jupyterlab_comments
 
-Collaborative notebooks in git
+Notebooks comments in git
 
 
 

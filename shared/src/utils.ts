@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
+import { ServerConnection } from '@jupyterlab/services';
+
 // Utility functions and types
 /** Interface for an <option> inside a <select> */
 export interface Option {
   text: string;
   value: string | number;
   disabled?: boolean;
+}
+
+/**
+ * Subset of GCE VM Metadata for AI Platform Notebooks
+ * https://cloud.google.com/compute/docs/storing-retrieving-metadata
+ */
+export interface InstanceMetadata {
+  project: string;
+  numericProjectId: string;
+  framework: string;
+  id: string;
+  name: string;
+  frameworkTitle: string;
+  dlvmImageVersion: string;
+  machineType: string;
+  zone: string;
 }
 
 /** Returns an option whose value matches the given value. */
@@ -41,3 +59,16 @@ export function removeFromList<T>(list: T[], value: T) {
 
 /** Link to Cloud Console */
 export const CLOUD_CONSOLE = 'https://console.cloud.google.com';
+
+/** Retrieves Metadata from the VM */
+export async function getMetadata(): Promise<InstanceMetadata> {
+  const response = await ServerConnection.makeRequest(
+    `${ServerConnection.defaultSettings.baseUrl}gcp/v1/metadata`,
+    {},
+    ServerConnection.defaultSettings
+  );
+  if (!response.ok) {
+    throw { result: await response.text() };
+  }
+  return (await response.json()) as InstanceMetadata;
+}

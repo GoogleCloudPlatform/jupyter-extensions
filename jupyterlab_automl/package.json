@@ -51,7 +51,7 @@
     "@types/base64-js": "^1.2.5",
     "@types/react": "^16.9.35",
     "csstips": "^1.2.0",
-    "gcp-jupyterlab-shared": "^1.0.0",
+    "gcp_jupyterlab_shared": "^1.0.1",
     "material-table": "^1.61.0",
     "react-portal": "^4.2.1",
     "recharts": "^1.8.5",

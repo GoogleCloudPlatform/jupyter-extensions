@@ -7,7 +7,7 @@ exports[`JobListItem Renders for failed job 1`] = `
   <div
     title="Status: SUCCEEDED"
   >
-    <WithStyles(pure(CheckIcon)) />
+    <WithStyles(CheckIcon) />
   </div>
   <div
     className="details_f1grbse3"
@@ -32,7 +32,7 @@ exports[`JobListItem Renders for failed job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<WithStyles(pure(MoreVertIcon)) />}
+      icon={<ForwardRef(WithStyles) />}
       menuItems={[Function]}
     />
   </div>
@@ -46,7 +46,7 @@ exports[`JobListItem Renders for running job 1`] = `
   <div
     title="Status: SUCCEEDED"
   >
-    <WithStyles(pure(CheckIcon)) />
+    <WithStyles(CheckIcon) />
   </div>
   <div
     className="details_f1grbse3"
@@ -71,7 +71,7 @@ exports[`JobListItem Renders for running job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<WithStyles(pure(MoreVertIcon)) />}
+      icon={<ForwardRef(WithStyles) />}
       menuItems={[Function]}
     />
   </div>
@@ -85,7 +85,7 @@ exports[`JobListItem Renders for successful job 1`] = `
   <div
     title="Status: SUCCEEDED"
   >
-    <WithStyles(pure(CheckIcon)) />
+    <WithStyles(CheckIcon) />
   </div>
   <div
     className="details_f1grbse3"
@@ -110,7 +110,7 @@ exports[`JobListItem Renders for successful job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<WithStyles(pure(MoreVertIcon)) />}
+      icon={<ForwardRef(WithStyles) />}
       menuItems={[Function]}
     />
   </div>
