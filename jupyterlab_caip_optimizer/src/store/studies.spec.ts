@@ -1,5 +1,5 @@
 import { studiesSlice, fetchStudies, createStudy } from './studies';
-import { AsyncState, Study } from '../types';
+import { AsyncState, Study, Algorithm } from '../types';
 
 describe('studies reducer', () => {
   describe('fetchStudies', () => {
@@ -78,7 +78,7 @@ describe('studies reducer', () => {
               metric: 'y',
             },
           ],
-          algorithm: 0,
+          algorithm: Algorithm.ALGORITHM_UNSPECIFIED,
         },
       } as Study;
       const newState = studiesSlice.reducer(
