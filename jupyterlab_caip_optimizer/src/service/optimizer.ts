@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 
-import { TransportService } from 'gcp_jupyterlab_shared';
+import { TransportService, handleApiError } from 'gcp_jupyterlab_shared';
 import { Study, MetadataFull, MetadataRequired } from '../types';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
@@ -58,16 +58,21 @@ export class OptimizerService {
   }
 
   async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
-    const body = JSON.stringify(study);
-    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-    const response = await this._transportService.submit<Study>({
-      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
-        metadata.region
-      }/studies?study_id=${encodeURI(study.name)}`,
-      method: 'POST',
-      body,
-    });
-    return response.result;
+    try {
+      const body = JSON.stringify(study);
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies?study_id=${encodeURI(study.name)}`,
+        method: 'POST',
+        body,
+      });
+      return response.result;
+    } catch (err) {
+      console.error('Unable to create study');
+      handleApiError(err);
+    }
   }
 
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
