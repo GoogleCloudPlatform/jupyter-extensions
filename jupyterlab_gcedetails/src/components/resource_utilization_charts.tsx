@@ -28,7 +28,7 @@ const UTILIZATION_CHART_PROPERTIES = {
 };
 
 interface Props {
-  serverWrapper: ServerWrapper;
+  detailsServer: ServerWrapper;
 }
 
 interface State {
@@ -37,7 +37,7 @@ interface State {
 }
 
 export class ResourceUtilizationCharts extends React.Component<Props, State> {
-  private readonly refreshInterval: number;
+  private refreshInterval: number;
   private readonly NUM_DATA_POINTS = 20;
   private readonly REFRESH_INTERVAL = 1000;
   constructor(props: Props) {
@@ -50,6 +50,9 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
       data,
       receivedError: false,
     };
+  }
+
+  componentDidMount() {
     this.refreshInterval = window.setInterval(() => {
       this.pollUtilizationData();
     }, this.REFRESH_INTERVAL);
@@ -89,14 +92,14 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
   }
 
   private async pollUtilizationData() {
-    const details = await this.props.serverWrapper.get();
-    if (!details.ok) {
+    try {
+      const details = await this.props.detailsServer.getUtilizationData();
+      const data = this.state.data.slice(1);
+      data.push(details.utilization);
+      this.setState({ data });
+    } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
-    } else {
-      const data = this.state.data.slice(1);
-      data.push(details.data.utilization);
-      this.setState({ data });
     }
   }
 }

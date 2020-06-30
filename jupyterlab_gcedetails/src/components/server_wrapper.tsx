@@ -1,4 +1,5 @@
 import { ServerConnection } from '@jupyterlab/services';
+import { Details } from '../data';
 
 export class ServerWrapper {
   private readonly serverSettings: ServerConnection.ISettings;
@@ -11,20 +12,16 @@ export class ServerWrapper {
     this.url = this.serverSettings.baseUrl + endpoint;
   }
 
-  async get() {
-    try {
-      const response = await ServerConnection.makeRequest(
-        this.url,
-        {},
-        this.serverSettings
-      );
-      if (!response.ok) {
-        return { ok: false };
-      }
-      const data = await response.json();
-      return { data, ok: true };
-    } catch (e) {
-      return { ok: false, err: e };
+  async getUtilizationData(): Promise<Details> {
+    const response = await ServerConnection.makeRequest(
+      this.url,
+      {},
+      this.serverSettings
+    );
+    if (!response.ok) {
+      throw new Error();
     }
+    const data = await response.json();
+    return { ...data };
   }
 }

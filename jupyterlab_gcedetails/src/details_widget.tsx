@@ -82,12 +82,12 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    const details = await this.props.detailsServer.get();
-    if (!details.ok) {
+    try {
+      const details = await this.props.detailsServer.getUtilizationData();
+      this.setState({ details: details as Details });
+    } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
-    } else {
-      this.setState({ details: details.data as Details });
     }
   }
 
