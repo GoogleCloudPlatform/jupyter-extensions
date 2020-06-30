@@ -31,3 +31,23 @@ export interface Comment {
     children?: any;
     parent?: any,
 }
+
+export function createCommentFromJSON(obj : any) : DetachedComment {
+    const content = obj.comment;
+    const hash = obj.hash;
+    const children = obj.children;
+    let comment : DetachedComment = {
+      author: content.author,
+      text: content.description,
+      timestamp: content.timestamp,
+      range: content.location.range,
+      hash: hash,
+    };
+    if (children) {
+      comment.children = children;
+    }
+    if (content.parent) {
+      comment.parent = parent;
+    }
+    return comment;
+}

@@ -21,3 +21,15 @@ export class File {
         this.filePath = filePath;
     }
 }
+
+//Extract the file name from the full file path
+export function trimPath(filePath : string) {
+    try {
+        var path = require('path');
+        return path.basename(filePath);
+    } catch (e) {
+        console.log("Error trimming file path, returning untrimmed path.");
+        return filePath;
+    }
+
+}

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, showErrorMessage } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { File } from '../service/file'
-import { DetachedComment } from '../service/comment'
+import { File, trimPath } from '../service/file'
+import { DetachedComment, createCommentFromJSON } from '../service/comment'
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest } from '../git'
 import { stylesheet } from 'typestyle';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
 import { JupyterFrontEnd, ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Comment } from '../components/comment'
 
 
 interface Props {
@@ -51,17 +49,12 @@ export interface Context {
 }
 
 const localStyles = stylesheet({
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
-    margin: 0,
-    padding: '8px 12px',
-    textTransform: 'uppercase',
-  },
   root: {
     backgroundColor: 'white',
+  },
+  header: {
+    paddingLeft: 10,
+    paddingTop: 10,
   },
 });
 
@@ -100,16 +93,14 @@ export class CommentsComponent extends React.Component<Props, State> {
     //TODO (mkalil): render entire comment threads, not just top level comments
     const commentsList = this.state.detachedComments.map((comment) =>
         <div>
-        <ListItem button>
-          <ListItemText primary= {comment.text} />
-        </ListItem>
-        <Divider variant="inset" component="li"/>
+        <Comment data={comment}/>
+        <Divider/>
         </div>
       );
     return (
       <div className = {localStyles.root}>
         <CssBaseline />
-          <Typography color="primary" variant="h5" gutterBottom>
+          <Typography color="primary" variant="h5" className={localStyles.header} gutterBottom>
               Comments for {this.state.fileName}
           </Typography>
         <List>{commentsList}</List>
@@ -132,32 +123,15 @@ export class CommentsComponent extends React.Component<Props, State> {
             } else {
               let comments : Array<DetachedComment> = new Array<DetachedComment>();
               data.forEach(function(obj) {
-                console.log(obj);
-                const content = obj.comment;
-                const hash = obj.hash;
-                const children = obj.children;
-                let comment : DetachedComment = {
-                  author: content.author,
-                  text: content.description,
-                  timestamp: content.timestamp,
-                  range: content.location.range,
-                  hash: hash,
-                };
-                if (children) {
-                  comment.children = children;
-                }
-                if (content.parent) {
-                  comment.parent = parent;
-                }
+                var comment = createCommentFromJSON(obj);
                 comments.push(comment);
               });
-              this.setState({detachedComments : comments, fileName: filePath});
+              const shortenedFilePath = trimPath(filePath);
+              this.setState({detachedComments : comments, fileName: shortenedFilePath});
             }
           }
-
     }));
   }
-
 }
 
 export class CommentsWidget extends ReactWidget {
