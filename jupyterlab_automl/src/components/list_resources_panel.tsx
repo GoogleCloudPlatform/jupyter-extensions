@@ -178,13 +178,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   title: 'Name',
                 },
                 {
-                  title: 'Rows',
-                  field: 'exampleCount',
-                  type: ColumnType.Numeric,
-                  minShowWidth: breakpoints[1],
-                  fixedWidth: 80,
-                },
-                {
                   title: 'Created at',
                   field: 'createTime',
                   type: ColumnType.DateTime,
@@ -294,19 +287,15 @@ export class ListResourcesPanel extends React.Component<Props, State> {
 
   private iconForDatasetType(datasetType: DatasetType) {
     const icons: { [key in DatasetType]: any } = {
-      other: {
+      OTHER: {
         icon: 'error',
         color: blue[900],
       },
-      TBL: {
+      TABLE: {
         icon: 'table_chart',
         color: blue[700],
       },
-      ICN: {
-        icon: 'image',
-        color: orange[500],
-      },
-      IOD: {
+      IMAGE: {
         icon: 'image',
         color: orange[500],
       },

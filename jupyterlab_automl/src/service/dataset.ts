@@ -9,15 +9,17 @@ export type ColumnType =
   | 'Struct'
   | 'Unspecified'
   | 'Unrecognized';
-export type DatasetType = 'TBL' | 'ICN' | 'IOD' | 'other';
+
+export type DatasetType = 'OTHER' | 'TABLE' | 'IMAGE';
+
 export interface Dataset {
   id: string; // Resource name of dataset
   displayName: string;
-  description: string;
   createTime: Date;
-  exampleCount: number;
-  metadata: any;
+  updateTime: Date;
+  etag: string;
   datasetType: DatasetType;
+  metadata: any;
 }
 
 export interface ColumnSpec {
@@ -51,9 +53,6 @@ export interface Datasets {
 export abstract class DatasetService {
   static async listDatasets(): Promise<Dataset[]> {
     const data = (await requestAPI<Datasets>('v1/datasets')).datasets;
-    for (let i = 0; i < data.length; ++i) {
-      data[i].createTime = new Date(data[i].createTime);
-    }
     return data;
   }
 
@@ -66,12 +65,5 @@ export abstract class DatasetService {
       method: 'POST',
     };
     await requestAPI('v1/deleteDataset', requestInit);
-  }
-
-  static async listTableSpecs(datasetId: string): Promise<TableSpec[]> {
-    const query = '?datasetId=' + datasetId;
-    const data = (await requestAPI<TableInfo>('v1/tableInfo' + query))
-      .tableSpecs;
-    return data;
   }
 }
