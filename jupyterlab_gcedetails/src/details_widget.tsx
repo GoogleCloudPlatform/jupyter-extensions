@@ -15,7 +15,6 @@
  */
 
 import { ReactWidget, showDialog } from '@jupyterlab/apputils';
-import { ServerConnection } from '@jupyterlab/services';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
@@ -25,7 +24,11 @@ import {
   REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data';
 import { DetailsDialogBody } from './components/details_dialog_body';
+import { ServerWrapper } from './components/server_wrapper';
 
+interface Props {
+  detailsServer: ServerWrapper;
+}
 interface State {
   displayedAttributes: [number, number];
   details?: Details;
@@ -36,12 +39,10 @@ interface State {
 const ICON_CLASS = 'jp-VmStatusIcon';
 
 /** Instance details display widget */
-export class VmDetails extends React.Component<{}, State> {
-  private readonly serverSettings = ServerConnection.defaultSettings;
-  private readonly detailsUrl = `${this.serverSettings.baseUrl}gcp/v1/details`;
+export class VmDetails extends React.Component<Props, State> {
   private readonly refreshInterval: number;
 
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       displayedAttributes: [0, 1],
@@ -68,33 +69,32 @@ export class VmDetails extends React.Component<{}, State> {
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
+
     return (
       <span className={STYLES.container}>
         <span
-          className={classes(STYLES.icon, ICON_CLASS)}
+          className={classes(
+            STYLES.icon,
+            ICON_CLASS,
+            STYLES.interactiveHover
+          )}
           title="Show all details"
           onClick={() => this.showDialog()}
         ></span>
-        {details ? this.getDisplayedDetails(details) : noDetailsMessage}
+        <span className={classes(STYLES.interactiveHover)}>
+          {details ? this.getDisplayedDetails(details) : noDetailsMessage}
+        </span>
       </span>
     );
   }
 
   private async getAndSetDetailsFromServer() {
     try {
-      const response = await ServerConnection.makeRequest(
-        this.detailsUrl,
-        {},
-        this.serverSettings
-      );
-      if (!response.ok) {
-        this.setState({ receivedError: true });
-        return;
-      }
-      const details = await response.json();
+      const details = await this.props.detailsServer.getUtilizationData();
       this.setState({ details: details as Details });
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
+      this.setState({ receivedError: true });
     }
   }
 
@@ -155,7 +155,9 @@ export class VmDetails extends React.Component<{}, State> {
 
 /** Top-level widget exposed to JupyterLab for showing VM details. */
 export class VmDetailsWidget extends ReactWidget {
+  private readonly detailsUrl = `gcp/v1/details`;
+  private readonly detailsServer = new ServerWrapper(this.detailsUrl);
   render() {
-    return <VmDetails />;
+    return <VmDetails detailsServer={this.detailsServer} />;
   }
 }

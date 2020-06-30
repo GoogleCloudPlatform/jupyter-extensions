@@ -15,11 +15,11 @@
  */
 
 export class File {
-    readonly filePath:string;
-    readonly comments: any[];
-    constructor(filePath : string) {
-        this.filePath = filePath;
-    }
+  readonly filePath: string;
+  readonly comments: any[];
+  constructor(filePath: string) {
+    this.filePath = filePath;
+  }
 }
 
 //Extract the file name from the full file path

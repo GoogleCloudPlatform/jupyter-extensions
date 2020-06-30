@@ -1,6 +1,9 @@
 import * as React from 'react';
 
-import { DatasetDetailsService } from './service/list_dataset_details';
+import {
+  DatasetDetailsService,
+  DatasetDetails,
+} from './service/list_dataset_details';
 
 interface Props {
   datasetDetailsService: DatasetDetailsService;
@@ -11,8 +14,7 @@ interface Props {
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
-  // TODO(cxjia): type these details
-  details: any;
+  details: DatasetDetails;
 }
 
 export default class DatasetDetailsPanel extends React.Component<Props, State> {
@@ -21,7 +23,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     this.state = {
       hasLoaded: false,
       isLoading: false,
-      details: { details: {} },
+      details: { details: {} } as DatasetDetails,
     };
   }
 
@@ -42,14 +44,12 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
   }
 
   private async getDetails() {
-    console.log('starting getDetails');
     try {
       this.setState({ isLoading: true });
       const details = await this.props.datasetDetailsService.listDatasetDetails(
         this.props.dataset_id
       );
       this.setState({ hasLoaded: true, details });
-      console.log('Details: ', this.state.details);
     } catch (err) {
       console.warn('Error retrieving dataset details', err);
     } finally {

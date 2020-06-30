@@ -32,6 +32,7 @@ METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 SCOPE = ('https://www.googleapis.com/auth/cloud-platform',)
 FRAMEWORK_ENV_VAR = 'ENV_VERSION_FILE_PATH'
 
+
 async def get_metadata():
   """Retrieves JSON-formatted metadata from the local metadata server."""
   request = HTTPRequest(METADATA_SERVER, headers=METADATA_HEADER)
