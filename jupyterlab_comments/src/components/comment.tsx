@@ -66,7 +66,6 @@ export class Comment extends React.Component<Props, State> {
                 }
                 secondary={
                     <Typography
-                      component="span"
                       variant="body2"
                       style={style.inline}
                       color="textPrimary"
