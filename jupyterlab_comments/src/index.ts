@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   ILabShell,
 } from '@jupyterlab/application';
 
-import {
-    IDocumentManager,
-} from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
-import { CommentsWidget } from './components/comments_widget'
+import { CommentsWidget } from './components/comments_widget';
 
-import { File } from './service/file'
+import { File } from './service/file';
 
-
-function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
+function activate(
+  app: JupyterFrontEnd,
+  labShell: ILabShell,
+  palette: ICommandPalette,
+  docManager: IDocumentManager
+) {
   console.log('JupyterLab extension jupyterlab_comments is activated!');
 
-  let widget : MainAreaWidget<CommentsWidget>;
-  let file : File;
-  let content : CommentsWidget;
+  let widget: MainAreaWidget<CommentsWidget>;
+  let file: File;
+  let content: CommentsWidget;
 
   // Add an application command
-  const command: string = 'comments:open';
+  const command = 'comments:open';
   app.commands.addCommand(command, {
     label: 'Notebook comments in git',
     execute: () => {
@@ -70,8 +71,9 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
             }
             app.shell.activateById(widget.id);
         }
-
-    }
+        app.shell.activateById(widget.id);
+      }
+    },
   });
 
   // Add the command to the palette.
@@ -89,5 +91,3 @@ const extension: JupyterFrontEndPlugin<void> = {
 };
 
 export default extension;
-
-

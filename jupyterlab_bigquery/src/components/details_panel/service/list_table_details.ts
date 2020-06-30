@@ -5,9 +5,9 @@ export interface TableDetailsObject {
   id: string;
   display_name: string;
   description: string;
-  labels: string;
+  labels: string[];
   date_created: string;
-  expires: string;
+  expiration: string;
   location: string;
   last_modified: string;
   project: string;

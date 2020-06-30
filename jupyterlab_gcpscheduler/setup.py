@@ -35,9 +35,6 @@ if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
 
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
-    ("etc/jupyter/jupyter_notebook_config.d",
-     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gcpscheduler.json",
-     )),
 ]
 
 setup(
@@ -52,9 +49,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "google-auth>=1.6.3",
+        "gcp_jupyterlab_shared>=1.0.0",
         "jupyterlab~=1.2.0",
-        "requests>=2.22.0",
-        "gcp_jupyterlab_shared>=1.0.0"
     ],
 )

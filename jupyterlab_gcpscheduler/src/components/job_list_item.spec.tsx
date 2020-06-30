@@ -53,7 +53,7 @@ describe('JobListItem', () => {
       .find(IconButtonMenu)
       .dive()
       .findWhere(w => w.text() === 'Import')
-      .parent()
+      .first()
       .simulate('click');
 
     expect(mockGcpService.importNotebook).toHaveBeenCalledWith(

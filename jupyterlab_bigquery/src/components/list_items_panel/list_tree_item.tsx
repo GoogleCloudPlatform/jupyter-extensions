@@ -118,7 +118,7 @@ function ListItem(props) {
         <div className={localStyles.icon} onClick={() => handleExpand()}>
           {getIconForWord(props.subfields)}
         </div>
-        <div className={localStyles.details} onClick={props.openDetails}>
+        <div className={localStyles.details} onDoubleClick={props.openDetails}>
           <a className="{css.link}" href="#">
             {props.name}
           </a>
@@ -154,7 +154,6 @@ export class ListDatasetItem extends React.Component<DatasetProps, State> {
           name={dataset.name}
           subfields={dataset.tables}
           openDetails={() => {
-            console.log('opening dataset details');
             const service = new DatasetDetailsService();
             const widgetType = DatasetDetailsWidget;
             context.manager.launchWidgetForId(
@@ -191,7 +190,6 @@ export class ListTableItem extends React.Component<TableProps, State> {
           name={table.name}
           subfields={null}
           openDetails={() => {
-            console.log('opening table details');
             const service = new TableDetailsService();
             const widgetType = TableDetailsWidget;
             context.manager.launchWidgetForId(

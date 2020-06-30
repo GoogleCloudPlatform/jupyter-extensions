@@ -16,10 +16,10 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { File } from '../service/file'
-import { DetachedComment } from '../service/comment'
+import { File } from '../service/file';
+import { DetachedComment } from '../service/comment';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { httpGitRequest } from '../git'
+import { httpGitRequest } from '../git';
 import { stylesheet } from 'typestyle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -66,7 +66,6 @@ const localStyles = stylesheet({
 });
 
 export class CommentsComponent extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -114,9 +113,7 @@ export class CommentsComponent extends React.Component<Props, State> {
           </Typography>
         <List>{commentsList}</List>
       </div>
-
-
-      );
+    );
   }
 
   private async getDetachedComments() {
@@ -157,7 +154,6 @@ export class CommentsComponent extends React.Component<Props, State> {
 
     }));
   }
-
 }
 
 export class CommentsWidget extends ReactWidget {
@@ -169,6 +165,4 @@ export class CommentsWidget extends ReactWidget {
   render() {
     return <CommentsComponent file = {this.file} context = {this.context} />;
   }
-
-
 }

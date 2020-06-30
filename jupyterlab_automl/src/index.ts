@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/application';
 
 import { AutoMLWidget } from './components/automl_widget';
-import { WidgetManager } from './widget_manager';
+import { WidgetManager } from 'gcp_jupyterlab_shared';
 
 async function activate(app: JupyterFrontEnd) {
   const manager = new WidgetManager(app);
