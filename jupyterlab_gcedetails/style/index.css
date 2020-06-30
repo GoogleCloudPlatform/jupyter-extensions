@@ -18,3 +18,8 @@
   background-image: url('./images/icon.png');
   background-size: contain;
 }
+
+.jp-UtilizationGraphsIcon {
+  background-image: url('./images/graphs-icon.png');
+  background-size: contain;
+}

@@ -6,7 +6,8 @@
     "jupyterlab_gcedetails/",
     "jupyterlab_gcpscheduler/",
     "jupyterlab_gcsfilebrowser/",
-    "jupyterlab_automl/"
+    "jupyterlab_automl/",
+    "jupyterlab_bigquery/"
   ],
   "version": "independent"
 }

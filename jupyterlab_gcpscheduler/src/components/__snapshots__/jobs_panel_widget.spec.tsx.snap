@@ -12,12 +12,12 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
     >
       AI Platform Notebook Jobs
     </header>
-    <WithStyles(WithStyles(IconButton))
+    <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
       title="Refresh Jobs"
     >
-      <WithStyles(pure(RefreshIcon)) />
-    </WithStyles(WithStyles(IconButton))>
+      <WithStyles(RefreshIcon) />
+    </WithStyles(WithStyles(ForwardRef(IconButton)))>
   </div>
   <ul
     className="list_fqi18ru"
@@ -37,12 +37,12 @@ exports[`GcpScheduledJobsPanel Shows error if jobs cannot be retrieved 1`] = `
     >
       AI Platform Notebook Jobs
     </header>
-    <WithStyles(WithStyles(IconButton))
+    <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
       title="Refresh Jobs"
     >
-      <WithStyles(pure(RefreshIcon)) />
-    </WithStyles(WithStyles(IconButton))>
+      <WithStyles(RefreshIcon) />
+    </WithStyles(WithStyles(ForwardRef(IconButton)))>
   </div>
   <Message
     asError={true}
@@ -63,12 +63,12 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     >
       AI Platform Notebook Jobs
     </header>
-    <WithStyles(WithStyles(IconButton))
+    <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
       title="Refresh Jobs"
     >
-      <WithStyles(pure(RefreshIcon)) />
-    </WithStyles(WithStyles(IconButton))>
+      <WithStyles(RefreshIcon) />
+    </WithStyles(WithStyles(ForwardRef(IconButton)))>
   </div>
   <Message
     asError={true}
@@ -89,12 +89,12 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
     >
       AI Platform Notebook Jobs
     </header>
-    <WithStyles(WithStyles(IconButton))
+    <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
       title="Refresh Jobs"
     >
-      <WithStyles(pure(RefreshIcon)) />
-    </WithStyles(WithStyles(IconButton))>
+      <WithStyles(RefreshIcon) />
+    </WithStyles(WithStyles(ForwardRef(IconButton)))>
   </div>
   <ul
     className="list_fqi18ru"
@@ -211,13 +211,13 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     >
       AI Platform Notebook Jobs
     </header>
-    <WithStyles(WithStyles(IconButton))
+    <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
       title="Refresh Jobs"
     >
-      <WithStyles(pure(RefreshIcon)) />
-    </WithStyles(WithStyles(IconButton))>
+      <WithStyles(RefreshIcon) />
+    </WithStyles(WithStyles(ForwardRef(IconButton)))>
   </div>
-  <WithStyles(LinearProgress) />
+  <WithStyles(ForwardRef(LinearProgress)) />
 </div>
 `;

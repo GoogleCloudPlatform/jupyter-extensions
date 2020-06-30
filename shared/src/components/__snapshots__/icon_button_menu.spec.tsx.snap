@@ -2,60 +2,60 @@
 
 exports[`IconButtonMenu Renders menu items 1`] = `
 <span>
-  <WithStyles(WithStyles(IconButton))
+  <WithStyles(WithStyles(ForwardRef(IconButton)))
     onClick={[Function]}
   >
-    <pure(MoreVertIcon) />
-  </WithStyles(WithStyles(IconButton))>
-  <WithStyles(Menu)
+    <MoreVertIcon />
+  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  <WithStyles(ForwardRef(Menu))
     onClose={[Function]}
     open={false}
   >
-    <WithStyles(MenuItem)
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 1
-    </WithStyles(MenuItem)>
-    <WithStyles(MenuItem)
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 2
-    </WithStyles(MenuItem)>
-    <WithStyles(MenuItem)
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 3
-    </WithStyles(MenuItem)>
-  </WithStyles(Menu)>
+    </WithStyles(ForwardRef(MenuItem))>
+  </WithStyles(ForwardRef(Menu))>
 </span>
 `;
 
 exports[`IconButtonMenu Renders with provided icon 1`] = `
 <span>
-  <WithStyles(WithStyles(IconButton))
+  <WithStyles(WithStyles(ForwardRef(IconButton)))
     onClick={[Function]}
   >
-    <pure(AddIcon) />
-  </WithStyles(WithStyles(IconButton))>
-  <WithStyles(Menu)
+    <AddIcon />
+  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  <WithStyles(ForwardRef(Menu))
     onClose={[Function]}
     open={false}
   >
-    <WithStyles(MenuItem)
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 1
-    </WithStyles(MenuItem)>
-    <WithStyles(MenuItem)
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 2
-    </WithStyles(MenuItem)>
-    <WithStyles(MenuItem)
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
       onClick={[Function]}
     >
       Item 3
-    </WithStyles(MenuItem)>
-  </WithStyles(Menu)>
+    </WithStyles(ForwardRef(MenuItem))>
+  </WithStyles(ForwardRef(Menu))>
 </span>
 `;

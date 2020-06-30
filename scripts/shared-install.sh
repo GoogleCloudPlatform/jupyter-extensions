@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-steps:
-  - name: 'node:10-alpine'
-    entrypoint: 'npm'
-    args: ['--unsafe-perm', 'install']
-  - name: 'node:10-alpine'
-    entrypoint: 'npm'
-    args: ['run', 'test']
-  - name: 'node:10-alpine'
-    entrypoint: 'npm'
-    args: ['pack']
-  - name: 'python:3.7'
-    args: ['./run_python_tests.sh']
+# This file assumes that it will be run from within the shared folder
+extension=$(grep 'name' package.json -m 1 | cut -d\" -f4)
+echo "Installing ${extension} for local development..."
+
+npm pack
+pip install -e .
+cp -v jupyter-config/jupyter_notebook_config.d/${extension}.json \
+  `pipenv --venv`/etc/jupyter/jupyter_notebook_config.d/
