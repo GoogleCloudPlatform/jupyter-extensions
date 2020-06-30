@@ -57,12 +57,12 @@ def _table_info(args):
 
 @_handler("POST", "deleteDataset")
 def _delete_dataset(args):
-  AutoMLService.get().client.delete_dataset(args["datasetId"])
+  AutoMLService.get().dataset_client.delete_dataset(name=args["datasetId"])
   return {"success": True}
 
 @_handler("POST", "deleteModel")
 def _delete_model(args):
-  AutoMLService.get().client.delete_model(args["modelId"])
+  AutoMLService.get().model_client.delete_model(name=args["modelId"])
   return {"success": True}
 
 @_handler("GET", "managedServices")
