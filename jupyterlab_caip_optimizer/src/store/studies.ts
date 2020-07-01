@@ -2,30 +2,39 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Study, AsyncState } from '../types';
 import { OptimizerService } from '../service/optimizer';
 import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
+import { RootState } from './store';
 
 const optimizer = new OptimizerService(new ServerProxyTransportService());
 
-export const fetchStudies = createAsyncThunk<Study[]>(
-  'studies/fetch',
-  async () => {
-    // TODO: use metadata service instead of hardcoded values
-    return optimizer.listStudy({
-      projectId: 'jupyterlab-interns-sandbox',
-      region: 'us-central1',
-    });
+export const fetchStudies = createAsyncThunk<
+  Study[],
+  undefined,
+  {
+    state: RootState;
   }
-);
+>('studies/fetch', async (_, thunkAPI) => {
+  const metadata = thunkAPI.getState().metadata.data;
+  if (!metadata) {
+    console.error('No Metadata found.');
+    throw new TypeError('No metadata');
+  }
+  return optimizer.listStudy(metadata);
+});
 
-export const createStudy = createAsyncThunk<Study, Study>(
-  'studies/create',
-  async (study: Study) => {
-    // TODO: use metadata service instead of hardcoded values
-    return optimizer.createStudy(study, {
-      projectId: 'jupyterlab-interns-sandbox',
-      region: 'us-central1',
-    });
+export const createStudy = createAsyncThunk<
+  Study,
+  Study,
+  {
+    state: RootState;
   }
-);
+>('studies/create', async (study: Study, thunkAPI) => {
+  const metadata = thunkAPI.getState().metadata.data;
+  if (!metadata) {
+    console.error('No Metadata found.');
+    throw new TypeError('No metadata');
+  }
+  return optimizer.createStudy(study, metadata);
+});
 
 export const studiesSlice = createSlice({
   name: 'studies',
