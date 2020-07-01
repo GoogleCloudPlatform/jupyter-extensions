@@ -51,9 +51,9 @@ def _list_datasets(_):
 def _list_models(_):
   return AutoMLService.get().get_models()
 
-@_handler("GET", "tableInfo")
-def _table_info(args):
-  return AutoMLService.get().get_table_specs(args["datasetId"])
+@_handler("GET", "pipeline")
+def _get_pipeline(args):
+  return AutoMLService.get().get_pipeline(args["pipelineId"])
 
 @_handler("POST", "deleteDataset")
 def _delete_dataset(args):

@@ -15,6 +15,7 @@ import {
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
+import { ModelWidget } from './model_widget';
 
 interface Props {
   isVisible: boolean;
@@ -187,7 +188,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               ]}
               data={this.filterResources<Dataset>(this.state.datasets)}
               onRowClick={rowData => {
-                if (rowData.datasetType === 'TBL') {
+                if (rowData.datasetType === 'TABLE') {
                   this.props.context.manager.launchWidgetForId(
                     DatasetWidget,
                     rowData.id,
@@ -239,6 +240,13 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   },
                 },
               ]}
+              onRowClick={rowData => {
+                this.props.context.manager.launchWidgetForId(
+                  ModelWidget,
+                  rowData.id,
+                  rowData
+                );
+              }}
             />
           )}
           <DialogComponent
