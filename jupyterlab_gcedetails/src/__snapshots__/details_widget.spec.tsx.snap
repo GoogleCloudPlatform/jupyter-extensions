@@ -9,6 +9,25 @@ exports[`VmDetails Renders with details: Details 1`] = `
     onClick={[Function]}
     title="Show all details"
   />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
   <span
     className="interactiveHover_feuq7k1"
   >
@@ -42,6 +61,25 @@ exports[`VmDetails Renders with details: Retrieving 1`] = `
     onClick={[Function]}
     title="Show all details"
   />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
   <span
     className="interactiveHover_feuq7k1"
   >
@@ -59,6 +97,25 @@ exports[`VmDetails Renders with error: Received Error 1`] = `
     onClick={[Function]}
     title="Show all details"
   />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "throw",
+                "value": [Error],
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
   <span
     className="interactiveHover_feuq7k1"
   >
