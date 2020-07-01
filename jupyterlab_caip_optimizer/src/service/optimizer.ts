@@ -41,17 +41,23 @@ export class OptimizerService {
 
   async getMetaData(): Promise<MetadataRequired> {
     try {
-      const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
+      const metadata_default: MetadataRequired = {
+        projectId: 'jupyterlab-interns-sandbox',
+        region: 'us-central1',
+      }
+      return metadata_default;
+      /** TODO: Switch back to actual metadata response below before release. Currently implemented this way because of ssh restrictions to GCP */
+      // const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
-      const response = await this._transportService.submit<MetadataFull>({
-        path: metadata_path,
-        method: 'GET',
-      });
-      const metadata_response: MetadataRequired = {
-        projectId: response.result.project,
-        region: zoneToRegion(response.result.zone),
-      };
-      return metadata_response;
+      // const response = await this._transportService.submit<MetadataFull>({
+      //   path: metadata_path,
+      //   method: 'GET',
+      // });
+      // const metadata_response: MetadataRequired = {
+      //   projectId: response.result.project,
+      //   region: zoneToRegion(response.result.zone),
+      // };
+      // return metadata_response;
     } catch (err) {
       console.error('Unable to fetch metadata');
       handleApiError(err);
@@ -71,7 +77,7 @@ export class OptimizerService {
       });
       return response.result;
     } catch (err) {
-      /** TODO: Add different error messages depending on the HTTP status code. 
+      /** TODO: Add different error messages depending on the HTTP status code.
        * Currently there is no troubleshooting documentation for Optimizer API
        * https://cloud.google.com/ai-platform/optimizer/docs/getting-support
        * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies/create */
