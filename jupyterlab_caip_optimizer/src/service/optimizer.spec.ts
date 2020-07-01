@@ -47,7 +47,7 @@ describe('OptimizerService', () => {
     );
     expect(object).toEqual(fakeStudyResponseActive);
     expect(mockSubmit).toHaveBeenCalledWith({
-      path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies?study_id=study-1`,
+      path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies?study_id=study-default`,
       method: 'POST',
       body: JSON.stringify(fakeStudy),
     });

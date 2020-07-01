@@ -22,7 +22,10 @@ export const fakeMetricMaximize = {
   metric: 'metric-maximize',
 } as MetricSpec;
 
-export const fakeMetrics: MetricSpec[] = [fakeMetricUnspecified, fakeMetricMaximize];
+export const fakeMetrics: MetricSpec[] = [
+  fakeMetricUnspecified,
+  fakeMetricMaximize,
+];
 
 export const fakeParamCategorical = {
   parameter: 'param-categorical',
@@ -40,7 +43,10 @@ export const fakeParamDiscrete = {
   },
 } as ParameterSpec;
 
-export const fakeParameters: ParameterSpec[] = [fakeParamCategorical, fakeParamDiscrete];
+export const fakeParameters: ParameterSpec[] = [
+  fakeParamCategorical,
+  fakeParamDiscrete,
+];
 
 export const fakeStudyConfig = {
   metrics: fakeMetrics,
