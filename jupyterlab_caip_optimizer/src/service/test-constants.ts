@@ -12,35 +12,35 @@ import {
   State,
 } from '../types';
 
-export const fakeMetric1 = {
+export const fakeMetricUnspecified = {
   goal: GoalType.GOAL_TYPE_UNSPECIFIED,
-  metric: 'metric-1',
+  metric: 'metric-unspecified',
 } as MetricSpec;
 
-export const fakeMetric2 = {
+export const fakeMetricMaximize = {
   goal: GoalType.MAXIMIZE,
-  metric: 'metric-2',
+  metric: 'metric-maximize',
 } as MetricSpec;
 
-export const fakeMetrics: MetricSpec[] = [fakeMetric1, fakeMetric2];
+export const fakeMetrics: MetricSpec[] = [fakeMetricUnspecified, fakeMetricMaximize];
 
-export const fakeParam1 = {
-  parameter: 'param-1',
+export const fakeParamCategorical = {
+  parameter: 'param-categorical',
   type: ParameterType.CATEGORICAL,
   categoricalValueSpec: {
     values: ['a', 'b', 'c'],
   },
 } as ParameterSpec;
 
-export const fakeParam2 = {
-  parameter: 'param-2',
+export const fakeParamDiscrete = {
+  parameter: 'param-discrete',
   type: ParameterType.DISCRETE,
   discreteValueSpec: {
     values: [1, 2, 3],
   },
 } as ParameterSpec;
 
-export const fakeParameters: ParameterSpec[] = [fakeParam1, fakeParam2];
+export const fakeParameters: ParameterSpec[] = [fakeParamCategorical, fakeParamDiscrete];
 
 export const fakeStudyConfig = {
   metrics: fakeMetrics,
@@ -49,25 +49,25 @@ export const fakeStudyConfig = {
 } as StudyConfig;
 
 export const fakeStudy = {
-  name: 'study-1',
+  name: 'study-default',
   studyConfig: fakeStudyConfig,
 } as Study;
 
-export const fakeStudyResponse = {
-  name: 'study-1',
+export const fakeStudyResponseActive = {
+  name: 'study-active',
   studyConfig: fakeStudyConfig,
   state: State.ACTIVE,
   createTime: '1',
 };
 
-export const fakeStudyResponse2 = {
-    name: 'study-2',
-    studyConfig: fakeStudyConfig,
-    state: State.INACTIVE,
-    createTime: '2',
+export const fakeStudyResponseInactive = {
+  name: 'study-inactive',
+  studyConfig: fakeStudyConfig,
+  state: State.INACTIVE,
+  createTime: '2',
 } as Study;
 
 export const fakeStudyListResponse: Study[] = [
-    fakeStudyResponse,
-    fakeStudyResponse2,
+  fakeStudyResponseActive,
+  fakeStudyResponseInactive,
 ];

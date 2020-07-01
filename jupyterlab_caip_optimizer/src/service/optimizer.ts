@@ -44,17 +44,22 @@ export class OptimizerService {
   }
 
   async getMetaData(): Promise<MetadataRequired> {
-    const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
+    try {
+      const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
-    const response = await this._transportService.submit<MetadataFull>({
-      path: metadata_path,
-      method: 'GET',
-    });
-    const metadata_response: MetadataRequired = {
-      projectId: response.result.project,
-      region: zoneToRegion(response.result.zone),
-    };
-    return metadata_response;
+      const response = await this._transportService.submit<MetadataFull>({
+        path: metadata_path,
+        method: 'GET',
+      });
+      const metadata_response: MetadataRequired = {
+        projectId: response.result.project,
+        region: zoneToRegion(response.result.zone),
+      };
+      return metadata_response;
+    } catch (err) {
+      console.error('Unable to fetch metadata');
+      handleApiError(err);
+    }
   }
 
   async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
@@ -76,11 +81,16 @@ export class OptimizerService {
   }
 
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
-    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-    const response = await this._transportService.submit<Study[]>({
-      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
-      method: 'GET',
-    });
-    return response.result;
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study[]>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+        method: 'GET',
+      });
+      return response.result;
+    } catch (err) {
+      console.error('Unable to fetch study list');
+      handleApiError(err);
+    }
   }
 }

@@ -16,7 +16,11 @@
 import { OptimizerService } from './optimizer';
 import { ServerConnection } from '@jupyterlab/services';
 import { MetadataRequired } from '../types';
-import { fakeStudy, fakeStudyResponse, fakeStudyListResponse } from './test-contsants';
+import {
+  fakeStudy,
+  fakeStudyResponseActive,
+  fakeStudyListResponse,
+} from './test-constants';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 
 describe('OptimizerService', () => {
@@ -36,12 +40,12 @@ describe('OptimizerService', () => {
   });
 
   it('Creates a study', async () => {
-    mockSubmit.mockReturnValue(asApiResponse(fakeStudyResponse));
+    mockSubmit.mockReturnValue(asApiResponse(fakeStudyResponseActive));
     const object = await optimizerService.createStudy(
       fakeStudy,
       fakeMetadataRequired
     );
-    expect(object).toEqual(fakeStudyResponse);
+    expect(object).toEqual(fakeStudyResponseActive);
     expect(mockSubmit).toHaveBeenCalledWith({
       path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies?study_id=study-1`,
       method: 'POST',
@@ -54,8 +58,8 @@ describe('OptimizerService', () => {
     const object = await optimizerService.listStudy(fakeMetadataRequired);
     expect(object).toEqual(fakeStudyListResponse);
     expect(mockSubmit).toHaveBeenCalledWith({
-        path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies`,
-        method: 'GET',
-    })
-  })
+      path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies`,
+      method: 'GET',
+    });
+  });
 });
