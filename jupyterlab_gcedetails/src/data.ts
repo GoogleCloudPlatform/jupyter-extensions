@@ -105,7 +105,7 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
 
 MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
 
-/* Class names applied to the component. Exported for test selectors. */
+/* Class names applied to the component. */
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
@@ -146,9 +146,5 @@ export const STYLES = stylesheet({
   listRow: {
     display: 'table-row',
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
-  },
-  chartTitleSmall: {
-    fontSize: '20px',
-    marginLeft: '20px',
   },
 });

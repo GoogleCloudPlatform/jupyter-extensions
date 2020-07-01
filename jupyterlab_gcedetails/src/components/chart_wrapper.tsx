@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { stylesheet } from 'typestyle';
 import { AreaChart, Area, Tooltip, CartesianGrid, YAxis } from 'recharts';
 
 interface ChartProps {
@@ -13,6 +14,13 @@ interface ChartProps {
   yAxisProps: {};
 }
 
+const STYLES = stylesheet({
+  chartContainer: {
+    paddingBottom: '5px',
+    paddingTop: '5px',
+  },
+});
+
 export function AreaChartWrapper(props: ChartProps) {
   const {
     data,
@@ -25,7 +33,7 @@ export function AreaChartWrapper(props: ChartProps) {
     yAxisProps,
   } = props;
   return (
-    <span>
+    <div className={STYLES.chartContainer}>
       <h1 className={titleClass}>{title}</h1>
       <AreaChart {...areaChartProps} data={data}>
         <Area {...areaProps} dataKey={dataKey} />
@@ -33,6 +41,6 @@ export function AreaChartWrapper(props: ChartProps) {
         <CartesianGrid {...cartesianGridProps} />
         <YAxis {...yAxisProps} />
       </AreaChart>
-    </span>
+    </div>
   );
 }
