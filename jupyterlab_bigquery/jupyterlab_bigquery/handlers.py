@@ -121,26 +121,18 @@ def make_query(request_body):
 
     if query_job.error_result is not None:
         raise Exception(query_job.error_result)
-        
-    # send contents
+
+    df = query_job.to_dataframe()	    # send contents
+
     en = query_job.result(100)
-    for df in en.to_dataframe_iterable():
+    response = {	    for df in en.to_dataframe_iterable():
         response = {
-        'content': df.to_json(orient='values'),
-        'labels': json.dumps(df.columns.to_list()),
-        'job_id': query_job.job_id,
+        'content': df.to_json(orient='values'),	        'content': df.to_json(orient='values'),
+        'labels': json.dumps(df.columns.to_list()),	        'labels': json.dumps(df.columns.to_list()),
+    }	        'job_id': query_job.job_id,
+
         'done': False,
-        }
-        yield(response)
-            
-    # send finish
-    response = {
-        'content': None,
-        'labels': None,
-        'job_id': query_job.job_id,
-        'done': True,
-        }
-    yield(response)
+    return response
 
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
