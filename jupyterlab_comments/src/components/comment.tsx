@@ -42,11 +42,7 @@ interface Props {
   data: DetachedComment,
 }
 
-interface State {
-    //empty
-}
-
-export class Comment extends React.Component<Props, State> {
+export class Comment extends React.Component<Props> {
     constructor(props) {
         super(props);
     }

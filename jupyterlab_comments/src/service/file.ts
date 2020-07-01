@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as path from 'path';
+
+
 export class File {
   readonly filePath: string;
   readonly comments: any[];
@@ -25,7 +28,6 @@ export class File {
 //Extract the file name from the full file path
 export function trimPath(filePath : string) {
     try {
-        var path = require('path');
         return path.basename(filePath);
     } catch (e) {
         console.log("Error trimming file path, returning untrimmed path.");
