@@ -71,7 +71,10 @@ export class OptimizerService {
       });
       return response.result;
     } catch (err) {
-      /** TODO: Add different error messages depending on the HTTP status code. Currently there is no troubleshooting documentation for Optimizer API (https://cloud.google.com/ai-platform/optimizer/docs/getting-support) */
+      /** TODO: Add different error messages depending on the HTTP status code. 
+       * Currently there is no troubleshooting documentation for Optimizer API
+       * https://cloud.google.com/ai-platform/optimizer/docs/getting-support
+       * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies/create */
       console.error('Unable to create study');
       handleApiError(err);
     }
