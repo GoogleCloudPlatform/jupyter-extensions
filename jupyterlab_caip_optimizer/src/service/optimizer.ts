@@ -39,10 +39,6 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  set transportService(transportService: TransportService) {
-    this._transportService = transportService;
-  }
-
   async getMetaData(): Promise<MetadataRequired> {
     try {
       const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
@@ -75,6 +71,7 @@ export class OptimizerService {
       });
       return response.result;
     } catch (err) {
+      /** TODO: Add different error messages depending on the HTTP status code. Currently there is no troubleshooting documentation for Optimizer API (https://cloud.google.com/ai-platform/optimizer/docs/getting-support) */
       console.error('Unable to create study');
       handleApiError(err);
     }
