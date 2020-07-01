@@ -27,9 +27,9 @@ interface Service {
 // Static list of required GCP services
 const REQUIRED_SERVICES: ReadonlyArray<Service> = [
   {
-    name: 'AutoML API',
-    endpoint: 'automl.googleapis.com',
-    documentation: 'https://cloud.google.com/automl-tables/',
+    name: 'Cloud AI Platform API',
+    endpoint: 'aiplatform.googleapis.com',
+    documentation: 'https://cloud.google.com/ai-platform',
     isOptional: false,
   },
 ];
@@ -44,7 +44,8 @@ export class AutoMLWidget extends ReactWidget {
   private _isVisible = false;
   private _currSize: Widget.ResizeMessage = new Widget.ResizeMessage(0, 0);
   private _checkedServices = false;
-  private _project = '';
+  private _project =
+    'https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=';
 
   constructor(private context: Context) {
     super();
@@ -115,10 +116,10 @@ export class AutoMLWidget extends ReactWidget {
                 submitLabel={'Ok'}
               >
                 <p>
-                  Cloud AutoML API is required to use this extension. Enable it
-                  by clicking 'Ok' then retry. If you enabled this API recently,
-                  wait a few minutes for the action to propagate to our systems
-                  and retry.
+                  Cloud AI Platform API is required to use this extension.
+                  Enable it by clicking 'Ok' then retry. If you enabled this API
+                  recently, wait a few minutes for the action to propagate to
+                  our systems and retry.
                 </p>
               </DialogComponent>
             );
@@ -140,9 +141,7 @@ export class AutoMLWidget extends ReactWidget {
       .every(s => s.enabled);
     if (requiredServicesEnabled === false) {
       const project = await ManagementService.getProject();
-      this._project =
-        'https://console.developers.google.com/apis/api/automl.googleapis.com/overview?project=' +
-        project;
+      this._project += project;
       this.alertSignal.emit(true);
     }
     return requiredServicesEnabled;
