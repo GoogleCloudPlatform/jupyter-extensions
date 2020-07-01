@@ -39,25 +39,27 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  async getMetaData(): Promise<MetadataRequired> {
+  /** TODO: Remove hardcoded values and 'option' parameter before release. Currently implemented this way because of ssh restrictions to GCP */
+  async getMetaData(option: string = 'default-metadata'): Promise<MetadataRequired> {
     try {
-      const metadata_default: MetadataRequired = {
-        projectId: 'jupyterlab-interns-sandbox',
-        region: 'us-central1',
+      if (option === 'default-metadata') {
+        const metadata_default: MetadataRequired = {
+          projectId: 'jupyterlab-interns-sandbox',
+          region: 'us-central1',
+        };
+        return metadata_default;
       }
-      return metadata_default;
-      /** TODO: Switch back to actual metadata response below before release. Currently implemented this way because of ssh restrictions to GCP */
-      // const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
+      const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
-      // const response = await this._transportService.submit<MetadataFull>({
-      //   path: metadata_path,
-      //   method: 'GET',
-      // });
-      // const metadata_response: MetadataRequired = {
-      //   projectId: response.result.project,
-      //   region: zoneToRegion(response.result.zone),
-      // };
-      // return metadata_response;
+      const response = await this._transportService.submit<MetadataFull>({
+        path: metadata_path,
+        method: 'GET',
+      });
+      const metadata_response: MetadataRequired = {
+        projectId: response.result.project,
+        region: zoneToRegion(response.result.zone),
+      };
+      return metadata_response;
     } catch (err) {
       console.error('Unable to fetch metadata');
       handleApiError(err);
