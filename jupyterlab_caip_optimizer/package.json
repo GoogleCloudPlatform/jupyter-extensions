@@ -57,6 +57,7 @@
     "minimist": ">=1.2.2",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
+    "gcp_jupyterlab_shared": "^1.0.1",
     "typestyle": "^2.1.0",
     "yaml": "^1.7.2"
   },

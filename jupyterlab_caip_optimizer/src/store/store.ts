@@ -1,10 +1,14 @@
 import { combineReducers } from 'redux';
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
+import { studiesSlice } from './studies';
 import { viewSlice } from './view';
+import { metadataSlice } from './metadata';
 
 const rootReducer = combineReducers({
+  studies: studiesSlice.reducer,
   view: viewSlice.reducer,
+  metadata: metadataSlice.reducer,
 });
 
 export const store = configureStore({
