@@ -32,6 +32,7 @@ def list_projects(client):
   project = client.project
   projects_list = [{
       'id': format(project),
+      'name': format(project),
       'datasets': list_datasets(client, project),
   }]
   return {'projects': projects_list}
@@ -66,7 +67,8 @@ def list_tables(client, dataset):
 def list_models(client, dataset):
   models = list(client.list_models(dataset))
   return [{
-      'id': format(model.model_id),
+      'id': '{}.{}'.format(model.dataset_id, model.model_id),
+      'name': model.model_id,
   } for model in models]
 
 
