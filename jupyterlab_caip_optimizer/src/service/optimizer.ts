@@ -39,10 +39,11 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  /** TODO: Remove hardcoded values and 'option' parameter before release. Currently implemented this way because of ssh restrictions to GCP */
-  async getMetaData(option: string = 'default-metadata'): Promise<MetadataRequired> {
+  /** TODO: Remove hardcoded values and 'option' parameter before release. 
+   * Currently implemented this way because of ssh restrictions to GCP */
+  async getMetaData(option = 'defaultMetadata'): Promise<MetadataRequired> {
     try {
-      if (option === 'default-metadata') {
+      if (option === 'defaultMetadata') {
         const metadata_default: MetadataRequired = {
           projectId: 'jupyterlab-interns-sandbox',
           region: 'us-central1',
