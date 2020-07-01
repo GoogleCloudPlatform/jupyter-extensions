@@ -12,6 +12,7 @@ import {
   ListResourcesTable,
   DialogComponent,
 } from 'gcp_jupyterlab_shared';
+import { ImportData } from './import_data';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
@@ -38,6 +39,7 @@ interface State {
   deleteDialog: boolean;
   deleteSubmit: () => void;
   deleteString: string;
+  modalOpen: boolean;
 }
 
 const FullWidthInput = styled(Box)`
@@ -88,6 +90,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteDialog: false,
       deleteSubmit: null,
       deleteString: '',
+      modalOpen: false,
     };
   }
 
@@ -138,6 +141,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               disabled={this.state.isLoading}
               style={styles.icon}
               size="small"
+              onClick={_ => {
+                this.setState({ modalOpen: true });
+              }}
             >
               <Icon>add</Icon>
             </IconButton>
@@ -247,7 +253,15 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onCancel={this.toggleDelete}
             onClose={this.toggleDelete}
             onSubmit={this.state.deleteSubmit}
+            submitLabel={'Ok'}
           />
+          {this.state.modalOpen ? (
+            <ImportData
+              onClose={() => {
+                this.setState({ modalOpen: false });
+              }}
+            />
+          ) : null}
         </Box>
       </>
     );
