@@ -1,16 +1,16 @@
-import * as React from 'react';
-import { Button } from '@material-ui/core';
-import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { LinearProgress, FormControl, FormHelperText } from '@material-ui/core';
+//import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
-  COLORS,
-  TextInput,
-  SelectInput,
-  Option,
   DialogComponent,
+  Option,
   RadioInput,
+  SelectInput,
+  TextInput,
 } from 'gcp_jupyterlab_shared';
+import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { DatasetService } from '../service/dataset';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
@@ -21,29 +21,10 @@ interface Props {
 interface State {
   from: SourceType;
   params: any;
+  name: string;
+  error: string | null;
+  loading: boolean;
 }
-
-const theme = createMuiTheme({
-  overrides: {
-    MuiButton: {
-      root: {
-        backgroundColor: COLORS.blue,
-        borderRadius: '2px',
-        lineHeight: 1.7,
-        '&:hover': {
-          backgroundColor: COLORS.blue,
-        },
-      },
-      text: {
-        padding: '1px 16px',
-      },
-      label: {
-        textTransform: 'capitalize',
-        color: COLORS.white,
-      },
-    },
-  },
-});
 
 const localStyles = stylesheet({
   title: {
@@ -54,6 +35,9 @@ const localStyles = stylesheet({
   },
   input: {
     display: 'none',
+  },
+  form: {
+    width: '100%',
   },
 });
 
@@ -79,9 +63,13 @@ const SOURCES: Option[] = [
 export class ImportData extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.submit = this.submit.bind(this);
     this.state = {
       from: 'computer',
       params: null,
+      name: '',
+      error: null,
+      loading: false,
     };
   }
 
@@ -93,7 +81,7 @@ export class ImportData extends React.Component<Props, State> {
         onClose={this.props.onClose}
         onCancel={this.props.onClose}
         submitLabel={'Import Data'}
-        onSubmit={this.props.onClose}
+        onSubmit={this.submit}
       >
         <RadioInput
           value={this.state.from}
@@ -102,73 +90,107 @@ export class ImportData extends React.Component<Props, State> {
             this.setState({ from: event.target.value as SourceType });
           }}
         />
-        <div style={{ paddingTop: '16px' }}>{this.getDialogContent()}</div>
+        <div style={{ paddingTop: '16px' }}>
+          <FormControl
+            error={this.state.error !== null}
+            className={localStyles.form}
+          >
+            <p className={localStyles.title}>
+              {
+                SOURCES.filter(el => {
+                  return el.value === this.state.from;
+                })[0].text
+              }
+            </p>
+            <TextInput
+              placeholder="my_dataset"
+              label="Name"
+              onChange={event => {
+                this.setState({ name: event.target.value });
+              }}
+            />
+            {this.getDialogContent()}
+            {this.state.error ? (
+              <FormHelperText>{this.state.error}</FormHelperText>
+            ) : (
+              <></>
+            )}
+            {this.state.loading && <LinearProgress />}
+          </FormControl>
+        </div>
       </DialogComponent>
     );
   }
 
-  buildFileSelector() {
-    const fileSelector = document.createElement('input');
-    fileSelector.setAttribute('type', 'file');
-    fileSelector.setAttribute('multiple', 'multiple');
-    return fileSelector;
+  private async submit() {
+    if (this.state.loading) return;
+    this.setState({ loading: true });
+    try {
+      switch (this.state.from) {
+        case 'gcs':
+          await DatasetService.createTablesDataset(
+            this.state.name,
+            this.state.params,
+            null
+          );
+          break;
+        case 'bigquery':
+          await DatasetService.createTablesDataset(
+            this.state.name,
+            null,
+            this.state.params
+          );
+          break;
+        case 'computer':
+          break;
+        case 'dataframe':
+          break;
+        default:
+      }
+    } catch (err) {
+      console.log(err);
+      // TODO (Shun): Handle error and show message in dialog
+    } finally {
+      this.setState({ loading: false });
+    }
+
+    this.props.onClose();
   }
 
   private getDialogContent(): JSX.Element {
     const { from } = this.state;
     if (from === 'computer') {
       return (
-        <div>
-          <p className={localStyles.title}>Upload files from your computer</p>
-          <input
-            className={localStyles.input}
-            id="button-file"
-            multiple
-            type="file"
-            onChange={event => {
-              this.setState({ params: event.target.files });
-            }}
-          />
-          <label htmlFor="button-file">
-            <ThemeProvider theme={theme}>
-              <Button component="span">Select Files</Button>
-            </ThemeProvider>
-          </label>
-        </div>
+        <input
+          //className={localStyles.input}
+          type="file"
+          onChange={event => {
+            this.setState({ params: event.target.files });
+          }}
+        />
       );
     } else if (from === 'bigquery') {
       return (
-        <div>
-          <p className={localStyles.title}>Import data from BigQuery</p>
-          <TextInput
-            label="BigQuery URI"
-            onChange={event => {
-              this.setState({ params: event.target.value });
-            }}
-          />
-        </div>
+        <TextInput
+          placeholder="bq://"
+          label="BigQuery URI"
+          onChange={event => {
+            this.setState({ params: event.target.value });
+          }}
+        />
       );
     } else if (from === 'gcs') {
       return (
-        <div>
-          <p className={localStyles.title}>
-            Import data from Google Cloud Storage
-          </p>
-          <TextInput
-            label="Google Cloud Storage URI"
-            onChange={event => {
-              this.setState({ params: event.target.value });
-            }}
-          />
-        </div>
+        <TextInput
+          placeholder="gs://"
+          label="Google Cloud Storage URI"
+          onChange={event => {
+            this.setState({ params: event.target.value });
+          }}
+        />
       );
     } else if (from === 'dataframe') {
-      return (
-        <div>
-          <p className={localStyles.title}>Select dataframe from kernel</p>
-          <SelectInput />
-        </div>
-      );
+      return <SelectInput />;
     }
     return null;
   }

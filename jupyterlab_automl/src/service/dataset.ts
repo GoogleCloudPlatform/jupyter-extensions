@@ -66,4 +66,21 @@ export abstract class DatasetService {
     };
     await requestAPI('v1/deleteDataset', requestInit);
   }
+
+  static async createTablesDataset(
+    displayName: string,
+    gcsSource: string | null,
+    bigquerySource: string | null
+  ) {
+    const body = {
+      displayName: displayName,
+      gcsSource: gcsSource,
+      bigquerySource: bigquerySource,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/createTablesDataset', requestInit);
+  }
 }

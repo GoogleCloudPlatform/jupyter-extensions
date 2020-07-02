@@ -138,7 +138,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             </ResourceSelect>
             <Box flexGrow={1}></Box>
             <IconButton
-              disabled={this.state.isLoading}
               style={styles.icon}
               size="small"
               onClick={_ => {
