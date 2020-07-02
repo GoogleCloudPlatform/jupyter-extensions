@@ -79,6 +79,7 @@ export class ContextMenu extends React.PureComponent<Props, State> {
   }
 
   openContextMenu(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+    event.stopPropagation();
     event.preventDefault();
     this.setState({
       isOpen: true,
