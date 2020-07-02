@@ -51,6 +51,8 @@ export interface Context {
 const localStyles = stylesheet({
   root: {
     backgroundColor: 'white',
+    overflow: 'auto',
+    overflowY: 'auto',
   },
   header: {
     paddingLeft: 10,
@@ -89,12 +91,11 @@ export class CommentsComponent extends React.Component<Props, State> {
   }
 
   render() {
-    //TODO (mkalil): render entire comment threads, not just top level comments
     const commentsList = this.state.detachedComments.map((comment) =>
-        <div>
+        <>
         <Comment data={comment}/>
         <Divider/>
-        </div>
+        </>
       );
     return (
       <div className = {localStyles.root}>

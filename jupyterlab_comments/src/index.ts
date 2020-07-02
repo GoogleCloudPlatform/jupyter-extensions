@@ -66,7 +66,7 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
             }
 
             if (!widget.isAttached) {
-                app.shell.add(widget, 'right');
+                app.shell.add(widget, 'right', { rank: 100 });
             }
             app.shell.activateById(widget.id);
         }
@@ -75,7 +75,7 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
   });
 
   // Add the command to the palette.
-  palette.addItem({ command, category: 'Tutorial' });
+  palette.addItem({ command, category: 'Collaboration' });
 }
 
 /**
