@@ -27,9 +27,9 @@ interface Service {
 // Static list of required GCP services
 const REQUIRED_SERVICES: ReadonlyArray<Service> = [
   {
-    name: 'AutoML API',
-    endpoint: 'automl.googleapis.com',
-    documentation: 'https://cloud.google.com/automl-tables/',
+    name: 'uCAIP API',
+    endpoint: 'aiplatform.googleapis.com',
+    documentation: 'https://cloud.google.com/ai-platform-unified/docs',
     isOptional: false,
   },
 ];
@@ -109,16 +109,16 @@ export class AutoMLWidget extends ReactWidget {
             return (
               <DialogComponent
                 open={event || false}
-                header={'API Not Enabled'}
+                header="API Not Enabled"
                 onCancel={() => this.alertSignal.emit(false)}
                 onSubmit={() => window.open(this._project)}
                 submitLabel={'Ok'}
               >
                 <p>
-                  Cloud AutoML API is required to use this extension. Enable it
-                  by clicking 'Ok' then retry. If you enabled this API recently,
-                  wait a few minutes for the action to propagate to our systems
-                  and retry.
+                  The Unified Cloud AI Platform API is required to use this
+                  extension. Enable it by clicking 'Ok' then retry. If you
+                  enabled this API recently, wait a few minutes for the action
+                  to propagate to our systems and retry.
                 </p>
               </DialogComponent>
             );

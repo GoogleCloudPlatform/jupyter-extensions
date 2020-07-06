@@ -15,6 +15,7 @@ interface Props {
   onCancel?: () => void;
   onSubmit?: () => void;
   children?: React.ReactNode;
+  submitDisabled?: boolean;
 }
 
 const dialogStyle = stylesheet({
@@ -51,7 +52,7 @@ export function DialogComponent(props: Props) {
         closeLabel={props.cancelLabel || 'Cancel'}
       >
         <SubmitButton
-          actionPending={false}
+          actionPending={props.submitDisabled || false}
           onClick={props.onSubmit}
           text={props.submitLabel || 'Submit'}
         />

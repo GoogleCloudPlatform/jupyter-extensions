@@ -8,6 +8,7 @@ from google.cloud import aiplatform_v1alpha1
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 
+API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
 
 
@@ -52,7 +53,7 @@ class AutoMLService:
   _instance = None
 
   def __init__(self):
-    client_options = {"api_endpoint": "us-central1-aiplatform.googleapis.com"}
+    client_options = {"api_endpoint": API_ENDPOINT}
     self._dataset_client = aiplatform_v1alpha1.DatasetServiceClient(
         client_options=client_options)
     self._model_client = aiplatform_v1alpha1.ModelServiceClient(
@@ -111,6 +112,10 @@ class AutoMLService:
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
 
     input_config = {}
+
+    if not display_name:
+      raise ValueError("Display name must not be empty")
+
     if gcs_uri:
       input_config["gcsSource"] = {"uri": [gcs_uri]}
     elif bigquery_uri:

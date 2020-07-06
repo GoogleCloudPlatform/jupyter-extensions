@@ -259,6 +259,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               onClose={() => {
                 this.setState({ modalOpen: false });
               }}
+              onSuccess={() => {
+                this.refresh();
+              }}
             />
           ) : null}
         </Box>

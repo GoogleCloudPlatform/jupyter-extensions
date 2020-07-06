@@ -1,4 +1,4 @@
-import { LinearProgress, FormControl, FormHelperText } from '@material-ui/core';
+import { FormControl, FormHelperText, LinearProgress } from '@material-ui/core';
 //import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
@@ -15,12 +15,13 @@ import { DatasetService } from '../service/dataset';
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
 interface Props {
-  onClose: any;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
 interface State {
   from: SourceType;
-  params: any;
+  source: any;
   name: string;
   error: string | null;
   loading: boolean;
@@ -66,11 +67,112 @@ export class ImportData extends React.Component<Props, State> {
     this.submit = this.submit.bind(this);
     this.state = {
       from: 'computer',
-      params: null,
+      source: null,
       name: '',
       error: null,
       loading: false,
     };
+  }
+
+  private async submit() {
+    this.setState({ loading: true });
+    try {
+      switch (this.state.from) {
+        case 'gcs':
+          await DatasetService.createTablesDataset(
+            this.state.name,
+            this.state.source,
+            null
+          );
+          break;
+        case 'bigquery':
+          await DatasetService.createTablesDataset(
+            this.state.name,
+            null,
+            this.state.source
+          );
+          break;
+        case 'computer':
+          break;
+        case 'dataframe':
+          break;
+        default:
+      }
+      this.setState({ error: null });
+      this.props.onSuccess();
+    } catch (err) {
+      console.warn(err);
+      this.setState({
+        error: 'There was an error creating the dataset: ' + err,
+      });
+    } finally {
+      this.setState({ loading: false });
+      if (!this.state.error) {
+        this.props.onClose();
+      }
+    }
+  }
+
+  private validateGCS(source: string) {
+    const regex = new RegExp('gs://.+/(.+/)*.+');
+    if (regex.test(source)) {
+      this.setState({ error: null });
+    } else {
+      this.setState({ error: 'Invalid GCS uri' });
+    }
+  }
+
+  private validateBigQuery(source: string) {
+    const regex = new RegExp(
+      'bq://[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+.[a-zA-Z0-9_-]+'
+    );
+    if (regex.test(source)) {
+      this.setState({ error: null });
+    } else {
+      this.setState({ error: 'Invalid BigQuery uri' });
+    }
+  }
+
+  private getDialogContent(): JSX.Element {
+    const { from } = this.state;
+    if (from === 'computer') {
+      return (
+        <input
+          //className={localStyles.input}
+          type="file"
+          onChange={event => {
+            this.setState({ source: event.target.files });
+          }}
+        />
+      );
+    } else if (from === 'bigquery') {
+      return (
+        <TextInput
+          placeholder="bq://example:abc.xyz"
+          label="BigQuery URI"
+          onChange={event => {
+            const source = event.target.value;
+            this.validateBigQuery(source);
+            this.setState({ source: source });
+          }}
+        />
+      );
+    } else if (from === 'gcs') {
+      return (
+        <TextInput
+          placeholder="gs://example/file"
+          label="Google Cloud Storage URI"
+          onChange={event => {
+            const source = event.target.value;
+            this.validateGCS(source);
+            this.setState({ source: source });
+          }}
+        />
+      );
+    } else if (from === 'dataframe') {
+      return <SelectInput />;
+    }
+    return null;
   }
 
   render() {
@@ -82,12 +184,22 @@ export class ImportData extends React.Component<Props, State> {
         onCancel={this.props.onClose}
         submitLabel={'Import Data'}
         onSubmit={this.submit}
+        submitDisabled={
+          this.state.loading ||
+          this.state.error !== null ||
+          !this.state.name ||
+          !this.state.source
+        }
       >
         <RadioInput
           value={this.state.from}
           options={SOURCES}
           onChange={event => {
-            this.setState({ from: event.target.value as SourceType });
+            this.setState({
+              from: event.target.value as SourceType,
+              source: null,
+              error: null,
+            });
           }}
         />
         <div style={{ paddingTop: '16px' }}>
@@ -110,88 +222,13 @@ export class ImportData extends React.Component<Props, State> {
               }}
             />
             {this.getDialogContent()}
-            {this.state.error ? (
+            {this.state.error && (
               <FormHelperText>{this.state.error}</FormHelperText>
-            ) : (
-              <></>
             )}
             {this.state.loading && <LinearProgress />}
           </FormControl>
         </div>
       </DialogComponent>
     );
-  }
-
-  private async submit() {
-    if (this.state.loading) return;
-    this.setState({ loading: true });
-    try {
-      switch (this.state.from) {
-        case 'gcs':
-          await DatasetService.createTablesDataset(
-            this.state.name,
-            this.state.params,
-            null
-          );
-          break;
-        case 'bigquery':
-          await DatasetService.createTablesDataset(
-            this.state.name,
-            null,
-            this.state.params
-          );
-          break;
-        case 'computer':
-          break;
-        case 'dataframe':
-          break;
-        default:
-      }
-    } catch (err) {
-      console.log(err);
-      // TODO (Shun): Handle error and show message in dialog
-    } finally {
-      this.setState({ loading: false });
-    }
-
-    this.props.onClose();
-  }
-
-  private getDialogContent(): JSX.Element {
-    const { from } = this.state;
-    if (from === 'computer') {
-      return (
-        <input
-          //className={localStyles.input}
-          type="file"
-          onChange={event => {
-            this.setState({ params: event.target.files });
-          }}
-        />
-      );
-    } else if (from === 'bigquery') {
-      return (
-        <TextInput
-          placeholder="bq://"
-          label="BigQuery URI"
-          onChange={event => {
-            this.setState({ params: event.target.value });
-          }}
-        />
-      );
-    } else if (from === 'gcs') {
-      return (
-        <TextInput
-          placeholder="gs://"
-          label="Google Cloud Storage URI"
-          onChange={event => {
-            this.setState({ params: event.target.value });
-          }}
-        />
-      );
-    } else if (from === 'dataframe') {
-      return <SelectInput />;
-    }
-    return null;
   }
 }

@@ -5,6 +5,7 @@ from unittest.mock import Mock, MagicMock
 from google.cloud.aiplatform_v1alpha1.types import Dataset, ListDatasetsResponse, Model, ListModelsResponse
 from jupyterlab_automl import service
 
+
 class TestAutoMLExtension(unittest.TestCase):
   """Testing the AutoML extension services"""
 
@@ -114,6 +115,16 @@ class TestAutoMLExtension(unittest.TestCase):
     }
     got = automl.get_models()
     self.assertEqual(wanted, got)
+
+  def testCreateDatasetThrows(self):
+    automl = service.AutoMLService.get()
+    automl._dataset_client = Mock()
+    with self.assertRaises(ValueError):
+      automl.create_dataset("", gcs_uri="gs://test/test")
+
+    with self.assertRaises(ValueError):
+      automl.create_dataset("test_name")
+
 
 if __name__ == "__main__":
   unittest.main()
