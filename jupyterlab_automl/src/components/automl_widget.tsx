@@ -27,9 +27,15 @@ interface Service {
 // Static list of required GCP services
 const REQUIRED_SERVICES: ReadonlyArray<Service> = [
   {
+<<<<<<< HEAD
     name: 'uCAIP API',
     endpoint: 'aiplatform.googleapis.com',
     documentation: 'https://cloud.google.com/ai-platform-unified/docs',
+=======
+    name: 'Cloud AI Platform API',
+    endpoint: 'aiplatform.googleapis.com',
+    documentation: 'https://cloud.google.com/ai-platform',
+>>>>>>> 265728394067ed2711337cb9e7e6e1330249fe44
     isOptional: false,
   },
 ];
@@ -44,7 +50,8 @@ export class AutoMLWidget extends ReactWidget {
   private _isVisible = false;
   private _currSize: Widget.ResizeMessage = new Widget.ResizeMessage(0, 0);
   private _checkedServices = false;
-  private _project = '';
+  private _project =
+    'https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=';
 
   constructor(private context: Context) {
     super();
@@ -118,7 +125,7 @@ export class AutoMLWidget extends ReactWidget {
                   The Unified Cloud AI Platform API is required to use this
                   extension. Enable it by clicking 'Ok' then retry. If you
                   enabled this API recently, wait a few minutes for the action
-                  to propagate to our systems and retry.
+                  to propagate to our systems and try again.
                 </p>
               </DialogComponent>
             );
@@ -140,9 +147,7 @@ export class AutoMLWidget extends ReactWidget {
       .every(s => s.enabled);
     if (requiredServicesEnabled === false) {
       const project = await ManagementService.getProject();
-      this._project =
-        'https://console.developers.google.com/apis/api/automl.googleapis.com/overview?project=' +
-        project;
+      this._project += project;
       this.alertSignal.emit(true);
     }
     return requiredServicesEnabled;

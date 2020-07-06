@@ -2,7 +2,7 @@
 
 import unittest
 from unittest.mock import Mock, MagicMock
-from google.cloud.aiplatform_v1alpha1.types import Dataset, ListDatasetsResponse, Model, ListModelsResponse
+from google.cloud.aiplatform_v1alpha1.types import Dataset, ListDatasetsResponse, Model, ListModelsResponse, TrainingPipeline
 from jupyterlab_automl import service
 
 
@@ -10,8 +10,8 @@ class TestAutoMLExtension(unittest.TestCase):
   """Testing the AutoML extension services"""
 
   def testListDatasets(self):
-    time1 = {"seconds": 0, "nanos": 0}
-    time2 = {"seconds": 1, "nanos": 1000000000}
+    time1 = {"seconds": 0}
+    time2 = {"seconds": 60}
     label1 = {"aiplatform.googleapis.com/dataset_metadata_schema": "TABLE"}
     label2 = {"aiplatform.googleapis.com/dataset_metadata_schema": "IMAGE"}
     metadata = {"somepath": {"to the gcp": {"location": "path"}}}
@@ -46,8 +46,8 @@ class TestAutoMLExtension(unittest.TestCase):
             {
                 "id": "dummy_dataset1",
                 "displayName": "dummy_dataset1",
-                "createTime": "01/01/1970, 00:00:00",
-                "updateTime": "01/01/1970, 00:00:02",
+                "createTime": "January 01, 1970, 12:00AM",
+                "updateTime": "January 01, 1970, 12:01AM",
                 "datasetType": "TABLE",
                 "etag": "ETAG1234",
                 "metadata": "",
@@ -55,8 +55,8 @@ class TestAutoMLExtension(unittest.TestCase):
             {
                 "id": "dummy_dataset2",
                 "displayName": "dummy_dataset2",
-                "createTime": "01/01/1970, 00:00:02",
-                "updateTime": "01/01/1970, 00:00:00",
+                "createTime": "January 01, 1970, 12:01AM",
+                "updateTime": "January 01, 1970, 12:00AM",
                 "datasetType": "IMAGE",
                 "etag": "1234ETAG",
                 "metadata": metadata,
@@ -67,8 +67,8 @@ class TestAutoMLExtension(unittest.TestCase):
     self.assertEqual(wanted, got)
 
   def testListModels(self):
-    time1 = {"seconds": 0, "nanos": 0}
-    time2 = {"seconds": 1, "nanos": 1000000000}
+    time1 = {"seconds": 0}
+    time2 = {"seconds": 60}
     gcp_models = ListModelsResponse(models=[
         Model(
             display_name="dummy_model1",
@@ -99,16 +99,16 @@ class TestAutoMLExtension(unittest.TestCase):
                 "id": "dummy_model1",
                 "displayName": "dummy_model1",
                 "pipelineId": "pipeline1",
-                "createTime": "01/01/1970, 00:00:00",
-                "updateTime": "01/01/1970, 00:00:02",
+                "createTime": "January 01, 1970, 12:00AM",
+                "updateTime": "January 01, 1970, 12:01AM",
                 "etag": "ETAG1234",
             },
             {
                 "id": "dummy_model2",
                 "displayName": "dummy_model2",
                 "pipelineId": "pipeline2",
-                "createTime": "01/01/1970, 00:00:02",
-                "updateTime": "01/01/1970, 00:00:00",
+                "createTime": "January 01, 1970, 12:01AM",
+                "updateTime": "January 01, 1970, 12:00AM",
                 "etag": "1234ETAG",
             },
         ]
@@ -124,6 +124,66 @@ class TestAutoMLExtension(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       automl.create_dataset("test_name")
+
+  def testGetPipeline(self):
+    time1 = {"seconds": 0}
+    time2 = {"seconds": 60}
+    transformations = [{
+        "numeric": {
+            "columnName": "Column1",
+        }
+    }, {
+        "categorical": {
+            "columnName": "Column2",
+        }
+    }]
+    training_task_inputs = {
+        "optimizationObjective": "minimize_loss",
+        "predictionType": "classification",
+        "targetColumn": "Column2",
+        "trainBudgetMilliNodeHours": "1000",
+        "transformations": transformations,
+    }
+    input_data_config = {"dataset_id": "dummy_dataset_id"}
+    gcp_pipeline = TrainingPipeline(
+        display_name="dummy_pipeline1",
+        name="dummy_pipeline1_id",
+        create_time=time1,
+        update_time=time2,
+        start_time=time1,
+        end_time=time2,
+        input_data_config=input_data_config,
+        training_task_inputs=training_task_inputs,
+    )
+
+    mock_client = Mock()
+    mock_client.get_training_pipeline = MagicMock(return_value=gcp_pipeline)
+    automl = service.AutoMLService.get()
+    automl._pipeline_client = mock_client
+
+    transformation_options = [{
+        "dataType": "Numeric",
+        "columnName": "Column1",
+    }, {
+        "dataType": "Categorical",
+        "columnName": "Column2",
+    }]
+
+    wanted = {
+        "id": "dummy_pipeline1_id",
+        "displayName": "dummy_pipeline1",
+        "createTime": "January 01, 1970, 12:00AM",
+        "updateTime": "January 01, 1970, 12:01AM",
+        "elapsedTime": 60,
+        "budget": "1000",
+        "datasetId": "dummy_dataset_id",
+        "targetColumn": "Column2",
+        "transformationOptions": transformation_options,
+        "objective": "classification",
+        "optimizedFor": "minimize_loss",
+    }
+    got = automl.get_pipeline('pipeline_id')
+    self.assertEqual(wanted, got)
 
 
 if __name__ == "__main__":
