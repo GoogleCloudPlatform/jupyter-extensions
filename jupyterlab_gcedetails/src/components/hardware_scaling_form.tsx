@@ -77,16 +77,18 @@ export const STYLES = stylesheet({
   },
 });
 
+const NO_ACCELERATOR = ACCELERATOR_TYPES[0].value as string;
+
 export class HardwareScalingForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      cpuValue: null,
-      memoryValue: null,
-      attachGpu: null,
-      gpuType: null,
-      gpuCount: null,
+      cpuValue: machineTypes[0].cpu,
+      memoryValue: machineTypes[0].memory,
+      attachGpu: false,
+      gpuType: NO_ACCELERATOR,
+      gpuCount: '',
     };
   }
 
@@ -110,7 +112,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       this.setState({
         gpuType: event.target.value,
         gpuCount: event.target.value
-          ? String(ACCELERATOR_COUNTS_1_2_4_8[0].value)
+          ? ACCELERATOR_COUNTS_1_2_4_8[0].value as string
           : '',
       });
     };
@@ -124,6 +126,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     const onAttachGpuChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       this.setState({
         attachGpu: event.target.checked,
+        gpuType: event.target.checked 
+          ? ACCELERATOR_TYPES[1].value as string 
+          : NO_ACCELERATOR,
+        gpuCount: event.target.checked ? ACCELERATOR_COUNTS_1_2_4_8[0].value as string : '',
       });
     };
 
@@ -160,7 +166,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     label="GPU type"
                     name="gpuType"
                     value={gpuType}
-                    options={ACCELERATOR_TYPES}
+                    options={ACCELERATOR_TYPES.slice(1)}
                     onChange={onGpuTypeChange}
                   />
                 </div>
