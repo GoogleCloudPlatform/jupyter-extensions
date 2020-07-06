@@ -54,6 +54,8 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "google-cloud-storage>=1.24.1", "jupyterlab~=1.2.0",
-        "google-cloud-automl", "gcp_jupyterlab_shared"
+        "gcp_jupyterlab_shared",
+        "pip @ https://storage.googleapis.com/google-cloud-aiplatform/libraries/python/0.1.0/google-cloud-aiplatform-0.1.0.tar.gz",
+        "google-api-python-client"
     ],
 )
