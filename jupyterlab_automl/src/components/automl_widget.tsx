@@ -27,15 +27,9 @@ interface Service {
 // Static list of required GCP services
 const REQUIRED_SERVICES: ReadonlyArray<Service> = [
   {
-<<<<<<< HEAD
-    name: 'uCAIP API',
-    endpoint: 'aiplatform.googleapis.com',
-    documentation: 'https://cloud.google.com/ai-platform-unified/docs',
-=======
     name: 'Cloud AI Platform API',
     endpoint: 'aiplatform.googleapis.com',
     documentation: 'https://cloud.google.com/ai-platform',
->>>>>>> 265728394067ed2711337cb9e7e6e1330249fe44
     isOptional: false,
   },
 ];

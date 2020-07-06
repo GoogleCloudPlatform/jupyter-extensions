@@ -142,7 +142,6 @@ class AutoMLService:
     return []
 
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
-
     input_config = {}
 
     if not display_name:
