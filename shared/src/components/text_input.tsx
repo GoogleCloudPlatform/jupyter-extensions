@@ -24,12 +24,14 @@ interface TextInputProps {
   type?: string;
   min?: string;
   max?: string;
+  step?: number;
   label?: string;
   name?: string;
   value?: string;
   placeholder?: string;
   hasError?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
 }
 
 /** Funtional Component for text input fields */

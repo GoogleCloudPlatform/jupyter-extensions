@@ -62,6 +62,17 @@ export interface Details {
   gpu: Gpu;
 }
 
+export interface Option {
+  text: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
+export interface HardwareCapacity {
+  cpu: number;
+  memory: number;
+}
+
 interface AttributeMapper {
   label: string;
   mapper: (details: Details) => string;
@@ -104,6 +115,43 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
 ];
 
 MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
+
+/**
+ * AI Platform Accelerator types.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ */
+export const ACCELERATOR_TYPES: Option[] = [
+  { value: '', text: 'None' },
+  { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
+  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
+  { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
+  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
+  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+];
+
+/**
+ * AI Platform Accelerator counts.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus
+ */
+export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
+  { value: '1', text: '1' },
+  { value: '2', text: '2' },
+  { value: '4', text: '4' },
+  { value: '8', text: '8' },
+];
+
+/* CPU to Memory mappings for the N1 standard machine types */
+export const machineTypes: HardwareCapacity[] = [
+  { cpu: 0, memory: 0 },
+  { cpu: 1, memory: 3.75 },
+  { cpu: 2, memory: 7.5 },
+  { cpu: 4, memory: 15 },
+  { cpu: 8, memory: 30 },
+  { cpu: 16, memory: 60 },
+  { cpu: 32, memory: 120 },
+  { cpu: 64, memory: 240 },
+  { cpu: 96, memory: 360 },
+];
 
 /* Class names applied to the component. */
 export const STYLES = stylesheet({
