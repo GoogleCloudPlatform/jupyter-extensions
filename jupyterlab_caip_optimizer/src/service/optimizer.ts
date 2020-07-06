@@ -109,4 +109,21 @@ export class OptimizerService {
       handleApiError(err);
     }
   }
+
+  async deleteStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<boolean> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      await this._transportService.submit<undefined>({
+        path: `${ENDPOINT}/${encodeURI(rawStudyName)}`,
+        method: 'DELETE',
+      });
+      return true;
+    } catch (err) {
+      console.error(`Unable to delete study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
 }

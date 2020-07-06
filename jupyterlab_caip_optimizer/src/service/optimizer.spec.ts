@@ -64,6 +64,17 @@ describe('OptimizerService', () => {
       method: 'GET',
     });
   });
+
+  it('deletes a study', async () => {
+    mockSubmit.mockReturnValue(asApiResponse(undefined));
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    await optimizerService.deleteStudy(studyName, fakeMetadataRequired);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/${studyName}`,
+      method: 'DELETE',
+    });
+  });
 });
 
 describe('prettifyStudyName', () => {
