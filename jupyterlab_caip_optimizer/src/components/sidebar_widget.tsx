@@ -34,6 +34,20 @@ import { Study } from '../types';
 import { setView } from '../store/view';
 import { Store } from 'redux';
 import { prettifyStudyName } from '../service/optimizer';
+import { style } from 'typestyle';
+
+const sidebarStyle = style({
+  height: '100%',
+  overflow: 'scroll',
+});
+
+const rowStyle = style({
+  $nest: {
+    '&:hover': {
+      cursor: 'pointer',
+    },
+  },
+});
 
 const mapStateToProps = (state: RootState) => ({
   loading: state.studies.loading,
@@ -70,8 +84,9 @@ export const Sidebar = ({
       borderRadius={0}
       display="flex"
       flexDirection="column"
+      className={sidebarStyle}
     >
-      <Box display="flex">
+      <Box display="flex" pt={2}>
         <Box mx="auto">
           <Typography variant="h4" gutterBottom>
             Optimizer
@@ -98,6 +113,7 @@ export const Sidebar = ({
                 <TableRow
                   key={study.name}
                   onClick={() => openStudy(study.name)}
+                  className={rowStyle}
                 >
                   <TableCell>{prettifyStudyName(study.name)}</TableCell>
                 </TableRow>
