@@ -9,6 +9,20 @@ export interface Model {
   etag: string;
 }
 
+export interface Pipeline {
+  id: string;
+  displayName: string;
+  createTime: Date;
+  updateTime: Date;
+  elapsedTime: number;
+  budget: number;
+  datasetId: string;
+  targetColumn: string;
+  transformationOptions: any;
+  objective: string;
+  optimizedFor: string;
+}
+
 interface Models {
   models: Model[];
 }
@@ -28,5 +42,11 @@ export abstract class ModelService {
       method: 'POST',
     };
     await requestAPI('v1/deleteModel', requestInit);
+  }
+
+  static async getPipeline(pipelineId: string): Promise<Pipeline> {
+    const query = '?pipelineId=' + pipelineId;
+    const data = await requestAPI<Pipeline>('v1/pipeline' + query);
+    return data;
   }
 }

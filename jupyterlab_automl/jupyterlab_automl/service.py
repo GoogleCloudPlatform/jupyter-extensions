@@ -57,9 +57,11 @@ class AutoMLService:
         client_options=client_options)
     self._model_client = aiplatform_v1alpha1.ModelServiceClient(
         client_options=client_options)
+    self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
+        client_options=client_options)
     self._parent = ("projects/" + AuthProvider.get().project +
                     "/locations/us-central1")
-    self._time_format = "%m/%d/%Y, %H:%M:%S"
+    self._time_format = "%B %d, %Y, %I:%M%p"
 
   @property
   def dataset_client(self):
@@ -86,6 +88,34 @@ class AutoMLService:
             "updateTime": model.update_time.strftime(self._time_format),
             "etag": model.etag,
         } for model in models]
+    }
+
+  def _get_feature_transformations(self, response):
+    transformations = []
+    for column in response:
+      for data_type in column.keys():
+        transformations.append({
+            "dataType": data_type.capitalize(),
+            "columnName": column[data_type]["columnName"]
+        })
+    return transformations
+
+  def get_pipeline(self, pipeline_id):
+    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    training_task_inputs = json_format.MessageToDict(pipeline._pb.training_task_inputs)
+    transformation_options = self._get_feature_transformations(training_task_inputs['transformations'])
+    return {
+        "id": pipeline.name,
+        "displayName": pipeline.display_name,
+        "createTime": pipeline.create_time.strftime(self._time_format),
+        "updateTime": pipeline.update_time.strftime(self._time_format),
+        "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
+        "budget": training_task_inputs['trainBudgetMilliNodeHours'],
+        "datasetId": pipeline.input_data_config.dataset_id,
+        "targetColumn": training_task_inputs['targetColumn'],
+        "transformationOptions": transformation_options,
+        "objective": training_task_inputs['predictionType'],
+        "optimizedFor": training_task_inputs['optimizationObjective'],
     }
 
   def get_datasets(self):
