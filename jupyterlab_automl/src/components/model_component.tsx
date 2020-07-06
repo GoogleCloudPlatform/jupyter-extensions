@@ -11,12 +11,12 @@ import {
 } from '@material-ui/core';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 import * as React from 'react';
-import { stylesheet } from 'typestyle';
 import { Model, ModelService } from '../service/model';
-import * as csstips from 'csstips';
 
 interface Props {
   model: Model;
+  value: number;
+  index: number;
 }
 
 interface State {
@@ -26,21 +26,6 @@ interface State {
   transformationOptions: any[];
   open: boolean;
 }
-
-const localStyles = stylesheet({
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '14px',
-    letterSpacing: '1px',
-    margin: 0,
-    padding: '8px 12px 8px 24px',
-  },
-  panel: {
-    backgroundColor: 'white',
-    height: '100%',
-    ...csstips.vertical,
-  },
-});
 
 export class ModelComponent extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -61,8 +46,10 @@ export class ModelComponent extends React.Component<Props, State> {
   render() {
     const { isLoading, modelDetails } = this.state;
     return (
-      <div className={localStyles.panel}>
-        <header className={localStyles.header}>Model Properties</header>
+      <div
+        hidden={this.props.value !== this.props.index}
+        style={{ marginTop: '16px' }}
+      >
         {isLoading ? (
           <LinearProgress />
         ) : (
