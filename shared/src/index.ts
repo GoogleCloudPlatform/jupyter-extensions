@@ -18,6 +18,7 @@ export * from './components/action_bar';
 export * from './components/checkbox_input';
 export * from './components/context_menu';
 export * from './components/dialog';
+export * from './components/radio_input';
 export * from './components/field_error';
 export * from './components/icon_button_menu';
 export * from './components/learn_more_link';
