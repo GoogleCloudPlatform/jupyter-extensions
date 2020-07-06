@@ -46,16 +46,24 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
     execute: () => {
         var currWidget = labShell.currentWidget;
         var currentFile = docManager.contextForWidget(currWidget);
+
         if (currentFile === undefined) {
             //Don't activate the widget if there is no file open
             console.log("No open files to display comments for.");
         } else {
-            file = new File(currentFile.path);
-            content = new CommentsWidget(file);
-            widget = new MainAreaWidget<CommentsWidget>({content});
-            widget.id = 'jupyterlab_comments';
-            widget.title.label = 'Notebook comments in Git';
-            widget.title.closable = true;
+            if (!widget || widget.isDisposed) {
+              const context = {
+                app: app,
+                labShell: labShell,
+                docManager: docManager,
+              };
+              file = new File(currentFile.path);
+              content = new CommentsWidget(file, context);
+              widget = new MainAreaWidget<CommentsWidget>({content});
+              widget.id = 'jupyterlab_comments';
+              widget.title.label = 'Notebook comments in Git';
+              widget.title.closable = true;
+            }
 
             if (!widget.isAttached) {
                 app.shell.add(widget, 'right');

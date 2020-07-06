@@ -15,14 +15,19 @@
  */
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { ServerConnection } from '@jupyterlab/services';
+const mockGetMetadata = jest.fn();
+jest.mock('gcp_jupyterlab_shared', () => {
+  const orig = jest.requireActual('gcp_jupyterlab_shared');
+
+  return {
+    __esModule: true,
+    ...orig,
+    getMetadata: mockGetMetadata,
+  };
+});
 
 import { BUCKET_NAME_SUFFIX, CLOUD_FUNCTION_REGION } from '../data';
-import {
-  ApiRequest,
-  asApiResponse,
-  asFetchResponse,
-} from 'gcp_jupyterlab_shared';
+import { ApiRequest, asApiResponse } from 'gcp_jupyterlab_shared';
 import { getProjectState, TEST_PROJECT } from '../test_helpers';
 import { ProjectStateService } from './project_state';
 
@@ -48,15 +53,13 @@ function pollerHelper(): () => void {
 
 describe('ProjectStateService', () => {
   const mockSubmit = jest.fn();
-  const mockMakeRequest = jest.fn();
-  const projectStateService = new ProjectStateService({ submit: mockSubmit });
+  let projectStateService: ProjectStateService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    ServerConnection.makeRequest = mockMakeRequest;
-
+    projectStateService = new ProjectStateService({ submit: mockSubmit });
     projectStateService.projectId = TEST_PROJECT;
   });
 
@@ -159,7 +162,7 @@ describe('ProjectStateService', () => {
     it('Gets empty project state with project ID from server', async () => {
       const project = 'other-project-id';
       projectStateService.projectId = null;
-      mockMakeRequest.mockReturnValue(asFetchResponse({ project }));
+      mockGetMetadata.mockResolvedValue({ project });
       mockSubmit.mockImplementation((request: ApiRequest) => {
         if (request.path.indexOf('servicemanagement') >= 0) {
           return asApiResponse({ services: [] });
@@ -294,18 +297,18 @@ describe('ProjectStateService', () => {
     });
 
     it('Fails to retrieve a project ID', async () => {
+      const error = {
+        result: 'Unable to retrieve metadata from VM',
+      };
       projectStateService.projectId = null;
-      mockMakeRequest.mockRejectedValue('Unable to retrieve project');
+      mockGetMetadata.mockRejectedValue(error);
 
-      expect.assertions(3);
+      expect.assertions(1);
       try {
         await projectStateService.getProjectState();
       } catch (err) {
-        expect(err).toBe('Unable to retrieve project');
+        expect(err).toEqual(error);
       }
-      const url = mockMakeRequest.mock.calls[0][0];
-      expect(mockMakeRequest).toHaveBeenCalledTimes(1);
-      expect(url).toMatch(new RegExp('/gcp/v1/project$'));
     });
 
     it('Enables services with failed operations', async () => {

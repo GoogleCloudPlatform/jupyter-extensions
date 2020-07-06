@@ -1,10 +1,15 @@
 """Services for AutoML extension that get reponses from the uCAIP API"""
 
+import json
 from enum import Enum
+
+from gcp_jupyterlab_shared.handlers import AuthProvider
 from google.cloud import aiplatform_v1alpha1
 from google.protobuf import json_format
 from googleapiclient.discovery import build
-from gcp_jupyterlab_shared.handlers import AuthProvider
+
+TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
+
 
 def parse_dataset_type(dataset):
   key = "aiplatform.googleapis.com/dataset_metadata_schema"
@@ -13,10 +18,12 @@ def parse_dataset_type(dataset):
       return dt
   return DatasetType.OTHER
 
+
 class DatasetType(Enum):
   OTHER = "OTHER"
   TABLE = "TABLE"
   IMAGE = "IMAGE"
+
 
 class ManagementService:
   """Provides an authenicated Service Management Client"""
@@ -37,6 +44,7 @@ class ManagementService:
 
   def get_project(self):
     return AuthProvider.get().project
+
 
 class AutoMLService:
   """Provides an authenticated AutoML Client and project info"""
@@ -126,3 +134,24 @@ class AutoMLService:
             "metadata": json_format.MessageToDict(dataset._pb.metadata),
         })
     return {"datasets": datasets}
+
+  def get_table_specs(self, dataset_id):
+    return []
+
+  def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
+
+    input_config = {}
+    if gcs_uri:
+      input_config["gcsSource"] = {"uri": [gcs_uri]}
+    elif bigquery_uri:
+      input_config["bigquerySource"] = {"uri": bigquery_uri}
+    else:
+      raise ValueError("Must provide either gcs uri or bigquery uri")
+
+    ds = aiplatform_v1alpha1.Dataset(display_name=display_name,
+                                     metadata_schema_uri=TABLES_METADATA_SCHEMA,
+                                     metadata={"inputConfig": input_config})
+
+    created = self._dataset_client.create_dataset(parent=self._parent,
+                                                  dataset=ds).result()
+    return created

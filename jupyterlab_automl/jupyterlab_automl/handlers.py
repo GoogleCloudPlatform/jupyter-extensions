@@ -7,11 +7,14 @@ from jupyterlab_automl.service import AutoMLService, ManagementService
 
 handlers = {}
 
+
 def _create_handler(req_type, handler):
+
   class Handler(APIHandler):
     """Handles the request types sent from the frontend"""
 
     if req_type == "GET":
+
       @gen.coroutine
       def get(self, _input=""):
         args = {k: self.get_argument(k) for k in self.request.arguments}
@@ -21,6 +24,7 @@ def _create_handler(req_type, handler):
           self._handle_exception(e)
 
     elif req_type == "POST":
+
       @gen.coroutine
       def post(self, _input=""):
         args = self.get_json_body()
@@ -36,39 +40,62 @@ def _create_handler(req_type, handler):
 
   return Handler
 
+
 def _handler(request_type, endpoint):
+
   def decorator(func):
     handlers[endpoint] = _create_handler(request_type, func)
     return func
 
   return decorator
 
+
 @_handler("GET", "datasets")
 def _list_datasets(_):
   return AutoMLService.get().get_datasets()
+
 
 @_handler("GET", "models")
 def _list_models(_):
   return AutoMLService.get().get_models()
 
+
 @_handler("GET", "pipeline")
 def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])
+
+
+@_handler("GET", "tableInfo")
+def _table_info(args):
+  return AutoMLService.get().get_table_specs(args["datasetId"])
+
 
 @_handler("POST", "deleteDataset")
 def _delete_dataset(args):
   AutoMLService.get().dataset_client.delete_dataset(name=args["datasetId"])
   return {"success": True}
 
+
 @_handler("POST", "deleteModel")
 def _delete_model(args):
   AutoMLService.get().model_client.delete_model(name=args["modelId"])
   return {"success": True}
 
+
 @_handler("GET", "managedServices")
 def _managed_services(_):
   return ManagementService.get().get_managed_services()
 
+
 @_handler("GET", "project")
 def _project(_):
   return ManagementService.get().get_project()
+
+
+@_handler("POST", "createTablesDataset")
+def _create_tables_dataset(args):
+  AutoMLService.get().create_dataset(
+      display_name=args["displayName"],
+      gcs_uri=args.get("gcsSource"),
+      bigquery_uri=args.get("bigquerySource"))
+  return {"success": True}

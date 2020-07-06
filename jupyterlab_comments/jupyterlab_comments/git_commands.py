@@ -63,18 +63,13 @@ class Git(Configurable):
 		Returns a JSON list of commments for the given file.
 
 		Assumes that git_root_dir is a valid path within a Git repo.
-		Keys of objects returned: timestamp, author, location, description
+		Keys of objects returned: hash, comment, original, **children
 		"""
 		#self.appraise_pull(current_path) #pull new comments from remote repo
 		comments_string = self.run(git_root_dir, 'appraise', 'show', '-d',
 									'-json', file_path_from_repo_root)
 		comments_json = json.loads(comments_string)
-		comments_list = []
-		if comments_json is not None:
-			for comment_obj in comments_json:
-				comments_list.append(comment_obj['comment'])
-
-		return comments_list
+		return comments_json
 
 	def get_code_review_comments(self, file_path, server_root):
 		pass
