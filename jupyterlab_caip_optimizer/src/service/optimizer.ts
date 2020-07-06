@@ -31,6 +31,11 @@ function zoneToRegion(zone: string): string {
   return region;
 }
 
+export function prettifyStudyName(studyName: string): string {
+  // projects/project-name/locations/us-central1/studies/study-name -> study-name
+  return studyName.replace(/projects\/.+\/locations\/.+\/studies\//, '');
+}
+
 /**
  * Class to interact with Optimizer
  */
@@ -41,12 +46,6 @@ export class OptimizerService {
 
   set transportService(transportService: TransportService) {
     this._transportService = transportService;
-  }
-
-  private serializeStudy(study: Study): Study {
-    // projects/project-name/locations/us-central1/studies/study-name -> study-name
-    const name = study.name.split('/').pop();
-    return { ...study, name };
   }
 
   async getMetaData(): Promise<MetadataRequired> {
@@ -82,6 +81,6 @@ export class OptimizerService {
       path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
       method: 'GET',
     });
-    return response.result.studies.map(this.serializeStudy);
+    return response.result.studies;
   }
 }

@@ -33,6 +33,7 @@ import { RootState, AppDispatch } from '../store/store';
 import { Study } from '../types';
 import { setView } from '../store/view';
 import { Store } from 'redux';
+import { prettifyStudyName } from '../service/optimizer';
 
 const mapStateToProps = (state: RootState) => ({
   loading: state.studies.loading,
@@ -98,7 +99,7 @@ export const Sidebar = ({
                   key={study.name}
                   onClick={() => openStudy(study.name)}
                 >
-                  <TableCell>{study.name}</TableCell>
+                  <TableCell>{prettifyStudyName(study.name)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
