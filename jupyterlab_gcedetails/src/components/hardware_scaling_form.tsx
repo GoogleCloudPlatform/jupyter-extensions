@@ -40,6 +40,7 @@ interface Props {
 }
 
 interface State {
+  baseMachineType: string;
   cpuValue: number;
   memoryValue: number;
   attachGpu: boolean;
@@ -67,13 +68,16 @@ export const STYLES = stylesheet({
     padding: '26px 16px 0px 16px',
   },
   container: {
-    width: '550px',
+    width: '500px',
   },
   description: {
     paddingBottom: '20px',
   },
   topPadding: {
     paddingTop: '10px',
+  },
+  bottomPadding: {
+    paddingBottom: '10px',
   },
 });
 
@@ -84,17 +88,33 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      cpuValue: machineTypes[0].cpu,
-      memoryValue: machineTypes[0].memory,
+      baseMachineType: machineTypes[0].base.value as string,
+      cpuValue: 0,
+      memoryValue: 0,
       attachGpu: false,
       gpuType: NO_ACCELERATOR,
       gpuCount: '',
     };
   }
 
+  private getMachineType = (baseMachineType: string) => {
+    return machineTypes.find(elem => elem.base.value === baseMachineType);
+  };
+
   render() {
     const { onDialogClose } = this.props;
-    const { gpuType, gpuCount, attachGpu } = this.state;
+    const { gpuType, gpuCount, attachGpu, baseMachineType } = this.state;
+
+    const onBaseMachineTypeChange = (
+      event: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+      this.setState({
+        baseMachineType: event.target.value,
+        cpuValue: this.getMachineType(event.target.value).configurations[0].cpu,
+        memoryValue: this.getMachineType(event.target.value).configurations[0]
+          .memory,
+      });
+    };
 
     const onCpuChange = (newValue: number) => {
       this.setState({
@@ -112,7 +132,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       this.setState({
         gpuType: event.target.value,
         gpuCount: event.target.value
-          ? ACCELERATOR_COUNTS_1_2_4_8[0].value as string
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
           : '',
       });
     };
@@ -126,10 +146,12 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     const onAttachGpuChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       this.setState({
         attachGpu: event.target.checked,
-        gpuType: event.target.checked 
-          ? ACCELERATOR_TYPES[1].value as string 
+        gpuType: event.target.checked
+          ? (ACCELERATOR_TYPES[1].value as string)
           : NO_ACCELERATOR,
-        gpuCount: event.target.checked ? ACCELERATOR_COUNTS_1_2_4_8[0].value as string : '',
+        gpuCount: event.target.checked
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+          : '',
       });
     };
 
@@ -143,10 +165,20 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.title}>Hardware Scaling Limits</span>
           <form>
             <HardwareConfigurationDescription />
+            <div className={classes(css.flex1, STYLES.bottomPadding)}>
+              <SelectInput
+                label="Machine type"
+                name="baseMachineType"
+                value={baseMachineType}
+                options={machineTypes.map(elem => elem.base)}
+                onChange={onBaseMachineTypeChange}
+              />
+            </div>
             <SynchronizedSliders
-              values={machineTypes}
+              values={this.getMachineType(baseMachineType).configurations}
               onMemoryChange={onMemoryChange}
               onCpuChange={onCpuChange}
+              key={baseMachineType}
             />
             <div className={STYLES.checkboxContainer}>
               <CheckboxInput

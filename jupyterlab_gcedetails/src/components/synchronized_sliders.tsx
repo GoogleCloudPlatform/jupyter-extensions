@@ -19,11 +19,11 @@ import { stylesheet } from 'typestyle';
 import Grid from '@material-ui/core/Grid';
 import Slider from '@material-ui/core/Slider';
 import { TextInput } from 'gcp_jupyterlab_shared';
-import { HardwareCapacity } from '../data';
+import { HardwareConfiguration } from '../data';
 
 interface Props {
   /* Assumes sorted list with memory and cpu set to 0 for first value */
-  values: HardwareCapacity[];
+  values: HardwareConfiguration[];
   onCpuChange: (value: number) => void;
   onMemoryChange: (value: number) => void;
 }
@@ -37,7 +37,7 @@ interface State {
 
 export const STYLES = stylesheet({
   container: {
-    minWidth: '500px',
+    minWidth: '450px',
 
     /**
      * Using overflow to deal with quirks of material-ui grid.
@@ -170,7 +170,9 @@ export class SynchronizedSliders extends React.Component<Props, State> {
           handleSliderChange={handleCpuSliderChange}
           handleInputChange={handleCpuInputChange}
           handleInputBlur={handleCpuInputBlur}
-          helperText="1 - 96 vCPUs"
+          helperText={`${this.cpuValues[0]}  - ${
+            this.cpuValues[this.cpuValues.length - 1]
+          } vCPUs`}
         />
         <InputSlider
           possibleValues={this.memoryValues}
@@ -180,7 +182,9 @@ export class SynchronizedSliders extends React.Component<Props, State> {
           handleSliderChange={handleMemorySliderChange}
           handleInputChange={handleMemoryInputChange}
           handleInputBlur={handleMemoryInputBlur}
-          helperText="3.75 - 360 GB"
+          helperText={`${this.memoryValues[0]} - ${
+            this.memoryValues[this.memoryValues.length - 1]
+          } GB`}
         />
       </div>
     );

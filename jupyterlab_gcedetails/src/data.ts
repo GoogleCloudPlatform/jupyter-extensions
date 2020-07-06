@@ -68,11 +68,6 @@ export interface Option {
   disabled?: boolean;
 }
 
-export interface HardwareCapacity {
-  cpu: number;
-  memory: number;
-}
-
 interface AttributeMapper {
   label: string;
   mapper: (details: Details) => string;
@@ -140,18 +135,85 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
   { value: '8', text: '8' },
 ];
 
-/* CPU to Memory mappings for the N1 standard machine types */
-export const machineTypes: HardwareCapacity[] = [
-  { cpu: 0, memory: 0 },
-  { cpu: 1, memory: 3.75 },
-  { cpu: 2, memory: 7.5 },
-  { cpu: 4, memory: 15 },
-  { cpu: 8, memory: 30 },
-  { cpu: 16, memory: 60 },
-  { cpu: 32, memory: 120 },
-  { cpu: 64, memory: 240 },
-  { cpu: 96, memory: 360 },
+/**
+ * AI Platform Machine types.
+ * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
+ */
+export const MASTER_TYPES: Option[] = [
+  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
+  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
+  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
+  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
+  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
+  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
+
+  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
+  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
+  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
+  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
+  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
+
+  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
+  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
+  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
+  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
 ];
+
+export interface HardwareConfiguration {
+  cpu: number;
+  memory: number;
+}
+
+/* CPU to Memory mappings for the Compute Engine machine types */
+interface CEMachineType {
+  base: Option;
+  configurations: HardwareConfiguration[];
+}
+
+export const machineTypes: CEMachineType[] = [
+  {
+    base: {
+      value: 'n1-standard-',
+      text: 'N1 Standard'
+    },
+    configurations: [
+      { cpu: 4, memory: 15 },
+      { cpu: 8, memory: 30 },
+      { cpu: 16, memory: 60 },
+      { cpu: 32, memory: 120 },
+      { cpu: 64, memory: 240 },
+      { cpu: 96, memory: 360 },     
+    ]
+  },
+  {
+    base: {
+      value: 'n1-highmem-',
+      text: 'N1 High Memory',
+    },
+    configurations: [
+      { cpu: 4, memory: 26 },
+      { cpu: 8, memory: 52 },
+      { cpu: 16, memory: 104 },
+      { cpu: 32, memory: 208 },
+      { cpu: 64, memory: 416 },
+      { cpu: 96, memory: 624 },     
+    ]
+  },
+  {
+    base: {
+      value: 'n1-highcpu-',
+      text: 'N1 High CPU',
+    },
+    configurations: [
+      { cpu: 16, memory: 14.4 },
+      { cpu: 32, memory: 28.8 },
+      { cpu: 64, memory: 57.6 },
+      { cpu: 96, memory: 86.4 },     
+    ]
+  },  
+]
 
 /* Class names applied to the component. */
 export const STYLES = stylesheet({
