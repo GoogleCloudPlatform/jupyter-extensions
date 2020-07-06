@@ -105,6 +105,9 @@ class AutoMLService:
         })
     return {"datasets": datasets}
 
+  def get_table_specs(self, dataset_id):
+    return []
+
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
 
     input_config = {}
