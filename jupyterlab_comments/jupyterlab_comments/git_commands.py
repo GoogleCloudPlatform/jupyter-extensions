@@ -75,23 +75,24 @@ class Git(Configurable):
 		"""
 		Returns the JSON for the current code review with comments for the requested file path.
 
-		Returns None of there are no review comments for the file path.
+		The value of key "comments" is modified to only include comments for the requested file path. If there are no code review comments for the requested file path, the value of key "comments" will be an empty array.
 		"""
 		#self.appraise_pull(current_path) #pull new comments from remote repo
 		review_string = self.run(git_root_dir, 'appraise', 'show',
 									'-json')
 		review_json = json.loads(review_string)
-		if "comments" in review_json.keys():
-			comments_on_file = []
-			for item in review_json["comments"]:
-				location = item["comment"]["location"]
-				if "path" in location.keys() and location["path"] == file_path_from_repo_root:
-					comments_on_file.append(item)
-
-			review_json["comments"] = comments_on_file
-			return review_json
-		else:
+		if not review_json:
 			return None
+
+		review_comments = review_json.get("comments", [])
+		comments_on_file = []
+		for item in review_comments:
+			location = item["comment"]["location"]
+			if location.get("path", "") == file_path_from_repo_root:
+				comments_on_file.append(item)
+
+		review_json["comments"] = comments_on_file
+		return review_json
 
 	def add_comment(self, file_path, server_root):
 		pass
