@@ -31,13 +31,6 @@ class PreviousNamesHandler(APIHandler):
         self.finish('Load previous names for a file (unimplemented)')
 
 
-class ReviewCommentsHandler(APIHandler):
-
-    def get(self):
-        file_path = self.get_argument('file_path')
-        self.finish('List review comments for a file (unimplemented)')
-
-
 class DetachedCommentsHandler(APIHandler):
 
     def get(self):
@@ -55,15 +48,35 @@ class DetachedCommentsHandler(APIHandler):
                 comments = git.get_comments_for_path(file_path_from_repo_root, git_root_dir)
                 self.finish(json.dumps(comments))
             else:
-                #TODO (mkalil) : notify the user that the file is not inside a git repository
                 print("Error: file is not inside a git repository")
-
                 self.finish(json.dumps({"error_message": "Error: file is not inside a git repository"}))
 
 
 
         except Exception as e:
             print("Error fetching detached comments")
+            print(traceback.format_exc())
+
+
+class ReviewCommentsHandler(APIHandler):
+
+    def get(self):
+        try:
+            file_path = self.get_argument('file_path')
+            server_root = os.path.expanduser(self.get_argument('server_root'))
+            full_file_path = os.path.join(server_root, file_path)
+            full_file_path_dir = os.path.dirname(full_file_path)
+
+            if git.inside_git_repo(full_file_path_dir):
+                git_root_dir = git.get_repo_root(full_file_path_dir)
+                file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
+                comments = git.get_code_review_comments(file_path_from_repo_root, git_root_dir)
+                self.finish(json.dumps(comments))
+            else:
+                print("Error: file is not inside a git repository")
+                self.finish(json.dumps({"error_message": "Error: file is not inside a git repository"}))
+        except Exception as e:
+            print("Error fetching code review comments")
             print(traceback.format_exc())
 
 

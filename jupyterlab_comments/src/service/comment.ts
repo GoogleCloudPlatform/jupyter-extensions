@@ -25,7 +25,7 @@ export interface CodeReviewComment extends Comment {
 export interface Comment {
     author: any,
     text: any,
-    timestamp: any,
+    timestamp: string,
     range: any,
     hash: any,
     children?: any;
@@ -36,10 +36,12 @@ export function createCommentFromJSON(obj : any) : DetachedComment {
     const content = obj.comment;
     const hash = obj.hash;
     const children = obj.children;
+    var timestamp : Date = new Date(parseInt(content.timestamp) * 1000);
+    var timestampString = timestamp.toDateString();
     let comment : DetachedComment = {
       author: content.author,
       text: content.description,
-      timestamp: content.timestamp,
+      timestamp: timestampString,
       range: content.location.range,
       hash: hash,
     };
