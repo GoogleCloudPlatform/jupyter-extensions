@@ -106,7 +106,12 @@ export interface MedianAutomatedStoppingConfig {
   useElapsedTime: boolean;
 }
 
-export enum Algorithm {}
+export enum Algorithm {
+  ALGORITHM_UNSPECIFIED = 'ALGORITHM_UNSPECIFIED',
+  GAUSSIAN_PROCESS_BANDIT = 'GAUSSIAN_PROCESS_BANDIT',
+  GRID_SEARCH = 'GRID_SEARCH',
+  RANDOM_SEARCH = 'RANDOM_SEARCH',
+}
 
 export type AutomatedStoppingConfig =
   | {
@@ -132,10 +137,10 @@ export interface Study {
 }
 
 export enum State {
-  STATE_UNSPECIFIED,
-  ACTIVE,
-  INACTIVE,
-  COMPLETED,
+  STATE_UNSPECIFIED = 'STATE_UNSPECIFIED',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  COMPLETED = 'COMPLETED',
 }
 
 export interface Metric {

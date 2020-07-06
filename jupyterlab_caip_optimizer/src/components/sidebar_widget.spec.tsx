@@ -5,6 +5,9 @@ jest.mock('react-redux', () => ({
 }));
 jest.mock('@material-ui/core');
 jest.mock('../store/view');
+jest.mock('../service/optimizer', () => ({
+  prettifyStudyName: name => name,
+}));
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 import { SidebarWidget, Sidebar } from './sidebar_widget';
@@ -15,7 +18,7 @@ import {
   CircularProgress,
   Typography,
 } from '@material-ui/core';
-import { Study } from '../types';
+import { fakeStudy } from '../service/test-constants';
 
 describe('Sidebar', () => {
   let mockOpenDashboard: jest.Mock;
@@ -45,41 +48,18 @@ describe('Sidebar', () => {
         loading={false}
         openDashboard={mockOpenDashboard}
         openStudy={mockOpenStudy}
-        studies={[
-          {
-            name: 'study-name-1',
-            studyConfig: {
-              parameters: [
-                {
-                  doubleValueSpec: {
-                    maxValue: 10.0,
-                    minValue: -10.0,
-                  },
-                  parameter: 'x',
-                  type: 'DOUBLE',
-                },
-              ],
-              metrics: [
-                {
-                  goal: 'MAXIMIZE',
-                  metric: 'y',
-                },
-              ],
-              algorithm: 0,
-            },
-          } as Study,
-        ]}
+        studies={[fakeStudy]}
       />
     );
 
     component
       .findWhere(
-        node => node.type() === TableRow && node.text().includes('study-name-1')
+        node => node.type() === TableRow && node.text().includes(fakeStudy.name)
       )
       .first()
       .simulate('click');
 
-    expect(mockOpenStudy).toHaveBeenCalledWith('study-name-1');
+    expect(mockOpenStudy).toHaveBeenCalledWith(fakeStudy.name);
   });
   it('shows no study list when there are no studies', () => {
     const component = shallow(

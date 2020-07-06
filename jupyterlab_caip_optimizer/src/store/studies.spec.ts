@@ -1,5 +1,5 @@
 import { studiesSlice, fetchStudies, createStudy } from './studies';
-import { AsyncState, Study } from '../types';
+import { AsyncState, Study, Algorithm } from '../types';
 
 describe('studies reducer', () => {
   describe('fetchStudies', () => {
@@ -11,7 +11,7 @@ describe('studies reducer', () => {
     it('intially starts loading', () => {
       const newState = studiesSlice.reducer(
         mockState,
-        fetchStudies.pending(undefined)
+        fetchStudies.pending(undefined, undefined)
       );
       expect(newState.loading).toBe(true);
     });
@@ -35,7 +35,7 @@ describe('studies reducer', () => {
     it('sets an error message on error', () => {
       const newState = studiesSlice.reducer(
         mockState,
-        fetchStudies.rejected(new Error('Error'), undefined)
+        fetchStudies.rejected(new Error('Error'), undefined, undefined)
       );
       expect(newState.loading).toBe(false);
       expect(newState.data).toBeUndefined();
@@ -78,7 +78,7 @@ describe('studies reducer', () => {
               metric: 'y',
             },
           ],
-          algorithm: 0,
+          algorithm: Algorithm.ALGORITHM_UNSPECIFIED,
         },
       } as Study;
       const newState = studiesSlice.reducer(

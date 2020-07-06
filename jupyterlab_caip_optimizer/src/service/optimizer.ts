@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 
-import { TransportService } from 'gcp_jupyterlab_shared';
+import { TransportService, handleApiError } from 'gcp_jupyterlab_shared';
 import { Study, MetadataFull, MetadataRequired } from '../types';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
@@ -44,43 +44,69 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  set transportService(transportService: TransportService) {
-    this._transportService = transportService;
-  }
+  /** TODO: Remove hardcoded values and 'option' parameter before release.
+   * Currently implemented this way because of ssh restrictions to GCP */
+  async getMetaData(option = 'defaultMetadata'): Promise<MetadataRequired> {
+    try {
+      if (option === 'defaultMetadata') {
+        const metadata_default: MetadataRequired = {
+          projectId: 'jupyterlab-interns-sandbox',
+          region: 'us-central1',
+        };
+        return metadata_default;
+      }
+      const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
 
-  async getMetaData(): Promise<MetadataRequired> {
-    const metadata_path = `${this.serverSettings.baseUrl}gcp/v1/metadata`;
-
-    const response = await this._transportService.submit<MetadataFull>({
-      path: metadata_path,
-      method: 'GET',
-    });
-    const metadata_response: MetadataRequired = {
-      projectId: response.result.project,
-      region: zoneToRegion(response.result.zone),
-    };
-    return metadata_response;
+      const response = await this._transportService.submit<MetadataFull>({
+        path: metadata_path,
+        method: 'GET',
+      });
+      const metadata_response: MetadataRequired = {
+        projectId: response.result.project,
+        region: zoneToRegion(response.result.zone),
+      };
+      return metadata_response;
+    } catch (err) {
+      console.error('Unable to fetch metadata');
+      handleApiError(err);
+    }
   }
 
   async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
-    const body = JSON.stringify(study);
-    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-    const response = await this._transportService.submit<Study>({
-      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
-        metadata.region
-      }/studies?study_id=${encodeURI(study.name)}`,
-      method: 'POST',
-      body,
-    });
-    return response.result;
+    try {
+      const body = JSON.stringify(study);
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies?study_id=${encodeURI(study.name)}`,
+        method: 'POST',
+        body,
+      });
+      return response.result;
+    } catch (err) {
+      /** TODO: Add different error messages depending on the HTTP status code.
+       * Currently there is no troubleshooting documentation for Optimizer API
+       * https://cloud.google.com/ai-platform/optimizer/docs/getting-support
+       * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies/create */
+      console.error('Unable to create study');
+      handleApiError(err);
+    }
   }
 
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
-    const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-    const response = await this._transportService.submit<{ studies: Study[] }>({
-      path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
-      method: 'GET',
-    });
-    return response.result.studies;
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<{
+        studies: Study[];
+      }>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+        method: 'GET',
+      });
+      return response.result.studies;
+    } catch (err) {
+      console.error('Unable to fetch study list');
+      handleApiError(err);
+    }
   }
 }

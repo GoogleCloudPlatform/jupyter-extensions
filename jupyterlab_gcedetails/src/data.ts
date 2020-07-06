@@ -41,7 +41,7 @@ interface Project {
   projectId: string;
 }
 
-interface Utilization {
+export interface Utilization {
   cpu: number;
   memory: number;
 }
@@ -146,5 +146,9 @@ export const STYLES = stylesheet({
   listRow: {
     display: 'table-row',
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
+  },
+  chartTitleSmall: {
+    fontSize: '20px',
+    marginLeft: '20px',
   },
 });

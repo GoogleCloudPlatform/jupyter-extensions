@@ -11,6 +11,7 @@ import { watch } from './store/watch';
 import { MainAreaWidget } from './components/main_area_widget';
 import { SidebarWidget } from './components/sidebar_widget';
 import { fetchStudies } from './store/studies';
+import { fetchMetadata } from './store/metadata';
 
 /**
  * Opens and closes a widget based on redux store's `view.isVisible` property.
@@ -58,6 +59,8 @@ async function activate(app: JupyterFrontEnd) {
   // Create Sidebar
   const sidebarWidget = new SidebarWidget(store);
   app.shell.add(sidebarWidget, 'left', { rank: 100 });
+  await store.dispatch(fetchMetadata());
+  await store.dispatch(fetchStudies());
 }
 
 /**
