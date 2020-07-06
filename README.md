@@ -68,3 +68,16 @@ environment.
      a new file to the project.
 
 You can then open JupyterLab at one of the links shown in the logging output.
+
+## Testing on an AI Platform Notebook
+
+If you would like to test an extension in an AI Platform Notebook, you can do so
+by following these steps.
+
+1. Create a new AI Platform Notebook from the Cloud Console.
+
+1. `cd` into the directory of the extension you wish to install.
+
+1. Run `../scripts/deploy.sh` passing the instance's name and zone as arguments.
+
+   - ie. `../scripts/deploy.sh test-instance us-east1-b`

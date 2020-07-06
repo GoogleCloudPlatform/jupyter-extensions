@@ -41,7 +41,7 @@ interface Project {
   projectId: string;
 }
 
-interface Utilization {
+export interface Utilization {
   cpu: number;
   memory: number;
 }
@@ -105,7 +105,7 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
 
 MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
 
-/* Class names applied to the component. Exported for test selectors. */
+/* Class names applied to the component. */
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
