@@ -14,6 +14,9 @@ import { ListWordsService } from './service/list_words';
 import { fetchStudies } from './store/studies';
 import { fetchMetadata } from './store/metadata';
 
+// temp
+import { setView } from './store/view'
+import { SideBarWidget } from './components/sidebar'
 /**
  * Opens and closes a widget based on redux store's `view.isVisible` property.
  * @param reduxStore the redux store with `view.isVisible`.
@@ -36,6 +39,10 @@ const createManagedWidget = <
     state => state.view.isVisible,
     (previousIsVisible, nextIsVisible) => previousIsVisible === nextIsVisible
   );
+  if (reduxStore.getState().view.isVisible) {
+    app.shell.add(widget, 'main');
+    app.shell.activateById(widget.id);
+  }
   reduxStore.subscribe(
     onChange(isVisible => {
       if (isVisible) {
@@ -55,12 +62,20 @@ async function activate(app: JupyterFrontEnd) {
   // Create main area widget
   createManagedWidget(store, app, MainAreaWidget);
 
+  // temp
+  let widget = new SideBarWidget(store);
+  console.log('test');
+  app.shell.add(widget, 'left', { rank: 100 });
+  app.shell.activateById(widget.id);
+
   const listWordsService = new ListWordsService();
   const listWidget = new ListWordsWidget(listWordsService);
   listWidget.addClass('optimizer');
   app.shell.add(listWidget, 'left', { rank: 100 });
   await store.dispatch(fetchMetadata());
   await store.dispatch(fetchStudies());
+  // temp
+  await store.dispatch(setView({ view: 'studyDetails', studyId: 'id' }))
 }
 
 /**

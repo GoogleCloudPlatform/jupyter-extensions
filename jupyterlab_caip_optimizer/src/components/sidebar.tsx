@@ -1,36 +1,42 @@
 import * as React from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { store, RootState } from '../store/store';
+import { store, AppDispatch } from '../store/store';
 import { Provider, connect } from 'react-redux';
-import { close, ViewType } from '../store/view';
-import { CreateStudy }from './create_study';
+import { close, ViewType, setView } from '../store/view';
+// import { Dashboard } from './dashboard';
 
-const mapStateToProps = (state: RootState) => ({
-  data: state.view.data,
+const mapDispatchToProps = (dispatch: AppDispatch) => ({
+  setView: (view: ViewType) => dispatch(setView(view)),
+  close: () => dispatch(close()),
 });
 
 /**
  * ViewManager acts as the extensions router for various views.
  */
-export const ViewManager = ({ data }: { data: ViewType }) => {
+export const Sidebar = ({
+  setView,
+  close,
+}: {
+  setView: (stuff: any) => void;
+  close: () => void;
+}) => {
   // TODO: add custom components
-  switch (data.view) {
-    case 'dashboard':
-      return <>Dashboard</>;
-    case 'createStudy':
-      return <CreateStudy />;
-    case 'studyDetails':
-      return <>Study ID: {data.studyId}</>;
-  }
+  return (
+    <>
+      <button onClick={() => setView({ view: 'createStudy' })}>open</button>
+
+      <button onClick={() => close()}>close</button>
+    </>
+  );
 };
 
-const WrappedViewManager = connect(mapStateToProps)(ViewManager);
+const WrappedViewManager = connect(undefined, mapDispatchToProps)(Sidebar);
 
 /**
  * Provides redux store for ViewManager and sub components.
  * Hooks into redux to maintain that view.isVisible is in sync with component creation/deletion.
  */
-export class MainAreaWidget extends ReactWidget {
+export class SideBarWidget extends ReactWidget {
   constructor(private readonly reduxStore: typeof store) {
     super();
     this.id = 'optimizer:main-area';
