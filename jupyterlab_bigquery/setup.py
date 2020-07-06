@@ -55,6 +55,7 @@ setup(
         "google-cloud-storage>=1.24.1",
         "jupyterlab~=1.2.0",
         "google-cloud-bigquery~=1.25.0",
-        "gcp_jupyterlab_shared>=1.0.0"
+        "gcp_jupyterlab_shared>=1.0.0",
+        "google-cloud-datacatalog",
     ],
 )

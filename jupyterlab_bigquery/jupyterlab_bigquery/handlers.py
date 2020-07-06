@@ -14,6 +14,7 @@ import datetime
 from collections import namedtuple
 from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
+from google.cloud.datacatalog import DataCatalogClient, enums, types
 
 # import google.auth
 # from google.auth.exceptions import GoogleAuthError
@@ -24,52 +25,65 @@ from jupyterlab_bigquery.version import VERSION
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
 
+def create_datacatalog_client():
+    return DataCatalogClient()
+
+
+def search_projects(client):
+    scope = types.SearchCatalogRequest.Scope()
+    scope.include_project_ids.append('hwing-sandbox')
+    results = client.search_catalog(
+        scope=scope, query='name:public_babynames')
+    fetched_results = [result for result in results]
+    print(fetched_results)
+
+
 def create_bigquery_client():
-  return bigquery.Client()
+    return bigquery.Client()
 
 
 def list_projects(client):
-  project = client.project
-  projects_list = [{
-      'id': format(project),
-      'name': format(project),
-      'datasets': list_datasets(client, project),
-  }]
-  return {'projects': projects_list}
+    project = client.project
+    projects_list = [{
+        'id': format(project),
+        'name': format(project),
+        'datasets': list_datasets(client, project),
+    }]
+    return {'projects': projects_list}
 
 
 def list_datasets(client, project):
-  datasets = list(client.list_datasets())
+    datasets = list(client.list_datasets())
 
-  datasetsList = []
-  for dataset in datasets:
-    dataset_id = dataset.dataset_id
-    currDataset = client.get_dataset(dataset_id)
+    datasetsList = []
+    for dataset in datasets:
+        dataset_id = dataset.dataset_id
+        currDataset = client.get_dataset(dataset_id)
 
-    datasetsList.append({
-        'id': '{}.{}'.format(dataset.project, dataset.dataset_id),
-        'name': dataset.dataset_id,
-        'tables': list_tables(client, currDataset),
-        'models': list_models(client, currDataset),
-    })
-  return datasetsList
+        datasetsList.append({
+            'id': '{}.{}'.format(dataset.project, dataset.dataset_id),
+            'name': dataset.dataset_id,
+            'tables': list_tables(client, currDataset),
+            'models': list_models(client, currDataset),
+        })
+    return datasetsList
 
 
 def list_tables(client, dataset):
-  tables = list(client.list_tables(dataset))
+    tables = list(client.list_tables(dataset))
 
-  return [{
-      'id': '{}.{}'.format(table.dataset_id, table.table_id),
-      'name': table.table_id
-  } for table in tables]
+    return [{
+        'id': '{}.{}'.format(table.dataset_id, table.table_id),
+        'name': table.table_id
+    } for table in tables]
 
 
 def list_models(client, dataset):
-  models = list(client.list_models(dataset))
-  return [{
-      'id': '{}.{}'.format(model.dataset_id, model.model_id),
-      'name': model.model_id,
-  } for model in models]
+    models = list(client.list_models(dataset))
+    return [{
+        'id': '{}.{}'.format(model.dataset_id, model.model_id),
+        'name': model.model_id,
+    } for model in models]
 
 
 def get_dataset_details(client, dataset_id):
@@ -119,45 +133,49 @@ def get_table_details(client, table_id):
   }
 
 class ListHandler(APIHandler):
-  """Handles requests for Dummy List of Items."""
-  bigquery_client = None
+    """Handles requests for Dummy List of Items."""
+    bigquery_client = None
+    datacatalog_client = None
 
-  @gen.coroutine
-  def post(self, *args, **kwargs):
-    try:
-      self.bigquery_client = create_bigquery_client()
-      self.finish(list_projects(self.bigquery_client))
+    @gen.coroutine
+    def post(self, *args, **kwargs):
+        try:
+            self.bigquery_client = create_bigquery_client()
+            self.datacatalog_client = create_datacatalog_client()
+            search_projects(self.datacatalog_client)
+            self.finish(list_projects(self.bigquery_client))
 
-    except Exception as e:
-      app_log.exception(str(e))
-      self.set_status(500, str(e))
-      self.finish({
-          'error': {
-              'message': str(e)
-          }
-      })
+        except Exception as e:
+            app_log.exception(str(e))
+            self.set_status(500, str(e))
+            self.finish({
+                'error': {
+                    'message': str(e)
+                }
+            })
 
 
 class DatasetDetailsHandler(APIHandler):
-  """Handles requests for dataset metadata."""
-  bigquery_client = None
+    """Handles requests for dataset metadata."""
+    bigquery_client = None
 
-  @gen.coroutine
-  def post(self, *args, **kwargs):
-    try:
-      self.bigquery_client = create_bigquery_client()
-      post_body = self.get_json_body()
+    @gen.coroutine
+    def post(self, *args, **kwargs):
+        try:
+            self.bigquery_client = create_bigquery_client()
+            post_body = self.get_json_body()
 
-      self.finish(get_dataset_details(self.bigquery_client, post_body['datasetId']))
+            self.finish(get_dataset_details(
+                self.bigquery_client, post_body['datasetId']))
 
-    except Exception as e:
-      app_log.exception(str(e))
-      self.set_status(500, str(e))
-      self.finish({
-          'error': {
-              'message': str(e)
-          }
-      })
+        except Exception as e:
+            app_log.exception(str(e))
+            self.set_status(500, str(e))
+            self.finish({
+                'error': {
+                    'message': str(e)
+                }
+            })
 
 
 class TableDetailsHandler(APIHandler):
