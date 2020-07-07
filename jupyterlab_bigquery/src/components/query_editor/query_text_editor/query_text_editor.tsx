@@ -16,6 +16,7 @@ import PagedJob from '../../../utils/pagedAPI/pagedJob';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
+  bytesProcessed: number;
 }
 
 interface QueryTextEditorProps {
@@ -26,6 +27,7 @@ interface QueryTextEditorProps {
 interface QueryResponseType {
   content: string;
   labels: string;
+  bytesProcessed: number;
 }
 
 interface QueryRequestBodyType {
@@ -68,6 +70,7 @@ class QueryTextEditor extends React.Component<
     super(props);
     this.state = {
       buttonState: ButtonStates.READY,
+      bytesProcessed: null,
     };
     this.queryService = new QueryService();
 
@@ -96,16 +99,19 @@ class QueryTextEditor extends React.Component<
     this.props.resetQueryResult();
     const query = this.editor.getValue();
 
-    this.setState({ buttonState: ButtonStates.PENDING });
+    this.setState({ buttonState: ButtonStates.PENDING, bytesProcessed: null });
 
     this.job = this.pagedQueryService.request(
       { query, jobConfig: {} },
       (state, _, response) => {
         if (state === JobState.Pending) {
+          response = response as QueryResponseType;
+
           Object.keys(response).map(key => {
             response[key] = JSON.parse(response[key]);
           });
 
+          this.setState({ bytesProcessed: response.bytesProcessed });
           this.props.updateQueryResult(response);
         } else if (state === JobState.Fail) {
           this.setState({ buttonState: ButtonStates.ERROR });
@@ -162,6 +168,35 @@ class QueryTextEditor extends React.Component<
     );
   }
 
+  readableBytes(bytes: number) {
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+  }
+
+  renderBytesProcessed() {
+    const readableSize = this.readableBytes(this.state.bytesProcessed);
+
+    // eslint-disable-next-line no-extra-boolean-cast
+    if (!!this.state.bytesProcessed) {
+      return (
+        <Typography
+          style={{
+            marginRight: '20px',
+            alignSelf: 'center',
+            justifySelf: 'center',
+          }}
+          variant="body1"
+        >
+          {readableSize}
+        </Typography>
+      );
+    }
+
+    return undefined;
+  }
+
   render() {
     return (
       <div>
@@ -176,7 +211,10 @@ class QueryTextEditor extends React.Component<
           editorDidMount={this.handleEditorDidMount.bind(this)}
           options={SQL_EDITOR_OPTIONS}
         />
-        {this.renderButton(this.state.buttonState)}
+        <div style={{ display: 'flex', flexDirection: 'row', float: 'right' }}>
+          {this.renderBytesProcessed()}
+          {this.renderButton(this.state.buttonState)}
+        </div>
       </div>
     );
   }
