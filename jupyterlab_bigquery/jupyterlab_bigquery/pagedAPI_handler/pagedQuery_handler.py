@@ -14,7 +14,8 @@ class PagedQueryHandler(PagedAPIHandler):
     try:
       dry_run_job = PagedQueryHandler.client.query(query, job_config=dry_run_job_config)
     except Exception as err:
-      yield err
+      err_msg = err.errors[0]['message']
+      raise Exception(err_msg)
     total_bytes_processed = dry_run_job.total_bytes_processed
 
     # actual run
@@ -23,7 +24,7 @@ class PagedQueryHandler(PagedAPIHandler):
 
 
     if query_job.error_result is not None:
-        yield Exception(query_job.error_result)
+        raise Exception(query_job.error_result)
 
     yield query_job, query_job.job_id
       

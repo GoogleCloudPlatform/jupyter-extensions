@@ -16,7 +16,8 @@ import PagedJob from '../../../utils/pagedAPI/pagedJob';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
-  bytesProcessed: number;
+  bytesProcessed: number | null;
+  errorMsg: string | null;
 }
 
 interface QueryTextEditorProps {
@@ -71,6 +72,7 @@ class QueryTextEditor extends React.Component<
     this.state = {
       buttonState: ButtonStates.READY,
       bytesProcessed: null,
+      errorMsg: null,
     };
     this.queryService = new QueryService();
 
@@ -99,7 +101,11 @@ class QueryTextEditor extends React.Component<
     this.props.resetQueryResult();
     const query = this.editor.getValue();
 
-    this.setState({ buttonState: ButtonStates.PENDING, bytesProcessed: null });
+    this.setState({
+      buttonState: ButtonStates.PENDING,
+      bytesProcessed: null,
+      errorMsg: null,
+    });
 
     this.job = this.pagedQueryService.request(
       { query, jobConfig: {} },
@@ -114,7 +120,10 @@ class QueryTextEditor extends React.Component<
           this.setState({ bytesProcessed: response.bytesProcessed });
           this.props.updateQueryResult(response);
         } else if (state === JobState.Fail) {
-          this.setState({ buttonState: ButtonStates.ERROR });
+          this.setState({
+            buttonState: ButtonStates.ERROR,
+            errorMsg: response as string,
+          });
 
           // switch to normal button after certain time
           setTimeout(() => {
@@ -132,7 +141,15 @@ class QueryTextEditor extends React.Component<
     this.editor = editor;
   }
 
-  renderButton(buttonState: ButtonStates) {
+  readableBytes(bytes: number) {
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+  }
+
+  renderButton() {
+    const buttonState = this.state.buttonState;
     let color = undefined;
     let content = undefined;
 
@@ -168,28 +185,21 @@ class QueryTextEditor extends React.Component<
     );
   }
 
-  readableBytes(bytes: number) {
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
-  }
-
-  renderBytesProcessed() {
-    const readableSize = this.readableBytes(this.state.bytesProcessed);
-
+  renderOptionalText(text, config = {}) {
     // eslint-disable-next-line no-extra-boolean-cast
-    if (!!this.state.bytesProcessed) {
+    if (!!text) {
       return (
         <Typography
           style={{
-            marginRight: '20px',
+            marginRight: '10px',
+            marginLeft: '10px',
             alignSelf: 'center',
             justifySelf: 'center',
           }}
           variant="body1"
+          {...config}
         >
-          {readableSize}
+          {text}
         </Typography>
       );
     }
@@ -198,6 +208,13 @@ class QueryTextEditor extends React.Component<
   }
 
   render() {
+    // eslint-disable-next-line no-extra-boolean-cast
+    const readableSize = !!this.state.bytesProcessed
+      ? 'Processed ' + this.readableBytes(this.state.bytesProcessed)
+      : null;
+
+    const errMsg = this.state.errorMsg;
+
     return (
       <div>
         <Editor
@@ -211,9 +228,20 @@ class QueryTextEditor extends React.Component<
           editorDidMount={this.handleEditorDidMount.bind(this)}
           options={SQL_EDITOR_OPTIONS}
         />
-        <div style={{ display: 'flex', flexDirection: 'row', float: 'right' }}>
-          {this.renderBytesProcessed()}
-          {this.renderButton(this.state.buttonState)}
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+          }}
+        >
+          {this.renderOptionalText(errMsg, {
+            variant: 'caption',
+            color: 'error',
+          })}
+          {this.renderOptionalText(readableSize)}
+          {this.renderButton()}
         </div>
       </div>
     );
