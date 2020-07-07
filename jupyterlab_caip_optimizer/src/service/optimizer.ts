@@ -128,4 +128,23 @@ export class OptimizerService {
       handleApiError(err);
     }
   }
+
+  async getStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<Study> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        method: 'GET',
+      });
+      return response.result;
+    } catch (err) {
+      console.error(`Unable to fetch study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
 }
