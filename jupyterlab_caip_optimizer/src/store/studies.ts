@@ -18,7 +18,12 @@ export const fetchStudies = createAsyncThunk<
     console.error('No Metadata found.');
     throw new TypeError('No metadata');
   }
-  return optimizer.listStudy(metadata);
+  const paritalStudies = await optimizer.listStudy(metadata);
+  const fullStudies: Study[] = [];
+  for (const paritalStudy of paritalStudies) {
+    fullStudies.push(await optimizer.getStudy(paritalStudy.name, metadata));
+  }
+  return fullStudies;
 });
 
 export const createStudy = createAsyncThunk<
@@ -92,7 +97,6 @@ export const studiesSlice = createSlice({
     });
     // Delete Study
     builder.addCase(deleteStudy.fulfilled, (state, action) => {
-      console.log(action.meta);
       // Find index of studyName
       const index = state.data?.findIndex(
         study => study.name === action.meta.arg
