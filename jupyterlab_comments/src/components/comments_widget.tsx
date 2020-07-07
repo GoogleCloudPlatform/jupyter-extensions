@@ -100,7 +100,7 @@ export class CommentsComponent extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.fileName != prevState.fileName) {
+    if (this.state.fileName !== prevState.fileName) {
       console.log("componentDidUpdate()");
     }
   }
@@ -135,7 +135,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             <Tab label="Detached" value={1}/>
           </Tabs>
         </AppBar>
-        {(this.state.activeTab == 0) ?
+        {(this.state.activeTab === 0) ?
           <List>{reviewCommentsList} </List> : <List> {detachedCommentsList} </List>}
       </div>
     );
