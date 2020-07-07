@@ -15,7 +15,7 @@
  */
 
 import * as React from 'react';
-import { DetachedComment, createCommentFromJSON } from '../service/comment'
+import { DetachedComment, createCommentFromJSON, CodeReviewComment } from '../service/comment'
 import {
   ListItem,
   ListItemText,
@@ -59,11 +59,11 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 };
 
 interface Props {
-  data: DetachedComment,
+  data: DetachedComment | CodeReviewComment,
 }
 
 interface State {
-    expandThread: boolean,
+  expandThread: boolean,
 }
 
 
