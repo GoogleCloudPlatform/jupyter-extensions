@@ -88,6 +88,10 @@ const columns = [
   },
   { title: 'State', field: 'state' },
   {
+    title: 'Objective',
+    field: 'metrics',
+  },
+  {
     title: 'Date Created',
     field: 'createTime',
     render: study => moment(study.createTime).format(dateFormat),
@@ -99,6 +103,10 @@ const columns = [
   },
 ];
 
+function capitalizeFirstLetter(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 interface Props {
   loading: boolean;
   error?: string;
@@ -106,6 +114,13 @@ interface Props {
   openCreateStudy: () => void;
   openStudyDetails: (studyName: string) => void;
   deleteStudy: (studyName: string) => void;
+}
+
+interface MappedStudy {
+  name: Study['name'];
+  createTime: Study['createTime'];
+  state: Study['state'];
+  metrics: string;
 }
 
 const mapStateToProps = state => ({
@@ -133,9 +148,19 @@ export const DashboardUnwrapped: React.FC<Props> = ({
   // thus the data needs to be copied to become mutable
   // read more here:
   // https://stackoverflow.com/questions/59648434/material-table-typeerror-cannot-add-property-tabledata-object-is-not-extensibl
-  const mappedStudies = studies
+  const mappedStudies: MappedStudy[] = studies
     ? studies.map(study => ({
-        ...study,
+        name: study.name,
+        createTime: study.createTime,
+        state: study.state,
+        metrics: study.studyConfig.metrics
+          .map(
+            metric =>
+              `${capitalizeFirstLetter(metric.goal.toLowerCase())} "${
+                metric.metric
+              }"`
+          )
+          .join(', '),
       }))
     : undefined;
 

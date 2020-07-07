@@ -9,7 +9,7 @@ jest.mock('../service/optimizer', () => ({
 }));
 import * as React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { fakeStudy } from '../service/test-constants';
+import { fakeStudyResponseActive } from '../service/test-constants';
 import MaterialTable from 'material-table';
 import { DashboardUnwrapped } from './dashboard';
 import { Button } from '@material-ui/core';
@@ -23,7 +23,11 @@ describe('Dashboard', () => {
   const dashboardData = {
     loading: false,
     error: undefined,
-    studies: [fakeStudy, fakeStudy, fakeStudy],
+    studies: [
+      fakeStudyResponseActive,
+      fakeStudyResponseActive,
+      fakeStudyResponseActive,
+    ],
   };
   beforeEach(() => {
     openCreateStudy = jest.fn();
@@ -45,30 +49,55 @@ describe('Dashboard', () => {
       table = component.find(MaterialTable);
     });
 
-    it('renders studies as rows', () => {
-      expect(table.prop('data')).toEqual(dashboardData.studies);
+    it('renders mapped studies as rows', () => {
+      expect(table.prop('data')).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "createTime": "1",
+            "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
+            "name": "study-active",
+            "state": "ACTIVE",
+          },
+          Object {
+            "createTime": "1",
+            "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
+            "name": "study-active",
+            "state": "ACTIVE",
+          },
+          Object {
+            "createTime": "1",
+            "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
+            "name": "study-active",
+            "state": "ACTIVE",
+          },
+        ]
+      `);
     });
     it('has columns', () => {
       // todo: test render and sort for createtime
       expect(table.prop('columns')).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "field": "name",
-                  "render": [Function],
-                  "title": "Name",
-                },
-                Object {
-                  "field": "state",
-                  "title": "State",
-                },
-                Object {
-                  "customSort": [Function],
-                  "field": "createTime",
-                  "render": [Function],
-                  "title": "Date Created",
-                },
-              ]
-          `);
+        Array [
+          Object {
+            "field": "name",
+            "render": [Function],
+            "title": "Name",
+          },
+          Object {
+            "field": "state",
+            "title": "State",
+          },
+          Object {
+            "field": "metrics",
+            "title": "Objective",
+          },
+          Object {
+            "customSort": [Function],
+            "field": "createTime",
+            "render": [Function],
+            "title": "Date Created",
+          },
+        ]
+      `);
     });
     it('opens the study details page', () => {
       const openStudy = table
@@ -82,13 +111,15 @@ describe('Dashboard', () => {
         }
       `);
 
-      openStudy.onClick(undefined, fakeStudy);
-      expect(openStudyDetails).toHaveBeenCalledWith(fakeStudy.name);
+      openStudy.onClick(undefined, fakeStudyResponseActive);
+      expect(openStudyDetails).toHaveBeenCalledWith(
+        fakeStudyResponseActive.name
+      );
     });
     it('deletes a study', () => {
       const { onRowDelete } = table.prop('editable');
-      onRowDelete(fakeStudy);
-      expect(deleteStudy).toHaveBeenCalledWith(fakeStudy.name);
+      onRowDelete(fakeStudyResponseActive);
+      expect(deleteStudy).toHaveBeenCalledWith(fakeStudyResponseActive.name);
     });
   });
 
