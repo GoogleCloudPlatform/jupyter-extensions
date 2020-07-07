@@ -117,7 +117,9 @@ export class OptimizerService {
     try {
       const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
       await this._transportService.submit<undefined>({
-        path: `${ENDPOINT}/${encodeURI(rawStudyName)}`,
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'DELETE',
       });
       return true;
