@@ -8,7 +8,7 @@ import {
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { Button } from '@material-ui/core';
+import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import { QueryService } from './service/query';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
@@ -45,7 +45,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
 };
 
 const styleSheet = stylesheet({
-  queryButton: { float: 'right' },
+  queryButton: { float: 'right', width: '100px', maxWidth: '200px' },
 });
 
 enum ButtonStates {
@@ -74,9 +74,29 @@ class QueryTextEditor extends React.Component<
     this.pagedQueryService = new PagedService('query');
   }
 
-  async handleSubmit() {
+  handleButtonClick() {
+    switch (this.state.buttonState) {
+      case ButtonStates.READY:
+      case ButtonStates.ERROR:
+        this.handleQuery();
+        break;
+      case ButtonStates.PENDING:
+        this.handleCancel();
+    }
+  }
+
+  handleCancel() {
+    // eslint-disable-next-line no-extra-boolean-cast
+    if (!!this.job) {
+      this.job.cancel();
+    }
+  }
+
+  handleQuery() {
     this.props.resetQueryResult();
     const query = this.editor.getValue();
+
+    this.setState({ buttonState: ButtonStates.PENDING });
 
     this.job = this.pagedQueryService.request(
       { query, jobConfig: {} },
@@ -87,6 +107,15 @@ class QueryTextEditor extends React.Component<
           });
 
           this.props.updateQueryResult(response);
+        } else if (state === JobState.Fail) {
+          this.setState({ buttonState: ButtonStates.ERROR });
+
+          // switch to normal button after certain time
+          setTimeout(() => {
+            this.setState({ buttonState: ButtonStates.READY });
+          }, 2000);
+        } else if (state === JobState.Done) {
+          this.setState({ buttonState: ButtonStates.READY });
         }
       },
       2000
@@ -95,6 +124,42 @@ class QueryTextEditor extends React.Component<
 
   handleEditorDidMount(_, editor) {
     this.editor = editor;
+  }
+
+  renderButton(buttonState: ButtonStates) {
+    let color = undefined;
+    let content = undefined;
+
+    switch (buttonState) {
+      case ButtonStates.PENDING:
+        color = 'default';
+        content = (
+          <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+            <CircularProgress size="75%" style={{ alignSelf: 'center' }} />
+            <Typography variant="button">Cancel</Typography>
+          </div>
+        );
+        break;
+      case ButtonStates.READY:
+        color = 'primary';
+        content = 'Submit';
+        break;
+      case ButtonStates.ERROR:
+        color = 'secondary';
+        content = 'Error';
+        break;
+    }
+
+    return (
+      <Button
+        color={color}
+        variant="contained"
+        onClick={this.handleButtonClick.bind(this)}
+        className={styleSheet.queryButton}
+      >
+        {content}
+      </Button>
+    );
   }
 
   render() {
@@ -111,14 +176,7 @@ class QueryTextEditor extends React.Component<
           editorDidMount={this.handleEditorDidMount.bind(this)}
           options={SQL_EDITOR_OPTIONS}
         />
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={this.handleSubmit.bind(this)}
-          className={styleSheet.queryButton}
-        >
-          Submit
-        </Button>
+        {this.renderButton(this.state.buttonState)}
       </div>
     );
   }

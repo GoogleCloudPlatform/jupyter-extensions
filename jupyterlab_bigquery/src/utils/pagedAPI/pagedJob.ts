@@ -53,6 +53,10 @@ class PagedJob<RequestType, ResponseType> {
           id: this.jobId,
         })) as ContinueResponse<ResponseType>;
 
+        if (this.getState() !== JobState.Pending) {
+          return;
+        }
+
         this.setState(res.finish === true ? JobState.Done : this.jobState);
         this.callback(this.getState(), this.jobId, res.load);
       }
@@ -63,12 +67,22 @@ class PagedJob<RequestType, ResponseType> {
   }
 
   async cancel(): Promise<void> {
-    if (this.getState() === JobState.Pending) {
+    if (this.getState() !== JobState.Pending) {
       console.warn('Attempting to cancel job already done');
     }
-    await this.makeQuery(RequestType.CANCEL, {
-      id: this.jobId,
-    });
+
+    let message = 'canceled';
+
+    try {
+      await this.makeQuery(RequestType.CANCEL, {
+        id: this.jobId,
+      });
+    } catch (err) {
+      message = 'already canceled';
+    } finally {
+      this.setState(JobState.Fail);
+      this.callback(this.getState(), this.jobId, message);
+    }
   }
 
   async makeQuery(intention, load) {
