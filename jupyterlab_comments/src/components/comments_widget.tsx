@@ -17,7 +17,7 @@
 import { ReactWidget, showErrorMessage } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { File, trimPath } from '../service/file'
-import { DetachedComment, createCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
+import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest } from '../git';
 import { stylesheet } from 'typestyle';
@@ -113,13 +113,13 @@ export class CommentsComponent extends React.Component<Props, State> {
     const activeTab = this.state.activeTab;
     const detachedCommentsList = this.state.detachedComments.map((comment) =>
         <>
-        <Comment data={comment}/>
+        <Comment detachedComment={comment}/>
         <Divider/>
         </>
       );
     const reviewCommentsList = this.state.reviewComments.map((comment) =>
         <>
-        <Comment data={comment}/>
+        <Comment reviewComment={comment}/>
         <Divider/>
         </>
       );
@@ -149,7 +149,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             } else {
               let comments : Array<DetachedComment> = new Array<DetachedComment>();
               data.forEach(function(obj) {
-                var comment = createCommentFromJSON(obj);
+                var comment = createDetachedCommentFromJSON(obj);
                 comments.push(comment);
               });
               const shortenedFilePath = trimPath(filePath);

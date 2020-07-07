@@ -42,7 +42,7 @@ export interface ReviewRequest {
     baseCommit: any,
 }
 
-export function createCommentFromJSON(obj : any) : DetachedComment {
+export function createDetachedCommentFromJSON(obj : any) : DetachedComment {
     const content = obj.comment;
     const hash = obj.hash;
     const children = obj.children;
