@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 import * as React from 'react';
-import { Model, ModelService } from '../service/model';
+import { Model, ModelService, Pipeline } from '../service/model';
 
 interface Props {
   model: Model;
@@ -25,6 +25,115 @@ interface State {
   modelDetails: any[];
   transformationOptions: any[];
   open: boolean;
+}
+
+interface RowProps {
+  row: any;
+  transformationOptions: any[];
+}
+
+interface RowState {
+  open: boolean;
+}
+
+const properties = [
+  {
+    name: 'createTime',
+    label: 'Created',
+  },
+  {
+    name: 'trainBudgetMilliNodeHours',
+    label: 'Budget',
+  },
+  {
+    name: 'budgetMilliNodeHours',
+    label: 'Budget',
+  },
+  {
+    name: 'elapsedTime',
+    label: 'Elapsed Time',
+  },
+  {
+    name: 'datasetId',
+    label: 'Dataset ID',
+  },
+  {
+    name: 'targetColumn',
+    label: 'Target column',
+  },
+  {
+    name: 'transformationOptions',
+    label: 'Transformation options',
+  },
+  {
+    name: 'predictionType',
+    label: 'Objective',
+  },
+  {
+    name: 'optimizationObjective',
+    label: 'Optimized for',
+  },
+];
+
+export class TransformationOptionsRow extends React.Component<
+  RowProps,
+  RowState
+> {
+  constructor(props: RowProps) {
+    super(props);
+    this.state = {
+      open: false,
+    };
+  }
+
+  render() {
+    return (
+      <React.Fragment key={'Expandable'}>
+        <TableRow key={this.props.row.key}>
+          <TableCell component="th" scope="row">
+            {this.props.row.key}
+          </TableCell>
+          <TableCell align="right">
+            <IconButton
+              aria-label="expand row"
+              size="small"
+              onClick={() => {
+                this.setState({ open: !this.state.open });
+              }}
+            >
+              {this.state.open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            </IconButton>
+          </TableCell>
+        </TableRow>
+        <TableRow key={'Collapse'}>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+            <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+              <Box margin={1}>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Column name</TableCell>
+                      <TableCell>Transformation</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {this.props.transformationOptions.map(option => (
+                      <TableRow key={option.columnName}>
+                        <TableCell component="th" scope="row">
+                          {option.columnName}
+                        </TableCell>
+                        <TableCell>{option.dataType}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      </React.Fragment>
+    );
+  }
 }
 
 export class ModelProperties extends React.Component<Props, State> {
@@ -41,93 +150,6 @@ export class ModelProperties extends React.Component<Props, State> {
 
   async componentDidMount() {
     this.getPipeline();
-  }
-
-  render() {
-    const { isLoading, modelDetails } = this.state;
-    return (
-      <div
-        hidden={this.props.value !== this.props.index}
-        style={{ marginTop: '16px' }}
-      >
-        {isLoading ? (
-          <LinearProgress />
-        ) : (
-          <Table size="small" style={{ width: 500 }}>
-            <TableBody>
-              {modelDetails.map(row =>
-                row.key === 'Transformation options' ? (
-                  <React.Fragment key={'Expandable'}>
-                    <TableRow key={row.key}>
-                      <TableCell component="th" scope="row">
-                        {row.key}
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => {
-                            this.setState({ open: !this.state.open });
-                          }}
-                        >
-                          {this.state.open ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow key={'Collapse'}>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={6}
-                      >
-                        <Collapse
-                          in={this.state.open}
-                          timeout="auto"
-                          unmountOnExit
-                        >
-                          <Box margin={1}>
-                            <Table size="small" aria-label="purchases">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Column name</TableCell>
-                                  <TableCell>Transformation</TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {this.state.transformationOptions.map(
-                                  option => (
-                                    <TableRow key={option.columnName}>
-                                      <TableCell component="th" scope="row">
-                                        {option.columnName}
-                                      </TableCell>
-                                      <TableCell>{option.dataType}</TableCell>
-                                    </TableRow>
-                                  )
-                                )}
-                              </TableBody>
-                            </Table>
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                ) : (
-                  <TableRow key={row.key}>
-                    <TableCell component="th" scope="row">
-                      {row.key}
-                    </TableCell>
-                    <TableCell align="right">{row.val}</TableCell>
-                  </TableRow>
-                )
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </div>
-    );
   }
 
   private getBudget(milliNodeHours: number): string {
@@ -151,29 +173,51 @@ export class ModelProperties extends React.Component<Props, State> {
     return { key, val };
   }
 
+  private getModelDetails(pipeline: Pipeline): any[] {
+    const modelId = this.props.model.id.split('/');
+    const modelDetails = [
+      this.createData('ID', modelId[modelId.length - 1]),
+      this.createData('Region', 'us-central1'),
+    ];
+    for (let i = 0; i < properties.length; i++) {
+      if (pipeline[properties[i]['name']]) {
+        if (
+          properties[i]['name'] === 'trainBudgetMilliNodeHours' ||
+          properties[i]['name'] === 'budgetMilliNodeHours'
+        ) {
+          modelDetails.push(
+            this.createData(
+              properties[i]['label'],
+              this.getBudget(pipeline[properties[i]['name']])
+            )
+          );
+        } else if (properties[i]['name'] === 'elapsedTime') {
+          modelDetails.push(
+            this.createData(
+              properties[i]['label'],
+              this.getElapsedTime(pipeline[properties[i]['name']])
+            )
+          );
+        } else {
+          modelDetails.push(
+            this.createData(
+              properties[i]['label'],
+              pipeline[properties[i]['name']]
+            )
+          );
+        }
+      }
+    }
+    return modelDetails;
+  }
+
   private async getPipeline() {
     try {
       this.setState({ isLoading: true });
       const pipeline = await ModelService.getPipeline(
         this.props.model.pipelineId
       );
-      const modelId = this.props.model.id.split('/');
-      const modelDetails = [
-        this.createData('ID', modelId[modelId.length - 1]),
-        this.createData('Created', pipeline.createTime),
-        this.createData('Budget', this.getBudget(pipeline.budget)),
-        this.createData(
-          'Elapsed Time',
-          this.getElapsedTime(pipeline.elapsedTime)
-        ),
-        this.createData('Region', 'us-central1'),
-        // TODO @josiegarza when you click this ID should launch dataset widget for ID
-        this.createData('Dataset ID', pipeline.datasetId),
-        this.createData('Target column', pipeline.targetColumn),
-        this.createData('Transformation options', 'click here'),
-        this.createData('Objective', pipeline.objective),
-        this.createData('Optimized for', pipeline.optimizedFor),
-      ];
+      const modelDetails = this.getModelDetails(pipeline);
       this.setState({
         hasLoaded: true,
         modelDetails: modelDetails,
@@ -184,5 +228,39 @@ export class ModelProperties extends React.Component<Props, State> {
     } finally {
       this.setState({ isLoading: false });
     }
+  }
+
+  render() {
+    const { isLoading, modelDetails, transformationOptions } = this.state;
+    return (
+      <div
+        hidden={this.props.value !== this.props.index}
+        style={{ marginTop: '16px' }}
+      >
+        {isLoading ? (
+          <LinearProgress />
+        ) : (
+          <Table size="small" style={{ width: 500 }}>
+            <TableBody>
+              {modelDetails.map(row =>
+                row.key === 'Transformation options' ? (
+                  <TransformationOptionsRow
+                    row={row}
+                    transformationOptions={transformationOptions}
+                  />
+                ) : (
+                  <TableRow key={row.key}>
+                    <TableCell component="th" scope="row">
+                      {row.key}
+                    </TableCell>
+                    <TableCell align="right">{row.val}</TableCell>
+                  </TableRow>
+                )
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    );
   }
 }

@@ -31,7 +31,11 @@ interface State {
   confidenceMetrics: ModelMetrics[];
   marks: any[];
   modelEvaluation: ModelEvaluation;
-  currentConfidenceInterval: number;
+  currentConfidenceThresh: number;
+}
+
+interface FeatureImportanceProps {
+  featureImportance: any[];
 }
 
 const localStyles = stylesheet({
@@ -49,6 +53,65 @@ const localStyles = stylesheet({
   },
 });
 
+const properties = [
+  {
+    name: 'auPrc',
+    label: 'ROC PRC',
+  },
+  {
+    name: 'auRoc',
+    label: 'ROC AUC',
+  },
+  {
+    name: 'logLoss',
+    label: 'Log loss',
+  },
+  {
+    name: 'elapsedTime',
+    label: 'Elapsed Time',
+  },
+  {
+    name: 'createTime',
+    label: 'Created',
+  },
+];
+
+export class FeatureImportance extends React.Component<FeatureImportanceProps> {
+  constructor(props: FeatureImportanceProps) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <Grid item xs={11}>
+        <header className={localStyles.header}>Feature Importance</header>
+        <BarChart
+          width={500}
+          height={35 * this.props.featureImportance.length}
+          data={this.props.featureImportance}
+          layout="vertical"
+          margin={{
+            top: 5,
+            bottom: 5,
+            left: 55,
+            right: 35,
+          }}
+        >
+          <YAxis
+            type="category"
+            dataKey="name"
+            tickLine={false}
+            tick={{ fill: 'black' }}
+          />
+          <XAxis type="number" domain={[0, 100]} tick={false} hide={true} />
+          <Tooltip />
+          <Bar dataKey="Percentage" fill="#3366CC" />
+        </BarChart>
+      </Grid>
+    );
+  }
+}
+
 export class EvaluationTable extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -60,7 +123,7 @@ export class EvaluationTable extends React.Component<Props, State> {
       confidenceMetrics: [],
       marks: [],
       modelEvaluation: null,
-      currentConfidenceInterval: null,
+      currentConfidenceThresh: null,
     };
   }
 
@@ -76,7 +139,7 @@ export class EvaluationTable extends React.Component<Props, State> {
       featureImportance,
       marks,
       modelEvaluation,
-      currentConfidenceInterval,
+      currentConfidenceThresh,
     } = this.state;
     return (
       <div
@@ -106,9 +169,9 @@ export class EvaluationTable extends React.Component<Props, State> {
                     }}
                     onChange={(event, value) => {
                       const formatted = (value as number) / 100;
-                      if (formatted !== currentConfidenceInterval) {
+                      if (formatted !== currentConfidenceThresh) {
                         this.setState({
-                          currentConfidenceInterval: formatted,
+                          currentConfidenceThresh: formatted,
                         });
                       }
                     }}
@@ -119,7 +182,7 @@ export class EvaluationTable extends React.Component<Props, State> {
                       this.updateEvaluationTable(metric, modelEvaluation);
                     }}
                   />
-                  {currentConfidenceInterval}
+                  {currentConfidenceThresh}
                 </p>
                 <Table size="small" style={{ width: 500 }}>
                   <TableBody>
@@ -134,38 +197,11 @@ export class EvaluationTable extends React.Component<Props, State> {
                   </TableBody>
                 </Table>
               </Grid>
-              <Grid item xs={11}>
-                <header className={localStyles.header}>
-                  Feature Importance
-                </header>
-                <BarChart
-                  width={500}
-                  height={35 * featureImportance.length}
-                  data={featureImportance}
-                  layout="vertical"
-                  margin={{
-                    top: 5,
-                    bottom: 5,
-                    left: 55,
-                    right: 35,
-                  }}
-                >
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tickLine={false}
-                    tick={{ fill: 'black' }}
-                  />
-                  <XAxis
-                    type="number"
-                    domain={[0, 100]}
-                    tick={false}
-                    hide={true}
-                  />
-                  <Tooltip />
-                  <Bar dataKey="Percentage" fill="#3366CC" />
-                </BarChart>
-              </Grid>
+              {featureImportance ? (
+                <FeatureImportance featureImportance={featureImportance} />
+              ) : (
+                <></>
+              )}
             </Grid>
           </ul>
         )}
@@ -177,27 +213,53 @@ export class EvaluationTable extends React.Component<Props, State> {
     return { key, val };
   }
 
+  private getSliderMarks(modelEvaluation: ModelEvaluation): any[] {
+    const marks = [];
+    for (let i = 0; i < modelEvaluation.confidenceMetrics.length; i++) {
+      marks.push({
+        value: modelEvaluation.confidenceMetrics[i].confidenceThreshold,
+      });
+    }
+    return marks;
+  }
+
+  private updateEvaluationTable(
+    metric: ModelMetrics,
+    modelEvaluation: ModelEvaluation
+  ) {
+    const evaluationTable = [];
+    for (let i = 0; i < properties.length; i++) {
+      if (modelEvaluation[properties[i]['name']]) {
+        evaluationTable.push(
+          this.createData(
+            properties[i]['label'],
+            modelEvaluation[properties[i]['name']]
+          )
+        );
+      }
+    }
+    if (metric.f1Score !== 'NaN') {
+      evaluationTable.push(this.createData('F1 score', metric.f1Score));
+    }
+    evaluationTable.push(this.createData('Precision', metric.precision));
+    evaluationTable.push(this.createData('Recall', metric.recall));
+    this.setState({
+      evaluationTable: evaluationTable,
+    });
+  }
+
   private async getModelEvaluations() {
     try {
       this.setState({ isLoading: true });
       const modelEvaluation = await ModelService.listModelEvaluations(
         this.props.model.id
       );
-      this.updateEvaluationTable(
-        modelEvaluation.confidenceMetrics[0],
-        modelEvaluation
-      );
-      const marks = [];
-      for (let i = 0; i < modelEvaluation.confidenceMetrics.length; i++) {
-        marks.push({
-          value: modelEvaluation.confidenceMetrics[i].confidenceThreshold,
-        });
-      }
+      const firstMetric = modelEvaluation.confidenceMetrics[0];
+      this.updateEvaluationTable(firstMetric, modelEvaluation);
       this.setState({
         hasLoaded: true,
-        marks: marks,
-        currentConfidenceInterval:
-          modelEvaluation.confidenceMetrics[0].confidenceThreshold / 100,
+        marks: this.getSliderMarks(modelEvaluation),
+        currentConfidenceThresh: firstMetric.confidenceThreshold / 100,
         confidenceMetrics: modelEvaluation.confidenceMetrics,
         featureImportance: modelEvaluation.featureImportance,
         modelEvaluation: modelEvaluation,
@@ -207,23 +269,5 @@ export class EvaluationTable extends React.Component<Props, State> {
     } finally {
       this.setState({ isLoading: false });
     }
-  }
-
-  private updateEvaluationTable(
-    metric: ModelMetrics,
-    modelEvaluation: ModelEvaluation
-  ) {
-    const evaluationTable = [
-      this.createData('ROC PRC', modelEvaluation.auPrc),
-      this.createData('ROC AUC', modelEvaluation.auRoc),
-      this.createData('Log loss', modelEvaluation.logLoss),
-      this.createData('F1 score', metric.f1Score),
-      this.createData('Precision', metric.precision),
-      this.createData('Recall', metric.recall),
-      this.createData('Created', modelEvaluation.createTime),
-    ];
-    this.setState({
-      evaluationTable: evaluationTable,
-    });
   }
 }

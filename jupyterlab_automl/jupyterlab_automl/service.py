@@ -92,13 +92,13 @@ class AutoMLService:
     }
 
   def _get_feature_importance(self, model_explanation):
-    feature_importance = []
-    for key, val in model_explanation["meanAttributions"][0]["featureAttributions"].items():
-      feature_importance.append({
-          "name": key,
-          "Percentage": round(val * 100, 3),
-      })
-    return feature_importance
+    features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
+    return [
+        {
+            "name": key,
+            "Percentage": round(val * 100, 3),
+        } for key, val in features
+    ]
 
   def _get_confidence_metrics(self, confidence_metrics):
     labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
@@ -110,30 +110,29 @@ class AutoMLService:
       metric = {}
       for label in labels:
         if label == "confidenceThreshold":
-          try:
-            value = confidence_metric[label] * 100
-          except:
-            value = 0.0
+          temp = confidence_metric.get(label, 0.0)
+          value = temp * 100
         else:
-          try:
-            value = confidence_metric[label]
-          except:
-            value = "NaN"
+          value = confidence_metric.get(label, "NaN")
         metric[label] = value
       metrics.append(metric)
     return metrics
 
   def get_model_evaluation(self, model_id):
+    optional_fields = ["auPrc", "auRoc", "logLoss"]
     evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
-    metrics = json_format.MessageToDict(evaluation._pb.metrics)
-    return {
-        "auPrc": metrics["auPrc"],
-        "auRoc": metrics["auRoc"],
-        "logLoss": metrics["logLoss"],
+    create_time = evaluation.create_time.strftime(self._time_format)
+    evaluation = json_format.MessageToDict(evaluation._pb)
+    metrics = evaluation["metrics"]
+    model_eval = {
         "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
-        "createTime": evaluation.create_time.strftime(self._time_format),
-        "featureImportance": self._get_feature_importance(json_format.MessageToDict(evaluation._pb.model_explanation)),
+        "createTime": create_time,
     }
+    if "modelExplanation" in evaluation:
+      model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+    for field in optional_fields:
+      model_eval[field] = metrics.get(field, None)
+    return model_eval
 
   def _get_feature_transformations(self, response):
     transformations = []
@@ -147,23 +146,24 @@ class AutoMLService:
 
   def get_pipeline(self, pipeline_id):
     pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    optional_fields = ["targetColumn", "predictionType", "optimizationObjective", "budgetMilliNodeHours", "trainBudgetMilliNodeHours"]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
-    transformation_options = self._get_feature_transformations(
-        training_task_inputs['transformations'])
-    return {
+    training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
         "createTime": pipeline.create_time.strftime(self._time_format),
         "updateTime": pipeline.update_time.strftime(self._time_format),
         "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
-        "budget": training_task_inputs['trainBudgetMilliNodeHours'],
         "datasetId": pipeline.input_data_config.dataset_id,
-        "targetColumn": training_task_inputs['targetColumn'],
-        "transformationOptions": transformation_options,
-        "objective": training_task_inputs['predictionType'],
-        "optimizedFor": training_task_inputs['optimizationObjective'],
     }
+    if "transformations" in training_task_inputs:
+      transformation_options = self._get_feature_transformations(
+          training_task_inputs["transformations"])
+      training_pipeline["transformationOptions"] = transformation_options
+    for field in optional_fields:
+      training_pipeline[field] = training_task_inputs.get(field, None)
+    return training_pipeline
 
   def get_datasets(self):
     datasets = []

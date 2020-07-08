@@ -19,17 +19,18 @@ export interface Pipeline {
   createTime: Date;
   updateTime: Date;
   elapsedTime: number;
-  budget: number;
   datasetId: string;
-  targetColumn: string;
-  transformationOptions: any;
-  objective: string;
-  optimizedFor: string;
+  trainBudgetMilliNodeHours: number | null;
+  budgetMilliNodeHours: number | null;
+  targetColumn: string | null;
+  transformationOptions: any | null;
+  predictionType: string | null;
+  optimizationObjective: string | null;
 }
 
 export interface ModelMetrics {
   confidenceThreshold: number;
-  f1Score: number;
+  f1Score: number | string;
   f1ScoreAt1: number;
   precision: number;
   precisionAt1: number;
