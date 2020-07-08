@@ -10,7 +10,6 @@ import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
-import { QueryService } from './service/query';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
 
@@ -34,6 +33,7 @@ interface QueryResponseType {
 interface QueryRequestBodyType {
   query: string;
   jobConfig: {};
+  dryRunOnly: boolean;
 }
 
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
@@ -61,9 +61,9 @@ class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
   QueryTextEditorState
 > {
-  queryService: QueryService;
   editor: editor.IStandaloneCodeEditor;
-  job: PagedJob<QueryRequestBodyType, QueryResponseType> = null;
+  job: PagedJob<QueryRequestBodyType, QueryResponseType>;
+  timeoutAlarm: NodeJS.Timeout;
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
@@ -74,9 +74,8 @@ class QueryTextEditor extends React.Component<
       bytesProcessed: null,
       errorMsg: null,
     };
-    this.queryService = new QueryService();
-
     this.pagedQueryService = new PagedService('query');
+    this.timeoutAlarm = null;
   }
 
   handleButtonClick() {
@@ -108,7 +107,7 @@ class QueryTextEditor extends React.Component<
     });
 
     this.job = this.pagedQueryService.request(
-      { query, jobConfig: {} },
+      { query, jobConfig: {}, dryRunOnly: false },
       (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
@@ -139,6 +138,29 @@ class QueryTextEditor extends React.Component<
 
   handleEditorDidMount(_, editor) {
     this.editor = editor;
+
+    this.editor.onKeyUp(() => {
+      // eslint-disable-next-line no-extra-boolean-cast
+      if (!!this.timeoutAlarm) {
+        clearTimeout(this.timeoutAlarm);
+        this.setState({ errorMsg: null });
+      }
+      this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
+    });
+  }
+
+  checkSQL() {
+    const query = this.editor.getValue();
+    this.pagedQueryService.request(
+      { query, jobConfig: {}, dryRunOnly: true },
+      (state, _, response) => {
+        if (state === JobState.Fail) {
+          this.setState({
+            errorMsg: response as string,
+          });
+        }
+      }
+    );
   }
 
   readableBytes(bytes: number) {

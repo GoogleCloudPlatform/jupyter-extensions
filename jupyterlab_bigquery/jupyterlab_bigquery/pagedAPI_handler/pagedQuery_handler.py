@@ -8,6 +8,7 @@ class PagedQueryHandler(PagedAPIHandler):
   def query(self, request_body, page_size):
     query = request_body['query']
     jobConfig = request_body['jobConfig']
+    dryRunOnly = request_body['dryRunOnly']
 
     # dry run, will throw exception if fail
     dry_run_job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)
@@ -18,10 +19,13 @@ class PagedQueryHandler(PagedAPIHandler):
       raise Exception(err_msg)
     total_bytes_processed = dry_run_job.total_bytes_processed
 
+    if dryRunOnly:
+      yield dry_run_job, dry_run_job.job_id
+      return
+
     # actual run
     job_config = bigquery.QueryJobConfig(*jobConfig)
     query_job = PagedQueryHandler.client.query(query, job_config=job_config)
-
 
     if query_job.error_result is not None:
         raise Exception(query_job.error_result)
