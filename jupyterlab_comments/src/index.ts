@@ -66,7 +66,7 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
             }
 
             if (!widget.isAttached) {
-                app.shell.add(widget, 'right', { rank: 100 });
+                app.shell.add(widget, 'right');
             }
             app.shell.activateById(widget.id);
         }

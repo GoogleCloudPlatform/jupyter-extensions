@@ -15,7 +15,7 @@
  */
 
 import * as React from 'react';
-import { DetachedComment, createCommentFromJSON } from '../service/comment'
+import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
 import {
   ListItem,
   ListItemText,
@@ -59,11 +59,12 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 };
 
 interface Props {
-  data: DetachedComment,
+  detachedComment?: DetachedComment,
+  reviewComment?: CodeReviewComment,
 }
 
 interface State {
-    expandThread: boolean,
+  expandThread: boolean,
 }
 
 
@@ -77,7 +78,7 @@ export class Comment extends React.Component<Props, State> {
     }
 
     render() {
-        const data = this.props.data;
+        const data = this.props.detachedComment ? this.props.detachedComment : this.props.reviewComment;
         return (
             <>
             <ListItem key={data.hash} alignItems="flex-start">
@@ -104,7 +105,7 @@ export class Comment extends React.Component<Props, State> {
             </ListItem>
         <div style={style.commentBottom}>
           <Button color="primary" size="small"> Reply </Button>
-          {data.children && <Button size="small" endIcon={this.state.expandThread ? <ArrowDropUpIcon/>  : <ArrowDropDownIcon/>}
+          {data.children && <Button size="small" endIcon={this.state.expandThread ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>}
           onClick= {() => {
                 this.setState({expandThread: !this.state.expandThread});
                 }}> {this.state.expandThread ? 'Hide thread' : 'Show thread'} </Button>}
@@ -113,8 +114,13 @@ export class Comment extends React.Component<Props, State> {
             {(this.state.expandThread && data.children) &&
             <List>
           {data.children.map(reply => {
-            var replyData = createCommentFromJSON(reply);
-            return <Comment data={replyData}/>;
+            if (this.props.detachedComment) {
+              var detached = createDetachedCommentFromJSON(reply);
+              return <Comment detachedComment={detached}/>;
+            } else {
+              var review = createReviewCommentFromJSON(reply, this.props.reviewComment.revision, this.props.reviewComment.request);
+              return <Comment reviewComment={review}/>;
+            }
           })}
           </List>}
         </div>

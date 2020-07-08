@@ -19,7 +19,8 @@ export interface DetachedComment extends Comment {
 }
 
 export interface CodeReviewComment extends Comment {
-    reviewDescription: any,
+    request: ReviewRequest,
+    revision: any,
 }
 
 export interface Comment {
@@ -32,7 +33,16 @@ export interface Comment {
     parent?: any,
 }
 
-export function createCommentFromJSON(obj : any) : DetachedComment {
+export interface ReviewRequest {
+    timestamp: any,
+    reviewRef: string,
+    targetRef: string,
+    requester: string,
+    description: any,
+    baseCommit: any,
+}
+
+export function createDetachedCommentFromJSON(obj : any) : DetachedComment {
     const content = obj.comment;
     const hash = obj.hash;
     const children = obj.children;
@@ -53,3 +63,29 @@ export function createCommentFromJSON(obj : any) : DetachedComment {
     }
     return comment;
 }
+
+export function createReviewCommentFromJSON(obj : any, revision: any, request: any) : CodeReviewComment {
+    const content = obj.comment;
+    const hash = obj.hash;
+    const children = obj.children;
+    var timestamp : Date = new Date(parseInt(content.timestamp) * 1000);
+    var timestampString = timestamp.toDateString();
+    let comment : CodeReviewComment = {
+      author: content.author,
+      text: content.description,
+      timestamp: timestampString,
+      range: content.location.range,
+      hash: hash,
+      revision: revision,
+      request: request,
+    };
+    if (children) {
+      comment.children = children;
+    }
+    if (content.parent) {
+      comment.parent = parent;
+    }
+    return comment;
+}
+
+
