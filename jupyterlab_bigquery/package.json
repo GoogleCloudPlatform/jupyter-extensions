@@ -48,6 +48,7 @@
     "@jupyterlab/ui-components": "^1.2.1",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^3.0.2",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@monaco-editor/react": "^3.3.2",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/commands": "^1.7.0",
@@ -64,7 +65,8 @@
     "monaco-editor": "^0.20.0",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
-    "typestyle": "^2.1.0"
+    "typestyle": "^2.1.0",
+    "gcp_jupyterlab_shared": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
