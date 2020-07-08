@@ -3,7 +3,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { store, RootState } from '../store/store';
 import { Provider, connect } from 'react-redux';
 import { close, ViewType } from '../store/view';
-import { CreateStudy }from './create_study';
+import { CreateStudy } from './create_study';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,

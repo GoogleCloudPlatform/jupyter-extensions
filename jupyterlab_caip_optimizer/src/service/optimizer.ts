@@ -39,7 +39,7 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  /** TODO: Remove hardcoded values and 'option' parameter before release. 
+  /** TODO: Remove hardcoded values and 'option' parameter before release.
    * Currently implemented this way because of ssh restrictions to GCP */
   async getMetaData(option = 'defaultMetadata'): Promise<MetadataRequired> {
     try {
