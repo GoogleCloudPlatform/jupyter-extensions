@@ -3,10 +3,10 @@
 import json
 from enum import Enum
 
-from gcp_jupyterlab_shared.handlers import AuthProvider
 from google.cloud import aiplatform_v1alpha1
 from google.protobuf import json_format
 from googleapiclient.discovery import build
+from gcp_jupyterlab_shared.handlers import AuthProvider
 
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
@@ -89,6 +89,50 @@ class AutoMLService:
             "updateTime": model.update_time.strftime(self._time_format),
             "etag": model.etag,
         } for model in models]
+    }
+
+  def _get_feature_importance(self, model_explanation):
+    feature_importance = []
+    for key, val in model_explanation["meanAttributions"][0]["featureAttributions"].items():
+      feature_importance.append({
+          "name": key,
+          "Percentage": round(val * 100, 3),
+      })
+    return feature_importance
+
+  def _get_confidence_metrics(self, confidence_metrics):
+    labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
+              "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
+              "truePositiveCount", "falseNegativeCount", "falsePositiveCount",
+              "falsePositiveRate", "falsePositiveRateAt1"]
+    metrics = []
+    for confidence_metric in confidence_metrics:
+      metric = {}
+      for label in labels:
+        if label == "confidenceThreshold":
+          try:
+            value = confidence_metric[label] * 100
+          except:
+            value = 0.0
+        else:
+          try:
+            value = confidence_metric[label]
+          except:
+            value = "NaN"
+        metric[label] = value
+      metrics.append(metric)
+    return metrics
+
+  def get_model_evaluation(self, model_id):
+    evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
+    metrics = json_format.MessageToDict(evaluation._pb.metrics)
+    return {
+        "auPrc": metrics["auPrc"],
+        "auRoc": metrics["auRoc"],
+        "logLoss": metrics["logLoss"],
+        "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
+        "createTime": evaluation.create_time.strftime(self._time_format),
+        "featureImportance": self._get_feature_importance(json_format.MessageToDict(evaluation._pb.model_explanation)),
     }
 
   def _get_feature_transformations(self, response):

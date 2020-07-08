@@ -9,6 +9,10 @@ export interface Model {
   etag: string;
 }
 
+export interface Models {
+  models: Model[];
+}
+
 export interface Pipeline {
   id: string;
   displayName: string;
@@ -23,8 +27,29 @@ export interface Pipeline {
   optimizedFor: string;
 }
 
-interface Models {
-  models: Model[];
+export interface ModelMetrics {
+  confidenceThreshold: number;
+  f1Score: number;
+  f1ScoreAt1: number;
+  precision: number;
+  precisionAt1: number;
+  recall: number;
+  recallAt1: number;
+  trueNegativeCount: number;
+  truePositiveCount: number;
+  falseNegativeCount: number;
+  falsePositiveCount: number;
+  falsePositiveRate: number;
+  falsePositiveRateAt1: number;
+}
+
+export interface ModelEvaluation {
+  auPrc: number;
+  auRoc: number;
+  logLoss: number;
+  confidenceMetrics: ModelMetrics[];
+  createTime: Date;
+  featureImportance: any[];
 }
 
 export abstract class ModelService {
@@ -47,6 +72,14 @@ export abstract class ModelService {
   static async getPipeline(pipelineId: string): Promise<Pipeline> {
     const query = '?pipelineId=' + pipelineId;
     const data = await requestAPI<Pipeline>('v1/pipeline' + query);
+    return data;
+  }
+
+  static async listModelEvaluations(modelId: string): Promise<ModelEvaluation> {
+    const query = '?modelId=' + modelId;
+    const data = await requestAPI<ModelEvaluation>(
+      'v1/modelEvaluation' + query
+    );
     return data;
   }
 }

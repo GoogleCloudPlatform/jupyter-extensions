@@ -60,6 +60,11 @@ def _list_models(_):
   return AutoMLService.get().get_models()
 
 
+@_handler("GET", "modelEvaluation")
+def _list_model_evaluations(args):
+  return AutoMLService.get().get_model_evaluation(args["modelId"])
+
+
 @_handler("GET", "pipeline")
 def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])

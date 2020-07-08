@@ -27,7 +27,7 @@ interface State {
   open: boolean;
 }
 
-export class ModelComponent extends React.Component<Props, State> {
+export class ModelProperties extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -57,7 +57,7 @@ export class ModelComponent extends React.Component<Props, State> {
             <TableBody>
               {modelDetails.map(row =>
                 row.key === 'Transformation options' ? (
-                  <React.Fragment>
+                  <React.Fragment key={'Expandable'}>
                     <TableRow key={row.key}>
                       <TableCell component="th" scope="row">
                         {row.key}
@@ -67,7 +67,6 @@ export class ModelComponent extends React.Component<Props, State> {
                           aria-label="expand row"
                           size="small"
                           onClick={() => {
-                            console.log(this.state.transformationOptions);
                             this.setState({ open: !this.state.open });
                           }}
                         >
@@ -79,7 +78,7 @@ export class ModelComponent extends React.Component<Props, State> {
                         </IconButton>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow key={'Collapse'}>
                       <TableCell
                         style={{ paddingBottom: 0, paddingTop: 0 }}
                         colSpan={6}

@@ -1,18 +1,13 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { Model } from '../service/model';
-import { ModelComponent } from './model_component';
+import { EvaluationTable } from './model_evaluation';
+import { ModelProperties } from './model_properties';
 import { Toolbar, Tabs, Tab, Box } from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 interface Props {
   model: Model;
-}
-
-interface TabProps {
-  value: number;
-  index: number;
-  message: string;
 }
 
 interface State {
@@ -51,20 +46,6 @@ const AntTab = withStyles((theme: Theme) =>
   })
 )((props: StyledTabProps) => <Tab disableRipple {...props} />);
 
-export class TabPanel extends React.Component<TabProps> {
-  constructor(props: TabProps) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div hidden={this.props.value !== this.props.index}>
-        <Box p={3}>{this.props.message}</Box>
-      </div>
-    );
-  }
-}
-
 export class ModelPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -84,12 +65,12 @@ export class ModelPanel extends React.Component<Props, State> {
               this.setState({ tabState: newValue })
             }
           >
-            <AntTab label="Model Properties"></AntTab>
-            <AntTab label="Evaluate"></AntTab>
+            <AntTab label="Evaluate" />
+            <AntTab label="Model Properties" />
           </AntTabs>
         </Toolbar>
-        <ModelComponent model={this.props.model} value={tabState} index={0} />
-        <TabPanel value={tabState} index={1} message="Evaluate" />
+        <EvaluationTable model={this.props.model} value={tabState} index={0} />
+        <ModelProperties model={this.props.model} value={tabState} index={1} />
       </Box>
     );
   }
