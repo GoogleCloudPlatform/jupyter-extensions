@@ -50,6 +50,21 @@ export interface Datasets {
   datasets: Dataset[];
 }
 
+export interface TablesDatasetOptions {
+  gcsSource?: string;
+  bigquerySource?: string;
+  fileSource?: File;
+}
+
+function toBase64(file: File) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = error => reject(error);
+  });
+}
+
 export abstract class DatasetService {
   static async listDatasets(): Promise<Dataset[]> {
     const data = (await requestAPI<Datasets>('v1/datasets')).datasets;
@@ -69,13 +84,19 @@ export abstract class DatasetService {
 
   static async createTablesDataset(
     displayName: string,
-    gcsSource: string | null,
-    bigquerySource: string | null
+    options: TablesDatasetOptions
   ) {
     const body = {
       displayName: displayName,
-      gcsSource: gcsSource,
-      bigquerySource: bigquerySource,
+      gcsSource: options.gcsSource,
+      bigquerySource: options.bigquerySource,
+      fileSource:
+        options.fileSource !== null
+          ? {
+              name: options.fileSource.name,
+              data: await toBase64(options.fileSource),
+            }
+          : null,
     };
     const requestInit: RequestInit = {
       body: JSON.stringify(body),

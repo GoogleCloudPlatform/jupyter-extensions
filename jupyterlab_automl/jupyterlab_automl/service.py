@@ -1,10 +1,13 @@
 """Services for AutoML extension that get reponses from the uCAIP API"""
 
+import base64
+import hashlib
 import json
+import uuid
 from enum import Enum
 
 from gcp_jupyterlab_shared.handlers import AuthProvider
-from google.cloud import aiplatform_v1alpha1
+from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 
@@ -60,9 +63,14 @@ class AutoMLService:
         client_options=client_options)
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
-    self._parent = ("projects/" + AuthProvider.get().project +
-                    "/locations/us-central1")
+    self._gcs_client = storage.Client()
+
+    self._project = AuthProvider.get().project
+
+    self._parent = "projects/{}/locations/us-central1".format(self._project)
     self._time_format = "%B %d, %Y, %I:%M%p"
+    self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
+        hashlib.md5(self._project.encode('utf-8')).hexdigest())
 
   @property
   def dataset_client(self):
@@ -161,3 +169,19 @@ class AutoMLService:
     created = self._dataset_client.create_dataset(parent=self._parent,
                                                   dataset=ds).result()
     return created
+
+  def create_dataset_from_file(self, display_name, file_name, file_data):
+    try:
+      bucket = self._gcs_client.create_bucket(self._gcs_bucket)
+    except exceptions.Conflict:
+      # Bucket already exists
+      bucket = self._gcs_client.bucket(self._gcs_bucket)
+
+    key = "{}-{}".format(str(uuid.uuid4()), file_name)
+    # Possible improvement: prepend md5 hash of file instead of uuid to
+    # skip uploading the same existing file
+    decoded = base64.decodebytes(file_data.encode("ascii"))
+    bucket.blob(key).upload_from_string(decoded)
+    return self.create_dataset(display_name,
+                               gcs_uri="gs://{}/{}".format(
+                                   self._gcs_bucket, key))
