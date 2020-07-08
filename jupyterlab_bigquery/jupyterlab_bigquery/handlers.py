@@ -87,6 +87,13 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
+def get_schema(schema):
+    return [{
+        'name': field.name,
+        'type': field.field_type,
+        'description': field.description,
+        'mode': field.mode
+    } for field in schema]
 
 def get_table_details(client, table_id):
   table = client.get_table(table_id)
@@ -105,7 +112,7 @@ def get_table_details(client, table_id):
           'link': table.self_link,
           'num_rows': table.num_rows,
           'num_bytes': table.num_bytes,
-          'schema': str(table.schema)
+          'schema': get_schema(table.schema)
       }
   }
 

@@ -95,7 +95,19 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
             Data location: {details.location ? details.location : 'None'}
           </div>
           <br />
-          <div>Schema: {details.schema ? details.schema : 'None'}</div>
+          <div>
+            Schema:{' '}
+            {details.schema
+              ? details.schema.map((field, index) => {
+                  return (
+                    <div key={index}>
+                      {field.name} {field.type} {field.mode}{' '}
+                      {field.description ?? ''}
+                    </div>
+                  );
+                })
+              : 'None'}
+          </div>
         </div>
       );
     }
