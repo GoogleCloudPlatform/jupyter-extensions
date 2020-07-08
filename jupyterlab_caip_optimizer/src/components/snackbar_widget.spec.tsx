@@ -1,20 +1,13 @@
 import * as React from 'react';
 import { SnackbarUnwrapped } from './snackbar_widget';
-import { createMount } from '@material-ui/core/test-utils';
 import { Alert } from '@material-ui/lab';
+import { mount } from 'enzyme';
 
 describe('Snackbar', () => {
-  let mount: ReturnType<typeof createMount>;
   let close: jest.Mock;
 
-  beforeAll(() => {
-    mount = createMount();
-  });
   beforeEach(() => {
     close = jest.fn();
-  });
-  afterAll(() => {
-    mount.cleanUp();
   });
 
   it('shows snackbar message with severity', () => {
