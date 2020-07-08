@@ -1,7 +1,14 @@
+jest.mock('../store/snackbar');
+jest.mock('@material-ui/core', () => ({
+  Snackbar: ({ children }) => children,
+}));
+jest.mock('@material-ui/lab', () => ({
+  Alert: ({ children }) => children,
+}));
 import * as React from 'react';
 import { SnackbarUnwrapped } from './snackbar_widget';
-import { Alert } from '@material-ui/lab';
 import { mount } from 'enzyme';
+import * as mui from '@material-ui/lab';
 
 describe('Snackbar', () => {
   let close: jest.Mock;
@@ -21,7 +28,7 @@ describe('Snackbar', () => {
       />
     );
 
-    expect(snackbar.find(Alert).text()).toEqual(message);
+    expect(snackbar.find(mui.Alert).text()).toEqual(message);
   });
   it('shows severity', () => {
     const severity = 'info';
@@ -34,7 +41,7 @@ describe('Snackbar', () => {
       />
     );
 
-    expect(snackbar.find(Alert).prop('severity')).toEqual(severity);
+    expect(snackbar.find(mui.Alert).prop('severity')).toEqual(severity);
   });
   it('closes the snackbar', () => {
     const snackbar = mount(
@@ -46,7 +53,7 @@ describe('Snackbar', () => {
       />
     );
 
-    const onClose = snackbar.find(Alert).prop('onClose');
+    const onClose = snackbar.find(mui.Alert).prop('onClose');
     onClose(undefined);
 
     expect(close).toHaveBeenCalled();
