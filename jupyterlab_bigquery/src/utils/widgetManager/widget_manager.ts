@@ -1,9 +1,9 @@
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import rootReducer from '../reducers';
+import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
-import { ReduxReactWidget } from './ReduxReactWidget';
+import { ReduxReactWidget } from './redux_react_widget';
 
 /**
  * A class that manages dataset widget instances in the Main area

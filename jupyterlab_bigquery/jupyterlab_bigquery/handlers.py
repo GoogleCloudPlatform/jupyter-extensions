@@ -89,6 +89,13 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
+def get_schema(schema):
+    return [{
+        'name': field.name,
+        'type': field.field_type,
+        'description': field.description,
+        'mode': field.mode
+    } for field in schema]
 
 def get_table_details(client, table_id):
   table = client.get_table(table_id)
@@ -107,7 +114,7 @@ def get_table_details(client, table_id):
           'link': table.self_link,
           'num_rows': table.num_rows,
           'num_bytes': table.num_bytes,
-          'schema': str(table.schema)
+          'schema': get_schema(table.schema)
       }
   }
 
@@ -122,15 +129,26 @@ def make_query(client, request_body):
 
     if query_job.error_result is not None:
         raise Exception(query_job.error_result)
-
-    df = query_job.to_dataframe()
-    
-    response = {
+        
+    # send contents
+    en = query_job.result(100)
+    for df in en.to_dataframe_iterable():
+        response = {
         'content': df.to_json(orient='values'),
         'labels': json.dumps(df.columns.to_list()),
-    }
-
-    return response
+        'job_id': query_job.job_id,
+        'done': False,
+        }
+        yield(response)
+            
+    # send finish
+    response = {
+        'content': None,
+        'labels': None,
+        'job_id': query_job.job_id,
+        'done': True,
+        }
+    yield(response)
 
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""

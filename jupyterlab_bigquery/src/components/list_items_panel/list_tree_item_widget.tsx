@@ -4,9 +4,9 @@ import * as React from 'react';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 // import { Contents } from '@jupyterlab/services';
 
-import { ReduxReactWidget } from '../../utils/ReduxReactWidget';
+import { ReduxReactWidget } from '../../utils/widgetManager/redux_react_widget';
 import { ListProjectsService } from './service/list_items';
-import { WidgetManager } from '../../utils/widget_manager';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListItemsPanel from './list_tree_panel';
 // import { IIterator, ArrayIterator, find } from '@phosphor/algorithm';
 
