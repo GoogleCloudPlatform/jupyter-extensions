@@ -10,6 +10,8 @@ import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree } from '../../reducers/dataTreeSlice';
+import { SearchProjectsService } from '../list_items_panel/service/search_items';
+import { SearchBar } from './search_bar';
 
 interface Props {
   listProjectsService: ListProjectsService;
@@ -38,6 +40,15 @@ const localStyles = stylesheet({
     padding: '8px 12px',
     textTransform: 'uppercase',
   },
+  editQueryButton: {
+    margin: 'auto',
+  },
+  list: {
+    margin: 0,
+    overflowY: 'scroll',
+    padding: 0,
+    ...csstips.flex,
+  },
   panel: {
     backgroundColor: 'white',
     //color: COLORS.base,
@@ -46,15 +57,6 @@ const localStyles = stylesheet({
     ...csstips.vertical,
     marginTop: '5px',
     marginBottom: '5px',
-  },
-  list: {
-    margin: 0,
-    overflowY: 'scroll',
-    padding: 0,
-    ...csstips.flex,
-  },
-  editQueryButton: {
-    margin: 'auto',
   },
 });
 
@@ -66,6 +68,20 @@ class ListItemsPanel extends React.Component<Props, State> {
       isLoading: false,
     };
   }
+
+  async search(searchKey, project) {
+    const service = new SearchProjectsService();
+    const results = await service.searchProjects(searchKey, project);
+    // TODO: Phase 3
+    console.log(results.searchResults);
+  }
+
+  handleKeyPress = event => {
+    if (event.key === 'Enter') {
+      const searchKey = event.target.value;
+      this.search(searchKey, 'hwing-sandbox');
+    }
+  };
 
   async componentWillMount() {
     try {
@@ -104,6 +120,10 @@ class ListItemsPanel extends React.Component<Props, State> {
             >
               Edit Query
             </Button>
+            <SearchBar
+              handleKeyPress={this.handleKeyPress}
+              defaultText={'Search...'}
+            />
           </header>
         </div>
         {isLoading ? (

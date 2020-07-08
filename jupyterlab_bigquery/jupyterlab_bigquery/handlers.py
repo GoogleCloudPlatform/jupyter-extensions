@@ -29,15 +29,6 @@ def create_datacatalog_client():
     return DataCatalogClient()
 
 
-def search_projects(client):
-    scope = types.SearchCatalogRequest.Scope()
-    scope.include_project_ids.append('hwing-sandbox')
-    results = client.search_catalog(
-        scope=scope, query='name:public_babynames')
-    fetched_results = [result for result in results]
-    print(fetched_results)
-
-
 def create_bigquery_client():
     return bigquery.Client()
 
@@ -50,6 +41,36 @@ def list_projects(client):
         'datasets': list_datasets(client, project),
     }]
     return {'projects': projects_list}
+
+
+def search_projects(bigquery_client, datacatalog_client, search_key, project_id):
+    scope = types.SearchCatalogRequest.Scope()
+    scope.include_project_ids.append(project_id)
+    results = datacatalog_client.search_catalog(
+        scope=scope, query='name:{} projectid:{}'.format(search_key, project_id))
+
+    fetched_results = []
+    for result in results:
+        resource = result.linked_resource
+        resultType = format(result.search_result_subtype)
+        if resultType == 'entry.dataset':
+            res = re.search('datasets/(.*)', resource)
+            dataset = res.group(1)
+            fetched_results.append({'name': dataset, 'id': dataset})
+        elif resultType == 'entry.table':
+            res = re.search('tables/(.*)', resource)
+            table = res.group(1)
+            fetched_results.append({'name': table, 'id': table})
+        elif resultType == 'entry.table.view':
+            res = re.search('tables/(.*)', resource)
+            view = res.group(1)
+            fetched_results.append({'name': view, 'id': view})
+        elif resultType == 'entry.model':
+            res = re.search('models/(.*)', resource)
+            model = res.group(1)
+            fetched_results.append({'name': model, 'id': model})
+
+    return {'results': fetched_results}
 
 
 def list_datasets(client, project):
@@ -133,7 +154,27 @@ def get_table_details(client, table_id):
   }
 
 class ListHandler(APIHandler):
-    """Handles requests for Dummy List of Items."""
+    """Handles requests for list of BigQuery elements."""
+    bigquery_client = None
+
+    @gen.coroutine
+    def post(self, *args, **kwargs):
+        try:
+            self.bigquery_client = create_bigquery_client()
+            self.finish(list_projects(self.bigquery_client))
+
+        except Exception as e:
+            app_log.exception(str(e))
+            self.set_status(500, str(e))
+            self.finish({
+                'error': {
+                    'message': str(e)
+                }
+            })
+
+
+class SearchHandler(APIHandler):
+    """Handles requests for Searching DataCatalog"""
     bigquery_client = None
     datacatalog_client = None
 
@@ -142,8 +183,10 @@ class ListHandler(APIHandler):
         try:
             self.bigquery_client = create_bigquery_client()
             self.datacatalog_client = create_datacatalog_client()
-            search_projects(self.datacatalog_client)
-            self.finish(list_projects(self.bigquery_client))
+            post_body = self.get_json_body()
+
+            self.finish(search_projects(
+                self.bigquery_client, self.datacatalog_client, post_body['searchKey'], post_body['projectId']))
 
         except Exception as e:
             app_log.exception(str(e))
