@@ -1,4 +1,4 @@
-import { LinearProgress, Typography } from '@material-ui/core';
+import { LinearProgress, Typography, Icon } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeView from '@material-ui/lab/TreeView';
@@ -16,6 +16,8 @@ import { DatasetDetailsService } from '../details_panel/service/list_dataset_det
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 
+import '../../../style/index.css';
+
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
@@ -26,13 +28,8 @@ const localStyles = stylesheet({
     paddingRight: '8px',
     ...csstips.horizontal,
   },
-  childItem: {
-    alignItems: 'center',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    listStyle: 'none',
-    height: '40px',
-    paddingRight: '8px',
-    paddingLeft: '30px',
+  dataset: {
+    flexDirection: 'row',
     ...csstips.horizontal,
   },
   details: {
@@ -40,19 +37,6 @@ const localStyles = stylesheet({
     paddingLeft: '4px',
     ...csstips.horizontal,
     ...csstips.flex,
-  },
-  wordTime: {
-    color: 'var(--jp-content-font-color2)',
-    fontSize: '9px',
-    textAlign: 'right',
-    ...csstips.flex,
-  },
-  viewLink: {
-    backgroundImage: 'var(--jp-icon-notebook)',
-    backgroundRepeat: 'no-repeat',
-    marginLeft: '5px',
-    padding: '0 6px',
-    textDecoration: 'none',
   },
   icon: {
     padding: '0 0 0 5px',
@@ -125,6 +109,9 @@ export function BuildTree(project, context) {
               onClick: () => item.handler(table),
             }))}
           >
+            <Icon style={{ display: 'flex', alignContent: 'center' }}>
+              <div className={'jp-Icon jp-Icon-20 jp-TableIcon'} />
+            </Icon>
             <Typography>{table.name}</Typography>
           </ContextMenu>
         }
@@ -150,6 +137,9 @@ export function BuildTree(project, context) {
               onClick: () => item.handler(model),
             }))}
           >
+            <Icon style={{ display: 'flex', alignContent: 'center' }}>
+              <div className={'jp-Icon jp-Icon-20 jp-ModelIcon'} />
+            </Icon>
             <Typography>{model.name}</Typography>
           </ContextMenu>
         }
@@ -166,7 +156,10 @@ export function BuildTree(project, context) {
     ];
 
     return (
-      <div>
+      <div className={localStyles.dataset}>
+        <Icon style={{ display: 'flex', alignContent: 'center' }}>
+          <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+        </Icon>
         <TreeItem
           nodeId={dataset.id}
           label={
