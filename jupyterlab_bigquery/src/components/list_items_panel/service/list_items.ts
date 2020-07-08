@@ -1,12 +1,13 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
 
-export interface Projects {
+export interface DataTree {
   projects: Project[];
 }
 
 export interface Project {
   id: string;
+  name: string;
   datasets: Dataset[];
 }
 
@@ -27,7 +28,7 @@ export interface Model {
 }
 
 export class ListProjectsService {
-  async listProjects(numItems: number): Promise<Projects> {
+  async listProjects(numItems: number): Promise<DataTree> {
     return new Promise((resolve, reject) => {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
@@ -54,6 +55,7 @@ export class ListProjectsService {
             projects: content.projects.map((p: any) => {
               return {
                 id: p.id,
+                name: p.name,
                 datasets: p.datasets,
               };
             }),
