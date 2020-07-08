@@ -167,16 +167,16 @@ export interface HardwareConfiguration {
 }
 
 /* CPU to Memory mappings for the Compute Engine machine types */
-interface CEMachineType {
+export interface MachineTypeConfigurations {
   base: Option;
   configurations: HardwareConfiguration[];
 }
 
-export const machineTypes: CEMachineType[] = [
+export const machineTypes: MachineTypeConfigurations[] = [
   {
     base: {
       value: 'n1-standard-',
-      text: 'N1 Standard'
+      text: 'N1 Standard',
     },
     configurations: [
       { cpu: 4, memory: 15 },
@@ -184,8 +184,8 @@ export const machineTypes: CEMachineType[] = [
       { cpu: 16, memory: 60 },
       { cpu: 32, memory: 120 },
       { cpu: 64, memory: 240 },
-      { cpu: 96, memory: 360 },     
-    ]
+      { cpu: 96, memory: 360 },
+    ],
   },
   {
     base: {
@@ -198,8 +198,8 @@ export const machineTypes: CEMachineType[] = [
       { cpu: 16, memory: 104 },
       { cpu: 32, memory: 208 },
       { cpu: 64, memory: 416 },
-      { cpu: 96, memory: 624 },     
-    ]
+      { cpu: 96, memory: 624 },
+    ],
   },
   {
     base: {
@@ -210,10 +210,10 @@ export const machineTypes: CEMachineType[] = [
       { cpu: 16, memory: 14.4 },
       { cpu: 32, memory: 28.8 },
       { cpu: 64, memory: 57.6 },
-      { cpu: 96, memory: 86.4 },     
-    ]
-  },  
-]
+      { cpu: 96, memory: 86.4 },
+    ],
+  },
+];
 
 /* Class names applied to the component. */
 export const STYLES = stylesheet({

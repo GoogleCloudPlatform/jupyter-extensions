@@ -32,6 +32,7 @@ import {
   ACCELERATOR_COUNTS_1_2_4_8,
   machineTypes,
   ACCELERATOR_TYPES,
+  MachineTypeConfigurations,
 } from '../data';
 
 interface Props {
@@ -44,8 +45,8 @@ interface State {
   cpuValue: number;
   memoryValue: number;
   attachGpu: boolean;
-  gpuType?: string;
-  gpuCount?: string;
+  gpuType: string;
+  gpuCount: string;
 }
 
 export const STYLES = stylesheet({
@@ -97,67 +98,48 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     };
   }
 
-  private getMachineType = (baseMachineType: string) => {
+  private getMachineType(baseMachineType: string): MachineTypeConfigurations {
     return machineTypes.find(elem => elem.base.value === baseMachineType);
-  };
+  }
+
+
+  private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      attachGpu: event.target.checked,
+      gpuType: event.target.checked
+        ? (ACCELERATOR_TYPES[1].value as string)
+        : NO_ACCELERATOR,
+      gpuCount: event.target.checked
+        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+        : '',
+    });
+  }
+
+  private onBaseMachineTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    this.setState({
+      baseMachineType: event.target.value,
+      cpuValue: this.getMachineType(event.target.value).configurations[0].cpu,
+      memoryValue: this.getMachineType(event.target.value).configurations[0]
+        .memory,
+    });
+  }
+
+  private onGpuTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    this.setState({
+      gpuType: event.target.value,
+      gpuCount: event.target.value
+        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+        : '',
+    });
+  }
+
+  // TODO: Implement submit functionality
+  //eslint-disable-next-line @typescript-eslint/no-empty-function
+  private submitForm() {};
 
   render() {
     const { onDialogClose } = this.props;
     const { gpuType, gpuCount, attachGpu, baseMachineType } = this.state;
-
-    const onBaseMachineTypeChange = (
-      event: React.ChangeEvent<HTMLSelectElement>
-    ) => {
-      this.setState({
-        baseMachineType: event.target.value,
-        cpuValue: this.getMachineType(event.target.value).configurations[0].cpu,
-        memoryValue: this.getMachineType(event.target.value).configurations[0]
-          .memory,
-      });
-    };
-
-    const onCpuChange = (newValue: number) => {
-      this.setState({
-        cpuValue: newValue,
-      });
-    };
-
-    const onMemoryChange = (newValue: number) => {
-      this.setState({
-        memoryValue: newValue,
-      });
-    };
-
-    const onGpuTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      this.setState({
-        gpuType: event.target.value,
-        gpuCount: event.target.value
-          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-          : '',
-      });
-    };
-
-    const onGpuCountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      this.setState({
-        gpuCount: event.target.value,
-      });
-    };
-
-    const onAttachGpuChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      this.setState({
-        attachGpu: event.target.checked,
-        gpuType: event.target.checked
-          ? (ACCELERATOR_TYPES[1].value as string)
-          : NO_ACCELERATOR,
-        gpuCount: event.target.checked
-          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-          : '',
-      });
-    };
-
-    // TODO: Implement submit functionality
-    //eslint-disable-next-line @typescript-eslint/no-empty-function
-    const submitForm = () => {};
 
     return (
       <div className={STYLES.container}>
@@ -171,13 +153,13 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 name="baseMachineType"
                 value={baseMachineType}
                 options={machineTypes.map(elem => elem.base)}
-                onChange={onBaseMachineTypeChange}
+                onChange={e => this.onBaseMachineTypeChange(e)}
               />
             </div>
             <SynchronizedSliders
               values={this.getMachineType(baseMachineType).configurations}
-              onMemoryChange={onMemoryChange}
-              onCpuChange={onCpuChange}
+              onMemoryChange={memoryValue => this.setState({ memoryValue })}
+              onCpuChange={cpuValue => this.setState({ cpuValue })}
               key={baseMachineType}
             />
             <div className={STYLES.checkboxContainer}>
@@ -186,7 +168,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 className={STYLES.checkbox}
                 name="attachGpu"
                 checked={attachGpu}
-                onChange={onAttachGpuChange}
+                onChange={e => this.onAttachGpuChange(e)}
               />
             </div>
             {attachGpu && (
@@ -199,7 +181,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     name="gpuType"
                     value={gpuType}
                     options={ACCELERATOR_TYPES.slice(1)}
-                    onChange={onGpuTypeChange}
+                    onChange={e => this.onGpuTypeChange(e)}
                   />
                 </div>
                 <div className={css.flex1}>
@@ -208,7 +190,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     name="gpuCount"
                     value={gpuCount}
                     options={ACCELERATOR_COUNTS_1_2_4_8}
-                    onChange={onGpuCountChange}
+                    onChange={e => this.setState({ gpuCount: e.target.value })}
                   />
                 </div>
               </div>
@@ -218,8 +200,8 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
           <SubmitButton
             actionPending={false}
-            onClick={submitForm}
-            text="Save"
+            onClick={() => this.submitForm()}
+            text="Submit"
           />
         </ActionBar>
       </div>
@@ -228,9 +210,9 @@ export class HardwareScalingForm extends React.Component<Props, State> {
 }
 
 const DESCRIPTION = `The hardware scaling limits you configured will be the
-max capacity allowed for this notebook. You'll only pay for the hardware 
-resources you use. `;
-const LINK = 'https://cloud.google.com/ai-platform/training/pricing';
+max capacity allowed for this notebook. You'll only pay for the time the 
+hardware resources are on. `;
+const LINK = 'https://cloud.google.com/compute/all-pricing';
 
 // tslint:disable-next-line:enforce-name-casing
 export function HardwareConfigurationDescription() {

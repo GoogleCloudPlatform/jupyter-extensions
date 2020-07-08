@@ -20,7 +20,7 @@ import { HardwareScalingForm } from './hardware_scaling_form';
 
 interface Props {
   open: boolean;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */

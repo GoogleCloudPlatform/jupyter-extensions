@@ -16,10 +16,8 @@
 
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import Grid from '@material-ui/core/Grid';
-import Slider from '@material-ui/core/Slider';
-import { TextInput } from 'gcp_jupyterlab_shared';
 import { HardwareConfiguration } from '../data';
+import { InputSlider } from './input_slider';
 
 interface Props {
   /* Assumes sorted list with memory and cpu set to 0 for first value */
@@ -58,12 +56,14 @@ export const STYLES = stylesheet({
 export class SynchronizedSliders extends React.Component<Props, State> {
   private memoryValues: number[];
   private cpuValues: number[];
+  private typingTimeout: any;
 
   constructor(props: Props) {
     super(props);
 
     this.memoryValues = this.props.values.map(elem => elem.memory);
     this.cpuValues = this.props.values.map(elem => elem.cpu);
+    this.typingTimeout = null;
 
     this.state = {
       memoryValue: this.memoryValues[0],
@@ -83,7 +83,7 @@ export class SynchronizedSliders extends React.Component<Props, State> {
     return obj.cpu;
   }
 
-  /* Returns closest higher value to targetValue in possibleValues */
+  /* Returns closest value to targetValue in possibleValues, using the higher value for ties */
   private closest(targetValue: number, possibleValues: number[]) {
     return possibleValues.reduce((a, b) => {
       return Math.abs(a - targetValue) < Math.abs(b - targetValue) ? a : b;
@@ -112,6 +112,38 @@ export class SynchronizedSliders extends React.Component<Props, State> {
     this.props.onMemoryChange(newMemory);
   }
 
+  private onCpuInputBlur(cpuInputDisplayValue: string) {
+    const newValue = this.closest(
+      Number(cpuInputDisplayValue),
+      this.cpuValues
+    );
+
+    this.onCpuChange(newValue);
+  }
+
+  private onMemoryInputBlur(memoryInputDisplayValue: string) {
+    const newValue = this.closest(
+      Number(memoryInputDisplayValue),
+      this.memoryValues
+    );
+    
+    this.onMemoryChange(newValue);
+  }
+
+  private onCpuInputChange(cpuInputDisplayValue: string) {
+    this.setState({ cpuInputDisplayValue })
+    clearTimeout(this.typingTimeout);
+
+    this.typingTimeout = setTimeout(() => this.onCpuInputBlur(cpuInputDisplayValue), 3000);
+  }
+
+  private onMemoryInputChange(memoryInputDisplayValue: string) {
+    this.setState({ memoryInputDisplayValue })
+    clearTimeout(this.typingTimeout);
+
+    this.typingTimeout = setTimeout(() => this.onMemoryInputBlur(memoryInputDisplayValue), 3000);
+  }
+
   render() {
     const {
       cpuInputDisplayValue,
@@ -120,46 +152,6 @@ export class SynchronizedSliders extends React.Component<Props, State> {
       memoryValue,
     } = this.state;
 
-    const handleCpuSliderChange = (event: any, newValue: number) => {
-      this.onCpuChange(newValue);
-    };
-
-    const handleMemorySliderChange = (event: any, newValue: number) => {
-      this.onMemoryChange(newValue);
-    };
-
-    const handleCpuInputChange = (
-      event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      this.setState({
-        cpuInputDisplayValue: event.target.value,
-      });
-    };
-
-    const handleCpuInputBlur = () => {
-      const newValue = this.closest(
-        Number(cpuInputDisplayValue),
-        this.cpuValues
-      );
-      this.onCpuChange(newValue);
-    };
-
-    const handleMemoryInputChange = (
-      event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      this.setState({
-        memoryInputDisplayValue: event.target.value,
-      });
-    };
-
-    const handleMemoryInputBlur = () => {
-      const newValue = this.closest(
-        Number(memoryInputDisplayValue),
-        this.memoryValues
-      );
-      this.onMemoryChange(newValue);
-    };
-
     return (
       <div>
         <InputSlider
@@ -167,9 +159,9 @@ export class SynchronizedSliders extends React.Component<Props, State> {
           label="Cores"
           value={cpuValue}
           inputDisplayValue={cpuInputDisplayValue}
-          handleSliderChange={handleCpuSliderChange}
-          handleInputChange={handleCpuInputChange}
-          handleInputBlur={handleCpuInputBlur}
+          handleSliderChange={(event, newValue) => this.onCpuChange(newValue)}
+          handleInputChange={e => this.onCpuInputChange(e.target.value)}
+          handleInputBlur={() => this.onCpuInputBlur(cpuInputDisplayValue)}
           helperText={`${this.cpuValues[0]}  - ${
             this.cpuValues[this.cpuValues.length - 1]
           } vCPUs`}
@@ -179,9 +171,9 @@ export class SynchronizedSliders extends React.Component<Props, State> {
           label="Memory"
           value={memoryValue}
           inputDisplayValue={memoryInputDisplayValue}
-          handleSliderChange={handleMemorySliderChange}
-          handleInputChange={handleMemoryInputChange}
-          handleInputBlur={handleMemoryInputBlur}
+          handleSliderChange={(event, newValue) => this.onMemoryChange(newValue)}
+          handleInputChange={e => this.onMemoryInputChange(e.target.value)}
+          handleInputBlur={() => this.onMemoryInputBlur(memoryInputDisplayValue)}
           helperText={`${this.memoryValues[0]} - ${
             this.memoryValues[this.memoryValues.length - 1]
           } GB`}
@@ -189,58 +181,4 @@ export class SynchronizedSliders extends React.Component<Props, State> {
       </div>
     );
   }
-}
-
-interface InputSliderProps {
-  value: number;
-  possibleValues: number[];
-  label?: string;
-  handleSliderChange: (event: any, newValue: number) => void;
-
-  inputDisplayValue: string;
-  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleInputBlur: () => void;
-  helperText?: string;
-}
-
-function InputSlider(props: InputSliderProps) {
-  const { label, value, handleSliderChange, possibleValues } = props;
-  const {
-    inputDisplayValue,
-    handleInputChange,
-    handleInputBlur,
-    helperText,
-  } = props;
-
-  return (
-    <div className={STYLES.container}>
-      <label>{label}</label>
-      <Grid container spacing={3} alignItems="center">
-        <Grid item xs>
-          <div className={STYLES.slider}>
-            <Slider
-              value={value}
-              onChange={handleSliderChange}
-              marks={possibleValues.map(value => ({ value }))}
-              min={possibleValues[0]}
-              max={possibleValues[possibleValues.length - 1]}
-              step={null}
-            />
-          </div>
-        </Grid>
-        <Grid item>
-          <TextInput
-            value={inputDisplayValue}
-            type="number"
-            min={String(possibleValues[0])}
-            max={String(possibleValues[possibleValues.length - 1])}
-            step={1}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-          />
-          {helperText && <label className={STYLES.label}>{helperText}</label>}
-        </Grid>
-      </Grid>
-    </div>
-  );
 }
