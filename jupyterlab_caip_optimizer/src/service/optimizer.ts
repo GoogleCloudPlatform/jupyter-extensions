@@ -31,6 +31,11 @@ function zoneToRegion(zone: string): string {
   return region;
 }
 
+export function prettifyStudyName(studyName: string): string {
+  // projects/project-name/locations/us-central1/studies/study-name -> study-name
+  return studyName.replace(/projects\/.+\/locations\/.+\/studies\//, '');
+}
+
 /**
  * Class to interact with Optimizer
  */
@@ -39,7 +44,7 @@ export class OptimizerService {
 
   constructor(private _transportService: TransportService) {}
 
-  /** TODO: Remove hardcoded values and 'option' parameter before release. 
+  /** TODO: Remove hardcoded values and 'option' parameter before release.
    * Currently implemented this way because of ssh restrictions to GCP */
   async getMetaData(option = 'defaultMetadata'): Promise<MetadataRequired> {
     try {
@@ -92,11 +97,13 @@ export class OptimizerService {
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
     try {
       const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-      const response = await this._transportService.submit<Study[]>({
+      const response = await this._transportService.submit<{
+        studies: Study[];
+      }>({
         path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
         method: 'GET',
       });
-      return response.result;
+      return response.result.studies;
     } catch (err) {
       console.error('Unable to fetch study list');
       handleApiError(err);
