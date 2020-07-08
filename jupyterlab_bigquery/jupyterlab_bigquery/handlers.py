@@ -77,7 +77,7 @@ def get_dataset_details(client, dataset_id):
   return {
       'details': {
           'id': "{}.{}".format(dataset.project, dataset.dataset_id),
-          'display_name': dataset.friendly_name,
+          'name': dataset.dataset_id,
           'description': dataset.description,
           'labels': ["\t{}: {}".format(label, value) for label, value in dataset.labels.items()] if dataset.labels else None,
           'date_created': json.dumps(dataset.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
@@ -102,7 +102,7 @@ def get_table_details(client, table_id):
   return {
       'details': {
           'id': "{}.{}.{}".format(table.project, table.dataset_id, table.table_id),
-          'display_name': table.friendly_name,
+          'name': table.table_id,
           'description': table.description,
           'labels': ["\t{}: {}".format(label, value) for label, value in table.labels.items()] if table.labels else None,
           'date_created': json.dumps(table.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
