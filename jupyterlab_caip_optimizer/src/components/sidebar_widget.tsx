@@ -98,9 +98,15 @@ export const Sidebar = ({
         </Box>
       </Box>
 
-      {!!error && <Typography color="error">{error}</Typography>}
+      {!!error && (
+        <Box display="flex" pt={2}>
+          <Box mx="auto">
+            <Typography color="error">{error}</Typography>
+          </Box>
+        </Box>
+      )}
       {loading && <CircularProgress />}
-      {!!studies && studies.length > 0 && (
+      {!!studies && studies.length > 0 ? (
         <TableContainer>
           <Table>
             <TableHead>
@@ -121,6 +127,12 @@ export const Sidebar = ({
             </TableBody>
           </Table>
         </TableContainer>
+      ) : (
+        <Box display="flex" pt={2}>
+          <Box mx="auto">
+            <Typography>No studies found.</Typography>
+          </Box>
+        </Box>
       )}
     </Box>
   );

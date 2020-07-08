@@ -121,6 +121,24 @@ describe('Sidebar', () => {
         .text()
     ).toEqual(errorMessage);
   });
+
+  it('shows a no studies message', () => {
+    const component = shallow(
+      <Sidebar
+        loading={false}
+        openDashboard={mockOpenDashboard}
+        openStudy={mockOpenStudy}
+        studies={[]}
+      />
+    );
+
+    const noStudiesText = component.findWhere(
+      node =>
+        node.type() === Typography && node.text().includes('No studies found.')
+    );
+
+    expect(noStudiesText.exists()).toBe(true);
+  });
 });
 
 describe('SidebarWidget', () => {
