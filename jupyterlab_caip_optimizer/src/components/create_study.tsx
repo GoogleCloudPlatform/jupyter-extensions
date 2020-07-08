@@ -39,9 +39,16 @@ type ParameterChip = {
   paramName: string;
   paramType: string;
   paramValList?: string[];
-  paramValString?: string;
+  paramValListString?: string;
   paramMinVal?: string;
   paramMaxVal?: string;
+};
+
+type MetricChip = {
+  key: number;
+  label: string;
+  metricName: string;
+  metricGoalType: string;
 };
 
 const paramChipDataSample: ParameterChip[] = [
@@ -63,6 +70,21 @@ const paramChipDataSample: ParameterChip[] = [
   },
 ];
 
+const metricChipDataSample: MetricChip[] = [
+  {
+    key: 0,
+    label: 'Metric 1',
+    metricName: 'Metric 1',
+    metricGoalType: Types.GoalType.MAXIMIZE,
+  },
+  {
+    key: 1,
+    label: 'Metric 2',
+    metricName: 'Metric 2',
+    metricGoalType: Types.GoalType.MINIMIZE,
+  },
+];
+
 const createDropdown = (items: string[]): DropdownItem[] => {
   const dropdownList: DropdownItem[] = items.map(
     (item: string): DropdownItem => {
@@ -80,12 +102,25 @@ export const CreateStudy = () => {
   const [paramValList, setParamValList] = React.useState([]);
   const [paramValListString, setParamValListString] = React.useState('');
   const [paramNew, setParamNew] = React.useState(true);
-  const [chipData, setChipData] = React.useState(paramChipDataSample); // TODO: change this to empty list. for demo purposes
+  const [paramChipData, setParamChipData] = React.useState(paramChipDataSample); // TODO: change this to empty list. for demo purposes
   const paramTypes: DropdownItem[] = createDropdown(
     Object.values(Types.ParameterType)
   );
+  const [metricName, setMetricName] = React.useState('');
+  const [metricGoalType, setMetricGoalType] = React.useState('');
+  const metricGoalTypes: DropdownItem[] = createDropdown(
+    Object.values(Types.GoalType)
+  );
+  const [metricNew, setMetricNew] = React.useState(true);
+  const [metricChipData, setMetricChipData] = React.useState(
+    metricChipDataSample
+  );
+  const [algorithmType, setAlgorithmType] = React.useState('');
+  const algorithmTypes: DropdownItem[] = createDropdown(
+    Object.values(Types.Algorithm)
+  );
 
-  const resetState = () => {
+  const resetParamState = () => {
     setParamType('');
     setParamName('');
     setParamMinVal('');
@@ -93,6 +128,12 @@ export const CreateStudy = () => {
     setParamValList([]);
     setParamValListString('');
     setParamNew(true);
+  };
+
+  const resetMetricState = () => {
+    setMetricGoalType('');
+    setMetricName('');
+    setMetricNew(true);
   };
 
   const handleParamValListChange = event => {
@@ -131,9 +172,15 @@ export const CreateStudy = () => {
     setParamNew(false);
   };
 
-  const getCurrentChip = (key?: number) => {
+  const loadMetricData = thisChip => {
+    setMetricName(thisChip.metricName);
+    setMetricGoalType(thisChip.metricGoalType);
+    setMetricNew(false);
+  };
+
+  const getCurrentParamChip = (key?: number): ParameterChip => {
     return {
-      key: key ? key : chipData.length,
+      key: key ? key : paramChipData.length,
       label: paramName,
       paramName,
       paramType,
@@ -144,29 +191,75 @@ export const CreateStudy = () => {
     };
   };
 
-  const handleChipClick = event => {
+  const getCurrentMetricChip = (key?: number): MetricChip => {
+    return {
+      key: key ? key : metricChipData.length,
+      label: metricName,
+      metricName,
+      metricGoalType,
+    };
+  };
+
+  const handleParamChipClick = event => {
     const clickedChipLabel = event.target.textContent;
-    const thisChip = chipData.find(chip => chip.paramName === clickedChipLabel);
+    const thisChip = paramChipData.find(
+      chip => chip.paramName === clickedChipLabel
+    );
     loadParamData(thisChip);
   };
 
+  const handleMetricChipClick = event => {
+    const clickedChipLabel = event.target.textContent;
+    const thisChip = metricChipData.find(
+      chip => chip.metricName === clickedChipLabel
+    );
+    loadMetricData(thisChip);
+  };
+
   const handleAddParam = () => {
-    setChipData([...chipData, getCurrentChip()]);
-    resetState();
+    setParamChipData([...paramChipData, getCurrentParamChip()]);
+    resetParamState();
   };
 
   const handleSaveParam = () => {
-    const newChipData = chipData.map(function(chip) {
-      return chip.paramName === paramName ? getCurrentChip(chip.key) : chip;
+    const newParamChipData = paramChipData.map(function(chip) {
+      return chip.paramName === paramName
+        ? getCurrentParamChip(chip.key)
+        : chip;
     });
-    setChipData(newChipData);
-    resetState();
+    setParamChipData(newParamChipData);
+    resetParamState();
   };
 
   const handleDeleteParam = () => {
-    const newChipData = chipData.filter(chip => chip.paramName !== paramName);
-    setChipData(newChipData);
-    resetState();
+    const newParamChipData = paramChipData.filter(
+      chip => chip.paramName !== paramName
+    );
+    setParamChipData(newParamChipData);
+    resetParamState();
+  };
+
+  const handleAddMetric = () => {
+    setMetricChipData([...metricChipData, getCurrentMetricChip()]);
+    resetMetricState();
+  };
+
+  const handleSaveMetric = () => {
+    const newMetricChipData = metricChipData.map(function(chip) {
+      return chip.metricName === metricName
+        ? getCurrentMetricChip(chip.key)
+        : chip;
+    });
+    setMetricChipData(newMetricChipData);
+    resetMetricState();
+  };
+
+  const handleDeleteMetric = () => {
+    const newMetricChipData = metricChipData.filter(
+      chip => chip.metricName !== metricName
+    );
+    setMetricChipData(newMetricChipData);
+    resetMetricState();
   };
 
   // const debug = event => {
@@ -178,10 +271,12 @@ export const CreateStudy = () => {
   return (
     <Box m={5}>
       <React.Fragment>
-        <Typography variant="h5" gutterBottom>
-          Create New Study
-        </Typography>
         <Grid container spacing={3}>
+          <Grid container item xs={12}>
+            <Typography variant="h5" gutterBottom>
+              Create New Study
+            </Typography>
+          </Grid>
           <Grid container item xs={12}>
             <TextField
               required
@@ -299,14 +394,14 @@ export const CreateStudy = () => {
             </Grid>
             <Grid item xs={12}>
               <Paper component="ul" className={classes.chipBox}>
-                {chipData.map(data => {
+                {paramChipData.map(data => {
                   return (
                     <li key={data.key}>
                       <Chip
                         label={data.label}
                         className={classes.chip}
                         clickable
-                        onClick={handleChipClick}
+                        onClick={handleParamChipClick}
                         color={
                           data.label === paramName ? 'secondary' : 'default'
                         }
@@ -317,10 +412,112 @@ export const CreateStudy = () => {
               </Paper>
             </Grid>
           </Grid>
-          <Grid container item spacing={1} xs={12} md={6}>
-            <Typography align="center" variant="h6" gutterBottom>
-              Metric Configuration
-            </Typography>
+          <Grid container item spacing={3} xs={12} md={6} alignContent="flex-start">
+            <Grid container item spacing={1} alignContent="flex-start">
+              <Typography align="center" variant="h6" gutterBottom>
+                Metric Configuration
+              </Typography>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  variant="outlined"
+                  id="metricName"
+                  name="metricName"
+                  label="Metric Name"
+                  fullWidth
+                  value={metricName}
+                  onChange={e => setMetricName(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  id="metricGoalType"
+                  variant="outlined"
+                  select
+                  label="Goal Type"
+                  value={metricGoalType}
+                  onChange={e => setMetricGoalType(e.target.value)}
+                  fullWidth
+                  required
+                >
+                  {metricGoalTypes.map(option => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid container item justify="space-evenly" xs={12}>
+                <Button
+                  color="primary"
+                  disabled={metricNew}
+                  onClick={handleSaveMetric}
+                >
+                  SAVE METRIC
+                </Button>
+                <Button
+                  color="primary"
+                  disabled={metricNew}
+                  onClick={handleDeleteMetric}
+                >
+                  DELETE METRIC
+                </Button>
+                <Button
+                  color="primary"
+                  disabled={!metricName || !metricGoalType || !metricNew}
+                  onClick={handleAddMetric}
+                >
+                  ADD METRIC
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper component="ul" className={classes.chipBox}>
+                  {metricChipData.map(data => {
+                    return (
+                      <li key={data.key}>
+                        <Chip
+                          label={data.label}
+                          className={classes.chip}
+                          clickable
+                          onClick={handleMetricChipClick}
+                          color={
+                            data.label === metricName ? 'secondary' : 'default'
+                          }
+                        />
+                      </li>
+                    );
+                  })}
+                </Paper>
+              </Grid>
+            </Grid>
+            <Grid container item spacing={1} alignContent="flex-start">
+              <Typography align="center" variant="h6" gutterBottom>
+                Algorithm
+              </Typography>
+              <Grid item xs={12}>
+                <TextField
+                  id="algorithmType"
+                  variant="outlined"
+                  select
+                  label="Algorithm Type"
+                  value={algorithmType}
+                  onChange={e => setAlgorithmType(e.target.value)}
+                  fullWidth
+                  required
+                >
+                  {algorithmTypes.map(option => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid container item spacing={3} justify="flex-end">
+            <Button size="large" variant="contained" color="primary">
+              Create Study
+            </Button>
           </Grid>
         </Grid>
         <Grid container spacing={3}>
