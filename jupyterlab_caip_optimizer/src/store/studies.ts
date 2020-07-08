@@ -18,12 +18,14 @@ export const fetchStudies = createAsyncThunk<
     console.error('No Metadata found.');
     throw new TypeError('No metadata');
   }
-  const paritalStudies = await optimizer.listStudy(metadata);
-  const fullStudies: Study[] = [];
-  for (const paritalStudy of paritalStudies) {
-    fullStudies.push(await optimizer.getStudy(paritalStudy.name, metadata));
+  const studyList = await optimizer.listStudy(metadata);
+  const studyListWithDetails: Study[] = [];
+  for (const paritalStudy of studyList) {
+    studyListWithDetails.push(
+      await optimizer.getStudy(paritalStudy.name, metadata)
+    );
   }
-  return fullStudies;
+  return studyListWithDetails;
 });
 
 export const createStudy = createAsyncThunk<
