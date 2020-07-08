@@ -32,6 +32,7 @@ def list_projects(client):
   project = client.project
   projects_list = [{
       'id': format(project),
+      'name': format(project),
       'datasets': list_datasets(client, project),
   }]
   return {'projects': projects_list}
@@ -66,7 +67,8 @@ def list_tables(client, dataset):
 def list_models(client, dataset):
   models = list(client.list_models(dataset))
   return [{
-      'id': format(model.model_id),
+      'id': '{}.{}'.format(model.dataset_id, model.model_id),
+      'name': model.model_id,
   } for model in models]
 
 
@@ -87,6 +89,13 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
+def get_schema(schema):
+    return [{
+        'name': field.name,
+        'type': field.field_type,
+        'description': field.description,
+        'mode': field.mode
+    } for field in schema]
 
 def get_table_details(client, table_id):
   table = client.get_table(table_id)
@@ -105,13 +114,12 @@ def get_table_details(client, table_id):
           'link': table.self_link,
           'num_rows': table.num_rows,
           'num_bytes': table.num_bytes,
-          'schema': str(table.schema)
+          'schema': get_schema(table.schema)
       }
   }
 
 
-def make_query(request_body):
-    client = bigquery.Client()
+def make_query(client, request_body):
 
     query = request_body['query']
     jobConfig = request_body['jobConfig']
@@ -195,19 +203,21 @@ class TableDetailsHandler(APIHandler):
 
 
 class QueryHandler(APIHandler):
-    """Handles request for query."""
+  """Handles request for query."""
+  bigquery_client = None
     
-    def post(self, *args, **kwargs):
-        try:
-            post_body = self.get_json_body()
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
 
-            self.finish(make_query(post_body))
+      self.finish(make_query(self.bigquery_client, post_body))
 
-        except Exception as e:
-            app_log.exception(str(e))
-            self.set_status(500, str(e))
-            self.finish({
-                'error': {
-                    'message': str(e)
-                }
-            })
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({
+          'error': {
+              'message': str(e)
+          }
+      })

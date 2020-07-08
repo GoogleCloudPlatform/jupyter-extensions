@@ -9,8 +9,7 @@ import { Store } from 'redux';
 import { store } from './store/store';
 import { watch } from './store/watch';
 import { MainAreaWidget } from './components/main_area_widget';
-import { ListWordsWidget } from './components/list_words_widget';
-import { ListWordsService } from './service/list_words';
+import { SidebarWidget } from './components/sidebar_widget';
 import { fetchStudies } from './store/studies';
 import { fetchMetadata } from './store/metadata';
 
@@ -52,13 +51,14 @@ const createManagedWidget = <
 };
 
 async function activate(app: JupyterFrontEnd) {
+  store.dispatch(fetchStudies());
+
   // Create main area widget
   createManagedWidget(store, app, MainAreaWidget);
 
-  const listWordsService = new ListWordsService();
-  const listWidget = new ListWordsWidget(listWordsService);
-  listWidget.addClass('optimizer');
-  app.shell.add(listWidget, 'left', { rank: 100 });
+  // Create Sidebar
+  const sidebarWidget = new SidebarWidget(store);
+  app.shell.add(sidebarWidget, 'left', { rank: 100 });
   await store.dispatch(fetchMetadata());
   await store.dispatch(fetchStudies());
 }
@@ -66,7 +66,7 @@ async function activate(app: JupyterFrontEnd) {
 /**
  * The JupyterLab plugin.
  */
-const ListWordsPlugin: JupyterFrontEndPlugin<void> = {
+const OptimizerPlugin: JupyterFrontEndPlugin<void> = {
   id: 'caip-optimizer',
   requires: [],
   activate: activate,
@@ -76,4 +76,4 @@ const ListWordsPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugin as default.
  */
-export default [ListWordsPlugin];
+export default [OptimizerPlugin];

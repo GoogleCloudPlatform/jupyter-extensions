@@ -9,28 +9,45 @@ import { ReduxReactWidget } from './ReduxReactWidget';
  * A class that manages dataset widget instances in the Main area
  */
 export class WidgetManager {
+  private static instance: WidgetManager = undefined;
   private widgets: { [id: string]: Widget } = {};
   private reduxWidgets: { [id: string]: ReduxReactWidget } = {};
   private store: EnhancedStore;
 
-  constructor(private app: JupyterFrontEnd) {
+  private constructor(private app: JupyterFrontEnd) {
     this.store = configureStore({ reducer: rootReducer });
 
     return this;
   }
 
+  static initInstance(app: JupyterFrontEnd) {
+    if (WidgetManager.instance === undefined) {
+      WidgetManager.instance = new WidgetManager(app);
+    }
+  }
+
+  static getInstance(): WidgetManager {
+    return WidgetManager.instance;
+  }
+
   launchWidget(
-    widgetType: new (...args: any[]) => ReduxReactWidget,
+    widgetType: new (...args: unknown[]) => ReduxReactWidget,
     windowType: string,
     id?: string,
-    ...args: any[]
+    postProcess?: (widget: ReduxReactWidget) => void,
+    widgetArgs: unknown[] = [],
+    windowArgs?: unknown
   ) {
     id = id !== undefined ? id : widgetType.toString();
 
     let widget = this.reduxWidgets[id];
     if (!widget || widget.isDisposed) {
-      widget = new widgetType(args);
+      widget = new widgetType(...widgetArgs);
       widget.setProviderProps({ store: this.store });
+
+      if (postProcess !== undefined) {
+        postProcess(widget);
+      }
 
       widget.disposed.connect(() => {
         if (this.reduxWidgets[id] === widget) {
@@ -42,7 +59,7 @@ export class WidgetManager {
     }
 
     if (!widget.isAttached) {
-      this.app.shell.add(widget, windowType);
+      this.app.shell.add(widget, windowType, windowArgs);
     }
     this.app.shell.activateById(widget.id);
   }

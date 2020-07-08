@@ -1,16 +1,18 @@
-import { withStyles } from '@material-ui/core';
+import { LinearProgress, withStyles } from '@material-ui/core';
 import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
+import TreeView from '@material-ui/lab/TreeView';
+import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
-import React, { useState } from 'react';
+import React from 'react';
+import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 
-import { Project, Dataset, Table, Model } from './service/list_items';
+import { DataTree } from './service/list_items';
 import { Context } from './list_tree_item_widget';
 import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
-//import { COLORS, css } from '../styles';
 
 const localStyles = stylesheet({
   item: {
@@ -53,29 +55,19 @@ const localStyles = stylesheet({
   },
   list: {
     margin: '0',
-    // overflowY: 'scroll',
     padding: '0',
     ...csstips.flex,
+  },
+  root: {
+    height: 216,
+    flexGrow: 1,
+    maxWidth: 400,
   },
 });
 
 interface ProjectProps {
-  project: Project;
   context: Context;
-}
-
-interface DatasetProps {
-  dataset: Dataset;
-  context: Context;
-}
-
-interface TableProps {
-  table: Table;
-  context: Context;
-}
-
-interface ModelProps {
-  model: Model;
+  data: DataTree;
 }
 
 interface State {
@@ -94,125 +86,104 @@ const ArrowDown = withStyles({
   },
 })(ArrowDropDown);
 
-function ListItem(props) {
-  const [expanded, setExpanded] = useState(false);
-
-  const handleExpand = () => {
-    const currentState = expanded;
-    setExpanded(!currentState);
+export function BuildTree(project, context) {
+  const openDatasetDetails = dataset => {
+    const service = new DatasetDetailsService();
+    const widgetType = DatasetDetailsWidget;
+    context.manager.launchWidgetForId(
+      dataset.id,
+      widgetType,
+      service,
+      dataset.id,
+      dataset.name
+    );
   };
 
-  const getIconForWord = subfields => {
-    if (subfields) {
-      if (expanded === false) {
-        return <BigArrowRight />;
-      } else {
-        return <ArrowDown />;
-      }
-    }
+  const openTableDetails = table => {
+    const service = new TableDetailsService();
+    const widgetType = TableDetailsWidget;
+    context.manager.launchWidgetForId(
+      table.id,
+      widgetType,
+      service,
+      table.id,
+      table.name
+    );
   };
+
+  const renderTables = table => (
+    <TreeItem
+      nodeId={table.id}
+      label={table.name}
+      onDoubleClick={() => openTableDetails(table)}
+    />
+  );
+
+  const renderModels = model => (
+    <TreeItem nodeId={model.id} label={model.name} />
+  );
+
+  const renderDatasets = dataset => (
+    <TreeItem
+      nodeId={dataset.id}
+      label={dataset.name}
+      onDoubleClick={() => openDatasetDetails(dataset)}
+    >
+      {Array.isArray(dataset.tables)
+        ? dataset.tables.map(table => (
+            <div key={table.id}>{renderTables(table)}</div>
+          ))
+        : null}
+      {Array.isArray(dataset.models)
+        ? dataset.models.map(model => (
+            <div key={model.id}>{renderModels(model)}</div>
+          ))
+        : null}
+    </TreeItem>
+  );
+
+  const renderProjects = (id, name, datasets) => (
+    <TreeItem nodeId={id} label={name}>
+      {Array.isArray(datasets)
+        ? datasets.map(dataset => (
+            <div key={dataset.id}>{renderDatasets(dataset)}</div>
+          ))
+        : null}
+    </TreeItem>
+  );
 
   return (
-    <div>
-      <li className={localStyles.item}>
-        <div className={localStyles.icon} onClick={() => handleExpand()}>
-          {getIconForWord(props.subfields)}
-        </div>
-        <div className={localStyles.details} onDoubleClick={props.openDetails}>
-          <a className="{css.link}" href="#">
-            {props.name}
-          </a>
-        </div>
-      </li>
-      {expanded && <div>{props.children}</div>}
-    </div>
+    <TreeView
+      className={localStyles.root}
+      defaultCollapseIcon={<ArrowDown />}
+      defaultExpanded={['root']}
+      defaultExpandIcon={<BigArrowRight />}
+    >
+      {renderProjects(project.id, project.name, project.datasets)}
+    </TreeView>
   );
 }
 
-export class ListProjectItem extends React.Component<ProjectProps, State> {
-  render() {
-    const { project, context } = this.props;
+class ListProjectItem extends React.Component<ProjectProps, State> {
+  constructor(props: ProjectProps) {
+    super(props);
+  }
 
-    return (
-      <ListItem name={project.id} subfields={project.datasets}>
-        <ul className={localStyles.list}>
-          {project.datasets.map(d => (
-            <ListDatasetItem key={d.id} dataset={d} context={context} />
-          ))}
-        </ul>
-      </ListItem>
-    );
+  render() {
+    const { data, context } = this.props;
+    if (data.projects.length > 0) {
+      return data.projects.map(p => (
+        <div key={p.id}>{BuildTree(p, context)}</div>
+      ));
+    } else {
+      return <LinearProgress />;
+    }
   }
 }
 
-export class ListDatasetItem extends React.Component<DatasetProps, State> {
-  render() {
-    const { dataset, context } = this.props;
-    return (
-      <ul>
-        <ListItem
-          name={dataset.name}
-          subfields={dataset.tables}
-          openDetails={() => {
-            const service = new DatasetDetailsService();
-            const widgetType = DatasetDetailsWidget;
-            context.manager.launchWidgetForId(
-              dataset.id,
-              widgetType,
-              service,
-              dataset.id,
-              dataset.name
-            );
-          }}
-        >
-          <ul className={localStyles.list}>
-            {dataset.tables.map(t => (
-              <ListTableItem key={t.id} table={t} context={context} />
-            ))}
-          </ul>
-          <ul className={localStyles.list}>
-            {dataset.models.map(m => (
-              <ListModelItem key={m.id} model={m} />
-            ))}
-          </ul>
-        </ListItem>
-      </ul>
-    );
-  }
-}
+const mapStateToProps = state => {
+  const data = state.dataTree.data;
+  return { data };
+};
 
-export class ListTableItem extends React.Component<TableProps, State> {
-  render() {
-    const { table, context } = this.props;
-    return (
-      <ul>
-        <ListItem
-          name={table.name}
-          subfields={null}
-          openDetails={() => {
-            const service = new TableDetailsService();
-            const widgetType = TableDetailsWidget;
-            context.manager.launchWidgetForId(
-              table.id,
-              widgetType,
-              service,
-              table.id,
-              table.name
-            );
-          }}
-        />
-      </ul>
-    );
-  }
-}
-
-export class ListModelItem extends React.Component<ModelProps, State> {
-  render() {
-    const { model } = this.props;
-    return (
-      <ul>
-        <ListItem name={model.id} subfields={null} />
-      </ul>
-    );
-  }
-}
+export default connect(mapStateToProps, null)(ListProjectItem);

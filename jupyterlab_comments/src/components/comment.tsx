@@ -15,62 +15,116 @@
  */
 
 import * as React from 'react';
-import { DetachedComment } from '../service/comment'
+import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
 import {
   ListItem,
   ListItemText,
   ListItemAvatar,
   Avatar,
   Typography,
+  Button,
+  List
 } from "@material-ui/core";
 
- const style = {
-  icon: {
-    fontSize: 20,
-  },
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
+ const style = {
   inline: {
     display: 'inline',
   },
   username: {
     fontWeight: 500,
     fontSize: 15,
+    display: 'inline',
+    textAlign: 'left' as const,
+  },
+  date: {
+    display: 'inline',
+    textAlign: 'left' as const,
+    paddingLeft: 10,
+    fontSize: 10,
+    color: 'grey',
+    },
+  threadIndent: {
+    paddingLeft: 50,
+  },
+  commentBottom: {
+    display: 'inlineBlock',
+    paddingLeft: 60,
+  },
+  replyButton: {
+    paddingLeft: 60,
   },
 };
 
 interface Props {
-  data: DetachedComment,
+  detachedComment?: DetachedComment,
+  reviewComment?: CodeReviewComment,
 }
 
-export class Comment extends React.Component<Props> {
+interface State {
+  expandThread: boolean,
+}
+
+
+//React component to render a single comment thread
+export class Comment extends React.Component<Props, State> {
     constructor(props) {
         super(props);
+        this.state = {
+            expandThread: false,
+        };
     }
 
     render() {
-        const data = this.props.data;
+        const data = this.props.detachedComment ? this.props.detachedComment : this.props.reviewComment;
         return (
+            <>
             <ListItem key={data.hash} alignItems="flex-start">
               <ListItemAvatar>
                 <Avatar alt="avatar"/>
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Typography style={style.username}>
-                    {data.author}
-                  </Typography>
+                <div>
+                    <p style={style.username}> {data.author} </p>
+                    <p style={style.date}> {data.timestamp} </p>
+                </div>
+
                 }
                 secondary={
                     <Typography
                       variant="body2"
                       style={style.inline}
-                      color="textPrimary"
-                    >
+                      color="textPrimary">
                       {data.text}
                     </Typography>
                 }
               />
             </ListItem>
+        <div style={style.commentBottom}>
+          <Button color="primary" size="small"> Reply </Button>
+          {data.children && <Button size="small" endIcon={this.state.expandThread ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>}
+          onClick= {() => {
+                this.setState({expandThread: !this.state.expandThread});
+                }}> {this.state.expandThread ? 'Hide thread' : 'Show thread'} </Button>}
+        </div>
+        <div style={style.threadIndent}>
+            {(this.state.expandThread && data.children) &&
+            <List>
+          {data.children.map(reply => {
+            if (this.props.detachedComment) {
+              var detached = createDetachedCommentFromJSON(reply);
+              return <Comment detachedComment={detached}/>;
+            } else {
+              var review = createReviewCommentFromJSON(reply, this.props.reviewComment.revision, this.props.reviewComment.request);
+              return <Comment reviewComment={review}/>;
+            }
+          })}
+          </List>}
+        </div>
+          </>
           );
     }
 }
