@@ -1,9 +1,9 @@
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import rootReducer from '../../reducers';
+import rootReducer from '../reducers';
 import { Widget } from '@phosphor/widgets';
-import { ReduxReactWidget } from './redux_react_widget';
+import { ReduxReactWidget } from './ReduxReactWidget';
 
 /**
  * A class that manages dataset widget instances in the Main area
@@ -20,11 +20,13 @@ export class WidgetManager {
     return this;
   }
 
-  static getInstance(app?: JupyterFrontEnd): WidgetManager {
-    if (WidgetManager.instance === undefined && app !== undefined) {
+  static initInstance(app: JupyterFrontEnd) {
+    if (WidgetManager.instance === undefined) {
       WidgetManager.instance = new WidgetManager(app);
     }
+  }
 
+  static getInstance(): WidgetManager {
     return WidgetManager.instance;
   }
 
