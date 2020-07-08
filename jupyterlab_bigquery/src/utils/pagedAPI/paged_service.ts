@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import CacheManager from './cache_manager';
 import PagedJob from './pagedJob';
 
 export enum JobState {
@@ -15,40 +13,17 @@ export type PagedServiceCallback<R> = (
 ) => void;
 
 class PagedService<RequestType, ResponseType> {
-  cacheManager: CacheManager = null;
   cacheId: string = null;
 
-  constructor(
-    private readonly endPoint: string,
-    private readonly ifCache = true
-  ) {
-    if (ifCache) {
-      // register cache
-      this.cacheManager = CacheManager.getInstance();
-      this.cacheId = this.cacheManager.register();
-    }
-  }
-
-  private async updateCache(key: string, content: ResponseType) {
-    this.cacheManager.put(this.cacheId, key, content);
-  }
+  constructor(private readonly endPoint: string) {}
 
   request(
     requestBody: RequestType,
     callBack: PagedServiceCallback<ResponseType>,
     pageSize = 200
   ): PagedJob<RequestType, ResponseType> {
-    // prepare key and call back for job
-    const jobCallback = (state, jobId, response) => {
-      callBack(state, jobId, response);
-
-      if (this.ifCache && state !== JobState.Fail) {
-        this.updateCache(jobId, response);
-      }
-    };
-
     return new PagedJob<RequestType, ResponseType>(
-      jobCallback.bind(this),
+      callBack,
       this.endPoint,
       requestBody,
       pageSize

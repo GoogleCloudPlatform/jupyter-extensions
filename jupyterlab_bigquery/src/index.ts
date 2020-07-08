@@ -8,8 +8,8 @@ import {
 
 import ListItemsWidget from './components/list_items_panel/list_tree_item_widget';
 import { ListProjectsService } from './components/list_items_panel/service/list_items';
-import { WidgetManager } from './utils/widget_manager';
-import { ReduxReactWidget } from './utils/ReduxReactWidget';
+import { WidgetManager } from './utils/widgetManager/widget_manager';
+import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
 async function activate(app: JupyterFrontEnd) {
   WidgetManager.initInstance(app);
