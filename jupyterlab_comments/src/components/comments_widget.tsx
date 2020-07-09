@@ -178,7 +178,7 @@ export class CommentsComponent extends React.Component<Props, State> {
   }
 
   private async pullFromRemoteRepo(serverRoot: string, filePath: string) {
-    httpGitRequest("remotePull", "POST", filePath, serverRoot).then(response => {});
+    httpGitRequest("remotePull", "POST", filePath, serverRoot);
   }
 
   private async getLocalComments() {
