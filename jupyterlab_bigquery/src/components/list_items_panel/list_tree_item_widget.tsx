@@ -9,7 +9,6 @@ import { Context } from './list_tree_panel';
 /** Widget to be registered in the left-side panel. */
 export default class ListItemsWidget extends ReduxReactWidget {
   id = 'listitems';
-  // private _items: Contents.IModel[] = [];
   private visibleSignal = new Signal<ListItemsWidget, boolean>(this);
 
   constructor(

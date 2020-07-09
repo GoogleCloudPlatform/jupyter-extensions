@@ -1,6 +1,6 @@
 from notebook.utils import url_path_join
 
-from jupyterlab_bigquery.handlers import ListHandler, DatasetDetailsHandler, TableDetailsHandler, QueryHandler
+from jupyterlab_bigquery.handlers import ListHandler, DatasetDetailsHandler, TableDetailsHandler
 from jupyterlab_bigquery.version import VERSION
 from jupyterlab_bigquery.pagedAPI_handler import PagedQueryHandler
 
