@@ -8,6 +8,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ListProjectsService, DataTree } from './service/list_items';
 import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree } from '../../reducers/dataTreeSlice';
 import { SearchProjectsService } from '../list_items_panel/service/search_items';
@@ -28,6 +29,7 @@ export interface Context {
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
+  isSearching: boolean;
 }
 
 const localStyles = stylesheet({
@@ -66,14 +68,22 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.state = {
       hasLoaded: false,
       isLoading: false,
+      isSearching: false,
     };
   }
 
   async search(searchKey, project) {
-    const service = new SearchProjectsService();
-    const results = await service.searchProjects(searchKey, project);
-    // TODO: Phase 3
-    console.log(results.searchResults);
+    try {
+      this.setState({ isLoading: true, isSearching: true });
+      const service = new SearchProjectsService();
+      await service.searchProjects(searchKey, project).then(results => {
+        console.log(results.searchResults);
+      });
+    } catch (err) {
+      console.warn('Error searching', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
   }
 
   handleKeyPress = event => {
@@ -81,6 +91,10 @@ class ListItemsPanel extends React.Component<Props, State> {
       const searchKey = event.target.value;
       this.search(searchKey, 'hwing-sandbox');
     }
+  };
+
+  handleClear = () => {
+    this.setState({ isSearching: false });
   };
 
   async componentWillMount() {
@@ -100,7 +114,7 @@ class ListItemsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading } = this.state;
+    const { isLoading, isSearching } = this.state;
     return (
       <div className={localStyles.panel}>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -122,12 +136,17 @@ class ListItemsPanel extends React.Component<Props, State> {
             </Button>
             <SearchBar
               handleKeyPress={this.handleKeyPress}
+              handleClear={this.handleClear}
               defaultText={'Search...'}
             />
           </header>
         </div>
         {isLoading ? (
           <LinearProgress />
+        ) : isSearching ? (
+          <ul className={localStyles.list}>
+            <ListSearchResults context={this.props.context} />
+          </ul>
         ) : (
           <ul className={localStyles.list}>
             <ListProjectItem context={this.props.context} />
