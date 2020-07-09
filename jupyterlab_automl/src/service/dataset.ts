@@ -90,13 +90,12 @@ export abstract class DatasetService {
       displayName: displayName,
       gcsSource: options.gcsSource,
       bigquerySource: options.bigquerySource,
-      fileSource:
-        options.fileSource !== null
-          ? {
-              name: options.fileSource.name,
-              data: await toBase64(options.fileSource),
-            }
-          : null,
+      fileSource: options.fileSource
+        ? {
+            name: options.fileSource.name,
+            data: await toBase64(options.fileSource),
+          }
+        : null,
     };
     const requestInit: RequestInit = {
       body: JSON.stringify(body),
