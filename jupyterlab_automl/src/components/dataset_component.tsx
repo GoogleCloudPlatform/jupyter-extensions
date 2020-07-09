@@ -35,6 +35,7 @@ interface State {
   hasLoaded: boolean;
   isLoading: boolean;
   tableSpecs: TableSpec[];
+  source: string;
 }
 
 const localStyles = stylesheet({
@@ -426,6 +427,7 @@ export class DatasetComponent extends React.Component<Props, State> {
       hasLoaded: false,
       isLoading: false,
       tableSpecs: [],
+      source: '',
     };
   }
 
@@ -434,7 +436,7 @@ export class DatasetComponent extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading, tableSpecs } = this.state;
+    const { isLoading, tableSpecs, source } = this.state;
     return (
       <div className={localStyles.panel}>
         <header className={localStyles.header}>
@@ -451,10 +453,7 @@ export class DatasetComponent extends React.Component<Props, State> {
             <p style={{ padding: '8px' }}>
               Dataset type: {this.props.dataset.datasetType}
             </p>
-            <p style={{ padding: '8px' }}>
-              Dataset location:{' '}
-              {this.props.dataset.metadata['inputConfig']['gcsSource']['uri']}
-            </p>
+            <p style={{ padding: '8px' }}>Dataset location: {source}</p>
           </div>
         ) : (
           <ul className={localStyles.list}>
@@ -523,7 +522,21 @@ export class DatasetComponent extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       const tableSpecs = [];
-      this.setState({ hasLoaded: true, tableSpecs: tableSpecs });
+      let source = '';
+      if ('gcsSource' in this.props.dataset.metadata['inputConfig']) {
+        source = this.props.dataset.metadata['inputConfig']['gcsSource']['uri'];
+      } else if (
+        'bigquerySource' in this.props.dataset.metadata['inputConfig']
+      ) {
+        source = this.props.dataset.metadata['inputConfig']['bigquerySource'][
+          'uri'
+        ];
+      }
+      this.setState({
+        hasLoaded: true,
+        tableSpecs: tableSpecs,
+        source: source,
+      });
     } catch (err) {
       console.warn('Error retrieving table details', err);
     } finally {
