@@ -54,21 +54,29 @@ def search_projects(bigquery_client, datacatalog_client, search_key, project_id)
         resource = result.linked_resource
         resultType = format(result.search_result_subtype)
         if resultType == 'entry.dataset':
-            res = re.search('datasets/(.*)', resource)
-            dataset = res.group(1)
-            fetched_results.append({'name': dataset, 'id': dataset})
+            res = re.search('projects/(.*)/datasets/(.*)', resource)
+            project = res.group(1)
+            dataset = res.group(2)
+            fetched_results.append(
+                {'type': 'dataset', 'parent': project, 'name': table, 'id': '{}.{}'.format(project, dataset)})
         elif resultType == 'entry.table':
-            res = re.search('tables/(.*)', resource)
-            table = res.group(1)
-            fetched_results.append({'name': table, 'id': table})
+            res = re.search('datasets/(.*)/tables/(.*)', resource)
+            dataset = res.group(1)
+            table = res.group(2)
+            fetched_results.append(
+                {'type': 'table', 'parent': dataset, 'name': table, 'id': '{}.{}'.format(dataset, table)})
         elif resultType == 'entry.table.view':
-            res = re.search('tables/(.*)', resource)
-            view = res.group(1)
-            fetched_results.append({'name': view, 'id': view})
+            res = re.search('datasets/(.*)/tables/(.*)', resource)
+            dataset = res.group(1)
+            view = res.group(2)
+            fetched_results.append(
+                {'type': 'view', 'parent': dataset, 'name': view, 'id': '{}.{}'.format(dataset, view)})
         elif resultType == 'entry.model':
-            res = re.search('models/(.*)', resource)
-            model = res.group(1)
-            fetched_results.append({'name': model, 'id': model})
+            res = re.search('datasets/(.*)/tables/(.*)', resource)
+            dataset = res.group(1)
+            model = res.group(2)
+            fetched_results.append(
+                {'type': 'model', 'parent': dataset, 'name': model, 'id': '{}.{}'.format(dataset, model)})
 
     return {'results': fetched_results}
 

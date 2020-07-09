@@ -6,6 +6,8 @@ export interface SearchResults {
 }
 
 export interface SearchResult {
+  type: string;
+  parent: string;
   id: string;
   name: string;
 }
@@ -40,6 +42,8 @@ export class SearchProjectsService {
           resolve({
             searchResults: content.results.map((result: any) => {
               return {
+                type: result.type,
+                parent: result.parent,
                 id: result.id,
                 name: result.name,
               };
