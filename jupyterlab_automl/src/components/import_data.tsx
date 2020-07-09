@@ -1,7 +1,13 @@
-import { FormControl, FormHelperText, LinearProgress } from '@material-ui/core';
-//import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  FormControl,
+  FormHelperText,
+  LinearProgress,
+  Button,
+} from '@material-ui/core';
+import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
+  COLORS,
   DialogComponent,
   Option,
   RadioInput,
@@ -26,6 +32,28 @@ interface State {
   error: string | null;
   loading: boolean;
 }
+
+const theme = createMuiTheme({
+  overrides: {
+    MuiButton: {
+      root: {
+        backgroundColor: COLORS.blue,
+        borderRadius: '2px',
+        lineHeight: 1.7,
+        '&:hover': {
+          backgroundColor: COLORS.blue,
+        },
+      },
+      text: {
+        padding: '1px 16px',
+      },
+      label: {
+        textTransform: 'capitalize',
+        color: COLORS.white,
+      },
+    },
+  },
+});
 
 const localStyles = stylesheet({
   title: {
@@ -65,7 +93,6 @@ const SOURCES: Option[] = [
 ];
 
 export class ImportData extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props);
     this.submit = this.submit.bind(this);
@@ -140,14 +167,30 @@ export class ImportData extends React.Component<Props, State> {
     const { from } = this.state;
     if (from === 'computer') {
       return (
-        <input
-          className={localStyles.fileInput}
-          type="file"
-          accept=".csv"
-          onChange={event => {
-            this.setState({ source: event.target.files, error: null });
-          }}
-        />
+        <>
+          <input
+            className={localStyles.input}
+            type="file"
+            accept=".csv"
+            onChange={event => {
+              this.setState({ source: event.target.files, error: null });
+            }}
+            id="ucaip-upload-dataset"
+          />
+          <label
+            htmlFor="ucaip-upload-dataset"
+            className={localStyles.fileInput}
+          >
+            <ThemeProvider theme={theme}>
+              <Button component="span">Select file</Button>
+            </ThemeProvider>
+            <label style={{ marginLeft: 8 }}>
+              {this.state.source
+                ? this.state.source[0].name
+                : 'No file selected'}
+            </label>
+          </label>
+        </>
       );
     } else if (from === 'bigquery') {
       return (
