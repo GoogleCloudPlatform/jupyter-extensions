@@ -41,5 +41,9 @@
       "pre-commit": "npm run lint",
       "pre-push": "npm run lint && npm test"
     }
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.10.1",
+    "@material-ui/icons": "^4.9.1"
   }
 }

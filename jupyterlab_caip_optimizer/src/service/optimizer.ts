@@ -31,6 +31,11 @@ function zoneToRegion(zone: string): string {
   return region;
 }
 
+export function prettifyStudyName(studyName: string): string {
+  // projects/project-name/locations/us-central1/studies/study-name -> study-name
+  return studyName.replace(/projects\/.+\/locations\/.+\/studies\//, '');
+}
+
 /**
  * Class to interact with Optimizer
  */
@@ -92,13 +97,53 @@ export class OptimizerService {
   async listStudy(metadata: MetadataRequired): Promise<Study[]> {
     try {
       const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
-      const response = await this._transportService.submit<Study[]>({
+      const response = await this._transportService.submit<{
+        studies: Study[];
+      }>({
         path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${metadata.region}/studies`,
+        method: 'GET',
+      });
+      return response.result.studies;
+    } catch (err) {
+      console.error('Unable to fetch study list');
+      handleApiError(err);
+    }
+  }
+
+  async deleteStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<boolean> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      await this._transportService.submit<undefined>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        method: 'DELETE',
+      });
+      return true;
+    } catch (err) {
+      console.error(`Unable to delete study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
+
+  async getStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<Study> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'GET',
       });
       return response.result;
     } catch (err) {
-      console.error('Unable to fetch study list');
+      console.error(`Unable to fetch study with name "${rawStudyName}"`);
       handleApiError(err);
     }
   }
