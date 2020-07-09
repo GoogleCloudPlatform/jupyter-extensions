@@ -32,7 +32,7 @@ interface State {
   confidenceMetrics: ModelMetrics[];
   marks: any[];
   modelEvaluation: ModelEvaluation;
-  currentConfidenceThresh: number;
+  currentConfidenceThresh: string;
   confusionMatrix: any[];
 }
 
@@ -236,7 +236,7 @@ export class EvaluationTable extends React.Component<Props, State> {
             direction="column"
           >
             <Grid item xs={12}>
-              <p style={{ margin: 16 }}>
+              <p style={{ marginBottom: 16, marginLeft: 16 }}>
                 Confidence Threshold
                 <Slider
                   step={null}
@@ -247,7 +247,7 @@ export class EvaluationTable extends React.Component<Props, State> {
                     paddingBottom: 5,
                   }}
                   onChange={(event, value) => {
-                    const formatted = (value as number) / 100;
+                    const formatted = ((value as number) / 100).toFixed(2);
                     if (formatted !== currentConfidenceThresh) {
                       this.setState({
                         currentConfidenceThresh: formatted,
@@ -309,19 +309,38 @@ export class EvaluationTable extends React.Component<Props, State> {
     const evaluationTable = [];
     for (let i = 0; i < properties.length; i++) {
       if (modelEvaluation[properties[i]['name']]) {
-        evaluationTable.push(
-          this.createData(
-            properties[i]['label'],
-            modelEvaluation[properties[i]['name']]
-          )
-        );
+        if (typeof modelEvaluation[properties[i]['name']] === 'number') {
+          evaluationTable.push(
+            this.createData(
+              properties[i]['label'],
+              modelEvaluation[properties[i]['name']].toFixed(3)
+            )
+          );
+        } else {
+          evaluationTable.push(
+            this.createData(
+              properties[i]['label'],
+              modelEvaluation[properties[i]['name']]
+            )
+          );
+        }
       }
     }
     if (metric.f1Score !== 'NaN') {
-      evaluationTable.push(this.createData('F1 score', metric.f1Score));
+      evaluationTable.push(
+        this.createData('F1 score', (metric.f1Score as number).toFixed(3))
+      );
     }
-    evaluationTable.push(this.createData('Precision', metric.precision));
-    evaluationTable.push(this.createData('Recall', metric.recall));
+    if (metric.precision !== 'NaN') {
+      evaluationTable.push(
+        this.createData('Precision', (metric.precision as number).toFixed(3))
+      );
+    }
+    if (metric.recall !== 'NaN') {
+      evaluationTable.push(
+        this.createData('Recall', (metric.recall as number).toFixed(3))
+      );
+    }
     this.setState({
       evaluationTable: evaluationTable,
     });
@@ -338,7 +357,9 @@ export class EvaluationTable extends React.Component<Props, State> {
       this.setState({
         hasLoaded: true,
         marks: this.getSliderMarks(modelEvaluation),
-        currentConfidenceThresh: firstMetric.confidenceThreshold / 100,
+        currentConfidenceThresh: (
+          firstMetric.confidenceThreshold / 100
+        ).toFixed(2),
         confidenceMetrics: modelEvaluation.confidenceMetrics,
         featureImportance: modelEvaluation.featureImportance,
         modelEvaluation: modelEvaluation,

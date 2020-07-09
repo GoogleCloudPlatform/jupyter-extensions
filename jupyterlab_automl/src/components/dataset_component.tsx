@@ -45,6 +45,13 @@ const localStyles = stylesheet({
     margin: 0,
     padding: '8px 12px 8px 24px',
   },
+  title: {
+    fontSize: '15px',
+    fontWeight: 600,
+    letterSpacing: '1px',
+    margin: 0,
+    padding: '8px',
+  },
   panel: {
     backgroundColor: 'white',
     height: '100%',
@@ -436,9 +443,19 @@ export class DatasetComponent extends React.Component<Props, State> {
         {isLoading ? (
           <LinearProgress />
         ) : tableSpecs.length === 0 ? (
-          <p className={localStyles.paper}>
-            Dataset is empty. Please import data.
-          </p>
+          <div className={localStyles.paper}>
+            <header className={localStyles.title}>Dataset Info</header>
+            <p style={{ padding: '8px' }}>
+              Created: {this.props.dataset.createTime}
+            </p>
+            <p style={{ padding: '8px' }}>
+              Dataset type: {this.props.dataset.datasetType}
+            </p>
+            <p style={{ padding: '8px' }}>
+              Dataset location:{' '}
+              {this.props.dataset.metadata['inputConfig']['gcsSource']['uri']}
+            </p>
+          </div>
         ) : (
           <ul className={localStyles.list}>
             {tableSpecs.map(tableSpec => (

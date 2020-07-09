@@ -16,6 +16,7 @@ import { ImportData } from './import_data';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
+import { ImageWidget } from './image_widget';
 import { ModelWidget } from './model_widget';
 
 interface Props {
@@ -196,6 +197,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 if (rowData.datasetType === 'TABLE') {
                   this.props.context.manager.launchWidgetForId(
                     DatasetWidget,
+                    rowData.id,
+                    rowData
+                  );
+                } else {
+                  this.props.context.manager.launchWidgetForId(
+                    ImageWidget,
                     rowData.id,
                     rowData
                   );

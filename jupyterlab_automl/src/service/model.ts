@@ -31,17 +31,17 @@ export interface Pipeline {
 export interface ModelMetrics {
   confidenceThreshold: number;
   f1Score: number | string;
-  f1ScoreAt1: number;
-  precision: number;
-  precisionAt1: number;
-  recall: number;
-  recallAt1: number;
-  trueNegativeCount: number;
-  truePositiveCount: number;
-  falseNegativeCount: number;
-  falsePositiveCount: number;
-  falsePositiveRate: number;
-  falsePositiveRateAt1: number;
+  f1ScoreAt1: number | string;
+  precision: number | string;
+  precisionAt1: number | string;
+  recall: number | string;
+  recallAt1: number | string;
+  trueNegativeCount: number | string;
+  truePositiveCount: number | string;
+  falseNegativeCount: number | string;
+  falsePositiveCount: number | string;
+  falsePositiveRate: number | string;
+  falsePositiveRateAt1: number | string;
 }
 
 export interface ModelEvaluation {
