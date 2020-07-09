@@ -1,6 +1,6 @@
 from notebook.utils import url_path_join
 
-from jupyterlab_bigquery.handlers import ListHandler, DatasetDetailsHandler, TableDetailsHandler, QueryHandler
+from jupyterlab_bigquery.handlers import ListHandler, DatasetDetailsHandler, TableDetailsHandler
 from jupyterlab_bigquery.version import VERSION
 from jupyterlab_bigquery.pagedAPI_handler import PagedQueryHandler
 
@@ -22,8 +22,8 @@ def load_jupyter_server_extension(nb_server_app):
     app = nb_server_app.web_app
     gcp_v1_endpoint = url_path_join(app.settings['base_url'], 'bigquery', 'v1')
 
-    def make_endpoint(endPoint, handler): return (
-        url_path_join(gcp_v1_endpoint, endPoint) + '(.*)', handler)
+    def make_endpoint(endPoint, handler):
+        return url_path_join(gcp_v1_endpoint, endPoint) + '(.*)', handler
 
     app.add_handlers(host_pattern, [
         # TODO(cbwilkes): Add auth checking if needed.

@@ -59,50 +59,54 @@ class PagedAPIHandler(APIHandler, ABC):
       self.finish({'id': json.dumps(id), 'error': json.dumps(error)})
 
   def _onContinue(self, load):
-      id = load['id']
-      query_generator = None
+    id = load['id']
+    query_generator = None
 
-      with self.generator_lock:
-          query_generator, _ = PagedAPIHandler.generator_pool[id]
-
-      finish = False
-      load = []
-      error = None
-      if query_generator is None:
-          finish = True
-      else:
-          try:
-            load = next(query_generator)
-          except StopIteration:
-            finish = True
-            with PagedAPIHandler.generator_lock:
-                del PagedAPIHandler.generator_pool[id]
-            app_log.log(INFO, 'Successfully finished query %s', id)
-          except Exception as err:
-            finish = True
-            error = str(err)
-            with PagedAPIHandler.generator_lock:
-                del PagedAPIHandler.generator_pool[id]
-            app_log.log(WARN, 'Failed continue fetching for query %s: %s', id, error)
-      
-      self.finish({
-          'finish': json.dumps(finish),
-          'load': json.dumps(load),
-          'error': json.dumps(error)
-      })
-
-  def _onCancel(self, load):
-      id = load['id']
-
-      with PagedAPIHandler.generator_lock:
+    with self.generator_lock:
         val = PagedAPIHandler.generator_pool[id]
         if val is not None:
-          _, job = val
-          cancel(job)
-          del PagedAPIHandler.generator_pool[id]
-          app_log.log(INFO, 'Successfully canceled query %s', id)
+          query_generator, _ = val
 
-      self.finish({'id': json.dumps(id)})
+    finish = False
+    load = []
+    error = None
+    if query_generator is None:
+        finish = True
+    else:
+        try:
+          load = next(query_generator)
+        except StopIteration:
+          finish = True
+          with PagedAPIHandler.generator_lock:
+              del PagedAPIHandler.generator_pool[id]
+          app_log.log(INFO, 'Successfully finished query %s', id)
+        except Exception as err:
+          finish = True
+          error = str(err)
+          with PagedAPIHandler.generator_lock:
+              del PagedAPIHandler.generator_pool[id]
+          app_log.log(WARN, 'Failed continue fetching for query %s: %s', id, error)
+    
+    self.finish({
+        'finish': json.dumps(finish),
+        'load': json.dumps(load),
+        'error': json.dumps(error)
+    })
+
+  def _onCancel(self, load):
+    id = load['id']
+    error = 'job not found'
+
+    with PagedAPIHandler.generator_lock:
+      val = PagedAPIHandler.generator_pool[id]
+      if val is not None:
+        _, job = val
+        self.cancel(job)
+        del PagedAPIHandler.generator_pool[id]
+        app_log.log(INFO, 'Successfully canceled query %s', id)
+        error = None
+
+    self.finish({'id': json.dumps(id), 'error': json.dumps(error)})
 
   @abstractmethod
   def query(self, request_body, page_size):
