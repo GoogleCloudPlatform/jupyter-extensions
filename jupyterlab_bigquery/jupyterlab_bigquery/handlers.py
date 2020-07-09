@@ -118,38 +118,6 @@ def get_table_details(client, table_id):
       }
   }
 
-
-def make_query(client, request_body):
-
-    query = request_body['query']
-    jobConfig = request_body['jobConfig']
-
-    job_config = bigquery.QueryJobConfig(*jobConfig)
-    query_job = client.query(query, job_config=job_config)
-
-    if query_job.error_result is not None:
-        raise Exception(query_job.error_result)
-        
-    # send contents
-    en = query_job.result(100)
-    for df in en.to_dataframe_iterable():
-        response = {
-        'content': df.to_json(orient='values'),
-        'labels': json.dumps(df.columns.to_list()),
-        'job_id': query_job.job_id,
-        'done': False,
-        }
-        yield(response)
-            
-    # send finish
-    response = {
-        'content': None,
-        'labels': None,
-        'job_id': query_job.job_id,
-        'done': True,
-        }
-    yield(response)
-
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
   bigquery_client = None
@@ -202,27 +170,6 @@ class TableDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_table_details(self.bigquery_client, post_body['tableId']))
-
-    except Exception as e:
-      app_log.exception(str(e))
-      self.set_status(500, str(e))
-      self.finish({
-          'error': {
-              'message': str(e)
-          }
-      })
-
-
-class QueryHandler(APIHandler):
-  """Handles request for query."""
-  bigquery_client = None
-    
-  def post(self, *args, **kwargs):
-    try:
-      self.bigquery_client = create_bigquery_client()
-      post_body = self.get_json_body()
-
-      self.finish(make_query(self.bigquery_client, post_body))
 
     except Exception as e:
       app_log.exception(str(e))
