@@ -1,8 +1,10 @@
 """Request handler classes for the extension"""
 
 import json
+
 import tornado.gen as gen
 from notebook.base.handlers import APIHandler, app_log
+
 from jupyterlab_automl.service import AutoMLService, ManagementService
 
 handlers = {}
@@ -99,8 +101,14 @@ def _project(_):
 
 @_handler("POST", "createTablesDataset")
 def _create_tables_dataset(args):
-  AutoMLService.get().create_dataset(
-      display_name=args["displayName"],
-      gcs_uri=args.get("gcsSource"),
-      bigquery_uri=args.get("bigquerySource"))
+  file_source = args.get("fileSource")
+  if file_source:
+    AutoMLService.get().create_dataset_from_file(
+        display_name=args["displayName"],
+        file_name=file_source["name"],
+        file_data=file_source["data"])
+  else:
+    AutoMLService.get().create_dataset(display_name=args["displayName"],
+                                       gcs_uri=args.get("gcsSource"),
+                                       bigquery_uri=args.get("bigquerySource"))
   return {"success": True}

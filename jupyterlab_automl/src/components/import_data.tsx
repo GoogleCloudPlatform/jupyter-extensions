@@ -40,6 +40,9 @@ const localStyles = stylesheet({
   form: {
     width: '100%',
   },
+  fileInput: {
+    paddingBottom: 8,
+  },
 });
 
 const SOURCES: Option[] = [
@@ -62,6 +65,7 @@ const SOURCES: Option[] = [
 ];
 
 export class ImportData extends React.Component<Props, State> {
+
   constructor(props: Props) {
     super(props);
     this.submit = this.submit.bind(this);
@@ -79,20 +83,19 @@ export class ImportData extends React.Component<Props, State> {
     try {
       switch (this.state.from) {
         case 'gcs':
-          await DatasetService.createTablesDataset(
-            this.state.name,
-            this.state.source,
-            null
-          );
+          await DatasetService.createTablesDataset(this.state.name, {
+            gcsSource: this.state.source,
+          });
           break;
         case 'bigquery':
-          await DatasetService.createTablesDataset(
-            this.state.name,
-            null,
-            this.state.source
-          );
+          await DatasetService.createTablesDataset(this.state.name, {
+            bigquerySource: this.state.source,
+          });
           break;
         case 'computer':
+          await DatasetService.createTablesDataset(this.state.name, {
+            fileSource: this.state.source[0],
+          });
           break;
         case 'dataframe':
           break;
@@ -138,10 +141,11 @@ export class ImportData extends React.Component<Props, State> {
     if (from === 'computer') {
       return (
         <input
-          //className={localStyles.input}
+          className={localStyles.fileInput}
           type="file"
+          accept=".csv"
           onChange={event => {
-            this.setState({ source: event.target.files });
+            this.setState({ source: event.target.files, error: null });
           }}
         />
       );
