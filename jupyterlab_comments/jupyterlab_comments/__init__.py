@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from notebook.utils import url_path_join
-from jupyterlab_comments.handlers import DetachedCommentsHandler, ReviewCommentsHandler, RefreshIntervalHandler
+from jupyterlab_comments.handlers import DetachedCommentsHandler, ReviewCommentsHandler, RefreshIntervalHandler, PullFromRemoteRepoHandler
 
 
 def load_jupyter_server_extension(nb_server_app):
@@ -30,9 +30,12 @@ def load_jupyter_server_extension(nb_server_app):
   detached_comments_route_pattern = url_path_join(base_url, '/detachedComments')
   review_comments_route_pattern = url_path_join(base_url, '/reviewComments')
   refresh_interval_route_pattern = url_path_join(base_url, '/refreshInterval')
+  remote_pull_route_pattern = url_path_join(base_url, '/remotePull')
+
 
   web_app.add_handlers(host_pattern, [
       (detached_comments_route_pattern, DetachedCommentsHandler),
       (review_comments_route_pattern, ReviewCommentsHandler),
       (refresh_interval_route_pattern, RefreshIntervalHandler),
+      (remote_pull_route_pattern, PullFromRemoteRepoHandler),
   ])

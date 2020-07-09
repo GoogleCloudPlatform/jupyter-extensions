@@ -96,7 +96,29 @@ class RefreshIntervalHandler(APIHandler):
     def get(self):
         try:
             interval = refresh.get_interval()
-            self.finish(str(interval))
+            self.finish(json.dumps({"interval" : interval}))
         except Exception as e:
             print("Error fetching configured refresh interval traitlet")
             print(traceback.format_exc())
+
+class PullFromRemoteRepoHandler(APIHandler):
+
+    def post(self):
+        try:
+            file_path = self.get_argument('file_path')
+            server_root = os.path.expanduser(self.get_argument('server_root'))
+            full_file_path = os.path.join(server_root, file_path)
+            full_file_path_dir = os.path.dirname(full_file_path)
+            if git.inside_git_repo(full_file_path_dir):
+                git_root_dir = git.get_repo_root(full_file_path_dir)
+                git.appraise_pull(git_root_dir)
+                self.finish()
+            else:
+                print("Error: file is not inside a git repository, cannot pull from remote")
+                self.finish()
+        except Exception as e:
+            print("Error pulling new comments from remote repository")
+            print(traceback.format_exc())
+
+
+

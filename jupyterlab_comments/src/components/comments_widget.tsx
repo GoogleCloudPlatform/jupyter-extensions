@@ -19,7 +19,7 @@ import * as React from 'react';
 import { File, trimPath } from '../service/file'
 import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
 import { PageConfig } from '@jupyterlab/coreutils';
-import { httpGitRequest } from '../git';
+import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
@@ -35,6 +35,7 @@ import AppBar from '@material-ui/core/AppBar';
 interface Props {
   file: File,
   context: Context,
+  refreshInterval: number,
 }
 
 interface State {
@@ -75,33 +76,27 @@ export class CommentsComponent extends React.Component<Props, State> {
       serverRoot: serverRoot,
       activeTab: 0,
     };
-    var context = this.props.context;
     //Track when the user switches to viewing a different file
+    var context = this.props.context;
     context.labShell.currentChanged.connect(() => {
         if (context.docManager.contextForWidget(context.labShell.currentWidget)) {
-          const currWidget = context.labShell.currentWidget;
-          const filePath = context.docManager.contextForWidget(currWidget).path;
-          this.getDetachedComments(this.state.serverRoot, filePath);
-          this.getCodeReviewComments(this.state.serverRoot, filePath);
+          this.getLocalComments();
         }
      });
   }
 
+
   async componentDidMount() {
     try {
-      const context = this.props.context;
-      const currWidget = context.labShell.currentWidget;
-      const filePath = context.docManager.contextForWidget(currWidget).path;
-      this.getDetachedComments(this.state.serverRoot, filePath);
-      this.getCodeReviewComments(this.state.serverRoot, filePath);
+      this.getLocalComments();
+      const refreshInterval = this.props.refreshInterval * 1000;
+      //Set timer for fetching new comments from the remote repository
+      setInterval(() => {
+        console.log('Refreshed');
+        this.getLocalAndRemoteComments();
+      }, refreshInterval);
     } catch (err) {
       console.warn('Unexpected error', err);
-    }
-  }
-
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.fileName !== prevState.fileName) {
-      console.log("componentDidUpdate()");
     }
   }
 
@@ -143,40 +138,64 @@ export class CommentsComponent extends React.Component<Props, State> {
 
   private async getDetachedComments(serverRoot : string, filePath: string) {
     httpGitRequest("detachedComments", "GET", filePath, serverRoot).then(response => response.json().then(data => {
+          let comments : Array<DetachedComment> = new Array<DetachedComment>();
+          const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
               showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
             } else {
-              let comments : Array<DetachedComment> = new Array<DetachedComment>();
               data.forEach(function(obj) {
                 var comment = createDetachedCommentFromJSON(obj);
                 comments.push(comment);
               });
-              const shortenedFilePath = trimPath(filePath);
-              this.setState({detachedComments : comments, fileName: shortenedFilePath});
             }
           }
+          this.setState({detachedComments : comments, fileName: shortenedFilePath});
+
     }));
   }
 
   private async getCodeReviewComments(serverRoot: string, filePath: string) {
     httpGitRequest("reviewComments", "GET", filePath, serverRoot).then(response => response.json().then(data => {
+          let comments : Array<CodeReviewComment> = new Array<CodeReviewComment>();
+          const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
               showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
             } else {
-              let comments : Array<CodeReviewComment> = new Array<CodeReviewComment>();
               if (data.comments) {
                 data.comments.forEach(function(obj) {
                   var comment = createReviewCommentFromJSON(obj, data.revision, data.request);
                   comments.push(comment);
                 });
-                const shortenedFilePath = trimPath(filePath);
                 this.setState({reviewComments : comments, fileName: shortenedFilePath});
               }
             }
           }
+          this.setState({reviewComments : comments, fileName: shortenedFilePath});
+
     }));
+  }
+
+  private async pullFromRemoteRepo(serverRoot: string, filePath: string) {
+    httpGitRequest("remotePull", "POST", filePath, serverRoot).then(response => {});
+  }
+
+  private async getLocalComments() {
+    const context = this.props.context;
+    const currWidget = context.labShell.currentWidget;
+    const filePath = context.docManager.contextForWidget(currWidget).path;
+    this.getDetachedComments(this.state.serverRoot, filePath);
+    this.getCodeReviewComments(this.state.serverRoot, filePath);
+  }
+
+  private async getLocalAndRemoteComments() {
+    const context = this.props.context;
+    const currWidget = context.labShell.currentWidget;
+    const filePath = context.docManager.contextForWidget(currWidget).path;
+    this.pullFromRemoteRepo(this.state.serverRoot, filePath);
+    this.getDetachedComments(this.state.serverRoot, filePath);
+    this.getCodeReviewComments(this.state.serverRoot, filePath);
   }
 }
 
@@ -187,6 +206,13 @@ export class CommentsWidget extends ReactWidget {
   }
 
   render() {
-    return <CommentsComponent file = {this.file} context = {this.context} />;
+    let interval: number = 10; //set a default refresh interval of 10 seconds
+    refreshIntervalRequest().then(response => response.json().then(data => {
+      if (data) {
+        //update interval with value configured by the user in the Jupyter config file
+        interval = data.interval;
+      }
+    }));
+    return <CommentsComponent file = {this.file} context = {this.context} refreshInterval = {interval} />;
   }
 }
