@@ -21,16 +21,10 @@ import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, crea
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Divider from '@material-ui/core/Divider';
+import { List, Typography, CssBaseline, Divider, Tabs, Tab, AppBar  } from '@material-ui/core';
 import { JupyterFrontEnd, ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment'
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import AppBar from '@material-ui/core/AppBar';
 
 interface Props {
   file: File,
