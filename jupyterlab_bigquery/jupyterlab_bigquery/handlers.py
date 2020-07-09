@@ -118,6 +118,14 @@ def get_table_details(client, table_id):
       }
   }
 
+def get_table_preview(client, table_id):
+  table = client.get_table(table_id)
+  rows = client.list_rows(table, max_results=100)
+  return {
+    'fields': [field.name for field in rows.schema],
+    'rows': [[value.__str__() if isinstance(value, datetime.date) else value for value in row.values()] for row in rows]
+  }
+
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
   bigquery_client = None
@@ -170,6 +178,27 @@ class TableDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_table_details(self.bigquery_client, post_body['tableId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({
+          'error': {
+              'message': str(e)
+          }
+      })
+
+class TablePreviewHandler(APIHandler):
+  """"Handles request for table preview."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_table_preview(self.bigquery_client, post_body['tableId']))
 
     except Exception as e:
       app_log.exception(str(e))

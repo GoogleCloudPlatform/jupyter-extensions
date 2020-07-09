@@ -7,6 +7,7 @@ import {
 } from './service/list_table_details';
 import LoadingPanel from '../loading_panel';
 import TableDetailsPanel from './table_details_panel';
+import TablePreviewPanel from './table_preview';
 import { stylesheet } from 'typestyle';
 
 const localStyles = stylesheet({
@@ -153,7 +154,11 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
               />
             </TabPanel>
             <TabPanel value={this.state.currentTab} index={TabInds.preview}>
-              <div>Table preview will go here</div>
+              <TablePreviewPanel
+                tableId={this.props.table_id}
+                isVisible={this.props.isVisible}
+                tableDetailsService={this.props.tableDetailsService}
+              />
             </TabPanel>
           </div>
         </div>

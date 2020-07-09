@@ -35,6 +35,7 @@ function formatBytes(numBytes, numDecimals = 2) {
 }
 
 export default class TableDetailsPanel extends React.Component<Props, State> {
+  private mounted = false;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -43,6 +44,14 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
       details: { details: {} } as TableDetails,
       rows: [],
     };
+  }
+
+  componentDidMount() {
+    this.mounted = true;
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -55,7 +64,10 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
 
   private async getDetails() {
     try {
-      this.setState({ isLoading: true });
+      if (this.mounted) {
+        this.setState({ isLoading: true });
+      }
+
       const details = await this.props.tableDetailsService.listTableDetails(
         this.props.tableId
       );
@@ -85,12 +97,15 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
           value: detailsObj.location ? detailsObj.location : 'None',
         },
       ];
-
-      this.setState({ hasLoaded: true, details, rows });
+      if (this.mounted) {
+        this.setState({ hasLoaded: true, details, rows });
+      }
     } catch (err) {
       console.warn('Error retrieving table details', err);
     } finally {
-      this.setState({ isLoading: false });
+      if (this.mounted) {
+        this.setState({ isLoading: false });
+      }
     }
   }
 
