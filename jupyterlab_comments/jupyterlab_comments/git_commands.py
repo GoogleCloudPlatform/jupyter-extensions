@@ -63,21 +63,36 @@ class Git(Configurable):
 		Returns a JSON list of commments for the given file.
 
 		Assumes that git_root_dir is a valid path within a Git repo.
-		Keys of objects returned: timestamp, author, location, description
+		Keys of objects returned: hash, comment, original, children
 		"""
 		#self.appraise_pull(current_path) #pull new comments from remote repo
 		comments_string = self.run(git_root_dir, 'appraise', 'show', '-d',
 									'-json', file_path_from_repo_root)
 		comments_json = json.loads(comments_string)
-		comments_list = []
-		if comments_json is not None:
-			for comment_obj in comments_json:
-				comments_list.append(comment_obj['comment'])
+		return comments_json
 
-		return comments_list
+	def get_code_review_comments(self, file_path_from_repo_root, git_root_dir):
+		"""
+		Returns the JSON for the current code review with comments for the requested file path.
 
-	def get_code_review_comments(self, file_path, server_root):
-		pass
+		The value of key "comments" is modified to only include comments for the requested file path. If there are no code review comments for the requested file path, the value of key "comments" will be an empty array.
+		"""
+		#self.appraise_pull(current_path) #pull new comments from remote repo
+		review_string = self.run(git_root_dir, 'appraise', 'show',
+									'-json')
+		review_json = json.loads(review_string)
+		if not review_json:
+			return None
+
+		review_comments = review_json.get("comments", [])
+		comments_on_file = []
+		for item in review_comments:
+			location = item["comment"]["location"]
+			if location.get("path", "") == file_path_from_repo_root:
+				comments_on_file.append(item)
+
+		review_json["comments"] = comments_on_file
+		return review_json
 
 	def add_comment(self, file_path, server_root):
 		pass
