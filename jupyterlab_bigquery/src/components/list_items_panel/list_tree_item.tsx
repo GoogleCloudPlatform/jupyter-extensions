@@ -1,11 +1,13 @@
-import { LinearProgress, withStyles } from '@material-ui/core';
-import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
+import { LinearProgress, Typography } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
+import { Clipboard } from '@jupyterlab/apputils';
 
 import { DataTree } from './service/list_items';
 import { Context } from './list_tree_panel';
@@ -13,6 +15,8 @@ import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
+
+import { ContextMenu } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
   item: {
@@ -74,20 +78,12 @@ interface State {
   expanded: boolean;
 }
 
-const BigArrowRight = withStyles({
-  root: {
-    fontSize: '16px',
-  },
-})(ArrowRight);
-
-const ArrowDown = withStyles({
-  root: {
-    fontSize: '16px',
-  },
-})(ArrowDropDown);
-
 export function BuildTree(project, context) {
-  const openDatasetDetails = dataset => {
+  const copyID = dataTreeItem => {
+    Clipboard.copyToSystem(dataTreeItem.id);
+  };
+
+  const openDatasetDetails = (event, dataset) => {
     const service = new DatasetDetailsService();
     const widgetType = DatasetDetailsWidget;
     context.manager.launchWidgetForId(
@@ -99,7 +95,8 @@ export function BuildTree(project, context) {
     );
   };
 
-  const openTableDetails = table => {
+  const openTableDetails = (event, table) => {
+    event.stopPropagation();
     const service = new TableDetailsService();
     const widgetType = TableDetailsWidget;
     context.manager.launchWidgetForId(
@@ -111,36 +108,94 @@ export function BuildTree(project, context) {
     );
   };
 
-  const renderTables = table => (
-    <TreeItem
-      nodeId={table.id}
-      label={table.name}
-      onDoubleClick={() => openTableDetails(table)}
-    />
-  );
+  const renderTables = table => {
+    const contextMenuItems = [
+      {
+        label: 'Copy Table ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+    return (
+      <TreeItem
+        nodeId={table.id}
+        label={
+          <ContextMenu
+            items={contextMenuItems.map(item => ({
+              label: item.label,
+              onClick: () => item.handler(table),
+            }))}
+          >
+            <Typography>{table.name}</Typography>
+          </ContextMenu>
+        }
+        onDoubleClick={event => openTableDetails(event, table)}
+      />
+    );
+  };
 
-  const renderModels = model => (
-    <TreeItem nodeId={model.id} label={model.name} />
-  );
+  const renderModels = model => {
+    const contextMenuItems = [
+      {
+        label: 'Copy Model ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+    return (
+      <TreeItem
+        nodeId={model.id}
+        label={
+          <ContextMenu
+            items={contextMenuItems.map(item => ({
+              label: item.label,
+              onClick: () => item.handler(model),
+            }))}
+          >
+            <Typography>{model.name}</Typography>
+          </ContextMenu>
+        }
+      />
+    );
+  };
 
-  const renderDatasets = dataset => (
-    <TreeItem
-      nodeId={dataset.id}
-      label={dataset.name}
-      onDoubleClick={() => openDatasetDetails(dataset)}
-    >
-      {Array.isArray(dataset.tables)
-        ? dataset.tables.map(table => (
-            <div key={table.id}>{renderTables(table)}</div>
-          ))
-        : null}
-      {Array.isArray(dataset.models)
-        ? dataset.models.map(model => (
-            <div key={model.id}>{renderModels(model)}</div>
-          ))
-        : null}
-    </TreeItem>
-  );
+  const renderDatasets = dataset => {
+    const contextMenuItems = [
+      {
+        label: 'Copy Dataset ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+
+    return (
+      <div>
+        <TreeItem
+          nodeId={dataset.id}
+          label={
+            <ContextMenu
+              items={contextMenuItems.map(item => ({
+                label: item.label,
+                onClick: () => item.handler(dataset),
+              }))}
+            >
+              <Typography>{dataset.name}</Typography>
+            </ContextMenu>
+          }
+          onDoubleClick={event => openDatasetDetails(event, dataset)}
+          onLabelClick={event => event.preventDefault()}
+        >
+          {Array.isArray(dataset.tables)
+            ? dataset.tables.map(table => (
+                <div key={table.id}>{renderTables(table)}</div>
+              ))
+            : null}
+          {Array.isArray(dataset.models)
+            ? dataset.models.map(model => (
+                <div key={model.id}>{renderModels(model)}</div>
+              ))
+            : null}
+        </TreeItem>
+      </div>
+    );
+  };
 
   const renderProjects = (id, name, datasets) => (
     <TreeItem nodeId={id} label={name}>
@@ -155,9 +210,9 @@ export function BuildTree(project, context) {
   return (
     <TreeView
       className={localStyles.root}
-      defaultCollapseIcon={<ArrowDown />}
+      defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpanded={['root']}
-      defaultExpandIcon={<BigArrowRight />}
+      defaultExpandIcon={<ChevronRightIcon />}
     >
       {renderProjects(project.id, project.name, project.datasets)}
     </TreeView>
