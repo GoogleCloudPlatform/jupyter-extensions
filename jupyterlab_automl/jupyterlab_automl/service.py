@@ -100,6 +100,14 @@ class AutoMLService:
         } for key, val in features
     ]
 
+  def _get_confusion_matrix(self, confusion_matrix):
+    rows = confusion_matrix["rows"]
+    titles = []
+    for column in confusion_matrix["annotationSpecs"]:
+      titles.append(column["displayName"])
+    rows.insert(0, titles)
+    return rows
+
   def _get_confidence_metrics(self, confidence_metrics):
     labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
               "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
@@ -110,8 +118,7 @@ class AutoMLService:
       metric = {}
       for label in labels:
         if label == "confidenceThreshold":
-          temp = confidence_metric.get(label, 0.0)
-          value = temp * 100
+          value = confidence_metric.get(label, 0.0) * 100
         else:
           value = confidence_metric.get(label, "NaN")
         metric[label] = value
@@ -127,6 +134,7 @@ class AutoMLService:
     model_eval = {
         "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
         "createTime": create_time,
+        "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
     }
     if "modelExplanation" in evaluation:
       model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])

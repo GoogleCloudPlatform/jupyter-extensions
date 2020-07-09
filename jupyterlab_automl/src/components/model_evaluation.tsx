@@ -6,6 +6,7 @@ import {
   TableRow,
   Grid,
   Slider,
+  Paper,
 } from '@material-ui/core';
 import { Bar, BarChart, Tooltip, YAxis, XAxis } from 'recharts';
 import * as React from 'react';
@@ -32,24 +33,28 @@ interface State {
   marks: any[];
   modelEvaluation: ModelEvaluation;
   currentConfidenceThresh: number;
+  confusionMatrix: any[];
 }
 
 interface FeatureImportanceProps {
   featureImportance: any[];
 }
 
+interface ConfusionMatrixProps {
+  confusionMatrix: any[];
+}
+
 const localStyles = stylesheet({
-  list: {
-    margin: 0,
-    overflowY: 'scroll',
-    padding: 0,
-  },
   header: {
     fontSize: '15px',
     fontWeight: 600,
     letterSpacing: '1px',
     margin: 0,
     padding: '8px 12px 12px 8px',
+  },
+  paper: {
+    padding: 8,
+    textAlign: 'center',
   },
 });
 
@@ -76,6 +81,79 @@ const properties = [
   },
 ];
 
+export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
+  constructor(props: ConfusionMatrixProps) {
+    super(props);
+  }
+
+  render() {
+    const matrix = [];
+    let sum = 0;
+    for (const [index, value] of this.props.confusionMatrix.entries()) {
+      if (index !== 0) {
+        sum += value.reduce(function(a, b) {
+          return a + b;
+        }, 0);
+      }
+    }
+    for (const [index, value] of this.props.confusionMatrix.entries()) {
+      if (index === 0) {
+        matrix.push(
+          <Grid
+            container
+            alignItems="center"
+            spacing={0}
+            style={{ width: 500 }}
+            key={index}
+          >
+            <Grid item xs={4} key={'n'}>
+              <Paper className={localStyles.paper} variant="outlined" square>
+                n = {sum}
+              </Paper>
+            </Grid>
+            {this.props.confusionMatrix[0].map(item => (
+              <Grid item xs={4} key={item}>
+                <Paper className={localStyles.paper} variant="outlined" square>
+                  Predicted: {item}
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        );
+      } else {
+        matrix.push(
+          <Grid
+            container
+            alignItems="center"
+            spacing={0}
+            style={{ width: 500 }}
+            key={index}
+          >
+            <Grid item xs={4} key={'label'}>
+              <Paper className={localStyles.paper} variant="outlined" square>
+                Actual: {this.props.confusionMatrix[0][index - 1]}
+              </Paper>
+            </Grid>
+            {value.map(item => (
+              <Grid item xs={4} key={item}>
+                <Paper className={localStyles.paper} variant="outlined" square>
+                  {item}
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        );
+      }
+    }
+    return (
+      <Grid item xs={12} key={'confusionMatrix'}>
+        <header className={localStyles.header}>Confusion Matrix</header>
+        {matrix}
+      </Grid>
+    );
+  }
+}
+
 export class FeatureImportance extends React.Component<FeatureImportanceProps> {
   constructor(props: FeatureImportanceProps) {
     super(props);
@@ -83,7 +161,7 @@ export class FeatureImportance extends React.Component<FeatureImportanceProps> {
 
   render() {
     return (
-      <Grid item xs={11}>
+      <Grid item xs={12}>
         <header className={localStyles.header}>Feature Importance</header>
         <BarChart
           width={500}
@@ -124,6 +202,7 @@ export class EvaluationTable extends React.Component<Props, State> {
       marks: [],
       modelEvaluation: null,
       currentConfidenceThresh: null,
+      confusionMatrix: [],
     };
   }
 
@@ -140,6 +219,7 @@ export class EvaluationTable extends React.Component<Props, State> {
       marks,
       modelEvaluation,
       currentConfidenceThresh,
+      confusionMatrix,
     } = this.state;
     return (
       <div
@@ -149,61 +229,60 @@ export class EvaluationTable extends React.Component<Props, State> {
         {isLoading ? (
           <LinearProgress />
         ) : (
-          <ul className={localStyles.list}>
-            <Grid
-              container
-              style={{ margin: '0px', width: '100%' }}
-              spacing={3}
-              direction="column"
-            >
-              <Grid item xs={11}>
-                <p style={{ margin: 16 }}>
-                  Confidence Threshold
-                  <Slider
-                    step={null}
-                    marks={marks}
-                    style={{
-                      width: 200,
-                      margin: '0 24px 0 24px',
-                      paddingBottom: 5,
-                    }}
-                    onChange={(event, value) => {
-                      const formatted = (value as number) / 100;
-                      if (formatted !== currentConfidenceThresh) {
-                        this.setState({
-                          currentConfidenceThresh: formatted,
-                        });
-                      }
-                    }}
-                    onChangeCommitted={(event, value) => {
-                      const metric = confidenceMetrics.filter(
-                        metric => metric.confidenceThreshold === value
-                      )[0];
-                      this.updateEvaluationTable(metric, modelEvaluation);
-                    }}
-                  />
-                  {currentConfidenceThresh}
-                </p>
-                <Table size="small" style={{ width: 500 }}>
-                  <TableBody>
-                    {evaluationTable.map(row => (
-                      <TableRow key={row.key}>
-                        <TableCell component="th" scope="row">
-                          {row.key}
-                        </TableCell>
-                        <TableCell align="right">{row.val}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Grid>
-              {featureImportance ? (
-                <FeatureImportance featureImportance={featureImportance} />
-              ) : (
-                <></>
-              )}
+          <Grid
+            container
+            style={{ margin: '0px', width: '100%' }}
+            spacing={3}
+            direction="column"
+          >
+            <Grid item xs={12}>
+              <p style={{ margin: 16 }}>
+                Confidence Threshold
+                <Slider
+                  step={null}
+                  marks={marks}
+                  style={{
+                    width: 200,
+                    margin: '0 24px 0 24px',
+                    paddingBottom: 5,
+                  }}
+                  onChange={(event, value) => {
+                    const formatted = (value as number) / 100;
+                    if (formatted !== currentConfidenceThresh) {
+                      this.setState({
+                        currentConfidenceThresh: formatted,
+                      });
+                    }
+                  }}
+                  onChangeCommitted={(event, value) => {
+                    const metric = confidenceMetrics.filter(
+                      metric => metric.confidenceThreshold === value
+                    )[0];
+                    this.updateEvaluationTable(metric, modelEvaluation);
+                  }}
+                />
+                {currentConfidenceThresh}
+              </p>
+              <Table size="small" style={{ width: 500 }}>
+                <TableBody>
+                  {evaluationTable.map(row => (
+                    <TableRow key={row.key}>
+                      <TableCell component="th" scope="row">
+                        {row.key}
+                      </TableCell>
+                      <TableCell align="right">{row.val}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </Grid>
-          </ul>
+            {featureImportance ? (
+              <FeatureImportance featureImportance={featureImportance} />
+            ) : (
+              <></>
+            )}
+            <ConfusionMatrix confusionMatrix={confusionMatrix} />
+          </Grid>
         )}
       </div>
     );
@@ -263,6 +342,7 @@ export class EvaluationTable extends React.Component<Props, State> {
         confidenceMetrics: modelEvaluation.confidenceMetrics,
         featureImportance: modelEvaluation.featureImportance,
         modelEvaluation: modelEvaluation,
+        confusionMatrix: modelEvaluation.confusionMatrix,
       });
     } catch (err) {
       console.warn('Error retrieving model evaluations', err);

@@ -51,6 +51,7 @@ export interface ModelEvaluation {
   confidenceMetrics: ModelMetrics[];
   createTime: Date;
   featureImportance: any[];
+  confusionMatrix: any[];
 }
 
 export abstract class ModelService {

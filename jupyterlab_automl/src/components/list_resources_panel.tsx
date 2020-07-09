@@ -218,12 +218,25 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               columns={[
                 {
                   field: 'displayName',
-                  title: 'Name',
+                  title: '',
+                  render: rowData => (
+                    <ListItem dense style={{ padding: 0 }}>
+                      <Icon
+                        style={{
+                          ...styles.icon,
+                          color: blue[900],
+                        }}
+                      >
+                        {'emoji_objects'}
+                      </Icon>
+                    </ListItem>
+                  ),
+                  fixedWidth: 30,
+                  sorting: false,
                 },
                 {
-                  title: 'Pipeline',
-                  field: 'pipelineId',
-                  minShowWidth: breakpoints[1],
+                  field: 'displayName',
+                  title: 'Name',
                 },
                 {
                   title: 'Last updated',

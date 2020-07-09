@@ -5,6 +5,8 @@ import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
 import { Toolbar, Tabs, Tab, Box } from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { stylesheet } from 'typestyle';
+import * as csstips from 'csstips';
 
 interface Props {
   model: Model;
@@ -46,6 +48,16 @@ const AntTab = withStyles((theme: Theme) =>
   })
 )((props: StyledTabProps) => <Tab disableRipple {...props} />);
 
+const localStyles = stylesheet({
+  list: {
+    margin: 0,
+    overflowY: 'scroll',
+    padding: 0,
+    ...csstips.flex,
+    height: '550px',
+  },
+});
+
 export class ModelPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -69,8 +81,18 @@ export class ModelPanel extends React.Component<Props, State> {
             <AntTab label="Model Properties" />
           </AntTabs>
         </Toolbar>
-        <EvaluationTable model={this.props.model} value={tabState} index={0} />
-        <ModelProperties model={this.props.model} value={tabState} index={1} />
+        <ul className={localStyles.list}>
+          <EvaluationTable
+            model={this.props.model}
+            value={tabState}
+            index={0}
+          />
+          <ModelProperties
+            model={this.props.model}
+            value={tabState}
+            index={1}
+          />
+        </ul>
       </Box>
     );
   }
