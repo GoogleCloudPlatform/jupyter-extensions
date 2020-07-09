@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 
 import { DataTree } from './service/list_items';
-import { Context } from './list_tree_item_widget';
+import { Context } from './list_tree_panel';
 import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
