@@ -3,11 +3,11 @@
   background-size: contain;
 }
 .jp-DatasetIcon {
-  background-image: url('./images/dataset_24px.svg');
+  background-image: url('./images/dataset_20px.svg');
   background-size: contain;
 }
 .jp-TableIcon {
-  background-image: url('./images/table_24px.svg');
+  background-image: url('./images/table_20px.svg');
   background-size: contain;
 }
 .jp-ViewIcon {
@@ -15,6 +15,6 @@
   background-size: contain;
 }
 .jp-ModelIcon {
-  background-image: url('./images/model_24px.svg');
+  background-image: url('./images/model_20px.svg');
   background-size: contain;
 }
