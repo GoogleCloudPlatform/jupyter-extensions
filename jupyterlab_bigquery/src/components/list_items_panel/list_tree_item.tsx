@@ -28,7 +28,7 @@ const localStyles = stylesheet({
     paddingRight: '8px',
     ...csstips.horizontal,
   },
-  dataset: {
+  itemName: {
     flexDirection: 'row',
     ...csstips.horizontal,
   },
@@ -92,6 +92,14 @@ export function BuildTree(project, context) {
     );
   };
 
+  const getIcon = iconType => {
+    return (
+      <Icon style={{ display: 'flex', alignContent: 'center' }}>
+        <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
+      </Icon>
+    );
+  };
+
   const renderTables = table => {
     const contextMenuItems = [
       {
@@ -102,6 +110,7 @@ export function BuildTree(project, context) {
     return (
       <TreeItem
         nodeId={table.id}
+        icon={getIcon('Table')}
         label={
           <ContextMenu
             items={contextMenuItems.map(item => ({
@@ -109,9 +118,6 @@ export function BuildTree(project, context) {
               onClick: () => item.handler(table),
             }))}
           >
-            <Icon style={{ display: 'flex', alignContent: 'center' }}>
-              <div className={'jp-Icon jp-Icon-20 jp-TableIcon'} />
-            </Icon>
             <Typography>{table.name}</Typography>
           </ContextMenu>
         }
@@ -130,6 +136,7 @@ export function BuildTree(project, context) {
     return (
       <TreeItem
         nodeId={model.id}
+        icon={getIcon('Model')}
         label={
           <ContextMenu
             items={contextMenuItems.map(item => ({
@@ -137,9 +144,6 @@ export function BuildTree(project, context) {
               onClick: () => item.handler(model),
             }))}
           >
-            <Icon style={{ display: 'flex', alignContent: 'center' }}>
-              <div className={'jp-Icon jp-Icon-20 jp-ModelIcon'} />
-            </Icon>
             <Typography>{model.name}</Typography>
           </ContextMenu>
         }
@@ -156,7 +160,7 @@ export function BuildTree(project, context) {
     ];
 
     return (
-      <div className={localStyles.dataset}>
+      <div className={localStyles.itemName}>
         <Icon style={{ display: 'flex', alignContent: 'center' }}>
           <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
         </Icon>
