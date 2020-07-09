@@ -10,6 +10,7 @@ from gcp_jupyterlab_shared.handlers import AuthProvider
 from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
+from gcp_jupyterlab_shared.handlers import AuthProvider
 
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
@@ -99,6 +100,57 @@ class AutoMLService:
         } for model in models]
     }
 
+  def _get_feature_importance(self, model_explanation):
+    features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
+    return [
+        {
+            "name": key,
+            "Percentage": round(val * 100, 3),
+        } for key, val in features
+    ]
+
+  def _get_confusion_matrix(self, confusion_matrix):
+    rows = confusion_matrix["rows"]
+    titles = []
+    for column in confusion_matrix["annotationSpecs"]:
+      titles.append(column["displayName"])
+    rows.insert(0, titles)
+    return rows
+
+  def _get_confidence_metrics(self, confidence_metrics):
+    labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
+              "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
+              "truePositiveCount", "falseNegativeCount", "falsePositiveCount",
+              "falsePositiveRate", "falsePositiveRateAt1"]
+    metrics = []
+    for confidence_metric in confidence_metrics:
+      metric = {}
+      for label in labels:
+        if label == "confidenceThreshold":
+          value = confidence_metric.get(label, 0.0) * 100
+        else:
+          value = confidence_metric.get(label, "NaN")
+        metric[label] = value
+      metrics.append(metric)
+    return metrics
+
+  def get_model_evaluation(self, model_id):
+    optional_fields = ["auPrc", "auRoc", "logLoss"]
+    evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
+    create_time = evaluation.create_time.strftime(self._time_format)
+    evaluation = json_format.MessageToDict(evaluation._pb)
+    metrics = evaluation["metrics"]
+    model_eval = {
+        "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
+        "createTime": create_time,
+        "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
+    }
+    if "modelExplanation" in evaluation:
+      model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+    for field in optional_fields:
+      model_eval[field] = metrics.get(field, None)
+    return model_eval
+
   def _get_feature_transformations(self, response):
     transformations = []
     for column in response:
@@ -111,23 +163,24 @@ class AutoMLService:
 
   def get_pipeline(self, pipeline_id):
     pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    optional_fields = ["targetColumn", "predictionType", "optimizationObjective", "budgetMilliNodeHours", "trainBudgetMilliNodeHours"]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
-    transformation_options = self._get_feature_transformations(
-        training_task_inputs['transformations'])
-    return {
+    training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
         "createTime": pipeline.create_time.strftime(self._time_format),
         "updateTime": pipeline.update_time.strftime(self._time_format),
         "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
-        "budget": training_task_inputs['trainBudgetMilliNodeHours'],
         "datasetId": pipeline.input_data_config.dataset_id,
-        "targetColumn": training_task_inputs['targetColumn'],
-        "transformationOptions": transformation_options,
-        "objective": training_task_inputs['predictionType'],
-        "optimizedFor": training_task_inputs['optimizationObjective'],
     }
+    if "transformations" in training_task_inputs:
+      transformation_options = self._get_feature_transformations(
+          training_task_inputs["transformations"])
+      training_pipeline["transformationOptions"] = transformation_options
+    for field in optional_fields:
+      training_pipeline[field] = training_task_inputs.get(field, None)
+    return training_pipeline
 
   def get_datasets(self):
     datasets = []
