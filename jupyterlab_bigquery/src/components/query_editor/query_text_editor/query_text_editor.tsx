@@ -238,7 +238,7 @@ class QueryTextEditor extends React.Component<
     const errMsg = this.state.errorMsg;
 
     return (
-      <div>
+      <div style={{ height: '50%' }}>
         <Editor
           width="100vw"
           height="40vh"

@@ -1,24 +1,18 @@
 import { LinearProgress, withStyles } from '@material-ui/core';
 import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
-// import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-// import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
-// import React, { useState } from 'react';
 import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 
-// import { DataTree, Project, Dataset, Table, Model } from './service/list_items';
 import { DataTree } from './service/list_items';
-import { Context } from './list_tree_item_widget';
+import { Context } from './list_tree_panel';
 import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
-
-//import { COLORS, css } from '../styles';
 
 const localStyles = stylesheet({
   item: {
@@ -61,7 +55,6 @@ const localStyles = stylesheet({
   },
   list: {
     margin: '0',
-    // overflowY: 'scroll',
     padding: '0',
     ...csstips.flex,
   },
@@ -73,7 +66,6 @@ const localStyles = stylesheet({
 });
 
 interface ProjectProps {
-  // project: Project;
   context: Context;
   data: DataTree;
 }

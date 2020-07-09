@@ -20,11 +20,13 @@ export class WidgetManager {
     return this;
   }
 
-  static getInstance(app?: JupyterFrontEnd): WidgetManager {
-    if (WidgetManager.instance === undefined && app !== undefined) {
+  static initInstance(app: JupyterFrontEnd) {
+    if (WidgetManager.instance === undefined) {
       WidgetManager.instance = new WidgetManager(app);
     }
+  }
 
+  static getInstance(): WidgetManager {
     return WidgetManager.instance;
   }
 

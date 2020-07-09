@@ -1,19 +1,10 @@
 import { UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import * as React from 'react';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-// import { Contents } from '@jupyterlab/services';
-
 import { ReduxReactWidget } from '../../utils/widgetManager/redux_react_widget';
 import { ListProjectsService } from './service/list_items';
-import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListItemsPanel from './list_tree_panel';
-// import { IIterator, ArrayIterator, find } from '@phosphor/algorithm';
-
-export interface Context {
-  app: JupyterFrontEnd;
-  manager: WidgetManager;
-}
+import { Context } from './list_tree_panel';
 
 /** Widget to be registered in the left-side panel. */
 export default class ListItemsWidget extends ReduxReactWidget {

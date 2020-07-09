@@ -63,7 +63,9 @@ class PagedAPIHandler(APIHandler, ABC):
     query_generator = None
 
     with self.generator_lock:
-        query_generator, _ = PagedAPIHandler.generator_pool[id]
+        val = PagedAPIHandler.generator_pool[id]
+        if val is not None:
+          query_generator, _ = val
 
     finish = False
     load = []
@@ -99,7 +101,7 @@ class PagedAPIHandler(APIHandler, ABC):
       val = PagedAPIHandler.generator_pool[id]
       if val is not None:
         _, job = val
-        cancel(job)
+        self.cancel(job)
         del PagedAPIHandler.generator_pool[id]
         app_log.log(INFO, 'Successfully canceled query %s', id)
         error = None

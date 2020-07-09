@@ -22,8 +22,8 @@ def load_jupyter_server_extension(nb_server_app):
     app = nb_server_app.web_app
     gcp_v1_endpoint = url_path_join(app.settings['base_url'], 'bigquery', 'v1')
 
-    def make_endpoint(endPoint, handler): return (
-        url_path_join(gcp_v1_endpoint, endPoint) + '(.*)', handler)
+    def make_endpoint(endPoint, handler):
+        return url_path_join(gcp_v1_endpoint, endPoint) + '(.*)', handler
 
     app.add_handlers(host_pattern, [
         # TODO(cbwilkes): Add auth checking if needed.

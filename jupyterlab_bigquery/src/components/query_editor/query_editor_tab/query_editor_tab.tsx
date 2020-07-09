@@ -16,7 +16,7 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
 
   render() {
     return (
-      <div>
+      <div style={{ height: '100%' }}>
         <QueryTextEditor />
         <QueryResults />
       </div>
