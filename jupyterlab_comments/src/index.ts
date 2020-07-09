@@ -75,7 +75,7 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
   });
 
   // Add the command to the palette.
-  palette.addItem({ command, category: 'Tutorial' });
+  palette.addItem({ command, category: 'Collaboration' });
 }
 
 /**
