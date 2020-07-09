@@ -410,7 +410,14 @@ export const CreateStudy = () => {
               </Paper>
             </Grid>
           </Grid>
-          <Grid container item spacing={3} xs={12} md={6} alignContent="flex-start">
+          <Grid
+            container
+            item
+            spacing={3}
+            xs={12}
+            md={6}
+            alignContent="flex-start"
+          >
             <Grid container item spacing={1} alignContent="flex-start">
               <Typography align="center" variant="h6" gutterBottom>
                 Metric Configuration

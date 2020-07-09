@@ -13,9 +13,6 @@ import { SidebarWidget } from './components/sidebar_widget';
 import { fetchStudies } from './store/studies';
 import { fetchMetadata } from './store/metadata';
 
-// temp
-import { setView } from './store/view';
-import { SideBarWidget } from './components/sidebar';
 /**
  * Opens and closes a widget based on redux store's `view.isVisible` property.
  * @param reduxStore the redux store with `view.isVisible`.
@@ -68,8 +65,6 @@ async function activate(app: JupyterFrontEnd) {
   app.shell.add(sidebarWidget, 'left', { rank: 100 });
   await store.dispatch(fetchMetadata());
   await store.dispatch(fetchStudies());
-  // temp
-  await store.dispatch(setView({ view: 'studyDetails', studyId: 'id' }));
 }
 
 /**
