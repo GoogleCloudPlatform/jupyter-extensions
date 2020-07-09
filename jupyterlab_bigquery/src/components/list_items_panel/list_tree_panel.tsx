@@ -11,7 +11,10 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree } from '../../reducers/dataTreeSlice';
-import { SearchProjectsService } from '../list_items_panel/service/search_items';
+import {
+  SearchProjectsService,
+  SearchResult,
+} from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
 
 interface Props {
@@ -30,6 +33,7 @@ interface State {
   hasLoaded: boolean;
   isLoading: boolean;
   isSearching: boolean;
+  searchResults: SearchResult[];
 }
 
 const localStyles = stylesheet({
@@ -69,6 +73,7 @@ class ListItemsPanel extends React.Component<Props, State> {
       hasLoaded: false,
       isLoading: false,
       isSearching: false,
+      searchResults: [],
     };
   }
 
@@ -77,7 +82,7 @@ class ListItemsPanel extends React.Component<Props, State> {
       this.setState({ isLoading: true, isSearching: true });
       const service = new SearchProjectsService();
       await service.searchProjects(searchKey, project).then(results => {
-        console.log(results.searchResults);
+        this.setState({ searchResults: results.searchResults });
       });
     } catch (err) {
       console.warn('Error searching', err);
@@ -114,7 +119,7 @@ class ListItemsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading, isSearching } = this.state;
+    const { isLoading, isSearching, searchResults } = this.state;
     return (
       <div className={localStyles.panel}>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -145,7 +150,10 @@ class ListItemsPanel extends React.Component<Props, State> {
           <LinearProgress />
         ) : isSearching ? (
           <ul className={localStyles.list}>
-            <ListSearchResults context={this.props.context} />
+            <ListSearchResults
+              context={this.props.context}
+              searchResults={searchResults}
+            />
           </ul>
         ) : (
           <ul className={localStyles.list}>

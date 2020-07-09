@@ -5,16 +5,16 @@ import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
-import { connect } from 'react-redux';
+// import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
 
-import { DataTree } from './service/list_items';
+import { SearchResult } from './service/search_items';
 import { Context } from './list_tree_panel';
-import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
-import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
-import { TableDetailsWidget } from '../details_panel/table_details_widget';
-import { TableDetailsService } from '../details_panel/service/list_table_details';
+// import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
+// import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
+// import { TableDetailsWidget } from '../details_panel/table_details_widget';
+// import { TableDetailsService } from '../details_panel/service/list_table_details';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -66,93 +66,92 @@ const localStyles = stylesheet({
     ...csstips.flex,
   },
   root: {
-    height: 216,
     flexGrow: 1,
     maxWidth: 400,
   },
 });
 
-interface ProjectProps {
+interface SearchProps {
   context: Context;
-  data: DataTree;
+  searchResults: SearchResult[];
 }
 
 interface State {
   expanded: boolean;
 }
 
-export function BuildTree(project, context) {
+export function BuildSearchResult(result, context) {
   const copyID = dataTreeItem => {
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
-  const openDatasetDetails = dataset => {
-    const service = new DatasetDetailsService();
-    const widgetType = DatasetDetailsWidget;
-    context.manager.launchWidgetForId(
-      dataset.id,
-      widgetType,
-      service,
-      dataset.id,
-      dataset.name
-    );
-  };
+  // const openDatasetDetails = dataset => {
+  //   const service = new DatasetDetailsService();
+  //   const widgetType = DatasetDetailsWidget;
+  //   context.manager.launchWidgetForId(
+  //     dataset.id,
+  //     widgetType,
+  //     service,
+  //     dataset.id,
+  //     dataset.name
+  //   );
+  // };
 
-  const openTableDetails = table => {
-    const service = new TableDetailsService();
-    const widgetType = TableDetailsWidget;
-    context.manager.launchWidgetForId(
-      table.id,
-      widgetType,
-      service,
-      table.id,
-      table.name
-    );
-  };
+  // const openTableDetails = table => {
+  //   const service = new TableDetailsService();
+  //   const widgetType = TableDetailsWidget;
+  //   context.manager.launchWidgetForId(
+  //     table.id,
+  //     widgetType,
+  //     service,
+  //     table.id,
+  //     table.name
+  //   );
+  // };
 
-  const renderTables = table => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Table ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <ContextMenu
-        items={contextMenuItems.map(item => ({
-          label: item.label,
-          onClick: () => item.handler(table),
-        }))}
-      >
-        <TreeItem
-          nodeId={table.id}
-          label={table.name}
-          onDoubleClick={() => openTableDetails(table)}
-        />
-      </ContextMenu>
-    );
-  };
+  // const renderTable = table => {
+  //   const contextMenuItems = [
+  //     {
+  //       label: 'Copy Table ID',
+  //       handler: dataTreeItem => copyID(dataTreeItem),
+  //     },
+  //   ];
+  //   return (
+  //     <ContextMenu
+  //       items={contextMenuItems.map(item => ({
+  //         label: item.label,
+  //         onClick: () => item.handler(table),
+  //       }))}
+  //     >
+  //       <TreeItem
+  //         nodeId={table.id}
+  //         label={table.name}
+  //         // onDoubleClick={() => openTableDetails(table)}
+  //       />
+  //     </ContextMenu>
+  //   );
+  // };
 
-  const renderModels = model => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Model ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <ContextMenu
-        items={contextMenuItems.map(item => ({
-          label: item.label,
-          onClick: () => item.handler(model),
-        }))}
-      >
-        <TreeItem nodeId={model.id} label={model.name} />
-      </ContextMenu>
-    );
-  };
+  // const renderModel = model => {
+  //   const contextMenuItems = [
+  //     {
+  //       label: 'Copy Model ID',
+  //       handler: dataTreeItem => copyID(dataTreeItem),
+  //     },
+  //   ];
+  //   return (
+  //     <ContextMenu
+  //       items={contextMenuItems.map(item => ({
+  //         label: item.label,
+  //         onClick: () => item.handler(model),
+  //       }))}
+  //     >
+  //       <TreeItem nodeId={model.id} label={model.name} />
+  //     </ContextMenu>
+  //   );
+  // };
 
-  const renderDatasets = dataset => {
+  const renderDataset = dataset => {
     const contextMenuItems = [
       {
         label: 'Copy Dataset ID',
@@ -160,77 +159,44 @@ export function BuildTree(project, context) {
       },
     ];
     return (
-      <div>
-        <ContextMenu
-          items={contextMenuItems.map(item => ({
-            label: item.label,
-            onClick: () => item.handler(dataset),
-          }))}
-        >
-          <TreeItem
-            nodeId={dataset.id}
-            label={dataset.name}
-            onDoubleClick={() => openDatasetDetails(dataset)}
-          >
-            {Array.isArray(dataset.tables)
-              ? dataset.tables.map(table => (
-                  <div key={table.id}>{renderTables(table)}</div>
-                ))
-              : null}
-            {Array.isArray(dataset.models)
-              ? dataset.models.map(model => (
-                  <div key={model.id}>{renderModels(model)}</div>
-                ))
-              : null}
-          </TreeItem>
-        </ContextMenu>
-      </div>
+      <ContextMenu
+        items={contextMenuItems.map(item => ({
+          label: item.label,
+          onClick: () => item.handler(dataset),
+        }))}
+      >
+        <TreeItem
+          nodeId={dataset.id}
+          label={dataset.name}
+          // onDoubleClick={() => openDatasetDetails(dataset)}
+        />
+      </ContextMenu>
     );
   };
 
-  const renderProjects = (id, name, datasets) => (
-    <TreeItem nodeId={id} label={name}>
-      {Array.isArray(datasets)
-        ? datasets.map(dataset => (
-            <div key={dataset.id}>{renderDatasets(dataset)}</div>
-          ))
-        : null}
-    </TreeItem>
-  );
-
-  return (
-    <TreeView
-      className={localStyles.root}
-      defaultCollapseIcon={<ExpandMoreIcon />}
-      defaultExpanded={['root']}
-      defaultExpandIcon={<ChevronRightIcon />}
-    >
-      {renderProjects(project.id, project.name, project.datasets)}
-    </TreeView>
-  );
+  return <div>{renderDataset(result)}</div>;
 }
 
-class ListSearchResults extends React.Component<ProjectProps, State> {
-  constructor(props: ProjectProps) {
+export default class ListSearchResults extends React.Component<
+  SearchProps,
+  State
+> {
+  constructor(props: SearchProps) {
     super(props);
   }
 
   render() {
-    // const { data, context } = this.props;
-    // if (data.projects.length > 0) {
-    //   return data.projects.map(p => (
-    //     <div key={p.id}>{BuildTree(p, context)}</div>
-    //   ));
-    // } else {
-    //   return <LinearProgress />;
-    // }
-    return <div>Display results here</div>;
+    const { context, searchResults } = this.props;
+    return searchResults.map(result => (
+      <TreeView
+        className={localStyles.root}
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpanded={['root']}
+        defaultExpandIcon={<ChevronRightIcon />}
+        key={result.id}
+      >
+        {BuildSearchResult(result, context)}
+      </TreeView>
+    ));
   }
 }
-
-const mapStateToProps = state => {
-  const data = state.dataTree.data;
-  return { data };
-};
-
-export default connect(mapStateToProps, null)(ListSearchResults);
