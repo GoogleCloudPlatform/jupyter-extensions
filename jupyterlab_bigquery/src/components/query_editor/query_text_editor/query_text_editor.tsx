@@ -41,8 +41,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   automaticLayout: true,
   formatOnType: true,
   formatOnPaste: true,
-  wordWrapColumn: 80,
-  wordWrap: 'bounded',
+  wordWrap: 'on',
   wrappingIndent: 'same',
   wrappingStrategy: 'advanced',
 };
