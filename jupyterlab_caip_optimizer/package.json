@@ -59,14 +59,12 @@
     "material-table": "^1.63.1",
     "minimist": ">=1.2.2",
     "moment": "^2.27.0",
-    "react": "~16.8.5",
-    "react-dom": "~16.8.5",
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
     "typestyle": "^2.1.0",
-    "yaml": "^1.7.2",
-    "react": "~16.8.4",
-    "react-dom": "~16.8.4"
+    "yaml": "^1.7.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
