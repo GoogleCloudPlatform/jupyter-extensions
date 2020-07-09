@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from notebook.utils import url_path_join
-from jupyterlab_comments.handlers import DetachedCommentsHandler
+from jupyterlab_comments.handlers import DetachedCommentsHandler, ReviewCommentsHandler
 
 
 def load_jupyter_server_extension(nb_server_app):
@@ -28,6 +28,9 @@ def load_jupyter_server_extension(nb_server_app):
   host_pattern = '.*$'
   base_url = web_app.settings['base_url']
   detached_comments_route_pattern = url_path_join(base_url, '/detachedComments')
+  review_comments_route_pattern = url_path_join(base_url, '/reviewComments')
+
   web_app.add_handlers(host_pattern, [
       (detached_comments_route_pattern, DetachedCommentsHandler),
+      (review_comments_route_pattern, ReviewCommentsHandler),
   ])

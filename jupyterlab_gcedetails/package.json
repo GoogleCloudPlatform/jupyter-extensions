@@ -38,6 +38,7 @@
     "@jupyterlab/services": "^4.2.2",
     "@jupyterlab/statusbar": "^1.2.1",
     "csstips": "^1.2.0",
+    "gcp_jupyterlab_shared": "^1.0.1",
     "recharts": "^1.8.5",
     "typestyle": "^2.1.0"
   },

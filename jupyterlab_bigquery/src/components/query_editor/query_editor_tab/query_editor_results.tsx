@@ -7,7 +7,14 @@ import {
   TableCell,
   TableBody,
   TablePagination,
+  IconButton,
 } from '@material-ui/core';
+import {
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  FirstPage,
+  LastPage,
+} from '@material-ui/icons';
 import { connect } from 'react-redux';
 import { QueryResult } from '../query_text_editor/service/query';
 
@@ -26,31 +33,21 @@ const localStyles = stylesheet({
     border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
   pagination: {
-    // position: 'fixed',
-    // bottom: 30,
+    position: 'fixed',
+    bottom: 30,
+    backgroundColor: 'white',
+    fontSize: '13px',
   },
-  tab: {
-    textTransform: 'none',
-    // minWidth: 72,
-    // fontWeight: theme.typography.fontWeightRegular,
-    // marginRight: theme.spacing(4),
-    '&:hover': {
-      color: '#40a9ff',
-      opacity: 1,
-    },
-    '&$selected': {
-      color: '#1890ff',
-      //   fontWeight: theme.typography.fontWeightMedium,
-    },
-    '&:focus': {
-      color: '#40a9ff',
-    },
+  paginationOptions: {
+    display: 'flex',
+    fontSize: '13px',
+  },
+  resultsContainer: {
+    overflow: 'auto',
+    width: '100%',
+    height: '-webkit-calc(50% - 50px)',
   },
 });
-
-// function createData(name, calories, fat, carbs, protein) {
-//   return { name, calories, fat, carbs, protein };
-// }
 
 interface QueryResultsState {
   page: number;
@@ -61,10 +58,68 @@ interface QueryResultsProps {
   queryResult: QueryResult;
 }
 
-class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
-  // const [page, setPage] = React.useState(0);
-  // const [rowsPerPage, setRowsPerPage] = React.useState(10);
+interface TablePaginationActionsProps {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onChangePage: (
+    event: React.MouseEvent<HTMLButtonElement>,
+    newPage: number
+  ) => void;
+}
 
+function TablePaginationActions(props: TablePaginationActionsProps) {
+  const { count, page, rowsPerPage, onChangePage } = props;
+
+  const handleFirstPageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    onChangePage(event, 0);
+  };
+
+  const handleBackButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    onChangePage(event, page - 1);
+  };
+
+  const handleNextButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    onChangePage(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    onChangePage(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <div className={localStyles.paginationOptions}>
+      <IconButton onClick={handleFirstPageButtonClick} disabled={page === 0}>
+        <FirstPage />
+      </IconButton>
+      <IconButton onClick={handleBackButtonClick} disabled={page === 0}>
+        <KeyboardArrowLeft />
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      >
+        <KeyboardArrowRight />
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      >
+        <LastPage />
+      </IconButton>
+    </div>
+  );
+}
+
+class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -83,84 +138,53 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   }
 
   render() {
-    console.log(this.props.queryResult);
-
-    const fields = this.props.queryResult.labels;
+    const fields = ['Row', ...this.props.queryResult.labels];
     const rows = this.props.queryResult.content;
-
-    // const fields = ['name', 'gender', 'count'];
-
-    // const rows = [
-    //   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    //   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    //   createData('Eclair', 262, 16.0, 24, 6.0),
-    //   createData('Cupcake', 305, 3.7, 67, 4.3),
-    //   createData('Gingerbread', 356, 16.0, 49, 3.9),
-    //   createData('hey', 1, 1, 1, 1),
-    // ];
-
-    //   const handleFirstPageButtonClick = event => {
-    //     onChangePage(event, 0);
-    //   };
 
     const { rowsPerPage, page } = this.state;
 
     return (
-      <div style={{ flexGrow: 1 }}>
+      <div className={localStyles.resultsContainer}>
         <div className={localStyles.header}>Query results</div>
-
-        <div>
-          <Table size="small">
-            <TableHead className={localStyles.tableHeader}>
-              <TableRow>
-                {fields.map(field => (
-                  <TableCell>{field}</TableCell>
+        <Table size="small" style={{ width: 'auto', tableLayout: 'auto' }}>
+          <TableHead className={localStyles.tableHeader}>
+            <TableRow>
+              {this.props.queryResult.labels.length !== 0 &&
+                fields.map((field, index) => (
+                  <TableCell key={`result_field_${index}`}>{field}</TableCell>
                 ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, indexRow) => (
-                  <TableRow key={'big_query_query_result_row' + indexRow}>
-                    {row.map((cell, indexCell) => (
-                      <TableCell
-                        className={localStyles.tableCell}
-                        key={
-                          'big_query_query_result_row_' +
-                          indexRow +
-                          '_cell' +
-                          indexCell
-                        }
-                      >
-                        {cell}
-                      </TableCell>
-                    ))}
-
-                    {/* <TableCell className={localStyles.tableCell}>
-                      {row.calories}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, rowIndex) => (
+                <TableRow key={'result_row' + rowIndex}>
+                  <TableCell>{page * rowsPerPage + rowIndex + 1}</TableCell>
+                  {row.map((cell, cellIndex) => (
+                    <TableCell
+                      className={localStyles.tableCell}
+                      key={'result_row_' + rowIndex + '_cell' + cellIndex}
+                    >
+                      {cell}
                     </TableCell>
-                    <TableCell className={localStyles.tableCell}>
-                      {row.fat}
-                    </TableCell>
-                    <TableCell className={localStyles.tableCell}>
-                      {row.carbs}
-                    </TableCell> */}
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-          <TablePagination
-            className={localStyles.pagination}
-            rowsPerPageOptions={[10, 30, 50, 100, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={this.handleChangePage.bind(this)}
-            onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
-          />
-        </div>
+                  ))}
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        {/* TODO(cxjia): hide table pagination when result rows <= 10 */}
+        <TablePagination
+          className={localStyles.pagination}
+          rowsPerPageOptions={[10, 30, 50, 100, 200]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={this.handleChangePage.bind(this)}
+          onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
+          ActionsComponent={TablePaginationActions}
+        />
       </div>
     );
   }

@@ -1,18 +1,14 @@
 import { UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import QueryEditorTab from './query_editor_tab';
-import QueryResults from './query_editor_results';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { ReduxReactWidget } from '../../../utils/ReduxReactWidget';
+import { ReduxReactWidget } from '../../../utils/widgetManager/redux_react_widget';
 
 const localStyles = stylesheet({
   panel: {
     backgroundColor: 'white',
     height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignContent: 'stretch',
   },
 });
 
@@ -41,7 +37,6 @@ export class QueryEditorTabWidget extends ReduxReactWidget {
           return (
             <div className={localStyles.panel}>
               <QueryEditorTab isVisible={isVisible} />
-              <QueryResults />
             </div>
           );
         }}

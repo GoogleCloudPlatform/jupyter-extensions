@@ -6,17 +6,26 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
-import { ListItemsWidget } from './components/list_items_panel/list_tree_item_widget';
+import ListItemsWidget from './components/list_items_panel/list_tree_item_widget';
 import { ListProjectsService } from './components/list_items_panel/service/list_items';
-import { WidgetManager } from './utils/widget_manager';
+import { WidgetManager } from './utils/widgetManager/widget_manager';
+import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
 async function activate(app: JupyterFrontEnd) {
-  const manager = new WidgetManager(app);
+  WidgetManager.initInstance(app);
+  const manager = WidgetManager.getInstance();
   const context = { app: app, manager: manager };
   const listProjectsService = new ListProjectsService();
-  const listWidget = new ListItemsWidget(listProjectsService, context);
-  listWidget.addClass('jp-BigQueryIcon');
-  app.shell.add(listWidget, 'left', { rank: 100 });
+  manager.launchWidget(
+    ListItemsWidget,
+    'left',
+    'ListItemWidget',
+    (widget: ReduxReactWidget) => {
+      widget.addClass('jp-BigQueryIcon');
+    },
+    [listProjectsService, context],
+    { rank: 100 }
+  );
 }
 
 /**

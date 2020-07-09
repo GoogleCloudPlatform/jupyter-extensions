@@ -3,7 +3,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 export interface TableDetailsObject {
   id: string;
-  display_name: string;
+  name: string;
   description: string;
   labels: string[];
   date_created: string;
@@ -15,7 +15,14 @@ export interface TableDetailsObject {
   link: string;
   num_rows: number;
   num_bytes: number;
-  schema: string;
+  schema: SchemaField[];
+}
+
+export interface SchemaField {
+  name: string;
+  type: string;
+  mode: string;
+  description: string;
 }
 
 export interface TableDetails {
