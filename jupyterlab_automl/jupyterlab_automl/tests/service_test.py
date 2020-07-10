@@ -46,8 +46,8 @@ class TestAutoMLExtension(unittest.TestCase):
             {
                 "id": "dummy_dataset1",
                 "displayName": "dummy_dataset1",
-                "createTime": "January 01, 1970, 12:00AM",
-                "updateTime": "January 01, 1970, 12:01AM",
+                "createTime": (1970, 1, 1, 0, 0, 0),
+                "updateTime": (1970, 1, 1, 0, 1, 0),
                 "datasetType": "TABLE",
                 "etag": "ETAG1234",
                 "metadata": "",
@@ -55,8 +55,8 @@ class TestAutoMLExtension(unittest.TestCase):
             {
                 "id": "dummy_dataset2",
                 "displayName": "dummy_dataset2",
-                "createTime": "January 01, 1970, 12:01AM",
-                "updateTime": "January 01, 1970, 12:00AM",
+                "createTime": (1970, 1, 1, 0, 1, 0),
+                "updateTime": (1970, 1, 1, 0, 0, 0),
                 "datasetType": "IMAGE",
                 "etag": "1234ETAG",
                 "metadata": metadata,
@@ -99,17 +99,19 @@ class TestAutoMLExtension(unittest.TestCase):
                 "id": "dummy_model1",
                 "displayName": "dummy_model1",
                 "pipelineId": "pipeline1",
-                "createTime": "January 01, 1970, 12:00AM",
-                "updateTime": "January 01, 1970, 12:01AM",
+                "createTime": (1970, 1, 1, 0, 0, 0),
+                "updateTime": (1970, 1, 1, 0, 1, 0),
                 "etag": "ETAG1234",
+                "modelType": "OTHER",
             },
             {
                 "id": "dummy_model2",
                 "displayName": "dummy_model2",
                 "pipelineId": "pipeline2",
-                "createTime": "January 01, 1970, 12:01AM",
-                "updateTime": "January 01, 1970, 12:00AM",
+                "createTime": (1970, 1, 1, 0, 1, 0),
+                "updateTime": (1970, 1, 1, 0, 0, 0),
                 "etag": "1234ETAG",
+                "modelType": "OTHER",
             },
         ]
     }
@@ -172,19 +174,19 @@ class TestAutoMLExtension(unittest.TestCase):
     wanted = {
         "id": "dummy_pipeline1_id",
         "displayName": "dummy_pipeline1",
-        "createTime": "January 01, 1970, 12:00AM",
-        "updateTime": "January 01, 1970, 12:01AM",
+        "createTime": (1970, 1, 1, 0, 0, 0),
+        "updateTime": (1970, 1, 1, 0, 1, 0),
         "elapsedTime": 60,
-        "budget": "1000",
+        "trainBudgetMilliNodeHours": "1000",
+        "budgetMilliNodeHours": None,
         "datasetId": "dummy_dataset_id",
         "targetColumn": "Column2",
         "transformationOptions": transformation_options,
-        "objective": "classification",
-        "optimizedFor": "minimize_loss",
+        "predictionType": "classification",
+        "optimizationObjective": "minimize_loss",
     }
     got = automl.get_pipeline('pipeline_id')
     self.assertEqual(wanted, got)
-
 
 if __name__ == "__main__":
   unittest.main()
