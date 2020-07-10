@@ -55,39 +55,39 @@ type MetricChip = {
   metricGoalType: Types.GoalType;
 };
 
-const paramChipDataSample: ParameterChip[] = [
-  {
-    key: 0,
-    label: 'Param 1',
-    paramName: 'Param 1',
-    paramType: "CATEGORICAL",
-    paramValList: ['high', 'medium', 'low'],
-  },
-  {
-    key: 1,
-    label: 'Param 2',
-    paramName: 'Param 2',
-    paramType: "DOUBLE",
-    paramMinVal: '0.0',
-    paramMaxVal: '12.5',
-    paramValList: [],
-  },
-];
+// const paramChipDataSample: ParameterChip[] = [
+//   {
+//     key: 0,
+//     label: 'Param 1',
+//     paramName: 'Param 1',
+//     paramType: "CATEGORICAL",
+//     paramValList: ['high', 'medium', 'low'],
+//   },
+//   {
+//     key: 1,
+//     label: 'Param 2',
+//     paramName: 'Param 2',
+//     paramType: "DOUBLE",
+//     paramMinVal: '0.0',
+//     paramMaxVal: '12.5',
+//     paramValList: [],
+//   },
+// ];
 
-const metricChipDataSample: MetricChip[] = [
-  {
-    key: 0,
-    label: 'Metric 1',
-    metricName: 'Metric 1',
-    metricGoalType: "MAXIMIZE",
-  },
-  {
-    key: 1,
-    label: 'Metric 2',
-    metricName: 'Metric 2',
-    metricGoalType: "MINIMIZE",
-  },
-];
+// const metricChipDataSample: MetricChip[] = [
+//   {
+//     key: 0,
+//     label: 'Metric 1',
+//     metricName: 'Metric 1',
+//     metricGoalType: "MAXIMIZE",
+//   },
+//   {
+//     key: 1,
+//     label: 'Metric 2',
+//     metricName: 'Metric 2',
+//     metricGoalType: "MINIMIZE",
+//   },
+// ];
 
 const createDropdown = (items: ReadonlyArray<string>): DropdownItem[] => {
   const dropdownList: DropdownItem[] = items.map(
@@ -110,17 +110,17 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   const [paramValList, setParamValList] = React.useState([]);
   const [paramValListString, setParamValListString] = React.useState('');
   const [paramNew, setParamNew] = React.useState(true);
-  const [paramChipData, setParamChipData] = React.useState(paramChipDataSample); // TODO: change this to empty list. for demo purposes
+  const [paramChipData, setParamChipData] = React.useState<ParameterChip[]>([]); // TODO: change this to empty list. for demo purposes
   const paramTypes: DropdownItem[] = createDropdown(Types.ParameterTypeList);
   const [metricName, setMetricName] = React.useState('');
   const [metricGoalType, setMetricGoalType] = React.useState<Types.GoalType>('GOAL_TYPE_UNSPECIFIED');
   const metricGoalTypes: DropdownItem[] = createDropdown(Types.GoalTypeList);
   const [metricNew, setMetricNew] = React.useState(true);
-  const [metricChipData, setMetricChipData] = React.useState(
-    metricChipDataSample
-  );
+  const [metricChipData, setMetricChipData] = React.useState<MetricChip[]>([]);
   const [algorithmType, setAlgorithmType] = React.useState<Types.Algorithm>('ALGORITHM_UNSPECIFIED');
   const algorithmTypes: DropdownItem[] = createDropdown(Types.AlgorithmList);
+  const [paramKeyCounter, setParamKeyCounter] = React.useState(0);
+  const [metricKeyCounter, setMetricKeyCounter] = React.useState(0);
 
   const resetParamState = () => {
     setParamType("PARAMETER_TYPE_UNSPECIFIED");
@@ -131,6 +131,13 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
     setParamValListString('');
     setParamNew(true);
   };
+
+  // TODO: Delete
+  // const debug = () => {
+  //   console.log(paramChipData);
+  //   console.log(metricChipData);
+  //   console.log(paramKeyCounter);
+  // };
 
   const resetMetricState = () => {
     setMetricGoalType("GOAL_TYPE_UNSPECIFIED");
@@ -179,9 +186,10 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
     setMetricNew(false);
   };
 
-  const getCurrentParamChip = (key?: number): ParameterChip => {
+  const getCurrentParamChip = (): ParameterChip => {
+    setParamKeyCounter(paramKeyCounter + 1);
     return {
-      key: key ? key : paramChipData.length,
+      key: paramKeyCounter,
       label: paramName,
       paramName,
       paramType,
@@ -192,9 +200,10 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
     };
   };
 
-  const getCurrentMetricChip = (key?: number): MetricChip => {
+  const getCurrentMetricChip = (): MetricChip => {
+    setMetricKeyCounter(metricKeyCounter + 1);
     return {
-      key: key ? key : metricChipData.length,
+      key: metricKeyCounter,
       label: metricName,
       metricName,
       metricGoalType,
@@ -225,11 +234,12 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   const handleSaveParam = () => {
     const newParamChipData = paramChipData.map(function(chip) {
       return chip.paramName === paramName
-        ? getCurrentParamChip(chip.key)
+        ? getCurrentParamChip()
         : chip;
     });
     setParamChipData(newParamChipData);
     resetParamState();
+    // debug();
   };
 
   const handleDeleteParam = () => {
@@ -258,7 +268,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   const handleSaveMetric = () => {
     const newMetricChipData = metricChipData.map(function(chip) {
       return chip.metricName === metricName
-        ? getCurrentMetricChip(chip.key)
+        ? getCurrentMetricChip()
         : chip;
     });
     setMetricChipData(newMetricChipData);
@@ -297,8 +307,8 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
         }
         case "INTEGER": {
           parameterSpec['integerValueSpec'] = {
-            minValue: BigInt(parameter.paramMinVal),
-            maxValue: BigInt(parameter.paramMaxVal),
+            minValue: parameter.paramMinVal,
+            maxValue: parameter.paramMaxVal,
           } as Types.IntegerValueSpec;
           break;
         }

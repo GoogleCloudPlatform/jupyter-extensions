@@ -11,6 +11,10 @@ export interface MetricSpec {
   metric: string;
 }
 
+/**
+ * 'Const assignment" used to control the string inputs in dropdown input fields.
+ * String enums don't support reverse mapping, and plain string literal types aren't iterable.
+ */
 export const GoalTypeList = ["MAXIMIZE", "MINIMIZE", "GOAL_TYPE_UNSPECIFIED"] as const;
 
 export type GoalType = typeof GoalTypeList[number];
@@ -28,9 +32,13 @@ export interface DoubleValueSpec {
   maxValue: number;
 }
 
+/**
+ * Integer values are expected to be strings by Optimizer API.
+ * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#IntegerValueSpec)
+ */
 export interface IntegerValueSpec {
-  minValue: bigint;
-  maxValue: bigint;
+  minValue: string;
+  maxValue: string;
 }
 
 export interface CategoricalValueSpec {
@@ -52,8 +60,12 @@ export interface MatchingParentDiscreteValueSpec {
   values: number[];
 }
 
+/**
+ * Integer values are expected to be strings by Optimizer API.
+ * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#matchingparentintvaluespec)
+ */
 export interface MatchingParentIntValueSpec {
-  values: bigint[];
+  values: string[];
 }
 
 export interface MatchingParentCategoricalValueSpec {
@@ -151,7 +163,7 @@ export type Parameter = ParameterBase &
         floatValue: number;
       }
     | {
-        intValue: bigint; // could we use bigint?
+        intValue: string;
       }
     | {
         stringValue: string;
