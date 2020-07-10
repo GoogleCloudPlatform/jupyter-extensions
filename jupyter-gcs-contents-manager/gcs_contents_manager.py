@@ -548,7 +548,7 @@ class CombinedContentsManager(ContentsManager):
       if path == path_prefix or path.startswith(path_prefix + '/'):
         relative_path = path[len(path_prefix):]
         return self._content_managers[path_prefix], relative_path, path_prefix
-    return None, '', path
+    return None, path, ''
 
   def is_hidden(self, path):
     try:
@@ -645,7 +645,7 @@ class CombinedContentsManager(ContentsManager):
       self.run_pre_save_hook(model=model, path=path)
 
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if relative_path in ['', '/']:
+      if (relative_path in ['', '/']) or (path_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
       if not cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
@@ -668,7 +668,7 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if relative_path in ['', '/']:
+      if (relative_path in ['', '/']) or (path_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
       if not cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
