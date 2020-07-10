@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Model } from '../service/model';
 import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
-import { Toolbar, Tabs, Tab, Box } from '@material-ui/core';
+import { Toolbar, Tabs, Tab } from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { stylesheet } from 'typestyle';
 import * as csstips from 'csstips';
@@ -56,6 +56,11 @@ const localStyles = stylesheet({
     ...csstips.flex,
     height: '550px',
   },
+  panel: {
+    backgroundColor: 'white',
+    height: '100%',
+    ...csstips.vertical,
+  },
 });
 
 export class ModelPanel extends React.Component<Props, State> {
@@ -69,7 +74,7 @@ export class ModelPanel extends React.Component<Props, State> {
   render() {
     const { tabState } = this.state;
     return (
-      <Box>
+      <div className={localStyles.panel}>
         <Toolbar variant="dense">
           <AntTabs
             value={tabState}
@@ -93,7 +98,7 @@ export class ModelPanel extends React.Component<Props, State> {
             index={1}
           />
         </ul>
-      </Box>
+      </div>
     );
   }
 }

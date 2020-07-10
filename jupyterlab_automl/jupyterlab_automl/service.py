@@ -69,7 +69,6 @@ class AutoMLService:
     self._project = AuthProvider.get().project
 
     self._parent = "projects/{}/locations/us-central1".format(self._project)
-    self._time_format = "%B %d, %Y, %I:%M%p"
     self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
         hashlib.md5(self._project.encode('utf-8')).hexdigest())
 
@@ -88,16 +87,24 @@ class AutoMLService:
     return cls._instance
 
   def get_models(self):
-    models = self._model_client.list_models(parent=self._parent).models
-    return {
-        "models": [{
+    models = []
+    for model in self._model_client.list_models(parent=self._parent).models:
+      model_type = 'OTHER'
+      if 'image' in model.metadata_schema_uri:
+        model_type = 'IMAGE'
+      elif 'tables' in model.metadata_schema_uri:
+        model_type = 'TABLE'
+      models.append({
             "id": model.name,
             "displayName": model.display_name,
             "pipelineId": model.training_pipeline,
-            "createTime": model.create_time.strftime(self._time_format),
-            "updateTime": model.update_time.strftime(self._time_format),
+            "createTime": (model.create_time.year, model.create_time.month, model.create_time.day, model.create_time.hour, model.create_time.minute, model.create_time.second),
+            "updateTime": (model.update_time.year, model.update_time.month, model.update_time.day, model.update_time.hour, model.update_time.minute, model.update_time.second),
             "etag": model.etag,
-        } for model in models]
+            "modelType": model_type
+        })
+    return {
+        "models": models,
     }
 
   def _get_feature_importance(self, model_explanation):
@@ -137,7 +144,7 @@ class AutoMLService:
   def get_model_evaluation(self, model_id):
     optional_fields = ["auPrc", "auRoc", "logLoss"]
     evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
-    create_time = evaluation.create_time.strftime(self._time_format)
+    create_time = (evaluation.create_time.year, evaluation.create_time.month, evaluation.create_time.day, evaluation.create_time.hour, evaluation.create_time.minute, evaluation.create_time.second),
     evaluation = json_format.MessageToDict(evaluation._pb)
     metrics = evaluation["metrics"]
     model_eval = {
@@ -169,8 +176,8 @@ class AutoMLService:
     training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
-        "createTime": pipeline.create_time.strftime(self._time_format),
-        "updateTime": pipeline.update_time.strftime(self._time_format),
+        "createTime": (pipeline.create_time.year, pipeline.create_time.month, pipeline.create_time.day, pipeline.create_time.hour, pipeline.create_time.minute, pipeline.create_time.second),
+        "updateTime": (pipeline.update_time.year, pipeline.update_time.month, pipeline.update_time.day, pipeline.update_time.hour, pipeline.update_time.minute, pipeline.update_time.second),
         "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
         "datasetId": pipeline.input_data_config.dataset_id,
     }
@@ -191,8 +198,8 @@ class AutoMLService:
         datasets.append({
             "id": dataset.name,
             "displayName": dataset.display_name,
-            "createTime": dataset.create_time.strftime(self._time_format),
-            "updateTime": dataset.update_time.strftime(self._time_format),
+            "createTime": (dataset.create_time.year, dataset.create_time.month, dataset.create_time.day, dataset.create_time.hour, dataset.create_time.minute, dataset.create_time.second),
+            "updateTime": (dataset.update_time.year, dataset.update_time.month, dataset.update_time.day, dataset.update_time.hour, dataset.update_time.minute, dataset.update_time.second),
             "datasetType": dataset_type.value,
             "etag": dataset.etag,
             "metadata": json_format.MessageToDict(dataset._pb.metadata),

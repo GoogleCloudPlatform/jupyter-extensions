@@ -198,6 +198,21 @@ export class ModelProperties extends React.Component<Props, State> {
               this.getElapsedTime(pipeline[properties[i]['name']])
             )
           );
+        } else if (properties[i]['name'] === 'createTime') {
+          const date = pipeline[properties[i]['name']];
+          modelDetails.push(
+            this.createData(
+              properties[i]['label'],
+              new Date(
+                date[0],
+                date[1],
+                date[2],
+                date[3],
+                date[4],
+                date[5]
+              ).toLocaleString()
+            )
+          );
         } else {
           modelDetails.push(
             this.createData(
@@ -247,6 +262,7 @@ export class ModelProperties extends React.Component<Props, State> {
                   <TransformationOptionsRow
                     row={row}
                     transformationOptions={transformationOptions}
+                    key={row.key}
                   />
                 ) : (
                   <TableRow key={row.key}>

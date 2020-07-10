@@ -24,6 +24,8 @@ interface Props {
   index: number;
 }
 
+type ColWidth = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
@@ -72,10 +74,6 @@ const properties = [
     label: 'Log loss',
   },
   {
-    name: 'elapsedTime',
-    label: 'Elapsed Time',
-  },
-  {
     name: 'createTime',
     label: 'Created',
   },
@@ -96,6 +94,10 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
         }, 0);
       }
     }
+    const width = this.props.confusionMatrix.length * 170;
+    const colWidth = Math.round(
+      12 / this.props.confusionMatrix.length
+    ) as ColWidth;
     for (const [index, value] of this.props.confusionMatrix.entries()) {
       if (index === 0) {
         matrix.push(
@@ -103,16 +105,16 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
             container
             alignItems="center"
             spacing={0}
-            style={{ width: 500 }}
+            style={{ width: width }}
             key={index}
           >
-            <Grid item xs={4} key={'n'}>
+            <Grid item xs={colWidth} key={'n'}>
               <Paper className={localStyles.paper} variant="outlined" square>
                 n = {sum}
               </Paper>
             </Grid>
             {this.props.confusionMatrix[0].map(item => (
-              <Grid item xs={4} key={item}>
+              <Grid item xs={colWidth} key={item}>
                 <Paper className={localStyles.paper} variant="outlined" square>
                   Predicted: {item}
                 </Paper>
@@ -126,16 +128,16 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
             container
             alignItems="center"
             spacing={0}
-            style={{ width: 500 }}
+            style={{ width: width }}
             key={index}
           >
-            <Grid item xs={4} key={'label'}>
+            <Grid item xs={colWidth} key={'label'}>
               <Paper className={localStyles.paper} variant="outlined" square>
                 Actual: {this.props.confusionMatrix[0][index - 1]}
               </Paper>
             </Grid>
             {value.map(item => (
-              <Grid item xs={4} key={item}>
+              <Grid item xs={colWidth} key={item}>
                 <Paper className={localStyles.paper} variant="outlined" square>
                   {item}
                 </Paper>
@@ -309,7 +311,22 @@ export class EvaluationTable extends React.Component<Props, State> {
     const evaluationTable = [];
     for (let i = 0; i < properties.length; i++) {
       if (modelEvaluation[properties[i]['name']]) {
-        if (typeof modelEvaluation[properties[i]['name']] === 'number') {
+        if (properties[i]['name'] === 'createTime') {
+          const date = modelEvaluation[properties[i]['name']];
+          evaluationTable.push(
+            this.createData(
+              properties[i]['label'],
+              new Date(
+                date[0],
+                date[1] - 1,
+                date[2],
+                date[3],
+                date[4],
+                date[5]
+              ).toLocaleString()
+            )
+          );
+        } else if (typeof modelEvaluation[properties[i]['name']] === 'number') {
           evaluationTable.push(
             this.createData(
               properties[i]['label'],

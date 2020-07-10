@@ -437,6 +437,7 @@ export class DatasetComponent extends React.Component<Props, State> {
 
   render() {
     const { isLoading, tableSpecs, source } = this.state;
+    const createTime = this.props.dataset.createTime;
     return (
       <div className={localStyles.panel}>
         <header className={localStyles.header}>
@@ -448,7 +449,15 @@ export class DatasetComponent extends React.Component<Props, State> {
           <div className={localStyles.paper}>
             <header className={localStyles.title}>Dataset Info</header>
             <p style={{ padding: '8px' }}>
-              Created: {this.props.dataset.createTime}
+              Created:{' '}
+              {new Date(
+                createTime[0],
+                createTime[1] - 1,
+                createTime[2],
+                createTime[3],
+                createTime[4],
+                createTime[5]
+              ).toLocaleString()}
             </p>
             <p style={{ padding: '8px' }}>
               Dataset type: {this.props.dataset.datasetType}

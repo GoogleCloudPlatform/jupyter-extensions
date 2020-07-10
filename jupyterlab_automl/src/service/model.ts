@@ -1,5 +1,7 @@
 import { requestAPI } from './api_request';
 
+export type ModelType = 'OTHER' | 'TABLE' | 'IMAGE';
+
 export interface Model {
   id: string; // Resource name of dataset
   displayName: string;
@@ -7,6 +9,7 @@ export interface Model {
   createTime: Date;
   updateTime: Date;
   etag: string;
+  modelType: string;
 }
 
 export interface Models {
