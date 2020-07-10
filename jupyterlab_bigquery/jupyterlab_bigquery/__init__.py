@@ -1,6 +1,6 @@
 from notebook.utils import url_path_join
 
-from jupyterlab_bigquery.handlers import ListHandler, SearchHandler, DatasetDetailsHandler, TableDetailsHandler
+from jupyterlab_bigquery.handlers import ListHandler, SearchHandler, DatasetDetailsHandler, TablePreviewHandler, TableDetailsHandler
 from jupyterlab_bigquery.version import VERSION
 from jupyterlab_bigquery.pagedAPI_handler import PagedQueryHandler
 
@@ -32,5 +32,6 @@ def load_jupyter_server_extension(nb_server_app):
         make_endpoint('search', SearchHandler),
         make_endpoint('datasetdetails', DatasetDetailsHandler),
         make_endpoint('tabledetails', TableDetailsHandler),
+        make_endpoint('tablepreview', TablePreviewHandler),
         make_endpoint('query', PagedQueryHandler)
     ])

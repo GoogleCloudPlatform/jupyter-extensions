@@ -31,12 +31,12 @@ export const localStyles = stylesheet({
     flexDirection: 'column',
   },
   detailsBody: {
-    margin: '24px',
     fontSize: '13px',
     flex: 1,
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
+    marginTop: '24px',
   },
   labelContainer: {
     display: 'flex',
@@ -88,9 +88,6 @@ export const DetailsPanel: React.SFC<Props> = props => {
   const { details, rows, detailsType } = props;
   return (
     <div className={localStyles.panel}>
-      <header className={localStyles.header}>
-        {detailsType === 'table' ? details.name : details.id}
-      </header>
       <div className={localStyles.detailsBody}>
         <Grid container spacing={4}>
           <Grid item xs={6}>

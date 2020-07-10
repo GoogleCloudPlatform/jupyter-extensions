@@ -18,7 +18,7 @@ import {
 import { connect } from 'react-redux';
 import { QueryResult } from '../query_text_editor/service/query';
 
-const localStyles = stylesheet({
+export const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     fontSize: '18px',
