@@ -548,6 +548,9 @@ class CombinedContentsManager(ContentsManager):
       if path == path_prefix or path.startswith(path_prefix + '/'):
         relative_path = path[len(path_prefix):]
         return self._content_managers[path_prefix], relative_path, path_prefix
+    if '/' in path:
+        path_parts = path.split('/', 1)
+        return None, path_parts[1], path_parts[0]
     return None, path, ''
 
   def is_hidden(self, path):
@@ -696,14 +699,14 @@ class CombinedContentsManager(ContentsManager):
     if (old_path in ['', '/']) or (new_path in ['', '/']):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
-      old_cm, old_relative_path, _ = self._content_manager_for_path(old_path)
-      if old_relative_path in ['', '/']:
+      old_cm, old_relative_path, old_prefix = self._content_manager_for_path(old_path)
+      if (old_relative_path in ['', '/']) or (old_prefix in ['', '/']) :
         raise HTTPError(403, 'The top-level directory contents are read-only')
       if not old_cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(old_path))
 
-      new_cm, new_relative_path, _ = self._content_manager_for_path(new_path)
-      if new_relative_path in ['', '/']:
+      new_cm, new_relative_path, new_prefix = self._content_manager_for_path(new_path)
+      if (new_relative_path in ['', '/']) or (new_prefix in ['', '/']) :
         raise HTTPError(403, 'The top-level directory contents are read-only')
       if not new_cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(new_path))
