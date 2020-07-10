@@ -107,6 +107,7 @@ export class ImportData extends React.Component<Props, State> {
 
   private async submit() {
     this.setState({ loading: true });
+    this.props.onClose();
     try {
       switch (this.state.from) {
         case 'gcs':
@@ -129,7 +130,6 @@ export class ImportData extends React.Component<Props, State> {
         default:
       }
       this.setState({ error: null });
-      this.props.onSuccess();
     } catch (err) {
       console.warn(err);
       this.setState({
@@ -138,7 +138,7 @@ export class ImportData extends React.Component<Props, State> {
     } finally {
       this.setState({ loading: false });
       if (!this.state.error) {
-        this.props.onClose();
+        this.props.onSuccess();
       }
     }
   }
@@ -225,6 +225,7 @@ export class ImportData extends React.Component<Props, State> {
   render() {
     return (
       <DialogComponent
+        keepMounted={true}
         header={'Import Data'}
         open={true}
         onClose={this.props.onClose}
