@@ -601,4 +601,4 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   );
 };
 
-export const CreateStudy = connect(mapDispatchToProps)(CreateStudyUnwrapped);
+export const CreateStudy = connect(null, mapDispatchToProps)(CreateStudyUnwrapped);
