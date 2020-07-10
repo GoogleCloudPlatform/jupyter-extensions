@@ -109,4 +109,42 @@ export class OptimizerService {
       handleApiError(err);
     }
   }
+
+  async deleteStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<boolean> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      await this._transportService.submit<undefined>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        method: 'DELETE',
+      });
+      return true;
+    } catch (err) {
+      console.error(`Unable to delete study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
+
+  async getStudy(
+    rawStudyName: string,
+    metadata: MetadataRequired
+  ): Promise<Study> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Study>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        method: 'GET',
+      });
+      return response.result;
+    } catch (err) {
+      console.error(`Unable to fetch study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
 }

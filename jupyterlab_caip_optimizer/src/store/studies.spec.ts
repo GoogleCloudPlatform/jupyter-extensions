@@ -1,5 +1,11 @@
-import { studiesSlice, fetchStudies, createStudy } from './studies';
+import {
+  studiesSlice,
+  fetchStudies,
+  createStudy,
+  deleteStudy,
+} from './studies';
 import { AsyncState, Study, Algorithm } from '../types';
+import { fakeStudy } from '../service/test-constants';
 
 describe('studies reducer', () => {
   describe('fetchStudies', () => {
@@ -28,7 +34,7 @@ describe('studies reducer', () => {
       expect(newState).toEqual({
         loading: false,
         data: studies,
-        error: null,
+        error: undefined,
       });
     });
 
@@ -88,7 +94,7 @@ describe('studies reducer', () => {
       expect(newState).toEqual({
         loading: false,
         data: [newStudy],
-        error: null,
+        error: undefined,
       });
     });
 
@@ -101,6 +107,37 @@ describe('studies reducer', () => {
       expect(newState.data).toBeUndefined();
       expect(newState.error).toMatchInlineSnapshot(
         `"Failed to create the study!"`
+      );
+    });
+  });
+
+  describe('deleteStudy', () => {
+    const mockState: AsyncState<any> = {
+      data: [{}, fakeStudy, {}],
+      error: 'error',
+      loading: false,
+    };
+    it('removes the study from the list on success', () => {
+      const newState = studiesSlice.reducer(
+        mockState,
+        deleteStudy.fulfilled(undefined, undefined, fakeStudy.name)
+      );
+      expect(newState).toEqual({
+        loading: false,
+        data: [{}, {}],
+        error: undefined,
+      });
+    });
+
+    it('sets an error message on error', () => {
+      const newState = studiesSlice.reducer(
+        mockState,
+        deleteStudy.rejected(new Error('Error'), undefined, undefined)
+      );
+      expect(newState.loading).toBe(false);
+      expect(newState.data).toEqual(mockState.data);
+      expect(newState.error).toMatchInlineSnapshot(
+        `"Failed to delete the study!"`
       );
     });
   });
