@@ -6,32 +6,22 @@ export interface AsyncState<T> {
   data?: T;
 }
 
-// Optimizer API
 export interface MetricSpec {
   goal: GoalType;
   metric: string;
 }
 
-export enum GoalType {
-  MAXIMIZE = 'MAXIMIZE',
-  MINIMIZE = 'MINIMIZE',
-  GOAL_TYPE_UNSPECIFIED = 'GOAL_TYPE_UNSPECIFIED',
-}
+export const GoalTypeList = ["MAXIMIZE", "MINIMIZE", "GOAL_TYPE_UNSPECIFIED"] as const;
 
-export enum ParameterType {
-  DOUBLE = 'DOUBLE',
-  INTEGER = 'INTEGER',
-  CATEGORICAL = 'CATEGORICAL',
-  DISCRETE = 'DISCRETE',
-  PARAMETER_TYPE_UNSPECIFIED = 'PARAMETER_TYPE_UNSPECIFIED',
-}
+export type GoalType = typeof GoalTypeList[number];
 
-export enum ScaleType {
-  UNIT_LINEAR_SCALE = 'UNIT_LINEAR_SCALE',
-  UNIT_LOG_SCALE = 'UNIT_LOG_SCALE',
-  UNIT_REVERSE_LOG_SCALE = 'UNIT_REVERSE_LOG_SCALE',
-  SCALE_TYPE_UNSPECIFIED = 'SCALE_TYPE_UNSPECIFIED',
-}
+export const ParameterTypeList = ["DOUBLE", "INTEGER", "CATEGORICAL", "DISCRETE", "PARAMETER_TYPE_UNSPECIFIED"] as const;
+
+export type ParameterType = typeof ParameterTypeList[number];
+
+export const ScaleTypeList = ["UNIT_LINEAR_SCALE", "UNIT_LOG_SCALE", "UNIT_REVERSE_LOG_SCALE", "SCALE_TYPE_UNSPECIFIED"] as const;
+
+export type ScaleType = typeof ScaleTypeList[number];
 
 export interface DoubleValueSpec {
   minValue: number;
@@ -106,12 +96,9 @@ export interface MedianAutomatedStoppingConfig {
   useElapsedTime: boolean;
 }
 
-export enum Algorithm {
-  ALGORITHM_UNSPECIFIED = 'ALGORITHM_UNSPECIFIED',
-  GAUSSIAN_PROCESS_BANDIT = 'GAUSSIAN_PROCESS_BANDIT',
-  GRID_SEARCH = 'GRID_SEARCH',
-  RANDOM_SEARCH = 'RANDOM_SEARCH',
-}
+export const AlgorithmList = ["ALGORITHM_UNSPECIFIED", "GAUSSIAN_PROCESS_BANDIT", "GRID_SEARCH", "RANDOM_SEARCH"] as const;
+
+export type Algorithm = typeof AlgorithmList[number];
 
 export type AutomatedStoppingConfig =
   | {
