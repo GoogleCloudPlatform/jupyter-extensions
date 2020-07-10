@@ -1,15 +1,10 @@
 import * as React from 'react';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
-import { Box, Button, Paper, Chip } from '@material-ui/core';
+import { Box, Button, Paper, Chip, Typography, TextField, MenuItem, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import * as Types from '../types';
-
-/**
- * Checkout: https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/templates/sign-in/SignIn.js
- */
+import { connect } from 'react-redux';
+import { createStudy } from '../store/studies';
+import { setView } from '../store/view';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
@@ -26,6 +21,17 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+interface Props {
+  createStudyAndLoad: (study: Types.Study) => void;
+}
+
+const mapDispatchToProps = dispatch => ({
+  createStudyAndLoad: (study: Types.Study) => dispatch(createStudy(study)).then((study: Types.Study) => dispatch(setView({
+    view: 'studyDetails',
+    studyId: study.name, // might need to prettify?
+  }))),
+})
+
 interface DropdownItem {
   value: string;
   label: string;
@@ -35,7 +41,7 @@ type ParameterChip = {
   key: number;
   label: string;
   paramName: string;
-  paramType: string;
+  paramType: Types.ParameterType;
   paramValList?: string[];
   paramValListString?: string;
   paramMinVal?: string;
@@ -46,7 +52,7 @@ type MetricChip = {
   key: number;
   label: string;
   metricName: string;
-  metricGoalType: string;
+  metricGoalType: Types.GoalType;
 };
 
 const paramChipDataSample: ParameterChip[] = [
@@ -54,14 +60,14 @@ const paramChipDataSample: ParameterChip[] = [
     key: 0,
     label: 'Param 1',
     paramName: 'Param 1',
-    paramType: 'CATEGORICAL',
+    paramType: "CATEGORICAL",
     paramValList: ['high', 'medium', 'low'],
   },
   {
     key: 1,
     label: 'Param 2',
     paramName: 'Param 2',
-    paramType: 'DOUBLE',
+    paramType: "DOUBLE",
     paramMinVal: '0.0',
     paramMaxVal: '12.5',
     paramValList: [],
@@ -73,17 +79,17 @@ const metricChipDataSample: MetricChip[] = [
     key: 0,
     label: 'Metric 1',
     metricName: 'Metric 1',
-    metricGoalType: Types.GoalType.MAXIMIZE,
+    metricGoalType: "MAXIMIZE",
   },
   {
     key: 1,
     label: 'Metric 2',
     metricName: 'Metric 2',
-    metricGoalType: Types.GoalType.MINIMIZE,
+    metricGoalType: "MINIMIZE",
   },
 ];
 
-const createDropdown = (items: string[]): DropdownItem[] => {
+const createDropdown = (items: ReadonlyArray<string>): DropdownItem[] => {
   const dropdownList: DropdownItem[] = items.map(
     (item: string): DropdownItem => {
       return { value: item, label: item };
@@ -91,9 +97,13 @@ const createDropdown = (items: string[]): DropdownItem[] => {
   );
   return dropdownList;
 };
-export const CreateStudy = () => {
+
+export const CreateStudyUnwrapped: React.FC<Props> = ({
+  createStudyAndLoad,
+}) => {
   const classes = useStyles();
-  const [paramType, setParamType] = React.useState('');
+  const [studyName, setStudyName] = React.useState('');
+  const [paramType, setParamType] = React.useState<Types.ParameterType>('PARAMETER_TYPE_UNSPECIFIED');
   const [paramName, setParamName] = React.useState('');
   const [paramMinVal, setParamMinVal] = React.useState('');
   const [paramMaxVal, setParamMaxVal] = React.useState('');
@@ -101,25 +111,19 @@ export const CreateStudy = () => {
   const [paramValListString, setParamValListString] = React.useState('');
   const [paramNew, setParamNew] = React.useState(true);
   const [paramChipData, setParamChipData] = React.useState(paramChipDataSample); // TODO: change this to empty list. for demo purposes
-  const paramTypes: DropdownItem[] = createDropdown(
-    Object.values(Types.ParameterType)
-  );
+  const paramTypes: DropdownItem[] = createDropdown(Types.ParameterTypeList);
   const [metricName, setMetricName] = React.useState('');
-  const [metricGoalType, setMetricGoalType] = React.useState('');
-  const metricGoalTypes: DropdownItem[] = createDropdown(
-    Object.values(Types.GoalType)
-  );
+  const [metricGoalType, setMetricGoalType] = React.useState<Types.GoalType>('GOAL_TYPE_UNSPECIFIED');
+  const metricGoalTypes: DropdownItem[] = createDropdown(Types.GoalTypeList);
   const [metricNew, setMetricNew] = React.useState(true);
   const [metricChipData, setMetricChipData] = React.useState(
     metricChipDataSample
   );
-  const [algorithmType, setAlgorithmType] = React.useState('');
-  const algorithmTypes: DropdownItem[] = createDropdown(
-    Object.values(Types.Algorithm)
-  );
+  const [algorithmType, setAlgorithmType] = React.useState<Types.Algorithm>('ALGORITHM_UNSPECIFIED');
+  const algorithmTypes: DropdownItem[] = createDropdown(Types.AlgorithmList);
 
   const resetParamState = () => {
-    setParamType('');
+    setParamType("PARAMETER_TYPE_UNSPECIFIED");
     setParamName('');
     setParamMinVal('');
     setParamMaxVal('');
@@ -129,7 +133,7 @@ export const CreateStudy = () => {
   };
 
   const resetMetricState = () => {
-    setMetricGoalType('');
+    setMetricGoalType("GOAL_TYPE_UNSPECIFIED");
     setMetricName('');
     setMetricNew(true);
   };
@@ -144,7 +148,6 @@ export const CreateStudy = () => {
     const type = event.target.value;
     setParamType(type);
     if (type === 'DOUBLE' || type === 'INTEGER') {
-      console.log(type);
       setParamValListString('');
       setParamValList([]);
       return;
@@ -237,6 +240,16 @@ export const CreateStudy = () => {
     resetParamState();
   };
 
+  const handleMetricGoalTypeChange = event => {
+    const type = event.target.value;
+    setMetricGoalType(type);
+  }
+
+  const handleAlgorithmTypeChange = event => {
+    const type = event.target.value;
+    setAlgorithmType(type);
+  }
+
   const handleAddMetric = () => {
     setMetricChipData([...metricChipData, getCurrentMetricChip()]);
     resetMetricState();
@@ -260,11 +273,67 @@ export const CreateStudy = () => {
     resetMetricState();
   };
 
-  // const debug = event => {
-  //   console.log(paramValList);
-  //   console.log(paramValListString);
-  //   setChipData([]);
-  // };
+  const getMetricSpecList = (): Types.MetricSpec[] => {
+    return metricChipData.map((metric: MetricChip): Types.MetricSpec => {
+      return {
+        goal: metric.metricGoalType,
+        metric: metric.metricName,
+      }
+    });
+  }
+
+  const getParameterSpecList = (): Types.ParameterSpec[] => {
+    return paramChipData.map((parameter: ParameterChip): Types.ParameterSpec => {
+      let parameterSpec: Partial<Types.ParameterSpec> = {};
+      parameterSpec['parameter'] = parameter.paramName;
+      parameterSpec['type'] = parameter.paramType;
+      switch (parameterSpec.type) {
+        case "DOUBLE": {
+          parameterSpec['doubleValueSpec'] = {
+            minValue: Number(parameter.paramMinVal),
+            maxValue: Number(parameter.paramMaxVal),
+          } as Types.DoubleValueSpec;
+          break;
+        }
+        case "INTEGER": {
+          parameterSpec['integerValueSpec'] = {
+            minValue: BigInt(parameter.paramMinVal),
+            maxValue: BigInt(parameter.paramMaxVal),
+          } as Types.IntegerValueSpec;
+          break;
+        }
+        case "CATEGORICAL": {
+          parameterSpec['categoricalValueSpec'] = {
+            values: parameter.paramValList,
+          } as Types.CategoricalValueSpec;
+          break;
+        }
+        case "DISCRETE": {
+          parameterSpec['discreteValueSpec'] = {
+            values: parameter.paramValList.map((valueString: string):number => Number(valueString)),
+          } as Types.DiscreteValueSpec;
+          break;
+        }
+      }
+      const finalParameterSpec = parameterSpec as Types.ParameterSpec;
+      return finalParameterSpec;
+    })
+  }
+
+  const getStudyObject = (): Types.Study => {
+    const metrics = getMetricSpecList();
+    const parameters = getParameterSpecList();
+    const studyConfig: Types.StudyConfig = {
+      metrics,
+      parameters,
+      algorithm: algorithmType
+    }
+    const study: Types.Study = {
+      name: studyName,
+      studyConfig,
+    }
+    return study;
+  }
 
   return (
     <Box m={5}>
@@ -282,6 +351,8 @@ export const CreateStudy = () => {
               id="studyName"
               name="studyName"
               label="Study Name"
+              value={studyName}
+              onChange={e => setStudyName(e.target.value)}
               fullWidth
             />
           </Grid>
@@ -441,7 +512,7 @@ export const CreateStudy = () => {
                   select
                   label="Goal Type"
                   value={metricGoalType}
-                  onChange={e => setMetricGoalType(e.target.value)}
+                  onChange={handleMetricGoalTypeChange}
                   fullWidth
                   required
                 >
@@ -506,7 +577,7 @@ export const CreateStudy = () => {
                   select
                   label="Algorithm Type"
                   value={algorithmType}
-                  onChange={e => setAlgorithmType(e.target.value)}
+                  onChange={handleAlgorithmTypeChange}
                   fullWidth
                   required
                 >
@@ -520,7 +591,7 @@ export const CreateStudy = () => {
             </Grid>
           </Grid>
           <Grid container item spacing={3} justify="flex-end">
-            <Button size="large" variant="contained" color="primary">
+            <Button size="large" variant="contained" color="primary" disabled={!studyName} onClick={() => createStudyAndLoad(getStudyObject())}>
               Create Study
             </Button>
           </Grid>
@@ -529,3 +600,5 @@ export const CreateStudy = () => {
     </Box>
   );
 };
+
+export const CreateStudy = connect(mapDispatchToProps)(CreateStudyUnwrapped);

@@ -4,7 +4,7 @@ import {
   createStudy,
   deleteStudy,
 } from './studies';
-import { AsyncState, Study, Algorithm } from '../types';
+import { AsyncState, Study } from '../types';
 import { fakeStudy } from '../service/test-constants';
 
 describe('studies reducer', () => {
@@ -84,7 +84,7 @@ describe('studies reducer', () => {
               metric: 'y',
             },
           ],
-          algorithm: Algorithm.ALGORITHM_UNSPECIFIED,
+          algorithm: "ALGORITHM_UNSPECIFIED",
         },
       } as Study;
       const newState = studiesSlice.reducer(
