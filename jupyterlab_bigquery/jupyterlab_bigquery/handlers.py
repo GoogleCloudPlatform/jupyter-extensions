@@ -32,6 +32,7 @@ def list_projects(client):
   project = client.project
   projects_list = [{
       'id': format(project),
+      'name': format(project),
       'datasets': list_datasets(client, project),
   }]
   return {'projects': projects_list}
@@ -66,7 +67,8 @@ def list_tables(client, dataset):
 def list_models(client, dataset):
   models = list(client.list_models(dataset))
   return [{
-      'id': format(model.model_id),
+      'id': '{}.{}'.format(model.dataset_id, model.model_id),
+      'name': model.model_id,
   } for model in models]
 
 
@@ -75,7 +77,7 @@ def get_dataset_details(client, dataset_id):
   return {
       'details': {
           'id': "{}.{}".format(dataset.project, dataset.dataset_id),
-          'display_name': dataset.friendly_name,
+          'name': dataset.dataset_id,
           'description': dataset.description,
           'labels': ["\t{}: {}".format(label, value) for label, value in dataset.labels.items()] if dataset.labels else None,
           'date_created': json.dumps(dataset.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
@@ -87,13 +89,20 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
+def get_schema(schema):
+    return [{
+        'name': field.name,
+        'type': field.field_type,
+        'description': field.description,
+        'mode': field.mode
+    } for field in schema]
 
 def get_table_details(client, table_id):
   table = client.get_table(table_id)
   return {
       'details': {
           'id': "{}.{}.{}".format(table.project, table.dataset_id, table.table_id),
-          'display_name': table.friendly_name,
+          'name': table.table_id,
           'description': table.description,
           'labels': ["\t{}: {}".format(label, value) for label, value in table.labels.items()] if table.labels else None,
           'date_created': json.dumps(table.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
@@ -105,31 +114,9 @@ def get_table_details(client, table_id):
           'link': table.self_link,
           'num_rows': table.num_rows,
           'num_bytes': table.num_bytes,
-          'schema': str(table.schema)
+          'schema': get_schema(table.schema)
       }
   }
-
-
-def make_query(request_body):
-    client = bigquery.Client()
-
-    query = request_body['query']
-    jobConfig = request_body['jobConfig']
-
-    job_config = bigquery.QueryJobConfig(*jobConfig)
-    query_job = client.query(query, job_config=job_config)
-
-    if query_job.error_result is not None:
-        raise Exception(query_job.error_result)
-
-    df = query_job.to_dataframe()
-    
-    response = {
-        'content': df.to_json(orient='values'),
-        'labels': json.dumps(df.columns.to_list()),
-    }
-
-    return response
 
 class ListHandler(APIHandler):
   """Handles requests for Dummy List of Items."""
@@ -192,22 +179,3 @@ class TableDetailsHandler(APIHandler):
               'message': str(e)
           }
       })
-
-
-class QueryHandler(APIHandler):
-    """Handles request for query."""
-    
-    def post(self, *args, **kwargs):
-        try:
-            post_body = self.get_json_body()
-
-            self.finish(make_query(post_body))
-
-        except Exception as e:
-            app_log.exception(str(e))
-            self.set_status(500, str(e))
-            self.finish({
-                'error': {
-                    'message': str(e)
-                }
-            })

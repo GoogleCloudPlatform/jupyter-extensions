@@ -16,6 +16,7 @@ interface Props {
   onSubmit?: () => void;
   children?: React.ReactNode;
   submitDisabled?: boolean;
+  keepMounted?: boolean;
 }
 
 const dialogStyle = stylesheet({
@@ -40,7 +41,7 @@ const dialogStyle = stylesheet({
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
 export function DialogComponent(props: Props) {
   return (
-    <Dialog open={props.open}>
+    <Dialog keepMounted={props.keepMounted} open={props.open}>
       {props.header && (
         <header className={dialogStyle.header}>{props.header}</header>
       )}

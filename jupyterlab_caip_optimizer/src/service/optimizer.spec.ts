@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { OptimizerService } from './optimizer';
+import { OptimizerService, prettifyStudyName } from './optimizer';
 import { ServerConnection } from '@jupyterlab/services';
 import { MetadataRequired } from '../types';
 import {
@@ -54,12 +54,24 @@ describe('OptimizerService', () => {
   });
 
   it('Retrieves the list of created studies', async () => {
-    mockSubmit.mockReturnValue(asApiResponse(fakeStudyListResponse));
+    mockSubmit.mockReturnValue(
+      asApiResponse({ studies: fakeStudyListResponse })
+    );
     const object = await optimizerService.listStudy(fakeMetadataRequired);
     expect(object).toEqual(fakeStudyListResponse);
     expect(mockSubmit).toHaveBeenCalledWith({
       path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies`,
       method: 'GET',
     });
+  });
+});
+
+describe('prettifyStudyName', () => {
+  it('makes a study name readable', () => {
+    expect(
+      prettifyStudyName(
+        'projects/project-name/locations/us-central1/studies/study / name'
+      )
+    ).toEqual('study / name');
   });
 });

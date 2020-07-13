@@ -1,9 +1,10 @@
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
+import red from '@material-ui/core/colors/red';
 import * as React from 'react';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
-import { Model, ModelService } from '../service/model';
+import { Model, ModelService, ModelType } from '../service/model';
 import { Context } from './automl_widget';
 import {
   TextInput,
@@ -16,6 +17,7 @@ import { ImportData } from './import_data';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
+import { ImageWidget } from './image_widget';
 import { ModelWidget } from './model_widget';
 
 interface Props {
@@ -187,6 +189,18 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   title: 'Created at',
                   field: 'createTime',
                   type: ColumnType.DateTime,
+                  render: rowData => {
+                    const time = rowData.createTime;
+                    const newTime = new Date(
+                      time[0],
+                      time[1] - 1,
+                      time[2],
+                      time[3],
+                      time[4],
+                      time[5]
+                    ).toLocaleString();
+                    return <p>{newTime}</p>;
+                  },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
                 },
@@ -196,6 +210,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 if (rowData.datasetType === 'TABLE') {
                   this.props.context.manager.launchWidgetForId(
                     DatasetWidget,
+                    rowData.id,
+                    rowData
+                  );
+                } else {
+                  this.props.context.manager.launchWidgetForId(
+                    ImageWidget,
                     rowData.id,
                     rowData
                   );
@@ -218,17 +238,31 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               columns={[
                 {
                   field: 'displayName',
-                  title: 'Name',
+                  title: '',
+                  render: rowData => this.iconForModelType(rowData.modelType),
+                  fixedWidth: 30,
+                  sorting: false,
                 },
                 {
-                  title: 'Pipeline',
-                  field: 'pipelineId',
-                  minShowWidth: breakpoints[1],
+                  field: 'displayName',
+                  title: 'Name',
                 },
                 {
                   title: 'Last updated',
                   field: 'updateTime',
                   type: ColumnType.DateTime,
+                  render: rowData => {
+                    const time = rowData.updateTime;
+                    const newTime = new Date(
+                      time[0],
+                      time[1] - 1,
+                      time[2],
+                      time[3],
+                      time[4],
+                      time[5]
+                    ).toLocaleString();
+                    return <p>{newTime}</p>;
+                  },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
                 },
@@ -312,7 +346,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     const icons: { [key in DatasetType]: any } = {
       OTHER: {
         icon: 'error',
-        color: blue[900],
+        color: red[900],
       },
       TABLE: {
         icon: 'table_chart',
@@ -327,6 +361,30 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       <ListItem dense style={{ padding: 0 }}>
         <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
           {icons[datasetType].icon}
+        </Icon>
+      </ListItem>
+    );
+  }
+
+  private iconForModelType(modelType: ModelType) {
+    const icons: { [key in ModelType]: any } = {
+      OTHER: {
+        icon: 'emoji_objects',
+        color: red[900],
+      },
+      TABLE: {
+        icon: 'emoji_objects',
+        color: blue[700],
+      },
+      IMAGE: {
+        icon: 'emoji_objects',
+        color: orange[500],
+      },
+    };
+    return (
+      <ListItem dense style={{ padding: 0 }}>
+        <Icon style={{ ...styles.icon, color: icons[modelType].color }}>
+          {icons[modelType].icon}
         </Icon>
       </ListItem>
     );

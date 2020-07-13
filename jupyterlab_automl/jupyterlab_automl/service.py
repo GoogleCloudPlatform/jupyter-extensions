@@ -10,6 +10,7 @@ from gcp_jupyterlab_shared.handlers import AuthProvider
 from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
+from gcp_jupyterlab_shared.handlers import AuthProvider
 
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
@@ -68,7 +69,6 @@ class AutoMLService:
     self._project = AuthProvider.get().project
 
     self._parent = "projects/{}/locations/us-central1".format(self._project)
-    self._time_format = "%B %d, %Y, %I:%M%p"
     self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
         hashlib.md5(self._project.encode('utf-8')).hexdigest())
 
@@ -87,17 +87,76 @@ class AutoMLService:
     return cls._instance
 
   def get_models(self):
-    models = self._model_client.list_models(parent=self._parent).models
-    return {
-        "models": [{
+    models = []
+    for model in self._model_client.list_models(parent=self._parent).models:
+      model_type = 'OTHER'
+      if 'image' in model.metadata_schema_uri:
+        model_type = 'IMAGE'
+      elif 'tables' in model.metadata_schema_uri:
+        model_type = 'TABLE'
+      models.append({
             "id": model.name,
             "displayName": model.display_name,
             "pipelineId": model.training_pipeline,
-            "createTime": model.create_time.strftime(self._time_format),
-            "updateTime": model.update_time.strftime(self._time_format),
+            "createTime": (model.create_time.year, model.create_time.month, model.create_time.day, model.create_time.hour, model.create_time.minute, model.create_time.second),
+            "updateTime": (model.update_time.year, model.update_time.month, model.update_time.day, model.update_time.hour, model.update_time.minute, model.update_time.second),
             "etag": model.etag,
-        } for model in models]
+            "modelType": model_type
+        })
+    return {
+        "models": models,
     }
+
+  def _get_feature_importance(self, model_explanation):
+    features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
+    return [
+        {
+            "name": key,
+            "Percentage": round(val * 100, 3),
+        } for key, val in features
+    ]
+
+  def _get_confusion_matrix(self, confusion_matrix):
+    rows = confusion_matrix["rows"]
+    titles = []
+    for column in confusion_matrix["annotationSpecs"]:
+      titles.append(column["displayName"])
+    rows.insert(0, titles)
+    return rows
+
+  def _get_confidence_metrics(self, confidence_metrics):
+    labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
+              "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
+              "truePositiveCount", "falseNegativeCount", "falsePositiveCount",
+              "falsePositiveRate", "falsePositiveRateAt1"]
+    metrics = []
+    for confidence_metric in confidence_metrics:
+      metric = {}
+      for label in labels:
+        if label == "confidenceThreshold":
+          value = confidence_metric.get(label, 0.0) * 100
+        else:
+          value = confidence_metric.get(label, "NaN")
+        metric[label] = value
+      metrics.append(metric)
+    return metrics
+
+  def get_model_evaluation(self, model_id):
+    optional_fields = ["auPrc", "auRoc", "logLoss"]
+    evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
+    create_time = (evaluation.create_time.year, evaluation.create_time.month, evaluation.create_time.day, evaluation.create_time.hour, evaluation.create_time.minute, evaluation.create_time.second),
+    evaluation = json_format.MessageToDict(evaluation._pb)
+    metrics = evaluation["metrics"]
+    model_eval = {
+        "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
+        "createTime": create_time,
+        "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
+    }
+    if "modelExplanation" in evaluation:
+      model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+    for field in optional_fields:
+      model_eval[field] = metrics.get(field, None)
+    return model_eval
 
   def _get_feature_transformations(self, response):
     transformations = []
@@ -111,23 +170,24 @@ class AutoMLService:
 
   def get_pipeline(self, pipeline_id):
     pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    optional_fields = ["targetColumn", "predictionType", "optimizationObjective", "budgetMilliNodeHours", "trainBudgetMilliNodeHours"]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
-    transformation_options = self._get_feature_transformations(
-        training_task_inputs['transformations'])
-    return {
+    training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
-        "createTime": pipeline.create_time.strftime(self._time_format),
-        "updateTime": pipeline.update_time.strftime(self._time_format),
+        "createTime": (pipeline.create_time.year, pipeline.create_time.month, pipeline.create_time.day, pipeline.create_time.hour, pipeline.create_time.minute, pipeline.create_time.second),
+        "updateTime": (pipeline.update_time.year, pipeline.update_time.month, pipeline.update_time.day, pipeline.update_time.hour, pipeline.update_time.minute, pipeline.update_time.second),
         "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
-        "budget": training_task_inputs['trainBudgetMilliNodeHours'],
         "datasetId": pipeline.input_data_config.dataset_id,
-        "targetColumn": training_task_inputs['targetColumn'],
-        "transformationOptions": transformation_options,
-        "objective": training_task_inputs['predictionType'],
-        "optimizedFor": training_task_inputs['optimizationObjective'],
     }
+    if "transformations" in training_task_inputs:
+      transformation_options = self._get_feature_transformations(
+          training_task_inputs["transformations"])
+      training_pipeline["transformationOptions"] = transformation_options
+    for field in optional_fields:
+      training_pipeline[field] = training_task_inputs.get(field, None)
+    return training_pipeline
 
   def get_datasets(self):
     datasets = []
@@ -138,8 +198,8 @@ class AutoMLService:
         datasets.append({
             "id": dataset.name,
             "displayName": dataset.display_name,
-            "createTime": dataset.create_time.strftime(self._time_format),
-            "updateTime": dataset.update_time.strftime(self._time_format),
+            "createTime": (dataset.create_time.year, dataset.create_time.month, dataset.create_time.day, dataset.create_time.hour, dataset.create_time.minute, dataset.create_time.second),
+            "updateTime": (dataset.update_time.year, dataset.update_time.month, dataset.update_time.day, dataset.update_time.hour, dataset.update_time.minute, dataset.update_time.second),
             "datasetType": dataset_type.value,
             "etag": dataset.etag,
             "metadata": json_format.MessageToDict(dataset._pb.metadata),
