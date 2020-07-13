@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ReactWidget, showErrorMessage } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { File, trimPath } from '../service/file'
 import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
@@ -38,6 +38,7 @@ interface State {
   fileName: string,
   serverRoot: string,
   activeTab: number,
+  errorMessage: string,
 }
 
 export interface Context {
@@ -69,12 +70,13 @@ export class CommentsComponent extends React.Component<Props, State> {
       fileName: this.props.file.filePath,
       serverRoot: serverRoot,
       activeTab: 0,
+      errorMessage: "",
     };
     //Track when the user switches to viewing a different file
     var context = this.props.context;
     context.labShell.currentChanged.connect(() => {
         if (context.docManager.contextForWidget(context.labShell.currentWidget)) {
-          this.getLocalComments();
+          this.getLocalAndRemoteComments();
         }
      });
   }
@@ -82,7 +84,7 @@ export class CommentsComponent extends React.Component<Props, State> {
 
   async componentDidMount() {
     try {
-      this.getLocalComments();
+      this.getLocalAndRemoteComments();
       const refreshInterval = this.props.refreshInterval * 1000;
       //Set timer for fetching new comments from the remote repository
       setInterval(() => {
@@ -124,6 +126,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             <Tab label="Detached" value={1}/>
           </Tabs>
         </AppBar>
+        {(this.state.errorMessage) && <Typography variant="subtitle1" className={localStyles.header} gutterBottom> {this.state.errorMessage}</Typography>}
         {(this.state.activeTab === 0) ?
           <List>{reviewCommentsList} </List> : <List> {detachedCommentsList} </List>}
       </div>
@@ -136,8 +139,10 @@ export class CommentsComponent extends React.Component<Props, State> {
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
-              showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
+              //file not stored inside a git repo
+              this.setState({errorMessage: "No comments to display: file not stored in any Git repository"});
             } else {
+              this.setState({errorMessage: ""}); //remove error message
               data.forEach(function(obj) {
                 var comment = createDetachedCommentFromJSON(obj);
                 comments.push(comment);
@@ -155,14 +160,15 @@ export class CommentsComponent extends React.Component<Props, State> {
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
-              showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
+              //file not stored in git repo
+              this.setState({errorMessage: "No comments to display: file not stored in any Git repository"});
             } else {
+              this.setState({errorMessage: ""}); //remove error message
               if (data.comments) {
                 data.comments.forEach(function(obj) {
                   var comment = createReviewCommentFromJSON(obj, data.revision, data.request);
                   comments.push(comment);
                 });
-                this.setState({reviewComments : comments, fileName: shortenedFilePath});
               }
             }
           }
@@ -175,21 +181,18 @@ export class CommentsComponent extends React.Component<Props, State> {
     httpGitRequest("remotePull", "POST", filePath, serverRoot);
   }
 
-  private async getLocalComments() {
-    const context = this.props.context;
-    const currWidget = context.labShell.currentWidget;
-    const filePath = context.docManager.contextForWidget(currWidget).path;
-    this.getDetachedComments(this.state.serverRoot, filePath);
-    this.getCodeReviewComments(this.state.serverRoot, filePath);
-  }
-
   private async getLocalAndRemoteComments() {
     const context = this.props.context;
     const currWidget = context.labShell.currentWidget;
     const filePath = context.docManager.contextForWidget(currWidget).path;
+    this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
     this.pullFromRemoteRepo(this.state.serverRoot, filePath);
-    this.getDetachedComments(this.state.serverRoot, filePath);
-    this.getCodeReviewComments(this.state.serverRoot, filePath);
+    this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
+  }
+
+  private async getLocalReviewAndDetachedComments(serverRoot: any, filePath: any) {
+    this.getDetachedComments(serverRoot, filePath);
+    this.getCodeReviewComments(serverRoot, filePath);
   }
 }
 
@@ -207,6 +210,6 @@ export class CommentsWidget extends ReactWidget {
         interval = data.interval;
       }
     }));
-    return <CommentsComponent file = {this.file} context = {this.context} refreshInterval = {interval} />;
+    return <div className={localStyles.root}> <CommentsComponent file = {this.file} context = {this.context} refreshInterval = {interval} /> </div>;
   }
 }
