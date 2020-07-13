@@ -11,18 +11,21 @@ import {
   DialogComponent,
   Option,
   RadioInput,
-  SelectInput,
   TextInput,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { DatasetService } from '../service/dataset';
+import { Context } from './automl_widget';
+import { ClientSession, UseSignal } from '@jupyterlab/apputils';
+import { KernelModel } from '../service/kernel_model';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
 interface Props {
   onClose: () => void;
   onSuccess: () => void;
+  context: Context;
 }
 
 interface State {
@@ -217,7 +220,35 @@ export class ImportData extends React.Component<Props, State> {
         />
       );
     } else if (from === 'dataframe') {
-      return <SelectInput />;
+      const manager = this.props.context.app.serviceManager;
+      const session = new ClientSession({
+        manager: manager.sessions,
+        name: 'Example',
+      });
+      session.initialize().catch(reason => {
+        console.error(
+          `Failed to initialize the session in ExamplePanel.\n${reason}`
+        );
+      });
+      const model = new KernelModel(session);
+      return (
+        <React.Fragment>
+          <button
+            key="header-thread"
+            className="jp-example-button"
+            onClick={() => {
+              model.execute('df');
+            }}
+          >
+            Compute 3+5
+          </button>
+          <UseSignal signal={model.stateChanged}>
+            {() => (
+              <span key="output field">{JSON.stringify(model.output)}</span>
+            )}
+          </UseSignal>
+        </React.Fragment>
+      );
     }
     return null;
   }
