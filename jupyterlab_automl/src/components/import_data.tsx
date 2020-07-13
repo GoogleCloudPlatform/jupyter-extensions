@@ -1,8 +1,9 @@
 import {
   FormControl,
   FormHelperText,
-  LinearProgress,
   Button,
+  Portal,
+  CircularProgress,
 } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
@@ -17,10 +18,12 @@ import {
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { DatasetService } from '../service/dataset';
+import Toast from './toast';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
 interface Props {
+  open: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -224,59 +227,72 @@ export class ImportData extends React.Component<Props, State> {
 
   render() {
     return (
-      <DialogComponent
-        keepMounted={true}
-        header={'Import Data'}
-        open={true}
-        onClose={this.props.onClose}
-        onCancel={this.props.onClose}
-        submitLabel={'Import Data'}
-        onSubmit={this.submit}
-        submitDisabled={
-          this.state.loading ||
-          this.state.error !== null ||
-          !this.state.name ||
-          !this.state.source
-        }
-      >
-        <RadioInput
-          value={this.state.from}
-          options={SOURCES}
-          onChange={event => {
-            this.setState({
-              from: event.target.value as SourceType,
-              source: null,
-              error: null,
-            });
-          }}
-        />
-        <div style={{ paddingTop: '16px' }}>
-          <FormControl
-            error={this.state.error !== null}
-            className={localStyles.form}
+      <>
+        <Portal>
+          <Toast
+            open={this.state.loading}
+            message={'Creating dataset...'}
+            onClose={() => {
+              this.setState({ loading: false });
+            }}
           >
-            <p className={localStyles.title}>
-              {
-                SOURCES.filter(el => {
-                  return el.value === this.state.from;
-                })[0].text
-              }
-            </p>
-            <TextInput
-              placeholder="my_dataset"
-              label="Name"
+            <CircularProgress size={24}></CircularProgress>
+          </Toast>
+        </Portal>
+        {this.props.open && (
+          <DialogComponent
+            header={'Import Data'}
+            open={true}
+            onClose={this.props.onClose}
+            onCancel={this.props.onClose}
+            submitLabel={'Import Data'}
+            onSubmit={this.submit}
+            submitDisabled={
+              this.state.loading ||
+              this.state.error !== null ||
+              !this.state.name ||
+              !this.state.source
+            }
+          >
+            <RadioInput
+              value={this.state.from}
+              options={SOURCES}
               onChange={event => {
-                this.setState({ name: event.target.value });
+                this.setState({
+                  from: event.target.value as SourceType,
+                  source: null,
+                  error: null,
+                });
               }}
             />
-            {this.getDialogContent()}
-            {this.state.error && (
-              <FormHelperText>{this.state.error}</FormHelperText>
-            )}
-            {this.state.loading && <LinearProgress />}
-          </FormControl>
-        </div>
-      </DialogComponent>
+            <div style={{ paddingTop: '16px' }}>
+              <FormControl
+                error={this.state.error !== null}
+                className={localStyles.form}
+              >
+                <p className={localStyles.title}>
+                  {
+                    SOURCES.filter(el => {
+                      return el.value === this.state.from;
+                    })[0].text
+                  }
+                </p>
+                <TextInput
+                  placeholder="my_dataset"
+                  label="Name"
+                  onChange={event => {
+                    this.setState({ name: event.target.value });
+                  }}
+                />
+                {this.getDialogContent()}
+                {this.state.error && (
+                  <FormHelperText>{this.state.error}</FormHelperText>
+                )}
+              </FormControl>
+            </div>
+          </DialogComponent>
+        )}
+      </>
     );
   }
 }

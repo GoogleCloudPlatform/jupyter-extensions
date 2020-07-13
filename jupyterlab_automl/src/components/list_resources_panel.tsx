@@ -296,16 +296,15 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onSubmit={this.state.deleteSubmit}
             submitLabel={'Ok'}
           />
-          {this.state.modalOpen ? (
-            <ImportData
-              onClose={() => {
-                this.setState({ modalOpen: false });
-              }}
-              onSuccess={() => {
-                this.refresh();
-              }}
-            />
-          ) : null}
+          <ImportData
+            open={this.state.modalOpen}
+            onClose={() => {
+              this.setState({ modalOpen: false });
+            }}
+            onSuccess={() => {
+              this.refresh();
+            }}
+          />
         </Box>
       </>
     );
