@@ -8,6 +8,10 @@ interface ChartProps {
   dataKey: string;
   title: string;
   titleClass: string;
+  chartColor: {
+    stroke: string;
+    fill: string;
+  };
   areaChartProps: {};
   areaProps: {};
   cartesianGridProps: {};
@@ -27,6 +31,7 @@ export function AreaChartWrapper(props: ChartProps) {
     dataKey,
     title,
     titleClass,
+    chartColor,
     areaChartProps,
     areaProps,
     cartesianGridProps,
@@ -34,9 +39,11 @@ export function AreaChartWrapper(props: ChartProps) {
   } = props;
   return (
     <div className={STYLES.chartContainer}>
-      <h1 className={titleClass}>{title}</h1>
+      <h1 className={titleClass}>{`${title} - ${
+        data[data.length - 1][dataKey]
+      }%`}</h1>
       <AreaChart {...areaChartProps} data={data}>
-        <Area {...areaProps} dataKey={dataKey} />
+        <Area {...areaProps} {...chartColor} dataKey={dataKey} />
         <Tooltip />
         <CartesianGrid {...cartesianGridProps} />
         <YAxis {...yAxisProps} />
