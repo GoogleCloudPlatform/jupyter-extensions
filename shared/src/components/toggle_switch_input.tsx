@@ -17,8 +17,6 @@
 import { Switch, FormControlLabel, withStyles } from '@material-ui/core';
 import * as React from 'react';
 
-import { COLORS } from '../styles';
-
 interface LabelProps {
   label?: string;
   name?: string;
@@ -32,25 +30,13 @@ const StyledLabel = withStyles({
   },
 })(FormControlLabel);
 
-const StyledSwitch = withStyles({
-  iconChecked: {
-    color: COLORS.blue,
-  },
-  checked: {
-    '& + $bar': {
-      backgroundColor: COLORS.blue,
-    },
-  },
-  bar: {},
-})(Switch);
-
 /** Material style toggle switch */
 export function ToggleSwitch(props: LabelProps) {
   const { name, checked, label, onChange } = props;
   return (
     <StyledLabel
       control={
-        <StyledSwitch
+        <Switch
           checked={checked}
           onChange={onChange}
           name={name}
