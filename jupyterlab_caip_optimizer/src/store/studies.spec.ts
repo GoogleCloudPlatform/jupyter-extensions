@@ -84,7 +84,7 @@ describe('studies reducer', () => {
               metric: 'y',
             },
           ],
-          algorithm: "ALGORITHM_UNSPECIFIED",
+          algorithm: 'ALGORITHM_UNSPECIFIED',
         },
       } as Study;
       const newState = studiesSlice.reducer(

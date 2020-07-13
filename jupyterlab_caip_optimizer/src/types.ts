@@ -15,15 +15,30 @@ export interface MetricSpec {
  * 'Const assignment" used to control the string inputs in dropdown input fields.
  * String enums don't support reverse mapping, and plain string literal types aren't iterable.
  */
-export const GoalTypeList = ["MAXIMIZE", "MINIMIZE", "GOAL_TYPE_UNSPECIFIED"] as const;
+export const GoalTypeList = [
+  'MAXIMIZE',
+  'MINIMIZE',
+  'GOAL_TYPE_UNSPECIFIED',
+] as const;
 
 export type GoalType = typeof GoalTypeList[number];
 
-export const ParameterTypeList = ["DOUBLE", "INTEGER", "CATEGORICAL", "DISCRETE", "PARAMETER_TYPE_UNSPECIFIED"] as const;
+export const ParameterTypeList = [
+  'DOUBLE',
+  'INTEGER',
+  'CATEGORICAL',
+  'DISCRETE',
+  'PARAMETER_TYPE_UNSPECIFIED',
+] as const;
 
 export type ParameterType = typeof ParameterTypeList[number];
 
-export const ScaleTypeList = ["UNIT_LINEAR_SCALE", "UNIT_LOG_SCALE", "UNIT_REVERSE_LOG_SCALE", "SCALE_TYPE_UNSPECIFIED"] as const;
+export const ScaleTypeList = [
+  'UNIT_LINEAR_SCALE',
+  'UNIT_LOG_SCALE',
+  'UNIT_REVERSE_LOG_SCALE',
+  'SCALE_TYPE_UNSPECIFIED',
+] as const;
 
 export type ScaleType = typeof ScaleTypeList[number];
 
@@ -108,7 +123,12 @@ export interface MedianAutomatedStoppingConfig {
   useElapsedTime: boolean;
 }
 
-export const AlgorithmList = ["ALGORITHM_UNSPECIFIED", "GAUSSIAN_PROCESS_BANDIT", "GRID_SEARCH", "RANDOM_SEARCH"] as const;
+export const AlgorithmList = [
+  'ALGORITHM_UNSPECIFIED',
+  'GAUSSIAN_PROCESS_BANDIT',
+  'GRID_SEARCH',
+  'RANDOM_SEARCH',
+] as const;
 
 export type Algorithm = typeof AlgorithmList[number];
 
