@@ -3,7 +3,7 @@ import { Signal } from '@phosphor/signaling';
 import * as React from 'react';
 
 import { TableDetailsService } from './service/list_table_details';
-import TableDetailsPanel from './table_details_panel';
+import TableDetailsTabs from './table_details_tabs';
 
 /** Widget to be registered in the main panel. */
 export class TableDetailsWidget extends ReactWidget {
@@ -12,12 +12,12 @@ export class TableDetailsWidget extends ReactWidget {
 
   constructor(
     private readonly service: TableDetailsService,
-    private readonly dataset_id: string,
+    private readonly table_id: string,
     private readonly name: string
   ) {
     super();
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
-    this.title.caption = `Dataset Details for ${this.dataset_id}`;
+    this.title.caption = `Table Details for ${this.table_id}`;
     this.title.label = this.name;
     this.title.closable = true;
   }
@@ -35,9 +35,10 @@ export class TableDetailsWidget extends ReactWidget {
       <UseSignal signal={this.visibleSignal}>
         {(_, isVisible) => {
           return (
-            <TableDetailsPanel
+            <TableDetailsTabs
               isVisible={isVisible}
-              table_id={this.dataset_id}
+              table_id={this.table_id}
+              table_name={this.name}
               tableDetailsService={this.service}
             />
           );
