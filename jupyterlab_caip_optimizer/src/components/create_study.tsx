@@ -103,19 +103,19 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
   const [studyName, setStudyName] = React.useState('');
-  const [paramType, setParamType] = React.useState<Types.ParameterType>('PARAMETER_TYPE_UNSPECIFIED');
   const [paramName, setParamName] = React.useState('');
+  const [paramType, setParamType] = React.useState<Types.ParameterType>('PARAMETER_TYPE_UNSPECIFIED');
+  const paramTypes: DropdownItem[] = createDropdown(Types.ParameterTypeList);
   const [paramMinVal, setParamMinVal] = React.useState('');
   const [paramMaxVal, setParamMaxVal] = React.useState('');
   const [paramValList, setParamValList] = React.useState([]);
   const [paramValListString, setParamValListString] = React.useState('');
-  const [paramNew, setParamNew] = React.useState(true);
+  const [paramIsNew, setParamIsNew] = React.useState(true);
   const [paramChipData, setParamChipData] = React.useState<ParameterChip[]>([]); // TODO: change this to empty list. for demo purposes
-  const paramTypes: DropdownItem[] = createDropdown(Types.ParameterTypeList);
   const [metricName, setMetricName] = React.useState('');
   const [metricGoalType, setMetricGoalType] = React.useState<Types.GoalType>('GOAL_TYPE_UNSPECIFIED');
   const metricGoalTypes: DropdownItem[] = createDropdown(Types.GoalTypeList);
-  const [metricNew, setMetricNew] = React.useState(true);
+  const [metricIsNew, setMetricIsNew] = React.useState(true);
   const [metricChipData, setMetricChipData] = React.useState<MetricChip[]>([]);
   const [algorithmType, setAlgorithmType] = React.useState<Types.Algorithm>('ALGORITHM_UNSPECIFIED');
   const algorithmTypes: DropdownItem[] = createDropdown(Types.AlgorithmList);
@@ -129,20 +129,13 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
     setParamMaxVal('');
     setParamValList([]);
     setParamValListString('');
-    setParamNew(true);
+    setParamIsNew(true);
   };
-
-  // TODO: Delete
-  // const debug = () => {
-  //   console.log(paramChipData);
-  //   console.log(metricChipData);
-  //   console.log(paramKeyCounter);
-  // };
 
   const resetMetricState = () => {
     setMetricGoalType("GOAL_TYPE_UNSPECIFIED");
     setMetricName('');
-    setMetricNew(true);
+    setMetricIsNew(true);
   };
 
   const handleParamValListChange = event => {
@@ -177,13 +170,13 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
       setParamValList(thisChip.paramValList);
       setParamValListString(thisChip.paramValList.join(','));
     }
-    setParamNew(false);
+    setParamIsNew(false);
   };
 
   const loadMetricData = thisChip => {
     setMetricName(thisChip.metricName);
     setMetricGoalType(thisChip.metricGoalType);
-    setMetricNew(false);
+    setMetricIsNew(false);
   };
 
   const getCurrentParamChip = (): ParameterChip => {
@@ -446,14 +439,14 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
             <Grid container item justify="space-evenly" xs={12}>
               <Button
                 color="primary"
-                disabled={paramNew}
+                disabled={paramIsNew}
                 onClick={handleSaveParam}
               >
                 SAVE PARAM
               </Button>
               <Button
                 color="primary"
-                disabled={paramNew}
+                disabled={paramIsNew}
                 onClick={handleDeleteParam}
               >
                 DELETE PARAM
@@ -464,7 +457,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                   !paramType ||
                   !paramName ||
                   (!paramMinVal && !paramMaxVal && paramValList.length === 0) ||
-                  !paramNew
+                  !paramIsNew
                 }
                 onClick={handleAddParam}
               >
@@ -536,21 +529,21 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               <Grid container item justify="space-evenly" xs={12}>
                 <Button
                   color="primary"
-                  disabled={metricNew}
+                  disabled={metricIsNew}
                   onClick={handleSaveMetric}
                 >
                   SAVE METRIC
                 </Button>
                 <Button
                   color="primary"
-                  disabled={metricNew}
+                  disabled={metricIsNew}
                   onClick={handleDeleteMetric}
                 >
                   DELETE METRIC
                 </Button>
                 <Button
                   color="primary"
-                  disabled={!metricName || !metricGoalType || !metricNew}
+                  disabled={!metricName || !metricGoalType || !metricIsNew}
                   onClick={handleAddMetric}
                 >
                   ADD METRIC

@@ -75,8 +75,6 @@ export class OptimizerService {
   async createStudy(study: Study, metadata: MetadataRequired): Promise<Study> {
     try {
       const body = JSON.stringify(study);
-      console.log(study);
-      console.log(body);
       const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
         path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
