@@ -10,6 +10,7 @@ interface QueryEditorTabProps {
   isVisible: boolean;
   queryId?: string;
   iniQuery?: string;
+  width?: number;
 }
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
@@ -37,6 +38,7 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.props.iniQuery}
+          width={this.props.width}
         />
         <QueryResults queryId={this.queryId} />
       </div>
