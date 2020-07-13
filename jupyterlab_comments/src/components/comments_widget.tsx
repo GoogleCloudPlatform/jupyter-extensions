@@ -29,7 +29,6 @@ import { Comment } from '../components/comment'
 interface Props {
   file: File,
   context: Context,
-  refreshInterval: number,
 }
 
 interface State {
@@ -51,8 +50,8 @@ export interface Context {
 const localStyles = stylesheet({
   root: {
     backgroundColor: 'white',
-    overflow: 'auto',
-    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   },
   header: {
     paddingLeft: 10,
@@ -85,7 +84,8 @@ export class CommentsComponent extends React.Component<Props, State> {
   async componentDidMount() {
     try {
       this.getLocalAndRemoteComments();
-      const refreshInterval = this.props.refreshInterval * 1000;
+      const refresh = await refreshIntervalRequest().then(response => response.json().then(data => data.interval));
+      const refreshInterval = refresh * 1000;
       //Set timer for fetching new comments from the remote repository
       setInterval(() => {
         console.log('Refreshed');
@@ -203,13 +203,6 @@ export class CommentsWidget extends ReactWidget {
   }
 
   render() {
-    let interval: number = 10; //set a default refresh interval of 10 seconds
-    refreshIntervalRequest().then(response => response.json().then(data => {
-      if (data) {
-        //update interval with value configured by the user in the Jupyter config file
-        interval = data.interval;
-      }
-    }));
-    return <div className={localStyles.root}> <CommentsComponent file = {this.file} context = {this.context} refreshInterval = {interval} /> </div>;
+    return <div className={localStyles.root}> <CommentsComponent file = {this.file} context = {this.context} /> </div>;
   }
 }
