@@ -106,6 +106,8 @@ function TabPanel(props: TabPanelProps) {
         minHeight: 0,
         flexDirection: 'column',
         display: value !== index ? 'none' : 'flex',
+        overflowX: value === TabInds.preview ? 'auto' : 'hidden',
+        overflowY: 'auto',
       }}
     >
       {children}

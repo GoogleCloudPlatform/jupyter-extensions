@@ -5,7 +5,24 @@ import {
   DatasetDetails,
 } from './service/list_dataset_details';
 import LoadingPanel from '../loading_panel';
-import { DetailsPanel, localStyles } from './details_panel';
+import { DetailsPanel } from './details_panel';
+import { stylesheet } from 'typestyle';
+
+const localStyles = stylesheet({
+  body: {
+    marginBottom: '24px',
+    marginRight: '24px',
+    marginLeft: '24px',
+    height: '100%',
+    overflowY: 'auto',
+  },
+  header: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    fontSize: '18px',
+    margin: 0,
+    padding: '8px 12px 8px 24px',
+  },
+});
 
 interface Props {
   datasetDetailsService: DatasetDetailsService;
@@ -86,17 +103,11 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div>
+        <div style={{ height: '100%' }}>
           <header className={localStyles.header}>
             {this.props.dataset_id}
           </header>
-          <div
-            style={{
-              marginBottom: '24px',
-              marginRight: '24px',
-              marginLeft: '24px',
-            }}
-          >
+          <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
               rows={this.state.rows}
