@@ -76,16 +76,12 @@ export class VmDetails extends React.Component<Props, State> {
     return (
       <span className={STYLES.container}>
         <span
-          className={classes(
-            STYLES.icon,
-            ICON_CLASS,
-            STYLES.interactiveHover
-          )}
+          className={classes(STYLES.icon, ICON_CLASS, STYLES.interactiveHover)}
           title="Show all details"
           onClick={() => this.showDialog()}
         ></span>
         <WidgetPopup>
-          <ResourceUtilizationCharts detailsServer={detailsServer}/>
+          <ResourceUtilizationCharts detailsServer={detailsServer} />
         </WidgetPopup>
         <span className={classes(STYLES.interactiveHover)}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
