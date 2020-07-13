@@ -24,6 +24,7 @@ import moment from 'moment';
 import { Launch } from '@material-ui/icons';
 import { prettifyStudyName } from '../service/optimizer';
 import { connect } from 'react-redux';
+import AddIcon from '@material-ui/icons/Add';
 
 const tableIcons = {
   Add: forwardRef((props, ref: React.Ref<SVGSVGElement>) => (
@@ -103,8 +104,8 @@ const columns = [
   },
 ];
 
-function capitalizeFirstLetter(string: string): string {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+function makeReadable(string: string): string {
+  return string.charAt(0).toUpperCase() + string.toLowerCase().slice(1);
 }
 
 interface Props {
@@ -154,21 +155,33 @@ export const DashboardUnwrapped: React.FC<Props> = ({
         createTime: study.createTime,
         state: study.state,
         metrics: study.studyConfig.metrics
-          .map(
-            metric =>
-              `${capitalizeFirstLetter(metric.goal.toLowerCase())} "${
-                metric.metric
-              }"`
-          )
+          .map(metric => `${makeReadable(metric.goal)} "${metric.metric}"`)
           .join(', '),
       }))
     : undefined;
 
   return (
     <Box pt={2} px={3} style={{ height: '100%', overflow: 'scroll' }}>
-      <Typography variant="h4" gutterBottom>
-        Optimizer Dashboard
-      </Typography>
+      <Box display="flex" my={2}>
+        <Typography variant="h4" gutterBottom>
+          Optimizer Dashboard
+        </Typography>
+
+        {/* Spacing Element */}
+        <Box mx="auto" />
+
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => openCreateStudy()}
+            startIcon={<AddIcon />}
+          >
+            Create Study
+          </Button>
+        </Box>
+      </Box>
+
       {loading && <>Loading</>}
       {!!error && <>Error {error}</>}
       {!!mappedStudies && (
@@ -196,10 +209,6 @@ export const DashboardUnwrapped: React.FC<Props> = ({
           }}
         />
       )}
-
-      <Button color="primary" onClick={() => openCreateStudy()}>
-        Create Study
-      </Button>
     </Box>
   );
 };

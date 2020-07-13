@@ -1,5 +1,6 @@
 import React from 'react';
 import QueryTextEditor from '../query_text_editor/query_text_editor';
+import QueryResults from './query_editor_results';
 
 interface QueryEditorTabProps {
   isVisible: boolean;
@@ -15,8 +16,9 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
 
   render() {
     return (
-      <div>
+      <div style={{ height: '100%', width: '100%' }}>
         <QueryTextEditor />
+        <QueryResults />
       </div>
     );
   }

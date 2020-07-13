@@ -62,6 +62,12 @@ export interface Details {
   gpu: Gpu;
 }
 
+export interface Option {
+  text: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
 interface AttributeMapper {
   label: string;
   mapper: (details: Details) => string;
@@ -105,7 +111,111 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
 
 MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
 
-/* Class names applied to the component. Exported for test selectors. */
+/**
+ * AI Platform Accelerator types.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ */
+export const ACCELERATOR_TYPES: Option[] = [
+  { value: '', text: 'None' },
+  { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
+  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
+  { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
+  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
+  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+];
+
+/**
+ * AI Platform Accelerator counts.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus
+ */
+export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
+  { value: '1', text: '1' },
+  { value: '2', text: '2' },
+  { value: '4', text: '4' },
+  { value: '8', text: '8' },
+];
+
+/**
+ * AI Platform Machine types.
+ * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
+ */
+export const MASTER_TYPES: Option[] = [
+  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
+  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
+  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
+  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
+  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
+  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
+
+  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
+  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
+  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
+  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
+  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
+  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
+
+  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
+  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
+  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
+  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
+];
+
+export interface HardwareConfiguration {
+  cpu: number;
+  memory: number;
+}
+
+/* CPU to Memory mappings for the Compute Engine machine types */
+export interface MachineTypeConfigurations {
+  base: Option;
+  configurations: HardwareConfiguration[];
+}
+
+export const machineTypes: MachineTypeConfigurations[] = [
+  {
+    base: {
+      value: 'n1-standard-',
+      text: 'N1 Standard',
+    },
+    configurations: [
+      { cpu: 4, memory: 15 },
+      { cpu: 8, memory: 30 },
+      { cpu: 16, memory: 60 },
+      { cpu: 32, memory: 120 },
+      { cpu: 64, memory: 240 },
+      { cpu: 96, memory: 360 },
+    ],
+  },
+  {
+    base: {
+      value: 'n1-highmem-',
+      text: 'N1 High Memory',
+    },
+    configurations: [
+      { cpu: 4, memory: 26 },
+      { cpu: 8, memory: 52 },
+      { cpu: 16, memory: 104 },
+      { cpu: 32, memory: 208 },
+      { cpu: 64, memory: 416 },
+      { cpu: 96, memory: 624 },
+    ],
+  },
+  {
+    base: {
+      value: 'n1-highcpu-',
+      text: 'N1 High CPU',
+    },
+    configurations: [
+      { cpu: 16, memory: 14.4 },
+      { cpu: 32, memory: 28.8 },
+      { cpu: 64, memory: 57.6 },
+      { cpu: 96, memory: 86.4 },
+    ],
+  },
+];
+
+/* Class names applied to the component. */
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
@@ -146,9 +256,5 @@ export const STYLES = stylesheet({
   listRow: {
     display: 'table-row',
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
-  },
-  chartTitleSmall: {
-    fontSize: '20px',
-    marginLeft: '20px',
   },
 });
