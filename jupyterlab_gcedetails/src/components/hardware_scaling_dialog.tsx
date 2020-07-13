@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-import * as path from 'path';
+import { Dialog } from '@material-ui/core';
+import * as React from 'react';
+import { HardwareScalingForm } from './hardware_scaling_form';
 
-
-export class File {
-  readonly filePath: string;
-  readonly comments: any[];
-  constructor(filePath: string) {
-    this.filePath = filePath;
-  }
+interface Props {
+  open: boolean;
+  onClose: () => void;
 }
 
-//Extract the file name from the full file path
-export function trimPath(filePath : string) {
-    try {
-        return path.basename(filePath);
-    } catch (e) {
-        console.log("Error trimming file path, returning untrimmed path.");
-        return filePath;
-    }
-
+/** Funtional Component for a common dialog interface with cancel and submit buttons. */
+export function HardwareScalingDialog(props: Props) {
+  return (
+    <Dialog open={props.open}>
+      <HardwareScalingForm onDialogClose={props.onClose} />
+    </Dialog>
+  );
 }

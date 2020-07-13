@@ -25,6 +25,8 @@ import {
 } from './data';
 import { DetailsDialogBody } from './components/details_dialog_body';
 import { ServerWrapper } from './components/server_wrapper';
+import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
+import { WidgetPopup } from './components/widget_popup';
 
 interface Props {
   detailsServer: ServerWrapper;
@@ -66,6 +68,7 @@ export class VmDetails extends React.Component<Props, State> {
 
   render() {
     const { details, receivedError } = this.state;
+    const { detailsServer } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -77,6 +80,9 @@ export class VmDetails extends React.Component<Props, State> {
           title="Show all details"
           onClick={() => this.showDialog()}
         ></span>
+        <WidgetPopup>
+          <ResourceUtilizationCharts detailsServer={detailsServer}/>
+        </WidgetPopup>
         <span className={classes(STYLES.interactiveHover)}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>

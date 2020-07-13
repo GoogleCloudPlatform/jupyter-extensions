@@ -4,6 +4,8 @@ import {
   DatasetDetailsService,
   DatasetDetails,
 } from './service/list_dataset_details';
+import LoadingPanel from '../loading_panel';
+import { DetailsPanel, localStyles } from './details_panel';
 
 interface Props {
   datasetDetailsService: DatasetDetailsService;
@@ -15,6 +17,12 @@ interface State {
   hasLoaded: boolean;
   isLoading: boolean;
   details: DatasetDetails;
+  rows: DetailRow[];
+}
+
+interface DetailRow {
+  name: string;
+  value: string;
 }
 
 export default class DatasetDetailsPanel extends React.Component<Props, State> {
@@ -24,15 +32,8 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
       hasLoaded: false,
       isLoading: false,
       details: { details: {} } as DatasetDetails,
+      rows: [],
     };
-  }
-
-  async componentDidMount() {
-    try {
-      // empty
-    } catch (err) {
-      console.warn('Unexpected error', err);
-    }
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -49,7 +50,25 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
       const details = await this.props.datasetDetailsService.listDatasetDetails(
         this.props.dataset_id
       );
-      this.setState({ hasLoaded: true, details });
+
+      const detailsObj = details.details;
+      const rows = [
+        { name: 'Dataset ID', value: detailsObj.id },
+        { name: 'Created', value: detailsObj.date_created },
+        {
+          name: 'Default table expiration',
+          value: detailsObj.default_expiration
+            ? detailsObj.default_expiration
+            : 'Never',
+        },
+        { name: 'Last modified', value: detailsObj.last_modified },
+        {
+          name: 'Data location',
+          value: detailsObj.location ? detailsObj.location : 'None',
+        },
+      ];
+
+      this.setState({ hasLoaded: true, details, rows });
     } catch (err) {
       console.warn('Error retrieving dataset details', err);
     } finally {
@@ -58,39 +77,26 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const details = this.state.details.details;
     if (this.state.isLoading) {
-      return <div>loading</div>;
+      return <LoadingPanel />;
     } else {
       return (
-        <div style={{ margin: 30 }}>
-          <div>{`Details for dataset ${details.id}`}</div>
-          <br />
-          <div>
-            Description: {details.description ? details.description : 'None'}
-          </div>
-          <div>
-            Labels:{' '}
-            {details.labels ? (
-              <ul>
-                {details.labels.map((value, index) => {
-                  return <li key={index}>{value}</li>;
-                })}
-              </ul>
-            ) : (
-              'None'
-            )}
-          </div>
-          <br />
-          <div>{`Dataset ID: ${details.id}`}</div>
-          <div>{`Created: ${details.date_created}`}</div>
-          <div>
-            Default table expiration:{' '}
-            {details.default_expiration ? details.default_expiration : 'Never'}
-          </div>
-          <div>{`Last modified: ${details.last_modified}`}</div>
-          <div>
-            Data location: {details.location ? details.location : 'None'}
+        <div>
+          <header className={localStyles.header}>
+            {this.props.dataset_id}
+          </header>
+          <div
+            style={{
+              marginBottom: '24px',
+              marginRight: '24px',
+              marginLeft: '24px',
+            }}
+          >
+            <DetailsPanel
+              details={this.state.details.details}
+              rows={this.state.rows}
+              detailsType="dataset"
+            />
           </div>
         </div>
       );

@@ -3,7 +3,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 export interface DatasetDetailsObject {
   id: string;
-  display_name: string;
+  name: string;
   description: string;
   labels: string[];
   date_created: string;

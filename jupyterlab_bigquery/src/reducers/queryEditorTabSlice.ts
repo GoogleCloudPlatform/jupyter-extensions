@@ -18,11 +18,21 @@ const queryEditorTabSlice = createSlice({
   reducers: {
     updateQueryResult(state, action: PayloadAction<QueryResult>) {
       const queryResult = action.payload;
-      state.queryResult = queryResult;
+      state.queryResult.content = state.queryResult.content.concat(
+        queryResult.content
+      );
+      state.queryResult.labels = queryResult.labels;
+    },
+    resetQueryResult(state, _) {
+      state.queryResult.content = [];
+      state.queryResult.labels = [];
     },
   },
 });
 
-export const { updateQueryResult } = queryEditorTabSlice.actions;
+export const {
+  updateQueryResult,
+  resetQueryResult,
+} = queryEditorTabSlice.actions;
 
 export default queryEditorTabSlice.reducer;

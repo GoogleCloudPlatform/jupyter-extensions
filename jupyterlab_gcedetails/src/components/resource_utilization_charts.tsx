@@ -1,7 +1,8 @@
 import * as React from 'react';
+import { stylesheet } from 'typestyle';
 import { ServerWrapper } from './server_wrapper';
 import { AreaChartWrapper } from './chart_wrapper';
-import { Utilization, STYLES } from '../data';
+import { Utilization } from '../data';
 
 const AREA_CHART_BLUE = {
   stroke: '#15B2D3',
@@ -36,6 +37,16 @@ interface State {
   receivedError: boolean;
 }
 
+const STYLES = stylesheet({
+  chartTitleSmall: {
+    fontSize: '15px',
+    marginLeft: '20px',
+  },
+  utilizationChartsContainer: {
+      padding: '10px 20px 20px 0px',
+  },
+});
+
 export class ResourceUtilizationCharts extends React.Component<Props, State> {
   private refreshInterval: number;
   private readonly NUM_DATA_POINTS = 20;
@@ -64,7 +75,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
 
   render() {
     return (
-      <span>
+      <div className={STYLES.utilizationChartsContainer}>
         {this.state.receivedError ? (
           'Unable to retrieve GCE VM details, please check your server logs'
         ) : (
@@ -87,7 +98,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
             />
           </span>
         )}
-      </span>
+      </div>
     );
   }
 
