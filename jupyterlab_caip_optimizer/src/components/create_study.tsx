@@ -40,7 +40,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(
         setView({
           view: 'studyDetails',
-          studyId: study.name, // might need to prettify?
+          studyId: study.name,
         })
       )
     ),
@@ -93,7 +93,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   const [paramValList, setParamValList] = React.useState([]);
   const [paramValListString, setParamValListString] = React.useState('');
   const [paramIsNew, setParamIsNew] = React.useState(true);
-  const [paramChipData, setParamChipData] = React.useState<ParameterChip[]>([]); // TODO: change this to empty list. for demo purposes
+  const [paramChipData, setParamChipData] = React.useState<ParameterChip[]>([]);
   const [metricName, setMetricName] = React.useState('');
   const [metricGoalType, setMetricGoalType] = React.useState<Types.GoalType>(
     'GOAL_TYPE_UNSPECIFIED'
