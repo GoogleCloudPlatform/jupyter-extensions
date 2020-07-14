@@ -16,7 +16,7 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { File, trimPath } from '../service/file'
+import { trimPath } from '../service/file'
 import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
@@ -27,7 +27,6 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment'
 
 interface Props {
-  file: File,
   context: Context,
 }
 
@@ -70,17 +69,15 @@ export class CommentsComponent extends React.Component<Props, State> {
     this.state = {
       reviewComments: [],
       detachedComments: [],
-      fileName: this.props.file.filePath,
       serverRoot: serverRoot,
       activeTab: 0,
       errorMessage: "",
+      fileName: "",
     };
     //Track when the user switches to viewing a different file
     var context = this.props.context;
     context.labShell.currentChanged.connect(() => {
-        if (context.docManager.contextForWidget(context.labShell.currentWidget)) {
-          this.getLocalAndRemoteComments();
-        }
+        this.getLocalAndRemoteComments();
      });
   }
 
@@ -121,9 +118,10 @@ export class CommentsComponent extends React.Component<Props, State> {
     return (
       <div className = {localStyles.root}>
         <CssBaseline/>
+        {(!this.state.errorMessage) &&
           <Typography color="primary" variant="h5" className={localStyles.header} gutterBottom>
               Comments for {this.state.fileName}
-          </Typography>
+          </Typography>}
         <AppBar position="static">
           <Tabs value={activeTab} onChange={this.tabChange} className={localStyles.tabs} >
             <Tab label="Review" value={0}/>
@@ -188,25 +186,40 @@ export class CommentsComponent extends React.Component<Props, State> {
   private async getLocalAndRemoteComments() {
     const context = this.props.context;
     const currWidget = context.labShell.currentWidget;
-    const filePath = context.docManager.contextForWidget(currWidget).path;
-    this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
-    this.pullFromRemoteRepo(this.state.serverRoot, filePath);
-    this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
+    if (currWidget) {
+      var currentFile = context.docManager.contextForWidget(currWidget);
+      if (!(currentFile === undefined)) {
+        const filePath = context.docManager.contextForWidget(currWidget).path;
+        this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
+        this.pullFromRemoteRepo(this.state.serverRoot, filePath);
+        this.getLocalReviewAndDetachedComments(this.state.serverRoot, filePath);
+      } else {
+          this.clearComments();
+          this.setState({errorMessage: "Open a file to view commments"});
+      }
+    } else {
+      this.clearComments();
+      this.setState({errorMessage: "Open a file to view commments"});
+    }
   }
 
   private async getLocalReviewAndDetachedComments(serverRoot: any, filePath: any) {
     this.getDetachedComments(serverRoot, filePath);
     this.getCodeReviewComments(serverRoot, filePath);
   }
+
+  private clearComments() {
+    this.setState({detachedComments: [], reviewComments: [], fileName: ""});
+  }
 }
 
 export class CommentsWidget extends ReactWidget {
-  constructor(private file : File, private context : Context) {
+  constructor(private context : Context) {
     super();
     this.addClass('comments-widget');
   }
 
   render() {
-    return <div className={localStyles.root}> <CommentsComponent file = {this.file} context = {this.context} /> </div>;
+    return <div className={localStyles.root}> <CommentsComponent context = {this.context} /> </div>;
   }
 }

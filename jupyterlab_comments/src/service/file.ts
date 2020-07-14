@@ -16,15 +16,6 @@
 
 import * as path from 'path';
 
-
-export class File {
-  readonly filePath: string;
-  readonly comments: any[];
-  constructor(filePath: string) {
-    this.filePath = filePath;
-  }
-}
-
 //Extract the file name from the full file path
 export function trimPath(filePath : string) {
     try {
