@@ -27,10 +27,16 @@ export const localStyles = stylesheet({
   panel: {
     backgroundColor: 'white',
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   detailsBody: {
     margin: '24px',
     fontSize: '13px',
+    flex: 1,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
   },
   labelContainer: {
     display: 'flex',
@@ -45,6 +51,11 @@ export const localStyles = stylesheet({
   row: {
     display: 'flex',
     padding: '6px',
+  },
+  scrollable: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'auto',
   },
 });
 
@@ -117,44 +128,49 @@ export const DetailsPanel: React.SFC<Props> = props => {
               </div>
             ))}
           </Grid>
-
-          {detailsType === 'table' && (
-            <Grid item xs={12}>
-              <div className={localStyles.title}>Schema</div>
-              {details.schema ? (
-                <Table
-                  size="small"
-                  style={{ width: 'auto', tableLayout: 'auto' }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableHeadCell>Field name</TableHeadCell>
-                      <TableHeadCell>Type</TableHeadCell>
-                      <TableHeadCell>Mode</TableHeadCell>
-                      <TableHeadCell>Description</TableHeadCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {details.schema.map((field, index) => {
-                      return (
-                        <TableRow key={`schema_row_${index}`}>
-                          <TableCell>
-                            <b>{field.name}</b>
-                          </TableCell>
-                          <TableCell>{field.type}</TableCell>
-                          <TableCell>{field.mode}</TableCell>
-                          <TableCell>{field.description ?? ''}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              ) : (
-                'Table does not have a schema.'
-              )}
-            </Grid>
-          )}
         </Grid>
+
+        {detailsType === 'table' && (
+          <div className={localStyles.title} style={{ marginTop: '32px' }}>
+            Schema
+          </div>
+        )}
+
+        {detailsType === 'table' && (
+          <div className={localStyles.scrollable}>
+            {details.schema ? (
+              <Table
+                size="small"
+                style={{ width: 'auto', tableLayout: 'auto' }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableHeadCell>Field name</TableHeadCell>
+                    <TableHeadCell>Type</TableHeadCell>
+                    <TableHeadCell>Mode</TableHeadCell>
+                    <TableHeadCell>Description</TableHeadCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {details.schema.map((field, index) => {
+                    return (
+                      <TableRow key={`schema_row_${index}`}>
+                        <TableCell>
+                          <b>{field.name}</b>
+                        </TableCell>
+                        <TableCell>{field.type}</TableCell>
+                        <TableCell>{field.mode}</TableCell>
+                        <TableCell>{field.description ?? ''}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              'Table does not have a schema.'
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

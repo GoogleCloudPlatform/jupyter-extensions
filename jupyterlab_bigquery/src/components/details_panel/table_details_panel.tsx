@@ -91,13 +91,11 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div>
-          <DetailsPanel
-            details={this.state.details.details}
-            rows={this.state.rows}
-            detailsType="table"
-          />
-        </div>
+        <DetailsPanel
+          details={this.state.details.details}
+          rows={this.state.rows}
+          detailsType="table"
+        />
       );
     }
   }
