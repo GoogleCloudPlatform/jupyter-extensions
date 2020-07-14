@@ -46,8 +46,9 @@ export function createDetachedCommentFromJSON(obj : any) : DetachedComment {
     const content = obj.comment;
     const hash = obj.hash;
     const children = obj.children;
-    var timestamp : Date = new Date(parseInt(content.timestamp) * 1000);
-    var timestampString = timestamp.toDateString();
+    var now = new Date();
+    var current = now.getTime();
+    var timestampString = timeAgo(current, parseInt(content.timestamp) * 1000);
     let comment : DetachedComment = {
       author: content.author,
       text: content.description,
@@ -68,8 +69,9 @@ export function createReviewCommentFromJSON(obj : any, revision: any, request: a
     const content = obj.comment;
     const hash = obj.hash;
     const children = obj.children;
-    var timestamp : Date = new Date(parseInt(content.timestamp) * 1000);
-    var timestampString = timestamp.toDateString();
+    var now = new Date();
+    var current = now.getTime();
+    var timestampString = timeAgo(current, parseInt(content.timestamp) * 1000);
     let comment : CodeReviewComment = {
       author: content.author,
       text: content.description,
@@ -86,6 +88,57 @@ export function createReviewCommentFromJSON(obj : any, revision: any, request: a
       comment.parent = parent;
     }
     return comment;
+}
+
+function timeAgo(current, previous) {
+  //Returns a new timestamp string (i.e. "20 minutes ago", "3 days ago")
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+
+    var elapsed = current - previous;
+    let time : number;
+
+    if (elapsed < msPerMinute) {
+      time = Math.round(elapsed/1000);
+      if (time == 1) {
+        return time + ' second ago';
+      } else {
+        return time + ' seconds ago'
+      }
+    }
+
+    else if (elapsed < msPerHour) {
+      time = Math.round(elapsed/msPerMinute);
+      if (time == 1) {
+        return time + ' minute ago';
+      } else {
+        return time + ' minutes ago'
+      }
+    }
+
+    else if (elapsed < msPerDay ) {
+      time = Math.round(elapsed/msPerHour);
+      if (time == 1) {
+        return time + ' hour ago';
+      } else {
+        return time + ' hours ago'
+      }
+    }
+
+    else if (elapsed < msPerMonth) {
+      time = Math.round(elapsed/msPerDay);
+      if (time == 1) {
+        return time + ' day ago';
+      } else {
+        return time + ' days ago'
+      }
+    }
+
+    else {
+      return '> 1 month ago';
+    }
 }
 
 

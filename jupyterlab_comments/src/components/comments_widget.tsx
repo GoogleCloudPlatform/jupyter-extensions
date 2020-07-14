@@ -57,6 +57,10 @@ const localStyles = stylesheet({
     paddingLeft: 10,
     paddingTop: 10,
   },
+  tabs: {
+    textAlign: 'center',
+    centered: true,
+  },
 });
 
 export class CommentsComponent extends React.Component<Props, State> {
@@ -121,7 +125,7 @@ export class CommentsComponent extends React.Component<Props, State> {
               Comments for {this.state.fileName}
           </Typography>
         <AppBar position="static">
-          <Tabs value={activeTab} onChange={this.tabChange}>
+          <Tabs value={activeTab} onChange={this.tabChange} className={localStyles.tabs} >
             <Tab label="Review" value={0}/>
             <Tab label="Detached" value={1}/>
           </Tabs>
