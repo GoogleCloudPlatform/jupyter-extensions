@@ -94,19 +94,19 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
   }
 }
 
-/* Menu body component */
+/* Nested select body component */
 
-interface MenuBodyProps {
+interface NestedSelectBodyProps {
   onSelect: (o: Option) => void;
   selectedOption: Option;
 }
 
-interface MenuBodyState {
+interface NestedSelectBodyState {
   displayedOptions: Option[];
 }
 
-class MenuBody extends React.Component<MenuBodyProps, MenuBodyState> {
-  constructor(props: MenuBodyProps) {
+class NestedSelectBody extends React.Component<NestedSelectBodyProps, NestedSelectBodyState> {
+  constructor(props: NestedSelectBodyProps) {
     super(props);
 
     this.state = {
@@ -184,19 +184,19 @@ class MenuBody extends React.Component<MenuBodyProps, MenuBodyState> {
   }
 }
 
-/* Menu component */
+/* Nested select component */
 
-interface MenuProps {
+interface NestedSelectProps {
   onChange?: (value: string) => void;
 }
 
-interface MenuState {
+interface NestedSelectState {
   visible: boolean;
   value: Option;
 }
 
-export class Menu extends React.Component<MenuProps, MenuState> {
-  constructor(props: MenuProps) {
+export class NestedSelect extends React.Component<NestedSelectProps, NestedSelectState> {
+  constructor(props: NestedSelectProps) {
     super(props);
 
     this.state = {
@@ -240,7 +240,7 @@ export class Menu extends React.Component<MenuProps, MenuState> {
           }
         />
         {visible && (
-          <MenuBody
+          <NestedSelectBody
             onSelect={newValue => this.selectOption(newValue)}
             selectedOption={value}
           />
