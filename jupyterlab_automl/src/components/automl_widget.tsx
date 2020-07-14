@@ -3,9 +3,18 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { WidgetManager, DialogComponent } from 'gcp_jupyterlab_shared';
+import { WidgetManager, DialogComponent, COLORS } from 'gcp_jupyterlab_shared';
 import { ListResourcesPanel } from './list_resources_panel';
 import { ManagementService } from '../service/management';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: COLORS.blue,
+    },
+  },
+});
 
 export interface Context {
   app: JupyterFrontEnd;
@@ -90,7 +99,7 @@ export class AutoMLWidget extends ReactWidget {
 
   render() {
     return (
-      <>
+      <ThemeProvider theme={theme}>
         <UseSignal signal={this.resizeVisibleSignal}>
           {(_, event: ResizeOrVisible) => {
             const w = event ? event.resize.width : 0;
@@ -125,7 +134,7 @@ export class AutoMLWidget extends ReactWidget {
             );
           }}
         </UseSignal>
-      </>
+      </ThemeProvider>
     );
   }
 
