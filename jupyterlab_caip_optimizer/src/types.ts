@@ -203,3 +203,43 @@ export interface MetadataRequired {
   projectId: string;
   region: string;
 }
+
+export type OperationMetadata<BODY extends {}> = BODY & {
+  '@type': string;
+};
+
+export interface OperationBase<BODY> {
+  name: string;
+  metadata: OperationMetadata<BODY>;
+  done?: boolean;
+}
+
+export type Operation<BODY = {}, METADATA = {}> = OperationBase<METADATA> &
+  (
+    | {
+        error: {
+          code: number;
+          message: string;
+          details: OperationMetadata<BODY>[];
+        };
+      }
+    | {
+        response: OperationMetadata<BODY>;
+      }
+  );
+
+export interface SuggestTrialsMetadata {
+  suggestionCount: number;
+}
+
+export interface SuggestTrialsResponse {
+  trials: Trial[];
+  studyState: State;
+  startTime: string;
+  endTime: string;
+}
+
+export type SuggestTrialOperation = Operation<
+  SuggestTrialsResponse,
+  SuggestTrialsMetadata
+>;
