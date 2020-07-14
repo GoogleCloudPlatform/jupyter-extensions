@@ -36,6 +36,20 @@ export function prettifyStudyName(studyName: string): string {
   return studyName.replace(/projects\/.+\/locations\/.+\/studies\//, '');
 }
 
+export function prettifyOperationId(rawOperationId: string): string {
+  return rawOperationId.replace(
+    /projects\/.+\/locations\/.+\/operations\//,
+    ''
+  );
+}
+
+export function prettifyTrial(rawTrialName: string): string {
+  return rawTrialName.replace(
+    /projects\/.+\/locations\/.+\/studies\/.+\/trials\//,
+    ''
+  );
+}
+
 /**
  * Class to interact with Optimizer
  */

@@ -88,12 +88,32 @@ describe('OptimizerService', () => {
   });
 });
 
-describe('prettifyStudyName', () => {
+describe('prettifyOperationId', () => {
   it('makes a study name readable', () => {
+    expect(
+      prettifyOperationId(
+        'projects/project-name/locations/us-central1/operations/operation / id'
+      )
+    ).toEqual('operation / id');
+  });
+});
+
+describe('prettifyStudyName', () => {
+  it('makes an operation id readable', () => {
     expect(
       prettifyStudyName(
         'projects/project-name/locations/us-central1/studies/study / name'
       )
     ).toEqual('study / name');
+  });
+});
+
+describe('prettifyTrial', () => {
+  it('makes a trial name readable', () => {
+    expect(
+      prettifyTrial(
+        'projects/project-name/locations/us-central1/studies/study / name/trials/trial / name'
+      )
+    ).toEqual('trial / name');
   });
 });
