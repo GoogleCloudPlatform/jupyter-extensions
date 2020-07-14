@@ -18,7 +18,14 @@ export const fetchStudies = createAsyncThunk<
     console.error('No Metadata found.');
     throw new TypeError('No metadata');
   }
-  return optimizer.listStudy(metadata);
+  const studyList = await optimizer.listStudy(metadata);
+  const studyListWithDetails: Study[] = [];
+  for (const paritalStudy of studyList) {
+    studyListWithDetails.push(
+      await optimizer.getStudy(paritalStudy.name, metadata)
+    );
+  }
+  return studyListWithDetails;
 });
 
 export const createStudy = createAsyncThunk<
@@ -34,6 +41,21 @@ export const createStudy = createAsyncThunk<
     throw new TypeError('No metadata');
   }
   return optimizer.createStudy(study, metadata);
+});
+
+export const deleteStudy = createAsyncThunk<
+  void,
+  string,
+  {
+    state: RootState;
+  }
+>('studies/delete', async (rawStudyName, thunkAPI) => {
+  const metadata = thunkAPI.getState().metadata.data;
+  if (!metadata) {
+    console.error('No Metadata found.');
+    throw new TypeError('No metadata');
+  }
+  await optimizer.deleteStudy(rawStudyName, metadata);
 });
 
 export const studiesSlice = createSlice({
@@ -52,6 +74,7 @@ export const studiesSlice = createSlice({
     builder.addCase(fetchStudies.fulfilled, (state, action) => {
       state.loading = false;
       state.data = action.payload;
+      state.error = undefined;
     });
     builder.addCase(fetchStudies.rejected, state => {
       state.loading = false;
@@ -68,10 +91,26 @@ export const studiesSlice = createSlice({
       } else {
         state.data.push(action.payload);
       }
+      state.error = undefined;
     });
     builder.addCase(createStudy.rejected, (state, action) => {
       state.loading = false;
       state.error = 'Failed to create the study!';
+    });
+    // Delete Study
+    builder.addCase(deleteStudy.fulfilled, (state, action) => {
+      // Find index of studyName
+      const index = state.data?.findIndex(
+        study => study.name === action.meta.arg
+      );
+      // Delete from list if it exists
+      if (index !== undefined) {
+        state.data.splice(index, 1);
+      }
+      state.error = undefined;
+    });
+    builder.addCase(deleteStudy.rejected, (state, action) => {
+      state.error = 'Failed to delete the study!';
     });
   },
 });

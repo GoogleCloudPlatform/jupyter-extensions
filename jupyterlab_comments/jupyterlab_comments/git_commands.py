@@ -38,8 +38,8 @@ class Git(Configurable):
 		status = self.run(repo_path, 'status').decode('utf-8')
 		return status
 
-	def appraise_pull(self, repo_path):
-		self.run(repo_path, 'appraise', 'pull', self.remote)
+	def appraise_pull(self, git_root_dir):
+		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 
 	def inside_git_repo(self, path_to_file):
 		"""
@@ -65,7 +65,6 @@ class Git(Configurable):
 		Assumes that git_root_dir is a valid path within a Git repo.
 		Keys of objects returned: hash, comment, original, children
 		"""
-		#self.appraise_pull(current_path) #pull new comments from remote repo
 		comments_string = self.run(git_root_dir, 'appraise', 'show', '-d',
 									'-json', file_path_from_repo_root)
 		comments_json = json.loads(comments_string)
@@ -77,7 +76,6 @@ class Git(Configurable):
 
 		The value of key "comments" is modified to only include comments for the requested file path. If there are no code review comments for the requested file path, the value of key "comments" will be an empty array.
 		"""
-		#self.appraise_pull(current_path) #pull new comments from remote repo
 		review_string = self.run(git_root_dir, 'appraise', 'show',
 									'-json')
 		review_json = json.loads(review_string)
@@ -93,6 +91,7 @@ class Git(Configurable):
 
 		review_json["comments"] = comments_on_file
 		return review_json
+
 
 	def add_comment(self, file_path, server_root):
 		pass

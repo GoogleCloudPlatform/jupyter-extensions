@@ -55,5 +55,11 @@ jupyter labextension uninstall jupyterlab-comments
 Add the following lines to your Jupyter config file (e.g. jupyter_notebook_config.py):
 ```bash
 c.Git.remote = '${NAME_OF_REMOTE_REPOSITORY}'
+
+c.Refresh.interval = '${REFRESH_INTERVAL_SECONDS}'
 ```
-(The name of the remote repository defaults to 'origin' if no value is configured)
+1) The name of the remote repository defaults to 'origin' if no value is configured.
+
+2) New comments are pulled from the current repository at a constant interval which can be configured. The default interval is 10 seconds.
+
+
