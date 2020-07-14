@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import {
   updateQueryResult,
   resetQueryResult,
+  deleteQueryEntry,
+  QueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
@@ -22,12 +24,21 @@ interface QueryTextEditorState {
 interface QueryTextEditorProps {
   updateQueryResult: any;
   resetQueryResult: any;
+  deleteQueryEntry: any;
+  queryId: QueryId;
 }
 
 interface QueryResponseType {
   content: string;
   labels: string;
   bytesProcessed: number;
+}
+
+export interface QueryResult {
+  content: Array<Array<unknown>>;
+  labels: Array<string>;
+  bytesProcessed: number;
+  queryId: QueryId;
 }
 
 interface QueryRequestBodyType {
@@ -93,6 +104,7 @@ class QueryTextEditor extends React.Component<
   editor: editor.IStandaloneCodeEditor;
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
+  queryId: QueryId;
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
@@ -105,6 +117,11 @@ class QueryTextEditor extends React.Component<
     };
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
+    this.queryId = props.queryId;
+  }
+
+  componentWillUnmount() {
+    this.props.deleteQueryEntry(this.queryId);
   }
 
   handleButtonClick() {
@@ -146,7 +163,10 @@ class QueryTextEditor extends React.Component<
           });
 
           this.setState({ bytesProcessed: response.bytesProcessed });
-          this.props.updateQueryResult(response);
+          const processed = (response as unknown) as QueryResult;
+          processed.queryId = this.queryId;
+
+          this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
           this.setState({
             buttonState: ButtonStates.ERROR,
@@ -294,6 +314,10 @@ const mapStateToProps = _ => {
   return {};
 };
 
-const mapDispatchToProps = { updateQueryResult, resetQueryResult };
+const mapDispatchToProps = {
+  updateQueryResult,
+  resetQueryResult,
+  deleteQueryEntry,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);
