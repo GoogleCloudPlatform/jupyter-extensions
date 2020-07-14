@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { OptimizerService, prettifyStudyName } from './optimizer';
+import {
+  OptimizerService,
+  prettifyStudyName,
+  prettifyOperationId,
+  prettifyTrial,
+} from './optimizer';
 import { ServerConnection } from '@jupyterlab/services';
 import { MetadataRequired } from '../types';
 import {
