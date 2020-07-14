@@ -19,6 +19,9 @@ const UTILIZATION_CHART_PROPERTIES = {
     height: 75,
     width: 350,
   },
+  areaProps: {
+    isAnimationActive: false,
+  },
   yAxisProps: {
     domain: [0, 100],
   },
@@ -43,7 +46,7 @@ const STYLES = stylesheet({
     marginLeft: '20px',
   },
   utilizationChartsContainer: {
-      padding: '10px 20px 20px 0px',
+    padding: '10px 20px 20px 0px',
   },
 });
 
@@ -85,7 +88,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
               titleClass={STYLES.chartTitleSmall}
               dataKey="cpu"
               data={this.state.data}
-              areaProps={AREA_CHART_ORANGE}
+              chartColor={AREA_CHART_ORANGE}
               {...UTILIZATION_CHART_PROPERTIES}
             />
             <AreaChartWrapper
@@ -93,7 +96,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
               titleClass={STYLES.chartTitleSmall}
               dataKey="memory"
               data={this.state.data}
-              areaProps={AREA_CHART_BLUE}
+              chartColor={AREA_CHART_BLUE}
               {...UTILIZATION_CHART_PROPERTIES}
             />
           </span>
