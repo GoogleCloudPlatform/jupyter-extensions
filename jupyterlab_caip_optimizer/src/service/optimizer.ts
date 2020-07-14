@@ -18,7 +18,13 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 import { TransportService, handleApiError } from 'gcp_jupyterlab_shared';
-import { Study, MetadataFull, MetadataRequired } from '../types';
+import {
+  Study,
+  MetadataFull,
+  MetadataRequired,
+  Trial,
+  Measurement,
+} from '../types';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
@@ -158,6 +164,144 @@ export class OptimizerService {
       return response.result;
     } catch (err) {
       console.error(`Unable to fetch study with name "${rawStudyName}"`);
+      handleApiError(err);
+    }
+  }
+
+  // Trials
+
+  /**
+   * Lists the trials associated with a study.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/list
+   * @param suggestionCount The number of wanted suggested trials.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the study.
+   */
+  async listTrials(
+    studyName: string,
+    metadata: MetadataRequired
+  ): Promise<Trial[]> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<{
+        trials?: Trial[];
+      }>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials`,
+        method: 'GET',
+      });
+      if (Array.isArray(response.result.trials)) {
+        return response.result.trials;
+      } else {
+        return [];
+      }
+    } catch (err) {
+      console.error(
+        `Unable to fetch trials for study with name "${prettifyStudyName(
+          studyName
+        )}"`
+      );
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Adds one or more trials to a study, with parameter values suggested by AI Platform Optimizer.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/suggest
+   * @param suggestionCount The number of wanted suggested trials.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the study.
+   * @returns A long-running operation associated with the generation of trial suggestions.
+   */
+  async suggestTrials(
+    suggestionCount: number,
+    studyName: string,
+    metadata: MetadataRequired
+  ): Promise<SuggestTrialOperation> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<
+        SuggestTrialOperation
+      >({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials:suggest`,
+        method: 'POST',
+        body: { suggestionCount, clientId: 'optimizer-extension' },
+      });
+      return response.result;
+    } catch (err) {
+      console.error(
+        `Unable to fetch suggested trials for study with name "${prettifyStudyName(
+          studyName
+        )}"`
+      );
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Marks a trial as complete.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/complete
+   * @param trialName Raw trial name.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the trial.
+   */
+  async completeTrial(
+    trialName: string,
+    studyName: string,
+    finalMeasurement: Measurement,
+    metadata: MetadataRequired
+  ): Promise<Trial> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<Trial>({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+          prettifyTrial(trialName)
+        )}:complete`,
+        method: 'POST',
+        body: {
+          finalMeasurement,
+        },
+      });
+      return response.result;
+    } catch (err) {
+      console.error(
+        `Unable to complete trial with name "${prettifyTrial(trialName)}"`
+      );
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Deletes a trial.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/delete
+   * @param trialName Raw trial name.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the trial.
+   */
+  async deleteTrial(
+    trialName: string,
+    studyName: string,
+    metadata: MetadataRequired
+  ): Promise<void> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      await this._transportService.submit({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+          prettifyTrial(trialName)
+        )}`,
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error(
+        `Unable to delete trial with name "${prettifyTrial(trialName)}"`
+      );
       handleApiError(err);
     }
   }

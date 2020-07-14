@@ -10,6 +10,8 @@ import {
   Algorithm,
   GoalType,
   State,
+  Trial,
+  Measurement,
 } from '../types';
 
 export const fakeMetricUnspecified = {
@@ -77,3 +79,34 @@ export const fakeStudyListResponse: Study[] = [
   fakeStudyResponseActive,
   fakeStudyResponseInactive,
 ];
+
+export const fakeTrial: Trial = {
+  name:
+    'projects/222309772370/locations/us-central1/studies/study-default/trial-default',
+  state: State.ACTIVE,
+  parameters: [
+    {
+      parameter: 'a',
+      floatValue: 55.55,
+    },
+    {
+      parameter: 'b',
+      stringValue: 'category',
+    },
+  ],
+  measurements: [],
+  startTime: '1',
+  endTime: '2',
+  clientId: 'optimizer-extension',
+};
+
+export const fakeMeasurement: Measurement = {
+  elapsedTime: '1',
+  stepCount: '100',
+  metrics: [
+    {
+      metric: 'a',
+      value: 77,
+    },
+  ],
+};

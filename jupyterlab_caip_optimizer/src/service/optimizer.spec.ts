@@ -86,6 +86,59 @@ describe('OptimizerService', () => {
       method: 'GET',
     });
   });
+
+  it('gets a list of trials', async () => {
+    const trials = [fakeTrial, fakeTrial, fakeTrial];
+    mockSubmit.mockReturnValue(asApiResponse({ trials }));
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    const response = await optimizerService.listTrials(
+      studyName,
+      fakeMetadataRequired
+    );
+    expect(response).toBe(trials);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials`,
+      method: 'GET',
+    });
+  });
+
+  it('completes a trial', async () => {
+    mockSubmit.mockReturnValue(asApiResponse(fakeTrial));
+    const trialName = fakeTrial.name;
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    const response = await optimizerService.completeTrial(
+      trialName,
+      studyName,
+      fakeMeasurement,
+      fakeMetadataRequired
+    );
+    expect(response).toBe(fakeTrial);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${trialName}:complete`,
+      method: 'POST',
+      body: {
+        finalMeasurement: fakeMeasurement,
+      },
+    });
+  });
+
+  it('deletes a trial', async () => {
+    mockSubmit.mockReturnValue(asApiResponse({}));
+    const trialName = fakeTrial.name;
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    await optimizerService.deleteTrial(
+      trialName,
+      studyName,
+      fakeMetadataRequired
+    );
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${trialName}`,
+      method: 'DELETE',
+    });
+  });
 });
 
 describe('prettifyOperationId', () => {
