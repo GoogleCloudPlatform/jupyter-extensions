@@ -46,10 +46,6 @@ export interface TableInfo {
   tableSpecs: TableSpec[];
 }
 
-export interface Datasets {
-  datasets: Dataset[];
-}
-
 export interface TablesDatasetOptions {
   gcsSource?: string;
   bigquerySource?: string;
@@ -67,7 +63,11 @@ function toBase64(file: File) {
 
 export abstract class DatasetService {
   static async listDatasets(): Promise<Dataset[]> {
-    const data = (await requestAPI<Datasets>('v1/datasets')).datasets;
+    const data = await requestAPI<Dataset[]>('v1/datasets');
+    for (let i = 0; i < data.length; ++i) {
+      data[i].createTime = new Date(data[i].createTime);
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
     return data;
   }
 

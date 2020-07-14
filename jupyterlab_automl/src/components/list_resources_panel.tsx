@@ -190,16 +190,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   field: 'createTime',
                   type: ColumnType.DateTime,
                   render: rowData => {
-                    const time = rowData.createTime;
-                    const newTime = new Date(
-                      time[0],
-                      time[1] - 1,
-                      time[2],
-                      time[3],
-                      time[4],
-                      time[5]
-                    ).toLocaleString();
-                    return <p>{newTime}</p>;
+                    return <p>{rowData.createTime.toLocaleString()}</p>;
                   },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
@@ -252,16 +243,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   field: 'updateTime',
                   type: ColumnType.DateTime,
                   render: rowData => {
-                    const time = rowData.updateTime;
-                    const newTime = new Date(
-                      time[0],
-                      time[1] - 1,
-                      time[2],
-                      time[3],
-                      time[4],
-                      time[5]
-                    ).toLocaleString();
-                    return <p>{newTime}</p>;
+                    return <p>{rowData.updateTime.toLocaleString()}</p>;
                   },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
