@@ -26,7 +26,7 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option, MACHINE_TYPES } from '../data';
+import { Option } from '../data';
 
 export const STYLES = stylesheet({
   itemGroup: {
@@ -41,7 +41,12 @@ export const STYLES = stylesheet({
   },
 });
 
-/* Item component that the user can select on the menu */
+export interface NestedOptions {
+  header: Option;
+  options: Option[];
+}
+
+/* Item component that wraps an option the user can select on the menu */
 
 interface ItemProps {
   option: Option;
@@ -99,6 +104,7 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
 interface NestedSelectBodyProps {
   onSelect: (o: Option) => void;
   selectedOption: Option;
+  nestedOptionsList: NestedOptions[];
 }
 
 interface NestedSelectBodyState {
@@ -113,32 +119,34 @@ class NestedSelectBody extends React.Component<
     super(props);
 
     this.state = {
-      displayedOptions: MACHINE_TYPES[0].configurations,
+      displayedOptions: props.nestedOptionsList[0].options,
     };
   }
 
   /* Displays a menu of header items that, on hover, change the options the user 
         can select on the menu */
   private headersList() {
+    const { nestedOptionsList } = this.props;
+
     return (
       <div className={STYLES.itemGroup}>
         <List dense={true} disablePadding={true}>
           <HeaderItem
-            key={MACHINE_TYPES[0].base.value}
-            label={MACHINE_TYPES[0].base.text}
+            key={nestedOptionsList[0].header.value}
+            label={nestedOptionsList[0].header.text}
             onHover={() =>
               this.setState({
-                displayedOptions: MACHINE_TYPES[0].configurations,
+                displayedOptions: nestedOptionsList[0].options,
               })
             }
           />
           <Divider style={{ marginTop: 4, marginBottom: 4 }} />
-          {MACHINE_TYPES.slice(1).map(machineType => (
+          {nestedOptionsList.slice(1).map(nestedOptions => (
             <HeaderItem
-              key={machineType.base.value}
-              label={machineType.base.text}
+              key={nestedOptions.header.value}
+              label={nestedOptions.header.text}
               onHover={() =>
-                this.setState({ displayedOptions: machineType.configurations })
+                this.setState({ displayedOptions: nestedOptions.options })
               }
             />
           ))}
@@ -174,7 +182,7 @@ class NestedSelectBody extends React.Component<
         <div className={STYLES.menuContainer}>
           <Grid container spacing={0} alignItems="center">
             <Grid item xs>
-              {this.headersList}
+              {this.headersList()}
             </Grid>
             <Divider orientation="vertical" flexItem />
             <Grid item xs>
@@ -190,6 +198,7 @@ class NestedSelectBody extends React.Component<
 /* Nested select component */
 
 interface NestedSelectProps {
+  nestedOptionsList: NestedOptions[];
   onChange?: (value: string) => void;
 }
 
@@ -207,7 +216,7 @@ export class NestedSelect extends React.Component<
 
     this.state = {
       visible: false,
-      value: MACHINE_TYPES[0].configurations[0],
+      value: props.nestedOptionsList[0].options[0],
     };
   }
 
@@ -230,6 +239,7 @@ export class NestedSelect extends React.Component<
 
   render() {
     const { visible, value } = this.state;
+    const { nestedOptionsList } = this.props;
 
     return (
       <div>
@@ -249,6 +259,7 @@ export class NestedSelect extends React.Component<
           <NestedSelectBody
             onSelect={newValue => this.selectOption(newValue)}
             selectedOption={value}
+            nestedOptionsList={nestedOptionsList}
           />
         )}
       </div>
