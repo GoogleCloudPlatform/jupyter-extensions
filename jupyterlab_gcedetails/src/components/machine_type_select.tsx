@@ -105,7 +105,10 @@ interface NestedSelectBodyState {
   displayedOptions: Option[];
 }
 
-class NestedSelectBody extends React.Component<NestedSelectBodyProps, NestedSelectBodyState> {
+class NestedSelectBody extends React.Component<
+  NestedSelectBodyProps,
+  NestedSelectBodyState
+> {
   constructor(props: NestedSelectBodyProps) {
     super(props);
 
@@ -167,19 +170,19 @@ class NestedSelectBody extends React.Component<NestedSelectBodyProps, NestedSele
 
   render() {
     return (
-        <Paper elevation={5} square>
-          <div className={STYLES.menuContainer}>
-            <Grid container spacing={0} alignItems="center">
-              <Grid item xs>
-                {this.headersList}
-              </Grid>
-              <Divider orientation="vertical" flexItem />
-              <Grid item xs>
-                {this.optionsList()}
-              </Grid>
+      <Paper elevation={5} square>
+        <div className={STYLES.menuContainer}>
+          <Grid container spacing={0} alignItems="center">
+            <Grid item xs>
+              {this.headersList}
             </Grid>
-          </div>
-        </Paper>
+            <Divider orientation="vertical" flexItem />
+            <Grid item xs>
+              {this.optionsList()}
+            </Grid>
+          </Grid>
+        </div>
+      </Paper>
     );
   }
 }
@@ -195,7 +198,10 @@ interface NestedSelectState {
   value: Option;
 }
 
-export class NestedSelect extends React.Component<NestedSelectProps, NestedSelectState> {
+export class NestedSelect extends React.Component<
+  NestedSelectProps,
+  NestedSelectState
+> {
   constructor(props: NestedSelectProps) {
     super(props);
 
