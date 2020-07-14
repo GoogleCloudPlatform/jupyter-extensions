@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Snackbar as MaterialSnackbar } from '@material-ui/core';
-import { Alert as MuiAlert, AlertProps } from '@material-ui/lab';
+import { Alert as MaterialAlert, AlertProps } from '@material-ui/lab';
 import { SnackbarState, snackbarSlice } from '../store/snackbar';
 import { connect, Provider } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
@@ -18,7 +18,7 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
 type Props = SnackbarState & { close: () => void };
 
 function Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
+  return <MaterialAlert elevation={6} variant="filled" {...props} />;
 }
 
 export const SnackbarUnwrapped = ({
