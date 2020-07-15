@@ -23,6 +23,7 @@ const localStyles = stylesheet({
   },
   tableCell: {
     border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    whiteSpace: 'nowrap',
   },
   pagination: {
     backgroundColor: 'white',
