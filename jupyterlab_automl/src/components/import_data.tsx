@@ -12,12 +12,13 @@ import {
   Option,
   RadioInput,
   TextInput,
+  SelectInput,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { DatasetService } from '../service/dataset';
 import { Context } from './automl_widget';
-import { ClientSession, UseSignal } from '@jupyterlab/apputils';
+import { ClientSession } from '@jupyterlab/apputils';
 import { KernelModel } from '../service/kernel_model';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
@@ -25,6 +26,7 @@ type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 interface Props {
   onClose: () => void;
   onSuccess: () => void;
+  onError: () => void;
   context: Context;
 }
 
@@ -34,6 +36,9 @@ interface State {
   name: string;
   error: string | null;
   loading: boolean;
+  sessions: Option[];
+  // TODO @josiegarza make this a part of source
+  kernelId: string;
 }
 
 const theme = createMuiTheme({
@@ -105,6 +110,8 @@ export class ImportData extends React.Component<Props, State> {
       name: '',
       error: null,
       loading: false,
+      sessions: null,
+      kernelId: null,
     };
   }
 
@@ -129,6 +136,7 @@ export class ImportData extends React.Component<Props, State> {
           });
           break;
         case 'dataframe':
+          this.initializeSession(this.state.kernelId);
           break;
         default:
       }
@@ -140,10 +148,72 @@ export class ImportData extends React.Component<Props, State> {
       });
     } finally {
       this.setState({ loading: false });
-      if (!this.state.error) {
+      if (!this.state.error && this.state.from !== 'dataframe') {
         this.props.onSuccess();
       }
     }
+  }
+
+  private getSessions() {
+    const manager = this.props.context.app.serviceManager;
+    const running = manager.sessions.running();
+    const sessions: Option[] = [];
+    let current = running.next();
+    this.setState({ kernelId: current['kernel']['id'] });
+    while (current) {
+      if (current.name !== '') {
+        sessions.push({
+          text: current['name'],
+          value: current['kernel']['id'],
+        });
+      }
+      current = running.next();
+    }
+    this.setState({ sessions: sessions });
+  }
+
+  private initializeSession(kernelId: string) {
+    const manager = this.props.context.app.serviceManager;
+    const kernelPreference = {
+      id: kernelId,
+    };
+    const session = new ClientSession({
+      manager: manager.sessions,
+      kernelPreference: kernelPreference,
+    });
+    session
+      .initialize()
+      .catch(reason => {
+        console.error(`Failed to initialize the session.\n${reason}`);
+      })
+      .then(() => {
+        this.createModel(session);
+      });
+  }
+
+  private createModel(session: ClientSession) {
+    const model = new KernelModel(
+      session,
+      this.props.onSuccess,
+      this.props.onError
+    );
+    model.receivedData.connect(this.uploadDataFrame);
+    model.receivedError.connect(this.uploadDataFrameError);
+    model.createCSV(this.state.name, this.state.source);
+  }
+
+  private async uploadDataFrame(emitter: KernelModel) {
+    await DatasetService.createTablesDataset(emitter.name, {
+      dfSource: emitter.output,
+    });
+    emitter.refresh();
+  }
+
+  private uploadDataFrameError(emitter: KernelModel, title: string) {
+    emitter.onError();
+    console.log(title);
+    console.log(emitter.output);
+    console.log('Make sure the variable you entered is a pandas dataframe.');
   }
 
   private validateGCS(source: string) {
@@ -220,34 +290,24 @@ export class ImportData extends React.Component<Props, State> {
         />
       );
     } else if (from === 'dataframe') {
-      const manager = this.props.context.app.serviceManager;
-      const session = new ClientSession({
-        manager: manager.sessions,
-        name: 'Example',
-      });
-      session.initialize().catch(reason => {
-        console.error(
-          `Failed to initialize the session in ExamplePanel.\n${reason}`
-        );
-      });
-      const model = new KernelModel(session);
       return (
-        <React.Fragment>
-          <button
-            key="header-thread"
-            className="jp-example-button"
-            onClick={() => {
-              model.execute('df');
+        <>
+          <SelectInput
+            label={'Select file'}
+            options={this.state.sessions}
+            onChange={event => {
+              this.setState({ kernelId: event.target.value });
             }}
-          >
-            Compute 3+5
-          </button>
-          <UseSignal signal={model.stateChanged}>
-            {() => (
-              <span key="output field">{JSON.stringify(model.output)}</span>
-            )}
-          </UseSignal>
-        </React.Fragment>
+          />
+          <TextInput
+            placeholder="df"
+            label="Dataframe variable from selected kernel"
+            onChange={event => {
+              const source = event.target.value;
+              this.setState({ source: source });
+            }}
+          />
+        </>
       );
     }
     return null;
@@ -279,6 +339,9 @@ export class ImportData extends React.Component<Props, State> {
               source: null,
               error: null,
             });
+            if (event.target.value === 'dataframe') {
+              this.getSessions();
+            }
           }}
         />
         <div style={{ paddingTop: '16px' }}>

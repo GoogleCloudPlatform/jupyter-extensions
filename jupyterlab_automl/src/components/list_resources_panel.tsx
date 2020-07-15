@@ -43,6 +43,7 @@ interface State {
   deleteSubmit: () => void;
   deleteString: string;
   modalOpen: boolean;
+  errorOpen: boolean;
 }
 
 const FullWidthInput = styled(Box)`
@@ -94,6 +95,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteSubmit: null,
       deleteString: '',
       modalOpen: false,
+      errorOpen: false,
     };
   }
 
@@ -304,6 +306,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               onSuccess={() => {
                 this.refresh();
               }}
+              onError={this.toggleError}
               context={this.props.context}
             />
           ) : null}
@@ -341,6 +344,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   private toggleDelete = () => {
     this.setState({
       deleteDialog: !this.state.deleteDialog,
+    });
+  };
+
+  private toggleError = () => {
+    this.setState({
+      errorOpen: !this.state.errorOpen,
     });
   };
 
