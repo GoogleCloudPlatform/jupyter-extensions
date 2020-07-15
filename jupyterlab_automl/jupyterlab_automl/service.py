@@ -2,11 +2,9 @@
 
 import base64
 import hashlib
-import json
 import uuid
 from enum import Enum
 
-from gcp_jupyterlab_shared.handlers import AuthProvider
 from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
@@ -15,6 +13,9 @@ from gcp_jupyterlab_shared.handlers import AuthProvider
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
 
+
+def get_milli_time(dt):
+  return dt.timestamp() * 1000
 
 def parse_dataset_type(dataset):
   key = "aiplatform.googleapis.com/dataset_metadata_schema"
@@ -65,9 +66,7 @@ class AutoMLService:
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
     self._gcs_client = storage.Client()
-
     self._project = AuthProvider.get().project
-
     self._parent = "projects/{}/locations/us-central1".format(self._project)
     self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
         hashlib.md5(self._project.encode('utf-8')).hexdigest())
@@ -98,14 +97,12 @@ class AutoMLService:
             "id": model.name,
             "displayName": model.display_name,
             "pipelineId": model.training_pipeline,
-            "createTime": (model.create_time.year, model.create_time.month, model.create_time.day, model.create_time.hour, model.create_time.minute, model.create_time.second),
-            "updateTime": (model.update_time.year, model.update_time.month, model.update_time.day, model.update_time.hour, model.update_time.minute, model.update_time.second),
+            "createTime": get_milli_time(model.create_time),
+            "updateTime": get_milli_time(model.update_time),
             "etag": model.etag,
             "modelType": model_type
         })
-    return {
-        "models": models,
-    }
+    return models
 
   def _get_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
@@ -143,13 +140,12 @@ class AutoMLService:
 
   def get_model_evaluation(self, model_id):
     optional_fields = ["auPrc", "auRoc", "logLoss"]
-    evaluation = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
-    create_time = (evaluation.create_time.year, evaluation.create_time.month, evaluation.create_time.day, evaluation.create_time.hour, evaluation.create_time.minute, evaluation.create_time.second),
-    evaluation = json_format.MessageToDict(evaluation._pb)
+    gcp_eval = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
+    evaluation = json_format.MessageToDict(gcp_eval._pb)
     metrics = evaluation["metrics"]
     model_eval = {
         "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
-        "createTime": create_time,
+        "createTime": get_milli_time(gcp_eval.create_time),
         "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
     }
     if "modelExplanation" in evaluation:
@@ -176,8 +172,8 @@ class AutoMLService:
     training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
-        "createTime": (pipeline.create_time.year, pipeline.create_time.month, pipeline.create_time.day, pipeline.create_time.hour, pipeline.create_time.minute, pipeline.create_time.second),
-        "updateTime": (pipeline.update_time.year, pipeline.update_time.month, pipeline.update_time.day, pipeline.update_time.hour, pipeline.update_time.minute, pipeline.update_time.second),
+        "createTime": get_milli_time(pipeline.create_time),
+        "updateTime": get_milli_time(pipeline.update_time),
         "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
         "datasetId": pipeline.input_data_config.dataset_id,
     }
@@ -198,13 +194,13 @@ class AutoMLService:
         datasets.append({
             "id": dataset.name,
             "displayName": dataset.display_name,
-            "createTime": (dataset.create_time.year, dataset.create_time.month, dataset.create_time.day, dataset.create_time.hour, dataset.create_time.minute, dataset.create_time.second),
-            "updateTime": (dataset.update_time.year, dataset.update_time.month, dataset.update_time.day, dataset.update_time.hour, dataset.update_time.minute, dataset.update_time.second),
+            "createTime": get_milli_time(dataset.create_time),
+            "updateTime": get_milli_time(dataset.update_time),
             "datasetType": dataset_type.value,
             "etag": dataset.etag,
             "metadata": json_format.MessageToDict(dataset._pb.metadata),
         })
-    return {"datasets": datasets}
+    return datasets
 
   def get_table_specs(self, dataset_id):
     return []

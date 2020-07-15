@@ -312,18 +312,13 @@ export class EvaluationTable extends React.Component<Props, State> {
     for (let i = 0; i < properties.length; i++) {
       if (modelEvaluation[properties[i]['name']]) {
         if (properties[i]['name'] === 'createTime') {
-          const date = modelEvaluation[properties[i]['name']];
+          console.log('here');
+          console.log(modelEvaluation[properties[i]['name']]);
+          console.log(modelEvaluation[properties[i]['name']].toLocaleString());
           evaluationTable.push(
             this.createData(
               properties[i]['label'],
-              new Date(
-                date[0],
-                date[1] - 1,
-                date[2],
-                date[3],
-                date[4],
-                date[5]
-              ).toLocaleString()
+              modelEvaluation[properties[i]['name']].toLocaleString()
             )
           );
         } else if (typeof modelEvaluation[properties[i]['name']] === 'number') {
@@ -366,7 +361,7 @@ export class EvaluationTable extends React.Component<Props, State> {
   private async getModelEvaluations() {
     try {
       this.setState({ isLoading: true });
-      const modelEvaluation = await ModelService.listModelEvaluations(
+      const modelEvaluation = await ModelService.getModelEvaluation(
         this.props.model.id
       );
       const firstMetric = modelEvaluation.confidenceMetrics[0];

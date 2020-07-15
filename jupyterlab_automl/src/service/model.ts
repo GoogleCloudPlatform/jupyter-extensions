@@ -12,10 +12,6 @@ export interface Model {
   modelType: string;
 }
 
-export interface Models {
-  models: Model[];
-}
-
 export interface Pipeline {
   id: string;
   displayName: string;
@@ -59,7 +55,11 @@ export interface ModelEvaluation {
 
 export abstract class ModelService {
   static async listModels(): Promise<Model[]> {
-    const data = (await requestAPI<Models>('v1/models')).models;
+    const data = await requestAPI<Model[]>('v1/models');
+    for (let i = 0; i < data.length; ++i) {
+      data[i].createTime = new Date(data[i].createTime);
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
     return data;
   }
 
@@ -77,14 +77,17 @@ export abstract class ModelService {
   static async getPipeline(pipelineId: string): Promise<Pipeline> {
     const query = '?pipelineId=' + pipelineId;
     const data = await requestAPI<Pipeline>('v1/pipeline' + query);
+    data.createTime = new Date(data.createTime);
+    data.updateTime = new Date(data.updateTime);
     return data;
   }
 
-  static async listModelEvaluations(modelId: string): Promise<ModelEvaluation> {
+  static async getModelEvaluation(modelId: string): Promise<ModelEvaluation> {
     const query = '?modelId=' + modelId;
     const data = await requestAPI<ModelEvaluation>(
       'v1/modelEvaluation' + query
     );
+    data.createTime = new Date(data.createTime);
     return data;
   }
 }

@@ -8,7 +8,7 @@ export class KernelModel {
   constructor(
     session: IClientSession,
     refresh: () => void,
-    onError: () => void
+    onError: (error: string) => void
   ) {
     this._session = session;
     this._refresh = refresh;
@@ -51,7 +51,7 @@ export class KernelModel {
     return this._refresh;
   }
 
-  get onError(): () => void | null {
+  get onError(): (error: string) => void | null {
     return this._onError;
   }
 
@@ -107,5 +107,5 @@ export class KernelModel {
   private _receivedError = new Signal<KernelModel, string>(this);
   private _name: string | null = null;
   private _refresh: () => void | null = null;
-  private _onError: () => void | null = null;
+  private _onError: (error: string) => void | null = null;
 }

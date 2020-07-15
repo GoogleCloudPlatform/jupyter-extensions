@@ -43,7 +43,6 @@ interface State {
   deleteSubmit: () => void;
   deleteString: string;
   modalOpen: boolean;
-  errorOpen: boolean;
 }
 
 const FullWidthInput = styled(Box)`
@@ -95,7 +94,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteSubmit: null,
       deleteString: '',
       modalOpen: false,
-      errorOpen: false,
     };
   }
 
@@ -192,16 +190,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   field: 'createTime',
                   type: ColumnType.DateTime,
                   render: rowData => {
-                    const time = rowData.createTime;
-                    const newTime = new Date(
-                      time[0],
-                      time[1] - 1,
-                      time[2],
-                      time[3],
-                      time[4],
-                      time[5]
-                    ).toLocaleString();
-                    return <p>{newTime}</p>;
+                    return <p>{rowData.createTime.toLocaleString()}</p>;
                   },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
@@ -254,16 +243,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   field: 'updateTime',
                   type: ColumnType.DateTime,
                   render: rowData => {
-                    const time = rowData.updateTime;
-                    const newTime = new Date(
-                      time[0],
-                      time[1] - 1,
-                      time[2],
-                      time[3],
-                      time[4],
-                      time[5]
-                    ).toLocaleString();
-                    return <p>{newTime}</p>;
+                    return <p>{rowData.updateTime.toLocaleString()}</p>;
                   },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
@@ -298,18 +278,16 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onSubmit={this.state.deleteSubmit}
             submitLabel={'Ok'}
           />
-          {this.state.modalOpen ? (
-            <ImportData
-              onClose={() => {
-                this.setState({ modalOpen: false });
-              }}
-              onSuccess={() => {
-                this.refresh();
-              }}
-              onError={this.toggleError}
-              context={this.props.context}
-            />
-          ) : null}
+          <ImportData
+            open={this.state.modalOpen}
+            onClose={() => {
+              this.setState({ modalOpen: false });
+            }}
+            onSuccess={() => {
+              this.refresh();
+            }}
+            context={this.props.context}
+          />
         </Box>
       </>
     );
@@ -344,12 +322,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   private toggleDelete = () => {
     this.setState({
       deleteDialog: !this.state.deleteDialog,
-    });
-  };
-
-  private toggleError = () => {
-    this.setState({
-      errorOpen: !this.state.errorOpen,
     });
   };
 

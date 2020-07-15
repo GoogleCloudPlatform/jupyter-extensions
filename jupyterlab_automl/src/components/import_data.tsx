@@ -1,8 +1,9 @@
 import {
   FormControl,
   FormHelperText,
-  LinearProgress,
   Button,
+  Portal,
+  CircularProgress,
 } from '@material-ui/core';
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
@@ -20,13 +21,14 @@ import { DatasetService } from '../service/dataset';
 import { Context } from './automl_widget';
 import { ClientSession } from '@jupyterlab/apputils';
 import { KernelModel } from '../service/kernel_model';
+import Toast from './toast';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
 interface Props {
+  open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  onError: () => void;
   context: Context;
 }
 
@@ -39,6 +41,7 @@ interface State {
   sessions: Option[];
   // TODO @josiegarza make this a part of source
   kernelId: string;
+  errorOpen: boolean;
 }
 
 const theme = createMuiTheme({
@@ -112,6 +115,7 @@ export class ImportData extends React.Component<Props, State> {
       loading: false,
       sessions: null,
       kernelId: null,
+      errorOpen: false,
     };
   }
 
@@ -147,9 +151,11 @@ export class ImportData extends React.Component<Props, State> {
         error: 'There was an error creating the dataset: ' + err,
       });
     } finally {
-      this.setState({ loading: false });
-      if (!this.state.error && this.state.from !== 'dataframe') {
-        this.props.onSuccess();
+      if (this.state.from !== 'dataframe') {
+        this.setState({ loading: false });
+        if (!this.state.error) {
+          this.props.onSuccess();
+        }
       }
     }
   }
@@ -194,8 +200,13 @@ export class ImportData extends React.Component<Props, State> {
   private createModel(session: ClientSession) {
     const model = new KernelModel(
       session,
-      this.props.onSuccess,
-      this.props.onError
+      () => {
+        this.props.onSuccess();
+        this.setState({ loading: false });
+      },
+      error => {
+        this.setState({ error: error, loading: false, errorOpen: true });
+      }
     );
     model.receivedData.connect(this.uploadDataFrame);
     model.receivedError.connect(this.uploadDataFrameError);
@@ -210,10 +221,12 @@ export class ImportData extends React.Component<Props, State> {
   }
 
   private uploadDataFrameError(emitter: KernelModel, title: string) {
-    emitter.onError();
-    console.log(title);
-    console.log(emitter.output);
-    console.log('Make sure the variable you entered is a pandas dataframe.');
+    const error =
+      title +
+      ': ' +
+      emitter.output +
+      '. Make sure the variable you entered is a pandas dataframe.';
+    emitter.onError(error);
   }
 
   private validateGCS(source: string) {
@@ -315,62 +328,88 @@ export class ImportData extends React.Component<Props, State> {
 
   render() {
     return (
-      <DialogComponent
-        keepMounted={true}
-        header={'Import Data'}
-        open={true}
-        onClose={this.props.onClose}
-        onCancel={this.props.onClose}
-        submitLabel={'Import Data'}
-        onSubmit={this.submit}
-        submitDisabled={
-          this.state.loading ||
-          this.state.error !== null ||
-          !this.state.name ||
-          !this.state.source
-        }
-      >
-        <RadioInput
-          value={this.state.from}
-          options={SOURCES}
-          onChange={event => {
-            this.setState({
-              from: event.target.value as SourceType,
-              source: null,
-              error: null,
-            });
-            if (event.target.value === 'dataframe') {
-              this.getSessions();
-            }
-          }}
-        />
-        <div style={{ paddingTop: '16px' }}>
-          <FormControl
-            error={this.state.error !== null}
-            className={localStyles.form}
+      <>
+        <Portal>
+          <Toast
+            open={this.state.loading}
+            message={'Creating dataset...'}
+            onClose={() => {
+              this.setState({ loading: false });
+            }}
           >
-            <p className={localStyles.title}>
-              {
-                SOURCES.filter(el => {
-                  return el.value === this.state.from;
-                })[0].text
-              }
-            </p>
-            <TextInput
-              placeholder="my_dataset"
-              label="Name"
+            <CircularProgress size={24}></CircularProgress>
+          </Toast>
+        </Portal>
+        <Portal>
+          <Toast
+            open={this.state.errorOpen}
+            onClose={() => {
+              this.setState({ errorOpen: false });
+              this.setState({ error: null });
+            }}
+            error={true}
+            autoHideDuration={6000}
+          >
+            {this.state.error}
+          </Toast>
+        </Portal>
+        {this.props.open && (
+          <DialogComponent
+            header={'Import Data'}
+            open={true}
+            onClose={this.props.onClose}
+            onCancel={this.props.onClose}
+            submitLabel={'Import Data'}
+            onSubmit={this.submit}
+            submitDisabled={
+              this.state.loading ||
+              this.state.error !== null ||
+              !this.state.name ||
+              !this.state.source
+            }
+          >
+            <RadioInput
+              value={this.state.from}
+              options={SOURCES}
               onChange={event => {
-                this.setState({ name: event.target.value });
+                this.setState({
+                  from: event.target.value as SourceType,
+                  source: null,
+                  error: null,
+                });
+                if (event.target.value === 'dataframe') {
+                  this.getSessions();
+                }
               }}
             />
-            {this.getDialogContent()}
-            {this.state.error && (
-              <FormHelperText>{this.state.error}</FormHelperText>
-            )}
-            {this.state.loading && <LinearProgress />}
-          </FormControl>
-        </div>
-      </DialogComponent>
+            <div style={{ paddingTop: '16px' }}>
+              <FormControl
+                error={this.state.error !== null}
+                className={localStyles.form}
+              >
+                <p className={localStyles.title}>
+                  {
+                    SOURCES.filter(el => {
+                      return el.value === this.state.from;
+                    })[0].text
+                  }
+                </p>
+                <TextInput
+                  placeholder="my_dataset"
+                  label="Name"
+                  onChange={event => {
+                    this.setState({ name: event.target.value });
+                  }}
+                />
+                {this.getDialogContent()}
+                {this.state.error && (
+                  <FormHelperText>{this.state.error}</FormHelperText>
+                )}
+              </FormControl>
+            </div>
+          </DialogComponent>
+        )}
+      </>
     );
   }
 }
