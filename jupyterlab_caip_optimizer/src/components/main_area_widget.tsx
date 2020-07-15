@@ -4,6 +4,7 @@ import { store, RootState } from '../store/store';
 import { Provider, connect } from 'react-redux';
 import { close, ViewType } from '../store/view';
 import { Dashboard } from './dashboard';
+import { SuggestTrials } from './suggest_trials';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
@@ -13,7 +14,6 @@ const mapStateToProps = (state: RootState) => ({
  * ViewManager acts as the extensions router for various views.
  */
 export const ViewManager = ({ data }: { data: ViewType }) => {
-  // TODO: add custom components
   switch (data.view) {
     case 'dashboard':
       return <Dashboard />;
@@ -21,6 +21,8 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
       return <>Create A Study</>;
     case 'studyDetails':
       return <>Study ID: {data.studyId}</>;
+    case 'suggestTrials':
+      return <SuggestTrials studyName={data.studyId} />;
   }
 };
 
