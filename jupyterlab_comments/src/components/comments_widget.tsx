@@ -16,8 +16,13 @@
 
 import { ReactWidget, showErrorMessage } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { File, trimPath } from '../service/file'
-import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
+import { File, trimPath } from '../service/file';
+import {
+  DetachedComment,
+  createDetachedCommentFromJSON,
+  CodeReviewComment,
+  createReviewCommentFromJSON,
+} from '../service/comment';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
@@ -33,18 +38,17 @@ interface Props {
 }
 
 interface State {
-  detachedComments: DetachedComment[],
-  reviewComments: CodeReviewComment[],
-  fileName: string,
-  serverRoot: string,
-  activeTab: number,
+  detachedComments: DetachedComment[];
+  reviewComments: CodeReviewComment[];
+  fileName: string;
+  serverRoot: string;
+  activeTab: number;
 }
 
 export interface Context {
-  app: JupyterFrontEnd,
-  labShell: ILabShell,
-  docManager: IDocumentManager,
-
+  app: JupyterFrontEnd;
+  labShell: ILabShell;
+  docManager: IDocumentManager;
 }
 
 const localStyles = stylesheet({
@@ -95,37 +99,45 @@ export class CommentsComponent extends React.Component<Props, State> {
   }
 
   tabChange = (event, activeTab) => {
-    this.setState({activeTab: activeTab});
+    this.setState({ activeTab: activeTab });
   };
 
   render() {
     const activeTab = this.state.activeTab;
-    const detachedCommentsList = this.state.detachedComments.map((comment) =>
-        <>
-        <Comment detachedComment={comment}/>
-        <Divider/>
-        </>
-      );
-    const reviewCommentsList = this.state.reviewComments.map((comment) =>
-        <>
-        <Comment reviewComment={comment}/>
-        <Divider/>
-        </>
-      );
+    const detachedCommentsList = this.state.detachedComments.map(comment => (
+      <>
+        <Comment detachedComment={comment} />
+        <Divider />
+      </>
+    ));
+    const reviewCommentsList = this.state.reviewComments.map(comment => (
+      <>
+        <Comment reviewComment={comment} />
+        <Divider />
+      </>
+    ));
     return (
-      <div className = {localStyles.root}>
-        <CssBaseline/>
-          <Typography color="primary" variant="h5" className={localStyles.header} gutterBottom>
-              Comments for {this.state.fileName}
-          </Typography>
+      <div className={localStyles.root}>
+        <CssBaseline />
+        <Typography
+          color="primary"
+          variant="h5"
+          className={localStyles.header}
+          gutterBottom
+        >
+          Comments for {this.state.fileName}
+        </Typography>
         <AppBar position="static">
           <Tabs value={activeTab} onChange={this.tabChange}>
-            <Tab label="Review" value={0}/>
-            <Tab label="Detached" value={1}/>
+            <Tab label="Review" value={0} />
+            <Tab label="Detached" value={1} />
           </Tabs>
         </AppBar>
-        {(this.state.activeTab === 0) ?
-          <List>{reviewCommentsList} </List> : <List> {detachedCommentsList} </List>}
+        {this.state.activeTab === 0 ? (
+          <List>{reviewCommentsList} </List>
+        ) : (
+          <List> {detachedCommentsList} </List>
+        )}
       </div>
     );
   }
@@ -136,10 +148,13 @@ export class CommentsComponent extends React.Component<Props, State> {
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
-              showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
+              showErrorMessage(
+                'Git repository error',
+                'The file: ' + filePath + ' is not stored in a Git repository'
+              );
             } else {
               data.forEach(function(obj) {
-                var comment = createDetachedCommentFromJSON(obj);
+                const comment = createDetachedCommentFromJSON(obj);
                 comments.push(comment);
               });
             }
@@ -155,11 +170,18 @@ export class CommentsComponent extends React.Component<Props, State> {
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
-              showErrorMessage("Git repository error", "The file: " + filePath + " is not stored in a Git repository");
+              showErrorMessage(
+                'Git repository error',
+                'The file: ' + filePath + ' is not stored in a Git repository'
+              );
             } else {
               if (data.comments) {
                 data.comments.forEach(function(obj) {
-                  var comment = createReviewCommentFromJSON(obj, data.revision, data.request);
+                  const comment = createReviewCommentFromJSON(
+                    obj,
+                    data.revision,
+                    data.request
+                  );
                   comments.push(comment);
                 });
                 this.setState({reviewComments : comments, fileName: shortenedFilePath});
@@ -194,7 +216,7 @@ export class CommentsComponent extends React.Component<Props, State> {
 }
 
 export class CommentsWidget extends ReactWidget {
-  constructor(private file : File, private context : Context) {
+  constructor(private file: File, private context: Context) {
     super();
     this.addClass('comments-widget');
   }
