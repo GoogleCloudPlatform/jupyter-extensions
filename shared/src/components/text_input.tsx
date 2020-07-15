@@ -19,18 +19,17 @@ import { classes } from 'typestyle';
 
 import { css } from '../styles';
 
-interface TextInputProps 
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-    disabled?: boolean;
-    type?: string;
-    min?: string;
-    max?: string;
-    step?: number;
-    label?: string;
-    name?: string;
-    value?: string;
-    placeholder?: string;
-    hasError?: boolean;
+interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  disabled?: boolean;
+  type?: string;
+  min?: string;
+  max?: string;
+  step?: number;
+  label?: string;
+  name?: string;
+  value?: string;
+  placeholder?: string;
+  hasError?: boolean;
 }
 
 /** Funtional Component for text input fields */
