@@ -33,7 +33,7 @@ export class WidgetPopup extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      anchorEl: null
+      anchorEl: null,
     };
   }
 
@@ -41,8 +41,8 @@ export class WidgetPopup extends React.Component<Props, State> {
     const { anchorEl } = this.state;
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-      this.setState({ 
-        anchorEl: this.state.anchorEl ? null : event.currentTarget 
+      this.setState({
+        anchorEl: this.state.anchorEl ? null : event.currentTarget,
       });
     };
 
@@ -69,9 +69,7 @@ export class WidgetPopup extends React.Component<Props, State> {
         >
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
-              <Paper elevation={5}>
-                {this.props.children}
-              </Paper>
+              <Paper elevation={5}>{this.props.children}</Paper>
             </Fade>
           )}
         </Popper>

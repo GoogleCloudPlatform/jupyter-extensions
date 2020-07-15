@@ -15,7 +15,12 @@
  */
 
 import * as React from 'react';
-import { DetachedComment, createDetachedCommentFromJSON, CodeReviewComment, createReviewCommentFromJSON } from '../service/comment'
+import {
+  DetachedComment,
+  createDetachedCommentFromJSON,
+  CodeReviewComment,
+  createReviewCommentFromJSON,
+} from '../service/comment';
 import {
   ListItem,
   ListItemText,
@@ -23,13 +28,13 @@ import {
   Avatar,
   Typography,
   Button,
-  List
-} from "@material-ui/core";
+  List,
+} from '@material-ui/core';
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
- const style = {
+const style = {
   inline: {
     display: 'inline',
   },
@@ -45,7 +50,7 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
     paddingLeft: 10,
     fontSize: 10,
     color: 'grey',
-    },
+  },
   threadIndent: {
     paddingLeft: 50,
   },
@@ -59,72 +64,95 @@ import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 };
 
 interface Props {
-  detachedComment?: DetachedComment,
-  reviewComment?: CodeReviewComment,
+  detachedComment?: DetachedComment;
+  reviewComment?: CodeReviewComment;
 }
 
 interface State {
-  expandThread: boolean,
+  expandThread: boolean;
 }
-
 
 //React component to render a single comment thread
 export class Comment extends React.Component<Props, State> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            expandThread: false,
-        };
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      expandThread: false,
+    };
+  }
 
-    render() {
-        const data = this.props.detachedComment ? this.props.detachedComment : this.props.reviewComment;
-        return (
-            <>
-            <ListItem key={data.hash} alignItems="flex-start">
-              <ListItemAvatar>
-                <Avatar alt="avatar"/>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                <div>
-                    <p style={style.username}> {data.author} </p>
-                    <p style={style.date}> {data.timestamp} </p>
-                </div>
-
-                }
-                secondary={
-                    <Typography
-                      variant="body2"
-                      style={style.inline}
-                      color="textPrimary">
-                      {data.text}
-                    </Typography>
-                }
-              />
-            </ListItem>
+  render() {
+    const data = this.props.detachedComment
+      ? this.props.detachedComment
+      : this.props.reviewComment;
+    return (
+      <>
+        <ListItem key={data.hash} alignItems="flex-start">
+          <ListItemAvatar>
+            <Avatar alt="avatar" />
+          </ListItemAvatar>
+          <ListItemText
+            primary={
+              <div>
+                <p style={style.username}> {data.author} </p>
+                <p style={style.date}> {data.timestamp} </p>
+              </div>
+            }
+            secondary={
+              <Typography
+                variant="body2"
+                style={style.inline}
+                color="textPrimary"
+              >
+                {data.text}
+              </Typography>
+            }
+          />
+        </ListItem>
         <div style={style.commentBottom}>
-          <Button color="primary" size="small"> Reply </Button>
-          {data.children && <Button size="small" endIcon={this.state.expandThread ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>}
-          onClick= {() => {
-                this.setState({expandThread: !this.state.expandThread});
-                }}> {this.state.expandThread ? 'Hide thread' : 'Show thread'} </Button>}
+          <Button color="primary" size="small">
+            {' '}
+            Reply{' '}
+          </Button>
+          {data.children && (
+            <Button
+              size="small"
+              endIcon={
+                this.state.expandThread ? (
+                  <ArrowDropUpIcon />
+                ) : (
+                  <ArrowDropDownIcon />
+                )
+              }
+              onClick={() => {
+                this.setState({ expandThread: !this.state.expandThread });
+              }}
+            >
+              {' '}
+              {this.state.expandThread ? 'Hide thread' : 'Show thread'}{' '}
+            </Button>
+          )}
         </div>
         <div style={style.threadIndent}>
-            {(this.state.expandThread && data.children) &&
+          {this.state.expandThread && data.children && (
             <List>
-          {data.children.map(reply => {
-            if (this.props.detachedComment) {
-              var detached = createDetachedCommentFromJSON(reply);
-              return <Comment detachedComment={detached}/>;
-            } else {
-              var review = createReviewCommentFromJSON(reply, this.props.reviewComment.revision, this.props.reviewComment.request);
-              return <Comment reviewComment={review}/>;
-            }
-          })}
-          </List>}
+              {data.children.map(reply => {
+                if (this.props.detachedComment) {
+                  const detached = createDetachedCommentFromJSON(reply);
+                  return <Comment detachedComment={detached} />;
+                } else {
+                  const review = createReviewCommentFromJSON(
+                    reply,
+                    this.props.reviewComment.revision,
+                    this.props.reviewComment.request
+                  );
+                  return <Comment reviewComment={review} />;
+                }
+              })}
+            </List>
+          )}
         </div>
-          </>
-          );
-    }
+      </>
+    );
+  }
 }
