@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import time
 import uuid
 from enum import Enum
 
@@ -16,6 +17,7 @@ TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/t
 
 def get_milli_time(dt):
   return dt.timestamp() * 1000
+
 
 def parse_dataset_type(dataset):
   key = "aiplatform.googleapis.com/dataset_metadata_schema"
@@ -94,24 +96,23 @@ class AutoMLService:
       elif 'tables' in model.metadata_schema_uri:
         model_type = 'TABLE'
       models.append({
-            "id": model.name,
-            "displayName": model.display_name,
-            "pipelineId": model.training_pipeline,
-            "createTime": get_milli_time(model.create_time),
-            "updateTime": get_milli_time(model.update_time),
-            "etag": model.etag,
-            "modelType": model_type
-        })
+          "id": model.name,
+          "displayName": model.display_name,
+          "pipelineId": model.training_pipeline,
+          "createTime": get_milli_time(model.create_time),
+          "updateTime": get_milli_time(model.update_time),
+          "etag": model.etag,
+          "modelType": model_type
+      })
     return models
 
   def _get_feature_importance(self, model_explanation):
-    features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
-    return [
-        {
-            "name": key,
-            "Percentage": round(val * 100, 3),
-        } for key, val in features
-    ]
+    features = model_explanation["meanAttributions"][0][
+        "featureAttributions"].items()
+    return [{
+        "name": key,
+        "Percentage": round(val * 100, 3),
+    } for key, val in features]
 
   def _get_confusion_matrix(self, confusion_matrix):
     rows = confusion_matrix["rows"]
@@ -122,10 +123,12 @@ class AutoMLService:
     return rows
 
   def _get_confidence_metrics(self, confidence_metrics):
-    labels = ["confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
-              "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
-              "truePositiveCount", "falseNegativeCount", "falsePositiveCount",
-              "falsePositiveRate", "falsePositiveRateAt1"]
+    labels = [
+        "confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
+        "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
+        "truePositiveCount", "falseNegativeCount", "falsePositiveCount",
+        "falsePositiveRate", "falsePositiveRateAt1"
+    ]
     metrics = []
     for confidence_metric in confidence_metrics:
       metric = {}
@@ -140,16 +143,21 @@ class AutoMLService:
 
   def get_model_evaluation(self, model_id):
     optional_fields = ["auPrc", "auRoc", "logLoss"]
-    gcp_eval = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
+    gcp_eval = self._model_client.list_model_evaluations(
+        parent=model_id).model_evaluations[0]
     evaluation = json_format.MessageToDict(gcp_eval._pb)
     metrics = evaluation["metrics"]
     model_eval = {
-        "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
-        "createTime": get_milli_time(gcp_eval.create_time),
-        "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
+        "confidenceMetrics":
+            self._get_confidence_metrics(metrics["confidenceMetrics"]),
+        "createTime":
+            get_milli_time(gcp_eval.create_time),
+        "confusionMatrix":
+            self._get_confusion_matrix(metrics['confusionMatrix'])
     }
     if "modelExplanation" in evaluation:
-      model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+      model_eval["featureImportance"] = self._get_feature_importance(
+          evaluation["modelExplanation"])
     for field in optional_fields:
       model_eval[field] = metrics.get(field, None)
     return model_eval
@@ -164,18 +172,33 @@ class AutoMLService:
         })
     return transformations
 
-  def get_pipeline(self, pipeline_id):
-    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
-    optional_fields = ["targetColumn", "predictionType", "optimizationObjective", "budgetMilliNodeHours", "trainBudgetMilliNodeHours"]
+  def _parse_training_pipeline(self, pipeline):
+    optional_fields = [
+        "targetColumn", "predictionType", "optimizationObjective",
+        "budgetMilliNodeHours", "trainBudgetMilliNodeHours"
+    ]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
+    objective = "unknown"
+
+    # Detect training model type from gcs uri
+    for ob in ["tables", "image_classification", "image_object_detection"]:
+      if ob in pipeline.training_task_definition:
+        objective = ob
+        break
+
+    end_time = pipeline.end_time.timestamp() if pipeline.end_time else int(time.time())
+
     training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
         "createTime": get_milli_time(pipeline.create_time),
         "updateTime": get_milli_time(pipeline.update_time),
-        "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
+        "elapsedTime": end_time - pipeline.start_time.timestamp(),
         "datasetId": pipeline.input_data_config.dataset_id,
+        "state": pipeline.state.name.split("_")[-1],
+        "error": pipeline.error.message,
+        "objective": objective
     }
     if "transformations" in training_task_inputs:
       transformation_options = self._get_feature_transformations(
@@ -184,6 +207,18 @@ class AutoMLService:
     for field in optional_fields:
       training_pipeline[field] = training_task_inputs.get(field, None)
     return training_pipeline
+
+  def get_pipeline(self, pipeline_id):
+    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    return self._parse_training_pipeline(pipeline)
+
+  def get_training_pipelines(self):
+    pipelines = []
+    for pipeline in self._pipeline_client.list_training_pipelines(
+        parent=self._parent):
+      pipelines.append(self._parse_training_pipeline(pipeline))
+
+    return pipelines
 
   def get_datasets(self):
     datasets = []

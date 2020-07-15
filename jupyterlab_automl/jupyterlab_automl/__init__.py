@@ -6,8 +6,10 @@ from jupyterlab_automl.version import VERSION
 
 __version__ = VERSION
 
+
 def _jupyter_server_extension_paths():
   return [{"module": "jupyterlab_automl"}]
+
 
 def load_jupyter_server_extension(nb_server_app):
   """
@@ -21,6 +23,5 @@ def load_jupyter_server_extension(nb_server_app):
   gcp_v1_endpoint = url_path_join(app.settings["base_url"], "automl", "v1")
   app.add_handlers(
       host_pattern,
-      [(url_path_join(gcp_v1_endpoint, k) + "(.*)", v)
-       for (k, v) in handlers.items()],
+      [(url_path_join(gcp_v1_endpoint, k), v) for (k, v) in handlers.items()],
   )

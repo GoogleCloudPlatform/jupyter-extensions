@@ -1,24 +1,34 @@
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
+import green from '@material-ui/core/colors/green';
+import grey from '@material-ui/core/colors/grey';
 import orange from '@material-ui/core/colors/orange';
 import red from '@material-ui/core/colors/red';
-import * as React from 'react';
-import { Dataset, DatasetService, DatasetType } from '../service/dataset';
-import { Model, ModelService, ModelType } from '../service/model';
-import { Context } from './automl_widget';
+import yellow from '@material-ui/core/colors/yellow';
 import {
-  TextInput,
-  SelectInput,
   ColumnType,
-  ListResourcesTable,
   DialogComponent,
+  ListResourcesTable,
+  SelectInput,
+  TextInput,
 } from 'gcp_jupyterlab_shared';
-import { ImportData } from './import_data';
+import * as React from 'react';
 import styled from 'styled-components';
+import { Dataset, DatasetService, DatasetType } from '../service/dataset';
+import {
+  Model,
+  ModelService,
+  ModelType,
+  Pipeline,
+  PipelineState,
+} from '../service/model';
 import { debounce } from '../util';
+import { Context } from './automl_widget';
 import { DatasetWidget } from './dataset_widget';
 import { ImageWidget } from './image_widget';
+import { ImportData } from './import_data';
 import { ModelWidget } from './model_widget';
+import { PipelineWidget } from './pipeline_widget';
 
 interface Props {
   isVisible: boolean;
@@ -30,6 +40,7 @@ interface Props {
 enum ResourceType {
   Model = 'model',
   Dataset = 'dataset',
+  Training = 'training',
 }
 
 interface State {
@@ -37,6 +48,7 @@ interface State {
   isLoading: boolean;
   datasets: Dataset[];
   models: Model[];
+  pipelines: Pipeline[];
   resourceType: ResourceType;
   searchString: string;
   deleteDialog: boolean;
@@ -88,6 +100,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       isLoading: false,
       datasets: [],
       models: [],
+      pipelines: [],
       resourceType: ResourceType.Dataset,
       searchString: '',
       deleteDialog: false,
@@ -120,6 +133,153 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     }
   }
 
+  private getTableForResourceType(type: ResourceType) {
+    const sharedProps = {
+      isLoading: this.state.isLoading,
+      height: this.props.height - 80,
+      width: this.props.width,
+    };
+    switch (type) {
+      case ResourceType.Dataset:
+        return (
+          <ListResourcesTable
+            {...sharedProps}
+            columns={[
+              {
+                field: 'datasetType',
+                title: '',
+                render: rowData => this.iconForDatasetType(rowData.datasetType),
+                fixedWidth: 30,
+                sorting: false,
+              },
+              {
+                field: 'displayName',
+                title: 'Name',
+              },
+              {
+                title: 'Created at',
+                field: 'createTime',
+                type: ColumnType.DateTime,
+                render: rowData => {
+                  return <p>{rowData.createTime.toLocaleString()}</p>;
+                },
+                rightAlign: true,
+                minShowWidth: breakpoints[0],
+              },
+            ]}
+            data={this.filterResources<Dataset>(this.state.datasets)}
+            onRowClick={rowData => {
+              if (rowData.datasetType === 'TABLE') {
+                this.props.context.manager.launchWidgetForId(
+                  DatasetWidget,
+                  rowData.id,
+                  rowData
+                );
+              } else {
+                this.props.context.manager.launchWidgetForId(
+                  ImageWidget,
+                  rowData.id,
+                  rowData
+                );
+              }
+            }}
+            rowContextMenu={[
+              {
+                label: 'Delete',
+                handler: rowData => {
+                  this.deleteConfirm(rowData);
+                },
+              },
+            ]}
+          />
+        );
+      case ResourceType.Model:
+        return (
+          <ListResourcesTable
+            {...sharedProps}
+            columns={[
+              {
+                field: 'displayName',
+                title: '',
+                render: rowData => this.iconForModelType(rowData.modelType),
+                fixedWidth: 30,
+                sorting: false,
+              },
+              {
+                field: 'displayName',
+                title: 'Name',
+              },
+              {
+                title: 'Last updated',
+                field: 'updateTime',
+                type: ColumnType.DateTime,
+                render: rowData => {
+                  return <p>{rowData.updateTime.toLocaleString()}</p>;
+                },
+                rightAlign: true,
+                minShowWidth: breakpoints[0],
+              },
+            ]}
+            data={this.filterResources<Model>(this.state.models)}
+            rowContextMenu={[
+              {
+                label: 'Delete',
+                handler: rowData => {
+                  this.deleteConfirm(rowData);
+                },
+              },
+            ]}
+            onRowClick={rowData => {
+              this.props.context.manager.launchWidgetForId(
+                ModelWidget,
+                rowData.id,
+                rowData
+              );
+            }}
+          />
+        );
+      case ResourceType.Training:
+        return (
+          <ListResourcesTable
+            {...sharedProps}
+            columns={[
+              {
+                field: 'status',
+                title: '',
+                render: rowData => this.iconForPipelineState(rowData.state),
+                fixedWidth: 30,
+                sorting: false,
+              },
+              {
+                field: 'displayName',
+                title: 'Name',
+              },
+              {
+                title: 'Time elapsed',
+                field: 'elapsedTime',
+                minShowWidth: breakpoints[1],
+              },
+              {
+                title: 'Created',
+                field: 'createTime',
+                type: ColumnType.DateTime,
+                rightAlign: true,
+                minShowWidth: breakpoints[0],
+              },
+            ]}
+            data={this.filterResources<Pipeline>(this.state.pipelines)}
+            onRowClick={rowData => {
+              this.props.context.manager.launchWidgetForId(
+                PipelineWidget,
+                rowData.id,
+                rowData
+              );
+            }}
+          />
+        );
+    }
+  }
+
   render() {
     // TODO: Make styles separate
     return (
@@ -132,6 +292,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 options={[
                   { text: 'Models', value: ResourceType.Model },
                   { text: 'Datasets', value: ResourceType.Dataset },
+                  { text: 'Training', value: ResourceType.Training },
                 ]}
                 onChange={event => {
                   if (this.state.isLoading) return;
@@ -170,106 +331,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               />
             </FullWidthInput>
           </Toolbar>
-          {this.state.resourceType === ResourceType.Dataset ? (
-            <ListResourcesTable
-              columns={[
-                {
-                  field: 'datasetType',
-                  title: '',
-                  render: rowData =>
-                    this.iconForDatasetType(rowData.datasetType),
-                  fixedWidth: 30,
-                  sorting: false,
-                },
-                {
-                  field: 'displayName',
-                  title: 'Name',
-                },
-                {
-                  title: 'Created at',
-                  field: 'createTime',
-                  type: ColumnType.DateTime,
-                  render: rowData => {
-                    return <p>{rowData.createTime.toLocaleString()}</p>;
-                  },
-                  rightAlign: true,
-                  minShowWidth: breakpoints[0],
-                },
-              ]}
-              data={this.filterResources<Dataset>(this.state.datasets)}
-              onRowClick={rowData => {
-                if (rowData.datasetType === 'TABLE') {
-                  this.props.context.manager.launchWidgetForId(
-                    DatasetWidget,
-                    rowData.id,
-                    rowData
-                  );
-                } else {
-                  this.props.context.manager.launchWidgetForId(
-                    ImageWidget,
-                    rowData.id,
-                    rowData
-                  );
-                }
-              }}
-              isLoading={this.state.isLoading}
-              height={this.props.height - 80}
-              width={this.props.width}
-              rowContextMenu={[
-                {
-                  label: 'Delete',
-                  handler: rowData => {
-                    this.deleteConfirm(rowData);
-                  },
-                },
-              ]}
-            />
-          ) : (
-            <ListResourcesTable
-              columns={[
-                {
-                  field: 'displayName',
-                  title: '',
-                  render: rowData => this.iconForModelType(rowData.modelType),
-                  fixedWidth: 30,
-                  sorting: false,
-                },
-                {
-                  field: 'displayName',
-                  title: 'Name',
-                },
-                {
-                  title: 'Last updated',
-                  field: 'updateTime',
-                  type: ColumnType.DateTime,
-                  render: rowData => {
-                    return <p>{rowData.updateTime.toLocaleString()}</p>;
-                  },
-                  rightAlign: true,
-                  minShowWidth: breakpoints[0],
-                },
-              ]}
-              data={this.filterResources<Model>(this.state.models)}
-              isLoading={this.state.isLoading}
-              height={this.props.height - 80}
-              width={this.props.width}
-              rowContextMenu={[
-                {
-                  label: 'Delete',
-                  handler: rowData => {
-                    this.deleteConfirm(rowData);
-                  },
-                },
-              ]}
-              onRowClick={rowData => {
-                this.props.context.manager.launchWidgetForId(
-                  ModelWidget,
-                  rowData.id,
-                  rowData
-                );
-              }}
-            />
-          )}
+          {this.getTableForResourceType(this.state.resourceType)}
           <DialogComponent
             open={this.state.deleteDialog}
             header={`Are you sure you want to delete ${this.state.deleteString}?`}
@@ -372,6 +434,54 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     );
   }
 
+  private iconForPipelineState(state: PipelineState) {
+    const icons: { [key in PipelineState]: any } = {
+      CANCELLED: {
+        icon: 'cancel',
+        color: grey[700],
+      },
+      CANCELLING: {
+        icon: 'cancel',
+        color: orange[500],
+      },
+      FAILED: {
+        icon: 'error',
+        color: red[600],
+      },
+      PAUSED: {
+        icon: 'pause_circle_filled',
+        color: grey[700],
+      },
+      PENDING: {
+        icon: 'pending',
+        color: yellow[700],
+      },
+      QUEUED: {
+        icon: 'pending',
+        color: grey[700],
+      },
+      RUNNING: {
+        icon: 'refresh',
+        color: green[500],
+      },
+      SUCCEEDED: {
+        icon: 'check_circle',
+        color: green[500],
+      },
+      UNSPECIFIED: {
+        icon: 'help',
+        color: grey[600],
+      },
+    };
+    return (
+      <ListItem dense style={{ padding: 0 }}>
+        <Icon style={{ ...styles.icon, color: icons[state].color }}>
+          {icons[state].icon}
+        </Icon>
+      </ListItem>
+    );
+  }
+
   private handleSearch = debounce((value: string) => {
     this.setState({ searchString: value });
   }, 250);
@@ -416,32 +526,37 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   }
 
   private async refresh() {
-    try {
-      this.setState({ isLoading: true });
-      await Promise.all([this.getDatasets(), this.getModels()]);
-      this.setState({ hasLoaded: true });
-    } catch (err) {
-      console.warn('Error retrieving datasets', err);
-    } finally {
-      this.setState({ isLoading: false });
-    }
+    this.setState({ isLoading: true });
+    await Promise.all([
+      this.getDatasets(),
+      this.getModels(),
+      this.getPipelines(),
+    ]);
+    this.setState({ hasLoaded: true });
+    this.setState({ isLoading: false });
   }
 
   private async getDatasets() {
     try {
-      const datasets = await DatasetService.listDatasets();
-      this.setState({ datasets: datasets });
+      this.setState({ datasets: await DatasetService.listDatasets() });
     } catch (e) {
-      console.log('Failed to load dataset resource.');
+      console.warn('Failed to load datasets.', e);
     }
   }
 
   private async getModels() {
     try {
-      const models = await ModelService.listModels();
-      this.setState({ models: models });
+      this.setState({ models: await ModelService.listModels() });
     } catch (e) {
-      console.log('Failed to load models resource.');
+      console.warn('Failed to load models.', e);
+    }
+  }
+
+  private async getPipelines() {
+    try {
+      this.setState({ pipelines: await ModelService.listPipelines() });
+    } catch (e) {
+      console.warn('Failed to load pipelines.', e);
     }
   }
 }

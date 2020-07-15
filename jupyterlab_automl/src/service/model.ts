@@ -1,7 +1,17 @@
 import { requestAPI } from './api_request';
+import humanizeDuration from 'humanize-duration';
 
 export type ModelType = 'OTHER' | 'TABLE' | 'IMAGE';
-
+export type PipelineState =
+  | 'CANCELLED'
+  | 'CANCELLING'
+  | 'FAILED'
+  | 'PAUSED'
+  | 'PENDING'
+  | 'QUEUED'
+  | 'RUNNING'
+  | 'SUCCEEDED'
+  | 'UNSPECIFIED';
 export interface Model {
   id: string; // Resource name of dataset
   displayName: string;
@@ -17,7 +27,7 @@ export interface Pipeline {
   displayName: string;
   createTime: Date;
   updateTime: Date;
-  elapsedTime: number;
+  elapsedTime: number | string;
   datasetId: string;
   trainBudgetMilliNodeHours: number | null;
   budgetMilliNodeHours: number | null;
@@ -25,6 +35,9 @@ export interface Pipeline {
   transformationOptions: any | null;
   predictionType: string | null;
   optimizationObjective: string | null;
+  objective: string;
+  state: string;
+  error: string | null;
 }
 
 export interface ModelMetrics {
@@ -53,12 +66,35 @@ export interface ModelEvaluation {
   confusionMatrix: any[];
 }
 
+function formatTime(data: Model | Pipeline) {
+  data.createTime = new Date(data.createTime);
+  data.updateTime = new Date(data.updateTime);
+  if ('elapsedTime' in data) {
+    const humanizer = humanizeDuration.humanizer({
+      round: true,
+      language: 'shortEn',
+      largest: 2,
+      languages: {
+        shortEn: {
+          y: () => 'y',
+          mo: () => 'mo',
+          w: () => 'w',
+          d: () => 'day',
+          h: () => 'hr',
+          m: () => 'min',
+          s: () => 'sec',
+        },
+      },
+    });
+    data.elapsedTime = humanizer(Math.round(data.elapsedTime as number) * 1000);
+  }
+}
+
 export abstract class ModelService {
   static async listModels(): Promise<Model[]> {
     const data = await requestAPI<Model[]>('v1/models');
     for (let i = 0; i < data.length; ++i) {
-      data[i].createTime = new Date(data[i].createTime);
-      data[i].updateTime = new Date(data[i].updateTime);
+      formatTime(data[i]);
     }
     return data;
   }
@@ -77,8 +113,15 @@ export abstract class ModelService {
   static async getPipeline(pipelineId: string): Promise<Pipeline> {
     const query = '?pipelineId=' + pipelineId;
     const data = await requestAPI<Pipeline>('v1/pipeline' + query);
-    data.createTime = new Date(data.createTime);
-    data.updateTime = new Date(data.updateTime);
+    formatTime(data);
+    return data;
+  }
+
+  static async listPipelines(): Promise<Pipeline[]> {
+    const data = await requestAPI<Pipeline[]>('v1/pipelines');
+    for (let i = 0; i < data.length; ++i) {
+      formatTime(data[i]);
+    }
     return data;
   }
 
