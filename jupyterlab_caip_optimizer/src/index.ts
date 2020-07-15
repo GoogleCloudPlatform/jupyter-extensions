@@ -12,6 +12,9 @@ import { MainAreaWidget } from './components/main_area_widget';
 import { SidebarWidget } from './components/sidebar_widget';
 import { fetchStudies } from './store/studies';
 import { fetchMetadata } from './store/metadata';
+import { createSnack } from './store/snackbar';
+import { SnackbarWidget } from './components/snackbar_widget';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 /**
  * Opens and closes a widget based on redux store's `view.isVisible` property.
@@ -59,8 +62,13 @@ async function activate(app: JupyterFrontEnd) {
   // Create Sidebar
   const sidebarWidget = new SidebarWidget(store);
   app.shell.add(sidebarWidget, 'left', { rank: 100 });
-  await store.dispatch(fetchMetadata());
-  await store.dispatch(fetchStudies());
+  app.shell.add(new SnackbarWidget(store), 'header');
+
+  await store
+    .dispatch(fetchMetadata())
+    .then(() => store.dispatch(fetchStudies()))
+    .then(unwrapResult)
+    .catch(error => store.dispatch(createSnack(error, 'error', 10000)));
 }
 
 /**

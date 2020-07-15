@@ -4,11 +4,13 @@ import { useDispatch } from 'react-redux';
 import { studiesSlice } from './studies';
 import { viewSlice } from './view';
 import { metadataSlice } from './metadata';
+import { snackbarSlice } from './snackbar';
 
 const rootReducer = combineReducers({
   studies: studiesSlice.reducer,
   view: viewSlice.reducer,
   metadata: metadataSlice.reducer,
+  snackbar: snackbarSlice.reducer,
 });
 
 export const store = configureStore({

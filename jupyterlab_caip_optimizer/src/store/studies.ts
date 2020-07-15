@@ -3,6 +3,8 @@ import { Study, AsyncState } from '../types';
 import { OptimizerService } from '../service/optimizer';
 import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
 import { RootState } from './store';
+import { wrapThunk } from './utils';
+import { createSnack } from './snackbar';
 
 const optimizer = new OptimizerService(new ServerProxyTransportService());
 
@@ -12,21 +14,30 @@ export const fetchStudies = createAsyncThunk<
   {
     state: RootState;
   }
->('studies/fetch', async (_, thunkAPI) => {
-  const metadata = thunkAPI.getState().metadata.data;
-  if (!metadata) {
-    console.error('No Metadata found.');
-    throw new TypeError('No metadata');
-  }
-  const studyList = await optimizer.listStudy(metadata);
-  const studyListWithDetails: Study[] = [];
-  for (const paritalStudy of studyList) {
-    studyListWithDetails.push(
-      await optimizer.getStudy(paritalStudy.name, metadata)
-    );
-  }
-  return studyListWithDetails;
-});
+>(
+  'studies/fetch',
+  wrapThunk(
+    async (_, thunkAPI) => {
+      const metadata = thunkAPI.getState().metadata.data;
+      if (!metadata) {
+        console.error('No Metadata found.');
+        throw new TypeError('No metadata');
+      }
+      const studyList = await optimizer.listStudy(metadata);
+      const studyListWithDetails: Study[] = [];
+      for (const paritalStudy of studyList) {
+        studyListWithDetails.push(
+          await optimizer.getStudy(paritalStudy.name, metadata)
+        );
+      }
+      return studyListWithDetails;
+    },
+    {
+      error: dispatch =>
+        dispatch(createSnack('Failed to fetch studies!', 'error')),
+    }
+  )
+);
 
 export const createStudy = createAsyncThunk<
   Study,
@@ -49,14 +60,24 @@ export const deleteStudy = createAsyncThunk<
   {
     state: RootState;
   }
->('studies/delete', async (rawStudyName, thunkAPI) => {
-  const metadata = thunkAPI.getState().metadata.data;
-  if (!metadata) {
-    console.error('No Metadata found.');
-    throw new TypeError('No metadata');
-  }
-  await optimizer.deleteStudy(rawStudyName, metadata);
-});
+>(
+  'studies/delete',
+  wrapThunk(
+    async (rawStudyName, thunkAPI) => {
+      const metadata = thunkAPI.getState().metadata.data;
+      if (!metadata) {
+        console.error('No Metadata found.');
+        throw new TypeError('No metadata');
+      }
+      await optimizer.deleteStudy(rawStudyName, metadata);
+    },
+    {
+      success: dispatch => dispatch(createSnack('Deleted study.', 'success')),
+      error: dispatch =>
+        dispatch(createSnack('Failed to delete the study!', 'error')),
+    }
+  )
+);
 
 export const studiesSlice = createSlice({
   name: 'studies',
