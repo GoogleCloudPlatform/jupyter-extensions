@@ -44,6 +44,11 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     }
   }
 
+  formatMs(ms) {
+    const days = ms / 86400000;
+    return `${days} day${days > 1 ? 's' : ''} 0 hr`;
+  }
+
   private async getDetails() {
     try {
       this.setState({ isLoading: true });
@@ -58,7 +63,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
         {
           name: 'Default table expiration',
           value: detailsObj.default_expiration
-            ? detailsObj.default_expiration
+            ? this.formatMs(detailsObj.default_expiration)
             : 'Never',
         },
         { name: 'Last modified', value: detailsObj.last_modified },

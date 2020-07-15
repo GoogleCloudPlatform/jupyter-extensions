@@ -86,6 +86,9 @@ interface Props {
 
 export const DetailsPanel: React.SFC<Props> = props => {
   const { details, rows, detailsType } = props;
+  if (details.schema) {
+    console.log('schema: ', details.schema);
+  }
   return (
     <div className={localStyles.panel}>
       <div className={localStyles.detailsBody}>
@@ -111,7 +114,9 @@ export const DetailsPanel: React.SFC<Props> = props => {
           </Grid>
 
           <Grid item xs={12}>
-            <div className={localStyles.title}>Dataset info</div>
+            <div className={localStyles.title}>
+              {detailsType === 'table' ? 'Table' : 'Dataset'} info
+            </div>
             {rows.map((row, index) => (
               <div
                 key={index}
@@ -135,7 +140,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
 
         {detailsType === 'table' && (
           <div className={localStyles.scrollable}>
-            {details.schema ? (
+            {details.schema && details.schema.length > 0 ? (
               <Table
                 size="small"
                 style={{ width: 'auto', tableLayout: 'auto' }}

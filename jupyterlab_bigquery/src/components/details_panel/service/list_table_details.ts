@@ -7,7 +7,7 @@ export interface TableDetailsObject {
   description: string;
   labels: string[];
   date_created: string;
-  expiration: string;
+  expires: string;
   location: string;
   last_modified: string;
   project: string;
