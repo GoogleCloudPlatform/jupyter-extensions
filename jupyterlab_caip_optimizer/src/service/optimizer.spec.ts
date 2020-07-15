@@ -25,15 +25,15 @@ import {
   fakeStudy,
   fakeStudyResponseActive,
   fakeStudyListResponse,
+  fakeTrial,
+  fakeMeasurement,
 } from './test-constants';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 
 describe('OptimizerService', () => {
-  const mockSubmit = jest.fn();
-  const mockMakeRequest = jest.fn();
-  const optimizerService = new OptimizerService({
-    submit: mockSubmit,
-  });
+  let mockSubmit: jest.Mock;
+  let mockMakeRequest: jest.Mock;
+  let optimizerService: OptimizerService;
 
   const fakeMetadataRequired = {
     projectId: '1',
@@ -41,7 +41,12 @@ describe('OptimizerService', () => {
   } as MetadataRequired;
 
   beforeEach(() => {
+    mockSubmit = jest.fn();
+    mockMakeRequest = jest.fn();
     ServerConnection.makeRequest = mockMakeRequest;
+    optimizerService = new OptimizerService({
+      submit: mockSubmit,
+    });
   });
 
   it('Creates a study', async () => {
@@ -142,6 +147,17 @@ describe('OptimizerService', () => {
     expect(mockSubmit).toHaveBeenCalledWith({
       path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${trialName}`,
       method: 'DELETE',
+    });
+  });
+
+  it('gets an operation', async () => {
+    mockSubmit.mockReturnValue(asApiResponse(fakeStudy));
+    const operationName =
+      'projects/222309772370/locations/us-central1/operations/operation-name';
+    await optimizerService.getOperation(operationName, fakeMetadataRequired);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/operations/operation-name`,
+      method: 'GET',
     });
   });
 });

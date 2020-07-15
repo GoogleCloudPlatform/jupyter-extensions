@@ -305,4 +305,34 @@ export class OptimizerService {
       handleApiError(err);
     }
   }
+
+  // Operations
+
+  /**
+   * Gets the latest state of a long-running operation.
+   * Clients can use this method to poll the operation result at intervals as recommended by the API service.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.operations/get
+   * @param operationId The full length opeartion id.
+   * @param metadata The region and project id associated with the operation.
+   */
+  async getOperation<BODY = {}, METADATA = {}>(
+    operationId: string,
+    metadata: MetadataRequired
+  ): Promise<Operation<BODY, METADATA>> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      const response = await this._transportService.submit<
+        Operation<BODY, METADATA>
+      >({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/operations/${prettifyOperationId(operationId)}`,
+        method: 'GET',
+      });
+      return response.result;
+    } catch (err) {
+      console.error(`Unable to fetch operation with id "${operationId}"`);
+      handleApiError(err);
+    }
+  }
 }
