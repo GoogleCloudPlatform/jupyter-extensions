@@ -123,44 +123,60 @@ export default class TablePreviewPanel extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.previewBody}>
-          <div className={localStyles.scrollable}>
-            <Table size="small" style={{ width: 'auto', tableLayout: 'auto' }}>
-              <TableHead className={localStyles.tableHeader}>
-                <TableRow>
-                  {fields.map((field, index) => (
-                    <TableCell key={'field_' + index}>{field}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, indexRow) => (
-                    <TableRow key={'preview_row_' + indexRow}>
-                      <TableCell>{page * rowsPerPage + indexRow + 1}</TableCell>
-                      {row.map((cell, indexCell) => (
-                        <TableCell
-                          className={localStyles.tableCell}
-                          key={'preview_row_' + indexRow + '_cell' + indexCell}
-                        >
-                          {cell}
-                        </TableCell>
+          {rows.length > 0 ? (
+            <div className={localStyles.previewBody}>
+              <div className={localStyles.scrollable}>
+                <Table
+                  size="small"
+                  style={{ width: 'auto', tableLayout: 'auto' }}
+                >
+                  <TableHead className={localStyles.tableHeader}>
+                    <TableRow>
+                      {fields.map((field, index) => (
+                        <TableCell key={'field_' + index}>{field}</TableCell>
                       ))}
                     </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-          <TablePagination
-            className={localStyles.pagination}
-            rowsPerPageOptions={[10, 30, 50, 100, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={this.handleChangePage.bind(this)}
-            onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
-          />
+                  </TableHead>
+                  <TableBody>
+                    {rows
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row, indexRow) => (
+                        <TableRow key={'preview_row_' + indexRow}>
+                          <TableCell>
+                            {page * rowsPerPage + indexRow + 1}
+                          </TableCell>
+                          {row.map((cell, indexCell) => (
+                            <TableCell
+                              className={localStyles.tableCell}
+                              key={
+                                'preview_row_' + indexRow + '_cell' + indexCell
+                              }
+                            >
+                              {cell}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <TablePagination
+                className={localStyles.pagination}
+                rowsPerPageOptions={[10, 30, 50, 100, 200]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onChangePage={this.handleChangePage.bind(this)}
+                onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
+              />
+            </div>
+          ) : (
+            <div>This table is empty.</div>
+          )}
         </div>
       );
     }
