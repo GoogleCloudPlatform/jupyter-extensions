@@ -2,7 +2,7 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode
 
 # TODO: refactor name and version to sync with front 
-module_name = 'bigQuery-query-incell-editor'
+module_name = 'bigquery_query_incell_editor'
 module_version = '0.0.1'
 
 class QueryIncellEditor(DOMWidget):
