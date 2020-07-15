@@ -69,6 +69,7 @@
     "@babel/core": "^7.8.7",
     "@babel/preset-env": "^7.8.7",
     "@jupyterlab/testutils": "^1.2.2",
+    "@testing-library/react": "^10.4.6",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/fs-extra": "^8.1.0",

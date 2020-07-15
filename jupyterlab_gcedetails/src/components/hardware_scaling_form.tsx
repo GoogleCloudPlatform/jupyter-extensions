@@ -102,7 +102,6 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     return machineTypes.find(elem => elem.base.value === baseMachineType);
   }
 
-
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       attachGpu: event.target.checked,
@@ -135,7 +134,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
 
   // TODO: Implement submit functionality
   //eslint-disable-next-line @typescript-eslint/no-empty-function
-  private submitForm() {};
+  private submitForm() {}
 
   render() {
     const { onDialogClose } = this.props;

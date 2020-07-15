@@ -43,7 +43,7 @@ const STYLES = stylesheet({
     marginLeft: '20px',
   },
   utilizationChartsContainer: {
-      padding: '10px 20px 20px 0px',
+    padding: '10px 20px 20px 0px',
   },
 });
 

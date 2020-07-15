@@ -69,9 +69,7 @@ export class WidgetPopup extends React.Component<Props, State> {
         >
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
-              <Paper elevation={5}>
-                {this.props.children}
-              </Paper>
+              <Paper elevation={5}>{this.props.children}</Paper>
             </Fade>
           )}
         </Popper>
