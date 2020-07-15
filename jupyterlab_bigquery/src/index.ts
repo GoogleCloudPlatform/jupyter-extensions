@@ -34,7 +34,7 @@ async function activate(
 
   // TODO: refactor name and version to sync with back
   registry.registerWidget({
-    name: 'bigQuery-query-incell-editor',
+    name: 'bigquery_query_incell_editor',
     version: '0.0.1',
     exports: QueryEditorInCellWidgetsExport,
   });
