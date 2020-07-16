@@ -312,9 +312,6 @@ export class EvaluationTable extends React.Component<Props, State> {
     for (let i = 0; i < properties.length; i++) {
       if (modelEvaluation[properties[i]['name']]) {
         if (properties[i]['name'] === 'createTime') {
-          console.log('here');
-          console.log(modelEvaluation[properties[i]['name']]);
-          console.log(modelEvaluation[properties[i]['name']].toLocaleString());
           evaluationTable.push(
             this.createData(
               properties[i]['label'],

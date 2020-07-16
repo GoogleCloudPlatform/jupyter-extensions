@@ -193,11 +193,11 @@ export class ImportData extends React.Component<Props, State> {
         console.error(`Failed to initialize the session.\n${reason}`);
       })
       .then(() => {
-        this.createModel(session);
+        this.createKernelModel(session);
       });
   }
 
-  private createModel(session: ClientSession) {
+  private createKernelModel(session: ClientSession) {
     const model = new KernelModel(
       session,
       () => {
