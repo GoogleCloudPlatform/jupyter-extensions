@@ -30,6 +30,10 @@ export class WidgetManager {
     return WidgetManager.instance;
   }
 
+  getStore(): EnhancedStore {
+    return this.store;
+  }
+
   launchWidget(
     widgetType: new (...args: unknown[]) => ReduxReactWidget,
     windowType: string,

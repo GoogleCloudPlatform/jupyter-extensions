@@ -5,13 +5,18 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
+import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
+import * as QueryEditorInCellWidgetsExport from './components/query_editor/query_editor_incell/query_editor_incell_widget';
 
 import ListItemsWidget from './components/list_items_panel/list_tree_item_widget';
 import { ListProjectsService } from './components/list_items_panel/service/list_items';
 import { WidgetManager } from './utils/widgetManager/widget_manager';
 import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
-async function activate(app: JupyterFrontEnd) {
+async function activate(
+  app: JupyterFrontEnd,
+  registry: IJupyterWidgetRegistry
+) {
   WidgetManager.initInstance(app);
   const manager = WidgetManager.getInstance();
   const context = { app: app, manager: manager };
@@ -26,14 +31,22 @@ async function activate(app: JupyterFrontEnd) {
     [listProjectsService, context],
     { rank: 100 }
   );
+
+  // TODO: refactor name and version to sync with back
+  registry.registerWidget({
+    name: 'bigquery_query_incell_editor',
+    version: '0.0.1',
+    exports: QueryEditorInCellWidgetsExport,
+  });
 }
 
 /**
  * The JupyterLab plugin.
  */
-const ListItemsPlugin: JupyterFrontEndPlugin<void> = {
+const BigQueryPlugin: JupyterFrontEndPlugin<void> = {
   id: 'bigquery:bigquery',
-  requires: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  requires: [IJupyterWidgetRegistry as any],
   activate: activate,
   autoStart: true,
 };
@@ -41,4 +54,4 @@ const ListItemsPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugin as default.
  */
-export default [ListItemsPlugin];
+export default [BigQueryPlugin];

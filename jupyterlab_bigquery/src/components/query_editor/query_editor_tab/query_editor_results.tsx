@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import {
@@ -16,7 +17,8 @@ import {
   LastPage,
 } from '@material-ui/icons';
 import { connect } from 'react-redux';
-import { QueryResult } from '../query_text_editor/service/query';
+import { QueryResult } from '../query_text_editor/query_text_editor';
+import { QueryId } from '../../../reducers/queryEditorTabSlice';
 
 const localStyles = stylesheet({
   header: {
@@ -56,6 +58,7 @@ interface QueryResultsState {
 
 interface QueryResultsProps {
   queryResult: QueryResult;
+  queryId: QueryId;
 }
 
 interface TablePaginationActionsProps {
@@ -120,12 +123,15 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 }
 
 class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
+  queryId: QueryId;
+
   constructor(props) {
     super(props);
     this.state = {
       page: 0,
       rowsPerPage: 10,
     };
+    this.queryId = props.queryId;
   }
 
   handleChangePage(event, newPage) {
@@ -190,8 +196,19 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   }
 }
 
-const mapStateToProps = state => {
-  return { queryResult: state.queryEditorTab.queryResult };
+const mapStateToProps = (state, ownProps) => {
+  const queryId = ownProps.queryId;
+  let queryResult = state.queryEditorTab.queries[queryId];
+
+  if (!queryResult) {
+    queryResult = {
+      content: [],
+      labels: [],
+      bytesProcessed: null,
+      queryId: queryId,
+    } as QueryResult;
+  }
+  return { queryResult: queryResult };
 };
 
 export default connect(mapStateToProps)(QueryResults);
