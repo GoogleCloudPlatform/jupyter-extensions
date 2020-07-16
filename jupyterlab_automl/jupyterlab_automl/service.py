@@ -24,6 +24,17 @@ def parse_dataset_type(dataset):
       return dt
   return DatasetType.OTHER
 
+def parse_model_type(model):
+  for mt in ModelType:
+    if mt.value.lower() in model.metadata_schema_uri:
+      return mt.value
+  return ModelType.OTHER.value
+
+class ModelType(Enum):
+  OTHER = "OTHER"
+  TABLE = "TABLE"
+  IMAGE = "IMAGE"
+
 
 class DatasetType(Enum):
   OTHER = "OTHER"
@@ -86,23 +97,18 @@ class AutoMLService:
     return cls._instance
 
   def get_models(self):
-    models = []
-    for model in self._model_client.list_models(parent=self._parent).models:
-      model_type = 'OTHER'
-      if 'image' in model.metadata_schema_uri:
-        model_type = 'IMAGE'
-      elif 'tables' in model.metadata_schema_uri:
-        model_type = 'TABLE'
-      models.append({
+    models = self._model_client.list_models(parent=self._parent).models
+    return [
+      {
             "id": model.name,
             "displayName": model.display_name,
             "pipelineId": model.training_pipeline,
             "createTime": get_milli_time(model.create_time),
             "updateTime": get_milli_time(model.update_time),
             "etag": model.etag,
-            "modelType": model_type
-        })
-    return models
+            "modelType": parse_model_type(model)
+        } for model in models
+    ]
 
   def _get_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0]["featureAttributions"].items()
@@ -139,17 +145,19 @@ class AutoMLService:
     return metrics
 
   def get_model_evaluation(self, model_id):
-    optional_fields = ["auPrc", "auRoc", "logLoss"]
+    optional_fields = ["auPrc", "auRoc", "logLoss", "rootMeanSquaredLogError", "rSquared", "meanAbsolutePercentageError", "rootMeanSquaredError", "meanAbsoluteError"]
     gcp_eval = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
     evaluation = json_format.MessageToDict(gcp_eval._pb)
     metrics = evaluation["metrics"]
     model_eval = {
-        "confidenceMetrics": self._get_confidence_metrics(metrics["confidenceMetrics"]),
-        "createTime": get_milli_time(gcp_eval.create_time),
-        "confusionMatrix": self._get_confusion_matrix(metrics['confusionMatrix'])
+        "createTime": get_milli_time(gcp_eval.create_time)
     }
     if "modelExplanation" in evaluation:
       model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+    if "confusionMatrix" in metrics:
+      model_eval["confusionMatrix"] = self._get_confusion_matrix(metrics['confusionMatrix'])
+    if "confidenceMetrics" in metrics:
+      model_eval["confidenceMetrics"] = self._get_confidence_metrics(metrics["confidenceMetrics"])
     for field in optional_fields:
       model_eval[field] = metrics.get(field, None)
     return model_eval

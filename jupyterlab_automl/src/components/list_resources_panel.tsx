@@ -1,6 +1,7 @@
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
+import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import * as React from 'react';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
@@ -352,7 +353,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     const icons: { [key in ModelType]: any } = {
       OTHER: {
         icon: 'emoji_objects',
-        color: red[900],
+        color: green[500],
       },
       TABLE: {
         icon: 'emoji_objects',
