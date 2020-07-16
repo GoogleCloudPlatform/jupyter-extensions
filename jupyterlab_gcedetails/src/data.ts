@@ -339,6 +339,6 @@ export const STYLES = stylesheet({
 });
 
 export const TEXT_STYLE = {
-  fontFamily: BASE_FONT.fontFamily as string, //'var(--jp-ui-font-family)'
+  fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
 };

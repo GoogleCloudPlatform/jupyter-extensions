@@ -106,10 +106,6 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     });
   }
 
-  private onMachineTypeChange(machineType: Option) {
-    this.setState({ machineType });
-  }
-
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       gpuType: event.target.value,
@@ -139,7 +135,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 header: machineType.base,
                 options: machineType.configurations,
               }))}
-              onChange={value => this.onMachineTypeChange(value)}
+              onChange={machineType => this.setState({ machineType })}
             />
             <div className={STYLES.checkboxContainer}>
               <CheckboxInput
