@@ -6,7 +6,7 @@ import json
 import re
 import tornado.gen as gen
 import os
-import random
+import math
 
 import json
 import datetime
@@ -89,13 +89,25 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
-def get_schema(schema):
-    return [{
+def format_detail_schema(schema):
+  formatted_schema = []
+  for field in schema:
+    formatted_schema.append({
         'name': field.name,
         'type': field.field_type,
         'description': field.description,
         'mode': field.mode
-    } for field in schema]
+      })
+    if field.field_type == 'RECORD':
+      for record_entry in field.fields:
+        formatted_schema.append({
+          'name': "{}.{}".format(field.name, record_entry.name),
+          'type': record_entry.field_type,
+          'description': record_entry.description,
+          'mode': record_entry.mode
+        })
+  return formatted_schema
+    
 
 def get_table_details(client, table_id):
   table = client.get_table(table_id)
@@ -114,8 +126,55 @@ def get_table_details(client, table_id):
           'link': table.self_link,
           'num_rows': table.num_rows,
           'num_bytes': table.num_bytes,
-          'schema': get_schema(table.schema)
+          'schema': format_detail_schema(table.schema)
       }
+  }
+
+def format_preview_fields(schema):
+  formatted_fields = []
+  for field in schema:
+    if field.field_type == 'RECORD':
+      for record_entry in field.fields:
+        formatted_fields.append("{}.{}".format(field.name, record_entry.name))
+    else:
+      formatted_fields.append(field.name)
+
+  return formatted_fields
+
+def format_preview_row(row):
+  formatted_row = []
+  for value in row.values():
+    if isinstance(value, bytes):
+      formatted_row.append(base64.b64encode(value).__str__()[2:-1])
+
+    elif isinstance(value, dict):
+      for sub_value in value.values():
+        formatted_row.append(sub_value)
+
+    elif isinstance(value, float):
+      if value == float('inf'):
+        formatted_row.append('Infinity')
+      elif value == float('-inf'):
+        formatted_row.append('-Infinity')
+      elif math.isnan(value):
+        formatted_row.append('NaN')
+      else:
+        formatted_row.append(value.__str__())
+
+    elif isinstance(value, datetime.datetime):
+      formatted_row.append(json.dumps(value.strftime('%Y-%m-%d %H:%M:%S.%f %Z'))[1:-1])
+
+    else:
+      formatted_row.append(value.__str__())
+
+  return formatted_row
+  
+def get_table_preview(client, table_id):
+  table = client.get_table(table_id)
+  rows = client.list_rows(table, max_results=100)
+  return {
+    'fields': format_preview_fields(rows.schema),
+    'rows': [format_preview_row(row) for row in rows]
   }
 
 class ListHandler(APIHandler):
@@ -170,6 +229,27 @@ class TableDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_table_details(self.bigquery_client, post_body['tableId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({
+          'error': {
+              'message': str(e)
+          }
+      })
+
+class TablePreviewHandler(APIHandler):
+  """"Handles request for table preview."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_table_preview(self.bigquery_client, post_body['tableId']))
 
     except Exception as e:
       app_log.exception(str(e))
