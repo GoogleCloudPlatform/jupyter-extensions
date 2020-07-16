@@ -187,7 +187,8 @@ class AutoMLService:
         objective = ob
         break
 
-    end_time = pipeline.end_time.timestamp() if pipeline.end_time else int(time.time())
+    end_time = pipeline.end_time.timestamp() if pipeline.end_time else int(
+        time.time())
 
     training_pipeline = {
         "id": pipeline.name,
