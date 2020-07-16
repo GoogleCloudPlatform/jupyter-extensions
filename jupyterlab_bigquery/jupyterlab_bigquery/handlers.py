@@ -89,23 +89,28 @@ def get_dataset_details(client, dataset_id):
       }
   }
 
-def format_detail_schema(schema):
-  formatted_schema = []
-  for field in schema:
+def format_detail_field(formatted_schema, field, field_name):
+  if field.field_type == 'RECORD':
     formatted_schema.append({
-        'name': field.name,
-        'type': field.field_type,
+        'name': field_name + field.name,
+        'type': 'RECORD',
         'description': field.description,
         'mode': field.mode
       })
-    if field.field_type == 'RECORD':
-      for record_entry in field.fields:
-        formatted_schema.append({
-          'name': "{}.{}".format(field.name, record_entry.name),
-          'type': record_entry.field_type,
-          'description': record_entry.description,
-          'mode': record_entry.mode
-        })
+    for sub_field in field.fields:
+      format_detail_field(formatted_schema, sub_field, field_name + field.name + '.')
+  else:
+    formatted_schema.append({
+      'name': field_name + field.name,
+      'type': field.field_type,
+      'description': field.description,
+      'mode': field.mode
+    })
+
+def format_detail_schema(schema):
+  formatted_schema = []
+  for field in schema:
+    format_detail_field(formatted_schema, field, '')
   return formatted_schema
     
 
@@ -130,43 +135,43 @@ def get_table_details(client, table_id):
       }
   }
 
+def format_preview_field(formatted_fields, field, field_name):
+  if field.field_type == 'RECORD':
+    for record_entry in field.fields:
+      format_preview_field(formatted_fields, record_entry, field_name + field.name + ".")
+  else:
+    formatted_fields.append(field_name + field.name)
+
 def format_preview_fields(schema):
   formatted_fields = []
   for field in schema:
-    if field.field_type == 'RECORD':
-      for record_entry in field.fields:
-        formatted_fields.append("{}.{}".format(field.name, record_entry.name))
-    else:
-      formatted_fields.append(field.name)
-
+    format_preview_field(formatted_fields, field, '')
   return formatted_fields
+
+def format_preview_value(formatted_row, value):
+  if isinstance(value, bytes):
+      formatted_row.append(base64.b64encode(value).__str__()[2:-1])
+  elif isinstance(value, dict):
+    for sub_value in value.values():
+      format_preview_value(formatted_row, sub_value)
+  elif isinstance(value, float):
+    if value == float('inf'):
+      formatted_row.append('Infinity')
+    elif value == float('-inf'):
+      formatted_row.append('-Infinity')
+    elif math.isnan(value):
+      formatted_row.append('NaN')
+    else:
+      formatted_row.append(value.__str__())
+  elif isinstance(value, datetime.datetime):
+    formatted_row.append(json.dumps(value.strftime('%Y-%m-%d %H:%M:%S.%f %Z'))[1:-1])
+  else:
+    formatted_row.append(value.__str__())
 
 def format_preview_row(row):
   formatted_row = []
   for value in row.values():
-    if isinstance(value, bytes):
-      formatted_row.append(base64.b64encode(value).__str__()[2:-1])
-
-    elif isinstance(value, dict):
-      for sub_value in value.values():
-        formatted_row.append(sub_value)
-
-    elif isinstance(value, float):
-      if value == float('inf'):
-        formatted_row.append('Infinity')
-      elif value == float('-inf'):
-        formatted_row.append('-Infinity')
-      elif math.isnan(value):
-        formatted_row.append('NaN')
-      else:
-        formatted_row.append(value.__str__())
-
-    elif isinstance(value, datetime.datetime):
-      formatted_row.append(json.dumps(value.strftime('%Y-%m-%d %H:%M:%S.%f %Z'))[1:-1])
-
-    else:
-      formatted_row.append(value.__str__())
-
+    format_preview_value(formatted_row, value)
   return formatted_row
   
 def get_table_preview(client, table_id):
