@@ -1,26 +1,24 @@
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
+import {
+    Box,
+    Button,
+    Paper,
+    Typography,
+    Grid,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+  } from '@material-ui/core';
 import { withStyles, makeStyles } from "@material-ui/core/styles";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
-import Box from "@material-ui/core/Box";
-import Collapse from "@material-ui/core/Collapse";
 import * as Types from "../types"
 import { prettifyStudyName } from "../service/optimizer"
 import { connect } from 'react-redux';
 import moment from 'moment';
-
-const dateFormat = 'h:mm a, MMM. D, YYYY';
+import { dateFormat, makeReadable } from '../utils';
+import { setView } from '../store/view';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -90,9 +88,13 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
     return formattedParams;
 }
 
-function makeReadable(string: string): string {
-    return string.charAt(0).toUpperCase() + string.toLowerCase().slice(1);
-  }
+interface Props {
+    studyId: string,
+    studyToDisplay: FormattedStudy,
+    openTrials: (studyName: string) => void,
+    openVisualizations: (studyName: string) => void,
+    openDashboard: () => void,
+}
 
 const mapStateToProps = (state, ownProps) => {
     const study: Types.Study = state.studies.data?.find(
@@ -109,54 +111,21 @@ const mapStateToProps = (state, ownProps) => {
         parameters: formatParams(study.studyConfig.parameters),
     }
     return {
-      studyToDisplay,
+        studyId: study.name,
+        studyToDisplay,
       // TODO: add trials
       // trialsToDisplay
     };
 };
 
-interface Props {
-    studyToDisplay: FormattedStudy;
-}
-
-const dummyTrials = [
-  {
-    name: "1",
-    state: "ACTIVE",
-    infeasible: "-",
-    model_type: "LINEAR",
-    finalMeasurement: {
-      metrics: [
-        {
-          metric: "accruacy",
-          value: "0.9"
-        },
-        {
-          metric: "learning_rate",
-          value: "0.89"
-        }
-      ]
-    }
-  },
-  {
-    name: "2",
-    state: "ACTIVE",
-    infeasible: "-",
-    model_type: "LINEAR",
-    finalMeasurement: {
-      metrics: [
-        {
-          metric: "accruacy",
-          value: "0.95"
-        },
-        {
-          metric: "learning_rate",
-          value: "0.87"
-        }
-      ]
-    }
-  }
-];
+const mapDispatchToProps = dispatch => ({
+    openTrials: (studyName: string) =>
+      dispatch(setView({ view: 'suggestTrials', studyId: studyName })),
+    openVisualizations: (studyName: string) =>
+      dispatch(setView({ view: 'visualizeTrials', studyId: studyName })),
+    openDashboard: () =>
+      dispatch(setView({ view: 'dashboard'})),
+  });
 
 interface ConfigRow {
     key: number,
@@ -201,104 +170,12 @@ function createParamRows(study: FormattedStudy): ParamRow[] {
   return paramRows;
 }
 
-function ExpandableRow(props) {
-  const { expandable, mainContents, subContents, subTableTitle } = props;
-  const [open, setOpen] = React.useState(false);
-  const classes = useStyles();
-
-  return (
-    <React.Fragment>
-      <TableRow>
-        {Object.values(mainContents).map((value, index) => {
-          if (index === 0) {
-            return (
-              <TableCell key={index} component="th" scope="row">
-                {value}
-              </TableCell>
-            );
-          }
-          return (
-            <TableCell key={index} align="right">
-              {value}
-            </TableCell>
-          );
-        })}
-        <TableCell align="right">
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {expandable ? (
-              open ? (
-                <KeyboardArrowUpIcon />
-              ) : (
-                <KeyboardArrowDownIcon />
-              )
-            ) : (
-              ""
-            )}
-          </IconButton>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={1}>
-              <Typography variant="subtitle2" gutterBottom component="div">
-                {subTableTitle}
-              </Typography>
-              <Table
-                size="small"
-                aria-label="subtable"
-                className={classes.table}
-              >
-                <TableHead>
-                  <TableRow>
-                    {Object.keys(subContents[0]).map((title, index) => (
-                      <TableCell align={index === 0 ? "left" : "right"}>
-                        {title}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {subContents.map((subtableRow, index) => (
-                    <TableRow key={`subTableRow-${index}`}>
-                      {Object.values(subtableRow).map((column, subIndex) => {
-                        if (subIndex === 0)
-                          return (
-                            <TableCell
-                              key={`subTableCell-${index}-${subIndex}`}
-                              component="th"
-                              scope="row"
-                            >
-                              {column}
-                            </TableCell>
-                          );
-                        return (
-                          <TableCell
-                            key={`subTableCell-${index}-${subIndex}`}
-                            align="right"
-                          >
-                            {column}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
 export const StudyDetailsUnwrapped: React.FC<Props> = ({
+    studyId,
     studyToDisplay,
+    openTrials,
+    openVisualizations,
+    openDashboard,
 }) => {
   const classes = useStyles();
   const configRows = createConfigRows(studyToDisplay);
@@ -324,17 +201,17 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {configRows.map((row, index) => (
-                  <StyledTableRow key={`${row.entryName}-${index}`}>
+                {configRows.map((row: ConfigRow, index: number) => (
+                  <StyledTableRow key={`config-row-${index}`}>
                     <StyledTableCell
-                      key={`${row.entryName}-${index}`}
+                      key={`config-row-${index}-cell-entryName`}
                       component="th"
                       scope="row"
                     >
                       {row.entryName}
                     </StyledTableCell>
                     <StyledTableCell
-                      key={`${row.entryValue}-${index}`}
+                      key={`config-row-${index}-cell-entryValue`}
                       align="right"
                     >
                       {row.entryValue}
@@ -358,16 +235,16 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paramRows.map(row => {
+                {paramRows.map((row: ParamRow, index: number) => {
                   return (
-                    <StyledTableRow key={row.name}>
-                      <StyledTableCell component="th" scope="row">
+                    <StyledTableRow key={`param-row-${index}`}>
+                      <StyledTableCell key={`param-row-${index}-cell-name`} component="th" scope="row">
                         {row.name}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
+                      <StyledTableCell key={`param-row-${index}-cell-type`} align="right">
                         {row.type}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
+                      <StyledTableCell key={`param-row-${index}-cell-values`} align="right">
                         {row.values}
                       </StyledTableCell>
                     </StyledTableRow>
@@ -376,55 +253,16 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
               </TableBody>
             </Table>
           </TableContainer>
-          <TableContainer component={Paper}>
-            <Table
-              className={classes.table}
-              aria-label="customized table"
-              size="small"
-            >
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>Trials</StyledTableCell>
-                  <StyledTableCell align="right">State</StyledTableCell>
-                  <StyledTableCell align="right">Infeasible</StyledTableCell>
-                  <StyledTableCell align="right">Model Type</StyledTableCell>
-                  <StyledTableCell align="right">
-                    Final Measurement
-                  </StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dummyTrials.map(row => {
-                  const mainContents = {
-                    name: row.name,
-                    state: row.state,
-                    infeasible: row.infeasible,
-                    model_type: row.model_type
-                  };
-                  const subContents = row.finalMeasurement.metrics;
-                  return (
-                    <ExpandableRow
-                      key={row.name}
-                      expandable={true}
-                      mainContents={mainContents}
-                      subContents={subContents}
-                      subTableTitle="Final Measurement"
-                    />
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
         </Grid>
         <Grid item sm={3}>
           <Grid container item justify="center" xs={12}>
-            <Button color="primary">See Visualization</Button>
+            <Button color="primary" onClick={()=>openVisualizations(studyId)}>See Visualization</Button>
           </Grid>
           <Grid container item justify="center" xs={12}>
-            <Button color="primary">Go to Dashboard</Button>
+            <Button color="primary" onClick={()=>openDashboard()}>Go to Dashboard</Button>
           </Grid>
           <Grid container item justify="center" xs={12}>
-            <Button color="primary">Edit Trials</Button>
+            <Button color="primary" onClick={()=>openTrials(studyId)}>View Trials</Button>
           </Grid>
         </Grid>
       </Grid>
@@ -435,5 +273,5 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
 
 export const StudyDetails = connect(
     mapStateToProps,
-    null
+    mapDispatchToProps
   )(StudyDetailsUnwrapped);

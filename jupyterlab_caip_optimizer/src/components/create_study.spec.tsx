@@ -10,10 +10,7 @@ jest.mock('react-redux', () => ({
   Provider: ({ store, children }: any) => children,
 }));
 import * as React from 'react';
-// import { render, cleanup } from '@testing-library/react';
-// import { Button } from '@material-ui/core';
 import {
-  // CreateStudyUnwrapped,
   createDropdown,
   DropdownItem,
 } from './create_study';
@@ -39,40 +36,3 @@ describe('Dropdown list', () => {
     expect(dropdown).toEqual(goalDropdownList);
   });
 });
-/*
-describe('Create Study page', () => {
-  const setStateMock = jest.fn();
-  const useStateMock: any = (initState: any) => [initState, setStateMock];
-  afterEach(cleanup);
-
-  it('renders', () => {
-    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
-    const mockCreateStudyAndLoad = jest.fn();
-    const { getByText } = render(
-      <CreateStudyUnwrapped createStudyAndLoad={mockCreateStudyAndLoad} />
-    );
-    const CreateStudyButton = getByText('Create Study');
-    expect(CreateStudyButton).toHaveProperty('disabled');
-  });
-
-  // let useState;
-  // const mockCreateStudyAndLoad = jest.fn();
-  // let component;
-
-  // const mockUseState = () => {
-  //   useState.mockImplementationOnce(f => f());
-  // };
-  // beforeEach(() => {
-  //   useState = jest.spyOn(React, 'useState');
-  //   mockUseState();
-  //   component = shallow(
-  //     <CreateStudyUnwrapped createStudyAndLoad={mockCreateStudyAndLoad} />
-  //   );
-  // });
-  // it('initially has Create Study button inactive', () => {
-  //   const button = component.findWhere(
-  //     node => node.type() === Button && node.text().includes('Create Study')
-  //   );
-  //   expect(button.prop('disabled')).toEqual(false);
-  // });
-});*/
