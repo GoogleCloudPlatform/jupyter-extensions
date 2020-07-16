@@ -10,10 +10,7 @@ jest.mock('react-redux', () => ({
   Provider: ({ store, children }: any) => children,
 }));
 import * as React from 'react';
-import {
-  createDropdown,
-  DropdownItem,
-} from './create_study';
+import { createDropdown, DropdownItem } from './create_study';
 import * as Types from '../types';
 
 describe('Dropdown list', () => {

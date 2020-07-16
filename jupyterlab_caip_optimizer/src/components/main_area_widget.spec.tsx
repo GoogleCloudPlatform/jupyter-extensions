@@ -11,6 +11,9 @@ jest.mock('./dashboard', () => ({
 jest.mock('./create_study', () => ({
   CreateStudy: () => <div>Create Study Component</div>,
 }));
+jest.mock('./study_details', () => ({
+  StudyDetails: () => <div>Study Details Component</div>,
+}));
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { close as reduxClose } from '../store/view';
@@ -30,10 +33,9 @@ describe('ViewManager', () => {
       <ViewManager data={{ view: 'studyDetails', studyId: 'STUDY-ID' }} />
     );
     expect(viewManager).toMatchInlineSnapshot(`
-      <Fragment>
-        Study ID: 
-        STUDY-ID
-      </Fragment>
+    <StudyDetails
+      studyId="STUDY-ID"
+    />
     `);
   });
 });
