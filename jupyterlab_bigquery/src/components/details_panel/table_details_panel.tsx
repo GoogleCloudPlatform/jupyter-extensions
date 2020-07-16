@@ -86,7 +86,7 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
         { name: 'Created', value: detailsObj.date_created },
         {
           name: 'Table expiration',
-          value: detailsObj.expiration ? detailsObj.expiration : 'Never',
+          value: detailsObj.expires ? detailsObj.expires : 'Never',
         },
         {
           name: 'Last modified',
