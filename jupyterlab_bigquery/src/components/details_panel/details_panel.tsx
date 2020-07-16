@@ -60,6 +60,20 @@ const getStripedStyle = index => {
   return { background: index % 2 ? 'white' : '#fafafa' };
 };
 
+const formatFieldName = name => {
+  if (name.includes('.')) {
+    const child = name.substr(name.lastIndexOf('.') + 1);
+    const parents = name.substr(0, name.lastIndexOf('.') + 1);
+    return (
+      <div>
+        {parents} <b>{child}</b>
+      </div>
+    );
+  } else {
+    return <b>{name}</b>;
+  }
+};
+
 interface SharedDetails {
   id: string;
   description: string;
@@ -146,9 +160,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
                   {details.schema.map((field, index) => {
                     return (
                       <TableRow key={`schema_row_${index}`}>
-                        <TableCell>
-                          <b>{field.name}</b>
-                        </TableCell>
+                        <TableCell>{formatFieldName(field.name)}</TableCell>
                         <TableCell>{field.type}</TableCell>
                         <TableCell>{field.mode}</TableCell>
                         <TableCell>{field.description ?? ''}</TableCell>
