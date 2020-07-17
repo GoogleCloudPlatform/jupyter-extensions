@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { setDefaultOptions } from 'expect-puppeteer';
+// import { setDefaultOptions } from 'expect-puppeteer';
 
-// Extend the time allowed for tests to complete:
-const timeout = 30 * 1000;
-jest.setTimeout(timeout);
-setDefaultOptions({ timeout });
+// // Extend the time allowed for tests to complete:
+// const timeout = 30 * 1000;
+// jest.setTimeout(timeout);
+// setDefaultOptions({ timeout });
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// function sleep(ms) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
-describe('JupyterLab Notebook Comments in Git', () => {
-  beforeAll(async () => {
-    await page.goto('http://localhost:8888/lab');
-    await sleep(12000);
-  });
+// describe('JupyterLab Notebook Comments in Git', () => {
+//   beforeAll(async () => {
+//     await page.goto('http://localhost:8888/lab');
+//     await sleep(12000);
+//   });
 
-  it('should navigate to command tab and activate the extension"', async () => {
-    await expect(page).toClick('[title~="Commands"]');
-    await expect(page).toMatch('Notebook Comments in Git', { timeout: 500 });
-  });
-});
+//   it('should navigate to command tab and activate the extension"', async () => {
+//     await expect(page).toClick('[title~="Commands"]');
+//     await expect(page).toMatch('Notebook Comments in Git', { timeout: 500 });
+//   });
+// });
