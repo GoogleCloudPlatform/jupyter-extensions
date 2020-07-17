@@ -8,8 +8,8 @@ import {
 import React from 'react';
 import ReactDOM from 'react-dom';
 import QueryEditorInCell from './query_editor_incell';
-
-// TODO: refactor name and version to sync with back
+import { Provider } from 'react-redux';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 
 export class QueryIncellEditorModel extends DOMWidgetModel {
   defaults() {
@@ -31,18 +31,26 @@ export class QueryIncellEditorModel extends DOMWidgetModel {
   };
 
   static model_name = 'QueryIncellEditorModel';
-  static model_module = 'bigquery_query_incell_editor';
+  static model_module = 'bigQuery-query-incell-editor';
   static model_module_version = '0.0.1';
   static view_name = 'QueryIncellEditorView'; // Set to null if no view
-  static view_module = 'bigquery_query_incell_editor'; // Set to null if no view
+  static view_module = 'bigQuery-query-incell-editor'; // Set to null if no view
   static view_module_version = '0.0.1';
 }
 
 export class QueryIncellEditorView extends DOMWidgetView {
   initialize() {
     const appContainer = document.createElement('div');
-    const reactApp = React.createElement(QueryEditorInCell);
-    ReactDOM.render(reactApp, appContainer);
+    const reactApp = React.createElement(QueryEditorInCell, {
+      ipyView: this,
+    });
+    const reduxStore = WidgetManager.getInstance().getStore();
+    const reduxProvider = React.createElement(
+      Provider,
+      { store: reduxStore },
+      reactApp
+    );
+    ReactDOM.render(reduxProvider, appContainer);
     this.el.append(appContainer);
   }
 }

@@ -15,8 +15,10 @@ class PagedQueryHandler(PagedAPIHandler):
     try:
       dry_run_job = PagedQueryHandler.client.query(query, job_config=dry_run_job_config)
     except Exception as err:
-      err_msg = err.errors[0]['message']
-      raise Exception(err_msg)
+      if hasattr(err, 'errors'):
+        raise Exception(err.errors[0]['message'])
+      else:
+        raise Exception(err)
     total_bytes_processed = dry_run_job.total_bytes_processed
 
     if dryRunOnly:
