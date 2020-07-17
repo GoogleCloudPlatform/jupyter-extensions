@@ -31,10 +31,10 @@ export class QueryIncellEditorModel extends DOMWidgetModel {
   };
 
   static model_name = 'QueryIncellEditorModel';
-  static model_module = 'bigQuery-query-incell-editor';
+  static model_module = 'bigquery_query_incell_editor';
   static model_module_version = '0.0.1';
   static view_name = 'QueryIncellEditorView'; // Set to null if no view
-  static view_module = 'bigQuery-query-incell-editor'; // Set to null if no view
+  static view_module = 'bigquery_query_incell_editor'; // Set to null if no view
   static view_module_version = '0.0.1';
 }
 
