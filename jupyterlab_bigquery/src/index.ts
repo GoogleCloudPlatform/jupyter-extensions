@@ -46,7 +46,6 @@ async function activate(
     { rank: 100 }
   );
 
-  // TODO: refactor name and version to sync with back
   registry.registerWidget({
     name: 'bigquery_query_incell_editor',
     version: '0.0.1',

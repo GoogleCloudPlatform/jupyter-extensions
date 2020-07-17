@@ -22,13 +22,14 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
+import Popover from '@material-ui/core/Popover';
+import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option } from '../data';
+import { Option, TEXT_STYLE } from '../data';
 
-export const STYLES = stylesheet({
+const STYLES = stylesheet({
   itemGroup: {
     overflowY: 'auto',
     height: '240px',
@@ -38,6 +39,13 @@ export const STYLES = stylesheet({
     paddingTop: '8px',
     paddingBottom: '8px',
     width: '468px',
+  },
+  nestedSelect: {
+    paddingTop: '8px',
+    paddingBottom: '8px',
+  },
+  input: {
+    marginTop: '4px',
   },
 });
 
@@ -59,7 +67,12 @@ export function Item(props: ItemProps) {
 
   return (
     <ListItem onClick={e => onSelect(option)} button selected={selected}>
-      <ListItemText primary={option.value} secondary={option.text} />
+      <ListItemText
+        primary={option.value}
+        secondary={option.text}
+        primaryTypographyProps={{ style: TEXT_STYLE }}
+        secondaryTypographyProps={{ style: TEXT_STYLE }}
+      />
     </ListItem>
   );
 }
@@ -91,7 +104,10 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
     return (
       <div onMouseEnter={() => onHover()}>
         <ListItem button>
-          <ListItemText primary={label} />
+          <ListItemText
+            primary={label}
+            primaryTypographyProps={{ style: TEXT_STYLE }}
+          />
           <ChevronRightRoundedIcon />
         </ListItem>
       </div>
@@ -178,7 +194,7 @@ class NestedSelectBody extends React.Component<
 
   render() {
     return (
-      <Paper elevation={5} square>
+      <Paper elevation={5}>
         <div className={STYLES.menuContainer}>
           <Grid container spacing={0} alignItems="center">
             <Grid item xs>
@@ -199,12 +215,13 @@ class NestedSelectBody extends React.Component<
 
 interface NestedSelectProps {
   nestedOptionsList: NestedOptions[];
-  onChange?: (value: string) => void;
+  onChange?: (value: Option) => void;
+  label?: string;
 }
 
 interface NestedSelectState {
-  visible: boolean;
   value: Option;
+  anchorEl: null | HTMLElement;
 }
 
 export class NestedSelect extends React.Component<
@@ -215,8 +232,8 @@ export class NestedSelect extends React.Component<
     super(props);
 
     this.state = {
-      visible: false,
       value: props.nestedOptionsList[0].options[0],
+      anchorEl: null,
     };
   }
 
@@ -224,44 +241,72 @@ export class NestedSelect extends React.Component<
     return `${option.value} (${option.text})`;
   }
 
-  private toggleMenuBody() {
-    this.setState({ visible: !this.state.visible });
+  private handleClick(event: React.MouseEvent<HTMLElement>) {
+    this.setState({
+      anchorEl: this.state.anchorEl ? null : event.currentTarget,
+    });
+  }
+
+  private handleClose() {
+    this.setState({
+      anchorEl: null,
+    });
   }
 
   private selectOption(newValue: Option) {
     this.setState({
       value: newValue,
-      visible: false,
+      anchorEl: null,
     });
 
-    this.props.onChange(newValue.value as string);
+    this.props.onChange(newValue);
   }
 
   render() {
-    const { visible, value } = this.state;
-    const { nestedOptionsList } = this.props;
+    const { value, anchorEl } = this.state;
+    const { nestedOptionsList, label } = this.props;
+
+    const open = Boolean(anchorEl);
 
     return (
-      <div>
-        <OutlinedInput
+      <div className={STYLES.nestedSelect}>
+        {label && <label>{label}</label>}
+        <TextField
+          className={STYLES.input}
           value={this.displayValue(value)}
           margin="dense"
+          variant="outlined"
           fullWidth={true}
-          readOnly={true}
-          onClick={e => this.toggleMenuBody()}
-          endAdornment={
-            <InputAdornment variant="outlined" position="end">
-              <ArrowDropDownIcon />
-            </InputAdornment>
-          }
+          onClick={e => this.handleClick(e)}
+          InputProps={{
+            readOnly: true,
+            style: TEXT_STYLE,
+            endAdornment: (
+              <InputAdornment position="end">
+                <ArrowDropDownIcon />
+              </InputAdornment>
+            ),
+          }}
         />
-        {visible && (
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={() => this.handleClose()}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
           <NestedSelectBody
             onSelect={newValue => this.selectOption(newValue)}
             selectedOption={value}
             nestedOptionsList={nestedOptionsList}
           />
-        )}
+        </Popover>
       </div>
     );
   }

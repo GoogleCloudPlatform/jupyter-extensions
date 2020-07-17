@@ -8,8 +8,8 @@ import {
 import React from 'react';
 import ReactDOM from 'react-dom';
 import QueryEditorInCell from './query_editor_incell';
-
-// TODO: refactor name and version to sync with back
+import { Provider } from 'react-redux';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 
 export class QueryIncellEditorModel extends DOMWidgetModel {
   defaults() {
@@ -41,8 +41,16 @@ export class QueryIncellEditorModel extends DOMWidgetModel {
 export class QueryIncellEditorView extends DOMWidgetView {
   initialize() {
     const appContainer = document.createElement('div');
-    const reactApp = React.createElement(QueryEditorInCell);
-    ReactDOM.render(reactApp, appContainer);
+    const reactApp = React.createElement(QueryEditorInCell, {
+      ipyView: this,
+    });
+    const reduxStore = WidgetManager.getInstance().getStore();
+    const reduxProvider = React.createElement(
+      Provider,
+      { store: reduxStore },
+      reactApp
+    );
+    ReactDOM.render(reduxProvider, appContainer);
     this.el.append(appContainer);
   }
 }
