@@ -3,7 +3,7 @@ from traitlets import Unicode, Any
 from IPython.core import magic_arguments
 import IPython
 
-module_name = 'bigQuery-query-incell-editor'
+module_name = 'bigquery_query_incell_editor'
 module_version = '0.0.1'
 
 class QueryIncellEditor(DOMWidget):
