@@ -26,11 +26,13 @@ def parse_dataset_type(dataset):
       return dt
   return DatasetType.OTHER
 
+
 def parse_model_type(model):
   for mt in ModelType:
     if mt.value.lower() in model.metadata_schema_uri:
       return mt.value
   return ModelType.OTHER.value
+
 
 class ModelType(Enum):
   OTHER = "OTHER"
@@ -100,19 +102,17 @@ class AutoMLService:
 
   def get_models(self):
     models = self._model_client.list_models(parent=self._parent).models
-    return [
-      {
-            "id": model.name,
-            "displayName": model.display_name,
-            "pipelineId": model.training_pipeline,
-            "createTime": get_milli_time(model.create_time),
-            "updateTime": get_milli_time(model.update_time),
-            "etag": model.etag,
-            "modelType": parse_model_type(model)
-        } for model in models
-    ]
+    return [{
+        "id": model.name,
+        "displayName": model.display_name,
+        "pipelineId": model.training_pipeline,
+        "createTime": get_milli_time(model.create_time),
+        "updateTime": get_milli_time(model.update_time),
+        "etag": model.etag,
+        "modelType": parse_model_type(model)
+    } for model in models]
 
-  def _get_feature_importance(self, model_explanation):
+  def _build_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0][
         "featureAttributions"].items()
     return [{
@@ -120,7 +120,7 @@ class AutoMLService:
         "Percentage": round(val * 100, 3),
     } for key, val in features]
 
-  def _get_confusion_matrix(self, confusion_matrix):
+  def _build_confusion_matrix(self, confusion_matrix):
     rows = confusion_matrix["rows"]
     titles = []
     for column in confusion_matrix["annotationSpecs"]:
@@ -128,7 +128,7 @@ class AutoMLService:
     rows.insert(0, titles)
     return rows
 
-  def _get_confidence_metrics(self, confidence_metrics):
+  def _build_confidence_metrics(self, confidence_metrics):
     labels = [
         "confidenceThreshold", "f1Score", "f1ScoreAt1", "precision",
         "precisionAt1", "recall", "recallAt1", "trueNegativeCount",
@@ -139,33 +139,43 @@ class AutoMLService:
     for confidence_metric in confidence_metrics:
       metric = {}
       for label in labels:
-        if label == "confidenceThreshold":
-          value = confidence_metric.get(label, 0.0) * 100
-        else:
-          value = confidence_metric.get(label, "NaN")
-        metric[label] = value
+        metric[label] = confidence_metric.get(label, "NaN")
+      metric["confidenceThreshold"] = confidence_metric.get(
+          "confidenceThreshold", 0.0) * 100
       metrics.append(metric)
     return metrics
 
-  def get_model_evaluation(self, model_id):
-    optional_fields = ["auPrc", "auRoc", "logLoss", "rootMeanSquaredLogError", "rSquared", "meanAbsolutePercentageError", "rootMeanSquaredError", "meanAbsoluteError"]
-    gcp_eval = self._model_client.list_model_evaluations(parent=model_id).model_evaluations[0]
-    evaluation = json_format.MessageToDict(gcp_eval._pb)
+  def _build_model_evaluation(self, raw_eval):
+    evaluation = json_format.MessageToDict(raw_eval._pb)
+
+    optional_fields = [
+        "auPrc", "auRoc", "logLoss", "rootMeanSquaredLogError", "rSquared",
+        "meanAbsolutePercentageError", "rootMeanSquaredError",
+        "meanAbsoluteError"
+    ]
+
     metrics = evaluation["metrics"]
-    model_eval = {
-        "createTime": get_milli_time(gcp_eval.create_time)
-    }
+    model_eval = {"createTime": get_milli_time(raw_eval.create_time)}
     if "modelExplanation" in evaluation:
-      model_eval["featureImportance"] = self._get_feature_importance(evaluation["modelExplanation"])
+      model_eval["featureImportance"] = self._build_feature_importance(
+          evaluation["modelExplanation"])
     if "confusionMatrix" in metrics:
-      model_eval["confusionMatrix"] = self._get_confusion_matrix(metrics['confusionMatrix'])
+      model_eval["confusionMatrix"] = self._build_confusion_matrix(
+          metrics['confusionMatrix'])
     if "confidenceMetrics" in metrics:
-      model_eval["confidenceMetrics"] = self._get_confidence_metrics(metrics["confidenceMetrics"])
+      model_eval["confidenceMetrics"] = self._build_confidence_metrics(
+          metrics["confidenceMetrics"])
     for field in optional_fields:
       model_eval[field] = metrics.get(field, None)
     return model_eval
 
-  def _get_feature_transformations(self, response):
+  def get_model_evaluation(self, model_id):
+    raw_eval = self._model_client.list_model_evaluations(
+        parent=model_id).model_evaluations[0]
+
+    return self._build_model_evaluation(raw_eval)
+
+  def _build_feature_transformations(self, response):
     transformations = []
     for column in response:
       for data_type in column.keys():
@@ -192,7 +202,7 @@ class AutoMLService:
         "datasetId": pipeline.input_data_config.dataset_id,
     }
     if "transformations" in training_task_inputs:
-      transformation_options = self._get_feature_transformations(
+      transformation_options = self._build_feature_transformations(
           training_task_inputs["transformations"])
       training_pipeline["transformationOptions"] = transformation_options
     for field in optional_fields:
