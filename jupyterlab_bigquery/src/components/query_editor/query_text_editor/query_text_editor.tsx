@@ -144,7 +144,7 @@ class QueryTextEditor extends React.Component<
   }
 
   handleQuery() {
-    this.props.resetQueryResult();
+    this.props.resetQueryResult(this.props.queryId);
     const query = this.editor.getValue();
 
     this.setState({
