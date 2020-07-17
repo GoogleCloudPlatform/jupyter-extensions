@@ -33,7 +33,7 @@ export const fakeParamCategorical = {
   parameter: 'param-categorical',
   type: ParameterType.CATEGORICAL,
   categoricalValueSpec: {
-    values: ['a', 'b', 'c'],
+    values: ['a', 'b', 'c', 'categorical-type'],
   },
 } as ParameterSpec;
 
@@ -41,7 +41,7 @@ export const fakeParamDiscrete = {
   parameter: 'param-discrete',
   type: ParameterType.DISCRETE,
   discreteValueSpec: {
-    values: [1, 2, 3],
+    values: [1, 2, 3, 556],
   },
 } as ParameterSpec;
 
@@ -80,24 +80,52 @@ export const fakeStudyListResponse: Study[] = [
   fakeStudyResponseInactive,
 ];
 
+export const fakeStudyName =
+  'projects/project-id/locations/us-region/studies/study-default';
+export const cleanFakeStudyName = 'study-default';
+
+export const fakeTrialName =
+  'projects/project-id/locations/us-region/studies/study-default/trials/trial-default';
+export const cleanFakeTrialName = 'trial-default';
+
+export const fakeOperationName =
+  'projects/project-id/locations/us-region/operations/operation-name';
+export const fakeCleanOperationName = 'operation-name';
+
 export const fakeTrial: Trial = {
-  name:
-    'projects/222309772370/locations/us-central1/studies/study-default/trial-default',
+  name: fakeTrialName,
   state: State.ACTIVE,
   parameters: [
     {
-      parameter: 'a',
-      floatValue: 55.55,
+      parameter: 'param-discrete',
+      floatValue: 556,
     },
     {
-      parameter: 'b',
-      stringValue: 'category',
+      parameter: 'param-categorical',
+      stringValue: 'categorical-type',
     },
   ],
   measurements: [],
   startTime: '1',
   endTime: '2',
   clientId: 'optimizer-extension',
+};
+
+export const fakeTrialWithFinalMeasurement: Trial = {
+  ...fakeTrial,
+  finalMeasurement: {
+    stepCount: '1',
+    metrics: [
+      {
+        metric: 'metric-maximize',
+        value: 101,
+      },
+      {
+        metric: 'metric-unspecified',
+        value: 666,
+      },
+    ],
+  },
 };
 
 export const fakeMeasurement: Measurement = {
@@ -109,4 +137,52 @@ export const fakeMeasurement: Measurement = {
       value: 77,
     },
   ],
+};
+
+export const fakePendingSuggestOperation = {
+  name: fakeOperationName,
+  metadata: {
+    '@type': 'type.googleapis.com/google.cloud.ml.v1.SuggestTrialsMetadata',
+    study: fakeStudyName,
+    createTime: '2020-07-17T16:05:11Z',
+    suggestionCount: 10,
+    clientId: 'optimizer-extension',
+  },
+};
+
+export const fakeSuggestOperationGetSuccess = {
+  name: fakeOperationName,
+  metadata: {
+    '@type': 'type.googleapis.com/google.cloud.ml.v1.SuggestTrialsMetadata',
+    study: fakeStudyName,
+    createTime: '2020-07-17T16:05:11Z',
+    suggestionCount: 10,
+    clientId: 'optimizer-extension',
+  },
+  done: true,
+  response: {
+    '@type': 'type.googleapis.com/google.cloud.ml.v1.SuggestTrialsResponse',
+    trials: [
+      {
+        name: fakeTrialName,
+        state: 'ACTIVE',
+        // matches fakeStudyConfig parameters
+        parameters: [
+          {
+            parameter: 'param-categorical',
+            stringValue: 'a',
+          },
+          {
+            parameter: 'param-discrete',
+            floatValue: 1,
+          },
+        ],
+        startTime: '2020-07-17T16:05:21Z',
+        clientId: 'optimizer-extension',
+      },
+    ],
+    studyState: 'ACTIVE',
+    startTime: '2020-07-17T16:05:11Z',
+    endTime: '2020-07-17T16:05:21Z',
+  },
 };

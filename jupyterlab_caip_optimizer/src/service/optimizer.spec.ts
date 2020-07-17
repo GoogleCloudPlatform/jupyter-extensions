@@ -27,6 +27,7 @@ import {
   fakeStudyListResponse,
   fakeTrial,
   fakeMeasurement,
+  cleanFakeTrialName,
 } from './test-constants';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 
@@ -126,7 +127,7 @@ describe('OptimizerService', () => {
     );
     expect(response).toBe(fakeTrial);
     expect(mockSubmit).toHaveBeenCalledWith({
-      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${trialName}:complete`,
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${cleanFakeTrialName}:complete`,
       method: 'POST',
       body: {
         finalMeasurement: fakeMeasurement,
@@ -145,7 +146,7 @@ describe('OptimizerService', () => {
       fakeMetadataRequired
     );
     expect(mockSubmit).toHaveBeenCalledWith({
-      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${trialName}`,
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${cleanFakeTrialName}`,
       method: 'DELETE',
     });
   });

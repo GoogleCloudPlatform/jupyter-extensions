@@ -24,6 +24,8 @@ import {
   MetadataRequired,
   Trial,
   Measurement,
+  Operation,
+  SuggestTrialOperation,
 } from '../types';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
@@ -332,6 +334,30 @@ export class OptimizerService {
       return response.result;
     } catch (err) {
       console.error(`Unable to fetch operation with id "${operationId}"`);
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Starts asynchronous cancellation on a long-running operation.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.operations/cancel
+   * @param operationId The full length opeartion id.
+   * @param metadata The region and project id associated with the operation.
+   */
+  async cancelOperation(
+    operationId: string,
+    metadata: MetadataRequired
+  ): Promise<void> {
+    try {
+      const ENDPOINT = `https://${metadata.region}-ml.googleapis.com/v1`;
+      await this._transportService.submit({
+        path: `${ENDPOINT}/projects/${metadata.projectId}/locations/${
+          metadata.region
+        }/operations/${prettifyOperationId(operationId)}:cancel`,
+        method: 'POST',
+      });
+    } catch (err) {
+      console.error(`Unable to cancel operation with id "${operationId}"`);
       handleApiError(err);
     }
   }
