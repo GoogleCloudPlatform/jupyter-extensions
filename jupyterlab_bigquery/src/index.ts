@@ -33,7 +33,7 @@ async function activate(
   );
 
   registry.registerWidget({
-    name: 'bigQuery-query-incell-editor',
+    name: 'bigquery_query_incell_editor',
     version: '0.0.1',
     exports: QueryEditorInCellWidgetsExport,
   });
