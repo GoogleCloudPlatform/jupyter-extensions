@@ -17,6 +17,7 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { trimPath } from '../service/file';
+
 import {
   DetachedComment,
   createDetachedCommentFromJSON,
@@ -151,6 +152,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             <Tab label="Detached" value={1} />
           </Tabs>
         </AppBar>
+
         {this.state.errorMessage && (
           <Typography
             variant="subtitle1"
@@ -274,6 +276,7 @@ export class CommentsComponent extends React.Component<Props, State> {
 }
 
 export class CommentsWidget extends ReactWidget {
+
   constructor(private context: Context) {
     super();
     this.addClass('comments-widget');

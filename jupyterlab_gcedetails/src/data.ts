@@ -16,6 +16,7 @@
 
 import * as csstips from 'csstips';
 import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 interface MachineType {
   name: string;
@@ -161,56 +162,135 @@ export const MASTER_TYPES: Option[] = [
   { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
 ];
 
-export interface HardwareConfiguration {
-  cpu: number;
-  memory: number;
-}
-
 /* CPU to Memory mappings for the Compute Engine machine types */
-export interface MachineTypeConfigurations {
+export interface MachineTypeConfiguration {
   base: Option;
-  configurations: HardwareConfiguration[];
+  configurations: Option[];
 }
 
-export const machineTypes: MachineTypeConfigurations[] = [
+export const MACHINE_TYPES: MachineTypeConfiguration[] = [
   {
     base: {
       value: 'n1-standard-',
-      text: 'N1 Standard',
+      text: 'N1 standard',
     },
     configurations: [
-      { cpu: 4, memory: 15 },
-      { cpu: 8, memory: 30 },
-      { cpu: 16, memory: 60 },
-      { cpu: 32, memory: 120 },
-      { cpu: 64, memory: 240 },
-      { cpu: 96, memory: 360 },
-    ],
-  },
-  {
-    base: {
-      value: 'n1-highmem-',
-      text: 'N1 High Memory',
-    },
-    configurations: [
-      { cpu: 4, memory: 26 },
-      { cpu: 8, memory: 52 },
-      { cpu: 16, memory: 104 },
-      { cpu: 32, memory: 208 },
-      { cpu: 64, memory: 416 },
-      { cpu: 96, memory: 624 },
+      { value: 'n1-standard-1', text: '1 vCPUs, 3.75 GB RAM' },
+      { value: 'n1-standard-2', text: '2 vCPUs, 7.5 GB RAM' },
+      { value: 'n1-standard-4', text: '4 vCPUs, 15 GB RAM' },
+      { value: 'n1-standard-8', text: '8 vCPUs, 30 GB RAM' },
+      { value: 'n1-standard-16', text: '16 vCPUs, 60 GB RAM' },
+      { value: 'n1-standard-32', text: '32 vCPUs, 120 GB RAM' },
+      { value: 'n1-standard-64', text: '64 vCPUs, 240 GB RAM' },
+      { value: 'n1-standard-96', text: '96 vCPUs, 360 GB RAM' },
     ],
   },
   {
     base: {
       value: 'n1-highcpu-',
-      text: 'N1 High CPU',
+      text: 'N1 high-CPU',
     },
     configurations: [
-      { cpu: 16, memory: 14.4 },
-      { cpu: 32, memory: 28.8 },
-      { cpu: 64, memory: 57.6 },
-      { cpu: 96, memory: 86.4 },
+      { value: 'n1-highcpu-2', text: '2 vCPUs, 1.8 GB RAM' },
+      { value: 'n1-highcpu-4', text: '4 vCPUs, 3.6 GB RAM' },
+      { value: 'n1-highcpu-8', text: '8 vCPUs, 7.2 GB RAM' },
+      { value: 'n1-highcpu-16', text: '16 vCPUs, 14.4 GB RAM' },
+      { value: 'n1-highcpu-32', text: '32 vCPUs, 28.8 GB RAM' },
+      { value: 'n1-highcpu-64', text: '64 vCPUs, 57.6 GB RAM' },
+      { value: 'n1-highcpu-96', text: '96 vCPUs, 86 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'n1-highmem-',
+      text: 'N1 high-memory',
+    },
+    configurations: [
+      { value: 'n1-highmem-2', text: '2 vCPUs, 13 GB RAM' },
+      { value: 'n1-highmem-4', text: '4 vCPUs, 26 GB RAM' },
+      { value: 'n1-highmem-8', text: '8 vCPUs, 52 GB RAM' },
+      { value: 'n1-highmem-16', text: '16 vCPUs, 104 GB RAM' },
+      { value: 'n1-highmem-32', text: '32 vCPUs, 208 GB RAM' },
+      { value: 'n1-highmem-64', text: '64 vCPUs, 416 GB RAM' },
+      { value: 'n1-highmem-96', text: '96 vCPUs, 624 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'n1-megamem-',
+      text: 'N1 megamem',
+    },
+    configurations: [{ value: 'n1-megamem-96', text: '96 vCPUs, 1.4 TB RAM' }],
+  },
+  {
+    base: {
+      value: 'n1-ultramem-',
+      text: 'N1 ultramem',
+    },
+    configurations: [
+      { value: 'n1-ultramem-40', text: '40 vCPUs, 961 GB RAM' },
+      { value: 'n1-ultramem-80', text: '80 vCPUs, 1922 GB RAM' },
+      { value: 'n1-ultramem-160', text: '160 vCPUs, 3844 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'n2-highcpu-',
+      text: 'N2 high-CPU',
+    },
+    configurations: [
+      { value: 'n2-highcpu-2', text: '2 vCPUs, 2 GB RAM' },
+      { value: 'n2-highcpu-4', text: '4 vCPUs, 4 GB RAM' },
+      { value: 'n2-highcpu-8', text: '8 vCPUs, 8 GB RAM' },
+      { value: 'n2-highcpu-16', text: '16 vCPUs, 16 GB RAM' },
+      { value: 'n2-highcpu-32', text: '32 vCPUs, 32 GB RAM' },
+      { value: 'n2-highcpu-48', text: '48 vCPUs, 48 GB RAM' },
+      { value: 'n2-highcpu-64', text: '64 vCPUs, 64 GB RAM' },
+      { value: 'n2-highcpu-80', text: '80 vCPUs, 80 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'n2-highmem-',
+      text: 'N2 high-memory',
+    },
+    configurations: [
+      { value: 'n2-highmem-2', text: '2 vCPUs, 16 GB RAM' },
+      { value: 'n2-highmem-4', text: '4 vCPUs, 32 GB RAM' },
+      { value: 'n2-highmem-8', text: '8 vCPUs, 64 GB RAM' },
+      { value: 'n2-highmem-16', text: '16 vCPUs, 128 GB RAM' },
+      { value: 'n2-highmem-32', text: '32 vCPUs, 256 GB RAM' },
+      { value: 'n2-highmem-48', text: '48 vCPUs, 384 GB RAM' },
+      { value: 'n2-highmem-64', text: '64 vCPUs, 512 GB RAM' },
+      { value: 'n2-highmem-80', text: '80 vCPUs, 640 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'n2-standard-',
+      text: 'N2 standard',
+    },
+    configurations: [
+      { value: 'n2-standard-2', text: '2 vCPUs, 8 GB RAM' },
+      { value: 'n2-standard-4', text: '4 vCPUs, 16 GB RAM' },
+      { value: 'n2-standard-8', text: '8 vCPUs, 32 GB RAM' },
+      { value: 'n2-standard-16', text: '16 vCPUs, 64 GB RAM' },
+      { value: 'n2-standard-32', text: '32 vCPUs, 128 GB RAM' },
+      { value: 'n2-standard-48', text: '48 vCPUs, 192 GB RAM' },
+      { value: 'n2-standard-64', text: '64 vCPUs, 256 GB RAM' },
+      { value: 'n2-standard-80', text: '80 vCPUs, 320 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'm1-ultramem-',
+      text: 'Memory-optimized',
+    },
+    configurations: [
+      { value: 'm1-ultramem-40', text: '40 vCPUs, 961 GB RAM' },
+      { value: 'm1-ultramem-80', text: '80 vCPUs, 1922 GB RAM' },
+      { value: 'm1-ultramem-96', text: '96 vCPUs, 1.4 TB RAM' },
+      { value: 'm1-ultramem-160', text: '160 vCPUs, 3844 GB RAM' },
     ],
   },
 ];
@@ -219,7 +299,6 @@ export const machineTypes: MachineTypeConfigurations[] = [
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
-
     fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size1, 13px)',
     lineHeight: '24px',
@@ -258,3 +337,8 @@ export const STYLES = stylesheet({
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
   },
 });
+
+export const TEXT_STYLE = {
+  fontFamily: BASE_FONT.fontFamily as string,
+  fontSize: BASE_FONT.fontSize as number,
+};

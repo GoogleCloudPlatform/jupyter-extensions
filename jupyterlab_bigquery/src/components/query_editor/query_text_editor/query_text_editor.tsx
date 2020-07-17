@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import {
   updateQueryResult,
   resetQueryResult,
+  deleteQueryEntry,
+  QueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
@@ -22,12 +24,22 @@ interface QueryTextEditorState {
 interface QueryTextEditorProps {
   updateQueryResult: any;
   resetQueryResult: any;
+  deleteQueryEntry: any;
+  queryId: QueryId;
+  iniQuery?: string;
 }
 
 interface QueryResponseType {
   content: string;
   labels: string;
   bytesProcessed: number;
+}
+
+export interface QueryResult {
+  content: Array<Array<unknown>>;
+  labels: Array<string>;
+  bytesProcessed: number;
+  queryId: QueryId;
 }
 
 interface QueryRequestBodyType {
@@ -47,7 +59,37 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
 };
 
 const styleSheet = stylesheet({
-  queryButton: { float: 'right', width: '100px', maxWidth: '200px' },
+  queryButton: {
+    float: 'right',
+    width: '100px',
+    maxWidth: '200px',
+    margin: '10px',
+  },
+  queryTextEditor: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    minHeight: '300px',
+    height: '30vh',
+  },
+  wholeEditor: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  optionalText: {
+    marginRight: '10px',
+    marginLeft: '10px',
+    alignSelf: 'center',
+    justifySelf: 'center',
+  },
+  pendingStatus: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+  },
+  buttonInfoBar: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    margin: '10px',
+  },
 });
 
 enum ButtonStates {
@@ -63,6 +105,7 @@ class QueryTextEditor extends React.Component<
   editor: editor.IStandaloneCodeEditor;
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
+  queryId: QueryId;
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
@@ -75,6 +118,11 @@ class QueryTextEditor extends React.Component<
     };
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
+    this.queryId = props.queryId;
+  }
+
+  componentWillUnmount() {
+    this.props.deleteQueryEntry(this.queryId);
   }
 
   handleButtonClick() {
@@ -116,7 +164,10 @@ class QueryTextEditor extends React.Component<
           });
 
           this.setState({ bytesProcessed: response.bytesProcessed });
-          this.props.updateQueryResult(response);
+          const processed = (response as unknown) as QueryResult;
+          processed.queryId = this.queryId;
+
+          this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
           this.setState({
             buttonState: ButtonStates.ERROR,
@@ -146,10 +197,18 @@ class QueryTextEditor extends React.Component<
       }
       this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
     });
+
+    // initial check
+    this.checkSQL();
   }
 
   checkSQL() {
     const query = this.editor.getValue();
+
+    if (!query) {
+      return;
+    }
+
     this.pagedQueryService.request(
       { query, jobConfig: {}, dryRunOnly: true },
       (state, _, response) => {
@@ -178,7 +237,7 @@ class QueryTextEditor extends React.Component<
       case ButtonStates.PENDING:
         color = 'default';
         content = (
-          <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+          <div className={styleSheet.pendingStatus}>
             <CircularProgress size="75%" style={{ alignSelf: 'center' }} />
             <Typography variant="button">Cancel</Typography>
           </div>
@@ -211,12 +270,7 @@ class QueryTextEditor extends React.Component<
     if (!!text) {
       return (
         <Typography
-          style={{
-            marginRight: '10px',
-            marginLeft: '10px',
-            alignSelf: 'center',
-            justifySelf: 'center',
-          }}
+          className={styleSheet.optionalText}
           variant="body1"
           {...config}
         >
@@ -229,6 +283,8 @@ class QueryTextEditor extends React.Component<
   }
 
   render() {
+    const { iniQuery } = this.props;
+
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
       ? 'Processed ' + this.readableBytes(this.state.bytesProcessed)
@@ -236,27 +292,24 @@ class QueryTextEditor extends React.Component<
 
     const errMsg = this.state.errorMsg;
 
-    return (
-      <div style={{ height: '50%' }}>
-        <Editor
-          width="100vw"
-          height="40vh"
-          theme={'light'}
-          language={'sql'}
-          value={
-            'SELECT * FROM `jupyterlab-interns-sandbox.covid19_public_forecasts.county_14d` LIMIT 10'
-          }
-          editorDidMount={this.handleEditorDidMount.bind(this)}
-          options={SQL_EDITOR_OPTIONS}
-        />
+    // eslint-disable-next-line no-extra-boolean-cast
+    const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          }}
-        >
+    return (
+      <div className={styleSheet.wholeEditor}>
+        <div className={styleSheet.queryTextEditor}>
+          <Editor
+            width="100%"
+            height="100%"
+            theme={'light'}
+            language={'sql'}
+            value={queryValue}
+            editorDidMount={this.handleEditorDidMount.bind(this)}
+            options={SQL_EDITOR_OPTIONS}
+          />
+        </div>
+
+        <div className={styleSheet.buttonInfoBar}>
           {this.renderOptionalText(errMsg, {
             variant: 'caption',
             color: 'error',
@@ -273,6 +326,10 @@ const mapStateToProps = _ => {
   return {};
 };
 
-const mapDispatchToProps = { updateQueryResult, resetQueryResult };
+const mapDispatchToProps = {
+  updateQueryResult,
+  resetQueryResult,
+  deleteQueryEntry,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);

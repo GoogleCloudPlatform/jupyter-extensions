@@ -19,7 +19,6 @@ import * as React from 'react';
 
 import {
   css,
-  SelectInput,
   CheckboxInput,
   LearnMoreLink,
   BASE_FONT,
@@ -27,23 +26,21 @@ import {
   SubmitButton,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
-import { SynchronizedSliders } from './synchronized_sliders';
+import { NestedSelect } from './machine_type_select';
+import { SelectInput } from './select_input';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
-  machineTypes,
   ACCELERATOR_TYPES,
-  MachineTypeConfigurations,
+  Option,
+  MACHINE_TYPES,
 } from '../data';
 
 interface Props {
-  // Assumes sorted list with memory and cpu set to 0 for first value
   onDialogClose?: () => void;
 }
 
 interface State {
-  baseMachineType: string;
-  cpuValue: number;
-  memoryValue: number;
+  machineType: Option;
   attachGpu: boolean;
   gpuType: string;
   gpuCount: string;
@@ -54,8 +51,8 @@ export const STYLES = stylesheet({
     marginRight: '10px',
   },
   checkboxContainer: {
-    paddingTop: '8px',
-    paddingBottom: '10px',
+    paddingTop: '10px',
+    paddingBottom: '8px',
   },
   title: {
     ...BASE_FONT,
@@ -72,7 +69,7 @@ export const STYLES = stylesheet({
     width: '500px',
   },
   description: {
-    paddingBottom: '20px',
+    paddingBottom: '10px',
   },
   topPadding: {
     paddingTop: '10px',
@@ -83,25 +80,19 @@ export const STYLES = stylesheet({
 });
 
 const NO_ACCELERATOR = ACCELERATOR_TYPES[0].value as string;
+const DEFAULT_MACHINE_TYPE = MACHINE_TYPES[0].configurations[0];
 
 export class HardwareScalingForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      baseMachineType: machineTypes[0].base.value as string,
-      cpuValue: 0,
-      memoryValue: 0,
+      machineType: DEFAULT_MACHINE_TYPE,
       attachGpu: false,
       gpuType: NO_ACCELERATOR,
       gpuCount: '',
     };
   }
-
-  private getMachineType(baseMachineType: string): MachineTypeConfigurations {
-    return machineTypes.find(elem => elem.base.value === baseMachineType);
-  }
-
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
@@ -115,16 +106,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     });
   }
 
-  private onBaseMachineTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    this.setState({
-      baseMachineType: event.target.value,
-      cpuValue: this.getMachineType(event.target.value).configurations[0].cpu,
-      memoryValue: this.getMachineType(event.target.value).configurations[0]
-        .memory,
-    });
-  }
-
-  private onGpuTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       gpuType: event.target.value,
       gpuCount: event.target.value
@@ -135,11 +117,11 @@ export class HardwareScalingForm extends React.Component<Props, State> {
 
   // TODO: Implement submit functionality
   //eslint-disable-next-line @typescript-eslint/no-empty-function
-  private submitForm() {};
+  private submitForm() {}
 
   render() {
     const { onDialogClose } = this.props;
-    const { gpuType, gpuCount, attachGpu, baseMachineType } = this.state;
+    const { gpuType, gpuCount, attachGpu } = this.state;
 
     return (
       <div className={STYLES.container}>
@@ -147,20 +129,13 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.title}>Hardware Scaling Limits</span>
           <form>
             <HardwareConfigurationDescription />
-            <div className={classes(css.flex1, STYLES.bottomPadding)}>
-              <SelectInput
-                label="Machine type"
-                name="baseMachineType"
-                value={baseMachineType}
-                options={machineTypes.map(elem => elem.base)}
-                onChange={e => this.onBaseMachineTypeChange(e)}
-              />
-            </div>
-            <SynchronizedSliders
-              values={this.getMachineType(baseMachineType).configurations}
-              onMemoryChange={memoryValue => this.setState({ memoryValue })}
-              onCpuChange={cpuValue => this.setState({ cpuValue })}
-              key={baseMachineType}
+            <NestedSelect
+              label="Machine type"
+              nestedOptionsList={MACHINE_TYPES.map(machineType => ({
+                header: machineType.base,
+                options: machineType.configurations,
+              }))}
+              onChange={machineType => this.setState({ machineType })}
             />
             <div className={STYLES.checkboxContainer}>
               <CheckboxInput

@@ -9,6 +9,8 @@ python_version = "3.7"
 [packages]
 jupyterlab = "==1.2.15"
 pandas = "*"
+ipywidgets = "*"
+traitlets = "*"
 
 [dev-packages]
 coverage = "*"
