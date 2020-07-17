@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   ILabShell,
 } from '@jupyterlab/application';
 
-import {
-    IDocumentManager,
-} from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
-import { CommentsWidget } from './components/comments_widget'
+import { CommentsWidget } from './components/comments_widget';
 
-
-function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPalette, docManager: IDocumentManager) {
+function activate(
+  app: JupyterFrontEnd,
+  labShell: ILabShell,
+  palette: ICommandPalette,
+  docManager: IDocumentManager
+) {
   console.log('JupyterLab extension jupyterlab_comments is activated!');
 
-  let widget : MainAreaWidget<CommentsWidget>;
-  let content : CommentsWidget;
+  let widget: MainAreaWidget<CommentsWidget>;
+  let content: CommentsWidget;
 
   // Add an application command
-  const command: string = 'comments:open';
+  const command = 'comments:open';
   app.commands.addCommand(command, {
     label: 'Notebook comments in git',
     execute: () => {
@@ -48,17 +49,17 @@ function activate(app: JupyterFrontEnd, labShell:ILabShell, palette:ICommandPale
           docManager: docManager,
         };
         content = new CommentsWidget(context);
-        widget = new MainAreaWidget<CommentsWidget>({content});
+        widget = new MainAreaWidget<CommentsWidget>({ content });
         widget.id = 'jupyterlab_comments';
         widget.title.label = 'Notebook comments in Git';
         widget.title.closable = true;
       }
 
       if (!widget.isAttached) {
-          app.shell.add(widget, 'right');
+        app.shell.add(widget, 'right');
       }
       app.shell.activateById(widget.id);
-    }
+    },
   });
 
   // Add the command to the palette.
@@ -76,5 +77,3 @@ const extension: JupyterFrontEndPlugin<void> = {
 };
 
 export default extension;
-
-
