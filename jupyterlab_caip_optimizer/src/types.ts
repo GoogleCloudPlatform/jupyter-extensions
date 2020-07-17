@@ -134,6 +134,8 @@ export interface Study {
   state?: State; // TODO: check if return enum would match State enum declared here?
   createTime?: string;
   inactiveReason?: string;
+  // Lazy loaded from api
+  trials?: Trial[];
 }
 
 export enum State {
@@ -178,7 +180,7 @@ export interface Trial {
   name?: string;
   state: State;
   parameters: Parameter[];
-  finalMeasurement: Measurement;
+  finalMeasurement?: Measurement;
   measurements: Measurement[];
   startTime?: string;
   endTime?: string;
