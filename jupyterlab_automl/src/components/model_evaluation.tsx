@@ -60,24 +60,12 @@ const localStyles = stylesheet({
   },
 });
 
-const properties = [
-  {
-    name: 'auPrc',
-    label: 'ROC PRC',
-  },
-  {
-    name: 'auRoc',
-    label: 'ROC AUC',
-  },
-  {
-    name: 'logLoss',
-    label: 'Log loss',
-  },
-  {
-    name: 'createTime',
-    label: 'Created',
-  },
-];
+const properties = {
+  auPrc: 'ROC PRC',
+  auRoc: 'ROC AUC',
+  logLoss: 'Log loss',
+  createTime: 'Created',
+};
 
 export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
   constructor(props: ConfusionMatrixProps) {
@@ -309,32 +297,18 @@ export class EvaluationTable extends React.Component<Props, State> {
     modelEvaluation: ModelEvaluation
   ) {
     const evaluationTable = [];
-    for (let i = 0; i < properties.length; i++) {
-      if (modelEvaluation[properties[i]['name']]) {
-        if (properties[i]['name'] === 'createTime') {
-          console.log('here');
-          console.log(modelEvaluation[properties[i]['name']]);
-          console.log(modelEvaluation[properties[i]['name']].toLocaleString());
+    for (const [name, label] of Object.entries(properties)) {
+      if (modelEvaluation[name]) {
+        if (name === 'createTime') {
           evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']].toLocaleString()
-            )
+            this.createData(label, modelEvaluation[name].toLocaleString())
           );
-        } else if (typeof modelEvaluation[properties[i]['name']] === 'number') {
+        } else if (typeof modelEvaluation[name] === 'number') {
           evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']].toFixed(3)
-            )
+            this.createData(label, modelEvaluation[name].toFixed(3))
           );
         } else {
-          evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']]
-            )
-          );
+          evaluationTable.push(this.createData(label, modelEvaluation[name]));
         }
       }
     }
