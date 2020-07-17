@@ -1,6 +1,6 @@
-name: Presubmit
+name: Postpush
 on:
-  pull_request:
+  push:
     branches:
       - master
 jobs:
@@ -30,3 +30,18 @@ jobs:
       - name: Run Tests
         run: source $(pipenv --venv)/bin/activate &&
           scripts/run_all_tests.sh
+      - name: Upload Python Shared
+        uses: actions/upload-artifact@v2
+        with:
+          name: gcp_jupyterlab_shared_server_${{ github.sha }}
+          path: shared/dist/*.tar.gz
+      - name: Upload TS Shared
+        uses: actions/upload-artifact@v2
+        with:
+          name: gcp_jupyterlab_shared_client_${{ github.sha }}
+          path: shared/*.tgz
+      - name: Upload Extensions
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab_extensions_${{ github.sha }}
+          path: jupyter*/dist/*.tar.gz

@@ -7,7 +7,7 @@ export interface DatasetDetailsObject {
   description: string;
   labels: string[];
   date_created: string;
-  default_expiration: string;
+  default_expiration: number;
   location: string;
   last_modified: string;
   project: string;

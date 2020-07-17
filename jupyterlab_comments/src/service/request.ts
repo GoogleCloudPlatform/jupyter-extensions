@@ -18,7 +18,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
 
 /*
-Send a request to the server
+Send a request to the server to interact with the Git repo
 Params:
     handler = name of the handler route as defined in the jupyterlab_comments module
     method = GET or POST
@@ -56,5 +56,17 @@ export function httpGitRequest(
     };
   }
 
+  return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
+}
+
+/*
+Send a request to the server to fetch the refresh interval configured by the user
+*/
+export function refreshIntervalRequest() : Promise<Response> {
+  const setting = ServerConnection.makeSettings();
+  const fullUrl = URLExt.join(setting.baseUrl, 'refreshInterval');
+  let fullRequest: RequestInit = {
+    method: "GET",
+  };
   return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 }
