@@ -1,3 +1,4 @@
+"""Initialize server endpoints for extension"""
 from notebook.utils import url_path_join
 
 from jupyterlab_bigquery.list_items_handler import handlers
@@ -36,7 +37,6 @@ def load_jupyter_server_extension(nb_server_app):
     app.add_handlers(host_pattern, [
         # TODO(cbwilkes): Add auth checking if needed.
         # (url_path_join(gcp_v1_endpoint, auth'), AuthHandler)
-        make_endpoint('list', ListHandler),
         make_endpoint('datasetdetails', DatasetDetailsHandler),
         make_endpoint('tabledetails', TableDetailsHandler),
         make_endpoint('tablepreview', TablePreviewHandler),
@@ -44,11 +44,11 @@ def load_jupyter_server_extension(nb_server_app):
     ])
 
 def load_ipython_extension(ipython):
-    """Called by IPython when this module is loaded as an IPython extension."""
+  """Called by IPython when this module is loaded as an IPython extension."""
 
-    ipython.register_magic_function(
-        _cell_magic, magic_kind="line", magic_name="bigquery_editor"
-    )
-    ipython.register_magic_function(
-        _cell_magic, magic_kind="cell", magic_name="bigquery_editor"
-    )
+  ipython.register_magic_function(_cell_magic,
+                                  magic_kind="line",
+                                  magic_name="bigquery_editor")
+  ipython.register_magic_function(_cell_magic,
+                                  magic_kind="cell",
+                                  magic_name="bigquery_editor")

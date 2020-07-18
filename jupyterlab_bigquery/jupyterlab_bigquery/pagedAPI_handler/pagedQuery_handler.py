@@ -5,6 +5,7 @@ from jupyterlab_bigquery.handlers import format_preview_fields, format_preview_r
 
 
 
+
 class PagedQueryHandler(PagedAPIHandler):
   client = bigquery.Client()
 
