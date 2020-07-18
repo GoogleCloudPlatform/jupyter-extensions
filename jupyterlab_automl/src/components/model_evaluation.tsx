@@ -29,12 +29,16 @@ type ColWidth = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
-  evaluationTable: any[];
-  featureImportance: any[];
-  confidenceMetrics: ModelMetrics[];
-  marks: any[];
   modelEvaluation: ModelEvaluation;
-  currentConfidenceThresh: string;
+  // For classification tables models the following three variables determine what confidence metric is displayed
+  sliderMarks: any[];
+  currentThreshold: string;
+  confidenceMetrics: ModelMetrics[];
+  // Information for the first table displayed will get updated when the slider is moved
+  evaluationTable: any[];
+  // Information for the feature importance bar chart component
+  featureImportance: any[];
+  // Information for the confusion matrix component
   confusionMatrix: any[];
 }
 
@@ -72,13 +76,18 @@ const properties = {
   meanAbsoluteError: 'MAE',
 };
 
+const confidenceMetricProperties = {
+  f1Score: 'F1 score',
+  precision: 'Precision',
+  recall: 'Recall',
+};
+
 export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
   constructor(props: ConfusionMatrixProps) {
     super(props);
   }
 
-  render() {
-    const matrix = [];
+  private getConfusionMatrixSum(): number {
     let sum = 0;
     for (const [index, value] of this.props.confusionMatrix.entries()) {
       if (index !== 0) {
@@ -87,7 +96,13 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
         }, 0);
       }
     }
-    const width = this.props.confusionMatrix.length * 170;
+    return sum;
+  }
+
+  private getConfusionMatrix(): any[] {
+    const matrix = [];
+    const sum = this.getConfusionMatrixSum();
+    const rowWidth = this.props.confusionMatrix.length * 170;
     const colWidth = Math.round(
       12 / this.props.confusionMatrix.length
     ) as ColWidth;
@@ -98,7 +113,7 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
             container
             alignItems="center"
             spacing={0}
-            style={{ width: width }}
+            style={{ width: rowWidth }}
             key={index}
           >
             <Grid item xs={colWidth} key={'n'}>
@@ -121,7 +136,7 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
             container
             alignItems="center"
             spacing={0}
-            style={{ width: width }}
+            style={{ width: rowWidth }}
             key={index}
           >
             <Grid item xs={colWidth} key={'label'}>
@@ -140,10 +155,14 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
         );
       }
     }
+    return matrix;
+  }
+
+  render() {
     return (
       <Grid item xs={12} key={'confusionMatrix'}>
         <header className={localStyles.header}>Confusion Matrix</header>
-        {matrix}
+        {this.getConfusionMatrix()}
       </Grid>
     );
   }
@@ -191,12 +210,12 @@ export class EvaluationTable extends React.Component<Props, State> {
     this.state = {
       hasLoaded: false,
       isLoading: false,
+      modelEvaluation: null,
+      sliderMarks: null,
+      currentThreshold: null,
+      confidenceMetrics: [],
       evaluationTable: [],
       featureImportance: [],
-      confidenceMetrics: [],
-      marks: null,
-      modelEvaluation: null,
-      currentConfidenceThresh: null,
       confusionMatrix: [],
     };
   }
@@ -210,10 +229,10 @@ export class EvaluationTable extends React.Component<Props, State> {
       isLoading,
       evaluationTable,
       confidenceMetrics,
-      featureImportance,
-      marks,
+      sliderMarks,
       modelEvaluation,
-      currentConfidenceThresh,
+      currentThreshold,
+      featureImportance,
       confusionMatrix,
     } = this.state;
     return (
@@ -231,12 +250,12 @@ export class EvaluationTable extends React.Component<Props, State> {
             direction="column"
           >
             <Grid item xs={12}>
-              {marks && (
+              {sliderMarks && (
                 <p style={{ marginBottom: 16, marginLeft: 16 }}>
                   Confidence Threshold
                   <Slider
                     step={null}
-                    marks={marks}
+                    marks={sliderMarks}
                     style={{
                       width: 200,
                       margin: '0 24px 0 24px',
@@ -244,9 +263,9 @@ export class EvaluationTable extends React.Component<Props, State> {
                     }}
                     onChange={(event, value) => {
                       const formatted = ((value as number) / 100).toFixed(2);
-                      if (formatted !== currentConfidenceThresh) {
+                      if (formatted !== currentThreshold) {
                         this.setState({
-                          currentConfidenceThresh: formatted,
+                          currentThreshold: formatted,
                         });
                       }
                     }}
@@ -257,7 +276,7 @@ export class EvaluationTable extends React.Component<Props, State> {
                       this.updateEvaluationTable(metric, modelEvaluation);
                     }}
                   />
-                  {currentConfidenceThresh}
+                  {currentThreshold}
                 </p>
               )}
               <Table size="small" style={{ width: 500 }}>
@@ -290,20 +309,32 @@ export class EvaluationTable extends React.Component<Props, State> {
   }
 
   private getSliderMarks(modelEvaluation: ModelEvaluation): any[] {
-    const marks = [];
+    const sliderMarks = [];
     for (let i = 0; i < modelEvaluation.confidenceMetrics.length; i++) {
-      marks.push({
+      sliderMarks.push({
         value: modelEvaluation.confidenceMetrics[i].confidenceThreshold,
       });
     }
-    return marks;
+    return sliderMarks;
+  }
+
+  private getConfidenceMetricRows(metric): any[] {
+    const confidenceMetricRows = [];
+    for (const [name, label] of Object.entries(confidenceMetricProperties)) {
+      if (metric[name] !== 'NaN') {
+        confidenceMetricRows.push(
+          this.createData(label, (metric[name] as number).toFixed(3))
+        );
+      }
+    }
+    return confidenceMetricRows;
   }
 
   private updateEvaluationTable(
     metric: ModelMetrics,
     modelEvaluation: ModelEvaluation
   ) {
-    const evaluationTable = [];
+    let evaluationTable = [];
     for (const [name, label] of Object.entries(properties)) {
       if (modelEvaluation[name]) {
         if (name === 'createTime') {
@@ -320,21 +351,9 @@ export class EvaluationTable extends React.Component<Props, State> {
       }
     }
     if (metric) {
-      if (metric.f1Score !== 'NaN') {
-        evaluationTable.push(
-          this.createData('F1 score', (metric.f1Score as number).toFixed(3))
-        );
-      }
-      if (metric.precision !== 'NaN') {
-        evaluationTable.push(
-          this.createData('Precision', (metric.precision as number).toFixed(3))
-        );
-      }
-      if (metric.recall !== 'NaN') {
-        evaluationTable.push(
-          this.createData('Recall', (metric.recall as number).toFixed(3))
-        );
-      }
+      evaluationTable = evaluationTable.concat(
+        this.getConfidenceMetricRows(metric)
+      );
     }
     this.setState({
       evaluationTable: evaluationTable,
@@ -347,14 +366,15 @@ export class EvaluationTable extends React.Component<Props, State> {
       const modelEvaluation = await ModelService.getModelEvaluation(
         this.props.model.id
       );
-      let currentConfidence = '';
       if (modelEvaluation.confidenceMetrics) {
         const firstMetric = modelEvaluation.confidenceMetrics[0];
         this.updateEvaluationTable(firstMetric, modelEvaluation);
-        currentConfidence = (firstMetric.confidenceThreshold / 100).toFixed(2);
+        const currentConfidence = (
+          firstMetric.confidenceThreshold / 100
+        ).toFixed(2);
         this.setState({
-          marks: this.getSliderMarks(modelEvaluation),
-          currentConfidenceThresh: currentConfidence,
+          sliderMarks: this.getSliderMarks(modelEvaluation),
+          currentThreshold: currentConfidence,
           confidenceMetrics: modelEvaluation.confidenceMetrics,
         });
       } else {
