@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import * as path from 'path';
+import * as Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 
-//Extract the file name from the full file path
-export function trimPath(filePath: string) {
-  try {
-    return path.basename(filePath);
-  } catch (e) {
-    console.log('Error trimming file path, returning untrimmed path.');
-    return filePath;
-  }
-}
+Enzyme.configure({
+  adapter: new Adapter(),
+});

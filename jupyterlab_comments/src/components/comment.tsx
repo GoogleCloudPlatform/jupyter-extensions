@@ -127,13 +127,15 @@ export class Comment extends React.Component<Props, State> {
               onClick={() => {
                 this.setState({ expandThread: !this.state.expandThread });
               }}
+              className="threadButton"
             >
               {' '}
               {this.state.expandThread ? 'Hide thread' : 'Show thread'}{' '}
             </Button>
           )}
         </div>
-        <div style={style.threadIndent}>
+        <div style={style.threadIndent} className="threadList">
+
           {this.state.expandThread && data.children && (
             <List>
               {data.children.map(reply => {
