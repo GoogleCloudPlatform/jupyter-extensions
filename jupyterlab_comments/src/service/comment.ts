@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { timeAgo } from './timestamp';
+
 export type DetachedComment = Comment;
 
 export interface CodeReviewComment extends Comment {
@@ -44,8 +46,9 @@ export function createDetachedCommentFromJSON(obj: any): DetachedComment {
   const content = obj.comment;
   const hash = obj.hash;
   const children = obj.children;
-  const timestamp: Date = new Date(parseInt(content.timestamp) * 1000);
-  const timestampString = timestamp.toDateString();
+  const now = new Date();
+  const current = now.getTime();
+  const timestampString = timeAgo(current, parseInt(content.timestamp) * 1000);
   const comment: DetachedComment = {
     author: content.author,
     text: content.description,
@@ -70,8 +73,9 @@ export function createReviewCommentFromJSON(
   const content = obj.comment;
   const hash = obj.hash;
   const children = obj.children;
-  const timestamp: Date = new Date(parseInt(content.timestamp) * 1000);
-  const timestampString = timestamp.toDateString();
+  const now = new Date();
+  const current = now.getTime();
+  const timestampString = timeAgo(current, parseInt(content.timestamp) * 1000);
   const comment: CodeReviewComment = {
     author: content.author,
     text: content.description,

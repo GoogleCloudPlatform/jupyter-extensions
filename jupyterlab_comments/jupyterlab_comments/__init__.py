@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from notebook.utils import url_path_join
-from jupyterlab_comments.handlers import DetachedCommentsHandler, ReviewCommentsHandler, RefreshIntervalHandler, PullFromRemoteRepoHandler
+from jupyterlab_comments.handlers import DetachedCommentsHandler
+from jupyterlab_comments.handlers import ReviewCommentsHandler
+from jupyterlab_comments.handlers import RefreshIntervalHandler
+from jupyterlab_comments.handlers import PullFromRemoteRepoHandler
 
 
 def load_jupyter_server_extension(nb_server_app):

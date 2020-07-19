@@ -97,8 +97,8 @@ class RefreshIntervalHandler(APIHandler):
         try:
             interval = refresh.get_interval()
             self.finish(json.dumps({"interval" : interval}))
-        except Exception as e:
-            print("Error fetching configured refresh interval traitlet")
+        except TypeError as e:
+            print("Error fetching configured refresh interval traitlet, JSON not serializable")
             print(traceback.format_exc())
 
 class PullFromRemoteRepoHandler(APIHandler):

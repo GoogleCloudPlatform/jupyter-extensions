@@ -26,7 +26,6 @@ import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
 import { CommentsWidget } from './components/comments_widget';
 
-import { File } from './service/file';
 
 function activate(
   app: JupyterFrontEnd,
@@ -37,7 +36,6 @@ function activate(
   console.log('JupyterLab extension jupyterlab_comments is activated!');
 
   let widget: MainAreaWidget<CommentsWidget>;
-  let file: File;
   let content: CommentsWidget;
 
   // Add an application command
@@ -45,32 +43,23 @@ function activate(
   app.commands.addCommand(command, {
     label: 'Notebook comments in git',
     execute: () => {
-      const currWidget = labShell.currentWidget;
-      const currentFile = docManager.contextForWidget(currWidget);
-
-      if (currentFile === undefined) {
-        //Don't activate the widget if there is no file open
-        console.log('No open files to display comments for.');
-      } else {
-        if (!widget || widget.isDisposed) {
-          const context = {
-            app: app,
-            labShell: labShell,
-            docManager: docManager,
-          };
-          file = new File(currentFile.path);
-          content = new CommentsWidget(file, context);
-          widget = new MainAreaWidget<CommentsWidget>({ content });
-          widget.id = 'jupyterlab_comments';
-          widget.title.label = 'Notebook comments in Git';
-          widget.title.closable = true;
-        }
-
-        if (!widget.isAttached) {
-          app.shell.add(widget, 'right');
-        }
-        app.shell.activateById(widget.id);
+      if (!widget || widget.isDisposed) {
+        const context = {
+          app: app,
+          labShell: labShell,
+          docManager: docManager,
+        };
+        content = new CommentsWidget(context);
+        widget = new MainAreaWidget<CommentsWidget>({ content });
+        widget.id = 'jupyterlab_comments';
+        widget.title.label = 'Notebook comments in Git';
+        widget.title.closable = true;
       }
+
+      if (!widget.isAttached) {
+        app.shell.add(widget, 'right');
+      }
+      app.shell.activateById(widget.id);
     },
   });
 
