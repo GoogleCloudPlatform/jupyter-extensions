@@ -1,6 +1,8 @@
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 from google.cloud import bigquery
 import json
+from jupyterlab_bigquery.handlers import format_preview_fields, format_preview_row
+
 
 
 class PagedQueryHandler(PagedAPIHandler):
@@ -39,12 +41,13 @@ class PagedQueryHandler(PagedAPIHandler):
 
     # send contents
     en = query_job.result(page_size)
+    schema_fields = format_preview_fields(en.schema)
 
-    for df in en.to_dataframe_iterable():
+    for page in en.pages:
       response = {
-          'content': df.to_json(orient='values'),
-          'labels': json.dumps(df.columns.to_list()),
-          'bytesProcessed': json.dumps(total_bytes_processed),
+          'content': json.dumps([format_preview_row(row) for row in page]),
+          'labels': json.dumps(schema_fields),
+          'bytesProcessed': json.dumps(total_bytes_processed)
       }
       yield (response)
 
