@@ -24,7 +24,14 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
 
   render() {
     return (
-      <div style={{ height: '100%', width: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          height: '100%',
+        }}
+      >
         <QueryTextEditor queryId={this.queryId} />
         <QueryResults queryId={this.queryId} />
       </div>
