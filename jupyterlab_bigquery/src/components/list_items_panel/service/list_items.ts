@@ -1,26 +1,33 @@
-import { ServerConnection } from '@jupyterlab/services';
-import { URLExt } from '@jupyterlab/coreutils';
+// import { ServerConnection } from '@jupyterlab/services';
+// import { URLExt } from '@jupyterlab/coreutils';
+import { requestAPI } from './api_request';
 
 export interface DataTree {
-  projects: Project[];
+  projects: {};
+  projectIds: [];
 }
 
 export interface Project {
   id: string;
   name: string;
-  datasets: Dataset[];
+  datasets: {};
+  datasetIds: [];
 }
 
 export interface Dataset {
   id: string;
   name: string;
-  tables: Table[];
-  models: Model[];
+  tables: {};
+  tableIds: [];
+  models: {};
+  modelIds: [];
+  projectId: string;
 }
 
 export interface Table {
   id: string;
   name: string;
+  datasetId: string;
 }
 
 export interface Model {
@@ -28,40 +35,65 @@ export interface Model {
 }
 
 export class ListProjectsService {
-  async listProjects(numItems: number): Promise<DataTree> {
-    return new Promise((resolve, reject) => {
-      const serverSettings = ServerConnection.makeSettings();
-      const requestUrl = URLExt.join(
-        serverSettings.baseUrl,
-        'bigquery/v1/list'
-      );
-      const body = { numItems: numItems };
-      const requestInit: RequestInit = {
-        body: JSON.stringify(body),
-        method: 'POST',
-      };
-      ServerConnection.makeRequest(
-        requestUrl,
-        requestInit,
-        serverSettings
-      ).then(response => {
-        response.json().then(content => {
-          if (content.error) {
-            console.error(content.error);
-            reject(content.error);
-            return [];
-          }
-          resolve({
-            projects: content.projects.map((p: any) => {
-              return {
-                id: p.id,
-                name: p.name,
-                datasets: p.datasets,
-              };
-            }),
-          });
-        });
-      });
-    });
+  async listProjects(params: number): Promise<DataTree> {
+    const body = { params: params };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<DataTree>('v1/listProjects', requestInit);
+    const fetchedProjects = {};
+    for (const project in data.projects) {
+      fetchedProjects[project] = data.projects[project];
+    }
+
+    return {
+      projects: fetchedProjects,
+      projectIds: data.projectIds,
+    };
+  }
+}
+
+export class ListDatasetsService {
+  async listDatasets(project: Project): Promise<Project> {
+    const body = { projectId: project.id };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Project>('v1/listDatasets', requestInit);
+    const fetchedDatasets = {};
+    for (const dataset in data.datasets) {
+      fetchedDatasets[dataset] = data.datasets[dataset];
+    }
+    return {
+      ...project,
+      datasets: fetchedDatasets,
+      datasetIds: data.datasetIds,
+    };
+  }
+}
+
+export class ListTablesService {
+  async listTables(datasetId: string): Promise<Dataset> {
+    const body = { datasetId: datasetId };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Dataset>('v1/listTables', requestInit);
+    return data;
+  }
+}
+
+export class ListModelsService {
+  async listModels(datasetId: string): Promise<Model[]> {
+    const body = { datasetId: datasetId };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Model[]>('v1/listModels', requestInit);
+    return data;
   }
 }
