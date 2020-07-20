@@ -1,6 +1,7 @@
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
+import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 import * as React from 'react';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
@@ -39,10 +40,10 @@ interface State {
   models: Model[];
   resourceType: ResourceType;
   searchString: string;
-  deleteDialog: boolean;
-  deleteSubmit: () => void;
-  deleteString: string;
-  modalOpen: boolean;
+  importDialogOpen: boolean;
+  deleteDialogOpen: boolean;
+  deleteSubmitHandler: () => void;
+  deleteTargetName: string;
 }
 
 const FullWidthInput = styled(Box)`
@@ -90,10 +91,10 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       models: [],
       resourceType: ResourceType.Dataset,
       searchString: '',
-      deleteDialog: false,
-      deleteSubmit: null,
-      deleteString: '',
-      modalOpen: false,
+      deleteDialogOpen: false,
+      deleteSubmitHandler: null,
+      deleteTargetName: '',
+      importDialogOpen: false,
     };
   }
 
@@ -144,7 +145,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               style={styles.icon}
               size="small"
               onClick={_ => {
-                this.setState({ modalOpen: true });
+                this.setState({ importDialogOpen: true });
               }}
             >
               <Icon>add</Icon>
@@ -271,17 +272,17 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             />
           )}
           <DialogComponent
-            open={this.state.deleteDialog}
-            header={`Are you sure you want to delete ${this.state.deleteString}?`}
+            open={this.state.deleteDialogOpen}
+            header={`Are you sure you want to delete ${this.state.deleteTargetName}?`}
             onCancel={this.toggleDelete}
             onClose={this.toggleDelete}
-            onSubmit={this.state.deleteSubmit}
+            onSubmit={this.state.deleteSubmitHandler}
             submitLabel={'Ok'}
           />
           <ImportData
-            open={this.state.modalOpen}
+            open={this.state.importDialogOpen}
             onClose={() => {
-              this.setState({ modalOpen: false });
+              this.setState({ importDialogOpen: false });
             }}
             onSuccess={() => {
               this.refresh();
@@ -294,10 +295,10 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   }
 
   private deleteConfirm = rowData => {
-    this.setState({ deleteString: rowData.displayName });
+    this.setState({ deleteTargetName: rowData.displayName });
     if (this.state.resourceType === ResourceType.Dataset) {
       this.setState({
-        deleteSubmit: () => {
+        deleteSubmitHandler: () => {
           DatasetService.deleteDataset(rowData.id);
           this.refresh();
           this.toggleDelete();
@@ -305,7 +306,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       });
     } else if (this.state.resourceType === ResourceType.Model) {
       this.setState({
-        deleteSubmit: () => {
+        deleteSubmitHandler: () => {
           ModelService.deleteModel(rowData.id);
           this.refresh();
           this.toggleDelete();
@@ -313,7 +314,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       });
     } else {
       this.setState({
-        deleteSubmit: null,
+        deleteSubmitHandler: null,
       });
     }
     this.toggleDelete();
@@ -321,7 +322,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
 
   private toggleDelete = () => {
     this.setState({
-      deleteDialog: !this.state.deleteDialog,
+      deleteDialogOpen: !this.state.deleteDialogOpen,
     });
   };
 
@@ -353,7 +354,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     const icons: { [key in ModelType]: any } = {
       OTHER: {
         icon: 'emoji_objects',
-        color: red[900],
+        color: green[500],
       },
       TABLE: {
         icon: 'emoji_objects',
