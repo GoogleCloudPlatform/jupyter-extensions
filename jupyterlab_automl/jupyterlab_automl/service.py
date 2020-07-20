@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import time
 import uuid
 from enum import Enum
 
@@ -185,21 +186,34 @@ class AutoMLService:
         })
     return transformations
 
-  def get_pipeline(self, pipeline_id):
-    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+  def _build_training_pipeline(self, pipeline):
     optional_fields = [
         "targetColumn", "predictionType", "optimizationObjective",
         "budgetMilliNodeHours", "trainBudgetMilliNodeHours"
     ]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
+    objective = "unknown"
+
+    # Detect training model type from gcs uri
+    for ob in ["tables", "image_classification", "image_object_detection"]:
+      if ob in pipeline.training_task_definition:
+        objective = ob
+        break
+
+    end_time = pipeline.end_time.timestamp() if pipeline.end_time else int(
+        time.time())
+
     training_pipeline = {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
         "createTime": get_milli_time(pipeline.create_time),
         "updateTime": get_milli_time(pipeline.update_time),
-        "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
+        "elapsedTime": end_time - pipeline.start_time.timestamp(),
         "datasetId": pipeline.input_data_config.dataset_id,
+        "state": pipeline.state.name.split("_")[-1],
+        "error": pipeline.error.message,
+        "objective": objective
     }
     if "transformations" in training_task_inputs:
       transformation_options = self._build_feature_transformations(
@@ -208,6 +222,18 @@ class AutoMLService:
     for field in optional_fields:
       training_pipeline[field] = training_task_inputs.get(field, None)
     return training_pipeline
+
+  def get_pipeline(self, pipeline_id):
+    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    return self._build_training_pipeline(pipeline)
+
+  def get_training_pipelines(self):
+    pipelines = []
+    for pipeline in self._pipeline_client.list_training_pipelines(
+        parent=self._parent):
+      pipelines.append(self._build_training_pipeline(pipeline))
+
+    return pipelines
 
   def get_datasets(self):
     datasets = []
