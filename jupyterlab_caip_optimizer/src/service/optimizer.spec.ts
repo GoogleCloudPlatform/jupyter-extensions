@@ -28,6 +28,7 @@ import {
   fakeTrial,
   fakeMeasurement,
   cleanFakeTrialName,
+  cleanFakeStudyName,
 } from './test-constants';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 
@@ -52,15 +53,16 @@ describe('OptimizerService', () => {
 
   it('Creates a study', async () => {
     mockSubmit.mockReturnValue(asApiResponse(fakeStudyResponseActive));
+    const pendingStudy = { ...fakeStudy, name: cleanFakeStudyName };
     const object = await optimizerService.createStudy(
-      fakeStudy,
+      pendingStudy,
       fakeMetadataRequired
     );
     expect(object).toEqual(fakeStudyResponseActive);
     expect(mockSubmit).toHaveBeenCalledWith({
       path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies?study_id=study-default`,
       method: 'POST',
-      body: JSON.stringify(fakeStudy),
+      body: JSON.stringify(pendingStudy),
     });
   });
 
