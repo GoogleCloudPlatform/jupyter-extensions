@@ -42,6 +42,10 @@ const localStyles = stylesheet({
     flexGrow: 1,
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
+  searchResultSubtitle: {
+    fontSize: 12,
+    color: 'gray',
+  },
 });
 
 interface SearchProps {
@@ -101,10 +105,10 @@ export function BuildSearchResult(result, context) {
           label={
             <div>
               <Typography>{table.name}</Typography>
-              <Typography style={{ fontSize: 12, color: 'gray' }}>
+              <Typography className={localStyles.searchResultSubtitle}>
                 Dataset: {table.parent}
               </Typography>
-              <Typography style={{ fontSize: 12, color: 'gray' }}>
+              <Typography className={localStyles.searchResultSubtitle}>
                 Type: {table.type}
               </Typography>
             </div>
