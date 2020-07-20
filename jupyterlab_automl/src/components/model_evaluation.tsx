@@ -60,24 +60,17 @@ const localStyles = stylesheet({
   },
 });
 
-const properties = [
-  {
-    name: 'auPrc',
-    label: 'ROC PRC',
-  },
-  {
-    name: 'auRoc',
-    label: 'ROC AUC',
-  },
-  {
-    name: 'logLoss',
-    label: 'Log loss',
-  },
-  {
-    name: 'createTime',
-    label: 'Created',
-  },
-];
+const properties = {
+  auPrc: 'ROC PRC',
+  auRoc: 'ROC AUC',
+  logLoss: 'Log loss',
+  createTime: 'Created',
+  rootMeanSquaredLogError: 'RMSLE',
+  rSquared: 'R^2',
+  meanAbsolutePercentageError: 'MAPE',
+  rootMeanSquaredError: 'RMSE',
+  meanAbsoluteError: 'MAE',
+};
 
 export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
   constructor(props: ConfusionMatrixProps) {
@@ -201,7 +194,7 @@ export class EvaluationTable extends React.Component<Props, State> {
       evaluationTable: [],
       featureImportance: [],
       confidenceMetrics: [],
-      marks: [],
+      marks: null,
       modelEvaluation: null,
       currentConfidenceThresh: null,
       confusionMatrix: [],
@@ -238,33 +231,35 @@ export class EvaluationTable extends React.Component<Props, State> {
             direction="column"
           >
             <Grid item xs={12}>
-              <p style={{ marginBottom: 16, marginLeft: 16 }}>
-                Confidence Threshold
-                <Slider
-                  step={null}
-                  marks={marks}
-                  style={{
-                    width: 200,
-                    margin: '0 24px 0 24px',
-                    paddingBottom: 5,
-                  }}
-                  onChange={(event, value) => {
-                    const formatted = ((value as number) / 100).toFixed(2);
-                    if (formatted !== currentConfidenceThresh) {
-                      this.setState({
-                        currentConfidenceThresh: formatted,
-                      });
-                    }
-                  }}
-                  onChangeCommitted={(event, value) => {
-                    const metric = confidenceMetrics.filter(
-                      metric => metric.confidenceThreshold === value
-                    )[0];
-                    this.updateEvaluationTable(metric, modelEvaluation);
-                  }}
-                />
-                {currentConfidenceThresh}
-              </p>
+              {marks && (
+                <p style={{ marginBottom: 16, marginLeft: 16 }}>
+                  Confidence Threshold
+                  <Slider
+                    step={null}
+                    marks={marks}
+                    style={{
+                      width: 200,
+                      margin: '0 24px 0 24px',
+                      paddingBottom: 5,
+                    }}
+                    onChange={(event, value) => {
+                      const formatted = ((value as number) / 100).toFixed(2);
+                      if (formatted !== currentConfidenceThresh) {
+                        this.setState({
+                          currentConfidenceThresh: formatted,
+                        });
+                      }
+                    }}
+                    onChangeCommitted={(event, value) => {
+                      const metric = confidenceMetrics.filter(
+                        metric => metric.confidenceThreshold === value
+                      )[0];
+                      this.updateEvaluationTable(metric, modelEvaluation);
+                    }}
+                  />
+                  {currentConfidenceThresh}
+                </p>
+              )}
               <Table size="small" style={{ width: 500 }}>
                 <TableBody>
                   {evaluationTable.map(row => (
@@ -278,12 +273,12 @@ export class EvaluationTable extends React.Component<Props, State> {
                 </TableBody>
               </Table>
             </Grid>
-            {featureImportance ? (
+            {featureImportance && (
               <FeatureImportance featureImportance={featureImportance} />
-            ) : (
-              <></>
             )}
-            <ConfusionMatrix confusionMatrix={confusionMatrix} />
+            {confusionMatrix && (
+              <ConfusionMatrix confusionMatrix={confusionMatrix} />
+            )}
           </Grid>
         )}
       </div>
@@ -309,49 +304,37 @@ export class EvaluationTable extends React.Component<Props, State> {
     modelEvaluation: ModelEvaluation
   ) {
     const evaluationTable = [];
-    for (let i = 0; i < properties.length; i++) {
-      if (modelEvaluation[properties[i]['name']]) {
-        if (properties[i]['name'] === 'createTime') {
-          console.log('here');
-          console.log(modelEvaluation[properties[i]['name']]);
-          console.log(modelEvaluation[properties[i]['name']].toLocaleString());
+    for (const [name, label] of Object.entries(properties)) {
+      if (modelEvaluation[name]) {
+        if (name === 'createTime') {
           evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']].toLocaleString()
-            )
+            this.createData(label, modelEvaluation[name].toLocaleString())
           );
-        } else if (typeof modelEvaluation[properties[i]['name']] === 'number') {
+        } else if (typeof modelEvaluation[name] === 'number') {
           evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']].toFixed(3)
-            )
+            this.createData(label, modelEvaluation[name].toFixed(3))
           );
-        } else {
-          evaluationTable.push(
-            this.createData(
-              properties[i]['label'],
-              modelEvaluation[properties[i]['name']]
-            )
-          );
+        } else if (modelEvaluation[name] !== 'NaN') {
+          evaluationTable.push(this.createData(label, modelEvaluation[name]));
         }
       }
     }
-    if (metric.f1Score !== 'NaN') {
-      evaluationTable.push(
-        this.createData('F1 score', (metric.f1Score as number).toFixed(3))
-      );
-    }
-    if (metric.precision !== 'NaN') {
-      evaluationTable.push(
-        this.createData('Precision', (metric.precision as number).toFixed(3))
-      );
-    }
-    if (metric.recall !== 'NaN') {
-      evaluationTable.push(
-        this.createData('Recall', (metric.recall as number).toFixed(3))
-      );
+    if (metric) {
+      if (metric.f1Score !== 'NaN') {
+        evaluationTable.push(
+          this.createData('F1 score', (metric.f1Score as number).toFixed(3))
+        );
+      }
+      if (metric.precision !== 'NaN') {
+        evaluationTable.push(
+          this.createData('Precision', (metric.precision as number).toFixed(3))
+        );
+      }
+      if (metric.recall !== 'NaN') {
+        evaluationTable.push(
+          this.createData('Recall', (metric.recall as number).toFixed(3))
+        );
+      }
     }
     this.setState({
       evaluationTable: evaluationTable,
@@ -364,15 +347,21 @@ export class EvaluationTable extends React.Component<Props, State> {
       const modelEvaluation = await ModelService.getModelEvaluation(
         this.props.model.id
       );
-      const firstMetric = modelEvaluation.confidenceMetrics[0];
-      this.updateEvaluationTable(firstMetric, modelEvaluation);
+      let currentConfidence = '';
+      if (modelEvaluation.confidenceMetrics) {
+        const firstMetric = modelEvaluation.confidenceMetrics[0];
+        this.updateEvaluationTable(firstMetric, modelEvaluation);
+        currentConfidence = (firstMetric.confidenceThreshold / 100).toFixed(2);
+        this.setState({
+          marks: this.getSliderMarks(modelEvaluation),
+          currentConfidenceThresh: currentConfidence,
+          confidenceMetrics: modelEvaluation.confidenceMetrics,
+        });
+      } else {
+        this.updateEvaluationTable(null, modelEvaluation);
+      }
       this.setState({
         hasLoaded: true,
-        marks: this.getSliderMarks(modelEvaluation),
-        currentConfidenceThresh: (
-          firstMetric.confidenceThreshold / 100
-        ).toFixed(2),
-        confidenceMetrics: modelEvaluation.confidenceMetrics,
         featureImportance: modelEvaluation.featureImportance,
         modelEvaluation: modelEvaluation,
         confusionMatrix: modelEvaluation.confusionMatrix,

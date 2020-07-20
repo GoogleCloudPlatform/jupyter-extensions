@@ -3,7 +3,15 @@ import * as React from 'react';
 import { Model } from '../service/model';
 import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
-import { Toolbar, Tabs, Tab } from '@material-ui/core';
+import {
+  Toolbar,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { stylesheet } from 'typestyle';
 import * as csstips from 'csstips';
@@ -63,6 +71,47 @@ const localStyles = stylesheet({
   },
 });
 
+export class OtherModelPanel extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      tabState: 0,
+    };
+  }
+
+  render() {
+    const modelId = this.props.model.id.split('/');
+    return (
+      <div style={{ padding: '16px' }}>
+        <Table size="small" style={{ width: 500 }}>
+          <TableBody>
+            <TableRow key={'ID'}>
+              <TableCell component="th" scope="row">
+                ID
+              </TableCell>
+              <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
+            </TableRow>
+            <TableRow key={'Region'}>
+              <TableCell component="th" scope="row">
+                Region
+              </TableCell>
+              <TableCell align="right">us-central-1</TableCell>
+            </TableRow>
+            <TableRow key={'Created'}>
+              <TableCell component="th" scope="row">
+                Created
+              </TableCell>
+              <TableCell align="right">
+                {this.props.model.createTime.toLocaleString()}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+}
+
 export class ModelPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -116,6 +165,10 @@ export class ModelWidget extends ReactWidget {
   }
 
   render() {
-    return <ModelPanel model={this.modelMeta}></ModelPanel>;
+    if (this.modelMeta.modelType !== 'OTHER') {
+      return <ModelPanel model={this.modelMeta} />;
+    } else {
+      return <OtherModelPanel model={this.modelMeta} />;
+    }
   }
 }

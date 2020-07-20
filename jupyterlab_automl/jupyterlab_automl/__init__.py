@@ -21,7 +21,10 @@ def load_jupyter_server_extension(nb_server_app):
   host_pattern = ".*$"
   app = nb_server_app.web_app
   gcp_v1_endpoint = url_path_join(app.settings["base_url"], "automl", "v1")
+  app_handlers = []
+  for (route, handler) in handlers.items():
+    app_handlers.append((url_path_join(gcp_v1_endpoint, route), handler))
   app.add_handlers(
       host_pattern,
-      [(url_path_join(gcp_v1_endpoint, k), v) for (k, v) in handlers.items()],
+      app_handlers,
   )

@@ -26,48 +26,18 @@ interface RowState {
   open: boolean;
 }
 
-const properties = [
-  {
-    name: 'state',
-    label: 'Status',
-  },
-  {
-    name: 'createTime',
-    label: 'Created',
-  },
-  {
-    name: 'trainBudgetMilliNodeHours',
-    label: 'Budget',
-  },
-  {
-    name: 'budgetMilliNodeHours',
-    label: 'Budget',
-  },
-  {
-    name: 'elapsedTime',
-    label: 'Elapsed Time',
-  },
-  {
-    name: 'datasetId',
-    label: 'Dataset ID',
-  },
-  {
-    name: 'targetColumn',
-    label: 'Target column',
-  },
-  {
-    name: 'transformationOptions',
-    label: 'Transformation options',
-  },
-  {
-    name: 'objective',
-    label: 'Objective',
-  },
-  {
-    name: 'optimizationObjective',
-    label: 'Optimized for',
-  },
-];
+const properties = {
+  state: 'Status',
+  createTime: 'Created',
+  trainBudgetMilliNodeHours: 'Budget',
+  budgetMilliNodeHours: 'Budget',
+  elapsedTime: 'Elapsed Time',
+  datasetId: 'Dataset ID',
+  targetColumn: 'Target column',
+  transformationOptions: 'Transformation options',
+  objective: 'Objective',
+  optimizationObjective: 'Optimized for',
+};
 
 export class TransformationOptionsRow extends React.Component<
   RowProps,
@@ -149,9 +119,7 @@ export class PipelineProperties extends React.Component<Props> {
       this.createData('ID', pipelineID[pipelineID.length - 1]),
       this.createData('Region', 'us-central1'),
     ];
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i]['name'];
-      const label = properties[i]['label'];
+    for (const [property, label] of Object.entries(properties)) {
       if (pipeline[property]) {
         if (
           property === 'trainBudgetMilliNodeHours' ||
