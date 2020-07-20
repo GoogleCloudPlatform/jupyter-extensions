@@ -7,7 +7,7 @@ from notebook.base.handlers import APIHandler, app_log
 
 GET = "GET"
 POST = "POST"
-handlers = {}
+
 
 class Handler(APIHandler):
 
@@ -15,6 +15,22 @@ class Handler(APIHandler):
     app_log.exception(str(e))
     self.set_status(500, str(e))
     self.finish({"error": {"message": str(e)}})
+
+
+class Handlers():
+  """Singleton for handlers dictionary"""
+
+  _instance = {}
+
+  @classmethod
+  def get(cls):
+    if not cls._instance:
+      cls._instance = Handlers()
+    return cls._instance
+
+  @classmethod
+  def set_handler(cls, key, value):
+    cls._instance[key] = value
 
 
 def _create_get_handler(handler):
@@ -53,7 +69,7 @@ METHOD_HANDLERS = {GET: _create_get_handler, POST: _create_post_handler}
 def _handler(request_type, endpoint):
 
   def decorator(func):
-    handlers[endpoint] = METHOD_HANDLERS[request_type](func)
+    Handlers.set_handler(endpoint, METHOD_HANDLERS[request_type](func))
     return func
 
   return decorator
