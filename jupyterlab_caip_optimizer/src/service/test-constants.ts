@@ -14,6 +14,21 @@ import {
   Measurement,
 } from '../types';
 
+export const fakeProjectId = 'project-id';
+export const fakeRegion = 'us-region';
+
+export const fakeStudyName =
+  'projects/project-id/locations/us-region/studies/study-default';
+export const cleanFakeStudyName = 'study-default';
+
+export const fakeTrialName =
+  'projects/project-id/locations/us-region/studies/study-default/trials/trial-default';
+export const cleanFakeTrialName = 'trial-default';
+
+export const fakeOperationName =
+  'projects/project-id/locations/us-region/operations/operation-name';
+export const fakeCleanOperationName = 'operation-name';
+
 export const fakeMetricUnspecified = {
   goal: GoalType.GOAL_TYPE_UNSPECIFIED,
   metric: 'metric-unspecified',
@@ -57,12 +72,12 @@ export const fakeStudyConfig = {
 } as StudyConfig;
 
 export const fakeStudy = {
-  name: 'study-default',
+  name: fakeStudyName,
   studyConfig: fakeStudyConfig,
 } as Study;
 
 export const fakeStudyResponseActive = {
-  name: 'study-active',
+  name: fakeStudyName,
   studyConfig: fakeStudyConfig,
   state: State.ACTIVE,
   createTime: '1',
@@ -79,18 +94,6 @@ export const fakeStudyListResponse: Study[] = [
   fakeStudyResponseActive,
   fakeStudyResponseInactive,
 ];
-
-export const fakeStudyName =
-  'projects/project-id/locations/us-region/studies/study-default';
-export const cleanFakeStudyName = 'study-default';
-
-export const fakeTrialName =
-  'projects/project-id/locations/us-region/studies/study-default/trials/trial-default';
-export const cleanFakeTrialName = 'trial-default';
-
-export const fakeOperationName =
-  'projects/project-id/locations/us-region/operations/operation-name';
-export const fakeCleanOperationName = 'operation-name';
 
 export const fakeTrial: Trial = {
   name: fakeTrialName,
@@ -113,6 +116,7 @@ export const fakeTrial: Trial = {
 
 export const fakeTrialWithFinalMeasurement: Trial = {
   ...fakeTrial,
+  state: State.COMPLETED,
   finalMeasurement: {
     stepCount: '1',
     metrics: [
@@ -164,7 +168,8 @@ export const fakeSuggestOperationGetSuccess = {
     '@type': 'type.googleapis.com/google.cloud.ml.v1.SuggestTrialsResponse',
     trials: [
       {
-        name: fakeTrialName,
+        name:
+          'projects/project-id/locations/us-region/studies/study-default/trials/new-trial',
         state: 'ACTIVE',
         // matches fakeStudyConfig parameters
         parameters: [
