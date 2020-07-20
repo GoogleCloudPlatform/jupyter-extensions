@@ -4,6 +4,8 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg)$': '@jupyterlab/testutils/lib/jest-file-mock.js',
+    '^react$': '<rootDir>/node_modules/react',
+    '^react-dom$': '<rootDir>/node_modules/react-dom',
   },
   setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
