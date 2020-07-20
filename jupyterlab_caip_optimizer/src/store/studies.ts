@@ -356,7 +356,7 @@ export const requestAndGetSuggestedTrial = ({
       dispatch(studiesSlice.actions.replaceOrAddTrial({ studyName, trial }))
     );
     dispatch(
-      createSnack('Succesfully loaded suggest trials.', 'success', 4000)
+      createSnack('Successfully loaded suggest trials.', 'success', 4000)
     );
   }
 };
