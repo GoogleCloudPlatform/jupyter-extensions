@@ -38,6 +38,10 @@ const createManagedWidget = <
     state => state.view.isVisible,
     (previousIsVisible, nextIsVisible) => previousIsVisible === nextIsVisible
   );
+  if (reduxStore.getState().view.isVisible) {
+    app.shell.add(widget, 'main');
+    app.shell.activateById(widget.id);
+  }
   reduxStore.subscribe(
     onChange(isVisible => {
       if (isVisible) {

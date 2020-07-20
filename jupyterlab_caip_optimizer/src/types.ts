@@ -6,41 +6,54 @@ export interface AsyncState<T> {
   data?: T;
 }
 
-// Optimizer API
 export interface MetricSpec {
   goal: GoalType;
   metric: string;
 }
 
-export enum GoalType {
-  GOAL_TYPE_UNSPECIFIED = 'GOAL_TYPE_UNSPECIFIED',
-  MAXIMIZE = 'MAXIMIZE',
-  MINIMIZE = 'MINIMIZE',
-}
+/**
+ * 'Const assignment" used to control the string inputs in dropdown input fields.
+ * String enums don't support reverse mapping, and plain string literal types aren't iterable.
+ */
+export const GoalTypeList = [
+  'MAXIMIZE',
+  'MINIMIZE',
+  'GOAL_TYPE_UNSPECIFIED',
+] as const;
 
-export enum ParameterType {
-  PARAMETER_TYPE_UNSPECIFIED = 'PARAMETER_TYPE_UNSPECIFIED',
-  DOUBLE = 'DOUBLE',
-  INTEGER = 'INTEGER',
-  CATEGORICAL = 'CATEGORICAL',
-  DISCRETE = 'DISCRETE',
-}
+export type GoalType = typeof GoalTypeList[number];
 
-export enum ScaleType {
-  SCALE_TYPE_UNSPECIFIED = 'SCALE_TYPE_UNSPECIFIED',
-  UNIT_LINEAR_SCALE = 'UNIT_LINEAR_SCALE',
-  UNIT_LOG_SCALE = 'UNIT_LOG_SCALE',
-  UNIT_REVERSE_LOG_SCALE = 'UNIT_REVERSE_LOG_SCALE',
-}
+export const ParameterTypeList = [
+  'DOUBLE',
+  'INTEGER',
+  'CATEGORICAL',
+  'DISCRETE',
+  'PARAMETER_TYPE_UNSPECIFIED',
+] as const;
+
+export type ParameterType = typeof ParameterTypeList[number];
+
+export const ScaleTypeList = [
+  'UNIT_LINEAR_SCALE',
+  'UNIT_LOG_SCALE',
+  'UNIT_REVERSE_LOG_SCALE',
+  'SCALE_TYPE_UNSPECIFIED',
+] as const;
+
+export type ScaleType = typeof ScaleTypeList[number];
 
 export interface DoubleValueSpec {
   minValue: number;
   maxValue: number;
 }
 
+/**
+ * Integer values are expected to be strings by Optimizer API.
+ * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#IntegerValueSpec)
+ */
 export interface IntegerValueSpec {
-  minValue: bigint;
-  maxValue: bigint;
+  minValue: string;
+  maxValue: string;
 }
 
 export interface CategoricalValueSpec {
@@ -62,8 +75,12 @@ export interface MatchingParentDiscreteValueSpec {
   values: number[];
 }
 
+/**
+ * Integer values are expected to be strings by Optimizer API.
+ * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#matchingparentintvaluespec)
+ */
 export interface MatchingParentIntValueSpec {
-  values: bigint[];
+  values: string[];
 }
 
 export interface MatchingParentCategoricalValueSpec {
@@ -106,12 +123,14 @@ export interface MedianAutomatedStoppingConfig {
   useElapsedTime: boolean;
 }
 
-export enum Algorithm {
-  ALGORITHM_UNSPECIFIED = 'ALGORITHM_UNSPECIFIED',
-  GAUSSIAN_PROCESS_BANDIT = 'GAUSSIAN_PROCESS_BANDIT',
-  GRID_SEARCH = 'GRID_SEARCH',
-  RANDOM_SEARCH = 'RANDOM_SEARCH',
-}
+export const AlgorithmList = [
+  'ALGORITHM_UNSPECIFIED',
+  'GAUSSIAN_PROCESS_BANDIT',
+  'GRID_SEARCH',
+  'RANDOM_SEARCH',
+] as const;
+
+export type Algorithm = typeof AlgorithmList[number];
 
 export type AutomatedStoppingConfig =
   | {
@@ -166,7 +185,7 @@ export type Parameter = ParameterBase &
         floatValue: number;
       }
     | {
-        intValue: bigint; // could we use bigint?
+        intValue: string;
       }
     | {
         stringValue: string;

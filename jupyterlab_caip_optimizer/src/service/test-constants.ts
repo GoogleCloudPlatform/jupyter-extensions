@@ -6,9 +6,6 @@ import {
   StudyConfig,
   MetricSpec,
   ParameterSpec,
-  ParameterType,
-  Algorithm,
-  GoalType,
   State,
   Trial,
   Measurement,
@@ -30,12 +27,12 @@ export const fakeOperationName =
 export const fakeCleanOperationName = 'operation-name';
 
 export const fakeMetricUnspecified = {
-  goal: GoalType.GOAL_TYPE_UNSPECIFIED,
+  goal: 'GOAL_TYPE_UNSPECIFIED',
   metric: 'metric-unspecified',
 } as MetricSpec;
 
 export const fakeMetricMaximize = {
-  goal: GoalType.MAXIMIZE,
+  goal: 'MAXIMIZE',
   metric: 'metric-maximize',
 } as MetricSpec;
 
@@ -46,7 +43,7 @@ export const fakeMetrics: MetricSpec[] = [
 
 export const fakeParamCategorical = {
   parameter: 'param-categorical',
-  type: ParameterType.CATEGORICAL,
+  type: 'CATEGORICAL',
   categoricalValueSpec: {
     values: ['a', 'b', 'c', 'categorical-type'],
   },
@@ -54,7 +51,7 @@ export const fakeParamCategorical = {
 
 export const fakeParamDiscrete = {
   parameter: 'param-discrete',
-  type: ParameterType.DISCRETE,
+  type: 'DISCRETE',
   discreteValueSpec: {
     values: [1, 2, 3, 556],
   },
@@ -68,7 +65,7 @@ export const fakeParameters: ParameterSpec[] = [
 export const fakeStudyConfig = {
   metrics: fakeMetrics,
   parameters: fakeParameters,
-  algorithm: Algorithm.ALGORITHM_UNSPECIFIED,
+  algorithm: 'ALGORITHM_UNSPECIFIED',
 } as StudyConfig;
 
 export const fakeStudy = {

@@ -1,14 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppThunk } from './store';
 
+export type Serverity = 'error' | 'warning' | 'info' | 'success';
+
 export interface OpenAction {
-  severity: 'error' | 'warning' | 'info' | 'success';
+  severity: Serverity;
   message: string;
 }
 
 export interface SnackbarState {
   open: boolean;
-  severity: 'error' | 'warning' | 'info' | 'success';
+  severity: Serverity;
   message: string;
 }
 
@@ -36,7 +38,7 @@ const wait = async (time: number) =>
 
 export const createSnack = (
   message: string,
-  severity: OpenAction['severity'] = 'info',
+  severity: Serverity = 'info',
   waitMs = 2000
 ): AppThunk => async (dispatch, getState) => {
   dispatch(

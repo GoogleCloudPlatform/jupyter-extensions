@@ -113,10 +113,7 @@ export class SynchronizedSliders extends React.Component<Props, State> {
   }
 
   private onCpuInputBlur(cpuInputDisplayValue: string) {
-    const newValue = this.closest(
-      Number(cpuInputDisplayValue),
-      this.cpuValues
-    );
+    const newValue = this.closest(Number(cpuInputDisplayValue), this.cpuValues);
 
     this.onCpuChange(newValue);
   }
@@ -126,22 +123,28 @@ export class SynchronizedSliders extends React.Component<Props, State> {
       Number(memoryInputDisplayValue),
       this.memoryValues
     );
-    
+
     this.onMemoryChange(newValue);
   }
 
   private onCpuInputChange(cpuInputDisplayValue: string) {
-    this.setState({ cpuInputDisplayValue })
+    this.setState({ cpuInputDisplayValue });
     clearTimeout(this.typingTimeout);
 
-    this.typingTimeout = setTimeout(() => this.onCpuInputBlur(cpuInputDisplayValue), 3000);
+    this.typingTimeout = setTimeout(
+      () => this.onCpuInputBlur(cpuInputDisplayValue),
+      3000
+    );
   }
 
   private onMemoryInputChange(memoryInputDisplayValue: string) {
-    this.setState({ memoryInputDisplayValue })
+    this.setState({ memoryInputDisplayValue });
     clearTimeout(this.typingTimeout);
 
-    this.typingTimeout = setTimeout(() => this.onMemoryInputBlur(memoryInputDisplayValue), 3000);
+    this.typingTimeout = setTimeout(
+      () => this.onMemoryInputBlur(memoryInputDisplayValue),
+      3000
+    );
   }
 
   render() {
@@ -171,9 +174,13 @@ export class SynchronizedSliders extends React.Component<Props, State> {
           label="Memory"
           value={memoryValue}
           inputDisplayValue={memoryInputDisplayValue}
-          handleSliderChange={(event, newValue) => this.onMemoryChange(newValue)}
+          handleSliderChange={(event, newValue) =>
+            this.onMemoryChange(newValue)
+          }
           handleInputChange={e => this.onMemoryInputChange(e.target.value)}
-          handleInputBlur={() => this.onMemoryInputBlur(memoryInputDisplayValue)}
+          handleInputBlur={() =>
+            this.onMemoryInputBlur(memoryInputDisplayValue)
+          }
           helperText={`${this.memoryValues[0]} - ${
             this.memoryValues[this.memoryValues.length - 1]
           } GB`}

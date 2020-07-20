@@ -53,9 +53,9 @@ export const STYLES = stylesheet({
 
 export function InputSlider(props: InputSliderProps) {
   const {
-    label, 
-    value, 
-    handleSliderChange, 
+    label,
+    value,
+    handleSliderChange,
     possibleValues,
     inputDisplayValue,
     handleInputChange,
