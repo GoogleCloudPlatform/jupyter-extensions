@@ -205,14 +205,12 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                   {configRows.map((row: ConfigRow, index: number) => (
                     <StyledTableRow key={`config-row-${index}`}>
                       <StyledTableCell
-                        key={`config-row-${index}-cell-entryName`}
                         component="th"
                         scope="row"
                       >
                         {row.entryName}
                       </StyledTableCell>
                       <StyledTableCell
-                        key={`config-row-${index}-cell-entryValue`}
                         align="right"
                       >
                         {row.entryValue}
@@ -240,20 +238,17 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                     return (
                       <StyledTableRow key={`param-row-${index}`}>
                         <StyledTableCell
-                          key={`param-row-${index}-cell-name`}
                           component="th"
                           scope="row"
                         >
                           {row.name}
                         </StyledTableCell>
                         <StyledTableCell
-                          key={`param-row-${index}-cell-type`}
                           align="right"
                         >
                           {row.type}
                         </StyledTableCell>
                         <StyledTableCell
-                          key={`param-row-${index}-cell-values`}
                           align="right"
                         >
                           {row.values}
