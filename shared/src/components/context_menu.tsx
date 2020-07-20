@@ -64,8 +64,10 @@ export class ContextMenu extends React.PureComponent<Props, State> {
   };
 
   private onClick = event => {
-    event.preventDefault();
-    this.closeContextMenu();
+    if (this.state.isOpen) {
+      event.preventDefault();
+      this.closeContextMenu();
+    }
   };
 
   componentDidMount() {
