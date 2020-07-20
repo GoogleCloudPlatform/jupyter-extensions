@@ -287,6 +287,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onSuccess={() => {
               this.refresh();
             }}
+            context={this.props.context}
           />
         </Box>
       </>
