@@ -24,9 +24,10 @@ class TestPagedAPI_handler(unittest.TestCase):
   def setUp(self, fake_super):
     self.dummy_pagedAPI = DummyPageAPI(None, None)
 
-  def test_post_multiplex(self):
+  def prep_test_post(self, load):
     get_json_body_mock = MagicMock()
     self.dummy_pagedAPI.get_json_body = get_json_body_mock
+    get_json_body_mock.return_value = load
 
     on_start_mock = MagicMock()
     on_continue_mock = MagicMock()
@@ -35,53 +36,43 @@ class TestPagedAPI_handler(unittest.TestCase):
     self.dummy_pagedAPI._onContinue = on_continue_mock
     self.dummy_pagedAPI._onCancel = on_cancel_mock
 
-    def clear_mocks():
-      on_start_mock.reset_mock()
-      on_continue_mock.reset_mock()
-      on_cancel_mock.reset_mock()
+    return on_start_mock, on_continue_mock, on_cancel_mock
 
+  def test_post_start(self):
     # start
     fake_load = "fake_load"
-    get_json_body_mock.return_value = {
-        'intention': START_STATE,
-        'load': fake_load
-    }
-    self.dummy_pagedAPI.post()
+    load = {'intention': START_STATE, 'load': fake_load}
+    on_start_mock, on_continue_mock, on_cancel_mock = self.prep_test_post(load)
     on_start_mock.assert_called_once_with(fake_load)
     on_continue_mock.assert_not_called()
     on_cancel_mock.assert_not_called()
-    clear_mocks()
 
-    # continue
-    fake_load = "fake_load"
-    get_json_body_mock.return_value = {
-        'intention': CONTINUE_STATE,
-        'load': fake_load
-    }
-    self.dummy_pagedAPI.post()
-    on_start_mock.assert_not_called()
-    on_continue_mock.assert_called_once_with(fake_load)
-    on_cancel_mock.assert_not_called()
-    clear_mocks()
+  # def test_post_continue(self):
+  #   # start
+  #   fake_load = "fake_load"
+  #   load = {'intention': CONTINUE_STATE, 'load': fake_load}
+  #   on_start_mock, on_continue_mock, on_cancel_mock = self.prep_test_post(load)
+  #   on_start_mock.assert_not_called()
+  #   on_continue_mock.assert_called_once_with(fake_load)
+  #   on_cancel_mock.assert_not_called()
 
-    # cancel
-    fake_load = "fake_load"
-    get_json_body_mock.return_value = {
-        'intention': CANCEL_STATE,
-        'load': fake_load
-    }
-    self.dummy_pagedAPI.post()
-    on_start_mock.assert_not_called()
-    on_continue_mock.assert_not_called()
-    on_cancel_mock.assert_called_once_with(fake_load)
-    clear_mocks()
+  # def test_post_cancel(self):
+  #   # start
+  #   fake_load = "fake_load"
+  #   load = {'intention': CANCEL_STATE, 'load': fake_load}
+  #   on_start_mock, on_continue_mock, on_cancel_mock = self.prep_test_post(load)
+  #   on_start_mock.assert_not_called()
+  #   on_continue_mock.assert_not_called()
+  #   on_cancel_mock.assert_called_once_with(fake_load)
 
-    # None
-    get_json_body_mock.return_value = {'intention': 'HAHAHA', 'load': ''}
-    self.dummy_pagedAPI.post()
-    on_start_mock.assert_not_called()
-    on_continue_mock.assert_not_called()
-    on_cancel_mock.assert_not_called()
+  # def test_post_none(self):
+  #   # None
+  #   load = {'intention': 'HAHAHA', 'load': ''}
+  #   on_start_mock, on_continue_mock, on_cancel_mock = self.prep_test_post(load)
+  #   self.dummy_pagedAPI.post()
+  #   on_start_mock.assert_not_called()
+  #   on_continue_mock.assert_not_called()
+  #   on_cancel_mock.assert_not_called()
 
   @patch.object(app_log, 'log')
   def test_start(self, fake_app_log):
