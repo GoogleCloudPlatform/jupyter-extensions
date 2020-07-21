@@ -5,7 +5,7 @@ export type ViewType =
       view: 'dashboard' | 'createStudy';
     }
   | {
-      view: 'studyDetails' | 'suggestTrials';
+      view: 'studyDetails' | 'suggestTrials' | 'visualizeTrials';
       studyId: string;
     };
 

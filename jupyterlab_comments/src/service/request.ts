@@ -62,11 +62,11 @@ export function httpGitRequest(
 /*
 Send a request to the server to fetch the refresh interval configured by the user
 */
-export function refreshIntervalRequest() : Promise<Response> {
+export function refreshIntervalRequest(): Promise<Response> {
   const setting = ServerConnection.makeSettings();
   const fullUrl = URLExt.join(setting.baseUrl, 'refreshInterval');
-  let fullRequest: RequestInit = {
-    method: "GET",
+  const fullRequest: RequestInit = {
+    method: 'GET',
   };
   return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 }

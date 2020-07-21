@@ -7,7 +7,7 @@ export interface TableDetailsObject {
   description: string;
   labels: string[];
   date_created: string;
-  expiration: string;
+  expires: string;
   location: string;
   last_modified: string;
   project: string;
@@ -27,6 +27,11 @@ export interface SchemaField {
 
 export interface TableDetails {
   details: TableDetailsObject;
+}
+
+export interface TablePreview {
+  rows: any[];
+  fields: string[];
 }
 
 export class TableDetailsService {
@@ -55,6 +60,38 @@ export class TableDetailsService {
           }
           resolve({
             details: content.details,
+          });
+        });
+      });
+    });
+  }
+
+  async getTablePreview(tableId: string): Promise<TablePreview> {
+    return new Promise((resolve, reject) => {
+      const serverSettings = ServerConnection.makeSettings();
+      const requestUrl = URLExt.join(
+        serverSettings.baseUrl,
+        'bigquery/v1/tablepreview'
+      );
+      const body = { tableId: tableId };
+      const requestInit: RequestInit = {
+        body: JSON.stringify(body),
+        method: 'POST',
+      };
+      ServerConnection.makeRequest(
+        requestUrl,
+        requestInit,
+        serverSettings
+      ).then(response => {
+        response.json().then(content => {
+          if (content.error) {
+            console.error(content.error);
+            reject(content.error);
+            return [];
+          }
+          resolve({
+            fields: content.fields,
+            rows: content.rows,
           });
         });
       });

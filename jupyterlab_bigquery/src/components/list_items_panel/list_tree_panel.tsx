@@ -5,7 +5,13 @@ import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ListProjectsService, DataTree } from './service/list_items';
+import {
+  ListProjectsService,
+  DataTree,
+  ListDatasetsService,
+  ListTablesService,
+  ListModelsService,
+} from './service/list_items';
 import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
@@ -13,6 +19,9 @@ import { updateDataTree } from '../../reducers/dataTreeSlice';
 
 interface Props {
   listProjectsService: ListProjectsService;
+  listDatasetsService: ListDatasetsService;
+  listTablesService: ListTablesService;
+  listModelsService: ListModelsService;
   isVisible: boolean;
   context: Context;
   updateDataTree: any;
@@ -110,7 +119,12 @@ class ListItemsPanel extends React.Component<Props, State> {
           <LinearProgress />
         ) : (
           <ul className={localStyles.list}>
-            <ListProjectItem context={this.props.context} />
+            <ListProjectItem
+              context={this.props.context}
+              listDatasetsService={this.props.listDatasetsService}
+              listTablesService={this.props.listTablesService}
+              listModelsService={this.props.listModelsService}
+            />
           </ul>
         )}
       </div>

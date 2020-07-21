@@ -6,6 +6,7 @@ import { close, ViewType } from '../store/view';
 import { CreateStudy } from './create_study';
 import { Dashboard } from './dashboard';
 import { SuggestTrials } from './suggest_trials';
+import { StudyDetails } from './study_details';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
@@ -21,9 +22,11 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
     case 'createStudy':
       return <CreateStudy />;
     case 'studyDetails':
-      return <>Study ID: {data.studyId}</>;
+      return <StudyDetails studyId={data.studyId} />;
     case 'suggestTrials':
       return <SuggestTrials studyName={data.studyId} />;
+    case 'visualizeTrials':
+      return <>Visualize Trials: studyId={data.studyId} </>;
   }
 };
 

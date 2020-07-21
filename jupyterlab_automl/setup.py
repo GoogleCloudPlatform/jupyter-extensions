@@ -17,23 +17,21 @@ import os
 from setuptools import find_packages, setup
 
 with open("README.md") as f:
-    long_description = f.read()
+  long_description = f.read()
 
 version = None
 with open(os.path.join(os.getcwd(), "jupyterlab_automl", "version.py")) as f:
-    for l in f:
-        if l.startswith("VERSION"):
-            version = l.rstrip().split(" = ")[1].replace('"', "")
+  for l in f:
+    if l.startswith("VERSION"):
+      version = l.rstrip().split(" = ")[1].replace('"', "")
 
 if not version:
-    raise RuntimeError("Unable to determine version")
+  raise RuntimeError("Unable to determine version")
 
 npm_package = "jupyterlab_automl-{}.tgz".format(version)
 if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
-    raise FileNotFoundError(
-        "Cannot find NPM package. Did you run `npm pack`?"
-        + os.path.join(os.getcwd(), npm_package)
-    )
+  raise FileNotFoundError("Cannot find NPM package. Did you run `npm pack`?" +
+                          os.path.join(os.getcwd(), npm_package))
 
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
@@ -55,9 +53,9 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "google-cloud-storage>=1.24.1",
-        "jupyterlab~=1.2.0",
-        "google-cloud-automl",
-        "gcp_jupyterlab_shared"
+        "google-cloud-storage>=1.24.1", "jupyterlab~=1.2.0",
+        "gcp_jupyterlab_shared",
+        "pip @ https://storage.googleapis.com/google-cloud-aiplatform/libraries/python/0.1.0/google-cloud-aiplatform-0.1.0.tar.gz",
+        "google-api-python-client"
     ],
 )
