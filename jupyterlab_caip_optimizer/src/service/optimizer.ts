@@ -27,6 +27,7 @@ import {
   Operation,
   SuggestTrialOperation,
 } from '../types';
+import { createTrialUrl } from '../utils/urls';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
@@ -248,12 +249,17 @@ export class OptimizerService {
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/complete
    * @param trialName Raw trial name.
    * @param studyName Raw study name.
+   * @param Details The completion details.
    * @param metadata The region and project id associated with the trial.
    */
   async completeTrial(
     trialName: string,
     studyName: string,
-    finalMeasurement: Measurement,
+    details: {
+      finalMeasurement?: Measurement;
+      trialInfeasible?: boolean;
+      infeasibleReason?: string;
+    },
     metadata: MetadataRequired
   ): Promise<Trial> {
     try {
@@ -266,13 +272,48 @@ export class OptimizerService {
         )}:complete`,
         method: 'POST',
         body: {
-          finalMeasurement,
+          finalMeasurement: details.finalMeasurement,
+          trialInfeasible: details.trialInfeasible,
+          infeasibleReason: details.infeasibleReason,
         },
       });
       return response.result;
     } catch (err) {
       console.error(
         `Unable to complete trial with name "${prettifyTrial(trialName)}"`
+      );
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Adds a user provided trial to a study.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/create
+   * @param trialName The trial details.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the trial.
+   */
+  async createTrial(
+    trial: Trial,
+    studyName: string,
+    metadata: MetadataRequired
+  ): Promise<Trial> {
+    try {
+      const response = await this._transportService.submit<Trial>({
+        path: createTrialUrl({
+          projectId: metadata.projectId,
+          region: metadata.region,
+          cleanStudyName: prettifyStudyName(studyName),
+        }),
+        method: 'POST',
+        body: trial,
+      });
+      return response.result;
+    } catch (err) {
+      console.error(
+        `Unable to create trial for study with name "${prettifyTrial(
+          studyName
+        )}"`
       );
       handleApiError(err);
     }

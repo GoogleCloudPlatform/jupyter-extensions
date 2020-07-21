@@ -103,6 +103,26 @@ export function deleteTrialUrl(
   return `https://${region}-ml.googleapis.com/v1/projects/${projectId}/locations/${region}/studies/${cleanStudyName}/trials/${cleanTrialName}`;
 }
 
+export function createTrialUrl(
+  {
+    projectId,
+    region,
+    cleanStudyName,
+  }: {
+    projectId: string;
+    region: string;
+    cleanStudyName: string;
+  } = {
+    projectId: fakeProjectId,
+    region: fakeRegion,
+    cleanStudyName: cleanFakeStudyName,
+  }
+): string {
+  return `https://${region}-ml.googleapis.com/v1/projects/${projectId}/locations/${region}/studies/${encodeURI(
+    cleanStudyName
+  )}/trials`;
+}
+
 export function proxyUrl(googleApiUrl: string): string {
   return `/gcp/v1/proxy/${btoa(googleApiUrl)}`;
 }
