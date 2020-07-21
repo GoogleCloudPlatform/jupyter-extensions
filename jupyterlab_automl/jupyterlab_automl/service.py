@@ -9,6 +9,7 @@ from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
+from google.cloud.aiplatform_v1alpha1.types import Endpoint, DeployedModel, DedicatedResources, MachineSpec, UndeployModelRequest
 
 # TODO: Add ability to programatically set region
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
@@ -80,11 +81,14 @@ class AutoMLService:
         client_options=client_options)
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
+    self._endpoint_client = aiplatform_v1alpha1.EndpointServiceClient(
+        client_options=client_options)
     self._gcs_client = storage.Client()
     self._project = AuthProvider.get().project
     self._parent = "projects/{}/locations/us-central1".format(self._project)
     self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
         hashlib.md5(self._project.encode('utf-8')).hexdigest())
+    self._endpoint = None
 
   @property
   def dataset_client(self):
@@ -266,3 +270,40 @@ class AutoMLService:
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
+
+  def _get_model(self, model_id):
+    return self._model_client.get_model(name=model_id)
+  
+  def _create_endpoint(self, name):
+    name = "ucaip-extension/" + name
+    endpoint = Endpoint(display_name=name)
+    return self._endpoint_client.create_endpoint(parent=self._parent, endpoint=endpoint)
+  
+  def _delete_endpoint(self, endpoint_id):
+    self._endpoint_client.delete_endpoint(name=endpoint_id)
+
+  # maybe add endpoint id as optional parameter
+  def deploy_model(self, model_id, machine_type="n1-standard-2", endpoint_id=None):
+    model = self._get_model(model_id)
+    if not endpoint_id:
+      endpoint = self._create_endpoint(model.display_name).result()
+    else:
+      endpoint = self._endpoint_client.get_endpoint(name=endpoint_id)
+    spec = MachineSpec(machine_type=machine_type)
+    resources = DedicatedResources(machine_spec=spec, min_replica_count=1)
+    deployed_model = DeployedModel(model=model_id, dedicated_resources=resources)
+    self._endpoint_client.deploy_model(endpoint=endpoint.name, deployed_model=deployed_model, traffic_split={"0": 100})
+    if not endpoint_id:
+      return endpoint
+
+  def undeploy_model(self, model_id, endpoint_id):
+    deployed_models = self._endpoint_client.get_endpoint(name=endpoint_id).deployed_models
+    for deployed_model in deployed_models:
+      if deployed_model.model == model_id:
+        try:
+          self._endpoint_client.undeploy_model(endpoint=endpoint_id, deployed_model_id=deployed_model.id, traffic_split={})
+        except:
+          print("Exception occured")
+        self._delete_endpoint(endpoint_id)
+        return
+    print("Could not find deployed model with id")
