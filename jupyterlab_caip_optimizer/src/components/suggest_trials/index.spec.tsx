@@ -431,6 +431,14 @@ describe('Suggest Trials Page', () => {
       `);
     });
 
+    it('cancels and exits', async () => {
+      userEvent.click(screen.getByTestId('createTrialDialogCancel'));
+
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('createTrialDialog')
+      );
+    });
+
     // TODO: add other parameters types like integer and double
     it.todo(
       'validates errors for discrete, categorical, double and integer types'

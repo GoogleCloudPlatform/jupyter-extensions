@@ -65,7 +65,7 @@ const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
   validValues,
 }) => {
   return (
-    <FormControl variant="outlined">
+    <FormControl variant="outlined" fullWidth>
       <InputLabel id={label}>{label}</InputLabel>
       <Select
         labelId={label}
@@ -166,7 +166,7 @@ export const CreateTrial: React.FC<Props> = ({
   const handleClose = () => {
     if (!loading) {
       setMetrics(clearMetrics(metrics));
-      close();
+      onClose();
     }
   };
 
