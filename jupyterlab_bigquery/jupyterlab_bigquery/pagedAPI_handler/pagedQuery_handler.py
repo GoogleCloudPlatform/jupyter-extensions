@@ -4,9 +4,14 @@ import json
 from jupyterlab_bigquery.handlers import format_preview_fields, format_preview_row
 
 
-
 class PagedQueryHandler(PagedAPIHandler):
-  client = bigquery.Client()
+  client = None
+
+  def __init__(self, application, request, **kwargs):
+    super().__init__(application, request, **kwargs)
+
+    if PagedQueryHandler.client is None:
+      PagedQueryHandler.client = bigquery.Client()
 
   def query(self, request_body, page_size):
     query = request_body['query']
@@ -48,6 +53,14 @@ class PagedQueryHandler(PagedAPIHandler):
           'content': json.dumps([format_preview_row(row) for row in page]),
           'labels': json.dumps(schema_fields),
           'bytesProcessed': json.dumps(total_bytes_processed)
+      }
+      yield (response)
+
+    for df in en.to_dataframe_iterable():
+      response = {
+          'content': df.to_json(orient='values'),
+          'labels': json.dumps(df.columns.to_list()),
+          'bytesProcessed': json.dumps(total_bytes_processed),
       }
       yield (response)
 

@@ -14,6 +14,7 @@ CANCEL_STATE = 'cancel'
 CLEAR_GENERATORS_INTERVAL_SEC = 10
 CLEAR_GENERATORS_MAX_IDILE_SEC = 1200
 
+
 class PagedAPIHandler(APIHandler, ABC):
   '''
     Enables easy to use paged/batched API requests between front end and backend.
@@ -34,12 +35,14 @@ class PagedAPIHandler(APIHandler, ABC):
 
   def clear_generators(self):
     with PagedAPIHandler.generator_lock:
-      for job_id, (generator, job_obj, last_touch) in PagedAPIHandler.generator_pool.items():
+      for job_id, (generator, job_obj,
+                   last_touch) in PagedAPIHandler.generator_pool.items():
         idle_time = time() - last_touch
         if idle_time >= CLEAR_GENERATORS_MAX_IDILE_SEC:
           self.cancel(job_obj)
           del generator
-          app_log.log(INFO, 'Deleted {} due to long idle time {}', job_id, idle_time)
+          app_log.log(INFO, 'Deleted {} due to long idle time {}', job_id,
+                      idle_time)
 
   def post(self, *args, **kwargs):
     '''
@@ -62,30 +65,31 @@ class PagedAPIHandler(APIHandler, ABC):
     page_size = load['pageSize']
     query_generator = self.query(request_body, page_size)
 
-      job_id = None
-      error = None
-      try:
-        job, job_id = next(query_generator)
-      except Exception as err:
-        error = str(err)
-        app_log.log(WARN, 'Failed started query: %s', error)
-      
-      if error is None:
-        with PagedAPIHandler.generator_lock:
-          PagedAPIHandler.generator_pool[job_id] = query_generator, job, time()
-          app_log.log(INFO, 'Successfully started query %s', job_id)
+    job_id = None
+    error = None
+    try:
+      val = next(query_generator)
+      job, job_id = val
+    except Exception as err:
+      error = str(err)
+      app_log.log(WARN, 'Failed started query: %s', error)
 
-      self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
+    if error is None:
+      with PagedAPIHandler.generator_lock:
+        PagedAPIHandler.generator_pool[job_id] = query_generator, job, time()
+        app_log.log(INFO, 'Successfully started query %s', job_id)
+
+    self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
 
   def _onContinue(self, load):
     job_id = load['id']
     query_generator = None
 
     with self.generator_lock:
-        val = PagedAPIHandler.generator_pool[job_id]
-        if val is not None:
-          query_generator, job_obj, _ = val
-          val = query_generator, job_obj, time()
+      val = PagedAPIHandler.generator_pool[job_id]
+      if val is not None:
+        query_generator, job_obj, _ = val
+        val = query_generator, job_obj, time()
 
     finish = False
     load = []
@@ -93,20 +97,21 @@ class PagedAPIHandler(APIHandler, ABC):
     if query_generator is None:
       finish = True
     else:
-        try:
-          load = next(query_generator)
-        except StopIteration:
-          finish = True
-          with PagedAPIHandler.generator_lock:
-              del PagedAPIHandler.generator_pool[job_id]
-          app_log.log(INFO, 'Successfully finished query %s', job_id)
-        except Exception as err:
-          finish = True
-          error = str(err)
-          with PagedAPIHandler.generator_lock:
-              del PagedAPIHandler.generator_pool[job_id]
-          app_log.log(WARN, 'Failed continue fetching for query %s: %s', job_id, error)
-    
+      try:
+        load = next(query_generator)
+      except StopIteration:
+        finish = True
+        with PagedAPIHandler.generator_lock:
+          del PagedAPIHandler.generator_pool[job_id]
+        app_log.log(INFO, 'Successfully finished query %s', job_id)
+      except Exception as err:
+        finish = True
+        error = str(err)
+        with PagedAPIHandler.generator_lock:
+          del PagedAPIHandler.generator_pool[job_id]
+        app_log.log(WARN, 'Failed continue fetching for query %s: %s', job_id,
+                    error)
+
     self.finish({
         'finish': json.dumps(finish),
         'load': json.dumps(load),
