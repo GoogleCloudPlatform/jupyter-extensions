@@ -74,7 +74,10 @@ class ReviewCommentsHandler(APIHandler):
                 git_root_dir = git.get_repo_root(full_file_path_dir)
                 file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
                 comments = git.get_code_review_comments(file_path_from_repo_root, git_root_dir)
-                self.finish(json.dumps(comments))
+                if comments is None:
+                    self.finish(json.dumps({}))
+                else:
+                    self.finish(json.dumps(comments))
             else:
                 print("Error: file is not inside a git repository")
                 self.finish(json.dumps({"error_message": "Error: file is not inside a git repository"}))

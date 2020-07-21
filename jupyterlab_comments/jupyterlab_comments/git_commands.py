@@ -42,7 +42,13 @@ class Git(Configurable):
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 
 	def appraise_push(self, git_root_dir):
-		self.run(git_root_dir, 'appraise', 'push')
+		self.run(git_root_dir, 'appraise', 'push', self.remote)
+
+	def push_local_comments(self, git_root_dir):
+		self.run(git_root_dir, 'push', self.remote)
+		self.run(git_root_dir, 'appraise', 'pull', self.remote)
+		self.run(git_root_dir, 'appraise', 'push', self.remote)
+
 
 	def inside_git_repo(self, path_to_file):
 		"""
@@ -81,6 +87,10 @@ class Git(Configurable):
 		"""
 		review_string = self.run(git_root_dir, 'appraise', 'show',
 									'-json')
+		if review_string is None:
+			print('No open code reviews')
+			return None
+
 		review_json = json.loads(review_string)
 		if not review_json:
 			return None
@@ -98,6 +108,7 @@ class Git(Configurable):
 
 	def add_detached_comment(self, file_path_from_repo_root, git_root_dir, comment_string):
 		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root)
+		self.push_local_comments(git_root_dir)
 
 	def get_previous_names(self, file_path, server_root):
 		# names_string = run('log', '--follow', '--name-only', '--pretty=format:""', file_path)

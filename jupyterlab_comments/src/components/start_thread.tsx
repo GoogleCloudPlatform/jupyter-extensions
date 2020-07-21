@@ -43,9 +43,7 @@ async function newDetachedCommentThread(
     currFilePath,
     serverRoot,
     body
-  ).then(response => {
-    console.log(response);
-  });
+  ).then(response => {  });
 }
 
 export function CommentEditor(props) {

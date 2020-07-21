@@ -63,8 +63,8 @@ export interface Context {
 const localStyles = stylesheet({
   root: {
     backgroundColor: 'white',
-    display: 'flex',
-    flexDirection: 'column',
+    height: '100%',
+    overflowY: 'auto',
   },
   header: {
     paddingLeft: 10,
@@ -72,7 +72,10 @@ const localStyles = stylesheet({
   },
   tabs: {
     textAlign: 'center',
-    centered: true,
+  },
+  commentsList: {
+    flexDirection: 'column',
+    minHeight: '100vh',
   },
 });
 
@@ -168,14 +171,14 @@ export class CommentsComponent extends React.Component<Props, State> {
         )}
         {!this.state.errorMessage &&
           (this.state.activeTab === 0 ? (
-            <List>{reviewCommentsList} </List>
+            <List className={localStyles.commentsList}>{reviewCommentsList} </List>
           ) : (
             <>
               <NewCommentThread
                 serverRoot={this.state.serverRoot}
                 currFilePath={currFilePath}
               />
-              <List> {detachedCommentsList} </List>
+              <List className={localStyles.commentsList}> {detachedCommentsList} </List>
             </>
           ))}
       </div>
