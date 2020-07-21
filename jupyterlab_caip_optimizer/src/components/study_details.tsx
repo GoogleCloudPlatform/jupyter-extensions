@@ -62,7 +62,7 @@ interface FormattedStudy {
 }
 
 function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
-  const formattedParams: FormattedParam[] = params.map(param => {
+  return params.map(param => {
     const formattedParam: FormattedParam = {
       name: param.parameter,
       type: param.type,
@@ -85,7 +85,6 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
     }
     return formattedParam;
   });
-  return formattedParams;
 }
 
 interface Props {
@@ -204,15 +203,10 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                 <TableBody>
                   {configRows.map((row: ConfigRow, index: number) => (
                     <StyledTableRow key={`config-row-${index}`}>
-                      <StyledTableCell
-                        component="th"
-                        scope="row"
-                      >
+                      <StyledTableCell component="th" scope="row">
                         {row.entryName}
                       </StyledTableCell>
-                      <StyledTableCell
-                        align="right"
-                      >
+                      <StyledTableCell align="right">
                         {row.entryValue}
                       </StyledTableCell>
                     </StyledTableRow>
@@ -237,20 +231,13 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                   {paramRows.map((row: ParamRow, index: number) => {
                     return (
                       <StyledTableRow key={`param-row-${index}`}>
-                        <StyledTableCell
-                          component="th"
-                          scope="row"
-                        >
+                        <StyledTableCell component="th" scope="row">
                           {row.name}
                         </StyledTableCell>
-                        <StyledTableCell
-                          align="right"
-                        >
+                        <StyledTableCell align="right">
                           {row.type}
                         </StyledTableCell>
-                        <StyledTableCell
-                          align="right"
-                        >
+                        <StyledTableCell align="right">
                           {row.values}
                         </StyledTableCell>
                       </StyledTableRow>
