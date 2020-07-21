@@ -311,7 +311,7 @@ export class OptimizerService {
       return response.result;
     } catch (err) {
       console.error(
-        `Unable to create trial for study with name "${prettifyTrial(
+        `Unable to create trial for study with name "${prettifyStudyName(
           studyName
         )}"`
       );

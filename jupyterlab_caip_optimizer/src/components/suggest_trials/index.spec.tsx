@@ -24,6 +24,7 @@ import {
   operationGetUrl,
   completeTrialUrl,
   deleteTrialUrl,
+  createTrialUrl,
 } from '../../utils/urls';
 
 const server = setupServer();
@@ -47,6 +48,7 @@ describe('Suggest Trials Page', () => {
       })
     );
   });
+
   it('exits to study details page', async () => {
     const { getState } = render(<SuggestTrials studyName={fakeStudyName} />);
 
@@ -64,6 +66,15 @@ describe('Suggest Trials Page', () => {
       `)
     );
   });
+
+  it('opens custom create study dialog', async () => {
+    render(<SuggestTrials studyName={fakeStudyName} />);
+
+    userEvent.click(screen.getByText(/create custom trial/i));
+
+    await waitFor(() => screen.getByTestId('createTrialDialog'));
+  });
+
   describe('suggest form', () => {
     it('shows error message on input if value is less than one', () => {
       render(<SuggestTrials studyName={fakeStudyName} />);
@@ -345,5 +356,84 @@ describe('Suggest Trials Page', () => {
         screen.queryByTestId('measurementDialog')
       );
     });
+  });
+
+  describe('Add custom measurement', () => {
+    let createTrial: jest.Mock;
+    // open dialog
+    beforeEach(async () => {
+      createTrial = jest.fn((req, res, ctx) => {
+        return res(ctx.json(fakeTrialWithFinalMeasurement));
+      });
+      server.use(rest.post(proxyUrl(createTrialUrl()), createTrial));
+
+      render(<SuggestTrials studyName={fakeStudyName} />);
+
+      userEvent.click(screen.getByText(/create custom trial/i));
+
+      await waitFor(() => screen.getByTestId('createTrialDialog'));
+    });
+
+    it('adds parameter and final measurement value and submits them', async () => {
+      const parameterInputs = screen.getAllByTestId('selectionInput');
+      expect(parameterInputs).toHaveLength(2);
+
+      const metricInputs = screen.getAllByTestId('metricInput');
+      expect(metricInputs).toHaveLength(2);
+
+      // parameters
+
+      // categorical type (param-categorical)
+      // open selection panel
+      userEvent.click(parameterInputs[0]);
+      await waitFor(() => screen.getByTestId('categorical-type-menuItem'));
+      // select option
+      userEvent.click(screen.getByTestId('categorical-type-menuItem'));
+
+      // discrete type (param-discrete)
+      // open selection panel
+      userEvent.click(parameterInputs[1]);
+      await waitFor(() => screen.getByTestId('556-menuItem'));
+      // select option
+      userEvent.click(screen.getByTestId('556-menuItem'));
+
+      // metrics
+
+      // metric-unspecified
+      userEvent.type(metricInputs[0], '1000');
+      // metric-maximize
+      userEvent.type(metricInputs[1], '666');
+
+      // submit
+      userEvent.click(screen.getByTestId('createTrialButton'));
+
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('createTrialDialog')
+      );
+
+      expect(createTrial).toHaveBeenCalled();
+      const createTrialBody = JSON.parse(createTrial.mock.calls[0][0].body);
+      expect(createTrialBody).toMatchInlineSnapshot(`
+        Object {
+          "measurements": Array [],
+          "parameters": Array [
+            Object {
+              "parameter": "param-categorical",
+              "stringValue": "categorical-type",
+            },
+            Object {
+              "floatValue": 556,
+              "parameter": "param-discrete",
+            },
+          ],
+          "state": "COMPLETED",
+        }
+      `);
+    });
+
+    // TODO: add other parameters types like integer and double
+    it.todo(
+      'validates errors for discrete, categorical, double and integer types'
+    );
   });
 });

@@ -22,11 +22,22 @@ import {
   Trial,
   State,
   Metric,
+  DoubleValueSpec,
+  IntegerValueSpec,
 } from '../../types';
 import { Column } from 'material-table';
-import { MetricsInputs } from '.';
+import { MetricsInputs, ParameterInputs } from '.';
+import { ErrorCheckFunction } from '../../utils/use_error_state_map';
 
 export type TrialColumn = Column<Trial>;
+
+export interface ParameterSpecObject {
+  [parameterName: string]: ParameterSpec;
+}
+
+export interface ValidateParameterInputs {
+  [parameterName: string]: ErrorCheckFunction<string>;
+}
 
 /**
  * Converts a paramter to a valid column for `material-table`
@@ -142,6 +153,123 @@ export function metricsToMeasurement(metrics: MetricsInputs): Measurement {
 export function clearMetrics(metrics: MetricsInputs): MetricsInputs {
   return Object.keys(metrics).reduce(
     (prev, metricName) => ({ ...prev, [metricName]: '' }),
+    {}
+  );
+}
+
+export function parameterSpecToParameterSpecObject(
+  parameterSpecs: ParameterSpec[]
+): ParameterSpecObject {
+  return parameterSpecs.reduce(
+    (prev, parameterSpec) => ({
+      ...prev,
+      [parameterSpec.parameter]: parameterSpec,
+    }),
+    {}
+  );
+}
+
+/**
+ * Creates an empty object of parameters names to `''`.
+ * @param parameterSpecs The parameter specifications
+ */
+export function parameterSpecToInputsValues(
+  parameterSpecs: ParameterSpec[]
+): ParameterInputs {
+  return parameterSpecs.reduce(
+    (prev, parameterSpec) => ({ ...prev, [parameterSpec.parameter]: '' }),
+    {}
+  );
+}
+
+/**
+ * Converts parameter input values to parameter list for a trial.
+ * @param inputs The parameter input values (which are strings).
+ * @param parameterSpecs The parameter specifications.
+ */
+export function inputValuesToParameterList(
+  inputs: ParameterInputs,
+  parameterSpecs: ParameterSpec[]
+): Parameter[] {
+  return parameterSpecs.map(spec => {
+    const inputValue = inputs[spec.parameter];
+    switch (spec.type) {
+      case 'CATEGORICAL':
+        return { parameter: spec.parameter, stringValue: inputValue };
+      case 'INTEGER':
+        return { parameter: spec.parameter, intValue: inputValue };
+      case 'DISCRETE':
+      case 'DOUBLE':
+        return {
+          parameter: spec.parameter,
+          floatValue: parseFloat(inputValue),
+        };
+    }
+  });
+}
+
+/**
+ * Creates input validation functions to make sure inputs match the type and
+ * value they are supposed to. For example a discrete input must have 1,2,3 and
+ * nothing else.
+ * @param parameterSpecs The parameter specifications.
+ * @param parameterSpecObject The map of parameter specification name to spec.
+ */
+export function parameterSpecToValidateInput(
+  parameterSpecs: ParameterSpec[],
+  parameterSpecObject = parameterSpecToParameterSpecObject(parameterSpecs)
+): ValidateParameterInputs {
+  return parameterSpecs.reduce(
+    (prev, parameterSpec) => ({
+      ...prev,
+      [parameterSpec.parameter]: (name: string, value: string) => {
+        const spec = parameterSpecObject[name];
+        switch (spec.type) {
+          case 'CATEGORICAL':
+            if (!(spec as any).categoricalValueSpec.values.includes(value)) {
+              return 'Invalid categorical value.';
+            }
+            break;
+          case 'DISCRETE':
+            if (
+              !((spec as any).discreteValueSpec.values as number[])
+                .map(value => value.toString(10))
+                .includes(value)
+            ) {
+              return 'Invalid discrete value.';
+            }
+            break;
+          case 'DOUBLE': {
+            const { minValue, maxValue } = (spec as any)
+              .doubleValueSpec as DoubleValueSpec;
+            const number = parseFloat(value);
+            if (number < minValue) {
+              return `Number must be greater than ${minValue}`;
+            } else if (number > maxValue) {
+              return `Number must be less than ${maxValue}`;
+            }
+            break;
+          }
+          case 'INTEGER': {
+            const {
+              minValue: minValueString,
+              maxValue: maxValueString,
+            } = (spec as any).integerValueSpec as IntegerValueSpec;
+            const number = parseInt(value, 10);
+            const minValue = parseInt(minValueString, 10);
+            const maxValue = parseInt(maxValueString);
+            if (number !== parseFloat(value)) {
+              return 'Number must be an integer';
+            } else if (number < minValue) {
+              return `Number must be greater than ${minValue}`;
+            } else if (number > maxValue) {
+              return `Number must be less than ${maxValue}`;
+            }
+            break;
+          }
+        }
+      },
+    }),
     {}
   );
 }

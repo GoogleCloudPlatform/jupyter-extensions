@@ -25,9 +25,14 @@ import { AddMeasurementDialog } from './add_measurement_dialog';
 import { Trials } from './trials';
 import { RootState } from '../../store/store';
 import { setView } from '../../store/view';
+import { CreateTrial } from './create_trial';
 
 export interface MetricsInputs {
   [metricName: string]: string;
+}
+
+export interface ParameterInputs {
+  [parameterName: string]: string;
 }
 
 interface Props {
@@ -48,6 +53,7 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
 
   const isActiveTrial = trials.some(trial => trial.state === 'ACTIVE');
   const [trialName, setTrialName] = React.useState<null | string>(null);
+  const [openCustomTrial, setOpenCustomTrial] = React.useState(false);
 
   return (
     <>
@@ -68,6 +74,14 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
         </Box>
 
         <Box display="flex" mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenCustomTrial(true)}
+          >
+            Create Custom Trial
+          </Button>
+
           <Box ml="auto" mr={2}>
             <Button
               variant="contained"
@@ -92,6 +106,13 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
         studyConfig={studyConfig}
         trialName={trialName}
         close={() => setTrialName(null)}
+      />
+
+      <CreateTrial
+        studyName={studyName}
+        studyConfig={studyConfig}
+        open={openCustomTrial}
+        onClose={() => setOpenCustomTrial(false)}
       />
     </>
   );

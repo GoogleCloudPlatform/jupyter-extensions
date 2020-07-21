@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-interface ErrorState<T> {
+export interface ErrorState<T> {
   value: T;
   error: boolean;
   helperText: string;
 }
 
-type ErrorStateReturn<T> = [ErrorState<T>, (value: T) => void];
+export type ErrorStateReturn<T> = [ErrorState<T>, (value: T) => void];
 
 export function useErrorState<V>(
   defaultValue: V,
