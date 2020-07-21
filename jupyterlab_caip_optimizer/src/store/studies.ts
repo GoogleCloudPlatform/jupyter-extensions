@@ -111,14 +111,22 @@ export const fetchTrials = createAsyncThunk<
 
 export const completeTrial = createAsyncThunk<
   Trial,
-  { trialName: string; studyName: string; finalMeasurement: Measurement },
+  {
+    trialName: string;
+    studyName: string;
+    details: {
+      finalMeasurement?: Measurement;
+      trialInfeasible?: boolean;
+      infeasibleReason?: string;
+    };
+  },
   {
     state: RootState;
   }
 >(
   'studies/completeTrial',
   wrapThunk(
-    async ({ trialName, studyName, finalMeasurement }, thunkAPI) => {
+    async ({ trialName, studyName, details }, thunkAPI) => {
       const metadata = thunkAPI.getState().metadata.data;
       if (!metadata) {
         console.error('No Metadata found.');
@@ -127,7 +135,7 @@ export const completeTrial = createAsyncThunk<
       return await optimizer.completeTrial(
         trialName,
         studyName,
-        finalMeasurement,
+        details,
         metadata
       );
     },
@@ -159,6 +167,28 @@ export const deleteTrial = createAsyncThunk<
     {
       error: dispatch =>
         dispatch(createSnack('Failed to delete the trial!', 'error')),
+    }
+  )
+);
+
+export const createTrial = createAsyncThunk<
+  Trial,
+  { trial: Trial; studyName: string },
+  { state: RootState }
+>(
+  'studies/createTrial',
+  wrapThunk(
+    async ({ trial, studyName }, thunkAPI) => {
+      const metadata = thunkAPI.getState().metadata.data;
+      if (!metadata) {
+        console.error('No Metadata found.');
+        throw new TypeError('No metadata');
+      }
+      return await optimizer.createTrial(trial, studyName, metadata);
+    },
+    {
+      error: dispatch =>
+        dispatch(createSnack('Failed to create a custom trial!', 'error')),
     }
   )
 );
@@ -250,7 +280,7 @@ export const studiesSlice = createSlice({
       }
       state.error = undefined;
     });
-    builder.addCase(deleteStudy.rejected, (state, action) => {
+    builder.addCase(deleteStudy.rejected, state => {
       state.error = 'Failed to delete the study!';
     });
     // Fetch Trials
@@ -263,8 +293,26 @@ export const studiesSlice = createSlice({
       }
       state.error = undefined;
     });
-    builder.addCase(fetchTrials.rejected, (state, action) => {
+    builder.addCase(fetchTrials.rejected, state => {
       state.error = 'Failed to fetch the trials!';
+    });
+    // Create Trial
+    builder.addCase(createTrial.fulfilled, (state, action) => {
+      state.error = undefined;
+      const study = state.data?.find(
+        study => study.name === action.meta.arg.studyName
+      );
+      if (study) {
+        if (!study.trials) {
+          study.trials = [];
+        }
+        study.trials.push(action.payload);
+      } else {
+        console.warn('Study not found in list while creating trial.');
+      }
+    });
+    builder.addCase(createTrial.rejected, state => {
+      state.error = 'Failed to create custom trial.';
     });
     // Complete Trial
     builder.addCase(completeTrial.fulfilled, (state, action) => {

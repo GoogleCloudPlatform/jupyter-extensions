@@ -17,56 +17,27 @@
 import * as React from 'react';
 import {
   Button,
-  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
+  FormControlLabel,
+  Checkbox,
+  TextField,
 } from '@material-ui/core';
-import { MetricSpec, StudyConfig } from '../../types';
+import { StudyConfig } from '../../types';
 import { Loading } from './loading';
 import { prettifyTrial } from '../../service/optimizer';
 import { MetricsInputs } from './index';
 import { useDispatch } from 'react-redux';
 import { completeTrial } from '../../store/studies';
-import { metricSpecsToMetrics, metricsToMeasurement } from './utils';
-
-const MetricInputs: React.FC<{
-  value: MetricsInputs;
-  metricSpecs: MetricSpec[];
-  onChange: (metrics: MetricsInputs) => void;
-}> = ({ metricSpecs, onChange, value: metrics }) => {
-  const handleMetricChange = name => event =>
-    onChange({ ...metrics, [name]: event.target.value });
-
-  return (
-    <>
-      {metricSpecs.map(({ metric }) => (
-        <TextField
-          key={metric}
-          margin="dense"
-          variant="outlined"
-          label={`"${metric}" Metric`}
-          type="text"
-          fullWidth
-          value={metrics[metric]}
-          onChange={handleMetricChange(metric)}
-          inputProps={{
-            'data-testid': 'metricInput',
-          }}
-        />
-      ))}
-    </>
-  );
-};
-
-function clearMetrics(metrics: MetricsInputs): MetricsInputs {
-  return Object.keys(metrics).reduce(
-    (prev, metricName) => ({ ...prev, [metricName]: '' }),
-    {}
-  );
-}
+import {
+  metricSpecsToMetrics,
+  metricsToMeasurement,
+  clearMetrics,
+} from './utils';
+import { MetricInputs } from './metric_inputs';
 
 interface Props {
   studyName: string;
@@ -82,11 +53,12 @@ export const AddMeasurementDialog: React.FC<Props> = ({
   close,
 }) => {
   const dispatch = useDispatch();
+  const [loading, setLoading] = React.useState(false);
   const [metrics, setMetrics] = React.useState<MetricsInputs>(() =>
     metricSpecsToMetrics(studyConfig.metrics)
   );
-
-  const [loading, setLoading] = React.useState(false);
+  const [infeasible, setInfeasible] = React.useState(false);
+  const [infeasibleReason, setInfeasibleReason] = React.useState('');
 
   const handleClose = () => {
     if (!loading) {
@@ -97,13 +69,29 @@ export const AddMeasurementDialog: React.FC<Props> = ({
 
   const handleSubmit = async () => {
     setLoading(true);
-    await dispatch(
-      completeTrial({
-        studyName,
-        trialName,
-        finalMeasurement: metricsToMeasurement(metrics),
-      })
-    );
+    if (infeasible) {
+      await dispatch(
+        completeTrial({
+          studyName,
+          trialName,
+          details: {
+            trialInfeasible: true,
+            infeasibleReason,
+          },
+        })
+      );
+    } else {
+      await dispatch(
+        completeTrial({
+          studyName,
+          trialName,
+          details: {
+            finalMeasurement: metricsToMeasurement(metrics),
+          },
+        })
+      );
+    }
+
     setLoading(false);
     setMetrics(clearMetrics(metrics));
     close();
@@ -127,6 +115,31 @@ export const AddMeasurementDialog: React.FC<Props> = ({
           metricSpecs={studyConfig.metrics}
           value={metrics}
           onChange={setMetrics}
+          disabled={infeasible}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              data-testid="infeasible"
+              checked={infeasible}
+              onChange={event => setInfeasible(event.target.checked)}
+              color="primary"
+            />
+          }
+          label="Trial Infeasible"
+        />
+        <TextField
+          margin="dense"
+          variant="outlined"
+          label="Infeasible Reason"
+          type="text"
+          fullWidth
+          value={infeasibleReason}
+          onChange={event => setInfeasibleReason(event.target.value)}
+          disabled={!infeasible}
+          inputProps={{
+            'data-testid': 'infeasibleReason',
+          }}
         />
       </DialogContent>
       <DialogActions>

@@ -124,7 +124,7 @@ describe('OptimizerService', () => {
     const response = await optimizerService.completeTrial(
       trialName,
       studyName,
-      fakeMeasurement,
+      { finalMeasurement: fakeMeasurement },
       fakeMetadataRequired
     );
     expect(response).toBe(fakeTrial);

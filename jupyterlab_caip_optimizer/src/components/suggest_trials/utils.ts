@@ -28,6 +28,10 @@ import { MetricsInputs } from '.';
 
 export type TrialColumn = Column<Trial>;
 
+/**
+ * Converts a paramter to a valid column for `material-table`
+ * @param parameter The parameter to make into a column.
+ */
 export function parameterToColumn(parameter: ParameterSpec): TrialColumn {
   return {
     // Attach parameter to name to avoid name collision with other properties like state and name
@@ -36,10 +40,18 @@ export function parameterToColumn(parameter: ParameterSpec): TrialColumn {
   };
 }
 
+/**
+ * Converts a metric specification to a valid column for `material-table`
+ * @param metricSpec The metric specification to make into a column.
+ */
 export function metricToColumn(metricSpec: MetricSpec): TrialColumn {
   return { title: metricSpec.metric, field: `${metricSpec.metric}Metric` };
 }
 
+/**
+ * Converts a trial's parameter value to a valid data object for `material-table`
+ * @param parameter A trial parameter value.
+ */
 export function parameterToData(parameter: Parameter) {
   if ('floatValue' in parameter) {
     return { [`${parameter.parameter}Parameter`]: parameter.floatValue };
@@ -50,6 +62,10 @@ export function parameterToData(parameter: Parameter) {
   }
 }
 
+/**
+ * Converts a list of parameter values to data values for `material-table`
+ * @param parameters Trial's parameter list to convert.
+ */
 export function parametersToData(parameters: Parameter[]) {
   return parameters.reduce(
     (prev, parameter) => ({ ...prev, ...parameterToData(parameter) }),
@@ -57,6 +73,10 @@ export function parametersToData(parameters: Parameter[]) {
   );
 }
 
+/**
+ * Converts a measurement to a valid data object for `material-table`.
+ * @param finalMeasurement The final measurement for a trial's metric.
+ */
 export function finalMeasurementToData(finalMeasurement: Measurement) {
   return finalMeasurement.metrics.reduce(
     (prev, metric) => ({ ...prev, [`${metric.metric}Metric`]: metric.value }),
@@ -64,6 +84,10 @@ export function finalMeasurementToData(finalMeasurement: Measurement) {
   );
 }
 
+/**
+ * Converts a trial's `finalMeasurement` and parameter values to a object list for `material-table`
+ * @param trial The trial to convert to data for `material-table`
+ */
 export function trialToData(trial: Trial): any {
   let trialData = {
     name: trial.name,
@@ -113,4 +137,11 @@ export function metricsToMeasurement(metrics: MetricsInputs): Measurement {
     stepCount: '1',
     metrics: apiMetrics,
   };
+}
+
+export function clearMetrics(metrics: MetricsInputs): MetricsInputs {
+  return Object.keys(metrics).reduce(
+    (prev, metricName) => ({ ...prev, [metricName]: '' }),
+    {}
+  );
 }

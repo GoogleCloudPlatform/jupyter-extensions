@@ -219,6 +219,11 @@ describe('Suggest Trials Page', () => {
       await waitFor(() => screen.getByTestId('measurementDialog'));
     });
 
+    it('disables the infeasible input when feasible', () => {
+      expect(screen.getByTestId('infeasible')).not.toBeChecked();
+      expect(screen.getByTestId('infeasibleReason')).toBeDisabled();
+    });
+
     // TODO: fix test warning messages
     it('submits metrics and shows snackbar message and closes', async () => {
       const completeTrial = jest.fn((req, res, ctx) => {
@@ -273,6 +278,66 @@ describe('Suggest Trials Page', () => {
         }
       `);
     });
+
+    // TODO: fix test warning messages
+    it('submits infeasible message and shows snackbar message and closes', async () => {
+      const completeTrial = jest.fn((req, res, ctx) => {
+        return res(ctx.json(fakeTrialWithFinalMeasurement));
+      });
+      server.use(rest.post(proxyUrl(completeTrialUrl()), completeTrial));
+
+      const inputs = screen.getAllByTestId('metricInput');
+      expect(inputs).toHaveLength(2);
+
+      // These should not be sent to the backend since the trial is infeasible
+      userEvent.type(inputs[0], '1000');
+      userEvent.type(inputs[1], '666');
+
+      // Enable infeasible and add reason
+      userEvent.click(screen.getByTestId('infeasible'));
+      userEvent.type(
+        screen.getByTestId('infeasibleReason'),
+        'The values are too high!'
+      );
+
+      userEvent.click(screen.getByText(/submit/i));
+
+      // Opens snackbar
+      await waitFor(() =>
+        expect(getState().snackbar.message).toEqual('Trial Completed!')
+      );
+
+      // Closes dialog
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('measurementDialog')
+      );
+
+      // enables suggestion input
+      await waitFor(() =>
+        expect(screen.getByTestId('suggestionInput')).not.toBeDisabled()
+      );
+
+      expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+      // Calls complete trial api with only infeasible details
+      expect(completeTrial).toHaveBeenCalled();
+      const completeBody = JSON.parse(completeTrial.mock.calls[0][0].body);
+      expect(completeBody).toMatchInlineSnapshot(`
+        Object {
+          "infeasibleReason": "The values are too high!",
+          "trialInfeasible": true,
+        }
+      `);
+    });
+
+    it('disables the metric inputs when trial is infeasible', () => {
+      userEvent.click(screen.getByTestId('infeasible'));
+
+      const inputs = screen.getAllByTestId('metricInput');
+
+      expect(inputs[0]).toBeDisabled();
+      expect(inputs[1]).toBeDisabled();
+    });
+
     it('cancels and closes dialog', async () => {
       userEvent.click(screen.getByTestId('measureDialogCancel'));
       // Closes dialog
