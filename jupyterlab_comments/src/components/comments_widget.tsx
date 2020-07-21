@@ -39,6 +39,7 @@ import {
 import { JupyterFrontEnd, ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment';
+import { NewCommentThread } from '../components/start_thread';
 
 interface Props {
   context: Context;
@@ -129,6 +130,7 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
+    const currFilePath = this.getCurrentFilePath();
     return (
       <div className={localStyles.root}>
         <CssBaseline />
@@ -142,6 +144,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             Comments for {this.state.fileName}
           </Typography>
         )}
+
         <AppBar position="static">
           <Tabs
             value={activeTab}
@@ -163,11 +166,15 @@ export class CommentsComponent extends React.Component<Props, State> {
             {this.state.errorMessage}
           </Typography>
         )}
-        {this.state.activeTab === 0 ? (
+        {!this.state.errorMessage && (this.state.activeTab === 0 ? (
           <List>{reviewCommentsList} </List>
         ) : (
+          <>
+          <NewCommentThread serverRoot={this.state.serverRoot} currFilePath={currFilePath}/>
           <List> {detachedCommentsList} </List>
-        )}
+          </>
+        ))}
+
       </div>
     );
   }
@@ -259,6 +266,19 @@ export class CommentsComponent extends React.Component<Props, State> {
     } else {
       this.clearComments();
       this.setState({ errorMessage: 'Open a file to view commments' });
+    }
+  }
+
+  //File path is relative to the JupyterLab server root
+  private getCurrentFilePath() {
+    const context = this.props.context;
+    const currWidget = context.labShell.currentWidget;
+    if (currWidget) {
+      const currentFile = context.docManager.contextForWidget(currWidget);
+      if (!(currentFile === undefined)) {
+        const filePath = context.docManager.contextForWidget(currWidget).path;
+        return filePath;
+      }
     }
   }
 

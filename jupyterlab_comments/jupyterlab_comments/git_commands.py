@@ -41,6 +41,9 @@ class Git(Configurable):
 	def appraise_pull(self, git_root_dir):
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 
+	def appraise_push(self, git_root_dir):
+		self.run(git_root_dir, 'appraise', 'push')
+
 	def inside_git_repo(self, path_to_file):
 		"""
 		Return true if the path is inside a git repository.
@@ -93,8 +96,8 @@ class Git(Configurable):
 		return review_json
 
 
-	def add_comment(self, file_path, server_root):
-		pass
+	def add_detached_comment(self, file_path_from_repo_root, git_root_dir, comment_string):
+		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root)
 
 	def get_previous_names(self, file_path, server_root):
 		# names_string = run('log', '--follow', '--name-only', '--pretty=format:""', file_path)
