@@ -251,18 +251,29 @@ class AutoMLService:
                                                   dataset=ds).result()
     return created
 
-  def create_dataset_from_file(self, display_name, file_name, file_data):
+  def _get_gcs_bucket(self):
     try:
-      bucket = self._gcs_client.create_bucket(self._gcs_bucket)
+      return self._gcs_client.create_bucket(self._gcs_bucket)
     except exceptions.Conflict:
       # Bucket already exists
-      bucket = self._gcs_client.bucket(self._gcs_bucket)
+      return self._gcs_client.bucket(self._gcs_bucket)
 
+  def create_dataset_from_file(self, display_name, file_name, file_data):
+    bucket = self._get_gcs_bucket()
     key = "{}-{}".format(str(uuid.uuid4()), file_name)
     # Possible improvement: prepend md5 hash of file instead of uuid to
     # skip uploading the same existing file
     decoded = base64.decodebytes(file_data.encode("ascii"))
     bucket.blob(key).upload_from_string(decoded)
+    return self.create_dataset(display_name,
+                               gcs_uri="gs://{}/{}".format(
+                                   self._gcs_bucket, key))
+
+  def create_dataset_from_dataframe(self, display_name, df):
+    bucket = self._get_gcs_bucket()
+    key = "{}-{}".format(str(uuid.uuid4()), "dataframe")
+    data = df.to_csv().encode("utf-8")
+    bucket.blob(key).upload_from_string(data)
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
