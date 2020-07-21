@@ -135,7 +135,6 @@ export class Comment extends React.Component<Props, State> {
           )}
         </div>
         <div style={style.threadIndent} className="threadList">
-
           {this.state.expandThread && data.children && (
             <List>
               {data.children.map(reply => {

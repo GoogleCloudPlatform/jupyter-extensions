@@ -166,15 +166,18 @@ export class CommentsComponent extends React.Component<Props, State> {
             {this.state.errorMessage}
           </Typography>
         )}
-        {!this.state.errorMessage && (this.state.activeTab === 0 ? (
-          <List>{reviewCommentsList} </List>
-        ) : (
-          <>
-          <NewCommentThread serverRoot={this.state.serverRoot} currFilePath={currFilePath}/>
-          <List> {detachedCommentsList} </List>
-          </>
-        ))}
-
+        {!this.state.errorMessage &&
+          (this.state.activeTab === 0 ? (
+            <List>{reviewCommentsList} </List>
+          ) : (
+            <>
+              <NewCommentThread
+                serverRoot={this.state.serverRoot}
+                currFilePath={currFilePath}
+              />
+              <List> {detachedCommentsList} </List>
+            </>
+          ))}
       </div>
     );
   }
@@ -296,7 +299,6 @@ export class CommentsComponent extends React.Component<Props, State> {
 }
 
 export class CommentsWidget extends ReactWidget {
-
   constructor(private context: Context) {
     super();
     this.addClass('comments-widget');

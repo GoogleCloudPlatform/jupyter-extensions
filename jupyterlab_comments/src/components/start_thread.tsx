@@ -19,59 +19,70 @@ import { TextField, Button, Grid } from '@material-ui/core';
 import { httpGitRequest } from '../service/request';
 
 interface Props {
-  serverRoot: string,
-  currFilePath: string,
+  serverRoot: string;
+  currFilePath: string;
 }
 
 const style = {
-    editor: {
-        padding: 25,
-    },
+  editor: {
+    padding: 25,
+  },
+};
+
+async function newDetachedCommentThread(
+  currFilePath,
+  serverRoot,
+  commentString
+) {
+  const body: Record<string, string> = {
+    comment: commentString,
+  };
+  httpGitRequest(
+    'addDetachedComment',
+    'POST',
+    currFilePath,
+    serverRoot,
+    body
+  ).then(response => {
+    console.log(response);
+  });
 }
 
 export function CommentEditor(props) {
-        const [comment, setComment] = useState('');
+  const [comment, setComment] = useState('');
 
-        const handleSubmit = (event) => {
-            event.preventDefault();
-            console.log(comment);
-            newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
-            setComment(''); //clear comment text field
+  const handleSubmit = event => {
+    event.preventDefault();
+    console.log(comment);
+    newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
+    setComment(''); //clear comment text field
+  };
+  return (
+    <form onSubmit={handleSubmit} style={style.editor}>
+      <Grid container direction="row">
+        <Grid item>
+          <TextField
+            id="outlined-helperText"
+            label="Add a new comment"
+            defaultValue="Start a new comment thread"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item>
+          <Button type="submit" color="primary" size="medium">
+            {' '}
+            Submit{' '}
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
+  );
+}
 
-        }
-        return (
-            <form onSubmit={handleSubmit} style={style.editor}>
-            <Grid container direction="row">
-            <Grid item>
-                <TextField
-                  id="outlined-helperText"
-                  label="Add a new comment"
-                  defaultValue="Start a new comment thread"
-                  value={comment}
-                  onChange={e=>setComment(e.target.value)}
-                  variant="outlined"
-                />
-            </Grid>
-            <Grid item>
-                <Button type="submit" color="primary" size="medium"> Submit </Button>
-            </Grid>
-            </Grid>
-            </form>
-            )
-    }
-
- export class NewCommentThread extends React.Component<Props> {
-
-    render() {
-        return ( <CommentEditor {...this.props} /> );
-    }
- }
-
- async function newDetachedCommentThread(currFilePath, serverRoot, commentString) {
-    const body : Record<string, string> = {
-        comment: commentString,
-    };
-    httpGitRequest('addDetachedComment', 'POST', currFilePath, serverRoot, body).then(response => {
-        console.log(response);
-    });
- }
+export class NewCommentThread extends React.Component<Props> {
+  render() {
+    return <CommentEditor {...this.props} />;
+  }
+}

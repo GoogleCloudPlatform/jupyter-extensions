@@ -26,7 +26,6 @@ import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
 import { CommentsWidget } from './components/comments_widget';
 
-
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
