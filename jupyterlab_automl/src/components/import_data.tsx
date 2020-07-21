@@ -208,15 +208,12 @@ export class ImportData extends React.Component<Props, State> {
         this.setState({ error: error, loading: false, errorOpen: true });
       }
     );
-    model.receivedData.connect(this.uploadDataFrame);
+    model.receivedSuccess.connect(this.refresh);
     model.receivedError.connect(this.uploadDataFrameError);
     model.createCSV(this.state.name, this.state.source);
   }
 
-  private async uploadDataFrame(emitter: KernelModel) {
-    await DatasetService.createTablesDataset(emitter.name, {
-      dfSource: emitter.output,
-    });
+  private refresh(emitter: KernelModel) {
     emitter.refresh();
   }
 

@@ -43,10 +43,6 @@ export class KernelModel {
     return this._output;
   }
 
-  get name(): string | null {
-    return this._name;
-  }
-
   get refresh(): () => void | null {
     return this._refresh;
   }
@@ -55,8 +51,8 @@ export class KernelModel {
     return this._onError;
   }
 
-  get receivedData(): ISignal<KernelModel, void> {
-    return this._receivedData;
+  get receivedSuccess(): ISignal<KernelModel, void> {
+    return this._receivedSuccess;
   }
 
   get receivedError(): ISignal<KernelModel, string> {
@@ -64,17 +60,15 @@ export class KernelModel {
   }
 
   createCSV(name: string, df: string) {
-    this._name = name;
     if (!this._session || !this._session.kernel) {
       return;
     }
-    const path = './' + df + '.csv';
     const run =
-      "import base64;df.to_csv('" +
-      path +
-      "', index=False);base64.b64encode(open('" +
-      path +
-      "', 'r').read().encode('utf8')).decode('utf-8')";
+      "import jupyterlab_automl; jupyterlab_automl.create_dataset_from_dataframe('" +
+      name +
+      "', " +
+      df +
+      ')';
     this.future = this._session.kernel.requestExecute({ code: run });
   }
 
@@ -84,8 +78,7 @@ export class KernelModel {
       case 'execute_result':
       case 'display_data':
       case 'update_display_data':
-        this._output = msg.content['data']['text/plain'];
-        this._receivedData.emit();
+        this._receivedSuccess.emit();
         break;
       case 'error':
         this._output = msg.content['evalue'];
@@ -103,9 +96,8 @@ export class KernelModel {
   > | null = null;
   private _output: string | null = null;
   private _session: IClientSession;
-  private _receivedData = new Signal<KernelModel, void>(this);
+  private _receivedSuccess = new Signal<KernelModel, void>(this);
   private _receivedError = new Signal<KernelModel, string>(this);
-  private _name: string | null = null;
   private _refresh: () => void | null = null;
   private _onError: (error: string) => void | null = null;
 }
