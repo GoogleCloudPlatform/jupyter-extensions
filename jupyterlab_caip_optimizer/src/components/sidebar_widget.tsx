@@ -35,11 +35,7 @@ import { setView } from '../store/view';
 import { Store } from 'redux';
 import { prettifyStudyName } from '../service/optimizer';
 import { style } from 'typestyle';
-
-const sidebarStyle = style({
-  height: '100%',
-  overflow: 'scroll',
-});
+import { styles } from '../utils/styles';
 
 const rowStyle = style({
   $nest: {
@@ -78,13 +74,13 @@ export const Sidebar = ({
 }: SidebarProps) => {
   return (
     <Box
+      className={styles.root}
       height={1}
       width={1}
       bgcolor="white"
       borderRadius={0}
       display="flex"
       flexDirection="column"
-      className={sidebarStyle}
     >
       <Box display="flex" pt={2}>
         <Box mx="auto">

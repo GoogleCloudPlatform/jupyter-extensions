@@ -26,6 +26,7 @@ import { Trials } from './trials';
 import { RootState } from '../../store/store';
 import { setView } from '../../store/view';
 import { CreateTrial } from './create_trial';
+import {styles} from '../../utils/styles'
 
 export interface MetricsInputs {
   [metricName: string]: string;
@@ -57,7 +58,7 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
 
   return (
     <>
-      <Box p={2}>
+      <Box className={styles.root} p={2}>
         <Typography variant="h4" gutterBottom>
           Trial Suggestions for "{prettifyStudyName(studyName)}"
         </Typography>
