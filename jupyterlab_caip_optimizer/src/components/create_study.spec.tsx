@@ -99,7 +99,7 @@ describe('Create Study Page', () => {
     );
     userEvent.click(screen.getByText(/add param/i));
     // Categorical
-    userEvent.type(screen.getByLabelText(/parameter name/i), 'disValue');
+    userEvent.type(screen.getByLabelText(/parameter name/i), 'catValue');
     userEvent.click(screen.getByLabelText(/parameter type/i));
     const categoricalOption = await waitFor(() =>
       screen.getByText('CATEGORICAL')
@@ -218,7 +218,7 @@ describe('Create Study Page', () => {
                   "large",
                 ],
               },
-              "parameter": "disValue",
+              "parameter": "catValue",
               "type": "CATEGORICAL",
             },
           ],
