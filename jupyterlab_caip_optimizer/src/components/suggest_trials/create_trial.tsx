@@ -11,6 +11,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Typography,
 } from '@material-ui/core';
 import { prettifyStudyName } from '../../service/optimizer';
 import { Loading } from './loading';
@@ -23,6 +24,7 @@ import {
   parameterSpecToInputsValues,
   parameterSpecToValidateInput,
   inputValuesToParameterList,
+  metricsToMeasurement,
 } from './utils';
 import { StudyConfig, ParameterSpec, State } from '../../types';
 import { ErrorState } from '../../utils/use_error_state';
@@ -105,6 +107,7 @@ function parameterSpecToInputs(
       case 'CATEGORICAL':
         return (
           <SelectionInput
+            key={name}
             label={label}
             input={values[name]}
             onChange={value => onChange(name, value)}
@@ -115,6 +118,7 @@ function parameterSpecToInputs(
       case 'DISCRETE':
         return (
           <SelectionInput
+            key={name}
             label={label}
             input={values[name]}
             onChange={value => onChange(name, value)}
@@ -127,6 +131,7 @@ function parameterSpecToInputs(
       case 'INTEGER':
         return (
           <NumberInput
+            key={name}
             label={label}
             input={values[name]}
             onChange={value => onChange(name, value)}
@@ -181,12 +186,13 @@ export const CreateTrial: React.FC<Props> = ({
             errorStateMapToValueObject(map),
             studyConfig.parameters
           ),
+          finalMeasurement: metricsToMeasurement(metrics),
           measurements: [],
         },
       })
     );
     setLoading(false);
-    // setMetrics(clearMetrics(metrics));
+    setMetrics(clearMetrics(metrics));
     onClose();
   };
 
@@ -203,7 +209,9 @@ export const CreateTrial: React.FC<Props> = ({
       <DialogContent>
         <DialogContentText>Add custom trial data.</DialogContentText>
         {/* Parameter inputs */}
+        <Typography component="h3">Parameters</Typography>
         {parameterSpecToInputs(map, setInput, studyConfig.parameters)}
+        <Typography component="h3">Metrics</Typography>
         <MetricInputs
           metricSpecs={studyConfig.metrics}
           value={metrics}

@@ -415,6 +415,19 @@ describe('Suggest Trials Page', () => {
       const createTrialBody = JSON.parse(createTrial.mock.calls[0][0].body);
       expect(createTrialBody).toMatchInlineSnapshot(`
         Object {
+          "finalMeasurement": Object {
+            "metrics": Array [
+              Object {
+                "metric": "metric-unspecified",
+                "value": 1000,
+              },
+              Object {
+                "metric": "metric-maximize",
+                "value": 666,
+              },
+            ],
+            "stepCount": "1",
+          },
           "measurements": Array [],
           "parameters": Array [
             Object {
