@@ -134,5 +134,63 @@ class TestListTree(unittest.TestCase):
     got = bigquery.list_models('dummy_dataset1')
     self.assertEqual(wanted, got)
 
+  def testSearchProjects(self):
+    gcp_entries = []
+
+    mock_dataset = Mock()
+    mock_dataset.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset'
+    mock_dataset.search_result_subtype = 'entry.dataset'
+    gcp_entries.append(mock_dataset)
+
+    mock_table = Mock()
+    mock_table.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/tables/dummy_table'
+    mock_table.search_result_subtype = 'entry.table'
+    gcp_entries.append(mock_table)
+
+    mock_view = Mock()
+    mock_view.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/tables/dummy_view'
+    mock_view.search_result_subtype = 'entry.table.view'
+    gcp_entries.append(mock_view)
+
+    mock_model = Mock()
+    mock_model.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/models/dummy_model'
+    mock_model.search_result_subtype = 'entry.model'
+    gcp_entries.append(mock_model)
+
+    mock_client = Mock()
+    mock_client.search_catalog = MagicMock(return_value=gcp_entries)
+
+    bigquery = BigQueryService(None, mock_client)
+
+    wanted = {'results': [
+      {
+        'type': 'dataset',
+        'parent': 'dummy_project',
+        'name': 'dummy_dataset',
+        'id': 'dummy_project.dummy_dataset',
+      },
+      {
+        'type': 'table',
+        'parent': 'dummy_dataset',
+        'name': 'dummy_table',
+        'id': 'dummy_dataset.dummy_table',
+      },
+      {
+        'type': 'view',
+        'parent': 'dummy_dataset',
+        'name': 'dummy_view',
+        'id': 'dummy_dataset.dummy_view',
+      },
+      {
+        'type': 'model',
+        'parent': 'dummy_dataset',
+        'name': 'dummy_model',
+        'id': 'dummy_dataset.dummy_model',
+      },
+    ]}
+
+    got = bigquery.search_projects('dummy', 'dummy_project')
+    self.assertEqual(wanted, got)
+
 if __name__ == '__main__':
   unittest.main()
