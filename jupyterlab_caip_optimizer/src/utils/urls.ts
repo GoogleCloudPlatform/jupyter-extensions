@@ -7,6 +7,24 @@ import {
 } from '../service/test-constants';
 
 // TODO: refactor optimizer to use common set of url functions
+export function createStudyUrl(
+  {
+    projectId,
+    region,
+    cleanStudyName,
+  }: {
+    projectId: string;
+    region: string;
+    cleanStudyName: string;
+  } = {
+    projectId: fakeProjectId,
+    region: fakeRegion,
+    cleanStudyName: cleanFakeStudyName,
+  }
+) {
+  return `https://${region}-ml.googleapis.com/v1/projects/${projectId}/locations/${region}/studies?study_id=${cleanStudyName}`;
+}
+
 export function getTrialsUrl(
   {
     projectId,
