@@ -27,10 +27,12 @@ interface QueryResultsState {
   rowsPerPage: number;
 }
 
+export type QueryEditorType = 'FULL_WINDOW' | 'IN_CELL';
+
 interface QueryResultsProps {
   queryResult: QueryResult;
   queryId: QueryId;
-  location?: string;
+  editorType?: QueryEditorType;
 }
 
 class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
@@ -50,7 +52,13 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     const rows = this.props.queryResult.content;
 
     return (
-      <div className={localStyles.resultsContainer}>
+      <div
+        className={
+          this.props.editorType === 'IN_CELL'
+            ? localStyles.inCell
+            : localStyles.resultsContainer
+        }
+      >
         <Header text="Query results" />
         {fields.length > 0 ? <BQTable fields={fields} rows={rows} /> : <></>}
       </div>

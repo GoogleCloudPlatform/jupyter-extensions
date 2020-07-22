@@ -44,10 +44,10 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.iniQuery}
-          location="inCell"
+          editorType="IN_CELL"
         />
         {showResult ? (
-          <QueryResults queryId={this.queryId} location="inCell" />
+          <QueryResults queryId={this.queryId} editorType="IN_CELL" />
         ) : (
           undefined
         )}

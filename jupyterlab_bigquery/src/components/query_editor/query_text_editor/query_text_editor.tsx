@@ -14,6 +14,7 @@ import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
+import { QueryEditorType } from '../query_editor_tab/query_editor_results';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
@@ -27,7 +28,7 @@ interface QueryTextEditorProps {
   deleteQueryEntry: any;
   queryId: QueryId;
   iniQuery?: string;
-  location?: string;
+  editorType?: QueryEditorType;
 }
 
 interface QueryResponseType {
@@ -313,14 +314,14 @@ class QueryTextEditor extends React.Component<
     return (
       <div
         className={
-          this.props.location === 'inCell'
+          this.props.editorType === 'IN_CELL'
             ? styleSheet.wholeEditorInCell
             : styleSheet.wholeEditor
         }
       >
         <div
           className={
-            this.props.location === 'inCell'
+            this.props.editorType === 'IN_CELL'
               ? styleSheet.queryTextEditorInCell
               : styleSheet.queryTextEditor
           }
