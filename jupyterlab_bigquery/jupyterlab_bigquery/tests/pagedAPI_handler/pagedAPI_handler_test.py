@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE
+from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
+  import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
 from tornado import httputil
 from tornado.web import Application
 import json
@@ -128,8 +129,6 @@ class TestPagedHandlerOnStart(unittest.TestCase):
     def err_gen():
       raise err
       yield None
-
-    print('HERE', app_log)
 
     self.query_mock.return_value = err_gen()
     self.dummy_pagedAPI._onStart(load)
@@ -284,7 +283,6 @@ class TestPagedHandlerContinueCancel(unittest.TestCase):
          return_value=None)
   def setUp(self, fake_super):
     self.dummy_pagedAPI = DummyPageAPI(None, None)
-    print('HERER', self.dummy_pagedAPI.generator_pool)
     self.finish_mock = MagicMock()
     self.dummy_pagedAPI.finish = self.finish_mock
 
@@ -322,7 +320,6 @@ class TestPagedHandlerContinueCancel(unittest.TestCase):
   @patch.object(app_log, 'log')
   def test_already_cancel(self, fake_app_log):
     job_id = 'fake_job_id'
-    print(self.dummy_pagedAPI.generator_pool)
 
     self.dummy_pagedAPI._onCancel({'id': job_id})
 
@@ -331,10 +328,65 @@ class TestPagedHandlerContinueCancel(unittest.TestCase):
     self.assertIsNone(val)
 
     # test app log
-    print(fake_app_log.call_args)
     fake_app_log.assert_not_called()
 
     # test finish
     finish_args = self.finish_mock.call_args[0][0]
     self.assertEqual(finish_args['id'], json.dumps(job_id))
     self.assertEqual(finish_args['error'], json.dumps('job not found'))
+
+
+class TestPagedHandlerClearGenerators(unittest.TestCase):
+
+  @patch("jupyterlab_bigquery.pagedAPI_handler.PagedAPIHandler.__init__",
+         autospec=True,
+         return_value=None)
+  def setUp(self, fake_super):
+    self.dummy_pagedAPI = DummyPageAPI(None, None)
+
+  def tearDown(self):
+    PagedAPIHandler.generator_pool.clear()
+
+  @patch.object(time, 'time', return_value=CLEAR_GENERATORS_MAX_IDILE_SEC - 1)
+  @patch.object(app_log, 'log')
+  def test_not_delete_generators(self, fake_app_log, fake_time):
+    job_id = 'fake_job_id'
+    time1 = 0
+    job_obj = Mock()
+
+    def normal_gen():
+      yield None
+
+    gen = normal_gen()
+
+    self.dummy_pagedAPI.generator_pool[job_id] = gen, job_obj, time1
+    self.dummy_pagedAPI.clear_generators()
+
+    # check generator not cleared
+    val = self.dummy_pagedAPI.generator_pool[job_id]
+    self.assertIsNotNone(val)
+
+    # check log
+    fake_app_log.assert_not_called()
+
+  @patch.object(time, 'time', return_value=CLEAR_GENERATORS_MAX_IDILE_SEC + 1)
+  @patch.object(app_log, 'log')
+  def test_delete_generators(self, fake_app_log, fake_time):
+    job_id = 'fake_job_id'
+    time1 = 0
+    job_obj = Mock()
+
+    def normal_gen():
+      yield None
+
+    gen = normal_gen()
+
+    self.dummy_pagedAPI.generator_pool[job_id] = gen, job_obj, time1
+    self.dummy_pagedAPI.clear_generators()
+
+    # check generator cleared
+    val = self.dummy_pagedAPI.generator_pool[job_id]
+    self.assertIsNone(val)
+
+    # check log
+    log_args = fake_app_log.call_args[0]
