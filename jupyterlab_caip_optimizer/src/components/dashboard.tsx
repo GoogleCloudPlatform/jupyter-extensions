@@ -25,6 +25,7 @@ import { Launch } from '@material-ui/icons';
 import { prettifyStudyName } from '../service/optimizer';
 import { connect } from 'react-redux';
 import AddIcon from '@material-ui/icons/Add';
+import { dateFormat, makeReadable } from '../utils';
 
 const tableIcons = {
   Add: forwardRef((props, ref: React.Ref<SVGSVGElement>) => (
@@ -80,7 +81,6 @@ const tableIcons = {
   )),
 };
 
-const dateFormat = 'h:mm a, MMM. D, YYYY';
 const columns = [
   {
     title: 'Name',
@@ -103,10 +103,6 @@ const columns = [
     },
   },
 ];
-
-function makeReadable(string: string): string {
-  return string.charAt(0).toUpperCase() + string.toLowerCase().slice(1);
-}
 
 interface Props {
   loading: boolean;
