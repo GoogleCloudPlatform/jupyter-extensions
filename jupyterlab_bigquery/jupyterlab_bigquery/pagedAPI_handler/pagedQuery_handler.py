@@ -56,13 +56,5 @@ class PagedQueryHandler(PagedAPIHandler):
       }
       yield (response)
 
-    for df in en.to_dataframe_iterable():
-      response = {
-          'content': df.to_json(orient='values'),
-          'labels': json.dumps(df.columns.to_list()),
-          'bytesProcessed': json.dumps(total_bytes_processed),
-      }
-      yield (response)
-
   def cancel(self, job):
     job.cancel()
