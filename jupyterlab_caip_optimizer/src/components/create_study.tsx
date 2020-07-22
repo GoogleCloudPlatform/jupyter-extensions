@@ -14,6 +14,7 @@ import * as Types from '../types';
 import { connect } from 'react-redux';
 import { createStudy } from '../store/studies';
 import { setView } from '../store/view';
+import { PayloadAction } from '@reduxjs/toolkit';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
@@ -36,14 +37,14 @@ interface Props {
 
 const mapDispatchToProps = dispatch => ({
   createStudyAndLoad: (study: Types.Study) =>
-    dispatch(createStudy(study)).then((study: Types.Study) =>
+    dispatch(createStudy(study)).then((action: PayloadAction<Types.Study>) => {
       dispatch(
         setView({
           view: 'studyDetails',
-          studyId: study.name,
+          studyId: action.payload.name,
         })
-      )
-    ),
+      );
+    }),
 });
 
 export interface DropdownItem {
