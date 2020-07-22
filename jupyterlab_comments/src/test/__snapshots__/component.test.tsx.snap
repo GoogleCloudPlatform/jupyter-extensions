@@ -70,6 +70,7 @@ exports[`Basic Comment Component Rendering detached comment should render correc
   >
     <WithStyles(ForwardRef(Button))
       color="primary"
+      onClick={[Function]}
       size="small"
     >
        
@@ -158,6 +159,7 @@ exports[`Basic Comment Component Rendering review comment should render correctl
   >
     <WithStyles(ForwardRef(Button))
       color="primary"
+      onClick={[Function]}
       size="small"
     >
        
