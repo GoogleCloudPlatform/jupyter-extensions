@@ -16,6 +16,7 @@
 
 import * as csstips from 'csstips';
 import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 interface MachineType {
   name: string;
@@ -161,60 +162,6 @@ export const MASTER_TYPES: Option[] = [
   { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
 ];
 
-export interface HardwareConfiguration {
-  cpu: number;
-  memory: number;
-}
-
-/* CPU to Memory mappings for the Compute Engine machine types */
-export interface MachineTypeConfigurations {
-  base: Option;
-  configurations: HardwareConfiguration[];
-}
-
-export const machineTypes: MachineTypeConfigurations[] = [
-  {
-    base: {
-      value: 'n1-standard-',
-      text: 'N1 Standard',
-    },
-    configurations: [
-      { cpu: 4, memory: 15 },
-      { cpu: 8, memory: 30 },
-      { cpu: 16, memory: 60 },
-      { cpu: 32, memory: 120 },
-      { cpu: 64, memory: 240 },
-      { cpu: 96, memory: 360 },
-    ],
-  },
-  {
-    base: {
-      value: 'n1-highmem-',
-      text: 'N1 High Memory',
-    },
-    configurations: [
-      { cpu: 4, memory: 26 },
-      { cpu: 8, memory: 52 },
-      { cpu: 16, memory: 104 },
-      { cpu: 32, memory: 208 },
-      { cpu: 64, memory: 416 },
-      { cpu: 96, memory: 624 },
-    ],
-  },
-  {
-    base: {
-      value: 'n1-highcpu-',
-      text: 'N1 High CPU',
-    },
-    configurations: [
-      { cpu: 16, memory: 14.4 },
-      { cpu: 32, memory: 28.8 },
-      { cpu: 64, memory: 57.6 },
-      { cpu: 96, memory: 86.4 },
-    ],
-  },
-];
-
 /* CPU to Memory mappings for the Compute Engine machine types */
 export interface MachineTypeConfiguration {
   base: Option;
@@ -352,7 +299,6 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
 export const STYLES = stylesheet({
   container: {
     color: 'var(--jp-ui-font-color1)',
-
     fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size1, 13px)',
     lineHeight: '24px',
@@ -391,3 +337,8 @@ export const STYLES = stylesheet({
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
   },
 });
+
+export const TEXT_STYLE = {
+  fontFamily: BASE_FONT.fontFamily as string,
+  fontSize: BASE_FONT.fontSize as number,
+};

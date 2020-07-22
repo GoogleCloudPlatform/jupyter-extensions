@@ -5,17 +5,22 @@
   background-size: contain;
 }
 
-.jp-AutoMLIcon-tables {
+.jp-AutoMLIcon-TABLE {
   background-image: url('./images/table_chart-24px.svg');
   background-size: contain;
 }
 
-.jp-AutoMLIcon-image_classification {
+.jp-AutoMLIcon-IMAGE {
   background-image: url('./images/image-24px.svg');
   background-size: contain;
 }
 
-.jp-AutoMLIcon-other {
+.jp-AutoMLIcon-OTHER {
   background-image: url('./images/storage_24px.svg');
+  background-size: contain;
+}
+
+.jp-AutoMLIcon-model {
+  background-image: url('./images/emoji_objects-24px.svg');
   background-size: contain;
 }

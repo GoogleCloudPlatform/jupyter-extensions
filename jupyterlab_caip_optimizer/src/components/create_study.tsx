@@ -46,7 +46,7 @@ const mapDispatchToProps = dispatch => ({
     ),
 });
 
-interface DropdownItem {
+export interface DropdownItem {
   value: string;
   label: string;
 }
@@ -69,7 +69,9 @@ type MetricChip = {
   metricGoalType: Types.GoalType;
 };
 
-const createDropdown = (items: ReadonlyArray<string>): DropdownItem[] => {
+export const createDropdown = (
+  items: ReadonlyArray<string>
+): DropdownItem[] => {
   const dropdownList: DropdownItem[] = items.map(
     (item: string): DropdownItem => {
       return { value: item, label: item };
@@ -585,6 +587,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               size="large"
               variant="contained"
               color="primary"
+              id="createStudyButton"
               disabled={!studyName}
               onClick={() => createStudyAndLoad(getStudyObject())}
             >

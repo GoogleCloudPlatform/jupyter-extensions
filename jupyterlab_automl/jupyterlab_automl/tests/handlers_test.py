@@ -1,43 +1,43 @@
+"""Testing the handlers for the AutoML extension"""
+
 import inspect
 import unittest
-from unittest.mock import MagicMock, Mock, patch
-
+from unittest.mock import MagicMock
 from notebook.base.handlers import APIHandler
-
 from jupyterlab_automl.handlers import _handler, handlers
 
-
 class TestHandlers(unittest.TestCase):
-    def testHandlerDecorator(self):
-        func = MagicMock()
+  """Testing the AutoML extension handlers"""
 
-        @_handler("POST", "_test")
-        def f(args):
-            func(args)
+  def testHandlerDecorator(self):
+    func = MagicMock()
 
-        # Ensure handler is a subclass of APIHandler
-        self.assertTrue(APIHandler in inspect.getmro(handlers["_test"]))
+    @_handler("POST", "_test")
+    def f(args):
+      func(args)
 
-    def testHandlerDecoratorGet(self):
-        func = MagicMock()
+    # Ensure handler is a subclass of APIHandler
+    self.assertTrue(APIHandler in inspect.getmro(handlers["_test"]))
 
-        @_handler("GET", "_test")
-        def f(args):
-            func(args)
+  def testHandlerDecoratorGet(self):
+    func = MagicMock()
 
-        handlers["_test"].get(MagicMock())
-        func.assert_called()
+    @_handler("GET", "_test")
+    def f(args):
+      func(args)
 
-    def testHandlerDecoratorPost(self):
-        func = MagicMock()
+    handlers["_test"].get(MagicMock())
+    func.assert_called()
 
-        @_handler("POST", "_test")
-        def f(args):
-            func(args)
+  def testHandlerDecoratorPost(self):
+    func = MagicMock()
 
-        handlers["_test"].post(MagicMock())
-        func.assert_called()
+    @_handler("POST", "_test")
+    def f(args):
+      func(args)
 
+    handlers["_test"].post(MagicMock())
+    func.assert_called()
 
 if __name__ == "__main__":
-    unittest.main()
+  unittest.main()

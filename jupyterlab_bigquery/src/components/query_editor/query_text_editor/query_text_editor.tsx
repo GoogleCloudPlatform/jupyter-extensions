@@ -26,6 +26,7 @@ interface QueryTextEditorProps {
   resetQueryResult: any;
   deleteQueryEntry: any;
   queryId: QueryId;
+  iniQuery?: string;
 }
 
 interface QueryResponseType {
@@ -143,7 +144,7 @@ class QueryTextEditor extends React.Component<
   }
 
   handleQuery() {
-    this.props.resetQueryResult();
+    this.props.resetQueryResult(this.props.queryId);
     const query = this.editor.getValue();
 
     this.setState({
@@ -196,10 +197,18 @@ class QueryTextEditor extends React.Component<
       }
       this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
     });
+
+    // initial check
+    this.checkSQL();
   }
 
   checkSQL() {
     const query = this.editor.getValue();
+
+    if (!query) {
+      return;
+    }
+
     this.pagedQueryService.request(
       { query, jobConfig: {}, dryRunOnly: true },
       (state, _, response) => {
@@ -274,12 +283,17 @@ class QueryTextEditor extends React.Component<
   }
 
   render() {
+    const { iniQuery } = this.props;
+
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
       ? 'Processed ' + this.readableBytes(this.state.bytesProcessed)
       : null;
 
     const errMsg = this.state.errorMsg;
+
+    // eslint-disable-next-line no-extra-boolean-cast
+    const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
 
     return (
       <div className={styleSheet.wholeEditor}>
@@ -289,9 +303,7 @@ class QueryTextEditor extends React.Component<
             height="100%"
             theme={'light'}
             language={'sql'}
-            value={
-              'SELECT * FROM `jupyterlab-interns-sandbox.covid19_public_forecasts.county_14d` LIMIT 10'
-            }
+            value={queryValue}
             editorDidMount={this.handleEditorDidMount.bind(this)}
             options={SQL_EDITOR_OPTIONS}
           />

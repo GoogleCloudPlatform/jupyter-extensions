@@ -1,19 +1,25 @@
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
+import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
 import * as React from 'react';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
-import { Model, ModelService } from '../service/model';
+import { Model, ModelService, ModelType } from '../service/model';
 import { Context } from './automl_widget';
 import {
   TextInput,
   SelectInput,
   ColumnType,
   ListResourcesTable,
+  DialogComponent,
 } from 'gcp_jupyterlab_shared';
+import { ImportData } from './import_data';
 import styled from 'styled-components';
 import { debounce } from '../util';
 import { DatasetWidget } from './dataset_widget';
+import { ImageWidget } from './image_widget';
+import { ModelWidget } from './model_widget';
 
 interface Props {
   isVisible: boolean;
@@ -34,6 +40,10 @@ interface State {
   models: Model[];
   resourceType: ResourceType;
   searchString: string;
+  importDialogOpen: boolean;
+  deleteDialogOpen: boolean;
+  deleteSubmitHandler: () => void;
+  deleteTargetName: string;
 }
 
 const FullWidthInput = styled(Box)`
@@ -81,6 +91,10 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       models: [],
       resourceType: ResourceType.Dataset,
       searchString: '',
+      deleteDialogOpen: false,
+      deleteSubmitHandler: null,
+      deleteTargetName: '',
+      importDialogOpen: false,
     };
   }
 
@@ -128,9 +142,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             </ResourceSelect>
             <Box flexGrow={1}></Box>
             <IconButton
-              disabled={this.state.isLoading}
               style={styles.icon}
               size="small"
+              onClick={_ => {
+                this.setState({ importDialogOpen: true });
+              }}
             >
               <Icon>add</Icon>
             </IconButton>
@@ -171,25 +187,27 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   title: 'Name',
                 },
                 {
-                  title: 'Rows',
-                  field: 'exampleCount',
-                  type: ColumnType.Numeric,
-                  minShowWidth: breakpoints[1],
-                  fixedWidth: 80,
-                },
-                {
                   title: 'Created at',
                   field: 'createTime',
                   type: ColumnType.DateTime,
+                  render: rowData => {
+                    return <p>{rowData.createTime.toLocaleString()}</p>;
+                  },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
                 },
               ]}
               data={this.filterResources<Dataset>(this.state.datasets)}
               onRowClick={rowData => {
-                if (rowData.datasetType === 'TBL') {
+                if (rowData.datasetType === 'TABLE') {
                   this.props.context.manager.launchWidgetForId(
                     DatasetWidget,
+                    rowData.id,
+                    rowData
+                  );
+                } else {
+                  this.props.context.manager.launchWidgetForId(
+                    ImageWidget,
                     rowData.id,
                     rowData
                   );
@@ -202,9 +220,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 {
                   label: 'Delete',
                   handler: rowData => {
-                    // TODO: Show a confirmation dialog before deleting
-                    DatasetService.deleteDataset(rowData.id);
-                    this.refresh();
+                    this.deleteConfirm(rowData);
                   },
                 },
               ]}
@@ -214,17 +230,22 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               columns={[
                 {
                   field: 'displayName',
-                  title: 'Name',
+                  title: '',
+                  render: rowData => this.iconForModelType(rowData.modelType),
+                  fixedWidth: 30,
+                  sorting: false,
                 },
                 {
-                  title: 'Dataset',
-                  field: 'datasetId',
-                  minShowWidth: breakpoints[1],
+                  field: 'displayName',
+                  title: 'Name',
                 },
                 {
                   title: 'Last updated',
                   field: 'updateTime',
                   type: ColumnType.DateTime,
+                  render: rowData => {
+                    return <p>{rowData.updateTime.toLocaleString()}</p>;
+                  },
                   rightAlign: true,
                   minShowWidth: breakpoints[0],
                 },
@@ -237,34 +258,84 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 {
                   label: 'Delete',
                   handler: rowData => {
-                    // TODO: Show a confirmation dialog before deleting
-                    ModelService.deleteModel(rowData.id);
-                    this.refresh();
+                    this.deleteConfirm(rowData);
                   },
                 },
               ]}
+              onRowClick={rowData => {
+                this.props.context.manager.launchWidgetForId(
+                  ModelWidget,
+                  rowData.id,
+                  rowData
+                );
+              }}
             />
           )}
+          <DialogComponent
+            open={this.state.deleteDialogOpen}
+            header={`Are you sure you want to delete ${this.state.deleteTargetName}?`}
+            onCancel={this.toggleDelete}
+            onClose={this.toggleDelete}
+            onSubmit={this.state.deleteSubmitHandler}
+            submitLabel={'Ok'}
+          />
+          <ImportData
+            open={this.state.importDialogOpen}
+            onClose={() => {
+              this.setState({ importDialogOpen: false });
+            }}
+            onSuccess={() => {
+              this.refresh();
+            }}
+          />
         </Box>
       </>
     );
   }
 
+  private deleteConfirm = rowData => {
+    this.setState({ deleteTargetName: rowData.displayName });
+    if (this.state.resourceType === ResourceType.Dataset) {
+      this.setState({
+        deleteSubmitHandler: () => {
+          DatasetService.deleteDataset(rowData.id);
+          this.refresh();
+          this.toggleDelete();
+        },
+      });
+    } else if (this.state.resourceType === ResourceType.Model) {
+      this.setState({
+        deleteSubmitHandler: () => {
+          ModelService.deleteModel(rowData.id);
+          this.refresh();
+          this.toggleDelete();
+        },
+      });
+    } else {
+      this.setState({
+        deleteSubmitHandler: null,
+      });
+    }
+    this.toggleDelete();
+  };
+
+  private toggleDelete = () => {
+    this.setState({
+      deleteDialogOpen: !this.state.deleteDialogOpen,
+    });
+  };
+
   private iconForDatasetType(datasetType: DatasetType) {
     const icons: { [key in DatasetType]: any } = {
-      other: {
+      OTHER: {
         icon: 'error',
-        color: blue[900],
+        color: red[900],
       },
-      TBL: {
+      TABLE: {
         icon: 'table_chart',
         color: blue[700],
       },
-      ICN: {
-        icon: 'image',
-        color: orange[500],
-      },
-      IOD: {
+      IMAGE: {
         icon: 'image',
         color: orange[500],
       },
@@ -273,6 +344,30 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       <ListItem dense style={{ padding: 0 }}>
         <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
           {icons[datasetType].icon}
+        </Icon>
+      </ListItem>
+    );
+  }
+
+  private iconForModelType(modelType: ModelType) {
+    const icons: { [key in ModelType]: any } = {
+      OTHER: {
+        icon: 'emoji_objects',
+        color: green[500],
+      },
+      TABLE: {
+        icon: 'emoji_objects',
+        color: blue[700],
+      },
+      IMAGE: {
+        icon: 'emoji_objects',
+        color: orange[500],
+      },
+    };
+    return (
+      <ListItem dense style={{ padding: 0 }}>
+        <Icon style={{ ...styles.icon, color: icons[modelType].color }}>
+          {icons[modelType].icon}
         </Icon>
       </ListItem>
     );
@@ -334,12 +429,20 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   }
 
   private async getDatasets() {
-    const datasets = await DatasetService.listDatasets();
-    this.setState({ datasets: datasets });
+    try {
+      const datasets = await DatasetService.listDatasets();
+      this.setState({ datasets: datasets });
+    } catch (e) {
+      console.log('Failed to load dataset resource.');
+    }
   }
 
   private async getModels() {
-    const models = await ModelService.listModels();
-    this.setState({ models: models });
+    try {
+      const models = await ModelService.listModels();
+      this.setState({ models: models });
+    } catch (e) {
+      console.log('Failed to load models resource.');
+    }
   }
 }

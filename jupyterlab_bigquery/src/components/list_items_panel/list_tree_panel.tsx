@@ -1,18 +1,34 @@
-import { LinearProgress, Button } from '@material-ui/core';
+import { LinearProgress, Button, Switch } from '@material-ui/core';
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ListProjectsService, DataTree } from './service/list_items';
+import {
+  ListProjectsService,
+  DataTree,
+  ListDatasetsService,
+  ListTablesService,
+  ListModelsService,
+} from './service/list_items';
 import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree } from '../../reducers/dataTreeSlice';
+import {
+  SearchProjectsService,
+  SearchResult,
+} from '../list_items_panel/service/search_items';
+import { SearchBar } from './search_bar';
+import { DialogComponent } from 'gcp_jupyterlab_shared';
 
 interface Props {
   listProjectsService: ListProjectsService;
+  listDatasetsService: ListDatasetsService;
+  listTablesService: ListTablesService;
+  listModelsService: ListModelsService;
   isVisible: boolean;
   context: Context;
   updateDataTree: any;
@@ -26,6 +42,11 @@ export interface Context {
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
+  searchToggled: boolean;
+  searchEnabled: boolean;
+  dialogOpen: boolean;
+  isSearching: boolean;
+  searchResults: SearchResult[];
 }
 
 const localStyles = stylesheet({
@@ -38,6 +59,15 @@ const localStyles = stylesheet({
     padding: '8px 12px',
     textTransform: 'uppercase',
   },
+  editQueryButton: {
+    margin: 'auto',
+  },
+  list: {
+    margin: 0,
+    overflowY: 'scroll',
+    padding: 0,
+    ...csstips.flex,
+  },
   panel: {
     backgroundColor: 'white',
     //color: COLORS.base,
@@ -47,14 +77,11 @@ const localStyles = stylesheet({
     marginTop: '5px',
     marginBottom: '5px',
   },
-  list: {
-    margin: 0,
-    overflowY: 'scroll',
-    padding: 0,
+  enableSearch: {
     ...csstips.flex,
-  },
-  editQueryButton: {
-    margin: 'auto',
+    display: 'flex',
+    flexDirection: 'row',
+    alignContent: 'center',
   },
 });
 
@@ -64,8 +91,57 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.state = {
       hasLoaded: false,
       isLoading: false,
+      searchToggled: false,
+      searchEnabled: false,
+      dialogOpen: false,
+      isSearching: false,
+      searchResults: [],
     };
   }
+
+  handleOpenDialog = () => {
+    const { searchToggled } = this.state;
+    this.setState({
+      searchToggled: !searchToggled,
+      dialogOpen: true,
+    });
+  };
+
+  handleEnableSearch = () => {
+    this.setState({
+      dialogOpen: false,
+      searchEnabled: true,
+    });
+  };
+
+  handleCancelDialog = () => {
+    this.setState({ dialogOpen: false, searchToggled: false });
+  };
+
+  async search(searchKey, project) {
+    try {
+      this.setState({ isLoading: true, isSearching: true });
+      const service = new SearchProjectsService();
+      await service.searchProjects(searchKey, project).then(results => {
+        this.setState({ searchResults: results.searchResults });
+      });
+    } catch (err) {
+      console.warn('Error searching', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  handleKeyPress = event => {
+    if (event.key === 'Enter') {
+      const searchKey = event.target.value;
+      this.search(searchKey, 'hwing-sandbox');
+    }
+  };
+
+  handleClear = () => {
+    this.setState({ isSearching: false });
+  };
 
   async componentWillMount() {
     try {
@@ -84,7 +160,14 @@ class ListItemsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading } = this.state;
+    const {
+      isLoading,
+      isSearching,
+      searchResults,
+      searchToggled,
+      searchEnabled,
+      dialogOpen,
+    } = this.state;
     return (
       <div className={localStyles.panel}>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -104,15 +187,64 @@ class ListItemsPanel extends React.Component<Props, State> {
             >
               Edit Query
             </Button>
+            {searchEnabled ? (
+              <SearchBar
+                handleKeyPress={this.handleKeyPress}
+                handleClear={this.handleClear}
+                defaultText={'Search...'}
+              />
+            ) : (
+              <div className={localStyles.enableSearch}>
+                <Switch
+                  checked={searchToggled}
+                  onClick={this.handleOpenDialog}
+                />
+                <div style={{ alignSelf: 'center' }}>Enable Searching</div>
+              </div>
+            )}
           </header>
         </div>
         {isLoading ? (
           <LinearProgress />
+        ) : isSearching ? (
+          <ul className={localStyles.list}>
+            <ListSearchResults
+              context={this.props.context}
+              searchResults={searchResults}
+            />
+          </ul>
         ) : (
           <ul className={localStyles.list}>
-            <ListProjectItem context={this.props.context} />
+            <ListProjectItem
+              context={this.props.context}
+              listDatasetsService={this.props.listDatasetsService}
+              listTablesService={this.props.listTablesService}
+              listModelsService={this.props.listModelsService}
+            />
           </ul>
         )}
+        <DialogComponent
+          header="Requirements to Enable Searching"
+          open={dialogOpen}
+          onSubmit={this.handleEnableSearch}
+          onCancel={this.handleCancelDialog}
+          onClose={this.handleCancelDialog}
+          submitLabel="I have enabled the API"
+          children={
+            <p>
+              To start using BigQuery's Search feature, you'll need to first
+              enable the{' '}
+              <a
+                style={{ color: 'blue' }}
+                href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
+              >
+                Google Data Catalog API.
+              </a>{' '}
+              Once you click "Enable", this may take up to 2-3 minutes before
+              you can start searching.
+            </p>
+          }
+        />
       </div>
     );
   }
