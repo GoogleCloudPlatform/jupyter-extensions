@@ -103,6 +103,7 @@ export function trialToData(trial: Trial): any {
   let trialData = {
     name: trial.name,
     state: trial.state,
+    trialInfeasible: trial.trialInfeasible,
     ...parametersToData(trial.parameters),
   };
   if (trial.finalMeasurement) {
