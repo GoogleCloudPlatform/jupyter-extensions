@@ -24,7 +24,6 @@ import {
   CodeReviewComment,
   createReviewCommentFromJSON,
 } from '../service/comment';
-import { PageConfig } from '@jupyterlab/coreutils';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
 import {
@@ -36,10 +35,11 @@ import {
   Tab,
   AppBar,
 } from '@material-ui/core';
-import { JupyterFrontEnd, ILabShell } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
+import { getServerRoot } from '../service/jupyterConfig';
 
 interface Props {
   context: Context;
@@ -55,7 +55,6 @@ interface State {
 }
 
 export interface Context {
-  app: JupyterFrontEnd;
   labShell: ILabShell;
   docManager: IDocumentManager;
 }
@@ -82,7 +81,7 @@ const localStyles = stylesheet({
 export class CommentsComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const serverRoot = PageConfig.getOption('serverRoot');
+    const serverRoot = getServerRoot();
     this.state = {
       reviewComments: [],
       detachedComments: [],
@@ -92,8 +91,7 @@ export class CommentsComponent extends React.Component<Props, State> {
       fileName: '',
     };
     //Track when the user switches to viewing a different file
-    const context = this.props.context;
-    context.labShell.currentChanged.connect(() => {
+    this.props.context.labShell.currentChanged.connect(() => {
       this.getLocalAndRemoteComments();
     });
   }
@@ -121,6 +119,7 @@ export class CommentsComponent extends React.Component<Props, State> {
 
   render() {
     const activeTab = this.state.activeTab;
+    const currFilePath = this.getCurrentFilePath();
     const detachedCommentsList = this.state.detachedComments.map(comment => (
       <>
         <Comment detachedComment={comment} />
@@ -133,7 +132,6 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
-    const currFilePath = this.getCurrentFilePath();
     return (
       <div className={localStyles.root}>
         <CssBaseline />
@@ -171,14 +169,19 @@ export class CommentsComponent extends React.Component<Props, State> {
         )}
         {!this.state.errorMessage &&
           (this.state.activeTab === 0 ? (
-            <List className={localStyles.commentsList}>{reviewCommentsList} </List>
+            <List className={localStyles.commentsList}>
+              {reviewCommentsList}{' '}
+            </List>
           ) : (
             <>
               <NewCommentThread
                 serverRoot={this.state.serverRoot}
                 currFilePath={currFilePath}
               />
-              <List className={localStyles.commentsList}> {detachedCommentsList} </List>
+              <List className={localStyles.commentsList}>
+                {' '}
+                {detachedCommentsList}{' '}
+              </List>
             </>
           ))}
       </div>
@@ -201,7 +204,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             } else {
               this.setState({ errorMessage: '' }); //remove error message
               data.forEach(function(obj) {
-                const comment = createDetachedCommentFromJSON(obj);
+                const comment = createDetachedCommentFromJSON(obj, filePath);
                 comments.push(comment);
               });
             }
@@ -236,7 +239,8 @@ export class CommentsComponent extends React.Component<Props, State> {
                   const comment = createReviewCommentFromJSON(
                     obj,
                     data.revision,
-                    data.request
+                    data.request,
+                    filePath
                   );
                   comments.push(comment);
                 });
@@ -310,8 +314,7 @@ export class CommentsWidget extends ReactWidget {
   render() {
     return (
       <div className={localStyles.root}>
-        {' '}
-        <CommentsComponent context={this.context} />{' '}
+        <CommentsComponent context={this.context} />
       </div>
     );
   }

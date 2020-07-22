@@ -110,6 +110,10 @@ class Git(Configurable):
 		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root)
 		self.push_local_comments(git_root_dir)
 
+	def add_detached_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent):
+		self.run(git_root_dir, 'appraise', 'comment', '-d', '-p', parent,'-m', comment_string, '-f', file_path_from_repo_root)
+		self.push_local_comments(git_root_dir)
+
 	def get_previous_names(self, file_path, server_root):
 		# names_string = run('log', '--follow', '--name-only', '--pretty=format:""', file_path)
 		pass

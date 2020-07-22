@@ -33,6 +33,7 @@ import {
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+import { NewReplyComment } from '../components/reply_editor';
 
 const style = {
   inline: {
@@ -70,6 +71,7 @@ interface Props {
 
 interface State {
   expandThread: boolean;
+  showCommentEditor: boolean;
 }
 
 //React component to render a single comment thread
@@ -78,6 +80,7 @@ export class Comment extends React.Component<Props, State> {
     super(props);
     this.state = {
       expandThread: false,
+      showCommentEditor: false,
     };
   }
 
@@ -110,10 +113,21 @@ export class Comment extends React.Component<Props, State> {
           />
         </ListItem>
         <div style={style.commentBottom}>
-          <Button color="primary" size="small">
+          <Button
+            color="primary"
+            size="small"
+            onClick={() => {
+              this.setState({
+                showCommentEditor: !this.state.showCommentEditor,
+              });
+            }}
+          >
             {' '}
             Reply{' '}
           </Button>
+          {this.state.showCommentEditor && (
+            <NewReplyComment currFilePath={data.filePath} hash={data.hash} />
+          )}
           {data.children && (
             <Button
               size="small"
@@ -139,13 +153,17 @@ export class Comment extends React.Component<Props, State> {
             <List>
               {data.children.map(reply => {
                 if (this.props.detachedComment) {
-                  const detached = createDetachedCommentFromJSON(reply);
+                  const detached = createDetachedCommentFromJSON(
+                    reply,
+                    reply.filePath
+                  );
                   return <Comment detachedComment={detached} />;
                 } else {
                   const review = createReviewCommentFromJSON(
                     reply,
                     this.props.reviewComment.revision,
-                    this.props.reviewComment.request
+                    this.props.reviewComment.request,
+                    data.filePath
                   );
                   return <Comment reviewComment={review} />;
                 }

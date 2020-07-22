@@ -10,6 +10,7 @@ describe('Basic Comment Component Rendering', () => {
       timestamp: '2020',
       range: 'none',
       hash: 'none',
+      filePath: 'fake/path',
     };
     const componentDetached = shallow(
       <Comment detachedComment={fakeDetachedComment} />
@@ -34,6 +35,7 @@ describe('Basic Comment Component Rendering', () => {
         description: 'none',
         baseCommit: 'none',
       },
+      filePath: 'fake/path',
     };
     const componentReview = shallow(
       <Comment reviewComment={fakeReviewComment} />
@@ -51,6 +53,7 @@ describe('Comment Component Expand Threads Button', () => {
       timestamp: '2020',
       range: 'none',
       hash: 'none',
+      filePath: 'fake/path',
     };
     const withoutChildren = shallow(
       <Comment detachedComment={detachedWithoutChildren} />
@@ -65,6 +68,7 @@ describe('Comment Component Expand Threads Button', () => {
       timestamp: '2020',
       range: 'none',
       hash: 'none',
+      filePath: 'fake/path',
       children: ['fake', 'children', 'list'],
     };
     const withChildren = shallow(
@@ -81,6 +85,7 @@ describe('Comment Component Expand Threads Button', () => {
     timestamp: '1543622400',
     range: 'none',
     hash: 'none',
+    filePath: 'fake/path',
     children: [
       {
         comment: {
@@ -102,6 +107,7 @@ describe('Comment Component Expand Threads Button', () => {
     timestamp: '1543622400',
     range: 'none',
     hash: 'none',
+    filePath: 'fake/path',
     children: [
       {
         comment: {

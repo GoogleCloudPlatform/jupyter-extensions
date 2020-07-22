@@ -97,13 +97,18 @@ class AddDetachedCommentHandler(APIHandler):
             server_root = os.path.expanduser(self.get_argument('server_root'))
             data = json.loads(self.request.body)
             comment = data.get('comment')
+            parent = data.get('parent', "")
 
             full_file_path = os.path.join(server_root, file_path)
             full_file_path_dir = os.path.dirname(full_file_path)
             git_root_dir = git.get_repo_root(full_file_path_dir)
             file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
 
-            git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment)
+            if parent:
+                git.add_detached_reply_comment(file_path_from_repo_root, git_root_dir, comment, parent)
+            else:
+                git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment)
+
             git.appraise_push(git_root_dir)
         except Exception as e:
             print("Error adding a new detached comment")

@@ -12,37 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
+ **/
 import React, { useState } from 'react';
-import { TextField, Button, Grid, Icon } from '@material-ui/core';
-import { newDetachedCommentThread } from '../service/add_comment';
+import { TextField, Button, Grid } from '@material-ui/core';
+import { newDetachedCommentReply } from '../service/add_comment';
+import Icon from '@material-ui/core/Icon';
+import { getServerRoot } from '../service/jupyterConfig';
 
 interface Props {
-  serverRoot: string;
   currFilePath: string;
+  hash: string;
 }
 
 const style = {
   editor: {
-    padding: 20,
-  },
-  submit: {
-    paddingLeft: 225,
-    display: 'inlineBlock',
-  },
-  textField: {
-    width: 300,
+    padding: 10,
   },
 };
 
-export function CommentEditor(props) {
+function ReplyEditor(props) {
   const [comment, setComment] = useState('');
+  const serverRoot = getServerRoot();
 
   const handleSubmit = event => {
     event.preventDefault();
-    console.log(comment);
-    newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
+    newDetachedCommentReply(
+      props.currFilePath,
+      serverRoot,
+      comment,
+      props.hash
+    );
     setComment(''); //clear comment text field
   };
   return (
@@ -51,26 +50,23 @@ export function CommentEditor(props) {
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
       />
-      <Grid container direction="column">
+      <Grid container direction="row" spacing={0}>
         <Grid item>
           <TextField
-            multiline
-            rows={3}
             id="outlined-helperText"
-            label="Add a new comment"
-            defaultValue="Start a new comment thread"
+            label="Reply to this comment"
             value={comment}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
-            size="medium"
-            style={style.textField}
+            size="small"
+            style={{ margin: 2 }}
           />
         </Grid>
-        <Grid item style={style.submit}>
+        <Grid item>
           <Button
             type="submit"
             color="primary"
-            size="medium"
+            size="small"
             endIcon={<Icon>send</Icon>}
           >
             Send
@@ -81,8 +77,8 @@ export function CommentEditor(props) {
   );
 }
 
-export class NewCommentThread extends React.Component<Props> {
+export class NewReplyComment extends React.Component<Props> {
   render() {
-    return <CommentEditor {...this.props} />;
+    return <ReplyEditor {...this.props} />;
   }
 }

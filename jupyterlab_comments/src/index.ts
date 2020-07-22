@@ -44,7 +44,6 @@ function activate(
     execute: () => {
       if (!widget || widget.isDisposed) {
         const context = {
-          app: app,
           labShell: labShell,
           docManager: docManager,
         };
