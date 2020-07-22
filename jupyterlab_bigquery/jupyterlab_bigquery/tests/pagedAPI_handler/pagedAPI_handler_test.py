@@ -7,8 +7,6 @@ from notebook.base.handlers import app_log
 from logging import INFO, WARN
 import time
 
-PATH = '/gcp/v1/bigquery'
-
 
 class DummyPageAPI(PagedAPIHandler):
 
