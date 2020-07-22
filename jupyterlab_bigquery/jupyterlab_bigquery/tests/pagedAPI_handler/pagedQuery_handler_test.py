@@ -1,13 +1,8 @@
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
-  import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
 from jupyterlab_bigquery.pagedAPI_handler.pagedQuery_handler import PagedQueryHandler
 import json
-from notebook.base.handlers import app_log
 from google.cloud import bigquery
-from logging import INFO, WARN
-import time
 
 
 def multiple_return_helper(return_values):
@@ -244,9 +239,9 @@ class TestPagedQueryHandler(unittest.TestCase):
     except Exception as inst:
       self.assertEqual(str(inst), dummy_err_msg)
 
-    def text_cancel(self):
-      job_mock = MagicMock()
+  def text_cancel(self):
+    job_mock = MagicMock()
 
-      self.dummy_query_handler.cancel(job_mock)
+    self.dummy_query_handler.cancel(job_mock)
 
-      job_mock.assert_called()
+    job_mock.assert_called()
