@@ -4,10 +4,14 @@ import json
 from jupyterlab_bigquery.handlers import format_preview_fields, format_preview_row
 
 
-
-
 class PagedQueryHandler(PagedAPIHandler):
-  client = bigquery.Client()
+  client = None
+
+  def __init__(self, application, request, **kwargs):
+    super().__init__(application, request, **kwargs)
+
+    if PagedQueryHandler.client is None:
+      PagedQueryHandler.client = bigquery.Client()
 
   def query(self, request_body, page_size):
     query = request_body['query']
