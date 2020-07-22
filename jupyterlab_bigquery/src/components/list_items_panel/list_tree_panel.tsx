@@ -32,6 +32,7 @@ interface Props {
   isVisible: boolean;
   context: Context;
   updateDataTree: any;
+  currentProject: string;
 }
 
 export interface Context {
@@ -58,9 +59,11 @@ const localStyles = stylesheet({
     margin: 0,
     padding: '8px 12px',
     textTransform: 'uppercase',
+    flexDirection: 'column',
   },
   editQueryButton: {
     margin: 'auto',
+    flexGrow: 0,
   },
   list: {
     margin: 0,
@@ -127,15 +130,21 @@ class ListItemsPanel extends React.Component<Props, State> {
       });
     } catch (err) {
       console.warn('Error searching', err);
-    } finally {
-      this.setState({ isLoading: false });
     }
+    this.setState({ isLoading: false });
   }
 
   handleKeyPress = event => {
+    const { currentProject } = this.props;
     if (event.key === 'Enter') {
       const searchKey = event.target.value;
-      this.search(searchKey, 'hwing-sandbox');
+      if (currentProject !== '') {
+        this.search(searchKey, currentProject);
+      } else {
+        console.warn(
+          'Error searching, wait until data tree loads and try again'
+        );
+      }
     }
   };
 
@@ -170,40 +179,35 @@ class ListItemsPanel extends React.Component<Props, State> {
     } = this.state;
     return (
       <div className={localStyles.panel}>
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <header className={localStyles.header}>
-            BigQuery in Notebooks
-            <Button
-              color="primary"
-              size="small"
-              variant="contained"
-              className={localStyles.editQueryButton}
-              onClick={() => {
-                WidgetManager.getInstance().launchWidget(
-                  QueryEditorTabWidget,
-                  'main'
-                );
-              }}
-            >
-              Edit Query
-            </Button>
-            {searchEnabled ? (
-              <SearchBar
-                handleKeyPress={this.handleKeyPress}
-                handleClear={this.handleClear}
-                defaultText={'Search...'}
-              />
-            ) : (
-              <div className={localStyles.enableSearch}>
-                <Switch
-                  checked={searchToggled}
-                  onClick={this.handleOpenDialog}
-                />
-                <div style={{ alignSelf: 'center' }}>Enable Searching</div>
-              </div>
-            )}
-          </header>
-        </div>
+        <header className={localStyles.header}>
+          BigQuery in Notebooks
+          <Button
+            color="primary"
+            size="small"
+            variant="contained"
+            className={localStyles.editQueryButton}
+            onClick={() => {
+              WidgetManager.getInstance().launchWidget(
+                QueryEditorTabWidget,
+                'main'
+              );
+            }}
+          >
+            Edit Query
+          </Button>
+          {searchEnabled ? (
+            <SearchBar
+              handleKeyPress={this.handleKeyPress}
+              handleClear={this.handleClear}
+              defaultText={'Search...'}
+            />
+          ) : (
+            <div className={localStyles.enableSearch}>
+              <Switch checked={searchToggled} onClick={this.handleOpenDialog} />
+              <div style={{ alignSelf: 'center' }}>Enable Searching</div>
+            </div>
+          )}
+        </header>
         {isLoading ? (
           <LinearProgress />
         ) : isSearching ? (
@@ -267,7 +271,8 @@ class ListItemsPanel extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => {
-  return {};
+  const currentProject = state.dataTree.data.projectIds[0];
+  return { currentProject };
 };
 const mapDispatchToProps = {
   updateDataTree,

@@ -68,6 +68,7 @@ class BigQueryService:
         'id': table_full_id,
         'name': table.table_id,
         'datasetId': dataset_id,
+        'type': table.table_type,
       }
       table_ids.append(table_full_id)
 
