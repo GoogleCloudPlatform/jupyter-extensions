@@ -26,6 +26,7 @@ import { prettifyStudyName } from '../service/optimizer';
 import { connect } from 'react-redux';
 import AddIcon from '@material-ui/icons/Add';
 import { dateFormat, makeReadable } from '../utils';
+import { styles } from '../utils/styles';
 
 const tableIcons = {
   Add: forwardRef((props, ref: React.Ref<SVGSVGElement>) => (
@@ -157,7 +158,7 @@ export const DashboardUnwrapped: React.FC<Props> = ({
     : undefined;
 
   return (
-    <Box pt={2} px={3} style={{ height: '100%', overflow: 'scroll' }}>
+    <Box className={styles.root} pt={2} px={3}>
       <Box display="flex" my={2}>
         <Typography variant="h4" gutterBottom>
           Optimizer Dashboard

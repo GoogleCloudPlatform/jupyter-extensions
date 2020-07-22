@@ -14,6 +14,7 @@ import * as Types from '../types';
 import { connect } from 'react-redux';
 import { createStudy } from '../store/studies';
 import { setView } from '../store/view';
+import { styles } from '../utils/styles';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
@@ -328,7 +329,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   };
 
   return (
-    <Box m={5}>
+    <Box className={styles.root} m={5}>
       <React.Fragment>
         <Grid container spacing={3}>
           <Grid container item xs={12}>
