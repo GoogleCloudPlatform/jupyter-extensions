@@ -5,7 +5,7 @@ import json
 from threading import Lock, Timer
 from collections import deque, defaultdict
 from abc import ABC, abstractmethod
-from time import time
+import time
 
 START_STATE = 'start'
 CONTINUE_STATE = 'continue'
@@ -35,14 +35,20 @@ class PagedAPIHandler(APIHandler, ABC):
 
   def clear_generators(self):
     with PagedAPIHandler.generator_lock:
+      job_ids_to_delete = []
+
       for job_id, (generator, job_obj,
                    last_touch) in PagedAPIHandler.generator_pool.items():
-        idle_time = time() - last_touch
+        idle_time = time.time() - last_touch
         if idle_time >= CLEAR_GENERATORS_MAX_IDILE_SEC:
           self.cancel(job_obj)
+          job_ids_to_delete.append(job_id)
           del generator
           app_log.log(INFO, 'Deleted {} due to long idle time {}', job_id,
                       idle_time)
+      
+      for job_id in job_ids_to_delete:
+        del PagedAPIHandler.generator_pool[job_id]
 
   def post(self, *args, **kwargs):
     '''
@@ -76,7 +82,8 @@ class PagedAPIHandler(APIHandler, ABC):
 
     if error is None:
       with PagedAPIHandler.generator_lock:
-        PagedAPIHandler.generator_pool[job_id] = query_generator, job, time()
+        PagedAPIHandler.generator_pool[
+            job_id] = query_generator, job, time.time()
         app_log.log(INFO, 'Successfully started query %s', job_id)
 
     self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
@@ -89,7 +96,8 @@ class PagedAPIHandler(APIHandler, ABC):
       val = PagedAPIHandler.generator_pool[job_id]
       if val is not None:
         query_generator, job_obj, _ = val
-        val = query_generator, job_obj, time()
+        PagedAPIHandler.generator_pool[job_id]\
+          = query_generator, job_obj, time.time()
 
     finish = False
     load = []

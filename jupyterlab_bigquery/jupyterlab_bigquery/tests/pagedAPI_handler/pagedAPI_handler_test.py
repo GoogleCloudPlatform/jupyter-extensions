@@ -2,8 +2,6 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch
 from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
   import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
-from tornado import httputil
-from tornado.web import Application
 import json
 from notebook.base.handlers import app_log
 from logging import INFO, WARN
