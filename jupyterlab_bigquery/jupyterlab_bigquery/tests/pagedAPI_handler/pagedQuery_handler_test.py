@@ -1,13 +1,8 @@
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
-  import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
 from jupyterlab_bigquery.pagedAPI_handler.pagedQuery_handler import PagedQueryHandler
 import json
-from notebook.base.handlers import app_log
 from google.cloud import bigquery
-from logging import INFO, WARN
-import time
 
 
 def multiple_return_helper(return_values):
