@@ -3,9 +3,11 @@
 import base64
 import hashlib
 import uuid
+import pandas as pd
+import re
 from enum import Enum
 
-from google.cloud import aiplatform_v1alpha1, exceptions, storage
+from google.cloud import aiplatform_v1alpha1, bigquery, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
@@ -80,6 +82,7 @@ class AutoMLService:
         client_options=client_options)
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
+    self._bigquery_client = bigquery.Client()
     self._gcs_client = storage.Client()
     self._project = AuthProvider.get().project
     self._parent = "projects/{}/locations/us-central1".format(self._project)
@@ -277,3 +280,45 @@ class AutoMLService:
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
+
+  def _gcs_to_dataframe(self, uris):
+    return pd.concat((pd.read_csv(uri, index_col=0) for uri in uris),
+                     ignore_index=True)
+
+  def _export_bigquery_dataset(self, uri):
+    split = re.split(":|\.", uri)
+    dataset_id, table_id = split[-2], split[-1]
+    tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
+    destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
+    dataset_ref = bigquery.DatasetReference(self._project, dataset_id)
+    table_ref = dataset_ref.table(table_id)
+    dataset = self._bigquery_client.get_dataset(dataset_ref)
+
+    extract_job = self._bigquery_client.extract_table(
+        table_ref,
+        destination_uri,
+        # Location must match that of the source table.
+        location=dataset.location,
+    )
+    exported = extract_job.result()
+    return exported.destination_uris
+
+  def export_dataset(self, dataset_id):
+    dataset = self._dataset_client.get_dataset(name=dataset_id)
+    if parse_dataset_type(dataset) != DatasetType.TABLE:
+      raise ValueError("Dataset provided is not a tables dataset")
+    inputConfig = json_format.MessageToDict(dataset._pb.metadata).get(
+        "inputConfig", {})
+    if "gcsSource" in inputConfig:
+      return self._gcs_to_dataframe(inputConfig["gcsSource"]["uri"])
+    elif "bigquerySource" in inputConfig:
+      tmp_uris = self._export_bigquery_dataset(
+          inputConfig["bigquerySource"]["uri"])
+      df = self._gcs_to_dataframe(tmp_uris)
+      # Delete temp csvs
+      for uri in tmp_uris:
+        blob = storage.blob.Blob.from_string(uri)
+        blob.delete(self._gcs_client)
+      return df
+    else:
+      raise NotImplementedError("Export not implemented for this dataset")
