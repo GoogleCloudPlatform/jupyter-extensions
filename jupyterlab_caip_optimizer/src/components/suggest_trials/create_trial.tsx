@@ -234,7 +234,6 @@ export const CreateTrial: React.FC<Props> = ({
               checked={requested}
               onChange={event => setRequested(event.target.checked)}
               color="primary"
-              disabled={requested}
             />
           }
           label="Request Trial"
