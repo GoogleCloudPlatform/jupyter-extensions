@@ -192,12 +192,20 @@ export type Parameter = ParameterBase &
       }
   );
 
+export enum TrialState {
+  STATE_UNSPECIFIED = 'STATE_UNSPECIFIED',
+  REQUESTED = 'REQUESTED',
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  STOPPING = 'STOPPING',
+}
+
 /**
  * Optional params are "output only" by Optimizer API
  */
 export interface Trial {
   name?: string;
-  state: State;
+  state: TrialState;
   parameters: Parameter[];
   finalMeasurement?: Measurement;
   measurements: Measurement[];
