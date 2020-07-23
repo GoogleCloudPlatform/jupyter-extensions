@@ -9,6 +9,7 @@ import {
   State,
   Trial,
   Measurement,
+  TrialState,
 } from '../types';
 
 export const fakeProjectId = 'project-id';
@@ -94,7 +95,7 @@ export const fakeStudyListResponse: Study[] = [
 
 export const fakeTrial: Trial = {
   name: fakeTrialName,
-  state: State.ACTIVE,
+  state: TrialState.ACTIVE,
   parameters: [
     {
       parameter: 'param-discrete',
@@ -113,7 +114,7 @@ export const fakeTrial: Trial = {
 
 export const fakeTrialWithFinalMeasurement: Trial = {
   ...fakeTrial,
-  state: State.COMPLETED,
+  state: TrialState.COMPLETED,
   finalMeasurement: {
     stepCount: '1',
     metrics: [
