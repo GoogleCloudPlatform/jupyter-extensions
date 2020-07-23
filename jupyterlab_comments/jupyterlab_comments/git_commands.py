@@ -46,7 +46,13 @@ class Git(Configurable):
 
 	def push_local_comments(self, git_root_dir):
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
-		self.run(git_root_dir, 'appraise', 'push', self.remote)
+		return_code = subprocess.call(['git', 'appraise', 'push', self.remote], cwd=git_root_dir)
+		#Retry once if refs fail to get pushed
+		if return_code == 1:
+			self.run(git_root_dir, 'appraise', 'pull', self.remote)
+			self.run(git_root_dir, 'appraise', 'push', self.remote)
+
+
 
 
 	def inside_git_repo(self, path_to_file):
