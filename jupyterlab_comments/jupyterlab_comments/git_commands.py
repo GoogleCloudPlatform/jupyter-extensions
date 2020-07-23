@@ -45,7 +45,6 @@ class Git(Configurable):
 		self.run(git_root_dir, 'appraise', 'push', self.remote)
 
 	def push_local_comments(self, git_root_dir):
-		self.run(git_root_dir, 'push', self.remote)
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 		self.run(git_root_dir, 'appraise', 'push', self.remote)
 

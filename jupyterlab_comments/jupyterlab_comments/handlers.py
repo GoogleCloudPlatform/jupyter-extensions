@@ -109,7 +109,6 @@ class AddDetachedCommentHandler(APIHandler):
             else:
                 git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment)
 
-            git.appraise_push(git_root_dir)
         except Exception as e:
             print("Error adding a new detached comment")
             print(traceback.format_exc())
