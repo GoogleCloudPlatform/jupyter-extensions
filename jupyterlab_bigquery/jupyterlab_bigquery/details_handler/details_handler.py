@@ -175,6 +175,45 @@ def get_table_preview(client, table_id):
   }
 
 
+def get_view_details(client, view_id):
+  view = client.get_table(view_id)
+
+  return {
+      'details': {
+          'id':
+              "{}.{}.{}".format(view.project, view.dataset_id, view.table_id),
+          'query':
+              view.view_query,
+          'name':
+              view.table_id,
+          'description':
+              view.description,
+          'labels': [
+              "{}: {}".format(label, value)
+              for label, value in view.labels.items()
+          ] if view.labels else None,
+          'date_created':
+              json.dumps(view.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
+          'last_modified':
+              json.dumps(view.modified.strftime('%b %e, %G, %l:%M:%S %p'))
+              [1:-1],
+          'expires':
+              json.dumps(view.expires.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1]
+              if view.expires else None,
+          'project':
+              view.project,
+          'dataset':
+              view.dataset_id,
+          'link':
+              view.self_link,
+          'schema':
+              format_detail_schema(view.schema),
+          'legacy_sql':
+              'true' if view.view_use_legacy_sql else 'false'
+      }
+  }
+
+
 def format_preview_rows(rows, fields):
   formatted_rows = []
   for row in rows:
@@ -258,8 +297,22 @@ class TablePreviewHandler(APIHandler):
     except Exception as e:
       app_log.exception(str(e))
       self.set_status(500, str(e))
-      self.finish({
-          'error': {
-              'message': str(e)
-          }
-      })
+      self.finish({'error': {'message': str(e)}})
+
+
+class ViewDetailsHandler(APIHandler):
+  """Handles requests for view details."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_view_details(self.bigquery_client, post_body['viewId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({'error': {'message': str(e)}})
