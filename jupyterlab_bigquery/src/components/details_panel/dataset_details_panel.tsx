@@ -4,6 +4,7 @@ import {
   DatasetDetailsService,
   DatasetDetails,
 } from './service/list_dataset_details';
+import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { stylesheet } from 'typestyle';
@@ -15,12 +16,6 @@ const localStyles = stylesheet({
     marginLeft: '24px',
     height: '100%',
     overflowY: 'auto',
-  },
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '18px',
-    margin: 0,
-    padding: '8px 12px 8px 24px',
   },
 });
 
@@ -104,9 +99,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div style={{ height: '100%' }}>
-          <header className={localStyles.header}>
-            {this.props.dataset_id}
-          </header>
+          <Header text={this.props.dataset_id} />
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
