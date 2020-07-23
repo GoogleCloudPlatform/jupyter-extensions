@@ -121,6 +121,7 @@ export class Comment extends React.Component<Props, State> {
                 showCommentEditor: !this.state.showCommentEditor,
               });
             }}
+            className="replyButton"
           >
             {' '}
             Reply{' '}

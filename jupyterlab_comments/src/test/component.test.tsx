@@ -2,16 +2,23 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { Comment } from '../components/comment';
+import { NewReplyComment } from '../components/reply_editor';
+import { NewCommentThread } from '../components/start_thread';
+
+const getComment = () => {
+  const comment = {
+    author: 'mkalil',
+    text: 'fake comment for testing React component',
+    timestamp: '2020',
+    range: 'none',
+    hash: 'none',
+    filePath: 'fake/path',
+  };
+  return comment;
+};
 describe('Basic Comment Component Rendering', () => {
   it('detached comment should render correctly', () => {
-    const fakeDetachedComment = {
-      author: 'mkalil',
-      text: 'fake comment for testing React component',
-      timestamp: '2020',
-      range: 'none',
-      hash: 'none',
-      filePath: 'fake/path',
-    };
+    const fakeDetachedComment = getComment();
     const componentDetached = shallow(
       <Comment detachedComment={fakeDetachedComment} />
     );
@@ -47,14 +54,7 @@ describe('Basic Comment Component Rendering', () => {
 
 describe('Comment Component Expand Threads Button', () => {
   it("has no children comments, don't render thread button", () => {
-    const detachedWithoutChildren = {
-      author: 'mkalil',
-      text: 'fake comment for testing React component',
-      timestamp: '2020',
-      range: 'none',
-      hash: 'none',
-      filePath: 'fake/path',
-    };
+    const detachedWithoutChildren = getComment();
     const withoutChildren = shallow(
       <Comment detachedComment={detachedWithoutChildren} />
     );
@@ -163,5 +163,40 @@ describe('Comment Component Expand Threads Button', () => {
     threadButton.simulate('click');
     const threadList = withChildren.find('.threadList');
     expect(threadList.find('Comment')).toHaveLength(2);
+  });
+});
+
+describe('Comment editor components should render correctly', () => {
+  it('should render new comment thread editor', () => {
+    const newThreadEditor = shallow(
+      <NewCommentThread serverRoot="fake/path" currFilePath="fake/path" />
+    );
+    expect(newThreadEditor).toMatchSnapshot();
+  });
+
+  it('should render new reply comment editor', () => {
+    const replyEditor = shallow(
+      <NewReplyComment currFilePath="fake/path" hash="hash" />
+    );
+    expect(replyEditor).toMatchSnapshot();
+  });
+});
+
+describe('Reply button behavior', () => {
+  const comment = getComment();
+  it('should show comment editor when clicked', () => {
+    const component = shallow(<Comment detachedComment={comment} />);
+    const replyButton = component.find('.replyButton');
+    replyButton.simulate('click');
+    const replyEditor = component.find('NewReplyComment');
+    expect(replyEditor).toHaveLength(1);
+  });
+
+  it('should toggle component state when clicked', () => {
+    const component = shallow(<Comment detachedComment={comment} />);
+    const replyButton = component.find('.replyButton');
+    expect(component.state('showCommentEditor')).toEqual(false);
+    replyButton.simulate('click');
+    expect(component.state('showCommentEditor')).toEqual(true);
   });
 });

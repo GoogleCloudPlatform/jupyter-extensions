@@ -69,6 +69,7 @@ exports[`Basic Comment Component Rendering detached comment should render correc
     }
   >
     <WithStyles(ForwardRef(Button))
+      className="replyButton"
       color="primary"
       onClick={[Function]}
       size="small"
@@ -158,6 +159,7 @@ exports[`Basic Comment Component Rendering review comment should render correctl
     }
   >
     <WithStyles(ForwardRef(Button))
+      className="replyButton"
       color="primary"
       onClick={[Function]}
       size="small"
@@ -176,4 +178,18 @@ exports[`Basic Comment Component Rendering review comment should render correctl
     }
   />
 </Fragment>
+`;
+
+exports[`Comment editor components should render correctly should render new comment thread editor 1`] = `
+<CommentEditor
+  currFilePath="fake/path"
+  serverRoot="fake/path"
+/>
+`;
+
+exports[`Comment editor components should render correctly should render new reply comment editor 1`] = `
+<ReplyEditor
+  currFilePath="fake/path"
+  hash="hash"
+/>
 `;

@@ -60,6 +60,7 @@ function ReplyEditor(props) {
             variant="outlined"
             size="small"
             style={{ margin: 2 }}
+            className="replyCommentTextField"
           />
         </Grid>
         <Grid item>
@@ -68,6 +69,7 @@ function ReplyEditor(props) {
             color="primary"
             size="small"
             endIcon={<Icon>send</Icon>}
+            className="send"
           >
             Send
           </Button>
