@@ -32,3 +32,8 @@ def _list_models(args):
 def _search(args):
   return BigQueryService.get().search_projects(args["searchKey"],
                                                args["projectId"])
+
+@_handler("POST", "getProject")
+def _get_project(args):
+  custom_client = BigQueryService.get().create_custom_client(args["projectId"])
+  return BigQueryService.get().get_project(custom_client)
