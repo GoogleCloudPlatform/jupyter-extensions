@@ -25,6 +25,7 @@ import {
   completeTrialUrl,
   deleteTrialUrl,
   createTrialUrl,
+  addMeasurementTrialUrl,
 } from '../../utils/urls';
 
 const server = setupServer();
@@ -236,7 +237,7 @@ describe('Suggest Trials Page', () => {
     });
 
     // TODO: fix test warning messages
-    it('submits metrics and shows snackbar message and closes', async () => {
+    it('submits final measurement with metrics and shows snackbar message and closes', async () => {
       const completeTrial = jest.fn((req, res, ctx) => {
         return res(ctx.json(fakeTrialWithFinalMeasurement));
       });
@@ -336,6 +337,59 @@ describe('Suggest Trials Page', () => {
         Object {
           "infeasibleReason": "The values are too high!",
           "trialInfeasible": true,
+        }
+      `);
+    });
+
+    it('submits an intermediate measurement and shows snackbar message and closes', async () => {
+      const addMeasurement = jest.fn((req, res, ctx) => {
+        return res(ctx.json(fakeTrialWithFinalMeasurement));
+      });
+      server.use(rest.post(proxyUrl(addMeasurementTrialUrl()), addMeasurement));
+
+      // Uncheck final measurement
+      userEvent.click(screen.getByTestId('finalMeasurement'));
+
+      const inputs = screen.getAllByTestId('metricInput');
+      expect(inputs).toHaveLength(2);
+
+      // These should not be sent to the backend since the trial is infeasible
+      userEvent.type(inputs[0], '1000');
+      userEvent.type(inputs[1], '666');
+
+      userEvent.click(screen.getByText(/submit/i));
+
+      // Opens snackbar
+      await waitFor(() =>
+        expect(getState().snackbar.message).toEqual('Added the measurement!')
+      );
+
+      // Closes dialog
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('measurementDialog')
+      );
+
+      expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+      // Calls add measurement with valid data
+      expect(addMeasurement).toHaveBeenCalled();
+      const addMeasurementBody = JSON.parse(
+        addMeasurement.mock.calls[0][0].body
+      );
+      expect(addMeasurementBody).toMatchInlineSnapshot(`
+        Object {
+          "measurement": Object {
+            "metrics": Array [
+              Object {
+                "metric": "metric-unspecified",
+                "value": 1000,
+              },
+              Object {
+                "metric": "metric-maximize",
+                "value": 666,
+              },
+            ],
+            "stepCount": "1",
+          },
         }
       `);
     });

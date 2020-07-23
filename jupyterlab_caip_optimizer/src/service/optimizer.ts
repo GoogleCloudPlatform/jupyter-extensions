@@ -27,7 +27,7 @@ import {
   Operation,
   SuggestTrialOperation,
 } from '../types';
-import { createTrialUrl } from '../utils/urls';
+import { createTrialUrl, addMeasurementTrialUrl } from '../utils/urls';
 
 // const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 
@@ -203,6 +203,42 @@ export class OptimizerService {
       console.error(
         `Unable to fetch trials for study with name "${prettifyStudyName(
           studyName
+        )}"`
+      );
+      handleApiError(err);
+    }
+  }
+
+  /**
+   * Adds a measurement of the objective metrics to a trial. This measurement is assumed to have been taken before the trial is complete.
+   * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/addMeasurement
+   * @param measurement The measurement to add.
+   * @param trialName Raw trial name.
+   * @param studyName Raw study name.
+   * @param metadata The region and project id associated with the trial.
+   */
+  async addMeasurement(
+    measurement: Measurement,
+    trialName: string,
+    studyName: string,
+    metadata: MetadataRequired
+  ): Promise<Trial> {
+    try {
+      const response = await this._transportService.submit<Trial>({
+        path: addMeasurementTrialUrl({
+          projectId: metadata.projectId,
+          region: metadata.region,
+          cleanStudyName: prettifyStudyName(studyName),
+          cleanTrialName: prettifyTrial(trialName),
+        }),
+        method: 'POST',
+        body: { measurement },
+      });
+      return response.result;
+    } catch (err) {
+      console.error(
+        `Unable to add a measurement to the trial with then name "${prettifyStudyName(
+          prettifyTrial(trialName)
         )}"`
       );
       handleApiError(err);
