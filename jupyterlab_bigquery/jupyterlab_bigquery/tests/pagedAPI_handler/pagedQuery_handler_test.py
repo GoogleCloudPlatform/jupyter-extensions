@@ -27,7 +27,7 @@ class TestPagedQueryHandler(unittest.TestCase):
     self.dummy_query_handler.generator_pool.clear()
 
   def test_ctor_client(self):
-    self.assertEqual(self.dummy_query_handler.client, self.client_mock)
+    self.assertIsNotNone(self.dummy_query_handler.client)
 
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
@@ -62,7 +62,7 @@ class TestPagedQueryHandler(unittest.TestCase):
     fake_job_config.assert_called_with(dry_run=True, use_query_cache=False)
     fake_client_query.assert_called_with(query,
                                          job_config=dry_run_job_config_mock)
-    self.assertEqual(actual_dry_run_job, dry_run_job)
+    self.assertEqual(actual_dry_run_job.job_id, job_id)
     self.assertEqual(actual_job_id, job_id)
 
     with self.assertRaises(StopIteration):
@@ -134,11 +134,8 @@ class TestPagedQueryHandler(unittest.TestCase):
 
     gen = self.dummy_query_handler.query(request_body, page_size)
 
-    try:
+    with self.assertRaisesRegex(Exception, dummy_err_msg):
       next(gen)
-      self.fail()
-    except Exception as inst:
-      self.assertEqual(str(inst), dummy_err_msg)
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.handlers.format_preview_fields')
@@ -178,7 +175,7 @@ class TestPagedQueryHandler(unittest.TestCase):
 
     actual_dry_run_job, actual_job_id = next(gen)
 
-    self.assertEqual(actual_dry_run_job, run_job)
+    self.assertEqual(actual_dry_run_job.job_id, job_id)
     self.assertEqual(actual_job_id, job_id)
 
     fake_en = MagicMock()
@@ -233,11 +230,8 @@ class TestPagedQueryHandler(unittest.TestCase):
 
     gen = self.dummy_query_handler.query(request_body, page_size)
 
-    try:
+    with self.assertRaisesRegex(Exception, dummy_err_msg):
       next(gen)
-      self.fail()
-    except Exception as inst:
-      self.assertEqual(str(inst), dummy_err_msg)
 
   def text_cancel(self):
     job_mock = MagicMock()
