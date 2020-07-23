@@ -1,4 +1,3 @@
-import { Typography } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeView from '@material-ui/lab/TreeView';
@@ -86,6 +85,11 @@ export function BuildSearchResult(result, context) {
     );
   };
 
+  const openViewDetails = view => {
+    event.stopPropagation();
+    // TODO: Create view widget
+  };
+
   const renderTable = table => {
     const contextMenuItems = [
       {
@@ -104,16 +108,50 @@ export function BuildSearchResult(result, context) {
           nodeId={table.id}
           label={
             <div>
-              <Typography>{table.name}</Typography>
-              <Typography className={localStyles.searchResultSubtitle}>
+              <div>{table.name}</div>
+              <div className={localStyles.searchResultSubtitle}>
                 Dataset: {table.parent}
-              </Typography>
-              <Typography className={localStyles.searchResultSubtitle}>
+              </div>
+              <div className={localStyles.searchResultSubtitle}>
                 Type: {table.type}
-              </Typography>
+              </div>
             </div>
           }
           onDoubleClick={() => openTableDetails(table)}
+          className={localStyles.searchResultItem}
+        />
+      </ContextMenu>
+    );
+  };
+
+  const renderView = view => {
+    const contextMenuItems = [
+      {
+        label: 'Copy View ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+    return (
+      <ContextMenu
+        items={contextMenuItems.map(item => ({
+          label: item.label,
+          onClick: () => item.handler(view),
+        }))}
+      >
+        <TreeItem
+          nodeId={view.id}
+          label={
+            <div>
+              <div>{view.name}</div>
+              <div className={localStyles.searchResultSubtitle}>
+                Dataset: {view.parent}
+              </div>
+              <div className={localStyles.searchResultSubtitle}>
+                Type: {view.type}
+              </div>
+            </div>
+          }
+          onDoubleClick={() => openViewDetails(view)}
           className={localStyles.searchResultItem}
         />
       </ContextMenu>
@@ -138,13 +176,13 @@ export function BuildSearchResult(result, context) {
           nodeId={model.id}
           label={
             <div>
-              <Typography>{model.name}</Typography>
-              <Typography style={{ fontSize: 12, color: 'gray' }}>
+              <div>{model.name}</div>
+              <div className={localStyles.searchResultSubtitle}>
                 Dataset: {model.parent}
-              </Typography>
-              <Typography style={{ fontSize: 12, color: 'gray' }}>
+              </div>
+              <div className={localStyles.searchResultSubtitle}>
                 Type: {model.type}
-              </Typography>
+              </div>
             </div>
           }
           className={localStyles.searchResultItem}
@@ -169,7 +207,14 @@ export function BuildSearchResult(result, context) {
       >
         <TreeItem
           nodeId={dataset.id}
-          label={dataset.name}
+          label={
+            <div>
+              <div>{dataset.name}</div>
+              <div className={localStyles.searchResultSubtitle}>
+                Type: {dataset.type}
+              </div>
+            </div>
+          }
           onDoubleClick={() => openDatasetDetails(dataset)}
           className={localStyles.searchResultItem}
         />
@@ -183,7 +228,9 @@ export function BuildSearchResult(result, context) {
         ? renderDataset(result)
         : result.type === 'model'
         ? renderModel(result)
-        : renderTable(result)}
+        : result.type === 'table'
+        ? renderTable(result)
+        : renderView(result)}
     </div>
   );
 }
