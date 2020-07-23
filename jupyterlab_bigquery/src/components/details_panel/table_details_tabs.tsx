@@ -5,18 +5,13 @@ import {
   TableDetailsService,
   TableDetails,
 } from './service/list_table_details';
+import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import TableDetailsPanel from './table_details_panel';
 import TablePreviewPanel from './table_preview';
 import { stylesheet } from 'typestyle';
 
 const localStyles = stylesheet({
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '18px',
-    margin: 0,
-    padding: '8px 12px 8px 24px',
-  },
   body: {
     margin: '24px',
     marginBottom: 0,
@@ -137,9 +132,7 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
     } else {
       return (
         <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
-          <header className={localStyles.header}>
-            {this.props.table_name}
-          </header>
+          <Header text={this.props.table_name} />
           <div className={localStyles.body}>
             <StyledTabs
               value={this.state.currentTab}
