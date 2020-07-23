@@ -43,8 +43,8 @@ export const ScaleTypeList = [
 export type ScaleType = typeof ScaleTypeList[number];
 
 export interface DoubleValueSpec {
-  minValue: number;
-  maxValue: number;
+  minValue?: number;
+  maxValue?: number;
 }
 
 /**
@@ -52,8 +52,8 @@ export interface DoubleValueSpec {
  * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#IntegerValueSpec)
  */
 export interface IntegerValueSpec {
-  minValue: string;
-  maxValue: string;
+  minValue?: string;
+  maxValue?: string;
 }
 
 export interface CategoricalValueSpec {

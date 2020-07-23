@@ -26,7 +26,7 @@ import { Trials } from './trials';
 import { RootState } from '../../store/store';
 import { setView } from '../../store/view';
 import { CreateTrial } from './create_trial';
-import {styles} from '../../utils/styles'
+import { styles } from '../../utils/styles';
 
 export interface MetricsInputs {
   [metricName: string]: string;
