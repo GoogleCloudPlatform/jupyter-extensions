@@ -193,5 +193,18 @@ class TestListTree(unittest.TestCase):
     got = bigquery.search_projects('dummy', 'dummy_project')
     self.assertEqual(wanted, got)
 
+  def testGetProject(self):
+    gcp_project = 'dummy_project1'
+    mock_client = Mock()
+    mock_client.project = gcp_project
+    bigquery = BigQueryService(None)
+
+    wanted = {
+      'id': 'dummy_project1',
+      'name': 'dummy_project1',
+    }
+    got = bigquery.get_project(mock_client)
+    self.assertEqual(wanted, got)
+
 if __name__ == '__main__':
   unittest.main()

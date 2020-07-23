@@ -6,7 +6,7 @@ import {
 } from '../components/list_items_panel/service/list_items';
 
 export interface DataTreeState {
-  data: { projects: {}; projectIds: [] };
+  data: { projects: {}; projectIds: string[] };
 }
 
 const initialState: DataTreeState = {
@@ -33,6 +33,17 @@ const dataTreeSlice = createSlice({
         [projectId]: projectResult,
       };
     },
+    addProject(state, action: PayloadAction<Project>) {
+      const projectResult = action.payload;
+      const projectId = projectResult.id;
+      if (!state.data.projects[projectId]) {
+        state.data.projects = {
+          ...state.data.projects,
+          [projectId]: projectResult,
+        };
+        state.data.projectIds.push(projectId);
+      }
+    },
     updateDataset(state, action: PayloadAction<Dataset>) {
       const datasetResult = action.payload;
       const datasetId = datasetResult.id;
@@ -49,6 +60,7 @@ export const {
   updateDataTree,
   updateProject,
   updateDataset,
+  addProject,
 } = dataTreeSlice.actions;
 
 export default dataTreeSlice.reducer;
