@@ -26,6 +26,8 @@ export const fakeOperationName =
   'projects/project-id/locations/us-region/operations/operation-name';
 export const fakeCleanOperationName = 'operation-name';
 
+export const fakeCreateTime = '2020-07-23T18:34:52Z';
+
 export const fakeMetricUnspecified = {
   goal: 'GOAL_TYPE_UNSPECIFIED',
   metric: 'metric-unspecified',
@@ -77,7 +79,7 @@ export const fakeStudyResponseActive = {
   name: fakeStudyName,
   studyConfig: fakeStudyConfig,
   state: State.ACTIVE,
-  createTime: '1',
+  createTime: fakeCreateTime,
 };
 
 export const fakeStudyResponseInactive = {
