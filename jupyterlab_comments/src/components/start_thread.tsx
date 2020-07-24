@@ -37,7 +37,7 @@ const style = {
 };
 
 export function CommentEditor(props) {
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState('Start a new comment thread');
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -46,7 +46,11 @@ export function CommentEditor(props) {
     setComment(''); //clear comment text field
   };
   return (
-    <form onSubmit={handleSubmit} style={style.editor}>
+    <form
+      onSubmit={handleSubmit}
+      style={style.editor}
+      className="commentSubmit"
+    >
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -58,12 +62,12 @@ export function CommentEditor(props) {
             rows={3}
             id="outlined-helperText"
             label="Add a new comment"
-            defaultValue="Start a new comment thread"
             value={comment}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
             size="medium"
             style={style.textField}
+            className="newThreadTextField"
           />
         </Grid>
         <Grid item style={style.submit}>
@@ -72,6 +76,7 @@ export function CommentEditor(props) {
             color="primary"
             size="medium"
             endIcon={<Icon>send</Icon>}
+            className="sendThread"
           >
             Send
           </Button>

@@ -1,8 +1,9 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { Comment } from '../components/comment';
 import { NewReplyComment } from '../components/reply_editor';
+// import { ReplyEditor } from '../components/reply_editor';
 import { NewCommentThread } from '../components/start_thread';
 
 const getComment = () => {
@@ -16,6 +17,7 @@ const getComment = () => {
   };
   return comment;
 };
+
 describe('Basic Comment Component Rendering', () => {
   it('detached comment should render correctly', () => {
     const fakeDetachedComment = getComment();
@@ -198,5 +200,47 @@ describe('Reply button behavior', () => {
     expect(component.state('showCommentEditor')).toEqual(false);
     replyButton.simulate('click');
     expect(component.state('showCommentEditor')).toEqual(true);
+  });
+});
+
+describe('Behavior for comment input field', () => {
+  it('should display send button for new thread editor', () => {
+    const component = shallow(
+      <NewCommentThread serverRoot="root" currFilePath="path" />
+    );
+    const submit = component.dive().find('.sendThread');
+    expect(submit).toHaveLength(1);
+  });
+
+  it('should display send button for reply editor', () => {
+    const component = shallow(
+      <NewReplyComment hash="hash" currFilePath="path" />
+    );
+    const submit = component.dive().find('.sendReply');
+    expect(submit).toHaveLength(1);
+  });
+
+  it('should store the value of the comment (reply)', () => {
+    const component = mount(
+      <NewReplyComment hash="hash" currFilePath="path" />
+    );
+    const input = component.find('.replyCommentTextField').first();
+    expect(input.props().value).toEqual('');
+    input.props().value = 'new comment';
+    expect(input.props().value).toEqual('new comment');
+    const submit = component.find('.commentSubmit');
+    expect(typeof submit.props().onSubmit === 'function').toBe(true);
+  });
+
+  it('should store the value of the comment (new thread)', () => {
+    const component = mount(
+      <NewCommentThread serverRoot="root" currFilePath="path" />
+    );
+    const input = component.find('.newThreadTextField').first();
+    expect(input.props().value).toEqual('Start a new comment thread');
+    input.props().value = 'new comment';
+    expect(input.props().value).toEqual('new comment');
+    const submit = component.find('.commentSubmit');
+    expect(typeof submit.props().onSubmit === 'function').toBe(true);
   });
 });

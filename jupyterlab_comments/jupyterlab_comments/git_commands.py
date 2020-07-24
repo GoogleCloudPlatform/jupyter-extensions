@@ -48,7 +48,7 @@ class Git(Configurable):
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 		return_code = subprocess.call(['git', 'appraise', 'push', self.remote], cwd=git_root_dir)
 		#Retry once if refs fail to get pushed
-		if return_code == 1:
+		if return_code != 0:
 			self.run(git_root_dir, 'appraise', 'pull', self.remote)
 			self.run(git_root_dir, 'appraise', 'push', self.remote)
 

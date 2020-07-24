@@ -30,7 +30,7 @@ const style = {
   },
 };
 
-function ReplyEditor(props) {
+export function ReplyEditor(props) {
   const [comment, setComment] = useState('');
   const serverRoot = getServerRoot();
 
@@ -45,7 +45,11 @@ function ReplyEditor(props) {
     setComment(''); //clear comment text field
   };
   return (
-    <form onSubmit={handleSubmit} style={style.editor}>
+    <form
+      onSubmit={handleSubmit}
+      style={style.editor}
+      className="commentSubmit"
+    >
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -69,7 +73,7 @@ function ReplyEditor(props) {
             color="primary"
             size="small"
             endIcon={<Icon>send</Icon>}
-            className="send"
+            className="sendReply"
           >
             Send
           </Button>
