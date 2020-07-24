@@ -44,8 +44,9 @@ class PagedQueryHandler(PagedAPIHandler):
 
     if 'use_legacy_sql' in processed_flags and\
       not isinstance(processed_flags['use_legacy_sql'], bool):
-      raise ValueError('use_legacy_sql shoud be boolean, instead received {}'.format(
-                       processed_flags['use_legacy_sql']))
+      raise ValueError(
+          'use_legacy_sql shoud be boolean, instead received {}'.format(
+              processed_flags['use_legacy_sql']))
 
     # dry run, will throw exception if fail
     dry_run_job_config = bigquery.QueryJobConfig(**processed_flags)
@@ -53,8 +54,14 @@ class PagedQueryHandler(PagedAPIHandler):
     dry_run_job_config.use_query_cache = False
 
     try:
-      dry_run_job = PagedQueryHandler.client.query(
-          query, job_config=dry_run_job_config)
+      with PagedQueryHandler.client_lock:
+        if 'project' in jobConfig and jobConfig['project'] is not None:
+          PagedQueryHandler.client.project = jobConfig['project']
+        else:
+          PagedQueryHandler.client.project = PagedQueryHandler.orig_project
+        dry_run_job = PagedQueryHandler.client.query(
+            query, job_config=dry_run_job_config)
+        PagedQueryHandler.client.project = PagedQueryHandler.orig_project
     except Exception as err:
       if hasattr(err, 'errors'):
         raise Exception(err.errors[0]['message'])
@@ -76,6 +83,7 @@ class PagedQueryHandler(PagedAPIHandler):
       else:
         PagedQueryHandler.client.project = PagedQueryHandler.orig_project
       query_job = PagedQueryHandler.client.query(query, job_config=job_config)
+      PagedQueryHandler.client.project = PagedQueryHandler.orig_project
 
     if query_job.error_result is not None:
       raise Exception(query_job.error_result)
@@ -92,7 +100,7 @@ class PagedQueryHandler(PagedAPIHandler):
           'labels': json.dumps(schema_fields),
           'bytesProcessed': json.dumps(total_bytes_processed)
       }
-      yield (response)
+      yield response
 
   def cancel(self, job):
     job.cancel()
