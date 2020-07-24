@@ -1,5 +1,5 @@
 import React from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { monaco, Monaco } from '@monaco-editor/react';
 import { connect } from 'react-redux';
 import {
   updateQueryResult,
@@ -8,7 +8,7 @@ import {
   QueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
-import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
@@ -118,6 +118,7 @@ class QueryTextEditor extends React.Component<
   QueryTextEditorState
 > {
   editor: editor.IStandaloneCodeEditor;
+  monacoEditor: Monaco;
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
   queryId: QueryId;
@@ -134,6 +135,8 @@ class QueryTextEditor extends React.Component<
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
+
+    monaco.init().then(monacoInstance => (this.monacoEditor = monacoInstance));
   }
 
   componentWillUnmount() {
@@ -211,6 +214,7 @@ class QueryTextEditor extends React.Component<
         this.setState({ errorMsg: null });
       }
       this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
+      this.resetMarkers();
     });
 
     // initial check
@@ -228,12 +232,97 @@ class QueryTextEditor extends React.Component<
       { query, jobConfig: {}, dryRunOnly: true },
       (state, _, response) => {
         if (state === JobState.Fail) {
+          const res = response as string;
           this.setState({
-            errorMsg: response as string,
+            errorMsg: res,
           });
+
+          // deal with errors
+          this.handleSyntaxError(res);
+          this.handleNotFound(res);
         }
       }
     );
+  }
+
+  async handleNotFound(response: string) {
+    const prompt = 'Not found:';
+    response = response.trim();
+    if (!response.startsWith(prompt)) {
+      return;
+    }
+
+    const body = response;
+    // response follow the format "not found: [Table, Dataset, etc] xxx:name"
+    const errStr = response
+      .split(' ')[3]
+      .split(':')
+      .pop();
+    const model = this.editor.getModel();
+    const texts = model.getValue().split('\n');
+
+    let line = -1;
+    let pos = -1;
+
+    for (let i = 0; i < texts.length; i++) {
+      const text = texts[i];
+      const indx = text.indexOf(errStr);
+      if (indx !== -1) {
+        line = i + 1;
+        pos = indx;
+      }
+    }
+
+    const startPos = pos;
+    const endPos = pos + errStr.length;
+
+    this.monacoEditor.editor.setModelMarkers(model, 'owner', [
+      {
+        startLineNumber: line,
+        endLineNumber: line,
+        startColumn: startPos,
+        endColumn: endPos,
+        message: body,
+        severity: MarkerSeverity.Error,
+      },
+    ]);
+  }
+
+  async handleSyntaxError(response: string) {
+    const prompt = 'Syntax error:';
+    response = response.trim();
+    if (!response.startsWith(prompt)) {
+      return;
+    }
+
+    const body = response.substring(prompt.length, response.lastIndexOf('['));
+    const posStr = response.substring(
+      response.lastIndexOf('[') + 1,
+      response.lastIndexOf(']')
+    );
+
+    const [line, pos] = posStr.split(':').map(x => parseInt(x, 10));
+    const model = this.editor.getModel();
+    const text = model.getValue().split('\n')[line - 1];
+
+    const startPos = pos;
+    const errLen = text.substring(pos).indexOf(' ');
+    const endPos = errLen !== -1 ? errLen + pos + 1 : text.length + 1;
+    this.monacoEditor.editor.setModelMarkers(model, 'owner', [
+      {
+        startLineNumber: line,
+        endLineNumber: line,
+        startColumn: startPos,
+        endColumn: endPos,
+        message: body,
+        severity: MarkerSeverity.Error,
+      },
+    ]);
+  }
+
+  resetMarkers() {
+    const model = this.editor.getModel();
+    this.monacoEditor.editor.setModelMarkers(model, 'owner', []);
   }
 
   readableBytes(bytes: number) {
