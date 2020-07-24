@@ -34,7 +34,7 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
 
     const queryResult = queries[this.queryId];
     // eslint-disable-next-line no-extra-boolean-cast
-    const showResult = !!queryResult;
+    const showResult = !!queryResult && queryResult.content.length > 0;
 
     return (
       <div style={{ width: '75vw' }}>
