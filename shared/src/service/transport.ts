@@ -21,7 +21,7 @@ import { GET } from './data';
 /** Request object. */
 export interface ApiRequest {
   path: string;
-  method?: 'DELETE' | 'GET' | 'POST' | 'PUT';
+  method?: 'DELETE' | 'GET' | 'POST' | 'PUT' | 'PATCH';
   params?: { [k: string]: any };
   headers?: { [k: string]: any };
   body?: any;
