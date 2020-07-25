@@ -177,7 +177,6 @@ export class NotebookInstanceServiceLayer {
         locationId,
       };
 
-      console.log(state);
       return state;
     } catch (err) {
       console.error('Unable to determine project status', err);
@@ -317,7 +316,10 @@ export class NotebookInstanceServiceLayer {
     }
     try {
       const { zone } = await this._getMetadata();
-      return zone.split('/')[3];
+      // extract the location from the zone resource name
+      const locationId = zone.split('/')[3];
+      this.locationIdPromise = Promise.resolve(locationId);
+      return this.locationIdPromise;
     } catch (err) {
       console.error('Unable to obtain GCP Zone', err);
       throw err;
@@ -405,7 +407,7 @@ export class NotebookInstanceServiceLayer {
       const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
       const pendingOperation = await this._transportService.submit<Operation>({
         path: `${NOTEBOOKS_API_PATH}/${name}:setMachineType`,
-        method: 'PATCH',
+        method: PATCH,
         headers: { Authorization: `Bearer ${this._authToken}` },
         body: { machineType: machineType },
       });
@@ -421,7 +423,7 @@ export class NotebookInstanceServiceLayer {
 
   /**
    * Updates the guest accelerators of a single Instance.
-   * TODO: use enum for type, verify coreCoutn combo is an int that is a valid combo
+   * TODO: use enum for type, verify coreCount combo is an int that is a valid combo
    */
   async setAccelerator(type: string, coreCount: string): Promise<Instance> {
     try {
