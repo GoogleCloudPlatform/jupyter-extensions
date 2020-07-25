@@ -8,7 +8,7 @@ import {
   QueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
-import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api';
+import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
@@ -118,7 +118,7 @@ class QueryTextEditor extends React.Component<
   QueryTextEditorState
 > {
   editor: editor.IStandaloneCodeEditor;
-  monacoEditor: Monaco;
+  monacoInstance: Monaco;
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
   queryId: QueryId;
@@ -136,7 +136,9 @@ class QueryTextEditor extends React.Component<
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
 
-    monaco.init().then(monacoInstance => (this.monacoEditor = monacoInstance));
+    monaco
+      .init()
+      .then(monacoInstance => (this.monacoInstance = monacoInstance));
   }
 
   componentWillUnmount() {
@@ -233,9 +235,6 @@ class QueryTextEditor extends React.Component<
       (state, _, response) => {
         if (state === JobState.Fail) {
           const res = response as string;
-          this.setState({
-            errorMsg: res,
-          });
 
           // deal with errors
           this.handleSyntaxError(res);
@@ -276,14 +275,14 @@ class QueryTextEditor extends React.Component<
     const startPos = pos;
     const endPos = pos + errStr.length;
 
-    this.monacoEditor.editor.setModelMarkers(model, 'owner', [
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', [
       {
         startLineNumber: line,
         endLineNumber: line,
         startColumn: startPos,
         endColumn: endPos,
         message: body,
-        severity: MarkerSeverity.Error,
+        severity: this.monacoInstance.MarkerSeverity.Error,
       },
     ]);
   }
@@ -295,7 +294,8 @@ class QueryTextEditor extends React.Component<
       return;
     }
 
-    const body = response.substring(prompt.length, response.lastIndexOf('['));
+    // error message follows the format xxxx at [row:column]
+    const body = response.substring(prompt.length, response.lastIndexOf('at'));
     const posStr = response.substring(
       response.lastIndexOf('[') + 1,
       response.lastIndexOf(']')
@@ -308,21 +308,21 @@ class QueryTextEditor extends React.Component<
     const startPos = pos;
     const errLen = text.substring(pos).indexOf(' ');
     const endPos = errLen !== -1 ? errLen + pos + 1 : text.length + 1;
-    this.monacoEditor.editor.setModelMarkers(model, 'owner', [
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', [
       {
         startLineNumber: line,
         endLineNumber: line,
         startColumn: startPos,
         endColumn: endPos,
         message: body,
-        severity: MarkerSeverity.Error,
+        severity: this.monacoInstance.MarkerSeverity.Error,
       },
     ]);
   }
 
   resetMarkers() {
     const model = this.editor.getModel();
-    this.monacoEditor.editor.setModelMarkers(model, 'owner', []);
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', []);
   }
 
   readableBytes(bytes: number) {
