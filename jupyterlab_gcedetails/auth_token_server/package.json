@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "auth_token_server",
+  "version": "0.1.0",
+  "description": "Simple server hosted on app engine to generate and return authentication tokens to make GCE API calls",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "GCP AI Platform Notebooks Frontend Team",
+  "license": "Apache",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "googleapis": "^52.1.0"
+  }
+}
