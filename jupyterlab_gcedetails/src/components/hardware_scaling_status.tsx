@@ -17,7 +17,7 @@ export class HardwareScalingStatus extends React.Component<{}, State> {
   private readonly listener = (message: MessageEvent) => {
     this.authPopup.close();
     window.removeEventListener('message', this.listener);
-    if (message.data['credentials'] === null) {
+    if (message.data['error']) {
       this.setState({
         status: Status.Failed,
       });
