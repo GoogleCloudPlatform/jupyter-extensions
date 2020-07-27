@@ -35,8 +35,8 @@ export interface Model {
 }
 
 export class ListProjectsService {
-  async listProjects(params: number): Promise<DataTree> {
-    const body = { params: params };
+  async listProjects(projectId: string): Promise<DataTree> {
+    const body = { projectId: projectId };
     const requestInit: RequestInit = {
       body: JSON.stringify(body),
       method: 'POST',
@@ -94,6 +94,18 @@ export class ListModelsService {
       method: 'POST',
     };
     const data = await requestAPI<Model[]>('v1/listModels', requestInit);
+    return data;
+  }
+}
+
+export class GetProjectService {
+  async getProject(projectId: string): Promise<Project> {
+    const body = { projectId: projectId };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Project>('v1/getProject', requestInit);
     return data;
   }
 }

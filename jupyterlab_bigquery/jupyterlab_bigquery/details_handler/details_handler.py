@@ -6,7 +6,7 @@ import json
 import re
 import tornado.gen as gen
 import os
-import random
+import math
 
 import json
 import datetime
@@ -34,7 +34,7 @@ def get_dataset_details(client, dataset_id):
           'description':
               dataset.description,
           'labels': [
-              "\t{}: {}".format(label, value)
+              "{}: {}".format(label, value)
               for label, value in dataset.labels.items()
           ] if dataset.labels else None,
           'date_created':
@@ -86,7 +86,7 @@ def get_table_details(client, table_id):
           'id': "{}.{}.{}".format(table.project, table.dataset_id, table.table_id),
           'name': table.table_id,
           'description': table.description,
-          'labels': ["\t{}: {}".format(label, value) for label, value in table.labels.items()] if table.labels else None,
+          'labels': ["{}: {}".format(label, value) for label, value in table.labels.items()] if table.labels else None,
           'date_created': json.dumps(table.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
           'expires': json.dumps(table.expires.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1] if table.expires else None,
           'location': table.location,
