@@ -114,6 +114,7 @@ export const Sidebar = ({
               {studies.map(study => (
                 <TableRow
                   key={study.name}
+                  data-testid="studyRow"
                   onClick={() => openStudy(study.name)}
                   className={rowStyle}
                 >
