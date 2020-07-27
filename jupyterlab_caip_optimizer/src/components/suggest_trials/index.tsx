@@ -59,22 +59,11 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
   return (
     <>
       <Box className={styles.root} p={2}>
-        <Typography variant="h4" gutterBottom>
-          Trial Suggestions for "{prettifyStudyName(studyName)}"
-        </Typography>
-
-        <SuggestForm studyName={studyName} isActiveTrial={isActiveTrial} />
-
-        <Box display="flex" mx={3}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setOpenCustomTrial(true)}
-          >
-            Create Custom Trial
-          </Button>
-
-          <Box ml="auto" mr={2}>
+        <Box display="flex">
+          <Typography variant="h4" gutterBottom>
+            Trial Suggestions for "{prettifyStudyName(studyName)}"
+          </Typography>
+          <Box ml="auto">
             <Button
               variant="contained"
               color="primary"
@@ -91,15 +80,28 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
             </Button>
           </Box>
         </Box>
-      </Box>
 
-      <Box my={2}>
-        <Trials
-          studyName={studyName}
-          studyConfig={studyConfig}
-          trials={trials}
-          openTrial={setTrialName}
-        />
+        <Box display="flex" my={3}>
+          <SuggestForm studyName={studyName} isActiveTrial={isActiveTrial} />
+          <Box ml="auto">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setOpenCustomTrial(true)}
+            >
+              Create Custom Trial
+            </Button>
+          </Box>
+        </Box>
+
+        <Box my={2}>
+          <Trials
+            studyName={studyName}
+            studyConfig={studyConfig}
+            trials={trials}
+            openTrial={setTrialName}
+          />
+        </Box>
       </Box>
 
       <AddMeasurementDialog
