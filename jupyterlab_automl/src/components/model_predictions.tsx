@@ -10,7 +10,7 @@ import {
   TableRow,
   TableCell,
 } from '@material-ui/core';
-import { Clipboard } from '@jupyterlab/apputils';
+import { CopyCode } from './copy_code';
 
 interface Props {
   model: Model;
@@ -26,7 +26,7 @@ interface State {
   pipeline: Pipeline;
   inputs: any;
   notReady: boolean;
-  result: JSX.Element | string;
+  result: JSX.Element;
 }
 
 export class ModelPredictions extends React.Component<Props, State> {
@@ -135,7 +135,7 @@ export class ModelPredictions extends React.Component<Props, State> {
     for (let index = 0; index < entries.length; index++) {
       const key = entries[index][0];
       const val = entries[index][1];
-      instance += "\t'" + key + "': '" + val + "',\n";
+      instance += "  '" + key + "': '" + val + "',\n";
     }
     const generated =
       'from jupyterlab_automl import predict\ninstance = {\n' +
@@ -143,39 +143,9 @@ export class ModelPredictions extends React.Component<Props, State> {
       "}\npredict('" +
       this.state.deployedModel.endpointId +
       "', instance)";
-    Clipboard.copyToSystem(generated);
-    // const code = [<p key={'line1'}>import jupyterlab_automl</p>];
-    // code.push(<p key={'line2'}>instance = {'{'}</p>);
-    // const entries = Object.entries(this.state.inputs);
-    // for (let index = 0; index < entries.length; index++) {
-    //   const key = entries[index][0];
-    //   const val = entries[index][1];
-    //   code.push(
-    //     <p key={key} style={{ paddingLeft: '16px' }}>
-    //       "{key}": "{val}",
-    //     </p>
-    //   );
-    // }
-    // code.push(<p key={'line3'}>{'}'}</p>);
-    // code.push(
-    //   <p key={'line4'}>
-    //     jupyterlab_automl.predict('{this.state.deployedModel.endpointId}',
-    //     instance)
-    //   </p>
-    // );
-    // code.push(
-    //   <SubmitButton
-    //     actionPending={false}
-    //     onClick={_ => {
-    //       Clipboard.copyToSystem(generated);
-    //     }}
-    //     text={'Copy'}
-    //     style={{ marginTop: '16px' }}
-    //   />
-    // );
-    // this.setState({
-    //   result: <div>{code}</div>,
-    // });
+    this.setState({
+      result: <CopyCode code={generated} />,
+    });
   }
 
   private async handlePredict() {
@@ -275,9 +245,7 @@ export class ModelPredictions extends React.Component<Props, State> {
               <TableBody>
                 {pipeline.transformationOptions.map(option => (
                   <TableRow key={option.columnName}>
-                    <TableCell component="th" scope="row">
-                      {option.columnName}
-                    </TableCell>
+                    <TableCell>{option.columnName}</TableCell>
                     <TableCell>
                       <TextInput
                         name={option.columnName}
@@ -304,7 +272,7 @@ export class ModelPredictions extends React.Component<Props, State> {
             <SubmitButton
               actionPending={this.state.notReady || this.state.isLoading}
               onClick={this.handleGeneratePython}
-              text={'Copy Python'}
+              text={'Generate Python'}
             />
             <div style={{ marginTop: '16px' }}>{result}</div>
           </div>
