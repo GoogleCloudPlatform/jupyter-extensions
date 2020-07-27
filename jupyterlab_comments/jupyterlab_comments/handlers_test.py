@@ -15,7 +15,6 @@
 import sys
 import os
 sys.path.append(os.getcwd())
-
 import tempfile
 import handlers
 import subprocess
@@ -31,16 +30,22 @@ dir2 = tempfile.TemporaryDirectory()
 dir1_path = dir1.name
 dir2_path = dir2.name
 
-from os.path import expanduser
-home = expanduser("~")
 
+sys.path.append(os.getcwd())
+home = os.path.expanduser("~")
 FNULL = open(os.devnull, 'w')
 
 
 def setup_repos():
     #Initialize remote repository with test file
     subprocess.call(['git', 'init'], cwd=remote_dir.name, stdout=FNULL, stderr=subprocess.STDOUT)
-    with open(os.path.join(remote_dir.name, "test.py"), 'a') as temp_file:
+    with open(os.path.join(remote_dir.name, "test1.py"), 'a') as temp_file:
+        temp_file.write("# Test file")
+    with open(os.path.join(remote_dir.name, "test2.py"), 'a') as temp_file:
+        temp_file.write("# Test file")
+    with open(os.path.join(remote_dir.name, "test3.py"), 'a') as temp_file:
+        temp_file.write("# Test file")
+    with open(os.path.join(remote_dir.name, "test4.py"), 'a') as temp_file:
         temp_file.write("# Test file")
     subprocess.call(['git', 'add', '.'], cwd=remote_dir.name, stdout=FNULL)
     subprocess.call(['git', 'commit', '-a', '-m', '"Initial commit with a test file"'], cwd=remote_dir.name, stdout=FNULL, stderr=subprocess.STDOUT)
@@ -57,8 +62,13 @@ def setup_repos():
     subprocess.call(['git', 'fetch', 'origin'], cwd=dir2_path, stdout=FNULL, stderr=subprocess.STDOUT)
     subprocess.call(['git', 'checkout', 'origin/master'], cwd=dir2_path, stdout=FNULL, stderr=subprocess.STDOUT)
 
+def add_detached_comment(text, file, cwd):
+    subprocess.call(['git', 'appraise', 'comment', '-d', '-m', text, '-f', file], cwd=cwd)
 
-class TestDetachedComments(tornado.testing.AsyncHTTPTestCase):
+def appraise_push(cwd):
+    subprocess.call(['git', 'appraise', 'push'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
+
+class TestLocalDetachedComments(tornado.testing.AsyncHTTPTestCase):
 
     def get_app(self):
         app = tornado.web.Application()
@@ -67,25 +77,69 @@ class TestDetachedComments(tornado.testing.AsyncHTTPTestCase):
         return app
 
     def test_single_local_comment(self):
-        subprocess.call(['git', 'appraise', 'comment', '-d', '-m', 'Adding a new comment', '-f', 'test.py'], cwd=dir1_path)
-        file_path = os.path.join(dir1_path, 'test.py')
+        add_detached_comment("Adding a new local comment", 'test1.py', dir1_path)
+        file_path = os.path.join(dir1_path, 'test1.py')
+        response = self.fetch('/detachedComments?file_path=' + file_path + '&server_root=' + home, method="GET")
+        self.assertIn('Adding a new local comment', str(response.body))
+
+    def test_multiple_local_comments(self):
+        add_detached_comment('Adding a first local comment', 'test2.py', dir1_path)
+        add_detached_comment('Adding a second local comment', 'test2.py', dir1_path)
+        add_detached_comment('Adding a third local comment', 'test2.py', dir1_path)
+
+        file_path = os.path.join(dir1_path, 'test2.py')
         response = self.fetch('/detachedComments?file_path=' + file_path + '&server_root=' + home, method="GET")
         data = json.loads(response.body)
-        comment = data[0].get("comment")
-        self.assertEqual(comment.get("description"), 'Adding a new comment')
+        self.assertEqual(3, len(data))
 
+class TestRemoteDetachedComments(tornado.testing.AsyncHTTPTestCase):
+
+    def get_app(self):
+        app = tornado.web.Application()
+        host_pattern = '.*$'
+        app.add_handlers(host_pattern, [
+            ('/detachedComments', handlers.DetachedCommentsHandler),
+            ('/remotePull', handlers.PullFromRemoteRepoHandler),
+            ('/addDetachedComment', handlers.AddDetachedCommentHandler)])
+        return app
+
+    def test_pull_from_remote(self):
+        #Add comments in dir1, push to remote, pull in dir2
+        add_detached_comment("First comment", "test3.py", dir1_path)
+        add_detached_comment("Second comment", "test3.py", dir1_path)
+        appraise_push(dir1_path)
+        file_path = os.path.join(dir2_path, 'test3.py')
+        self.fetch('/remotePull?file_path=' + file_path + '&server_root=' + home, method="POST", body=json.dumps({}))
+        response = self.fetch('/detachedComments?file_path=' + file_path + '&server_root=' + home, method="GET")
+        data = json.loads(response.body)
+        self.assertEqual(2, len(data))
+
+    def test_add_comment(self):
+        response = self.fetch('/detachedComments?file_path=' + os.path.join(dir2_path, 'test4.py') + '&server_root=' + home, method="GET")
+        data = json.loads(response.body)
+        #No comments
+        self.assertEqual(None, data)
+        file_path_dir_1 = os.path.join(dir1_path, 'test4.py')
+        self.fetch('/addDetachedComment?file_path=' + file_path_dir_1 + '&server_root=' + home, method="POST", body=json.dumps({"comment": "Test comment"}))
+        response = self.fetch('/detachedComments?file_path=' + file_path_dir_1 + '&server_root=' + home, method="GET")
+        #Comment stored locally in dir1
+        self.assertIn("Test comment", str(response.body))
+        self.fetch('/remotePull?file_path=' + os.path.join(dir2_path, 'test4.py') + '&server_root=' + home, method="POST", body=json.dumps({}))
+        response = self.fetch('/detachedComments?file_path=' + os.path.join(dir2_path, 'test4.py') + '&server_root=' + home, method="GET")
+        #Comments can be fetched remotely in dir2
+        self.assertIn('Test comment', str(response.body))
+        self.fetch('/addDetachedComment?file_path=' + file_path_dir_1 + '&server_root=' + home, method="POST", body=json.dumps({"comment": "Another test comment"}))
+        self.fetch('/remotePull?file_path=' + os.path.join(dir2_path, 'test4.py') + '&server_root=' + home, method="POST", body=json.dumps({}))
+        response = self.fetch('/detachedComments?file_path=' + os.path.join(dir2_path, 'test4.py') + '&server_root=' + home, method="GET")
+        data = json.loads(response.body)
+        self.assertIn('Test comment', str(response.body))
+        self.assertIn('Another test comment', str(response.body))
+        self.assertEqual(2, len(data))
 
 
 if __name__ == '__main__':
     setup_repos()
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDetachedComments)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-
-
-
-
-
-
-
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(TestLocalDetachedComments)
+    suite2 = unittest.TestLoader().loadTestsFromTestCase(TestRemoteDetachedComments)
+    unittest.TextTestRunner(verbosity=2).run(suite1)
+    unittest.TextTestRunner(verbosity=2).run(suite2)
