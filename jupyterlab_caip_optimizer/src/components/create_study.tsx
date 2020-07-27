@@ -38,6 +38,9 @@ interface Props {
 
 const mapDispatchToProps = dispatch => ({
   createStudyAndLoad: (study: Types.Study) =>
+    // Redux's createAsyncThunk returns a Promise<PayloadAction<type>> since the
+    // action has more information. Read more here:
+    // https://redux-toolkit.js.org/api/createAsyncThunk#return-value
     dispatch(createStudy(study)).then((action: PayloadAction<Types.Study>) => {
       dispatch(
         setView({
