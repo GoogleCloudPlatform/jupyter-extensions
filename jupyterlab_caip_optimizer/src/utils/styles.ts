@@ -5,5 +5,6 @@ export const styles = stylesheet({
     // 25px for the bottom statusbar in jupyter
     height: 'calc(100% - 25px)',
     overflow: 'scroll',
+    position: 'relative',
   },
 });

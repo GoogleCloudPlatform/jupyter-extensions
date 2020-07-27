@@ -27,7 +27,6 @@ import {
   TableContainer,
   TableRow,
   Typography,
-  CircularProgress,
 } from '@material-ui/core';
 import { RootState, AppDispatch } from '../store/store';
 import { Study } from '../types';
@@ -36,6 +35,7 @@ import { Store } from 'redux';
 import { prettifyStudyName } from '../service/optimizer';
 import { style } from 'typestyle';
 import { styles } from '../utils/styles';
+import { Loading } from './loading';
 
 const rowStyle = style({
   $nest: {
@@ -101,7 +101,7 @@ export const Sidebar = ({
           </Box>
         </Box>
       )}
-      {loading && <CircularProgress />}
+      {loading && <Loading />}
       {!!studies && studies.length > 0 ? (
         <TableContainer>
           <Table>
@@ -135,7 +135,10 @@ export const Sidebar = ({
   );
 };
 
-const WrappedSidebar = connect(mapStateToProps, mapDispatchToProps)(Sidebar);
+export const WrappedSidebar = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Sidebar);
 
 /** Top-level widget exposed to JupyterLab and connects to redux store */
 export class SidebarWidget extends ReactWidget {

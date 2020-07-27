@@ -12,14 +12,14 @@ import {
   fakeRegion,
 } from '../service/test-constants';
 
-const reducer = {
+export const reducer = {
   view: viewSlice.reducer,
   metadata: metadataSlice.reducer,
   snackbar: snackbarSlice.reducer,
   studies: studiesSlice.reducer,
 };
 
-const initialState = {
+export const initialState = {
   view: {
     data: { view: 'dashboard' },
     isVisible: false,
