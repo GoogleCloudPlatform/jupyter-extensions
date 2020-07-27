@@ -19,7 +19,7 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree, addProject } from '../../reducers/dataTreeSlice';
-import { SnackbarState } from '../../reducers/snackbarSlice';
+import { SnackbarState, openSnackbar } from '../../reducers/snackbarSlice';
 import {
   SearchProjectsService,
   SearchResult,
@@ -37,8 +37,10 @@ interface Props {
   context: Context;
   updateDataTree: any;
   currentProject: string;
+  projectIds: string[];
   addProject: any;
   snackbar: SnackbarState;
+  openSnackbar: any;
 }
 
 export interface Context {
@@ -121,7 +123,7 @@ class ListItemsPanel extends React.Component<Props, State> {
 
   // Handlers for searching
 
-  handleOpenDialog = () => {
+  handleOpenSearchDialog = () => {
     const { searchToggled } = this.state;
     this.setState({
       searchToggled: !searchToggled,
@@ -142,23 +144,35 @@ class ListItemsPanel extends React.Component<Props, State> {
 
   async search(searchKey, project) {
     try {
-      this.setState({ isLoading: true, isSearching: true });
       const service = new SearchProjectsService();
       await service.searchProjects(searchKey, project).then(results => {
-        this.setState({ searchResults: results.searchResults });
+        this.setState({
+          searchResults: this.state.searchResults.concat(results.searchResults),
+        });
       });
     } catch (err) {
-      console.warn('Error searching', err);
+      console.warn('Error searching', err.message);
+      this.handleOpenSearchDialog();
+      this.props.openSnackbar(
+        `Error: Searching not allowed in project ${project}. 
+        Enable the Data Catalog API in this project to continue.`
+      );
     }
-    this.setState({ isLoading: false });
   }
 
-  handleKeyPress = event => {
-    const { currentProject } = this.props;
+  handleKeyPress = async event => {
+    const { projectIds } = this.props;
     if (event.key === 'Enter') {
       const searchKey = event.target.value;
-      if (currentProject !== '') {
-        this.search(searchKey, currentProject);
+      this.setState({ searchResults: [] });
+      if (projectIds.length !== 0) {
+        this.setState({ isLoading: true, isSearching: true });
+        await Promise.all(
+          projectIds.map(async project => {
+            await this.search(searchKey, project);
+          })
+        );
+        this.setState({ isLoading: false });
       } else {
         console.warn(
           'Error searching, wait until data tree loads and try again'
@@ -273,7 +287,10 @@ class ListItemsPanel extends React.Component<Props, State> {
             />
           ) : (
             <div className={localStyles.enableSearch}>
-              <Switch checked={searchToggled} onClick={this.handleOpenDialog} />
+              <Switch
+                checked={searchToggled}
+                onClick={this.handleOpenSearchDialog}
+              />
               <div style={{ alignSelf: 'center' }}>Enable Searching</div>
             </div>
           )}
@@ -312,10 +329,10 @@ class ListItemsPanel extends React.Component<Props, State> {
                 style={{ color: 'blue' }}
                 href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
               >
-                Google Data Catalog API.
+                Google Data Catalog API
               </a>{' '}
-              Once you click "Enable", this may take up to 2-3 minutes before
-              you can start searching.
+              for all pinned projects. Once you click "Enable", this may take up
+              to 2-3 minutes before you can start searching.
             </p>
           }
         />
@@ -370,11 +387,13 @@ class ListItemsPanel extends React.Component<Props, State> {
 const mapStateToProps = state => {
   const currentProject = state.dataTree.data.projectIds[0];
   const snackbar = state.snackbar;
-  return { currentProject, snackbar };
+  const { projectIds } = state.dataTree.data;
+  return { currentProject, snackbar, projectIds };
 };
 const mapDispatchToProps = {
   updateDataTree,
   addProject,
+  openSnackbar,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListItemsPanel);
