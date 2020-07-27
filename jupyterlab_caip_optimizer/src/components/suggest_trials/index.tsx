@@ -26,7 +26,7 @@ import { Trials } from './trials';
 import { RootState } from '../../store/store';
 import { setView } from '../../store/view';
 import { CreateTrial } from './create_trial';
-import {styles} from '../../utils/styles'
+import { styles } from '../../utils/styles';
 
 export interface MetricsInputs {
   [metricName: string]: string;
@@ -65,16 +65,7 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
 
         <SuggestForm studyName={studyName} isActiveTrial={isActiveTrial} />
 
-        <Box my={2}>
-          <Trials
-            studyName={studyName}
-            studyConfig={studyConfig}
-            trials={trials}
-            openTrial={setTrialName}
-          />
-        </Box>
-
-        <Box display="flex" mt={2}>
+        <Box display="flex" mx={3}>
           <Button
             variant="contained"
             color="primary"
@@ -96,10 +87,19 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
                 )
               }
             >
-              Exit
+              Back To Dashboard
             </Button>
           </Box>
         </Box>
+      </Box>
+
+      <Box my={2}>
+        <Trials
+          studyName={studyName}
+          studyConfig={studyConfig}
+          trials={trials}
+          openTrial={setTrialName}
+        />
       </Box>
 
       <AddMeasurementDialog

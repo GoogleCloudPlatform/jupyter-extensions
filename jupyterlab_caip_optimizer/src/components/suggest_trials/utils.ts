@@ -115,6 +115,10 @@ export function trialToData(trial: Trial): any {
   return trialData;
 }
 
+/**
+ * Returns a number associated with state for sorting in the `material-table`.
+ * @param state The trial state.
+ */
 export function trialStateValue(state: State): number {
   switch (state) {
     case 'STATE_UNSPECIFIED':

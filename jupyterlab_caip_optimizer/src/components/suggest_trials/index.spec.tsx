@@ -52,7 +52,7 @@ describe('Suggest Trials Page', () => {
   it('exits to study details page', async () => {
     const { getState } = render(<SuggestTrials studyName={fakeStudyName} />);
 
-    userEvent.click(screen.getByText(/exit/i));
+    userEvent.click(screen.getByText(/back to dashboard/i));
 
     await waitFor(() =>
       expect(getState().view).toMatchInlineSnapshot(`

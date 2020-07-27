@@ -29,8 +29,6 @@ import {
 } from '../types';
 import { createTrialUrl } from '../utils/urls';
 
-// const AI_PLATFORM = 'https://ml.googleapis.com/v1';
-
 function zoneToRegion(zone: string): string {
   const divider = '-';
   const region = zone
