@@ -76,7 +76,7 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
                 )
               }
             >
-              Back To Dashboard
+              Back To Study
             </Button>
           </Box>
         </Box>
