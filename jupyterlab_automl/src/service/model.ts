@@ -3,13 +3,28 @@ import { requestAPI } from './api_request';
 export type ModelType = 'OTHER' | 'TABLE' | 'IMAGE';
 
 export interface Model {
-  id: string; // Resource name of dataset
+  id: string;
   displayName: string;
   pipelineId: string;
   createTime: Date;
   updateTime: Date;
   etag: string;
   modelType: string;
+}
+
+export interface Prediction {
+  label: string;
+  confidence: string;
+}
+
+export interface DeployedModel {
+  deployedModelId: string;
+  endpointId: string;
+}
+
+export interface CheckDeployedResponse {
+  state: number;
+  deployedModel?: DeployedModel;
 }
 
 export interface Pipeline {
@@ -89,5 +104,68 @@ export abstract class ModelService {
     );
     data.createTime = new Date(data.createTime);
     return data;
+  }
+
+  static async checkDeployed(modelId: string): Promise<CheckDeployedResponse> {
+    const body = {
+      modelId: modelId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    return await requestAPI('v1/checkDeployed', requestInit);
+  }
+
+  static async deployModel(modelId: string): Promise<void> {
+    const body = {
+      modelId: modelId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/deployModel', requestInit);
+  }
+
+  static async undeployModel(
+    deployedModelId: string,
+    endpointId: string
+  ): Promise<void> {
+    const body = {
+      deployedModelId: deployedModelId,
+      endpointId: endpointId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/undeployModel', requestInit);
+  }
+
+  static async deleteEndpoint(endpointId: string): Promise<void> {
+    const body = {
+      endpointId: endpointId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/deleteEndpoint', requestInit);
+  }
+
+  static async predict(
+    endpointId: string,
+    inputs: string
+  ): Promise<Prediction[]> {
+    const body = {
+      endpointId: endpointId,
+      inputs: inputs,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    return await requestAPI('v1/predict', requestInit);
   }
 }

@@ -3,6 +3,7 @@
 from notebook.utils import url_path_join
 from jupyterlab_automl.handlers import handlers
 from jupyterlab_automl.version import VERSION
+from jupyterlab_automl.public import *
 
 __version__ = VERSION
 

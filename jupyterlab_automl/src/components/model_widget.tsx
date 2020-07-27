@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Model } from '../service/model';
 import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
+import { ModelPredictions } from './model_predictions';
 import {
   Toolbar,
   Tabs,
@@ -133,6 +134,7 @@ export class ModelPanel extends React.Component<Props, State> {
           >
             <AntTab label="Evaluate" />
             <AntTab label="Model Properties" />
+            <AntTab label="Test" />
           </AntTabs>
         </Toolbar>
         <ul className={localStyles.list}>
@@ -145,6 +147,11 @@ export class ModelPanel extends React.Component<Props, State> {
             model={this.props.model}
             value={tabState}
             index={1}
+          />
+          <ModelPredictions
+            model={this.props.model}
+            value={tabState}
+            index={2}
           />
         </ul>
       </div>

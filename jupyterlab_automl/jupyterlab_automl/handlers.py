@@ -72,6 +72,34 @@ def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])
 
 
+@_handler("POST", "checkDeployed")
+def _check_deployed(args):
+  return AutoMLService.get().check_deployed(model_id=args["modelId"])
+
+
+@_handler("POST", "deployModel")
+def _deploy_model(args):
+  AutoMLService.get().deploy_model(model_id=args["modelId"])
+  return {"success": True}
+
+
+@_handler("POST", "undeployModel")
+def _undeploy_model(args):
+  AutoMLService.get().undeploy_model(deployed_model_id=args["deployedModelId"], endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "deleteEndpoint")
+def _delete_endpoint(args):
+  AutoMLService.get().delete_endpoint(endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "predict")
+def _predict_tables(args):
+  return AutoMLService.get().predict_tables(endpoint_id=args["endpointId"], instance=args["inputs"])
+
+
 @_handler("GET", "tableInfo")
 def _table_info(args):
   return AutoMLService.get().get_table_specs(args["datasetId"])
