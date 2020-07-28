@@ -60,9 +60,7 @@ const localStyles = stylesheet({
     ...csstips.flex,
   },
   root: {
-    height: 216,
     flexGrow: 1,
-    maxWidth: 400,
   },
   circularProgress: {
     padding: 5,
@@ -269,6 +267,8 @@ export function BuildTree(project, context, expandProject, expandDataset) {
             {renderDatasets(project.datasets[datasetId])}
           </div>
         ))
+      ) : project.error ? (
+        <div>{project.error}</div>
       ) : (
         <CircularProgress size={20} className={localStyles.circularProgress} />
       )}
@@ -317,18 +317,26 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
   };
 
   private async getDatasets(project, listDatasetsService) {
+    const newProject = {
+      id: project.id,
+      name: project.name,
+    };
     try {
       await listDatasetsService.listDatasets(project).then((data: Project) => {
-        const newProject = {
-          id: project.id,
-          name: project.name,
-          datasets: data.datasets,
-          datasetIds: data.datasetIds,
-        };
-        this.props.updateProject(newProject);
+        if (data.datasetIds.length === 0) {
+          newProject['error'] =
+            'No datasets available. Check your permissions for this project.';
+        } else {
+          newProject['datasets'] = data.datasets;
+          newProject['datasetIds'] = data.datasetIds;
+        }
       });
     } catch (err) {
       console.warn('Error retrieving datasets', err);
+      newProject['error'] =
+        'No datasets available. Check your permissions for this project.';
+    } finally {
+      this.props.updateProject(newProject);
     }
   }
 

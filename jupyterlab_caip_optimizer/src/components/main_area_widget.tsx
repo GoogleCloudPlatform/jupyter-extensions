@@ -5,6 +5,7 @@ import { Provider, connect } from 'react-redux';
 import { close, ViewType } from '../store/view';
 import { CreateStudy } from './create_study';
 import { Dashboard } from './dashboard';
+import { SuggestTrials } from './suggest_trials';
 import { StudyDetails } from './study_details';
 
 const mapStateToProps = (state: RootState) => ({
@@ -15,7 +16,6 @@ const mapStateToProps = (state: RootState) => ({
  * ViewManager acts as the extensions router for various views.
  */
 export const ViewManager = ({ data }: { data: ViewType }) => {
-  // TODO: add custom components
   switch (data.view) {
     case 'dashboard':
       return <Dashboard />;
@@ -24,7 +24,7 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
     case 'studyDetails':
       return <StudyDetails studyId={data.studyId} />;
     case 'suggestTrials':
-      return <>Suggest Trials: studyId={data.studyId} </>;
+      return <SuggestTrials studyName={data.studyId} />;
     case 'visualizeTrials':
       return <>Visualize Trials: studyId={data.studyId} </>;
   }

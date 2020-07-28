@@ -19,18 +19,7 @@ export const viewSlice = createSlice({
   } as ViewState,
   reducers: {
     setView: (state, action: PayloadAction<ViewType>) => {
-      if (
-        action.payload.view === 'studyDetails' ||
-        action.payload.view === 'suggestTrials' ||
-        action.payload.view === 'visualizeTrials'
-      ) {
-        state.data = {
-          view: action.payload.view,
-          studyId: action.payload.studyId,
-        };
-      } else {
-        state.data = action.payload;
-      }
+      state.data = action.payload;
       state.isVisible = true;
     },
     close: state => {

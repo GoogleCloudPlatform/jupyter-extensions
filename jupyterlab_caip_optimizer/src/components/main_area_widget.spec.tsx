@@ -8,6 +8,9 @@ jest.mock('../store/view');
 jest.mock('./dashboard', () => ({
   Dashboard: () => <div>Dashboard Component</div>,
 }));
+jest.mock('./suggest_trials', () => ({
+  SuggestTrials: () => <div>Suggest Trials Component</div>,
+}));
 jest.mock('./create_study', () => ({
   CreateStudy: () => <div>Create Study Component</div>,
 }));
@@ -36,6 +39,18 @@ describe('ViewManager', () => {
     <StudyDetails
       studyId="STUDY-ID"
     />
+    `);
+  });
+  it('renders the suggest trials page', () => {
+    const viewManager = shallow(
+      <ViewManager
+        data={{ view: 'suggestTrials', studyId: 'studyToSuggest' }}
+      />
+    );
+    expect(viewManager).toMatchInlineSnapshot(`
+      <SuggestTrials
+        studyName="studyToSuggest"
+      />
     `);
   });
 });
