@@ -423,12 +423,14 @@ describe('ClientTransportService', () => {
   });
 
   describe('Uses access token for authentication', () => {
-    it('Sets access token', async () => {
+    it('Sets access token when submitting request', async () => {
+      mockGapiRequest.mockResolvedValue(asApiResponse('all good'));
       const accessToken = 'access-token';
-      transportService = new ClientTransportService(CLIENT_ID, true);
+      const clientTransportService = new ClientTransportService();
+      clientTransportService.accessToken = accessToken;
 
-      await transportService.setAccessToken(accessToken);
-
+      const response = await clientTransportService.submit(SERVICES_REQUEST);
+      expect(response.result).toBe('all good');
       expect(mockGapiLoad).toHaveBeenCalled();
       expect(mockGapiSetToken).toHaveBeenCalledWith({
         // eslint-disable-next-line @typescript-eslint/camelcase

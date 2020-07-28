@@ -18,7 +18,7 @@
 
 import {
   handleApiError,
-  TransportService,
+  ClientTransportService,
   InstanceMetadata,
   getMetadata,
   PATCH,
@@ -76,7 +76,7 @@ export class NotebooksService {
   private metadataPromise?: Promise<InstanceMetadata>;
 
   constructor(
-    private _transportService: TransportService,
+    private _transportService: ClientTransportService,
     projectId?: string,
     instanceName?: string,
     locationId?: string
@@ -128,12 +128,12 @@ export class NotebooksService {
     }
   }
 
-  set transportService(transportService: TransportService) {
+  set transportService(transportService: ClientTransportService) {
     this._transportService = transportService;
   }
 
-  async setAuthToken(authToken: string) {
-    await this._transportService.setAccessToken(authToken);
+  setAuthToken(authToken: string) {
+    this._transportService.accessToken = authToken;
   }
 
   /**
@@ -275,6 +275,15 @@ export class NotebooksService {
     return this.metadataPromise;
   }
 
+  private async getResourceName(): Promise<string> {
+    const [projectId, instanceName, locationId] = await Promise.all([
+      this.projectId,
+      this.instanceName,
+      this.locationId,
+    ]);
+    return `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+  }
+
   private async submitRequest(
     request: ApiRequest,
     errorMessage: string
@@ -297,12 +306,7 @@ export class NotebooksService {
    * Stops the notebook instance.
    */
   async stop(): Promise<Instance> {
-    const [projectId, instanceName, locationId] = await Promise.all([
-      this.projectId,
-      this.instanceName,
-      this.locationId,
-    ]);
-    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const name = await this.getResourceName();
     const request: ApiRequest = {
       path: `${NOTEBOOKS_API_PATH}/${name}:stop`,
       method: POST,
@@ -316,12 +320,7 @@ export class NotebooksService {
    * Starts the notebook instance.
    */
   async start(): Promise<Instance> {
-    const [projectId, instanceName, locationId] = await Promise.all([
-      this.projectId,
-      this.instanceName,
-      this.locationId,
-    ]);
-    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const name = await this.getResourceName();
     const request: ApiRequest = {
       path: `${NOTEBOOKS_API_PATH}/${name}:start`,
       method: POST,
@@ -336,12 +335,7 @@ export class NotebooksService {
    * Updates the machine type of a single Instance.
    */
   async setMachineType(machineType: string): Promise<Instance> {
-    const [projectId, instanceName, locationId] = await Promise.all([
-      this.projectId,
-      this.instanceName,
-      this.locationId,
-    ]);
-    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const name = await this.getResourceName();
     const request: ApiRequest = {
       path: `${NOTEBOOKS_API_PATH}/${name}:setMachineType`,
       method: PATCH,
@@ -357,12 +351,7 @@ export class NotebooksService {
    * TODO: use enum for type, verify coreCount combo is an int that is a valid combo
    */
   async setAccelerator(type: string, coreCount: string): Promise<Instance> {
-    const [projectId, instanceName, locationId] = await Promise.all([
-      this.projectId,
-      this.instanceName,
-      this.locationId,
-    ]);
-    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const name = await this.getResourceName();
     const request: ApiRequest = {
       path: `${NOTEBOOKS_API_PATH}/${name}:setAccelerator`,
       method: 'PATCH',

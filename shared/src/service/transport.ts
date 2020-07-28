@@ -36,7 +36,6 @@ export interface ApiResponse<T> {
 export interface TransportService {
   /** Submit the Google API request and resolve its response. */
   submit<T>(request: ApiRequest): Promise<ApiResponse<T>>;
-  setAccessToken?(accessToken: string): Promise<void>;
 }
 
 /**
@@ -101,6 +100,7 @@ export class ClientTransportService implements TransportService {
   private gapiLoaded = false;
   private authenticatedPromise: Promise<void>;
   private authenticated = false;
+  private _accessToken: string;
 
   /**
    * If useAccessToken is set, you will need to call setAccessToken on the
@@ -108,17 +108,15 @@ export class ClientTransportService implements TransportService {
    * call it again whenever the token expires
    */
 
-  constructor(private clientId: string, private useAccessToken?: boolean) {}
+  constructor(private clientId?: string) {}
+
+  set accessToken(accessToken: string) {
+    this._accessToken = accessToken;
+  }
 
   async submit<T>(request: ApiRequest): Promise<ApiResponse<T>> {
     await this.initializeClient();
     return gapi.client.request(request);
-  }
-
-  async setAccessToken(accessToken: string): Promise<void> {
-    await this.initializeClient();
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    gapi.client.setToken({ access_token: accessToken });
   }
 
   private async _authenticateClient(): Promise<void> {
@@ -174,7 +172,7 @@ export class ClientTransportService implements TransportService {
       }
     }
 
-    if (!this.authenticated && !this.useAccessToken) {
+    if (!this.authenticated && !this._accessToken) {
       if (!this.authenticatedPromise) {
         this.authenticatedPromise = this._authenticateClient();
       }
@@ -184,6 +182,11 @@ export class ClientTransportService implements TransportService {
       } finally {
         this.authenticatedPromise = undefined;
       }
+    }
+
+    if (this._accessToken) {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      gapi.client.setToken({ access_token: this._accessToken });
     }
   }
 }

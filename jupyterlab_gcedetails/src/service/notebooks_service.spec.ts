@@ -33,6 +33,7 @@ import {
   Instance,
   State,
 } from './notebooks_service';
+import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
 const TEST_PROJECT = 'test-project';
 const TEST_INSTANCE_NAME = 'test-instance-name';
@@ -69,13 +70,16 @@ function pollerHelper(): () => void {
 describe('NotebookInstanceServiceLayer', () => {
   const name = `projects/${TEST_PROJECT}/locations/${TEST_LOCATION_ID}/instances/${TEST_INSTANCE_NAME}`;
   const mockSubmit = jest.fn();
+  const transportService = ({
+    submit: mockSubmit,
+  } as unknown) as ClientTransportService;
   let notebooksService: NotebooksService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    notebooksService = new NotebooksService({ submit: mockSubmit }, null);
+    notebooksService = new NotebooksService(transportService, null);
     notebooksService.projectId = TEST_PROJECT;
     notebooksService.instanceName = TEST_INSTANCE_NAME;
     notebooksService.locationId = TEST_LOCATION_ID;
