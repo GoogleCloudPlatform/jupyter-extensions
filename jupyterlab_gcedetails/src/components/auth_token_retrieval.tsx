@@ -1,8 +1,6 @@
 export function AuthTokenRetrieval(callback) {
   // eslint-disable-next-line prefer-const
   let authPopup: any;
-  const oAuthHost =
-    'https://jupyterlab-interns-sandbox.uc.r.appspot.com/authorize';
   const listener = (message: MessageEvent) => {
     authPopup.close();
     window.removeEventListener('message', listener);
@@ -10,7 +8,7 @@ export function AuthTokenRetrieval(callback) {
   };
   window.addEventListener('message', listener);
   authPopup = window.open(
-    `${oAuthHost}/authorize`,
+    'https://jupyterlab-interns-sandbox.uc.r.appspot.com/authorize',
     '_authPopup',
     'left=100,top=100,width=400,height=400'
   );
