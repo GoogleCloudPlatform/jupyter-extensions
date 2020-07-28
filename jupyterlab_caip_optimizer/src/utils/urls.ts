@@ -25,6 +25,27 @@ export function getTrialsUrl(
   return `https://${region}-ml.googleapis.com/v1/projects/${projectId}/locations/${region}/studies/${cleanStudyName}/trials`;
 }
 
+export function addMeasurementTrialUrl(
+  {
+    projectId,
+    region,
+    cleanStudyName,
+    cleanTrialName,
+  }: {
+    projectId: string;
+    region: string;
+    cleanStudyName: string;
+    cleanTrialName: string;
+  } = {
+    projectId: fakeProjectId,
+    region: fakeRegion,
+    cleanStudyName: cleanFakeStudyName,
+    cleanTrialName: cleanFakeTrialName,
+  }
+): string {
+  return `https://${region}-ml.googleapis.com/v1/projects/${projectId}/locations/${region}/studies/${cleanStudyName}/trials/${cleanTrialName}:addMeasurement`;
+}
+
 export function completeTrialUrl(
   {
     projectId,

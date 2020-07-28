@@ -25,6 +25,7 @@ import {
   completeTrialUrl,
   deleteTrialUrl,
   createTrialUrl,
+  addMeasurementTrialUrl,
 } from '../../utils/urls';
 
 const server = setupServer();
@@ -236,7 +237,7 @@ describe('Suggest Trials Page', () => {
     });
 
     // TODO: fix test warning messages
-    it('submits metrics and shows snackbar message and closes', async () => {
+    it('submits final measurement with metrics and shows snackbar message and closes', async () => {
       const completeTrial = jest.fn((req, res, ctx) => {
         return res(ctx.json(fakeTrialWithFinalMeasurement));
       });
@@ -340,6 +341,59 @@ describe('Suggest Trials Page', () => {
       `);
     });
 
+    it('submits an intermediate measurement and shows snackbar message and closes', async () => {
+      const addMeasurement = jest.fn((req, res, ctx) => {
+        return res(ctx.json(fakeTrialWithFinalMeasurement));
+      });
+      server.use(rest.post(proxyUrl(addMeasurementTrialUrl()), addMeasurement));
+
+      // Uncheck final measurement
+      userEvent.click(screen.getByTestId('finalMeasurement'));
+
+      const inputs = screen.getAllByTestId('metricInput');
+      expect(inputs).toHaveLength(2);
+
+      // These should not be sent to the backend since the trial is infeasible
+      userEvent.type(inputs[0], '1000');
+      userEvent.type(inputs[1], '666');
+
+      userEvent.click(screen.getByText(/submit/i));
+
+      // Opens snackbar
+      await waitFor(() =>
+        expect(getState().snackbar.message).toEqual('Added the measurement!')
+      );
+
+      // Closes dialog
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('measurementDialog')
+      );
+
+      expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+      // Calls add measurement with valid data
+      expect(addMeasurement).toHaveBeenCalled();
+      const addMeasurementBody = JSON.parse(
+        addMeasurement.mock.calls[0][0].body
+      );
+      expect(addMeasurementBody).toMatchInlineSnapshot(`
+        Object {
+          "measurement": Object {
+            "metrics": Array [
+              Object {
+                "metric": "metric-unspecified",
+                "value": 1000,
+              },
+              Object {
+                "metric": "metric-maximize",
+                "value": 666,
+              },
+            ],
+            "stepCount": "1",
+          },
+        }
+      `);
+    });
+
     it('disables the metric inputs when trial is infeasible', () => {
       userEvent.click(screen.getByTestId('infeasible'));
 
@@ -358,7 +412,7 @@ describe('Suggest Trials Page', () => {
     });
   });
 
-  describe('Add custom measurement', () => {
+  describe('add custom measurement', () => {
     let createTrial: jest.Mock;
     // open dialog
     beforeEach(async () => {
@@ -374,7 +428,7 @@ describe('Suggest Trials Page', () => {
       await waitFor(() => screen.getByTestId('createTrialDialog'));
     });
 
-    it('adds parameter and final measurement value and submits them', async () => {
+    it('creates a custom trial with parameters and metrics filled out', async () => {
       const parameterInputs = screen.getAllByTestId('selectionInput');
       expect(parameterInputs).toHaveLength(2);
 
@@ -450,6 +504,59 @@ describe('Suggest Trials Page', () => {
       await waitForElementToBeRemoved(() =>
         screen.queryByTestId('createTrialDialog')
       );
+    });
+
+    it('creates a requested trial', async () => {
+      const parameterInputs = screen.getAllByTestId('selectionInput');
+      expect(parameterInputs).toHaveLength(2);
+
+      const metricInputs = screen.getAllByTestId('metricInput');
+      expect(metricInputs).toHaveLength(2);
+
+      // enable requested
+      userEvent.click(screen.getByTestId('requestedTrial'));
+
+      // parameters
+
+      // categorical type (param-categorical)
+      // open selection panel
+      userEvent.click(parameterInputs[0]);
+      await waitFor(() => screen.getByTestId('categorical-type-menuItem'));
+      // select option
+      userEvent.click(screen.getByTestId('categorical-type-menuItem'));
+
+      // discrete type (param-discrete)
+      // open selection panel
+      userEvent.click(parameterInputs[1]);
+      await waitFor(() => screen.getByTestId('556-menuItem'));
+      // select option
+      userEvent.click(screen.getByTestId('556-menuItem'));
+
+      // submit
+      userEvent.click(screen.getByTestId('createTrialButton'));
+
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId('createTrialDialog')
+      );
+
+      expect(createTrial).toHaveBeenCalled();
+      const createTrialBody = JSON.parse(createTrial.mock.calls[0][0].body);
+      expect(createTrialBody).toMatchInlineSnapshot(`
+        Object {
+          "measurements": Array [],
+          "parameters": Array [
+            Object {
+              "parameter": "param-categorical",
+              "stringValue": "categorical-type",
+            },
+            Object {
+              "floatValue": 556,
+              "parameter": "param-discrete",
+            },
+          ],
+          "state": "REQUESTED",
+        }
+      `);
     });
 
     // TODO: add other parameters types like integer and double
