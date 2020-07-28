@@ -19,21 +19,15 @@
 import {
   handleApiError,
   TransportService,
-  POST,
-  PATCH,
   InstanceMetadata,
   getMetadata,
+  PATCH,
+  POST,
+  ApiRequest,
 } from 'gcp_jupyterlab_shared';
 
 const POLL_INTERVAL = 5000;
 const POLL_RETRIES = 3;
-
-interface Service {
-  endpoint: string;
-  name: string;
-  documentation: string;
-  isOptional: boolean;
-}
 
 interface AcceleratorConfig {
   type: string;
@@ -49,29 +43,13 @@ export interface Instance {
 
 /** Service wrapper state corresponding to a Notebook Instance. */
 export interface State {
-  serviceEnabled: boolean;
   projectId: string;
   instanceName: string;
   locationId: string;
 }
 
-/** API service status */
-export interface ServiceStatus {
-  service: Service;
-  enabled: boolean;
-}
-
-export const NOTEBOOKS_API_SERVICE: Readonly<Service> = {
-  name: 'AI Platform Notebooks API',
-  endpoint: 'notebooks.googleapis.com',
-  documentation: 'https://cloud.google.com/ai-platform/notebooks/',
-  isOptional: false,
-};
-
 type Operation = gapi.client.servicemanagement.Operation;
-type ListServicesResponse = gapi.client.servicemanagement.ListServicesResponse;
 
-const SERVICE_MANAGER = 'https://servicemanagement.googleapis.com/v1';
 export const NOTEBOOKS_API_PATH = 'https://notebooks.googleapis.com/v1beta1';
 
 const GOOGLE_API_UNAUTHENITCATED_CODE = 16;
@@ -89,8 +67,9 @@ export function isUnauthorized(err: any) {
 /**
  * Wraps around the GCP AI Platform Notebooks API to manage notebook resources in Google Cloud.
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest
+ * Must set authToken before making requests
  */
-export class NotebookInstanceServiceLayer {
+export class NotebooksService {
   private projectIdPromise?: Promise<string>;
   private instanceNamePromise?: Promise<string>;
   private locationIdPromise?: Promise<string>;
@@ -98,7 +77,6 @@ export class NotebookInstanceServiceLayer {
 
   constructor(
     private _transportService: TransportService,
-    private _authToken: string,
     projectId?: string,
     instanceName?: string,
     locationId?: string
@@ -154,8 +132,8 @@ export class NotebookInstanceServiceLayer {
     this._transportService = transportService;
   }
 
-  set authToken(authToken: string) {
-    this._authToken = authToken;
+  async setAuthToken(authToken: string) {
+    await this._transportService.setAccessToken(authToken);
   }
 
   /**
@@ -171,7 +149,6 @@ export class NotebookInstanceServiceLayer {
       ]);
 
       const state: State = {
-        serviceEnabled: false,
         projectId,
         instanceName,
         locationId,
@@ -181,48 +158,6 @@ export class NotebookInstanceServiceLayer {
     } catch (err) {
       console.error('Unable to determine project status', err);
       throw err;
-    }
-  }
-
-  /**
-   * Enables the service specified returning a Promise for the
-   * operation.
-   */
-  async enableService(serviceName: string): Promise<Operation> {
-    try {
-      const projectId = await this.projectId;
-      const pendingOperation = await this._transportService.submit<Operation>({
-        path: `${SERVICE_MANAGER}/services/${serviceName}:enable`,
-        method: POST,
-        body: { consumerId: `project:${projectId}` },
-      });
-
-      return await this._pollOperation(
-        `${SERVICE_MANAGER}/${pendingOperation.result.name}`
-      );
-    } catch (err) {
-      console.error('Unable to enable necessary GCP service');
-      handleApiError(err);
-    }
-  }
-
-  /** Returns the status of the required service. */
-  async _getServiceStatus(service: Service): Promise<boolean> {
-    try {
-      const projectId = await this._getProject();
-      const response = await this._transportService.submit<
-        ListServicesResponse
-      >({
-        path: `${SERVICE_MANAGER}/services`,
-        params: { consumerId: `project:${projectId}`, pageSize: 100 },
-      });
-      const enabledServices = new Set(
-        response.result.services.map(m => m.serviceName)
-      );
-      return enabledServices.has(service.endpoint);
-    } catch (err) {
-      console.error('Unable to return GCP services');
-      handleApiError(err);
     }
   }
 
@@ -340,85 +275,81 @@ export class NotebookInstanceServiceLayer {
     return this.metadataPromise;
   }
 
-  /**
-   * Stops the notebook instance.
-   */
-  async stop(): Promise<Instance> {
+  private async submitRequest(
+    request: ApiRequest,
+    errorMessage: string
+  ): Promise<Instance> {
     try {
-      const [projectId, instanceName, locationId] = await Promise.all([
-        this.projectId,
-        this.instanceName,
-        this.locationId,
-      ]);
-      const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
-      const pendingOperation = await this._transportService.submit<Operation>({
-        path: `${NOTEBOOKS_API_PATH}/${name}:stop`,
-        method: POST,
-        headers: { Authorization: `Bearer ${this._authToken}` },
-        body: {},
-      });
+      const pendingOperation = await this._transportService.submit<Operation>(
+        request
+      );
       const finishedOperation = await this._pollOperation(
         `${NOTEBOOKS_API_PATH}/${pendingOperation.result.name}`
       );
       return finishedOperation.response as Instance;
     } catch (err) {
-      console.error('Unable to stop notebook instance');
+      console.error(errorMessage);
       handleApiError(err);
     }
+  }
+
+  /**
+   * Stops the notebook instance.
+   */
+  async stop(): Promise<Instance> {
+    const [projectId, instanceName, locationId] = await Promise.all([
+      this.projectId,
+      this.instanceName,
+      this.locationId,
+    ]);
+    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const request: ApiRequest = {
+      path: `${NOTEBOOKS_API_PATH}/${name}:stop`,
+      method: POST,
+      body: {},
+    };
+    const errorMessage = 'Unable to stop notebook instance';
+    return this.submitRequest(request, errorMessage);
   }
 
   /**
    * Starts the notebook instance.
    */
   async start(): Promise<Instance> {
-    try {
-      const [projectId, instanceName, locationId] = await Promise.all([
-        this.projectId,
-        this.instanceName,
-        this.locationId,
-      ]);
-      const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
-      const pendingOperation = await this._transportService.submit<Operation>({
-        path: `${NOTEBOOKS_API_PATH}/${name}:start`,
-        method: POST,
-        headers: { Authorization: `Bearer ${this._authToken}` },
-        body: {},
-      });
-      const finishedOperation = await this._pollOperation(
-        `${NOTEBOOKS_API_PATH}/${pendingOperation.result.name}`
-      );
-      return finishedOperation.response as Instance;
-    } catch (err) {
-      console.error('Unable to start notebook instance');
-      handleApiError(err);
-    }
+    const [projectId, instanceName, locationId] = await Promise.all([
+      this.projectId,
+      this.instanceName,
+      this.locationId,
+    ]);
+    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const request: ApiRequest = {
+      path: `${NOTEBOOKS_API_PATH}/${name}:start`,
+      method: POST,
+      body: {},
+    };
+    const errorMessage = 'Unable to start notebook instance';
+
+    return this.submitRequest(request, errorMessage);
   }
 
   /**
    * Updates the machine type of a single Instance.
    */
   async setMachineType(machineType: string): Promise<Instance> {
-    try {
-      const [projectId, instanceName, locationId] = await Promise.all([
-        this.projectId,
-        this.instanceName,
-        this.locationId,
-      ]);
-      const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
-      const pendingOperation = await this._transportService.submit<Operation>({
-        path: `${NOTEBOOKS_API_PATH}/${name}:setMachineType`,
-        method: PATCH,
-        headers: { Authorization: `Bearer ${this._authToken}` },
-        body: { machineType: machineType },
-      });
-      const finishedOperation = await this._pollOperation(
-        `${NOTEBOOKS_API_PATH}/${pendingOperation.result.name}`
-      );
-      return finishedOperation.response as Instance;
-    } catch (err) {
-      console.error('Unable to set machine type of notebook instance');
-      handleApiError(err);
-    }
+    const [projectId, instanceName, locationId] = await Promise.all([
+      this.projectId,
+      this.instanceName,
+      this.locationId,
+    ]);
+    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const request: ApiRequest = {
+      path: `${NOTEBOOKS_API_PATH}/${name}:setMachineType`,
+      method: PATCH,
+      body: { machineType: machineType },
+    };
+    const errorMessage = 'Unable to set machine type of notebook instance';
+
+    return this.submitRequest(request, errorMessage);
   }
 
   /**
@@ -426,28 +357,20 @@ export class NotebookInstanceServiceLayer {
    * TODO: use enum for type, verify coreCount combo is an int that is a valid combo
    */
   async setAccelerator(type: string, coreCount: string): Promise<Instance> {
-    try {
-      const [projectId, instanceName, locationId] = await Promise.all([
-        this.projectId,
-        this.instanceName,
-        this.locationId,
-      ]);
-      const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
-      const pendingOperation = await this._transportService.submit<Operation>({
-        path: `${NOTEBOOKS_API_PATH}/${name}:setAccelerator`,
-        method: PATCH,
-        headers: { Authorization: `Bearer ${this._authToken}` },
-        body: { type, coreCount },
-      });
-      const finishedOperation = await this._pollOperation(
-        `${NOTEBOOKS_API_PATH}/${pendingOperation.result.name}`
-      );
-      return finishedOperation.response as Instance;
-    } catch (err) {
-      console.error(
-        'Unable to update the guest accelerators of notebook instance'
-      );
-      handleApiError(err);
-    }
+    const [projectId, instanceName, locationId] = await Promise.all([
+      this.projectId,
+      this.instanceName,
+      this.locationId,
+    ]);
+    const name = `projects/${projectId}/locations/${locationId}/instances/${instanceName}`;
+    const request: ApiRequest = {
+      path: `${NOTEBOOKS_API_PATH}/${name}:setAccelerator`,
+      method: 'PATCH',
+      body: { type, coreCount },
+    };
+    const errorMessage =
+      'Unable to update the guest accelerators of notebook instance';
+
+    return this.submitRequest(request, errorMessage);
   }
 }

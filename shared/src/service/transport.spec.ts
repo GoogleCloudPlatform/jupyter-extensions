@@ -151,6 +151,7 @@ describe('ClientTransportService', () => {
   const mockGapiInit = jest.fn();
   const mockGapiRequest = jest.fn();
   const mockGetAuthInstance = jest.fn();
+  const mockGapiSetToken = jest.fn();
   let mockGapiLoad: jest.Mock;
   let transportService: TransportService;
 
@@ -178,6 +179,7 @@ describe('ClientTransportService', () => {
       client: {
         init: mockGapiInit,
         request: mockGapiRequest,
+        setToken: mockGapiSetToken,
       },
     };
   });
@@ -416,6 +418,21 @@ describe('ClientTransportService', () => {
           pageSize: 100,
         },
         path: 'https://servicemanagement.googleapis.com/v1/services',
+      });
+    });
+  });
+
+  describe('Uses access token for authentication', () => {
+    it('Sets access token', async () => {
+      const accessToken = 'access-token';
+      transportService = new ClientTransportService(CLIENT_ID, true);
+
+      await transportService.setAccessToken(accessToken);
+
+      expect(mockGapiLoad).toHaveBeenCalled();
+      expect(mockGapiSetToken).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        access_token: accessToken,
       });
     });
   });

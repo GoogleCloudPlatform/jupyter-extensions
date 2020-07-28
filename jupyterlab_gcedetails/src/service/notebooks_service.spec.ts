@@ -28,11 +28,11 @@ jest.mock('gcp_jupyterlab_shared', () => {
 
 import { ApiRequest, asApiResponse } from 'gcp_jupyterlab_shared';
 import {
-  NotebookInstanceServiceLayer,
+  NotebooksService,
   NOTEBOOKS_API_PATH,
   Instance,
   State,
-} from './notebook_instance_service_layer';
+} from './notebooks_service';
 
 const TEST_PROJECT = 'test-project';
 const TEST_INSTANCE_NAME = 'test-instance-name';
@@ -40,7 +40,6 @@ const TEST_LOCATION_ID = 'test-location-id';
 
 function getState(): State {
   return {
-    serviceEnabled: false,
     projectId: TEST_PROJECT,
     instanceName: TEST_INSTANCE_NAME,
     locationId: TEST_LOCATION_ID,
@@ -70,34 +69,31 @@ function pollerHelper(): () => void {
 describe('NotebookInstanceServiceLayer', () => {
   const name = `projects/${TEST_PROJECT}/locations/${TEST_LOCATION_ID}/instances/${TEST_INSTANCE_NAME}`;
   const mockSubmit = jest.fn();
-  let notebookInstanceServiceLayer: NotebookInstanceServiceLayer;
+  let notebooksService: NotebooksService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    notebookInstanceServiceLayer = new NotebookInstanceServiceLayer(
-      { submit: mockSubmit },
-      null
-    );
-    notebookInstanceServiceLayer.projectId = TEST_PROJECT;
-    notebookInstanceServiceLayer.instanceName = TEST_INSTANCE_NAME;
-    notebookInstanceServiceLayer.locationId = TEST_LOCATION_ID;
+    notebooksService = new NotebooksService({ submit: mockSubmit }, null);
+    notebooksService.projectId = TEST_PROJECT;
+    notebooksService.instanceName = TEST_INSTANCE_NAME;
+    notebooksService.locationId = TEST_LOCATION_ID;
   });
 
   describe('Get State', () => {
     it('Gets fully enabled state', async () => {
-      const state = await notebookInstanceServiceLayer.getState();
+      const state = await notebooksService.getState();
       const expectedState: State = getState();
       expect(state).toEqual(expectedState);
     });
 
     it('Gets empty state with project ID from server', async () => {
       const project = 'other-project-id';
-      notebookInstanceServiceLayer.projectId = null;
+      notebooksService.projectId = null;
       mockGetMetadata.mockResolvedValue({ project });
 
-      const state = await notebookInstanceServiceLayer.getState();
+      const state = await notebooksService.getState();
       const expectedState = getState();
       expectedState.projectId = project;
       expect(state).toEqual(expectedState);
@@ -107,12 +103,12 @@ describe('NotebookInstanceServiceLayer', () => {
       const error = {
         result: 'Unable to retrieve metadata from VM',
       };
-      notebookInstanceServiceLayer.projectId = null;
+      notebooksService.projectId = null;
       mockGetMetadata.mockRejectedValue(error);
 
       expect.assertions(1);
       try {
-        await notebookInstanceServiceLayer.getState();
+        await notebooksService.getState();
       } catch (err) {
         expect(err).toEqual(error);
       }
@@ -120,10 +116,10 @@ describe('NotebookInstanceServiceLayer', () => {
 
     it('Gets empty state with instance name from server', async () => {
       const instanceName = 'other-istance-name';
-      notebookInstanceServiceLayer.instanceName = null;
+      notebooksService.instanceName = null;
       mockGetMetadata.mockResolvedValue({ name: instanceName });
 
-      const state = await notebookInstanceServiceLayer.getState();
+      const state = await notebooksService.getState();
       const expectedState = getState();
       expectedState.instanceName = instanceName;
       expect(state).toEqual(expectedState);
@@ -133,12 +129,12 @@ describe('NotebookInstanceServiceLayer', () => {
       const error = {
         result: 'Unable to retrieve metadata from VM',
       };
-      notebookInstanceServiceLayer.instanceName = null;
+      notebooksService.instanceName = null;
       mockGetMetadata.mockRejectedValue(error);
 
       expect.assertions(1);
       try {
-        await notebookInstanceServiceLayer.getState();
+        await notebooksService.getState();
       } catch (err) {
         expect(err).toEqual(error);
       }
@@ -146,10 +142,10 @@ describe('NotebookInstanceServiceLayer', () => {
 
     it('Gets empty state with location ID from server', async () => {
       const zone = 'projects/test-project/zones/other-location-id';
-      notebookInstanceServiceLayer.locationId = null;
+      notebooksService.locationId = null;
       mockGetMetadata.mockResolvedValue({ zone });
 
-      const state = await notebookInstanceServiceLayer.getState();
+      const state = await notebooksService.getState();
       const expectedState = getState();
       expectedState.locationId = zone.split('/')[3];
       expect(state).toEqual(expectedState);
@@ -159,12 +155,12 @@ describe('NotebookInstanceServiceLayer', () => {
       const error = {
         result: 'Unable to retrieve metadata from VM',
       };
-      notebookInstanceServiceLayer.locationId = null;
+      notebooksService.locationId = null;
       mockGetMetadata.mockRejectedValue(error);
 
       expect.assertions(1);
       try {
-        await notebookInstanceServiceLayer.getState();
+        await notebooksService.getState();
       } catch (err) {
         expect(err).toEqual(error);
       }
@@ -187,7 +183,7 @@ describe('NotebookInstanceServiceLayer', () => {
         .mockReturnValueOnce(asApiResponse({ done: true, response }));
 
       const stopTimers = pollerHelper();
-      const result = await notebookInstanceServiceLayer.stop();
+      const result = await notebooksService.stop();
       stopTimers();
 
       expect(result.state).toBe('STOPPED');
@@ -195,7 +191,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: stopPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -220,7 +215,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(5);
       try {
-        await notebookInstanceServiceLayer.stop();
+        await notebooksService.stop();
       } catch (err) {
         expect(err).toEqual('400: Could not stop Notebook Instance');
       }
@@ -230,7 +225,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: stopPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -253,7 +247,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(6);
       try {
-        await notebookInstanceServiceLayer.stop();
+        await notebooksService.stop();
       } catch (err) {
         expect(err).toEqual('Unexpected error fetching operation');
       }
@@ -263,7 +257,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: stopPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -294,7 +287,7 @@ describe('NotebookInstanceServiceLayer', () => {
         .mockReturnValueOnce(asApiResponse({ done: true, response }));
 
       const stopTimers = pollerHelper();
-      const result = await notebookInstanceServiceLayer.start();
+      const result = await notebooksService.start();
       stopTimers();
 
       expect(result.state).toBe('ACTIVE');
@@ -302,7 +295,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: startPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -327,7 +319,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(5);
       try {
-        await notebookInstanceServiceLayer.start();
+        await notebooksService.start();
       } catch (err) {
         expect(err).toEqual('400: Could not start Notebook Instance');
       }
@@ -337,7 +329,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: startPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -360,7 +351,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(6);
       try {
-        await notebookInstanceServiceLayer.start();
+        await notebooksService.start();
       } catch (err) {
         expect(err).toEqual('Unexpected error fetching operation');
       }
@@ -370,7 +361,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: startPath,
         method: 'POST',
-        headers: { Authorization: `Bearer ${null}` },
         body: {},
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -404,9 +394,7 @@ describe('NotebookInstanceServiceLayer', () => {
         .mockReturnValueOnce(asApiResponse({ done: true, response }));
 
       const stopTimers = pollerHelper();
-      const result = await notebookInstanceServiceLayer.setMachineType(
-        machineType
-      );
+      const result = await notebooksService.setMachineType(machineType);
       stopTimers();
 
       expect(result.machineType).toBe(machineType);
@@ -414,7 +402,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setMachineTypePath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { machineType },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -444,7 +431,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(5);
       try {
-        await notebookInstanceServiceLayer.setMachineType(machineType);
+        await notebooksService.setMachineType(machineType);
       } catch (err) {
         expect(err).toEqual(
           '400: Could not set Machine Type of Notebook Instance'
@@ -456,7 +443,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setMachineTypePath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { machineType },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -479,7 +465,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(6);
       try {
-        await notebookInstanceServiceLayer.setMachineType(machineType);
+        await notebooksService.setMachineType(machineType);
       } catch (err) {
         expect(err).toEqual('Unexpected error fetching operation');
       }
@@ -489,7 +475,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setMachineTypePath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { machineType },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -527,10 +512,7 @@ describe('NotebookInstanceServiceLayer', () => {
         .mockReturnValueOnce(asApiResponse({ done: true, response }));
 
       const stopTimers = pollerHelper();
-      const result = await notebookInstanceServiceLayer.setAccelerator(
-        type,
-        coreCount
-      );
+      const result = await notebooksService.setAccelerator(type, coreCount);
       stopTimers();
 
       expect(result.acceleratorConfig.type).toBe(type);
@@ -539,7 +521,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setAcceleratorPath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { type, coreCount },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -570,7 +551,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(5);
       try {
-        await notebookInstanceServiceLayer.setAccelerator(type, coreCount);
+        await notebooksService.setAccelerator(type, coreCount);
       } catch (err) {
         expect(err).toEqual(
           '400: Could not attach Accelerator to Notebook Instance'
@@ -582,7 +563,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setAcceleratorPath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { type, coreCount },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {
@@ -605,7 +585,7 @@ describe('NotebookInstanceServiceLayer', () => {
       const stopTimers = pollerHelper();
       expect.assertions(6);
       try {
-        await notebookInstanceServiceLayer.setAccelerator(type, coreCount);
+        await notebooksService.setAccelerator(type, coreCount);
       } catch (err) {
         expect(err).toEqual('Unexpected error fetching operation');
       }
@@ -615,7 +595,6 @@ describe('NotebookInstanceServiceLayer', () => {
       expect(mockSubmit).toHaveBeenNthCalledWith(1, {
         path: setAcceleratorPath,
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${null}` },
         body: { type, coreCount },
       });
       expect(mockSubmit).toHaveBeenNthCalledWith(2, {

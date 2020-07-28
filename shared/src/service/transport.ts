@@ -36,6 +36,7 @@ export interface ApiResponse<T> {
 export interface TransportService {
   /** Submit the Google API request and resolve its response. */
   submit<T>(request: ApiRequest): Promise<ApiResponse<T>>;
+  setAccessToken?(accessToken: string): Promise<void>;
 }
 
 /**
@@ -101,11 +102,23 @@ export class ClientTransportService implements TransportService {
   private authenticatedPromise: Promise<void>;
   private authenticated = false;
 
-  constructor(private clientId: string) {}
+  /**
+   * If useAccessToken is set, you will need to call setAccessToken on the
+   * ClientTransportService instance before making your first request and
+   * call it again whenever the token expires
+   */
+
+  constructor(private clientId: string, private useAccessToken?: boolean) {}
 
   async submit<T>(request: ApiRequest): Promise<ApiResponse<T>> {
     await this.initializeClient();
     return gapi.client.request(request);
+  }
+
+  async setAccessToken(accessToken: string): Promise<void> {
+    await this.initializeClient();
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    gapi.client.setToken({ access_token: accessToken });
   }
 
   private async _authenticateClient(): Promise<void> {
@@ -161,7 +174,7 @@ export class ClientTransportService implements TransportService {
       }
     }
 
-    if (!this.authenticated) {
+    if (!this.authenticated && !this.useAccessToken) {
       if (!this.authenticatedPromise) {
         this.authenticatedPromise = this._authenticateClient();
       }
