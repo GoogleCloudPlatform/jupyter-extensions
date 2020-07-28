@@ -23,10 +23,10 @@ if (fs.existsSync(keyPath)) {
 const oauth2Client = new google.auth.OAuth2(
   keys.client_id,
   keys.client_secret,
-  keys.redirect_uris[0]
+  'https://jupyterlab-interns-sandbox.uc.r.appspot.com/oauth2callback'
 );
 
-const scopes = ['https://www.googleapis.com/auth/compute'];
+const scopes = ['https://www.googleapis.com/auth/cloud-platform'];
 
 google.options({ auth: oauth2Client });
 
