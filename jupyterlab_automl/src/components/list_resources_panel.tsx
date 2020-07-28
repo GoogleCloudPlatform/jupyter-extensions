@@ -224,6 +224,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   },
                 },
               ]}
+              paging={true}
+              pageSize={20}
+              pageSizeOptions={[20]}
             />
           ) : (
             <ListResourcesTable

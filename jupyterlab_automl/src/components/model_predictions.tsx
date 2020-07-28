@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { Model, ModelService, DeployedModel, Pipeline } from '../service/model';
-import { SubmitButton, TextInput } from 'gcp_jupyterlab_shared';
+import {
+  SubmitButton,
+  TextInput,
+  ListResourcesTable,
+} from 'gcp_jupyterlab_shared';
 import Alert from '@material-ui/lab/Alert';
 import {
   LinearProgress,
@@ -16,16 +20,15 @@ interface Props {
   model: Model;
   value: number;
   index: number;
+  pipeline: Pipeline;
 }
 
 interface State {
-  hasLoaded: boolean;
   isLoading: boolean;
-  deployedModel: DeployedModel;
+  deployedModels: DeployedModel[];
   deployedState: number;
-  pipeline: Pipeline;
-  inputs: any;
-  notReady: boolean;
+  inputParameters: object;
+  predictReady: boolean;
   result: JSX.Element;
 }
 
@@ -33,59 +36,38 @@ export class ModelPredictions extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      hasLoaded: false,
       isLoading: false,
-      deployedModel: null,
+      deployedModels: null,
       deployedState: -1,
-      pipeline: null,
-      inputs: {},
-      notReady: true,
+      inputParameters: {},
+      predictReady: false,
       result: null,
     };
     this.deployModel = this.deployModel.bind(this);
-    this.undeployModel = this.undeployModel.bind(this);
+    // this.undeployModel = this.undeployModel.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
-    this.checkNotReady = this.checkNotReady.bind(this);
+    this.isPredictReady = this.isPredictReady.bind(this);
     this.handlePredict = this.handlePredict.bind(this);
     this.handleGeneratePython = this.handleGeneratePython.bind(this);
     this.checkDeployed = this.checkDeployed.bind(this);
   }
 
   async componentDidMount() {
-    this.getPipeline();
     this.checkDeployed();
-  }
-
-  private async getPipeline() {
-    try {
-      this.setState({ isLoading: true });
-      const pipeline = await ModelService.getPipeline(
-        this.props.model.pipelineId
-      );
-      this.setState({
-        hasLoaded: true,
-        pipeline: pipeline,
-      });
-    } catch (err) {
-      console.warn('Error getting model pipeline', err);
-    } finally {
-      this.setState({ isLoading: false });
-    }
   }
 
   private async checkDeployed() {
     try {
       this.setState({ isLoading: true });
       const check = await ModelService.checkDeployed(this.props.model.id);
-      let deployedModel = null;
+      let deployedModels = null;
       if (check.state === 1) {
-        deployedModel = check.deployedModel;
+        deployedModels = check.deployedModels;
       }
       this.setState({
-        hasLoaded: true,
         deployedState: check.state,
-        deployedModel: deployedModel,
+        deployedModels: deployedModels,
       });
     } catch (err) {
       console.warn('Error checking if model is already deployed', err);
@@ -99,7 +81,6 @@ export class ModelPredictions extends React.Component<Props, State> {
       this.setState({ isLoading: true });
       await ModelService.deployModel(this.props.model.id);
       this.setState({
-        hasLoaded: true,
         deployedState: 0,
       });
     } catch (err) {
@@ -109,29 +90,28 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
   }
 
-  private async undeployModel() {
-    try {
-      this.setState({ isLoading: true });
-      await ModelService.undeployModel(
-        this.state.deployedModel.deployedModelId,
-        this.state.deployedModel.endpointId
-      );
-      await ModelService.deleteEndpoint(this.state.deployedModel.endpointId);
-      this.setState({
-        hasLoaded: true,
-        deployedModel: null,
-        deployedState: -1,
-      });
-    } catch (err) {
-      console.warn('Error undeploying model', err);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
+  // private async undeployModel() {
+  //   try {
+  //     this.setState({ isLoading: true });
+  //     await ModelService.undeployModel(
+  //       this.state.deployedModel.deployedModelId,
+  //       this.state.deployedModel.endpointId
+  //     );
+  //     await ModelService.deleteEndpoint(this.state.deployedModel.endpointId);
+  //     this.setState({
+  //       deployedModel: null,
+  //       deployedState: -1,
+  //     });
+  //   } catch (err) {
+  //     console.warn('Error undeploying model', err);
+  //   } finally {
+  //     this.setState({ isLoading: false });
+  //   }
+  // }
 
   private handleGeneratePython() {
     let instance = '';
-    const entries = Object.entries(this.state.inputs);
+    const entries = Object.entries(this.state.inputParameters);
     for (let index = 0; index < entries.length; index++) {
       const key = entries[index][0];
       const val = entries[index][1];
@@ -141,7 +121,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       'from jupyterlab_automl import predict\ninstance = {\n' +
       instance +
       "}\npredict('" +
-      this.state.deployedModel.endpointId +
+      this.state.deployedModels[0].endpointId +
       "', instance)";
     this.setState({
       result: <CopyCode code={generated} />,
@@ -152,8 +132,8 @@ export class ModelPredictions extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       const result = await ModelService.predict(
-        this.state.deployedModel.endpointId,
-        this.state.inputs
+        this.state.deployedModels[0].endpointId,
+        this.state.inputParameters
       );
       const code = (
         <Table size="small" style={{ width: 300 }}>
@@ -174,7 +154,6 @@ export class ModelPredictions extends React.Component<Props, State> {
         </Table>
       );
       this.setState({
-        hasLoaded: true,
         result: code,
       });
     } catch (err) {
@@ -186,25 +165,25 @@ export class ModelPredictions extends React.Component<Props, State> {
 
   private handleReset() {
     this.setState({
-      inputs: {},
-      notReady: true,
+      inputParameters: {},
+      predictReady: false,
     });
   }
 
-  private checkNotReady() {
+  private isPredictReady() {
     if (
-      Object.keys(this.state.inputs).length ===
-      this.state.pipeline.transformationOptions.length
+      Object.keys(this.state.inputParameters).length ===
+      this.props.pipeline.transformationOptions.length
     ) {
-      return false;
-    } else {
       return true;
+    } else {
+      return false;
     }
   }
 
   private handleInputChange(event) {
     const target = event.target;
-    const current = this.state.inputs;
+    const current = this.state.inputParameters;
 
     if (target.value === '') {
       delete current[target.name];
@@ -213,24 +192,55 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
 
     this.setState({
-      inputs: current,
-      notReady: this.checkNotReady(),
+      inputParameters: current,
+      predictReady: this.isPredictReady(),
     });
   }
 
   render() {
-    const { pipeline, deployedModel, result } = this.state;
+    const { deployedModels, result } = this.state;
     return (
       <div
         hidden={this.props.value !== this.props.index}
         style={{ margin: '16px' }}
       >
-        {deployedModel !== null ? (
+        {deployedModels !== null ? (
           <div>
-            <SubmitButton
-              actionPending={this.state.isLoading}
-              onClick={this.undeployModel}
-              text={'Undeploy Model'}
+            <ListResourcesTable
+              columns={[
+                {
+                  field: 'displayName',
+                  title: 'Endpoint',
+                },
+                {
+                  field: 'models',
+                  title: 'Models',
+                },
+                {
+                  title: 'Last updated',
+                  field: 'updateTime',
+                  render: rowData => {
+                    return <p>{rowData.updateTime.toLocaleString()}</p>;
+                  },
+                },
+              ]}
+              data={this.state.deployedModels}
+              height={200}
+              width={500}
+              rowContextMenu={[
+                {
+                  label: 'CopyID',
+                  handler: rowData => {
+                    console.log(rowData.endpointId);
+                  },
+                },
+                {
+                  label: 'Undeploy model',
+                  handler: rowData => {
+                    console.log(rowData.deployedModelId);
+                  },
+                },
+              ]}
             />
             <Table
               size="small"
@@ -243,14 +253,16 @@ export class ModelPredictions extends React.Component<Props, State> {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pipeline.transformationOptions.map(option => (
+                {this.props.pipeline.transformationOptions.map(option => (
                   <TableRow key={option.columnName}>
                     <TableCell>{option.columnName}</TableCell>
                     <TableCell>
                       <TextInput
                         name={option.columnName}
                         onChange={this.handleInputChange}
-                        value={this.state.inputs[option.columnName] || ''}
+                        value={
+                          this.state.inputParameters[option.columnName] || ''
+                        }
                       />
                     </TableCell>
                   </TableRow>
@@ -258,7 +270,7 @@ export class ModelPredictions extends React.Component<Props, State> {
               </TableBody>
             </Table>
             <SubmitButton
-              actionPending={this.state.notReady || this.state.isLoading}
+              actionPending={!this.state.predictReady || this.state.isLoading}
               onClick={this.handlePredict}
               text={'Predict'}
               style={{ marginRight: '16px' }}
@@ -270,7 +282,7 @@ export class ModelPredictions extends React.Component<Props, State> {
               style={{ marginRight: '16px' }}
             />
             <SubmitButton
-              actionPending={this.state.notReady || this.state.isLoading}
+              actionPending={!this.state.predictReady || this.state.isLoading}
               onClick={this.handleGeneratePython}
               text={'Generate Python'}
             />

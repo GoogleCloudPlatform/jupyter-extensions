@@ -286,29 +286,43 @@ class AutoMLService:
   def delete_endpoint(self, endpoint_id):
     self._endpoint_client.delete_endpoint(name=endpoint_id).result()
 
-  def check_deployed(self, model_id):
-    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+  def _check_deploying(self, model_id, endpoints):
     name = "ucaip-extension/"
     name += self._get_model(model_id).display_name
     filtered = filter(lambda x: name in x.display_name, endpoints)
-    filtered = list(filtered)
-    for endpoint in filtered:
+    if len(list(filtered)) != 0:
+      return 0
+    else:
+      return -1
+
+  def _build_deployed_model(self, deployed_model, endpoint):
+    return {
+        "deployedModelId": deployed_model.id,
+        "endpointId": endpoint.name,
+        "displayName": endpoint.display_name,
+        "models": len(endpoint.deployed_models),
+        "updateTime": get_milli_time(endpoint.update_time),
+    }
+
+  def check_deployed(self, model_id):
+    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    deployed_models = []
+    for endpoint in endpoints:
       for deployed_model in endpoint.deployed_models:
         if deployed_model.model == model_id:
-          return {
-              "state": 1,
-              "deployedModel": {
-                  "deployedModelId": deployed_model.id,
-                  "endpointId": endpoint.name,
-            }
-          }
-    if len(filtered) != 0:
+          built = self._build_deployed_model(deployed_model, endpoint)
+          if 'ucaip-extension' in endpoint.display_name:
+            deployed_models.insert(0, built)
+          else:
+            deployed_models.append(built)
+    if len(deployed_models) != 0:
       return {
-          "state": 0,
+          "state": 1,
+          "deployedModels": deployed_models,
       }
     else:
       return {
-          "state": -1
+          "state": self._check_deploying(model_id, endpoints)
       }
 
   def deploy_model(self, model_id, machine_type="n1-standard-2", endpoint_id=None):
@@ -334,6 +348,7 @@ class AutoMLService:
     instances = [json_format.ParseDict(s, Value()) for s in instances_list]
     response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
     prediction = response.predictions[0]
+    print(prediction)
     readable = []
     labels = prediction["classes"]
     values = prediction["scores"]
@@ -373,15 +388,3 @@ class AutoMLService:
       i += 2
       j += 1
     return df
-
-# instance = {
-# 	'county_fips_code': 'asdf',
-# 	'state_fips_code': 'asdf',
-# 	'county_name': 'asdf',
-# 	'county_name_lsad': 'asdf',
-# 	'state_name': 'sdf',
-# 	'predicted_metric': 'ads',
-# 	'forecast_date': 'asdfdasdf',
-# 	'target_prediction_date': 'asfd',
-# }
-# print(AutoMLService().predict('projects/222309772370/locations/us-central1/endpoints/130745126682099712', instance))

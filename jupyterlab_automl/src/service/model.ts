@@ -20,11 +20,14 @@ export interface Prediction {
 export interface DeployedModel {
   deployedModelId: string;
   endpointId: string;
+  displayName: string;
+  models: number;
+  updateTime: Date;
 }
 
 export interface CheckDeployedResponse {
   state: number;
-  deployedModel?: DeployedModel;
+  deployedModels?: DeployedModel[];
 }
 
 export interface Pipeline {
@@ -114,7 +117,18 @@ export abstract class ModelService {
       body: JSON.stringify(body),
       method: 'POST',
     };
-    return await requestAPI('v1/checkDeployed', requestInit);
+    const data = await requestAPI<CheckDeployedResponse>(
+      'v1/checkDeployed',
+      requestInit
+    );
+    if (data.deployedModels) {
+      for (let i = 0; i < data.deployedModels.length; ++i) {
+        data.deployedModels[i].updateTime = new Date(
+          data.deployedModels[i].updateTime
+        );
+      }
+    }
+    return data;
   }
 
   static async deployModel(modelId: string): Promise<void> {
@@ -156,7 +170,7 @@ export abstract class ModelService {
 
   static async predict(
     endpointId: string,
-    inputs: string
+    inputs: object
   ): Promise<Prediction[]> {
     const body = {
       endpointId: endpointId,

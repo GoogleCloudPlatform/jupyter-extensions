@@ -42,9 +42,9 @@ export class CopyCode extends React.Component<Props, State> {
         </Tooltip>
         <Portal>
           <Toast
-            open={true}
+            open={this.state.copyAlertOpen}
             message={'Code copied to clipboard'}
-            autoHideDuration={6000}
+            autoHideDuration={4000}
             onClose={() => {
               this.setState({ copyAlertOpen: false });
             }}

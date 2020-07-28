@@ -1,10 +1,11 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { Model } from '../service/model';
+import { Model, ModelService, Pipeline } from '../service/model';
 import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
 import { ModelPredictions } from './model_predictions';
 import {
+  LinearProgress,
   Toolbar,
   Tabs,
   Tab,
@@ -23,6 +24,8 @@ interface Props {
 
 interface State {
   tabState: number;
+  isLoading: boolean;
+  pipeline: Pipeline;
 }
 
 interface StyledTabProps {
@@ -72,45 +75,37 @@ const localStyles = stylesheet({
   },
 });
 
-export class OtherModelPanel extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      tabState: 0,
-    };
-  }
+export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
+  const modelId = props.model.id.split('/');
 
-  render() {
-    const modelId = this.props.model.id.split('/');
-    return (
-      <div style={{ padding: '16px' }}>
-        <Table size="small" style={{ width: 500 }}>
-          <TableBody>
-            <TableRow key={'ID'}>
-              <TableCell component="th" scope="row">
-                ID
-              </TableCell>
-              <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
-            </TableRow>
-            <TableRow key={'Region'}>
-              <TableCell component="th" scope="row">
-                Region
-              </TableCell>
-              <TableCell align="right">us-central-1</TableCell>
-            </TableRow>
-            <TableRow key={'Created'}>
-              <TableCell component="th" scope="row">
-                Created
-              </TableCell>
-              <TableCell align="right">
-                {this.props.model.createTime.toLocaleString()}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
+  return (
+    <div style={{ padding: '16px' }}>
+      <Table size="small" style={{ width: 500 }}>
+        <TableBody>
+          <TableRow key={'ID'}>
+            <TableCell component="th" scope="row">
+              ID
+            </TableCell>
+            <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
+          </TableRow>
+          <TableRow key={'Region'}>
+            <TableCell component="th" scope="row">
+              Region
+            </TableCell>
+            <TableCell align="right">us-central-1</TableCell>
+          </TableRow>
+          <TableRow key={'Created'}>
+            <TableCell component="th" scope="row">
+              Created
+            </TableCell>
+            <TableCell align="right">
+              {props.model.createTime.toLocaleString()}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
 }
 
 export class ModelPanel extends React.Component<Props, State> {
@@ -118,44 +113,72 @@ export class ModelPanel extends React.Component<Props, State> {
     super(props);
     this.state = {
       tabState: 0,
+      isLoading: true,
+      pipeline: null,
     };
   }
 
+  async componentDidMount() {
+    this.getPipeline();
+  }
+
+  private async getPipeline() {
+    try {
+      this.setState({ isLoading: true });
+      const pipeline = await ModelService.getPipeline(
+        this.props.model.pipelineId
+      );
+      this.setState({
+        pipeline: pipeline,
+      });
+    } catch (err) {
+      console.warn('Error retrieving pipeline', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
   render() {
-    const { tabState } = this.state;
-    return (
-      <div className={localStyles.panel}>
-        <Toolbar variant="dense">
-          <AntTabs
-            value={tabState}
-            onChange={(_event, newValue) =>
-              this.setState({ tabState: newValue })
-            }
-          >
-            <AntTab label="Evaluate" />
-            <AntTab label="Model Properties" />
-            <AntTab label="Test" />
-          </AntTabs>
-        </Toolbar>
-        <ul className={localStyles.list}>
-          <EvaluationTable
-            model={this.props.model}
-            value={tabState}
-            index={0}
-          />
-          <ModelProperties
-            model={this.props.model}
-            value={tabState}
-            index={1}
-          />
-          <ModelPredictions
-            model={this.props.model}
-            value={tabState}
-            index={2}
-          />
-        </ul>
-      </div>
-    );
+    const { tabState, isLoading } = this.state;
+    if (!isLoading) {
+      return (
+        <div className={localStyles.panel}>
+          <Toolbar variant="dense">
+            <AntTabs
+              value={tabState}
+              onChange={(_event, newValue) =>
+                this.setState({ tabState: newValue })
+              }
+            >
+              <AntTab label="Evaluate" />
+              <AntTab label="Model Properties" />
+              <AntTab label="Test" />
+            </AntTabs>
+          </Toolbar>
+          <ul className={localStyles.list}>
+            <EvaluationTable
+              model={this.props.model}
+              value={tabState}
+              index={0}
+            />
+            <ModelProperties
+              model={this.props.model}
+              value={tabState}
+              index={1}
+              pipeline={this.state.pipeline}
+            />
+            <ModelPredictions
+              model={this.props.model}
+              value={tabState}
+              index={2}
+              pipeline={this.state.pipeline}
+            />
+          </ul>
+        </div>
+      );
+    } else {
+      return <LinearProgress />;
+    }
   }
 }
 
