@@ -29,6 +29,8 @@ import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { ModelDetailsWidget } from '../details_panel/model_details_widget';
+import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
@@ -128,6 +130,19 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
+  const openModelDetails = (event, model) => {
+    event.stopPropagation();
+    const service = new ModelDetailsService();
+    const widgetType = ModelDetailsWidget;
+    context.manager.launchWidgetForId(
+      model.id,
+      widgetType,
+      service,
+      model.id,
+      model.name
+    );
+  };
+
   const getIcon = iconType => {
     return (
       <Icon style={{ display: 'flex', alignContent: 'center' }}>
@@ -213,6 +228,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
             <Typography>{model.name}</Typography>
           </ContextMenu>
         }
+        onDoubleClick={event => openModelDetails(event, model)}
       />
     );
   };
