@@ -60,6 +60,9 @@ yarn.lock
 # dotenv environment variables file
 .env
 
+# json secrets
+*.secrets.json
+
 # next.js build output
 .next
 
