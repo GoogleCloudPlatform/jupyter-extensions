@@ -1,7 +1,9 @@
 # Lint as: python3
 """Request handler classes for the extensions."""
 
+import re
 from google.cloud import bigquery
+from google.cloud.datacatalog import DataCatalogClient, enums, types
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
@@ -11,8 +13,11 @@ class BigQueryService:
 
   _instance = None
 
-  def __init__(self, client=bigquery.Client()):
+  def __init__(self,
+               client=bigquery.Client(),
+               datacatalog_client=DataCatalogClient()):
     self._client = client
+    self._datacatalog_client = datacatalog_client
 
   @property
   def client(self):
@@ -63,6 +68,7 @@ class BigQueryService:
         'id': table_full_id,
         'name': table.table_id,
         'datasetId': dataset_id,
+        'type': table.table_type,
       }
       table_ids.append(table_full_id)
 
@@ -84,3 +90,57 @@ class BigQueryService:
       model_ids.append(model_full_id)
 
     return {'models': models_list, 'modelIds': model_ids}
+
+  def search_projects(self, search_key, project_id):
+    scope = types.SearchCatalogRequest.Scope()
+    scope.include_project_ids.append(project_id)
+    results = self._datacatalog_client.search_catalog(
+        scope=scope,
+        query='name:{} projectid:{}'.format(search_key, project_id))
+
+    fetched_results = []
+    for result in results:
+      resource = result.linked_resource
+      result_type = format(result.search_result_subtype)
+      if result_type == 'entry.dataset':
+        res = re.search('projects/(.*)/datasets/(.*)', resource)
+        project = res.group(1)
+        dataset = res.group(2)
+        fetched_results.append({
+            'type': 'dataset',
+            'parent': project,
+            'name': dataset,
+            'id': '{}.{}'.format(project, dataset)
+        })
+      elif result_type == 'entry.table':
+        res = re.search('datasets/(.*)/tables/(.*)', resource)
+        dataset = res.group(1)
+        table = res.group(2)
+        fetched_results.append({
+            'type': 'table',
+            'parent': dataset,
+            'name': table,
+            'id': '{}.{}'.format(dataset, table)
+        })
+      elif result_type == 'entry.table.view':
+        res = re.search('datasets/(.*)/tables/(.*)', resource)
+        dataset = res.group(1)
+        view = res.group(2)
+        fetched_results.append({
+            'type': 'view',
+            'parent': dataset,
+            'name': view,
+            'id': '{}.{}'.format(dataset, view)
+        })
+      elif result_type == 'entry.model':
+        res = re.search('datasets/(.*)/models/(.*)', resource)
+        dataset = res.group(1)
+        model = res.group(2)
+        fetched_results.append({
+            'type': 'model',
+            'parent': dataset,
+            'name': model,
+            'id': '{}.{}'.format(dataset, model)
+        })
+
+    return {'results': fetched_results}

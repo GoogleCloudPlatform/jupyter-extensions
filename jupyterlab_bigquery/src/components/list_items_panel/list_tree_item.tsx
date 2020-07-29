@@ -2,6 +2,7 @@ import {
   LinearProgress,
   Typography,
   CircularProgress,
+  Icon,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -28,6 +29,8 @@ import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 
+import '../../../style/index.css';
+
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
@@ -38,13 +41,8 @@ const localStyles = stylesheet({
     paddingRight: '8px',
     ...csstips.horizontal,
   },
-  childItem: {
-    alignItems: 'center',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    listStyle: 'none',
-    height: '40px',
-    paddingRight: '8px',
-    paddingLeft: '30px',
+  itemName: {
+    flexDirection: 'row',
     ...csstips.horizontal,
   },
   details: {
@@ -52,19 +50,6 @@ const localStyles = stylesheet({
     paddingLeft: '4px',
     ...csstips.horizontal,
     ...csstips.flex,
-  },
-  wordTime: {
-    color: 'var(--jp-content-font-color2)',
-    fontSize: '9px',
-    textAlign: 'right',
-    ...csstips.flex,
-  },
-  viewLink: {
-    backgroundImage: 'var(--jp-icon-notebook)',
-    backgroundRepeat: 'no-repeat',
-    marginLeft: '5px',
-    padding: '0 6px',
-    textDecoration: 'none',
   },
   icon: {
     padding: '0 0 0 5px',
@@ -128,28 +113,72 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
+  const openViewDetails = (event, view) => {
+    event.stopPropagation();
+    // TODO: Create view widget
+  };
+
+  const getIcon = iconType => {
+    return (
+      <Icon style={{ display: 'flex', alignContent: 'center' }}>
+        <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
+      </Icon>
+    );
+  };
+
   const renderTables = table => {
-    const contextMenuItems = [
+    const tableContextMenuItems = [
       {
         label: 'Copy Table ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
+
+    const viewContextMenuItems = [
+      {
+        label: 'Copy View ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+
     return (
-      <TreeItem
-        nodeId={table.id}
-        label={
-          <ContextMenu
-            items={contextMenuItems.map(item => ({
-              label: item.label,
-              onClick: () => item.handler(table),
-            }))}
-          >
-            <Typography>{table.name}</Typography>
-          </ContextMenu>
-        }
-        onDoubleClick={event => openTableDetails(event, table)}
-      />
+      <div>
+        {table.type === 'TABLE' ? (
+          <TreeItem
+            nodeId={table.id}
+            icon={getIcon('Table')}
+            label={
+              <ContextMenu
+                items={tableContextMenuItems.map(item => ({
+                  label: item.label,
+                  onClick: () => item.handler(table),
+                }))}
+              >
+                <Typography>{table.name}</Typography>
+              </ContextMenu>
+            }
+            onDoubleClick={event => openTableDetails(event, table)}
+          />
+        ) : table.type === 'VIEW' ? (
+          <TreeItem
+            nodeId={table.id}
+            icon={getIcon('View')}
+            label={
+              <ContextMenu
+                items={viewContextMenuItems.map(item => ({
+                  label: item.label,
+                  onClick: () => item.handler(table),
+                }))}
+              >
+                <Typography>{table.name}</Typography>
+              </ContextMenu>
+            }
+            onDoubleClick={event => openViewDetails(event, table)}
+          />
+        ) : (
+          <div>Table references an external data source</div>
+        )}
+      </div>
     );
   };
 
@@ -163,6 +192,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     return (
       <TreeItem
         nodeId={model.id}
+        icon={getIcon('Model')}
         label={
           <ContextMenu
             items={contextMenuItems.map(item => ({
@@ -186,7 +216,10 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     ];
 
     return (
-      <div>
+      <div className={localStyles.itemName}>
+        <Icon style={{ display: 'flex', alignContent: 'center' }}>
+          <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+        </Icon>
         <TreeItem
           nodeId={dataset.id}
           label={

@@ -10,5 +10,8 @@ def list_models():
 def create_dataset_from_dataframe(display_name, df):
   return AutoMLService.get().create_dataset_from_dataframe(display_name, df)
 
+def export_dataset(dataset_id):
+  return AutoMLService.get().export_dataset(dataset_id)
+
 def predict(endpoint_id, instance):
   return AutoMLService.get().predict_tables(endpoint_id, instance)

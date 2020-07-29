@@ -26,3 +26,9 @@ def _list_tables(args):
 @_handler("POST", "listModels")
 def _list_models(args):
   return BigQueryService.get().list_models(args["datasetId"])
+
+
+@_handler("POST", "search")
+def _search(args):
+  return BigQueryService.get().search_projects(args["searchKey"],
+                                               args["projectId"])

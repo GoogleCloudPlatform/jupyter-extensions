@@ -1,3 +1,4 @@
+import { Clipboard } from '@jupyterlab/apputils';
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';

@@ -40,9 +40,17 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     const showResult = !!queryResult;
 
     return (
-      <div style={{ width: '80vw' }}>
-        <QueryTextEditor queryId={this.queryId} iniQuery={this.iniQuery} />
-        {showResult ? <QueryResults queryId={this.queryId} /> : undefined}
+      <div style={{ width: '75vw' }}>
+        <QueryTextEditor
+          queryId={this.queryId}
+          iniQuery={this.iniQuery}
+          editorType="IN_CELL"
+        />
+        {showResult ? (
+          <QueryResults queryId={this.queryId} editorType="IN_CELL" />
+        ) : (
+          undefined
+        )}
       </div>
     );
   }

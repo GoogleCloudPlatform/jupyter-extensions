@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39 (31667) - http://www.bohemiancoding.com/sketch -->
+    <title>20/datasets</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="All-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="20/datasets">
+            <polygon id="Container" points="0 0 20 0 20 20 0 20"></polygon>
+            <g id="Datasets" transform="translate(1.000000, 1.000000)">
+                <polygon id="Container" points="0 0 18 0 18 18 0 18"></polygon>
+                <path d="M2,2 L16,2 L16,16 L2,16 L2,2 Z M4,4 L14,4 L14,14 L4,14 L4,4 Z M6,10 L8,10 L8,12 L6,12 L6,10 Z M6,6 L8,6 L8,8 L6,8 L6,6 Z M10,10 L12,10 L12,12 L10,12 L10,10 Z M10,6 L12,6 L12,8 L10,8 L10,6 Z" id="Shape" fill="#000000" fill-rule="evenodd"></path>
+            </g>
+        </g>
+    </g>
+</svg>

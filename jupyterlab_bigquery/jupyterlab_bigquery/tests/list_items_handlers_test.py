@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 from notebook.base.handlers import APIHandler
 
-from jupyterlab_bigquery.list_items_handler.create_handler import _handler, handlers
+from jupyterlab_bigquery.list_items_handler.create_handler import _handler, Handlers
 
 
 class TestHandlers(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestHandlers(unittest.TestCase):
       func(args)
 
     # Ensure handler is a subclass of APIHandler
-    self.assertTrue(APIHandler in inspect.getmro(handlers["_test"]))
+    self.assertTrue(APIHandler in inspect.getmro(Handlers.get().get_handlers()["_test"]))
 
   def testHandlerDecoratorGet(self):
     func = MagicMock()
@@ -26,7 +26,7 @@ class TestHandlers(unittest.TestCase):
     def f(args):
       func(args)
 
-    handlers["_test"].get(MagicMock())
+    Handlers.get().get_handlers()["_test"].get(MagicMock())
     func.assert_called()
 
   def testHandlerDecoratorPost(self):
@@ -36,7 +36,7 @@ class TestHandlers(unittest.TestCase):
     def f(args):
       func(args)
 
-    handlers["_test"].post(MagicMock())
+    Handlers.get().get_handlers()["_test"].post(MagicMock())
     func.assert_called()
 
 
