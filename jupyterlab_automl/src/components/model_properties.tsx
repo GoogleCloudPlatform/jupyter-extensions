@@ -227,7 +227,7 @@ export class ModelProperties extends React.Component<Props, State> {
     return (
       <div
         hidden={this.props.value !== this.props.index}
-        style={{ marginTop: '16px' }}
+        style={{ margin: '16px' }}
       >
         {isLoading ? (
           <LinearProgress />

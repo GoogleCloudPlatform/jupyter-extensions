@@ -72,9 +72,14 @@ def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])
 
 
-@_handler("POST", "checkDeployed")
-def _check_deployed(args):
-  return AutoMLService.get().check_deployed(model_id=args["modelId"])
+@_handler("POST", "getEndpoints")
+def _get_endpoints(args):
+  return AutoMLService.get().get_endpoints(model_id=args["modelId"])
+
+
+@_handler("POST", "checkDeploying")
+def _check_deploying(args):
+  return AutoMLService.get().check_deploying(model_name=args["modelName"])
 
 
 @_handler("POST", "deployModel")

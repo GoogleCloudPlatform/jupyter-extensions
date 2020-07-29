@@ -109,16 +109,22 @@ class AutoMLService:
     return cls._instance
 
   def get_models(self):
-    models = self._model_client.list_models(parent=self._parent).models
-    return [{
-        "id": model.name,
-        "displayName": model.display_name,
-        "pipelineId": model.training_pipeline,
-        "createTime": get_milli_time(model.create_time),
-        "updateTime": get_milli_time(model.update_time),
-        "etag": model.etag,
-        "modelType": parse_model_type(model)
-    } for model in models]
+    response = self._model_client.list_models(parent=self._parent).models
+    models = []
+    for model in response:
+      json_formatted = json_format.MessageToDict(model._pb)
+      models.append({
+          "id": model.name,
+          "displayName": model.display_name,
+          "pipelineId": model.training_pipeline,
+          "createTime": get_milli_time(model.create_time),
+          "updateTime": get_milli_time(model.update_time),
+          "etag": model.etag,
+          "modelType": parse_model_type(model),
+          "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
+          "deployedModels": json_formatted.get("deployedModels"),
+      })
+    return models
 
   def _build_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0][
@@ -174,7 +180,7 @@ class AutoMLService:
       model_eval["confidenceMetrics"] = self._build_confidence_metrics(
           metrics["confidenceMetrics"])
     for field in optional_fields:
-      model_eval[field] = metrics.get(field, None)
+      model_eval[field] = metrics.get(field)
     return model_eval
 
   def get_model_evaluation(self, model_id):
@@ -214,7 +220,7 @@ class AutoMLService:
           training_task_inputs["transformations"])
       training_pipeline["transformationOptions"] = transformation_options
     for field in optional_fields:
-      training_pipeline[field] = training_task_inputs.get(field, None)
+      training_pipeline[field] = training_task_inputs.get(field)
     return training_pipeline
 
   def get_datasets(self):
@@ -286,44 +292,33 @@ class AutoMLService:
   def delete_endpoint(self, endpoint_id):
     self._endpoint_client.delete_endpoint(name=endpoint_id).result()
 
-  def _check_deploying(self, model_id, endpoints):
-    name = "ucaip-extension/"
-    name += self._get_model(model_id).display_name
-    filtered = filter(lambda x: name in x.display_name, endpoints)
-    if len(list(filtered)) != 0:
-      return 0
-    else:
-      return -1
-
-  def _build_deployed_model(self, deployed_model, endpoint):
+  def _build_endpoint(self, deployed_model_id, endpoint):
     return {
-        "deployedModelId": deployed_model.id,
-        "endpointId": endpoint.name,
+        "deployedModelId": deployed_model_id,
+        "id": endpoint.name,
         "displayName": endpoint.display_name,
         "models": len(endpoint.deployed_models),
         "updateTime": get_milli_time(endpoint.update_time),
     }
 
-  def check_deployed(self, model_id):
+  def get_endpoints(self, model_id):
+    model = self._get_model(model_id)
+    endpoints = []
+    if model.deployed_models:
+      for deployed_model in model.deployed_models:
+        endpoint = self._endpoint_client.get_endpoint(name=deployed_model.endpoint)
+        built = self._build_endpoint(deployed_model.deployed_model_id, endpoint)
+        endpoints.append(built)
+    return endpoints
+
+  def check_deploying(self, model_name):
     endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
-    deployed_models = []
-    for endpoint in endpoints:
-      for deployed_model in endpoint.deployed_models:
-        if deployed_model.model == model_id:
-          built = self._build_deployed_model(deployed_model, endpoint)
-          if 'ucaip-extension' in endpoint.display_name:
-            deployed_models.insert(0, built)
-          else:
-            deployed_models.append(built)
-    if len(deployed_models) != 0:
-      return {
-          "state": 1,
-          "deployedModels": deployed_models,
-      }
-    else:
-      return {
-          "state": self._check_deploying(model_id, endpoints)
-      }
+    name = "ucaip-extension/" + model_name
+    filtered = filter(lambda x: name == x.display_name, endpoints)
+    filtered = list(filtered)
+    if len(filtered) > 0:
+      return [self._build_endpoint("None", filtered[0])]
+    return []
 
   def deploy_model(self, model_id, machine_type="n1-standard-2", endpoint_id=None):
     model = self._get_model(model_id)
@@ -347,44 +342,4 @@ class AutoMLService:
     instances_list = [instance]
     instances = [json_format.ParseDict(s, Value()) for s in instances_list]
     response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
-    prediction = response.predictions[0]
-    print(prediction)
-    readable = []
-    labels = prediction["classes"]
-    values = prediction["scores"]
-    for i, _ in enumerate(labels):
-      readable.append({
-          "label": labels[i],
-          "confidence": values[i],
-      })
-    return readable
-
-  def predict_df(self, endpoint_id, df):
-    parameters_dict = {}
-    parameters = json_format.ParseDict(parameters_dict, Value())
-    instances_list = df.to_dict('index').values()
-    instances = [json_format.ParseDict(s, Value()) for s in instances_list]
-    response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
-    predictions = response.predictions
-    num_new_columns = len(predictions[0]["classes"]) + len(predictions[0]["scores"])
-    new_columns = [ [] for _ in range(num_new_columns)]
-    for prediction in predictions:
-      labels = prediction["classes"]
-      values = prediction["scores"]
-      i = 0
-      j = 0
-      while i < len(labels):
-        new_columns[j].append(labels[i])
-        new_columns[j + 1].append(values[i])
-        i += 1
-        j += 2
-    i = 0
-    j = 0
-    while i < num_new_columns:
-      label = "Label" + str(j)
-      confidence = "Confidence" + str(j)
-      df[label] = new_columns[i]
-      df[confidence] = new_columns[i + 1]
-      i += 2
-      j += 1
-    return df
+    return json_format.MessageToDict(response._pb.predictions[0])

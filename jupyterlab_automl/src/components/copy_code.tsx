@@ -8,6 +8,7 @@ import { Clipboard } from '@jupyterlab/apputils';
 
 interface Props {
   code: string;
+  copy?: boolean;
 }
 
 interface State {
@@ -28,28 +29,32 @@ export class CopyCode extends React.Component<Props, State> {
         <SyntaxHighlighter language="python" style={docco} wrapLines={true}>
           {this.props.code}
         </SyntaxHighlighter>
-        <Tooltip title="Copy">
-          <IconButton
-            size="small"
-            onClick={_ => {
-              Clipboard.copyToSystem(this.props.code);
-              this.setState({ copyAlertOpen: true });
-            }}
-            style={{ position: 'absolute', top: '16px', right: '16px' }}
-          >
-            <Icon>content_copy</Icon>
-          </IconButton>
-        </Tooltip>
-        <Portal>
-          <Toast
-            open={this.state.copyAlertOpen}
-            message={'Code copied to clipboard'}
-            autoHideDuration={4000}
-            onClose={() => {
-              this.setState({ copyAlertOpen: false });
-            }}
-          />
-        </Portal>
+        {this.props.copy !== false && (
+          <div>
+            <Tooltip title="Copy">
+              <IconButton
+                size="small"
+                onClick={_ => {
+                  Clipboard.copyToSystem(this.props.code);
+                  this.setState({ copyAlertOpen: true });
+                }}
+                style={{ position: 'absolute', top: '16px', right: '16px' }}
+              >
+                <Icon>content_copy</Icon>
+              </IconButton>
+            </Tooltip>
+            <Portal>
+              <Toast
+                open={this.state.copyAlertOpen}
+                message={'Code copied to clipboard'}
+                autoHideDuration={4000}
+                onClose={() => {
+                  this.setState({ copyAlertOpen: false });
+                }}
+              />
+            </Portal>
+          </div>
+        )}
       </div>
     );
   }

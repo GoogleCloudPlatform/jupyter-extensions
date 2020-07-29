@@ -171,7 +171,6 @@ export class ModelPanel extends React.Component<Props, State> {
               model={this.props.model}
               value={tabState}
               index={2}
-              pipeline={this.state.pipeline}
             />
           </ul>
         </div>

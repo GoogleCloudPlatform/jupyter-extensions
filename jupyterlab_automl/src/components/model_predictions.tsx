@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Model, ModelService, DeployedModel, Pipeline } from '../service/model';
+import { Model, ModelService, Endpoint } from '../service/model';
 import {
   SubmitButton,
   TextInput,
@@ -7,7 +7,6 @@ import {
 } from 'gcp_jupyterlab_shared';
 import Alert from '@material-ui/lab/Alert';
 import {
-  LinearProgress,
   Table,
   TableHead,
   TableBody,
@@ -15,62 +14,93 @@ import {
   TableCell,
 } from '@material-ui/core';
 import { CopyCode } from './copy_code';
+import { stylesheet } from 'typestyle';
+import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { Clipboard } from '@jupyterlab/apputils';
+
+const theme = createMuiTheme({
+  overrides: {
+    MuiTable: {
+      root: {
+        borderRadius: 0,
+        borderTop: '1px solid var(--jp-border-color2)',
+      },
+    },
+    MuiTableHead: {
+      root: {
+        fontSize: 'var(--jp-ui-font-size1)',
+        padding: '0px 8px',
+      },
+    },
+    MuiTableCell: {
+      root: {
+        fontSize: 'var(--jp-ui-font-size1)',
+        padding: '2px 24px 2px 8px',
+      },
+    },
+  },
+});
 
 interface Props {
   model: Model;
   value: number;
   index: number;
-  pipeline: Pipeline;
 }
 
 interface State {
   isLoading: boolean;
-  deployedModels: DeployedModel[];
-  deployedState: number;
+  endpoints: Endpoint[];
   inputParameters: object;
   predictReady: boolean;
   result: JSX.Element;
 }
+
+const localStyles = stylesheet({
+  header: {
+    fontSize: '15px',
+    fontWeight: 600,
+    letterSpacing: '1px',
+    margin: 0,
+    padding: '8px 12px 12px 8px',
+  },
+});
 
 export class ModelPredictions extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       isLoading: false,
-      deployedModels: null,
-      deployedState: -1,
+      endpoints: [],
       inputParameters: {},
       predictReady: false,
       result: null,
     };
     this.deployModel = this.deployModel.bind(this);
-    // this.undeployModel = this.undeployModel.bind(this);
+    this.undeployModel = this.undeployModel.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.isPredictReady = this.isPredictReady.bind(this);
     this.handlePredict = this.handlePredict.bind(this);
     this.handleGeneratePython = this.handleGeneratePython.bind(this);
-    this.checkDeployed = this.checkDeployed.bind(this);
+    this.getEndpoints = this.getEndpoints.bind(this);
   }
 
   async componentDidMount() {
-    this.checkDeployed();
+    this.getEndpoints();
   }
 
-  private async checkDeployed() {
+  private async getEndpoints() {
     try {
       this.setState({ isLoading: true });
-      const check = await ModelService.checkDeployed(this.props.model.id);
-      let deployedModels = null;
-      if (check.state === 1) {
-        deployedModels = check.deployedModels;
+      let endpoints = await ModelService.getEndpoints(this.props.model.id);
+      if (endpoints.length === 0) {
+        endpoints = await ModelService.checkDeploying(this.props.model);
       }
       this.setState({
-        deployedState: check.state,
-        deployedModels: deployedModels,
+        endpoints: endpoints,
       });
     } catch (err) {
-      console.warn('Error checking if model is already deployed', err);
+      console.warn('Error getting endpoints', err);
     } finally {
       this.setState({ isLoading: false });
     }
@@ -80,9 +110,7 @@ export class ModelPredictions extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       await ModelService.deployModel(this.props.model.id);
-      this.setState({
-        deployedState: 0,
-      });
+      this.getEndpoints();
     } catch (err) {
       console.warn('Error deploying model', err);
     } finally {
@@ -90,24 +118,20 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
   }
 
-  // private async undeployModel() {
-  //   try {
-  //     this.setState({ isLoading: true });
-  //     await ModelService.undeployModel(
-  //       this.state.deployedModel.deployedModelId,
-  //       this.state.deployedModel.endpointId
-  //     );
-  //     await ModelService.deleteEndpoint(this.state.deployedModel.endpointId);
-  //     this.setState({
-  //       deployedModel: null,
-  //       deployedState: -1,
-  //     });
-  //   } catch (err) {
-  //     console.warn('Error undeploying model', err);
-  //   } finally {
-  //     this.setState({ isLoading: false });
-  //   }
-  // }
+  private async undeployModel(endpoint: Endpoint) {
+    try {
+      this.setState({ isLoading: true });
+      await ModelService.undeployModel(endpoint.deployedModelId, endpoint.id);
+      if (endpoint.displayName.includes('ucaip-extension')) {
+        await ModelService.deleteEndpoint(endpoint.id);
+      }
+      this.getEndpoints();
+    } catch (err) {
+      console.warn('Error undeploying model', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
 
   private handleGeneratePython() {
     let instance = '';
@@ -121,7 +145,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       'from jupyterlab_automl import predict\ninstance = {\n' +
       instance +
       "}\npredict('" +
-      this.state.deployedModels[0].endpointId +
+      this.state.endpoints[0].id +
       "', instance)";
     this.setState({
       result: <CopyCode code={generated} />,
@@ -132,29 +156,11 @@ export class ModelPredictions extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       const result = await ModelService.predict(
-        this.state.deployedModels[0].endpointId,
+        this.state.endpoints[0].id,
         this.state.inputParameters
       );
-      const code = (
-        <Table size="small" style={{ width: 300 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">Label</TableCell>
-              <TableCell align="left">Confidence</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {result.map(item => (
-              <TableRow key={item.label}>
-                <TableCell>{item.label}</TableCell>
-                <TableCell>{item.confidence}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      );
       this.setState({
-        result: code,
+        result: <CopyCode code={JSON.stringify(result)} copy={false} />,
       });
     } catch (err) {
       console.warn('Error predicting result', err);
@@ -167,13 +173,14 @@ export class ModelPredictions extends React.Component<Props, State> {
     this.setState({
       inputParameters: {},
       predictReady: false,
+      result: null,
     });
   }
 
   private isPredictReady() {
     if (
       Object.keys(this.state.inputParameters).length ===
-      this.props.pipeline.transformationOptions.length
+      Object.keys(this.props.model.inputs).length
     ) {
       return true;
     } else {
@@ -198,14 +205,15 @@ export class ModelPredictions extends React.Component<Props, State> {
   }
 
   render() {
-    const { deployedModels, result } = this.state;
+    const { endpoints, result } = this.state;
     return (
       <div
         hidden={this.props.value !== this.props.index}
         style={{ margin: '16px' }}
       >
-        {deployedModels !== null ? (
+        {endpoints.length !== 0 ? (
           <div>
+            <header className={localStyles.header}>Endpoints</header>
             <ListResourcesTable
               columns={[
                 {
@@ -224,100 +232,100 @@ export class ModelPredictions extends React.Component<Props, State> {
                   },
                 },
               ]}
-              data={this.state.deployedModels}
-              height={200}
+              data={this.state.endpoints}
+              height={this.state.endpoints.length * 60 + 60}
               width={500}
               rowContextMenu={[
                 {
                   label: 'CopyID',
                   handler: rowData => {
-                    console.log(rowData.endpointId);
+                    Clipboard.copyToSystem(rowData.endpointId);
                   },
                 },
                 {
                   label: 'Undeploy model',
                   handler: rowData => {
-                    console.log(rowData.deployedModelId);
+                    this.undeployModel(rowData);
                   },
                 },
               ]}
             />
-            <Table
-              size="small"
-              style={{ width: 500, marginTop: '16px', marginBottom: '16px' }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Feature column name</TableCell>
-                  <TableCell align="left">Value</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.props.pipeline.transformationOptions.map(option => (
-                  <TableRow key={option.columnName}>
-                    <TableCell>{option.columnName}</TableCell>
-                    <TableCell>
-                      <TextInput
-                        name={option.columnName}
-                        onChange={this.handleInputChange}
-                        value={
-                          this.state.inputParameters[option.columnName] || ''
-                        }
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <SubmitButton
-              actionPending={!this.state.predictReady || this.state.isLoading}
-              onClick={this.handlePredict}
-              text={'Predict'}
-              style={{ marginRight: '16px' }}
-            />
-            <SubmitButton
-              actionPending={false}
-              onClick={this.handleReset}
-              text={'Reset'}
-              style={{ marginRight: '16px' }}
-            />
-            <SubmitButton
-              actionPending={!this.state.predictReady || this.state.isLoading}
-              onClick={this.handleGeneratePython}
-              text={'Generate Python'}
-            />
-            <div style={{ marginTop: '16px' }}>{result}</div>
+            <header className={localStyles.header}>Test your model</header>
+            {endpoints[0].deployedModelId !== 'None' ? (
+              <div>
+                <ThemeProvider theme={theme}>
+                  <Table
+                    size="small"
+                    style={{ width: 500, marginBottom: '16px' }}
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left">Feature column name</TableCell>
+                        <TableCell align="left">Value</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.keys(this.props.model.inputs).map(option => (
+                        <TableRow key={option}>
+                          <TableCell>{option}</TableCell>
+                          <TableCell>
+                            <TextInput
+                              name={option}
+                              onChange={this.handleInputChange}
+                              value={this.state.inputParameters[option] || ''}
+                              placeholder={
+                                this.props.model.inputs[option][
+                                  'inputBaselines'
+                                ][0]
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ThemeProvider>
+                <SubmitButton
+                  actionPending={
+                    !this.state.predictReady || this.state.isLoading
+                  }
+                  onClick={this.handlePredict}
+                  text={'Predict'}
+                  style={{ marginRight: '16px' }}
+                />
+                <SubmitButton
+                  actionPending={false}
+                  onClick={this.handleReset}
+                  text={'Reset'}
+                  style={{ marginRight: '16px' }}
+                />
+                <SubmitButton
+                  actionPending={
+                    !this.state.predictReady || this.state.isLoading
+                  }
+                  onClick={this.handleGeneratePython}
+                  text={'Generate Python'}
+                />
+                <div style={{ marginTop: '16px' }}>{result}</div>
+              </div>
+            ) : (
+              <Alert severity="info">
+                Waiting for model to finish deploying. Check back in a few minutes.
+              </Alert>
+            )}
           </div>
         ) : (
           <div>
             <SubmitButton
-              actionPending={
-                this.state.isLoading || this.state.deployedState === 0
-              }
+              actionPending={this.state.isLoading}
               onClick={this.deployModel}
               text={'Deploy Model'}
+              style={{ marginBottom: '16px' }}
             />
-            <div style={{ paddingTop: '16px' }}>
-              {this.state.deployedState === 0 && (
-                <div>
-                  <LinearProgress />
-                  <p style={{ paddingBottom: '16px' }}>
-                    Deploying the model. Sit tight this takes a few minutes.
-                  </p>
-                  <SubmitButton
-                    actionPending={this.state.isLoading}
-                    onClick={this.checkDeployed}
-                    text={'Check Status'}
-                  />
-                </div>
-              )}
-              {this.state.deployedState === -1 && (
-                <Alert severity="info">
-                  Your model must be successfully deployed to an endpoint before
-                  you can test it.
-                </Alert>
-              )}
-            </div>
+            <Alert severity="info">
+              Your model must be successfully deployed to an endpoint before you
+              can test it.
+            </Alert>
           </div>
         )}
       </div>

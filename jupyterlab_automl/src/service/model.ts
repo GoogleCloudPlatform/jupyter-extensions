@@ -10,24 +10,32 @@ export interface Model {
   updateTime: Date;
   etag: string;
   modelType: string;
+  inputs?: object;
+  deployedModels?: DeployedModel[];
 }
 
-export interface Prediction {
-  label: string;
-  confidence: string;
+export interface ClassificationPrediction {
+  Scores: number[];
+  Classes: number[];
+}
+
+export interface RegressionPrediction {
+  Value: number;
+  UpperBound: number;
+  LowerBound: number;
 }
 
 export interface DeployedModel {
   deployedModelId: string;
-  endpointId: string;
+  endpoint: string;
+}
+
+export interface Endpoint {
+  deployedModelId: string;
+  id: string;
   displayName: string;
   models: number;
   updateTime: Date;
-}
-
-export interface CheckDeployedResponse {
-  state: number;
-  deployedModels?: DeployedModel[];
 }
 
 export interface Pipeline {
@@ -109,7 +117,7 @@ export abstract class ModelService {
     return data;
   }
 
-  static async checkDeployed(modelId: string): Promise<CheckDeployedResponse> {
+  static async getEndpoints(modelId: string): Promise<Endpoint[]> {
     const body = {
       modelId: modelId,
     };
@@ -117,16 +125,24 @@ export abstract class ModelService {
       body: JSON.stringify(body),
       method: 'POST',
     };
-    const data = await requestAPI<CheckDeployedResponse>(
-      'v1/checkDeployed',
-      requestInit
-    );
-    if (data.deployedModels) {
-      for (let i = 0; i < data.deployedModels.length; ++i) {
-        data.deployedModels[i].updateTime = new Date(
-          data.deployedModels[i].updateTime
-        );
-      }
+    const data = await requestAPI<Endpoint[]>('v1/getEndpoints', requestInit);
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
+    return data;
+  }
+
+  static async checkDeploying(model: Model): Promise<Endpoint[]> {
+    const body = {
+      modelName: model.displayName,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Endpoint[]>('v1/checkDeploying', requestInit);
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
     }
     return data;
   }
@@ -171,7 +187,7 @@ export abstract class ModelService {
   static async predict(
     endpointId: string,
     inputs: object
-  ): Promise<Prediction[]> {
+  ): Promise<RegressionPrediction | ClassificationPrediction> {
     const body = {
       endpointId: endpointId,
       inputs: inputs,
