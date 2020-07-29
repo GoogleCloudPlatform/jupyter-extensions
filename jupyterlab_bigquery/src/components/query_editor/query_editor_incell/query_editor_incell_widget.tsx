@@ -21,7 +21,9 @@ export class QueryIncellEditorModel extends DOMWidgetModel {
       _view_name: QueryIncellEditorModel.view_name,
       _view_module: QueryIncellEditorModel.view_module,
       _view_module_version: QueryIncellEditorModel.view_module_version,
-      value: '',
+      query: '',
+      query_flags: '',
+      result: '',
     };
   }
 

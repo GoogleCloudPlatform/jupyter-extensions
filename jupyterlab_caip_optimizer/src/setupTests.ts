@@ -16,7 +16,30 @@
 
 import * as Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+// Removes canvas mock not found error
+import 'jest-canvas-mock';
+// Add react-testing-library custom matchers
+import '@testing-library/jest-dom';
 
 Enzyme.configure({
   adapter: new Adapter(),
+});
+
+// TODO: remove when jupyterlab updates react version to 16.9.0
+// Removes invalid react-dom version warning from 'react-testing-library'
+const originalError = global.console.error;
+beforeAll(() => {
+  global.console.error = jest.fn((...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Please upgrade to at least react-dom@16.9.0')
+    ) {
+      return;
+    }
+    return originalError(...args);
+  });
+});
+
+afterAll(() => {
+  (global.console.error as jest.Mock).mockRestore();
 });

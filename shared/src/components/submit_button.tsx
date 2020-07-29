@@ -23,6 +23,7 @@ interface Props {
   actionPending: boolean;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   text: string;
+  style?: any;
 }
 
 const localStyles = stylesheet({
@@ -43,7 +44,6 @@ const localStyles = stylesheet({
     backgroundColor: 'var(--md-grey-300, #e0e0e0)',
     color: 'var(--md-grey-500, #9e9e9e)',
     cursor: 'not-allowed',
-    marginLeft: '16px',
   },
 });
 
@@ -61,6 +61,7 @@ export function SubmitButton(props: Props) {
       type="button"
       disabled={props.actionPending}
       onClick={props.onClick}
+      style={props.style}
     >
       {props.text}
     </button>

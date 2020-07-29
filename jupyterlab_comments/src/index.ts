@@ -26,7 +26,6 @@ import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
 import { CommentsWidget } from './components/comments_widget';
 
-
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
@@ -45,7 +44,6 @@ function activate(
     execute: () => {
       if (!widget || widget.isDisposed) {
         const context = {
-          app: app,
           labShell: labShell,
           docManager: docManager,
         };

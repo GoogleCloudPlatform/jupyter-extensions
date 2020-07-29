@@ -29,6 +29,7 @@ export interface Comment {
   timestamp: string;
   range: any;
   hash: any;
+  filePath: string;
   children?: any;
   parent?: any;
 }
@@ -42,7 +43,10 @@ export interface ReviewRequest {
   baseCommit: any;
 }
 
-export function createDetachedCommentFromJSON(obj: any): DetachedComment {
+export function createDetachedCommentFromJSON(
+  obj: any,
+  filePath: string
+): DetachedComment {
   const content = obj.comment;
   const hash = obj.hash;
   const children = obj.children;
@@ -55,6 +59,7 @@ export function createDetachedCommentFromJSON(obj: any): DetachedComment {
     timestamp: timestampString,
     range: content.location.range,
     hash: hash,
+    filePath: filePath,
   };
   if (children) {
     comment.children = children;
@@ -68,7 +73,8 @@ export function createDetachedCommentFromJSON(obj: any): DetachedComment {
 export function createReviewCommentFromJSON(
   obj: any,
   revision: any,
-  request: any
+  request: any,
+  filePath: string
 ): CodeReviewComment {
   const content = obj.comment;
   const hash = obj.hash;
@@ -84,6 +90,7 @@ export function createReviewCommentFromJSON(
     hash: hash,
     revision: revision,
     request: request,
+    filePath: filePath,
   };
   if (children) {
     comment.children = children;
