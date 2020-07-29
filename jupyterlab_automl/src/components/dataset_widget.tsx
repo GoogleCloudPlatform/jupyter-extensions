@@ -10,7 +10,7 @@ export class DatasetWidget extends ReactWidget {
   constructor(private readonly datasetMeta: Dataset) {
     super();
     this.title.label = datasetMeta.displayName;
-    this.title.caption = 'AutoML Dataset';
+    this.title.caption = 'Dataset ' + datasetMeta.displayName;
     this.title.closable = true;
     this.title.iconClass =
       'jp-Icon jp-Icon-20 jp-AutoMLIcon-' + datasetMeta.datasetType;

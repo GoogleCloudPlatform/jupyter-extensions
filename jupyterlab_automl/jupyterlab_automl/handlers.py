@@ -72,6 +72,11 @@ def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])
 
 
+@_handler("GET", "pipelines")
+def _get_pipelines(_):
+  return AutoMLService.get().get_training_pipelines()
+
+
 @_handler("POST", "getEndpoints")
 def _get_endpoints(args):
   return AutoMLService.get().get_endpoints(model_id=args["modelId"])
