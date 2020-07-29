@@ -14,7 +14,6 @@
 
 import sys
 import os
-sys.path.append(os.getcwd())
 import tempfile
 import handlers
 import subprocess
@@ -32,7 +31,6 @@ dir1_path = dir1.name
 dir2_path = dir2.name
 
 
-sys.path.append(os.getcwd())
 home = os.path.expanduser("~")
 FNULL = open(os.devnull, 'w')
 
