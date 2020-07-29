@@ -36,7 +36,6 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     // eslint-disable-next-line no-extra-boolean-cast
     const showResult = !!queryResult && queryResult.content.length > 0;
     const val = showResult ? JSON.stringify(queryResult) : '';
-    console.log(val);
     this.props.ipyView.model.set('result', val);
     this.props.ipyView.touch();
 
