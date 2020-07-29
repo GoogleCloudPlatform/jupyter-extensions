@@ -43,8 +43,8 @@ export const ScaleTypeList = [
 export type ScaleType = typeof ScaleTypeList[number];
 
 export interface DoubleValueSpec {
-  minValue: number;
-  maxValue: number;
+  minValue?: number;
+  maxValue?: number;
 }
 
 /**
@@ -52,8 +52,8 @@ export interface DoubleValueSpec {
  * (https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies#IntegerValueSpec)
  */
 export interface IntegerValueSpec {
-  minValue: string;
-  maxValue: string;
+  minValue?: string;
+  maxValue?: string;
 }
 
 export interface CategoricalValueSpec {
@@ -153,6 +153,8 @@ export interface Study {
   state?: State; // TODO: check if return enum would match State enum declared here?
   createTime?: string;
   inactiveReason?: string;
+  // Lazy loaded from api
+  trials?: Trial[];
 }
 
 export enum State {
@@ -190,14 +192,22 @@ export type Parameter = ParameterBase &
       }
   );
 
+export enum TrialState {
+  STATE_UNSPECIFIED = 'STATE_UNSPECIFIED',
+  REQUESTED = 'REQUESTED',
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  STOPPING = 'STOPPING',
+}
+
 /**
  * Optional params are "output only" by Optimizer API
  */
 export interface Trial {
   name?: string;
-  state: State;
+  state: TrialState;
   parameters: Parameter[];
-  finalMeasurement: Measurement;
+  finalMeasurement?: Measurement;
   measurements: Measurement[];
   startTime?: string;
   endTime?: string;
@@ -222,3 +232,43 @@ export interface MetadataRequired {
   projectId: string;
   region: string;
 }
+
+export type OperationMetadata<BODY extends {}> = BODY & {
+  '@type': string;
+};
+
+export interface OperationBase<BODY> {
+  name: string;
+  metadata: OperationMetadata<BODY>;
+  done?: boolean;
+}
+
+export type Operation<BODY = {}, METADATA = {}> = OperationBase<METADATA> &
+  (
+    | {
+        error: {
+          code: number;
+          message: string;
+          details: OperationMetadata<BODY>[];
+        };
+      }
+    | {
+        response: OperationMetadata<BODY>;
+      }
+  );
+
+export interface SuggestTrialsMetadata {
+  suggestionCount: number;
+}
+
+export interface SuggestTrialsResponse {
+  trials: Trial[];
+  studyState: State;
+  startTime: string;
+  endTime: string;
+}
+
+export type SuggestTrialOperation = Operation<
+  SuggestTrialsResponse,
+  SuggestTrialsMetadata
+>;

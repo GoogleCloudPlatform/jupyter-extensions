@@ -21,7 +21,7 @@ import { GET } from './data';
 /** Request object. */
 export interface ApiRequest {
   path: string;
-  method?: 'DELETE' | 'GET' | 'POST' | 'PUT';
+  method?: 'DELETE' | 'GET' | 'POST' | 'PUT' | 'PATCH';
   params?: { [k: string]: any };
   headers?: { [k: string]: any };
   body?: any;
@@ -100,8 +100,19 @@ export class ClientTransportService implements TransportService {
   private gapiLoaded = false;
   private authenticatedPromise: Promise<void>;
   private authenticated = false;
+  private _accessToken: string;
 
-  constructor(private clientId: string) {}
+  /**
+   * If useAccessToken is set, you will need to call setAccessToken on the
+   * ClientTransportService instance before making your first request and
+   * call it again whenever the token expires
+   */
+
+  constructor(private clientId?: string) {}
+
+  set accessToken(accessToken: string) {
+    this._accessToken = accessToken;
+  }
 
   async submit<T>(request: ApiRequest): Promise<ApiResponse<T>> {
     await this.initializeClient();
@@ -161,7 +172,7 @@ export class ClientTransportService implements TransportService {
       }
     }
 
-    if (!this.authenticated) {
+    if (!this.authenticated && !this._accessToken) {
       if (!this.authenticatedPromise) {
         this.authenticatedPromise = this._authenticateClient();
       }
@@ -171,6 +182,11 @@ export class ClientTransportService implements TransportService {
       } finally {
         this.authenticatedPromise = undefined;
       }
+    }
+
+    if (this._accessToken) {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      gapi.client.setToken({ access_token: this._accessToken });
     }
   }
 }

@@ -1,178 +1,107 @@
-const MockSidebar = () => <>Mock Sidebar</>;
-jest.mock('react-redux', () => ({
-  connect: (mapStateToProps: any) => (component: any) => MockSidebar,
-  Provider: ({ store, children }: any) => children,
-}));
-jest.mock('@material-ui/core');
-jest.mock('../store/view');
-jest.mock('../service/optimizer', () => ({
-  prettifyStudyName: name => name,
-}));
 import * as React from 'react';
-import { mount, shallow } from 'enzyme';
-import { SidebarWidget, Sidebar } from './sidebar_widget';
+import { WrappedSidebar, SidebarWidget } from './sidebar_widget';
 import {
-  Button,
-  TableRow,
-  Table,
-  CircularProgress,
-  Typography,
-} from '@material-ui/core';
-import { fakeStudy } from '../service/test-constants';
+  render as noProviderRender,
+  screen as noProviderScreen,
+} from '@testing-library/react';
+import { render, screen, initialState, reducer } from '../utils/redux_render';
+import userEvent from '@testing-library/user-event';
+import { cleanFakeStudyName, fakeStudyName } from '../service/test-constants';
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 
 describe('Sidebar', () => {
-  let mockOpenDashboard: jest.Mock;
-  let mockOpenStudy: jest.Mock;
-
-  beforeEach(() => {
-    mockOpenDashboard = jest.fn();
-    mockOpenStudy = jest.fn();
-  });
-
   it('opens the dashboard when the button is clicked', () => {
-    const component = shallow(
-      <Sidebar
-        loading={false}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-      />
-    );
+    const { getState } = render(<WrappedSidebar />);
 
-    component.find(Button).simulate('click');
+    userEvent.click(screen.getByText(/main dashboard/i));
 
-    expect(mockOpenDashboard).toHaveBeenCalled();
+    expect(getState().view).toEqual({
+      data: { view: 'dashboard' },
+      isVisible: true,
+    });
   });
   it('opens a study details page when a study in the list is clicked on', () => {
-    const component = shallow(
-      <Sidebar
-        loading={false}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[fakeStudy]}
-      />
-    );
+    const { getState } = render(<WrappedSidebar />);
 
-    component
-      .findWhere(
-        node => node.type() === TableRow && node.text().includes(fakeStudy.name)
-      )
-      .first()
-      .simulate('click');
+    // click on study row item
+    userEvent.click(screen.getByText(cleanFakeStudyName, { exact: false }));
 
-    expect(mockOpenStudy).toHaveBeenCalledWith(fakeStudy.name);
+    expect(getState().view).toEqual({
+      data: { view: 'studyDetails', studyId: fakeStudyName },
+      isVisible: true,
+    });
   });
-  it('shows no study list when there are no studies', () => {
-    const component = shallow(
-      <Sidebar
-        loading={false}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[]}
-      />
-    );
+  it('shows no study list when there are no studies and displays some text', () => {
+    render(<WrappedSidebar />, {
+      preloadedState: {
+        ...initialState,
+        studies: {
+          data: [],
+          loading: false,
+          error: undefined,
+        },
+      },
+    });
 
-    expect(component.find(Table).exists()).toBe(false);
+    expect(screen.queryAllByTestId('studyRow')).toHaveLength(0);
+    expect(screen.getByText(/no studies found/i)).toBeInTheDocument();
   });
 
   it('does not show spinner when not loading', () => {
-    const notLoadingSidebar = shallow(
-      <Sidebar
-        loading={false}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[]}
-      />
-    );
+    render(<WrappedSidebar />);
 
-    expect(notLoadingSidebar.find(CircularProgress).exists()).toBe(false);
+    expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
   });
 
   it('shows spinner when loading', () => {
-    const loadingSidebar = shallow(
-      <Sidebar
-        loading={true}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[]}
-      />
-    );
+    render(<WrappedSidebar />, {
+      preloadedState: {
+        ...initialState,
+        studies: {
+          data: [],
+          loading: true,
+          error: undefined,
+        },
+      },
+    });
 
-    expect(loadingSidebar.find(CircularProgress).exists()).toBe(true);
+    expect(screen.getByTestId('loadingSpinner')).toBeInTheDocument();
   });
 
   it('shows error message', () => {
     const errorMessage = 'Something went wrong!';
-    const loadingSidebar = shallow(
-      <Sidebar
-        loading={false}
-        error={errorMessage}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[]}
-      />
-    );
+    render(<WrappedSidebar />, {
+      preloadedState: {
+        ...initialState,
+        studies: {
+          data: [],
+          loading: false,
+          error: errorMessage,
+        },
+      },
+    });
 
-    expect(
-      loadingSidebar
-        .findWhere(
-          component =>
-            component.is(Typography) && component.prop('color') === 'error'
-        )
-        .text()
-    ).toEqual(errorMessage);
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('shows a no studies message', () => {
-    const component = shallow(
-      <Sidebar
-        loading={false}
-        openDashboard={mockOpenDashboard}
-        openStudy={mockOpenStudy}
-        studies={[]}
-      />
-    );
+  describe('SidebarWidget', () => {
+    it('provides the store for the Sidebar', () => {
+      // load with mocks in place
+      const mainAreaWidget = new SidebarWidget(
+        configureStore({
+          reducer,
+          middleware: getDefaultMiddleware(),
+          devTools: false,
+          preloadedState: initialState as unknown,
+        })
+      );
 
-    const noStudiesText = component.findWhere(
-      node =>
-        node.type() === Typography && node.text().includes('No studies found.')
-    );
+      noProviderRender(mainAreaWidget.render());
 
-    expect(noStudiesText.exists()).toBe(true);
-  });
-});
-
-describe('SidebarWidget', () => {
-  let mockStore: any;
-
-  beforeEach(() => {
-    mockStore = {
-      getState: jest.fn(),
-      dispatch: jest.fn(),
-    };
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('provides the store for the Sidebar', () => {
-    const mainAreaWidget = new SidebarWidget(mockStore);
-    const rendered = mount(mainAreaWidget.render());
-
-    expect(rendered.prop('store')).toBe(mockStore);
-    expect(rendered).toMatchInlineSnapshot(`
-      <Provider
-        store={
-          Object {
-            "dispatch": [MockFunction],
-            "getState": [MockFunction],
-          }
-        }
-      >
-        <MockSidebar>
-          Mock Sidebar
-        </MockSidebar>
-      </Provider>
-    `);
+      // shows the study name
+      expect(
+        noProviderScreen.getByText(cleanFakeStudyName)
+      ).toBeInTheDocument();
+    });
   });
 });

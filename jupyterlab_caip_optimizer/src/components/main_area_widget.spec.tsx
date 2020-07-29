@@ -8,8 +8,14 @@ jest.mock('../store/view');
 jest.mock('./dashboard', () => ({
   Dashboard: () => <div>Dashboard Component</div>,
 }));
+jest.mock('./suggest_trials', () => ({
+  SuggestTrials: () => <div>Suggest Trials Component</div>,
+}));
 jest.mock('./create_study', () => ({
   CreateStudy: () => <div>Create Study Component</div>,
+}));
+jest.mock('./study_details', () => ({
+  StudyDetails: () => <div>Study Details Component</div>,
 }));
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
@@ -30,10 +36,21 @@ describe('ViewManager', () => {
       <ViewManager data={{ view: 'studyDetails', studyId: 'STUDY-ID' }} />
     );
     expect(viewManager).toMatchInlineSnapshot(`
-      <Fragment>
-        Study ID: 
-        STUDY-ID
-      </Fragment>
+    <StudyDetails
+      studyId="STUDY-ID"
+    />
+    `);
+  });
+  it('renders the suggest trials page', () => {
+    const viewManager = shallow(
+      <ViewManager
+        data={{ view: 'suggestTrials', studyId: 'studyToSuggest' }}
+      />
+    );
+    expect(viewManager).toMatchInlineSnapshot(`
+      <SuggestTrials
+        studyName="studyToSuggest"
+      />
     `);
   });
 });

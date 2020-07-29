@@ -55,19 +55,19 @@ describe('Dashboard', () => {
           Object {
             "createTime": "1",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
-            "name": "study-active",
+            "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
           },
           Object {
             "createTime": "1",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
-            "name": "study-active",
+            "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
           },
           Object {
             "createTime": "1",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
-            "name": "study-active",
+            "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
           },
         ]

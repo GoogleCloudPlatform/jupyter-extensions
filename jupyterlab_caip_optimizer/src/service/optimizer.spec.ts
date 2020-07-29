@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { OptimizerService, prettifyStudyName } from './optimizer';
+import {
+  OptimizerService,
+  prettifyStudyName,
+  prettifyOperationId,
+  prettifyTrial,
+} from './optimizer';
 import { ServerConnection } from '@jupyterlab/services';
 import { MetadataRequired } from '../types';
 import {
   fakeStudy,
   fakeStudyResponseActive,
   fakeStudyListResponse,
+  fakeTrial,
+  fakeMeasurement,
+  cleanFakeTrialName,
+  cleanFakeStudyName,
 } from './test-constants';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 
 describe('OptimizerService', () => {
-  const mockSubmit = jest.fn();
-  const mockMakeRequest = jest.fn();
-  const optimizerService = new OptimizerService({
-    submit: mockSubmit,
-  });
+  let mockSubmit: jest.Mock;
+  let mockMakeRequest: jest.Mock;
+  let optimizerService: OptimizerService;
 
   const fakeMetadataRequired = {
     projectId: '1',
@@ -36,20 +43,26 @@ describe('OptimizerService', () => {
   } as MetadataRequired;
 
   beforeEach(() => {
+    mockSubmit = jest.fn();
+    mockMakeRequest = jest.fn();
     ServerConnection.makeRequest = mockMakeRequest;
+    optimizerService = new OptimizerService({
+      submit: mockSubmit,
+    });
   });
 
   it('Creates a study', async () => {
     mockSubmit.mockReturnValue(asApiResponse(fakeStudyResponseActive));
+    const pendingStudy = { ...fakeStudy, name: cleanFakeStudyName };
     const object = await optimizerService.createStudy(
-      fakeStudy,
+      pendingStudy,
       fakeMetadataRequired
     );
     expect(object).toEqual(fakeStudyResponseActive);
     expect(mockSubmit).toHaveBeenCalledWith({
       path: `https://us-central1-ml.googleapis.com/v1/projects/1/locations/us-central1/studies?study_id=study-default`,
       method: 'POST',
-      body: JSON.stringify(fakeStudy),
+      body: JSON.stringify(pendingStudy),
     });
   });
 
@@ -86,14 +99,98 @@ describe('OptimizerService', () => {
       method: 'GET',
     });
   });
+
+  it('gets a list of trials', async () => {
+    const trials = [fakeTrial, fakeTrial, fakeTrial];
+    mockSubmit.mockReturnValue(asApiResponse({ trials }));
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    const response = await optimizerService.listTrials(
+      studyName,
+      fakeMetadataRequired
+    );
+    expect(response).toBe(trials);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials`,
+      method: 'GET',
+    });
+  });
+
+  it('completes a trial', async () => {
+    mockSubmit.mockReturnValue(asApiResponse(fakeTrial));
+    const trialName = fakeTrial.name;
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    const response = await optimizerService.completeTrial(
+      trialName,
+      studyName,
+      { finalMeasurement: fakeMeasurement },
+      fakeMetadataRequired
+    );
+    expect(response).toBe(fakeTrial);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${cleanFakeTrialName}:complete`,
+      method: 'POST',
+      body: {
+        finalMeasurement: fakeMeasurement,
+      },
+    });
+  });
+
+  it('deletes a trial', async () => {
+    mockSubmit.mockReturnValue(asApiResponse({}));
+    const trialName = fakeTrial.name;
+    const studyName =
+      'projects/222309772370/locations/us-central1/studies/study-default';
+    await optimizerService.deleteTrial(
+      trialName,
+      studyName,
+      fakeMetadataRequired
+    );
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/studies/study-default/trials/${cleanFakeTrialName}`,
+      method: 'DELETE',
+    });
+  });
+
+  it('gets an operation', async () => {
+    mockSubmit.mockReturnValue(asApiResponse(fakeStudy));
+    const operationName =
+      'projects/222309772370/locations/us-central1/operations/operation-name';
+    await optimizerService.getOperation(operationName, fakeMetadataRequired);
+    expect(mockSubmit).toHaveBeenCalledWith({
+      path: `https://us-central1-ml.googleapis.com/v1/projects/${fakeMetadataRequired.projectId}/locations/${fakeMetadataRequired.region}/operations/operation-name`,
+      method: 'GET',
+    });
+  });
+});
+
+describe('prettifyOperationId', () => {
+  it('makes a study name readable', () => {
+    expect(
+      prettifyOperationId(
+        'projects/project-name/locations/us-central1/operations/operation / id'
+      )
+    ).toEqual('operation / id');
+  });
 });
 
 describe('prettifyStudyName', () => {
-  it('makes a study name readable', () => {
+  it('makes an operation id readable', () => {
     expect(
       prettifyStudyName(
         'projects/project-name/locations/us-central1/studies/study / name'
       )
     ).toEqual('study / name');
+  });
+});
+
+describe('prettifyTrial', () => {
+  it('makes a trial name readable', () => {
+    expect(
+      prettifyTrial(
+        'projects/project-name/locations/us-central1/studies/study / name/trials/trial / name'
+      )
+    ).toEqual('trial / name');
   });
 });

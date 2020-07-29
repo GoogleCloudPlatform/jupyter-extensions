@@ -14,6 +14,7 @@ import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
+import { QueryEditorType } from '../query_editor_tab/query_editor_results';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
@@ -27,6 +28,7 @@ interface QueryTextEditorProps {
   deleteQueryEntry: any;
   queryId: QueryId;
   iniQuery?: string;
+  editorType?: QueryEditorType;
 }
 
 interface QueryResponseType {
@@ -67,10 +69,23 @@ const styleSheet = stylesheet({
   },
   queryTextEditor: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    minHeight: '200px',
+    flex: 1,
+  },
+  queryTextEditorInCell: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     minHeight: '300px',
     height: '30vh',
   },
   wholeEditor: {
+    // 4/9 of panel height (in relation to results)
+    flex: 4,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  wholeEditorInCell: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
   optionalText: {
@@ -272,6 +287,7 @@ class QueryTextEditor extends React.Component<
         <Typography
           className={styleSheet.optionalText}
           variant="body1"
+          style={{ marginRight: '10px' }}
           {...config}
         >
           {text}
@@ -296,8 +312,20 @@ class QueryTextEditor extends React.Component<
     const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
 
     return (
-      <div className={styleSheet.wholeEditor}>
-        <div className={styleSheet.queryTextEditor}>
+      <div
+        className={
+          this.props.editorType === 'IN_CELL'
+            ? styleSheet.wholeEditorInCell
+            : styleSheet.wholeEditor
+        }
+      >
+        <div
+          className={
+            this.props.editorType === 'IN_CELL'
+              ? styleSheet.queryTextEditorInCell
+              : styleSheet.queryTextEditor
+          }
+        >
           <Editor
             width="100%"
             height="100%"

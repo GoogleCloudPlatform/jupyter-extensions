@@ -19,3 +19,6 @@ export const GET = 'GET';
 
 /** Constant for POST requests */
 export const POST = 'POST';
+
+/** Constant for PATCH requests */
+export const PATCH = 'PATCH';

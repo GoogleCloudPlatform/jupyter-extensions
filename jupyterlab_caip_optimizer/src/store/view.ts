@@ -5,7 +5,7 @@ export type ViewType =
       view: 'dashboard' | 'createStudy';
     }
   | {
-      view: 'studyDetails';
+      view: 'studyDetails' | 'suggestTrials' | 'visualizeTrials';
       studyId: string;
     };
 
@@ -19,14 +19,7 @@ export const viewSlice = createSlice({
   } as ViewState,
   reducers: {
     setView: (state, action: PayloadAction<ViewType>) => {
-      if (action.payload.view === 'studyDetails') {
-        state.data = {
-          view: 'studyDetails',
-          studyId: action.payload.studyId,
-        };
-      } else {
-        state.data = action.payload;
-      }
+      state.data = action.payload;
       state.isVisible = true;
     },
     close: state => {
