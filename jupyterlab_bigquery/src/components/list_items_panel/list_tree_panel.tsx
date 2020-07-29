@@ -1,4 +1,4 @@
-import { LinearProgress, Button, Switch } from '@material-ui/core';
+import { LinearProgress, Button, Switch, Portal } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import * as csstips from 'csstips';
 import * as React from 'react';
@@ -19,12 +19,14 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { updateDataTree, addProject } from '../../reducers/dataTreeSlice';
+import { SnackbarState } from '../../reducers/snackbarSlice';
 import {
   SearchProjectsService,
   SearchResult,
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
 import { DialogComponent } from 'gcp_jupyterlab_shared';
+import CustomSnackbar from './snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;
@@ -36,6 +38,7 @@ interface Props {
   updateDataTree: any;
   currentProject: string;
   addProject: any;
+  snackbar: SnackbarState;
 }
 
 export interface Context {
@@ -229,8 +232,12 @@ class ListItemsPanel extends React.Component<Props, State> {
       pinProjectDialogOpen,
       loadingPinnedProject,
     } = this.state;
+    const { snackbar } = this.props;
     return (
       <div className={localStyles.panel}>
+        <Portal>
+          <CustomSnackbar open={snackbar.open} message={snackbar.message} />
+        </Portal>
         <header className={localStyles.header}>
           BigQuery in Notebooks
           <Button
@@ -362,7 +369,8 @@ class ListItemsPanel extends React.Component<Props, State> {
 
 const mapStateToProps = state => {
   const currentProject = state.dataTree.data.projectIds[0];
-  return { currentProject };
+  const snackbar = state.snackbar;
+  return { currentProject, snackbar };
 };
 const mapDispatchToProps = {
   updateDataTree,
