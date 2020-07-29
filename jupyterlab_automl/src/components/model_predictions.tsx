@@ -237,7 +237,7 @@ export class ModelPredictions extends React.Component<Props, State> {
               width={500}
               rowContextMenu={[
                 {
-                  label: 'CopyID',
+                  label: 'Copy ID',
                   handler: rowData => {
                     Clipboard.copyToSystem(rowData.id);
                   },

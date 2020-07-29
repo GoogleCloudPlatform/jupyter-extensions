@@ -57,8 +57,8 @@ setup(
         "pandas>=1.0.5",
         "gcsfs>=0.6.2",
         "gcp_jupyterlab_shared",
-        "google-cloud-bigquery~=1.25.0"
+        "google-cloud-bigquery~=1.25.0",
         "google-cloud-aiplatform @ https://storage.googleapis.com/google-cloud-aiplatform/libraries/python/0.1.0/google-cloud-aiplatform-0.1.0.tar.gz",
-        "google-api-python-client"
+        "google-api-python-client",
     ],
 )

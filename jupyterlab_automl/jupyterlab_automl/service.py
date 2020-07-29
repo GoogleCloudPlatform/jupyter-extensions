@@ -9,11 +9,9 @@ import re
 from enum import Enum
 from google.cloud import aiplatform_v1alpha1, bigquery, exceptions, storage
 from google.protobuf.struct_pb2 import Value
-from google.cloud import aiplatform_v1alpha1, exceptions, storage
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
-from google.cloud.aiplatform_v1alpha1.types import PredictRequest
 
 # TODO: Add ability to programatically set region
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"

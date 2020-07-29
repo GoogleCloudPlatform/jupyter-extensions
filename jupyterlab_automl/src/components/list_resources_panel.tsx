@@ -191,6 +191,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   this.deleteConfirm(rowData);
                 },
               },
+              {
+                label: 'Copy ID',
+                handler: rowData => {
+                  Clipboard.copyToSystem(rowData.id);
+                },
+              },
             ]}
             paging={true}
             pageSize={20}
@@ -230,6 +236,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 label: 'Delete',
                 handler: rowData => {
                   this.deleteConfirm(rowData);
+                },
+              },
+              {
+                label: 'Copy ID',
+                handler: rowData => {
+                  Clipboard.copyToSystem(rowData.id);
                 },
               },
             ]}

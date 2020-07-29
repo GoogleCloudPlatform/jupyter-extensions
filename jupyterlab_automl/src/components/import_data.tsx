@@ -352,7 +352,7 @@ export class ImportData extends React.Component<Props, State> {
         </Portal>
         {this.props.open && (
           <DialogComponent
-            header={'Import Data'}
+            header={'Import Data to Tables Dataset'}
             open={true}
             onClose={this.props.onClose}
             onCancel={this.props.onClose}
