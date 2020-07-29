@@ -29,6 +29,7 @@ interface QueryTextEditorProps {
   queryId: QueryId;
   iniQuery?: string;
   editorType?: QueryEditorType;
+  queryFlags?: { [keys: string]: any };
 }
 
 interface QueryResponseType {
@@ -169,7 +170,7 @@ class QueryTextEditor extends React.Component<
     });
 
     this.job = this.pagedQueryService.request(
-      { query, jobConfig: {}, dryRunOnly: false },
+      { query, jobConfig: this.props.queryFlags, dryRunOnly: false },
       (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
@@ -225,7 +226,7 @@ class QueryTextEditor extends React.Component<
     }
 
     this.pagedQueryService.request(
-      { query, jobConfig: {}, dryRunOnly: true },
+      { query, jobConfig: this.props.queryFlags, dryRunOnly: true },
       (state, _, response) => {
         if (state === JobState.Fail) {
           this.setState({
