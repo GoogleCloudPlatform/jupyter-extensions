@@ -27,11 +27,11 @@ import {
   TextField,
 } from '@material-ui/core';
 import { StudyConfig } from '../../types';
-import { Loading } from './loading';
+import { Loading } from '../loading';
 import { prettifyTrial } from '../../service/optimizer';
 import { MetricsInputs } from './index';
 import { useDispatch } from 'react-redux';
-import { completeTrial } from '../../store/studies';
+import { completeTrial, addMeasurementTrial } from '../../store/studies';
 import {
   metricSpecsToMetrics,
   metricsToMeasurement,
@@ -57,6 +57,7 @@ export const AddMeasurementDialog: React.FC<Props> = ({
   const [metrics, setMetrics] = React.useState<MetricsInputs>(() =>
     metricSpecsToMetrics(studyConfig.metrics)
   );
+  const [finalMeasurement, setFinalMeasurement] = React.useState(true);
   const [infeasible, setInfeasible] = React.useState(false);
   const [infeasibleReason, setInfeasibleReason] = React.useState('');
 
@@ -80,7 +81,7 @@ export const AddMeasurementDialog: React.FC<Props> = ({
           },
         })
       );
-    } else {
+    } else if (finalMeasurement) {
       await dispatch(
         completeTrial({
           studyName,
@@ -88,6 +89,14 @@ export const AddMeasurementDialog: React.FC<Props> = ({
           details: {
             finalMeasurement: metricsToMeasurement(metrics),
           },
+        })
+      );
+    } else {
+      await dispatch(
+        addMeasurementTrial({
+          studyName,
+          trialName,
+          measurement: metricsToMeasurement(metrics),
         })
       );
     }
@@ -111,6 +120,18 @@ export const AddMeasurementDialog: React.FC<Props> = ({
       )}
       <DialogContent>
         <DialogContentText>Add evaluated trial data.</DialogContentText>
+        <FormControlLabel
+          control={
+            <Checkbox
+              data-testid="finalMeasurement"
+              checked={finalMeasurement}
+              onChange={event => setFinalMeasurement(event.target.checked)}
+              color="primary"
+              disabled={infeasible}
+            />
+          }
+          label="Final Measurement"
+        />
         <MetricInputs
           metricSpecs={studyConfig.metrics}
           value={metrics}

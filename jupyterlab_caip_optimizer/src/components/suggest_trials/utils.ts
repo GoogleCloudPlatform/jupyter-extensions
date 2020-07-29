@@ -245,7 +245,7 @@ export function parameterSpecToValidateInput(
             }
             break;
           case 'DOUBLE': {
-            const { minValue, maxValue } = (spec as any)
+            const { minValue = 0, maxValue = 0 } = (spec as any)
               .doubleValueSpec as DoubleValueSpec;
             const number = parseFloat(value);
             if (number < minValue) {
@@ -257,8 +257,8 @@ export function parameterSpecToValidateInput(
           }
           case 'INTEGER': {
             const {
-              minValue: minValueString,
-              maxValue: maxValueString,
+              minValue: minValueString = '0',
+              maxValue: maxValueString = '0',
             } = (spec as any).integerValueSpec as IntegerValueSpec;
             const number = parseInt(value, 10);
             const minValue = parseInt(minValueString, 10);

@@ -12,9 +12,11 @@ import {
   Select,
   MenuItem,
   Typography,
+  FormControlLabel,
+  Checkbox,
 } from '@material-ui/core';
 import { prettifyStudyName } from '../../service/optimizer';
-import { Loading } from './loading';
+import { Loading } from '../loading';
 import { MetricInputs } from './metric_inputs';
 import { useDispatch } from 'react-redux';
 import { MetricsInputs } from '.';
@@ -26,7 +28,7 @@ import {
   inputValuesToParameterList,
   metricsToMeasurement,
 } from './utils';
-import { StudyConfig, ParameterSpec, State } from '../../types';
+import { StudyConfig, ParameterSpec, TrialState } from '../../types';
 import { ErrorState } from '../../utils/use_error_state';
 import {
   useErrorStateMap,
@@ -160,6 +162,7 @@ export const CreateTrial: React.FC<Props> = ({
   const [metrics, setMetrics] = React.useState<MetricsInputs>(() =>
     metricSpecsToMetrics(studyConfig.metrics)
   );
+  const [requested, setRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   // Creates parameter default values of '' and setups input error handling
   // using the custom hook
@@ -177,20 +180,36 @@ export const CreateTrial: React.FC<Props> = ({
 
   const handleSubmit = async () => {
     setLoading(true);
-    dispatch(
-      createTrial({
-        studyName,
-        trial: {
-          state: State.COMPLETED,
-          parameters: inputValuesToParameterList(
-            errorStateMapToValueObject(map),
-            studyConfig.parameters
-          ),
-          finalMeasurement: metricsToMeasurement(metrics),
-          measurements: [],
-        },
-      })
-    );
+    if (requested) {
+      await dispatch(
+        createTrial({
+          studyName,
+          trial: {
+            state: TrialState.REQUESTED,
+            parameters: inputValuesToParameterList(
+              errorStateMapToValueObject(map),
+              studyConfig.parameters
+            ),
+            measurements: [],
+          },
+        })
+      );
+    } else {
+      await dispatch(
+        createTrial({
+          studyName,
+          trial: {
+            state: TrialState.COMPLETED,
+            parameters: inputValuesToParameterList(
+              errorStateMapToValueObject(map),
+              studyConfig.parameters
+            ),
+            finalMeasurement: metricsToMeasurement(metrics),
+            measurements: [],
+          },
+        })
+      );
+    }
     setLoading(false);
     setMetrics(clearMetrics(metrics));
     onClose();
@@ -208,15 +227,30 @@ export const CreateTrial: React.FC<Props> = ({
       </DialogTitle>
       <DialogContent>
         <DialogContentText>Add custom trial data.</DialogContentText>
+        <FormControlLabel
+          control={
+            <Checkbox
+              data-testid="requestedTrial"
+              checked={requested}
+              onChange={event => setRequested(event.target.checked)}
+              color="primary"
+            />
+          }
+          label="Request Trial"
+        />
         {/* Parameter inputs */}
         <Typography component="h3">Parameters</Typography>
         {parameterSpecToInputs(map, setInput, studyConfig.parameters)}
-        <Typography component="h3">Metrics</Typography>
-        <MetricInputs
-          metricSpecs={studyConfig.metrics}
-          value={metrics}
-          onChange={setMetrics}
-        />
+        {!requested && (
+          <>
+            <Typography component="h3">Metrics</Typography>
+            <MetricInputs
+              metricSpecs={studyConfig.metrics}
+              value={metrics}
+              onChange={setMetrics}
+            />
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button

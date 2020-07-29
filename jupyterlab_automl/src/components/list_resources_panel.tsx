@@ -1,3 +1,4 @@
+import { Clipboard } from '@jupyterlab/apputils';
 import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import orange from '@material-ui/core/colors/orange';
@@ -221,6 +222,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   label: 'Delete',
                   handler: rowData => {
                     this.deleteConfirm(rowData);
+                  },
+                },
+                {
+                  label: 'Copy ID',
+                  handler: rowData => {
+                    Clipboard.copyToSystem(rowData.id);
                   },
                 },
               ]}

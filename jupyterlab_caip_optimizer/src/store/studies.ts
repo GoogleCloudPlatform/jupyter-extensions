@@ -109,6 +109,41 @@ export const fetchTrials = createAsyncThunk<
   )
 );
 
+export const addMeasurementTrial = createAsyncThunk<
+  Trial,
+  {
+    trialName: string;
+    studyName: string;
+    measurement: Measurement;
+  },
+  {
+    state: RootState;
+  }
+>(
+  'studies/completeTrial',
+  wrapThunk(
+    async ({ trialName, studyName, measurement }, thunkAPI) => {
+      const metadata = thunkAPI.getState().metadata.data;
+      if (!metadata) {
+        console.error('No Metadata found.');
+        throw new TypeError('No metadata');
+      }
+      return await optimizer.addMeasurement(
+        measurement,
+        trialName,
+        studyName,
+        metadata
+      );
+    },
+    {
+      success: dispatch =>
+        dispatch(createSnack('Added the measurement!', 'success')),
+      error: dispatch =>
+        dispatch(createSnack('Failed to add a measurement!', 'error')),
+    }
+  )
+);
+
 export const completeTrial = createAsyncThunk<
   Trial,
   {
