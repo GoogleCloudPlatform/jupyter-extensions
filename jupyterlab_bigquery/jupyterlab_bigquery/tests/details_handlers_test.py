@@ -4,7 +4,7 @@ import unittest
 import datetime
 from unittest.mock import Mock, MagicMock, patch
 
-from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details
+from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview
 
 class TestDatasetDetails(unittest.TestCase):
   def testGetDatasetDetailsFull(self):
@@ -250,6 +250,148 @@ class TestTableDetails(unittest.TestCase):
     result = get_table_details(client, 'some_table_id')
     self.assertEqual(expected, result)
   
+class TestTablePreviewPreview(unittest.TestCase):
+    def testNestedTable(self):
+        # ensures records schema names are properly displayed and items
+        # within records are properly separated
+        client = Mock()
+
+        schema_field_0 = Mock(
+            field_type = 'STRING', 
+            mode = 'NULLABLE'
+        )
+        schema_field_0.name = 'field_name_0'
+
+        schema_subfield = Mock(
+            field_type = 'INTEGER', 
+            mode = 'NULLABLE'
+        )
+        schema_subfield.name = 'subfield'
+
+        schema_subfield_2 = Mock(
+            field_type = 'DATETIME',
+            mode = 'NULLABLE'
+        )
+        schema_subfield_2.name = 'other_subfield'
+
+        schema_field_1 = Mock(
+            field_type = 'RECORD', 
+            mode = 'NULLABLE',
+            fields = [schema_subfield, schema_subfield_2]
+        )
+        schema_field_1.name = 'field_name_1'
+
+        rows = MagicMock(schema = [schema_field_0, schema_field_1])
+        row_0 = ['hello', {'subfield': 1, 'other_subfield': datetime.datetime(2020, 7, 14, 13, 23, 45, 67, tzinfo=None)}]
+        row_1 = ['goodbye', {'subfield': 2, 'other_subfield': None}]
+        row_2 = [None, None]
+        rows.__iter__.return_value = [row_0, row_1, row_2]
+
+        client.list_rows = MagicMock(return_value = rows)
+
+        expected = {
+            'fields': ['field_name_0', 'field_name_1.subfield', 'field_name_1.other_subfield'],
+            'rows': [['hello', '1', '2020-07-14 13:23:45.000067 '], ['goodbye', '2', None], [None, None, None]]
+        }
+
+        result = get_table_preview(client, 'some_table_id')
+        self.assertEqual(expected, result)
+
+    def testEmptyTable(self):
+        # same as nested table, but ensures that when all entries are None the header
+        # still displays properly.
+
+        client = Mock()
+
+        schema_field_0 = Mock(
+            field_type = 'STRING', 
+            mode = 'NULLABLE'
+        )
+        schema_field_0.name = 'field_name_0'
+
+        schema_subfield = Mock(
+            field_type = 'INTEGER', 
+            mode = 'NULLABLE'
+        )
+        schema_subfield.name = 'subfield'
+
+        schema_subfield_2 = Mock(
+            field_type = 'DATETIME',
+            mode = 'NULLABLE'
+        )
+        schema_subfield_2.name = 'other_subfield'
+
+        schema_field_1 = Mock(
+            field_type = 'RECORD', 
+            mode = 'NULLABLE',
+            fields = [schema_subfield, schema_subfield_2]
+        )
+        schema_field_1.name = 'field_name_1'
+
+        rows = MagicMock(schema = [schema_field_0, schema_field_1])
+        row_0 = [None, None]
+        rows.__iter__.return_value = [row_0]
+
+        client.list_rows = MagicMock(return_value = rows)
+
+        expected = {
+            'fields': ['field_name_0', 'field_name_1.subfield', 'field_name_1.other_subfield'],
+            'rows': [[None, None, None]]
+        }
+
+        result = get_table_preview(client, 'some_table_id')
+        self.assertEqual(expected, result)
+
+    def testRepeatedTable(self):
+        # ensures that repeated fields are returned as strings, and that
+        # repeated record field name headers are not expanded
+        client = Mock()
+
+        schema_field_0 = Mock(
+            field_type = 'STRING', 
+            description = 'this field is a repeated string', 
+            mode = 'REPEATED'
+        )
+        schema_field_0.name = 'field_name_0'
+
+        schema_subfield = Mock(
+            field_type = 'INTEGER', 
+            description = 'this field is an integer', 
+            mode = 'NULLABLE'
+        )
+        schema_subfield.name = 'subfield'
+
+        schema_field_1 = Mock(
+            field_type = 'RECORD', 
+            description = 'this field is a repeated record', 
+            mode = 'REPEATED',
+            fields = [schema_subfield]
+        )
+        schema_field_1.name = 'field_name_1'
+
+        rows = MagicMock(schema = [schema_field_0, schema_field_1])
+        row_0 = [['hello', 'hi'], [{'subfield': 1}]]
+        row_1 = [['goodbye', 'bye'], [{'subfield': 2}, {'subfield': 3}]]
+        row_2 = [[], []]
+        row_3 = [[], [{'subfield': None}]]
+        rows.__iter__.return_value = [row_0, row_1, row_2, row_3]
+
+        client.list_rows = MagicMock(return_value = rows)
+
+        expected = {
+            'fields': ['field_name_0', 'field_name_1'],
+            'rows': [
+                ['["hello", "hi"]', '[{"subfield": 1}]'], 
+                ['["goodbye", "bye"]', '[{"subfield": 2}, {"subfield": 3}]'],
+                ['[]', '[]'],
+                ['[]', '[{"subfield": null}]']
+            ]
+        }
+
+        result = get_table_preview(client, 'some_table_id')
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
 
 if __name__ == '__main__':
   unittest.main()

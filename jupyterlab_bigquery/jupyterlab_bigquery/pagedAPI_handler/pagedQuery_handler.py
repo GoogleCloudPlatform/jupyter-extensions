@@ -1,7 +1,7 @@
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 from google.cloud import bigquery
 import json
-from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_row
+from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_rows
 from google.cloud.bigquery.dbapi import _helpers
 from threading import Lock
 
@@ -96,7 +96,7 @@ class PagedQueryHandler(PagedAPIHandler):
 
     for page in en.pages:
       response = {
-          'content': json.dumps([format_preview_row(row) for row in page]),
+          'content': json.dumps(format_preview_rows(page, en.schema)),
           'labels': json.dumps(schema_fields),
           'bytesProcessed': json.dumps(total_bytes_processed)
       }
