@@ -4,6 +4,9 @@ from IPython.core import magic_arguments
 from google.cloud.bigquery.dbapi import _helpers
 import ast
 import json
+import IPython
+from functools import partial
+import pandas as pd
 
 module_name = 'bigquery_query_incell_editor'
 module_version = '0.0.1'
@@ -23,6 +26,13 @@ class QueryIncellEditor(DOMWidget):
 
 
 @magic_arguments.magic_arguments()
+@magic_arguments.argument(
+    "destination_var",
+    nargs="?",
+    help=(
+        "If provided, save the output to this variable instead of displaying it."
+    ),
+)
 @magic_arguments.argument(
     "--destination_table",
     type=str,
@@ -92,9 +102,20 @@ def _cell_magic(line, query=None):
       'maximum_bytes_billed': maximum_bytes_billed,
       'params': params,
       'use_legacy_sql': args.use_legacy_sql,
+      'destination_var': args.destination_var,
   }
 
   e = QueryIncellEditor()
   e.query = query if isinstance(query, str) else ''
   e.query_flags = json.dumps(query_flags)
+  if args.destination_var:
+    e.observe(partial(handler, args.destination_var, e))
   return e
+
+
+def handler(dest_val, e, _):
+  val = e.result
+  if val:
+    val = json.loads(val)
+    df = pd.DataFrame(val['content'], columns=val['labels'])
+    IPython.get_ipython().push({dest_val: df})
