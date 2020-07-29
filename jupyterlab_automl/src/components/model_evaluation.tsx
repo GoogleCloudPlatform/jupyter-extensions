@@ -185,8 +185,8 @@ export class FeatureImportance extends React.Component<FeatureImportanceProps> {
           margin={{
             top: 5,
             bottom: 5,
-            left: 55,
-            right: 35,
+            left: 100,
+            right: 5,
           }}
         >
           <YAxis

@@ -11,12 +11,13 @@ import {
 } from '@material-ui/core';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 import * as React from 'react';
-import { Model, ModelService, Pipeline } from '../service/model';
+import { Model, Pipeline } from '../service/model';
 
 interface Props {
   model: Model;
   value: number;
   index: number;
+  pipeline: Pipeline;
 }
 
 interface State {
@@ -149,7 +150,7 @@ export class ModelProperties extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    this.getPipeline();
+    this.getModelDetails(this.props.pipeline);
   }
 
   private getBudget(milliNodeHours: number): string {
@@ -173,7 +174,7 @@ export class ModelProperties extends React.Component<Props, State> {
     return { key, val };
   }
 
-  private getModelDetails(pipeline: Pipeline): any[] {
+  private getModelDetails(pipeline: Pipeline) {
     const modelId = this.props.model.id.split('/');
     const modelDetails = [
       this.createData('ID', modelId[modelId.length - 1]),
@@ -215,26 +216,10 @@ export class ModelProperties extends React.Component<Props, State> {
         }
       }
     }
-    return modelDetails;
-  }
-
-  private async getPipeline() {
-    try {
-      this.setState({ isLoading: true });
-      const pipeline = await ModelService.getPipeline(
-        this.props.model.pipelineId
-      );
-      const modelDetails = this.getModelDetails(pipeline);
-      this.setState({
-        hasLoaded: true,
-        modelDetails: modelDetails,
-        transformationOptions: pipeline.transformationOptions,
-      });
-    } catch (err) {
-      console.warn('Error retrieving pipeline', err);
-    } finally {
-      this.setState({ isLoading: false });
-    }
+    this.setState({
+      modelDetails: modelDetails,
+      transformationOptions: this.props.pipeline.transformationOptions,
+    });
   }
 
   render() {
@@ -242,7 +227,7 @@ export class ModelProperties extends React.Component<Props, State> {
     return (
       <div
         hidden={this.props.value !== this.props.index}
-        style={{ marginTop: '16px' }}
+        style={{ margin: '16px' }}
       >
         {isLoading ? (
           <LinearProgress />

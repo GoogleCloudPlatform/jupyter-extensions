@@ -4,14 +4,17 @@ import base64
 import hashlib
 import uuid
 from enum import Enum
-
+from google.protobuf.struct_pb2 import Value
 from google.cloud import aiplatform_v1alpha1, exceptions, storage
+from google.cloud import aiplatform
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
+from google.cloud.aiplatform_v1alpha1.types import PredictRequest
 
 # TODO: Add ability to programatically set region
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
+PREDICTION_ENDPOINT = "us-central1-prediction-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
 
 
@@ -74,17 +77,22 @@ class AutoMLService:
 
   def __init__(self):
     client_options = {"api_endpoint": API_ENDPOINT}
-    self._dataset_client = aiplatform_v1alpha1.DatasetServiceClient(
+    self._dataset_client = aiplatform.DatasetServiceClient(
         client_options=client_options)
     self._model_client = aiplatform_v1alpha1.ModelServiceClient(
         client_options=client_options)
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
+    self._endpoint_client = aiplatform_v1alpha1.EndpointServiceClient(
+        client_options=client_options)
+    self._prediction_client = aiplatform_v1alpha1.PredictionServiceClient(
+        client_options={"api_endpoint": PREDICTION_ENDPOINT})
     self._gcs_client = storage.Client()
     self._project = AuthProvider.get().project
     self._parent = "projects/{}/locations/us-central1".format(self._project)
     self._gcs_bucket = "jupyterlab-ucaip-data-{}".format(
         hashlib.md5(self._project.encode('utf-8')).hexdigest())
+    self._endpoint = None
 
   @property
   def dataset_client(self):
@@ -101,16 +109,22 @@ class AutoMLService:
     return cls._instance
 
   def get_models(self):
-    models = self._model_client.list_models(parent=self._parent).models
-    return [{
-        "id": model.name,
-        "displayName": model.display_name,
-        "pipelineId": model.training_pipeline,
-        "createTime": get_milli_time(model.create_time),
-        "updateTime": get_milli_time(model.update_time),
-        "etag": model.etag,
-        "modelType": parse_model_type(model)
-    } for model in models]
+    response = self._model_client.list_models(parent=self._parent).models
+    models = []
+    for model in response:
+      json_formatted = json_format.MessageToDict(model._pb)
+      models.append({
+          "id": model.name,
+          "displayName": model.display_name,
+          "pipelineId": model.training_pipeline,
+          "createTime": get_milli_time(model.create_time),
+          "updateTime": get_milli_time(model.update_time),
+          "etag": model.etag,
+          "modelType": parse_model_type(model),
+          "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
+          "deployedModels": json_formatted.get("deployedModels"),
+      })
+    return models
 
   def _build_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0][
@@ -166,7 +180,7 @@ class AutoMLService:
       model_eval["confidenceMetrics"] = self._build_confidence_metrics(
           metrics["confidenceMetrics"])
     for field in optional_fields:
-      model_eval[field] = metrics.get(field, None)
+      model_eval[field] = metrics.get(field)
     return model_eval
 
   def get_model_evaluation(self, model_id):
@@ -206,7 +220,7 @@ class AutoMLService:
           training_task_inputs["transformations"])
       training_pipeline["transformationOptions"] = transformation_options
     for field in optional_fields:
-      training_pipeline[field] = training_task_inputs.get(field, None)
+      training_pipeline[field] = training_task_inputs.get(field)
     return training_pipeline
 
   def get_datasets(self):
@@ -277,3 +291,66 @@ class AutoMLService:
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
+  
+  def _get_model(self, model_id):
+    return self._model_client.get_model(name=model_id)
+  
+  def create_endpoint(self, name):
+    display_name = "ucaip-extension/" + name
+    endpoint = {"display_name": display_name}
+    return self._endpoint_client.create_endpoint(parent=self._parent, endpoint=endpoint).result()
+  
+  def delete_endpoint(self, endpoint_id):
+    self._endpoint_client.delete_endpoint(name=endpoint_id).result()
+
+  def _build_endpoint(self, deployed_model_id, endpoint):
+    return {
+        "deployedModelId": deployed_model_id,
+        "id": endpoint.name,
+        "displayName": endpoint.display_name,
+        "models": len(endpoint.deployed_models),
+        "updateTime": get_milli_time(endpoint.update_time),
+    }
+
+  def get_endpoints(self, model_id):
+    model = self._get_model(model_id)
+    endpoints = []
+    if model.deployed_models:
+      for deployed_model in model.deployed_models:
+        endpoint = self._endpoint_client.get_endpoint(name=deployed_model.endpoint)
+        built = self._build_endpoint(deployed_model.deployed_model_id, endpoint)
+        endpoints.append(built)
+    return endpoints
+
+  def check_deploying(self, model_name):
+    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    name = "ucaip-extension/" + model_name
+    filtered = filter(lambda x: name == x.display_name, endpoints)
+    filtered = list(filtered)
+    if len(filtered) > 0:
+      return [self._build_endpoint("None", filtered[0])]
+    return []
+
+  def deploy_model(self, model_id, machine_type="n1-standard-2", endpoint_id=None):
+    model = self._get_model(model_id)
+    if not endpoint_id:
+      endpoint_id = self.create_endpoint(model.display_name).name
+    traffic_split = {"0": 100}
+    machine_spec = {"machine_type": machine_type}
+    dedicated_resources = {"machine_spec": machine_spec, "min_replica_count": 1}
+    deployed_model = {"model": model_id, "display_name": model.display_name, "dedicated_resources": dedicated_resources}
+    self._endpoint_client.deploy_model(endpoint=endpoint_id, deployed_model=deployed_model, traffic_split=traffic_split)
+
+  def undeploy_model(self, deployed_model_id, endpoint_id):
+    try:
+      self._endpoint_client.undeploy_model(endpoint=endpoint_id, deployed_model_id=deployed_model_id).result()
+    except:
+      print('TypeError when undeploying model. Known error. Fixed in later versions of the API.')
+
+  def predict_tables(self, endpoint_id, instance):
+    parameters_dict = {}
+    parameters = json_format.ParseDict(parameters_dict, Value())
+    instances_list = [instance]
+    instances = [json_format.ParseDict(s, Value()) for s in instances_list]
+    response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
+    return json_format.MessageToDict(response._pb.predictions[0])
