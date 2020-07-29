@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Button,
@@ -19,6 +19,10 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import { dateFormat, makeReadable } from '../utils';
 import { setView } from '../store/view';
+import { ParameterSpecTree } from './parameter_spec_tree';
+import { styles } from '../utils/styles';
+import ParameterDetailsDialog from './parameter_details_dialog';
+import { CommonNode } from './parameter_spec_tree/common_node';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -90,6 +94,7 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
 interface Props {
   studyId: string;
   studyToDisplay: FormattedStudy;
+  parameterSpecs: Types.ParameterSpec[];
   openTrials: (studyName: string) => void;
   openVisualizations: (studyName: string) => void;
   openDashboard: () => void;
@@ -112,6 +117,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     studyId: study.name,
     studyToDisplay,
+    parameterSpecs: study.studyConfig.parameters,
     // TODO: add trials
     // trialsToDisplay
   };
@@ -173,6 +179,7 @@ function createParamRows(study: FormattedStudy): ParamRow[] {
 export const StudyDetailsUnwrapped: React.FC<Props> = ({
   studyId,
   studyToDisplay,
+  parameterSpecs,
   openTrials,
   openVisualizations,
   openDashboard,
@@ -180,8 +187,14 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
   const classes = useStyles();
   const configRows = createConfigRows(studyToDisplay);
   const paramRows = createParamRows(studyToDisplay);
+  const [selectedParameterSpec, setSelectedParameterSpec] = React.useState<
+    undefined | Types.ParameterSpec
+  >(undefined);
+  const parametersAreTree = useMemo(() => CommonNode.isTree(parameterSpecs), [
+    parameterSpecs,
+  ]);
   return (
-    <Box m={3}>
+    <Box m={3} className={styles.root}>
       <React.Fragment>
         <Typography variant="h5" gutterBottom align="left">
           {studyToDisplay.name}
@@ -268,6 +281,25 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
             </Grid>
           </Grid>
         </Grid>
+
+        {parametersAreTree && (
+          <>
+            <Box mt={3}>
+              <ParameterSpecTree
+                specs={parameterSpecs}
+                onClick={spec => {
+                  console.log(spec);
+                  setSelectedParameterSpec(spec);
+                }}
+              />
+            </Box>
+
+            <ParameterDetailsDialog
+              spec={selectedParameterSpec}
+              onClose={() => setSelectedParameterSpec(undefined)}
+            />
+          </>
+        )}
       </React.Fragment>
     </Box>
   );

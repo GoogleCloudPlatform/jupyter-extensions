@@ -5,3 +5,37 @@
   background-image: url('./images/storage_24px.svg');
   background-size: contain;
 }
+
+.noClick {
+  cursor: 'default';
+}
+
+.node circle {
+  fill: rgb(247, 106, 214);
+  stroke: rgb(184, 37, 81);
+  stroke-width: 1.5px;
+}
+
+.noClick circle {
+  fill: rgb(70, 109, 216);
+  stroke: rgb(27, 30, 179);
+  stroke-width: 1.5px;
+}
+
+.node text,
+.noClick text {
+  /* font-size: 11px; */
+  font-family: 'Roboto', sans-serif;
+  background-color: black;
+  fill: black;
+}
+
+.node {
+  cursor: pointer;
+}
+
+path.link {
+  fill: none;
+  stroke: #2593b8;
+  stroke-width: 1.5px;
+}
