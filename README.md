@@ -50,7 +50,7 @@ environment.
    JupyterLab environment in development mode. Afterwards, `cd` back to the root
    of the repository.
 
-   - Run `jupyter labextension install @jupyter-widgets/jupyterlab-manager` if your extension requires ipywidget. Currently, this is a requirement for the jupyterlab_bigquery extension.
+   - Run `jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.1` if your extension requires ipywidget. Currently, this is a requirement for the jupyterlab_bigquery extension.
 
 1. Run `npm run watch` to start the TypeScript compiler in watch mode. This will
    watch for changes in any of the TypeScript sources.
