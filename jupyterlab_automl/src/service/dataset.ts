@@ -50,7 +50,6 @@ export interface TablesDatasetOptions {
   gcsSource?: string;
   bigquerySource?: string;
   fileSource?: File;
-  dfSource?: string;
 }
 
 function toBase64(file: File) {
@@ -97,7 +96,6 @@ export abstract class DatasetService {
             data: await toBase64(options.fileSource),
           }
         : null,
-      dfSource: options.dfSource,
     };
     const requestInit: RequestInit = {
       body: JSON.stringify(body),
