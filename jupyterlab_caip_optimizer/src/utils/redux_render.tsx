@@ -10,6 +10,7 @@ import {
   fakeStudy,
   fakeProjectId,
   fakeRegion,
+  fakeStudyTree,
 } from '../service/test-constants';
 
 const reducer = {
@@ -33,7 +34,7 @@ const initialState = {
     severity: 'info',
   },
   studies: {
-    data: [fakeStudy],
+    data: [fakeStudy, fakeStudyTree],
     loading: false,
     error: undefined,
   },

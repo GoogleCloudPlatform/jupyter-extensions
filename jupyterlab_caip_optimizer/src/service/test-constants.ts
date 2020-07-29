@@ -188,3 +188,120 @@ export const fakeSuggestOperationGetSuccess = {
     endTime: '2020-07-17T16:05:21Z',
   },
 };
+
+// Tree Study
+export const fakeParamCategoricalTree = {
+  parameter: 'param-categorical',
+  type: 'CATEGORICAL',
+  categoricalValueSpec: {
+    values: ['a', 'b', 'c', 'categorical-type'],
+  },
+  childParameterSpecs: [
+    {
+      parameter: 'deep_learning_rate',
+      type: 'DOUBLE',
+      doubleValueSpec: {
+        minValue: -10,
+        maxValue: -1,
+      },
+      parentCategoricalValues: {
+        values: ['a'],
+      },
+    },
+    {
+      parameter: 'learning_rate',
+      type: 'DOUBLE',
+      doubleValueSpec: {
+        minValue: -10,
+        maxValue: -1,
+      },
+      parentCategoricalValues: {
+        values: ['a', 'b'],
+      },
+    },
+  ],
+} as ParameterSpec;
+
+export const fakeParamDiscreteTree = {
+  parameter: 'param-discrete',
+  type: 'DISCRETE',
+  discreteValueSpec: {
+    values: [1, 2, 3, 556],
+  },
+  childParameterSpecs: [
+    {
+      parameter: 'small_model',
+      type: 'DISCRETE',
+      discreteValueSpec: {
+        values: [1, 2, 3, 556],
+      },
+      parentDiscreteValues: {
+        values: [1, 2, 3],
+      },
+    },
+    {
+      parameter: 'big_model',
+      type: 'DISCRETE',
+      discreteValueSpec: {
+        values: [1, 2, 3, 556],
+      },
+      parentDiscreteValues: {
+        values: [556],
+      },
+    },
+  ],
+} as ParameterSpec;
+
+export const fakeParamIntegerTree = {
+  parameter: 'param-integer',
+  type: 'INTEGER',
+  integerValueSpec: {
+    minValue: '0',
+    maxValue: '1000',
+  },
+  childParameterSpecs: [
+    {
+      parameter: 'low',
+      parentIntValues: {
+        values: ['0', '1'],
+      },
+      type: 'INTEGER',
+      integerValueSpec: {
+        minValue: '1',
+        maxValue: '10',
+      },
+    },
+    {
+      parameter: 'high',
+      parentIntValues: {
+        values: ['999', '1000'],
+      },
+      type: 'INTEGER',
+      integerValueSpec: {
+        minValue: '1',
+        maxValue: '10',
+      },
+    },
+  ],
+} as ParameterSpec;
+
+const fakeParametersTree: ParameterSpec[] = [
+  fakeParamCategoricalTree,
+  fakeParamDiscreteTree,
+  fakeParamIntegerTree,
+];
+
+export const fakeStudyNameTree =
+  'projects/project-id/locations/us-region/studies/study-tree';
+export const cleanFakeStudyNameTree = 'study-tree';
+
+export const fakeStudyConfigTree = {
+  metrics: fakeMetrics,
+  parameters: fakeParametersTree,
+  algorithm: 'ALGORITHM_UNSPECIFIED',
+} as StudyConfig;
+
+export const fakeStudyTree = {
+  name: fakeStudyNameTree,
+  studyConfig: fakeStudyConfigTree,
+} as Study;
