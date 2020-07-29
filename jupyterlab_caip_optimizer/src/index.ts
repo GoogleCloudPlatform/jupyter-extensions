@@ -58,8 +58,6 @@ const createManagedWidget = <
 };
 
 async function activate(app: JupyterFrontEnd) {
-  store.dispatch(fetchStudies());
-
   // Create main area widget
   createManagedWidget(store, app, MainAreaWidget);
 
