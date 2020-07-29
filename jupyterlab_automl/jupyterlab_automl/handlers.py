@@ -77,6 +77,39 @@ def _get_pipelines(_):
   return AutoMLService.get().get_training_pipelines()
 
 
+@_handler("POST", "getEndpoints")
+def _get_endpoints(args):
+  return AutoMLService.get().get_endpoints(model_id=args["modelId"])
+
+
+@_handler("POST", "checkDeploying")
+def _check_deploying(args):
+  return AutoMLService.get().check_deploying(model_name=args["modelName"])
+
+
+@_handler("POST", "deployModel")
+def _deploy_model(args):
+  AutoMLService.get().deploy_model(model_id=args["modelId"])
+  return {"success": True}
+
+
+@_handler("POST", "undeployModel")
+def _undeploy_model(args):
+  AutoMLService.get().undeploy_model(deployed_model_id=args["deployedModelId"], endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "deleteEndpoint")
+def _delete_endpoint(args):
+  AutoMLService.get().delete_endpoint(endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "predict")
+def _predict_tables(args):
+  return AutoMLService.get().predict_tables(endpoint_id=args["endpointId"], instance=args["inputs"])
+
+
 @_handler("GET", "tableInfo")
 def _table_info(args):
   return AutoMLService.get().get_table_specs(args["datasetId"])
@@ -107,11 +140,17 @@ def _project(_):
 @_handler("POST", "createTablesDataset")
 def _create_tables_dataset(args):
   file_source = args.get("fileSource")
+  df_source = args.get("dfSource")
   if file_source:
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=file_source["name"],
         file_data=file_source["data"])
+  elif df_source:
+    AutoMLService.get().create_dataset_from_file(
+        display_name=args["displayName"],
+        file_name=args["displayName"],
+        file_data=df_source)
   else:
     AutoMLService.get().create_dataset(display_name=args["displayName"],
                                        gcs_uri=args.get("gcsSource"),

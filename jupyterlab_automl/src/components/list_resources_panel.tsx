@@ -191,6 +191,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 },
               },
             ]}
+            paging={true}
+            pageSize={20}
+            pageSizeOptions={[20]}
           />
         );
       case ResourceType.Model:
@@ -348,6 +351,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onSuccess={() => {
               this.refresh();
             }}
+            context={this.props.context}
           />
         </Box>
       </>
