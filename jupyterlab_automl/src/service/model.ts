@@ -3,13 +3,28 @@ import { requestAPI } from './api_request';
 export type ModelType = 'OTHER' | 'TABLE' | 'IMAGE';
 
 export interface Model {
-  id: string; // Resource name of dataset
+  id: string;
   displayName: string;
   pipelineId: string;
   createTime: Date;
   updateTime: Date;
   etag: string;
   modelType: string;
+  inputs?: object;
+  deployedModels?: DeployedModel[];
+}
+
+export interface DeployedModel {
+  deployedModelId: string;
+  endpoint: string;
+}
+
+export interface Endpoint {
+  deployedModelId: string;
+  id: string;
+  displayName: string;
+  models: number;
+  updateTime: Date;
 }
 
 export interface Pipeline {
@@ -89,5 +104,78 @@ export abstract class ModelService {
     );
     data.createTime = new Date(data.createTime);
     return data;
+  }
+
+  static async getEndpoints(modelId: string): Promise<Endpoint[]> {
+    const query = '?modelId=' + modelId;
+    const data = await requestAPI<Endpoint[]>('v1/getEndpoints' + query);
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
+    return data;
+  }
+
+  static async checkDeploying(model: Model): Promise<Endpoint[]> {
+    const body = {
+      modelName: model.displayName,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    const data = await requestAPI<Endpoint[]>('v1/checkDeploying', requestInit);
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
+    return data;
+  }
+
+  static async deployModel(modelId: string): Promise<void> {
+    const body = {
+      modelId: modelId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/deployModel', requestInit);
+  }
+
+  static async undeployModel(
+    deployedModelId: string,
+    endpointId: string
+  ): Promise<void> {
+    const body = {
+      deployedModelId: deployedModelId,
+      endpointId: endpointId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/undeployModel', requestInit);
+  }
+
+  static async deleteEndpoint(endpointId: string): Promise<void> {
+    const body = {
+      endpointId: endpointId,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    await requestAPI('v1/deleteEndpoint', requestInit);
+  }
+
+  static async predict(endpointId: string, inputs: object): Promise<object> {
+    const body = {
+      endpointId: endpointId,
+      inputs: inputs,
+    };
+    const requestInit: RequestInit = {
+      body: JSON.stringify(body),
+      method: 'POST',
+    };
+    return await requestAPI('v1/predict', requestInit);
   }
 }
