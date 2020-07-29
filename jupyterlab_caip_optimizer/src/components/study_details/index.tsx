@@ -13,16 +13,16 @@ import {
   TableRow,
 } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import * as Types from '../types';
-import { prettifyStudyName } from '../service/optimizer';
+import * as Types from '../../types';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import { dateFormat, makeReadable } from '../utils';
-import { setView } from '../store/view';
-import { ParameterSpecTree } from './parameter_spec_tree';
-import { styles } from '../utils/styles';
-import ParameterDetailsDialog from './parameter_details_dialog';
-import { CommonNode } from './parameter_spec_tree/common_node';
+import { prettifyStudyName } from '../../service/optimizer';
+import { makeReadable, dateFormat } from '../../utils';
+import { setView } from '../../store/view';
+import { CommonNode } from '../parameter_spec_tree/common_node';
+import { styles } from '../../utils/styles';
+import { ParameterSpecTree } from '../parameter_spec_tree';
+import ParameterDetailsDialog from '../parameter_details_dialog';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -287,10 +287,7 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
             <Box mt={3}>
               <ParameterSpecTree
                 specs={parameterSpecs}
-                onClick={spec => {
-                  console.log(spec);
-                  setSelectedParameterSpec(spec);
-                }}
+                onClick={spec => setSelectedParameterSpec(spec)}
               />
             </Box>
 

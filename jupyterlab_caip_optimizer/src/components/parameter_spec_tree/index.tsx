@@ -17,8 +17,8 @@ export const ParameterSpecTree: React.FC<Props> = ({ specs, onClick }) => {
       {resizeListener}
       <Tree
         data={rootNode}
-        height={sizes.height}
-        width={sizes.width}
+        height={sizes.height ?? 0}
+        width={sizes.width ?? 0}
         margins={{ top: 20, bottom: 10, left: 20, right: 200 }}
         keyProp="id"
         nodeProps={{

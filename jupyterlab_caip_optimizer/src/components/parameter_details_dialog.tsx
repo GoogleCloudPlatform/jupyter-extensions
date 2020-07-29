@@ -17,7 +17,11 @@ interface Props {
 
 const ParameterDetailsDialog: React.FC<Props> = ({ spec, onClose }) => {
   return (
-    <Dialog open={!!spec} onClose={onClose}>
+    <Dialog
+      open={!!spec}
+      onClose={onClose}
+      data-testid="parameterDetailsDialog"
+    >
       {!!spec && (
         <>
           <DialogTitle>Parameter "{spec.parameter}"</DialogTitle>

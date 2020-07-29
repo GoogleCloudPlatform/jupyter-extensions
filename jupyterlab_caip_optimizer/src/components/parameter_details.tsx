@@ -43,13 +43,17 @@ export const ParameterDetails: React.FC<Props> = ({ spec }) => {
             <TableCell component="th" scope="row">
               Name
             </TableCell>
-            <TableCell align="right">{spec.parameter}</TableCell>
+            <TableCell align="right" data-testid="parameterDetailsName">
+              {spec.parameter}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">
               Type
             </TableCell>
-            <TableCell align="right">{spec.type}</TableCell>
+            <TableCell align="right" data-testid="parameterDetailsType">
+              {spec.type}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">
