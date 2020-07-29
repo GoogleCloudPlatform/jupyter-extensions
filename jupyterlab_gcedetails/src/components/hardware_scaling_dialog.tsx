@@ -17,17 +17,46 @@
 import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
+import { HardwareConfiguration } from '../data';
+
+enum View {
+  FORM,
+  CONFIRMATION,
+}
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
+interface State {
+  view: View;
+  hardwareConfiguration: HardwareConfiguration;
+}
+
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
-export function HardwareScalingDialog(props: Props) {
-  return (
-    <Dialog open={props.open}>
-      <HardwareScalingForm onDialogClose={props.onClose} />
-    </Dialog>
-  );
+export class HardwareScalingDialog extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      view: View.FORM,
+      hardwareConfiguration: null,
+    };
+  }
+
+  render() {
+    const { open } = this.props;
+
+    return <Dialog open={open}>{this.getDisplay()}</Dialog>;
+  }
+
+  private getDisplay() {
+    const { onClose } = this.props;
+    const { view } = this.state;
+
+    switch (view) {
+      case View.FORM:
+        return <HardwareScalingForm onDialogClose={onClose} />;
+    }
+  }
 }
