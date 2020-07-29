@@ -239,7 +239,7 @@ export class ModelPredictions extends React.Component<Props, State> {
                 {
                   label: 'CopyID',
                   handler: rowData => {
-                    Clipboard.copyToSystem(rowData.endpointId);
+                    Clipboard.copyToSystem(rowData.id);
                   },
                 },
                 {
@@ -310,7 +310,8 @@ export class ModelPredictions extends React.Component<Props, State> {
               </div>
             ) : (
               <Alert severity="info">
-                Waiting for model to finish deploying. Check back in a few minutes.
+                Waiting for model to finish deploying. Check back in a few
+                minutes.
               </Alert>
             )}
           </div>
