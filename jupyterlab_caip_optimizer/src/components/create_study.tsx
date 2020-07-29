@@ -381,7 +381,11 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                 required
               >
                 {paramTypes.map(option => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                    data-testid="paramType"
+                  >
                     {option.label}
                   </MenuItem>
                 ))}
@@ -462,7 +466,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               <Paper component="ul" className={classes.chipBox}>
                 {paramChipData.map(data => {
                   return (
-                    <li key={data.key}>
+                    <li key={data.key} data-testid="paramChip">
                       <Chip
                         label={data.label}
                         className={classes.chip}
@@ -505,6 +509,14 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               <Grid item xs={12}>
                 <TextField
                   id="metricGoalType"
+                  SelectProps={{
+                    SelectDisplayProps: {
+                      // Needed for testing
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                      // @ts-ignore
+                      'data-testid': 'metricGoalType',
+                    },
+                  }}
                   variant="outlined"
                   select
                   label="Goal Type"
@@ -514,7 +526,11 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                   required
                 >
                   {metricGoalTypes.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <MenuItem
+                      key={option.value}
+                      value={option.value}
+                      data-testid="metricItem"
+                    >
                       {option.label}
                     </MenuItem>
                   ))}
@@ -547,7 +563,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                 <Paper component="ul" className={classes.chipBox}>
                   {metricChipData.map(data => {
                     return (
-                      <li key={data.key}>
+                      <li key={data.key} data-testid="metricChip">
                         <Chip
                           label={data.label}
                           className={classes.chip}

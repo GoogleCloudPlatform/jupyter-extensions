@@ -7,10 +7,10 @@ import { metadataSlice } from '../store/metadata';
 import { snackbarSlice } from '../store/snackbar';
 import { studiesSlice } from '../store/studies';
 import {
-  fakeStudy,
   fakeProjectId,
   fakeRegion,
   fakeStudyTree,
+  fakeStudyResponseActive,
 } from '../service/test-constants';
 
 export const reducer = {
@@ -34,7 +34,7 @@ export const initialState = {
     severity: 'info',
   },
   studies: {
-    data: [fakeStudy, fakeStudyTree],
+    data: [fakeStudyResponseActive, fakeStudyTree],
     loading: false,
     error: undefined,
   },

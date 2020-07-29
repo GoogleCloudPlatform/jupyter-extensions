@@ -53,19 +53,19 @@ describe('Dashboard', () => {
       expect(table.prop('data')).toMatchInlineSnapshot(`
         Array [
           Object {
-            "createTime": "1",
+            "createTime": "2020-07-23T18:34:52Z",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
             "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
           },
           Object {
-            "createTime": "1",
+            "createTime": "2020-07-23T18:34:52Z",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
             "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
           },
           Object {
-            "createTime": "1",
+            "createTime": "2020-07-23T18:34:52Z",
             "metrics": "Goal_type_unspecified \\"metric-unspecified\\", Maximize \\"metric-maximize\\"",
             "name": "projects/project-id/locations/us-region/studies/study-default",
             "state": "ACTIVE",
