@@ -4,7 +4,6 @@ import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
 import { ReduxReactWidget } from './redux_react_widget';
-import { QueryEditorTabWidget } from '../../components/query_editor/query_editor_tab/query_editor_tab_widget';
 
 /**
  * A class that manages dataset widget instances in the Main area
@@ -14,7 +13,6 @@ export class WidgetManager {
   private widgets: { [id: string]: Widget } = {};
   private reduxWidgets: { [id: string]: ReduxReactWidget } = {};
   private store: EnhancedStore;
-  private editorNumber = 1;
 
   private constructor(private app: JupyterFrontEnd) {
     this.store = configureStore({ reducer: rootReducer });
@@ -48,14 +46,7 @@ export class WidgetManager {
 
     let widget = this.reduxWidgets[id];
     if (!widget || widget.isDisposed) {
-      if (widgetType === QueryEditorTabWidget) {
-        widget = new widgetType(this.editorNumber, ...widgetArgs);
-        this.editorNumber += 1;
-      } else {
-        widget = new widgetType(...widgetArgs);
-      }
-
-      widget.id = id;
+      widget = new widgetType(...widgetArgs);
       widget.setProviderProps({ store: this.store });
 
       if (postProcess !== undefined) {
