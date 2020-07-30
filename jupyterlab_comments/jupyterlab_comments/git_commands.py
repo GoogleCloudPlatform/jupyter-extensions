@@ -31,7 +31,7 @@ class Git(Configurable):
 
 	def run(self, cwd, *args):
 		try:
-		  return subprocess.check_output(['git'] + list(args), cwd=cwd, stderr=subprocess.DEVNULL)
+		  return subprocess.check_output(['git'] + list(args), cwd=cwd)
 		except subprocess.CalledProcessError as e:
 		  print("Error invoking git command")
 		  print(e.output)
