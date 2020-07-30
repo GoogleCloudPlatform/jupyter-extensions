@@ -1,5 +1,6 @@
 import React from 'react';
 import Editor, { monaco, Monaco } from '@monaco-editor/react';
+import copy from 'copy-to-clipboard';
 import { connect } from 'react-redux';
 import {
   updateQueryResult,
@@ -15,8 +16,14 @@ import {
   PauseCircleOutline,
   CheckCircleOutline,
   ErrorOutlineOutlined,
+  FileCopyOutlined,
 } from '@material-ui/icons';
-import { Button, CircularProgress, Typography } from '@material-ui/core';
+import {
+  Button,
+  CircularProgress,
+  Typography,
+  IconButton,
+} from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
@@ -493,6 +500,20 @@ class QueryTextEditor extends React.Component<
     }
   }
 
+  renderButtonCopyButton() {
+    return (
+      <IconButton
+        size="small"
+        onClick={_ => {
+          const query = this.editor.getValue();
+          copy(query.trim());
+        }}
+      >
+        <FileCopyOutlined />
+      </IconButton>
+    );
+  }
+
   render() {
     const { iniQuery } = this.props;
 
@@ -512,7 +533,16 @@ class QueryTextEditor extends React.Component<
             {this.renderButton()}
             {this.renderCancelButton()}
           </div>
-          <div style={{ alignSelf: 'center' }}>{this.renderMessage()}</div>
+          <div
+            style={{
+              alignSelf: 'center',
+              display: 'flex',
+              flexDirection: 'row',
+            }}
+          >
+            {this.renderMessage()}
+            {this.renderButtonCopyButton()}
+          </div>
         </div>
 
         <div
