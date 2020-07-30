@@ -10,7 +10,7 @@ def list_models():
   return AutoMLService.get().get_models()
 
 
-def create_dataset_from_dataframe(display_name: str, df: pd.Dataframe):
+def create_dataset_from_dataframe(display_name: str, df: pd.DataFrame):
   return AutoMLService.get().create_dataset_from_dataframe(display_name, df)
 
 

@@ -391,7 +391,7 @@ class AutoMLService:
 
     container_spec = aiplatform_v1alpha1.ModelContainerSpec(
         image_uri="gcr.io/cloud-aiplatform/prediction/{}:latest".format(
-            framework.value))
+            framework))
     model = aiplatform_v1alpha1.Model(display_name=display_name,
                                       artifact_uri="gs://{}/{}".format(
                                           bucket.name, key),
