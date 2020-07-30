@@ -10,6 +10,10 @@ import {
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 
+import {
+  PlayCircleFilledRounded,
+  PauseCircleOutline,
+} from '@material-ui/icons';
 import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
@@ -59,22 +63,27 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   wordWrap: 'on',
   wrappingIndent: 'same',
   wrappingStrategy: 'advanced',
+  minimap: { enabled: false },
 };
 
 const styleSheet = stylesheet({
   queryButton: {
-    float: 'right',
-    width: '100px',
-    maxWidth: '200px',
-    margin: '10px',
+    marginTop: ' 2px',
+    marginBottom: ' 2px',
+    marginRight: '20px',
+    fontSize: '10px',
+  },
+  buttonText: {
+    alignSelf: 'center',
+    justifySelf: 'center',
+    textTransform: 'none',
+    fontWeight: 'bold',
   },
   queryTextEditor: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     minHeight: '200px',
     flex: 1,
   },
   queryTextEditorInCell: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     minHeight: '300px',
     height: '30vh',
   },
@@ -84,10 +93,12 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    // borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    border: '1px solid rgb(218, 220, 224)',
   },
   wholeEditorInCell: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    // borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    border: '1px solid rgb(218, 220, 224)',
   },
   optionalText: {
     marginRight: '10px',
@@ -103,8 +114,15 @@ const styleSheet = stylesheet({
   buttonInfoBar: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    margin: '10px',
+    justifyContent: 'space-between',
+    paddingTop: '5px',
+    paddingBottom: '5px',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    backgroundColor: 'rgb(248, 249, 250)',
+    // borderBlockColor: 'rgb(218, 220, 224)',
+    // borderStyle: 'solid',
+    borderBottom: '1px solid rgb(218, 220, 224)',
   },
 });
 
@@ -152,8 +170,6 @@ class QueryTextEditor extends React.Component<
       case ButtonStates.ERROR:
         this.handleQuery();
         break;
-      case ButtonStates.PENDING:
-        this.handleCancel();
     }
   }
 
@@ -335,38 +351,62 @@ class QueryTextEditor extends React.Component<
 
   renderButton() {
     const buttonState = this.state.buttonState;
-    let color = undefined;
     let content = undefined;
+    let startIcon = undefined;
 
     switch (buttonState) {
       case ButtonStates.PENDING:
-        color = 'default';
-        content = (
-          <div className={styleSheet.pendingStatus}>
-            <CircularProgress size="75%" style={{ alignSelf: 'center' }} />
-            <Typography variant="button">Cancel</Typography>
-          </div>
+        content = 'Running';
+        startIcon = (
+          <CircularProgress size="1rem" thickness={5} color="secondary" />
         );
         break;
       case ButtonStates.READY:
-        color = 'primary';
-        content = 'Submit';
-        break;
       case ButtonStates.ERROR:
-        color = 'secondary';
-        content = 'Error';
+        content = 'Submit query';
+        startIcon = <PlayCircleFilledRounded />;
         break;
     }
 
     return (
       <Button
-        color={color}
+        color="primary"
+        size="small"
         variant="contained"
         onClick={this.handleButtonClick.bind(this)}
         className={styleSheet.queryButton}
+        startIcon={startIcon}
       >
-        {content}
+        {this.renderButtontext(content)}
       </Button>
+    );
+  }
+
+  renderCancelButton() {
+    const buttonState = this.state.buttonState;
+    if (buttonState !== ButtonStates.PENDING) {
+      return undefined;
+    }
+
+    return (
+      <Button
+        onClick={this.handleCancel.bind(this)}
+        size="small"
+        startIcon={<PauseCircleOutline />}
+      >
+        {this.renderButtontext('stop')}
+      </Button>
+    );
+  }
+
+  renderButtontext(text) {
+    return (
+      <Typography
+        style={{ fontSize: '0.8rem' }}
+        className={styleSheet.buttonText}
+      >
+        {text}
+      </Typography>
     );
   }
 
@@ -409,6 +449,20 @@ class QueryTextEditor extends React.Component<
             : styleSheet.wholeEditor
         }
       >
+        <div className={styleSheet.buttonInfoBar}>
+          <div>
+            {this.renderButton()}
+            {this.renderCancelButton()}
+          </div>
+          <div>
+            {this.renderOptionalText(errMsg, {
+              variant: 'caption',
+              color: 'error',
+            })}
+            {this.renderOptionalText(readableSize)}
+          </div>
+        </div>
+
         <div
           className={
             this.props.editorType === 'IN_CELL'
@@ -425,15 +479,6 @@ class QueryTextEditor extends React.Component<
             editorDidMount={this.handleEditorDidMount.bind(this)}
             options={SQL_EDITOR_OPTIONS}
           />
-        </div>
-
-        <div className={styleSheet.buttonInfoBar}>
-          {this.renderOptionalText(errMsg, {
-            variant: 'caption',
-            color: 'error',
-          })}
-          {this.renderOptionalText(readableSize)}
-          {this.renderButton()}
         </div>
       </div>
     );
