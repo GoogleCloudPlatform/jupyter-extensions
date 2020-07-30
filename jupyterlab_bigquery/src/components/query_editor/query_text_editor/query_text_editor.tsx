@@ -469,7 +469,7 @@ class QueryTextEditor extends React.Component<
   renderMessage() {
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
-      ? 'Processed ' + this.readableBytes(this.state.bytesProcessed)
+      ? this.readableBytes(this.state.bytesProcessed)
       : null;
 
     const message = this.state.message;
