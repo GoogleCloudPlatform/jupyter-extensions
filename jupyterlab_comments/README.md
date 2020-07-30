@@ -8,7 +8,7 @@ Install [git-appraise](https://github.com/google/git-appraise#installation)
 
 ## Development
 
-1. Follow the [instructions](../#development) from the root of the repository.
+1. Follow the [instructions](https://github.com/GoogleCloudPlatform/jupyter-extensions#development) from the root of the repository.
 
 ### Configuration
 
