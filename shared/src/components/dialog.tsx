@@ -16,6 +16,7 @@ interface Props {
   onSubmit?: () => void;
   children?: React.ReactNode;
   submitDisabled?: boolean;
+  showSubmit?: boolean;
   keepMounted?: boolean;
 }
 
@@ -52,11 +53,13 @@ export function DialogComponent(props: Props) {
         onClick={props.onCancel}
         closeLabel={props.cancelLabel || 'Cancel'}
       >
-        <SubmitButton
-          actionPending={props.submitDisabled || false}
-          onClick={props.onSubmit}
-          text={props.submitLabel || 'Submit'}
-        />
+        {props.showSubmit && (
+          <SubmitButton
+            actionPending={props.submitDisabled || false}
+            onClick={props.onSubmit}
+            text={props.submitLabel || 'Submit'}
+          />
+        )}
       </ActionBar>
     </Dialog>
   );
