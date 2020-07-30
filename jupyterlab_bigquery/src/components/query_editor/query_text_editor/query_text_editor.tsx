@@ -155,9 +155,17 @@ class QueryTextEditor extends React.Component<
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
 
-    monaco
-      .init()
-      .then(monacoInstance => (this.monacoInstance = monacoInstance));
+    monaco.init().then(monacoInstance => {
+      this.monacoInstance = monacoInstance;
+      this.monacoInstance.editor.defineTheme('sqlTheme', {
+        base: 'vs',
+        inherit: true,
+        rules: [],
+        colors: {
+          'editorGutter.background': '#f8f9fa',
+        },
+      });
+    });
   }
 
   componentWillUnmount() {
@@ -473,7 +481,7 @@ class QueryTextEditor extends React.Component<
           <Editor
             width="100%"
             height="100%"
-            theme={'light'}
+            theme={'sqlTheme'}
             language={'sql'}
             value={queryValue}
             editorDidMount={this.handleEditorDidMount.bind(this)}
