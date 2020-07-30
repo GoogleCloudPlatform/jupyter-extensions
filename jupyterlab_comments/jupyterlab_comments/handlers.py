@@ -74,7 +74,10 @@ class ReviewCommentsHandler(APIHandler):
                 git_root_dir = git.get_repo_root(full_file_path_dir)
                 file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
                 comments = git.get_code_review_comments(file_path_from_repo_root, git_root_dir)
-                self.finish(json.dumps(comments))
+                if comments is None:
+                    self.finish(json.dumps({}))
+                else:
+                    self.finish(json.dumps(comments))
             else:
                 print("Error: file is not inside a git repository")
                 self.finish(json.dumps({"error_message": "Error: file is not inside a git repository"}))
@@ -83,13 +86,33 @@ class ReviewCommentsHandler(APIHandler):
             print(traceback.format_exc())
 
 
-class AddCommentHandler(APIHandler):
+class AddDetachedCommentHandler(APIHandler):
+    """
+    Assumes that the file is inside a Git repo (comment editor only appears when the file is stored in Git)
+    """
 
     def post(self):
-        file_path = self.get_argument('file_path')
-        comment = self.get_argument('comment')
-        self.finish(
-            'Add a detached comment for a specific file (unimplemented)')
+        try:
+            file_path = self.get_argument('file_path')
+            server_root = os.path.expanduser(self.get_argument('server_root'))
+            data = json.loads(self.request.body)
+            comment = data.get('comment')
+            parent = data.get('parent', "")
+
+            full_file_path = os.path.join(server_root, file_path)
+            full_file_path_dir = os.path.dirname(full_file_path)
+            git_root_dir = git.get_repo_root(full_file_path_dir)
+            file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
+
+            if parent:
+                git.add_detached_reply_comment(file_path_from_repo_root, git_root_dir, comment, parent)
+            else:
+                git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment)
+
+        except Exception as e:
+            print("Error adding a new detached comment")
+            print(traceback.format_exc())
+
 
 class RefreshIntervalHandler(APIHandler):
 

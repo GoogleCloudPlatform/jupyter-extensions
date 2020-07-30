@@ -1,4 +1,5 @@
-import { LinearProgress, Button, Switch } from '@material-ui/core';
+import { LinearProgress, Button, Switch, Portal } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -11,18 +12,21 @@ import {
   ListDatasetsService,
   ListTablesService,
   ListModelsService,
+  GetProjectService,
 } from './service/list_items';
 import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
-import { updateDataTree } from '../../reducers/dataTreeSlice';
+import { updateDataTree, addProject } from '../../reducers/dataTreeSlice';
+import { SnackbarState } from '../../reducers/snackbarSlice';
 import {
   SearchProjectsService,
   SearchResult,
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
 import { DialogComponent } from 'gcp_jupyterlab_shared';
+import CustomSnackbar from './snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;
@@ -33,6 +37,8 @@ interface Props {
   context: Context;
   updateDataTree: any;
   currentProject: string;
+  addProject: any;
+  snackbar: SnackbarState;
 }
 
 export interface Context {
@@ -48,6 +54,9 @@ interface State {
   dialogOpen: boolean;
   isSearching: boolean;
   searchResults: SearchResult[];
+  pinProjectDialogOpen: boolean;
+  pinnedProject: string;
+  loadingPinnedProject: boolean;
 }
 
 const localStyles = stylesheet({
@@ -84,7 +93,12 @@ const localStyles = stylesheet({
     ...csstips.flex,
     display: 'flex',
     flexDirection: 'row',
-    alignContent: 'center',
+    alignItems: 'center',
+  },
+  buttonWithIcon: {
+    flexDirection: 'row',
+    display: 'flex',
+    alignItems: 'center',
   },
 });
 
@@ -99,8 +113,13 @@ class ListItemsPanel extends React.Component<Props, State> {
       dialogOpen: false,
       isSearching: false,
       searchResults: [],
+      pinProjectDialogOpen: false,
+      pinnedProject: '',
+      loadingPinnedProject: false,
     };
   }
+
+  // Handlers for searching
 
   handleOpenDialog = () => {
     const { searchToggled } = this.state;
@@ -152,6 +171,40 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.setState({ isSearching: false });
   };
 
+  // Handlers for pinning projects
+
+  addNewProject = async () => {
+    try {
+      this.setState({ loadingPinnedProject: true });
+      const service = new GetProjectService();
+      const newProjectId = this.state.pinnedProject;
+      await service.getProject(newProjectId).then(project => {
+        if (project) {
+          this.props.addProject(project);
+        } else {
+          console.log('This project does not exist');
+        }
+      });
+    } catch (err) {
+      console.warn('Error checking access', err);
+    } finally {
+      this.handleClosePinProject();
+      this.setState({ loadingPinnedProject: false });
+    }
+  };
+
+  handleOpenPinProject = () => {
+    this.setState({ pinProjectDialogOpen: true });
+  };
+
+  handlePinnedProjectChange = event => {
+    this.setState({ pinnedProject: event.target.value });
+  };
+
+  handleClosePinProject = () => {
+    this.setState({ pinProjectDialogOpen: false });
+  };
+
   async componentWillMount() {
     try {
       //empty
@@ -176,9 +229,15 @@ class ListItemsPanel extends React.Component<Props, State> {
       searchToggled,
       searchEnabled,
       dialogOpen,
+      pinProjectDialogOpen,
+      loadingPinnedProject,
     } = this.state;
+    const { snackbar } = this.props;
     return (
       <div className={localStyles.panel}>
+        <Portal>
+          <CustomSnackbar open={snackbar.open} message={snackbar.message} />
+        </Portal>
         <header className={localStyles.header}>
           BigQuery in Notebooks
           <Button
@@ -194,6 +253,17 @@ class ListItemsPanel extends React.Component<Props, State> {
             }}
           >
             Edit Query
+          </Button>
+          <Button
+            color="primary"
+            size="small"
+            className={localStyles.editQueryButton}
+            onClick={this.handleOpenPinProject}
+          >
+            <div className={localStyles.buttonWithIcon}>
+              <AddIcon color="primary" />
+              Pin Project
+            </div>
           </Button>
           {searchEnabled ? (
             <SearchBar
@@ -249,6 +319,33 @@ class ListItemsPanel extends React.Component<Props, State> {
             </p>
           }
         />
+        <DialogComponent
+          header="Pin a Project"
+          open={pinProjectDialogOpen}
+          onSubmit={this.addNewProject}
+          onCancel={this.handleClosePinProject}
+          onClose={this.handleClosePinProject}
+          submitLabel="Pin Project"
+          children={
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <p>
+                Enter a project name to be pinned in the data tree for easy
+                access.
+              </p>
+              <p>
+                Warning: pins are not saved, and will be removed once the page
+                is refreshed. <br /> <br />
+                Enter a project name: <br /> <br />
+              </p>
+              <input
+                type="text"
+                value={this.state.pinnedProject}
+                onChange={this.handlePinnedProjectChange}
+              />
+              {loadingPinnedProject && <LinearProgress />}
+            </div>
+          }
+        />
       </div>
     );
   }
@@ -257,7 +354,7 @@ class ListItemsPanel extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       await this.props.listProjectsService
-        .listProjects(100)
+        .listProjects('')
         .then((data: DataTree) => {
           this.props.updateDataTree(data);
           this.setState({ hasLoaded: true });
@@ -272,10 +369,12 @@ class ListItemsPanel extends React.Component<Props, State> {
 
 const mapStateToProps = state => {
   const currentProject = state.dataTree.data.projectIds[0];
-  return { currentProject };
+  const snackbar = state.snackbar;
+  return { currentProject, snackbar };
 };
 const mapDispatchToProps = {
   updateDataTree,
+  addProject,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListItemsPanel);

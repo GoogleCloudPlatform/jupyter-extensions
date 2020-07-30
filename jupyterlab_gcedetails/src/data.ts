@@ -69,6 +69,13 @@ export interface Option {
   disabled?: boolean;
 }
 
+export interface HardwareConfiguration {
+  machineType: Option;
+  attachGpu: boolean;
+  gpuType: string;
+  gpuCount: string;
+}
+
 interface AttributeMapper {
   label: string;
   mapper: (details: Details) => string;

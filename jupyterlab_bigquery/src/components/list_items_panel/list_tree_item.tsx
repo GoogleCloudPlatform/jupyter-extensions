@@ -28,6 +28,7 @@ import { DatasetDetailsService } from '../details_panel/service/list_dataset_det
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
+import { openSnackbar } from '../../reducers/snackbarSlice';
 
 import '../../../style/index.css';
 
@@ -60,9 +61,7 @@ const localStyles = stylesheet({
     ...csstips.flex,
   },
   root: {
-    height: 216,
     flexGrow: 1,
-    maxWidth: 400,
   },
   circularProgress: {
     padding: 5,
@@ -77,6 +76,7 @@ interface ProjectProps {
   listDatasetsService: ListDatasetsService;
   listTablesService: ListTablesService;
   listModelsService: ListModelsService;
+  openSnackbar: any;
 }
 
 interface State {
@@ -261,7 +261,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     <TreeItem
       nodeId={project.id}
       label={project.name}
-      onIconClick={() => expandProject(project)}
+      onIconClick={expandProject(project)}
     >
       {Array.isArray(project.datasetIds) ? (
         project.datasetIds.map(datasetId => (
@@ -269,6 +269,8 @@ export function BuildTree(project, context, expandProject, expandDataset) {
             {renderDatasets(project.datasets[datasetId])}
           </div>
         ))
+      ) : project.error ? (
+        <div>{project.error}</div>
       ) : (
         <CircularProgress size={20} className={localStyles.circularProgress} />
       )}
@@ -292,43 +294,39 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
     super(props);
   }
 
-  render() {
-    const { dataTree, context } = this.props;
-    if (Array.isArray(dataTree.projectIds)) {
-      return dataTree.projectIds.map(projectId => (
-        <div key={projectId}>
-          {BuildTree(
-            dataTree.projects[projectId],
-            context,
-            this.expandProject,
-            this.expandDataset
-          )}
-        </div>
-      ));
-    } else {
-      return <LinearProgress />;
-    }
-  }
-
   expandProject = project => {
-    if (!Array.isArray(project.datasetIds)) {
+    if (project.error) {
+      this.handleOpenSnackbar(project.error);
+    } else if (!Array.isArray(project.datasetIds)) {
       this.getDatasets(project, this.props.listDatasetsService);
     }
   };
 
   private async getDatasets(project, listDatasetsService) {
+    const newProject = {
+      id: project.id,
+      name: project.name,
+    };
     try {
       await listDatasetsService.listDatasets(project).then((data: Project) => {
-        const newProject = {
-          id: project.id,
-          name: project.name,
-          datasets: data.datasets,
-          datasetIds: data.datasetIds,
-        };
-        this.props.updateProject(newProject);
+        if (data.datasetIds.length === 0) {
+          newProject[
+            'error'
+          ] = `No datasets available for ${project.name}. Check your permissions for this project.`;
+        } else {
+          newProject['datasets'] = data.datasets;
+          newProject['datasetIds'] = data.datasetIds;
+        }
       });
     } catch (err) {
-      console.warn('Error retrieving datasets', err);
+      const fullError = err.response.statusText;
+      console.warn('Error retrieving datasets: ', fullError);
+      const errorMessage =
+        fullError.split('datasets: ')[1] ||
+        'The project does not exist or does not have BigQuery enabled.';
+      newProject['error'] = `Error: ${errorMessage}`;
+    } finally {
+      this.props.updateProject(newProject);
     }
   }
 
@@ -370,12 +368,38 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
       console.warn('Error retrieving dataset children', err);
     }
   }
+
+  handleOpenSnackbar = error => {
+    this.props.openSnackbar(error);
+  };
+
+  render() {
+    const { dataTree, context } = this.props;
+    if (Array.isArray(dataTree.projectIds)) {
+      return dataTree.projectIds.map(projectId => (
+        <div key={projectId}>
+          {BuildTree(
+            dataTree.projects[projectId],
+            context,
+            this.expandProject,
+            this.expandDataset
+          )}
+        </div>
+      ));
+    } else {
+      return <LinearProgress />;
+    }
+  }
 }
 
 const mapStateToProps = state => {
   const dataTree = state.dataTree.data;
   return { dataTree };
 };
-const mapDispatchToProps = { updateProject, updateDataset };
+const mapDispatchToProps = {
+  updateProject,
+  updateDataset,
+  openSnackbar,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListProjectItem);

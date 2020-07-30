@@ -203,6 +203,10 @@ class ProxyHandler(BaseHandler):
     """Proxies the HTTP PUT request."""
     await self._make_request(base64_url, 'PUT', self.request.body)
 
+  async def patch(self, base64_url):
+    """Proxies the HTTP PATCH request."""
+    await self._make_request(base64_url, 'PATCH', self.request.body)
+
 
 class RuntimeEnvHandler(APIHandler):
   """Handler to obtain runtime environment"""

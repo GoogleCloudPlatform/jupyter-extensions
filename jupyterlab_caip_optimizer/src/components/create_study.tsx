@@ -14,6 +14,8 @@ import * as Types from '../types';
 import { connect } from 'react-redux';
 import { createStudy } from '../store/studies';
 import { setView } from '../store/view';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { styles } from '../utils/styles';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
@@ -36,14 +38,17 @@ interface Props {
 
 const mapDispatchToProps = dispatch => ({
   createStudyAndLoad: (study: Types.Study) =>
-    dispatch(createStudy(study)).then((study: Types.Study) =>
+    // Redux's createAsyncThunk returns a Promise<PayloadAction<type>> since the
+    // action has more information. Read more here:
+    // https://redux-toolkit.js.org/api/createAsyncThunk#return-value
+    dispatch(createStudy(study)).then((action: PayloadAction<Types.Study>) => {
       dispatch(
         setView({
           view: 'studyDetails',
-          studyId: study.name,
+          studyId: action.payload.name,
         })
-      )
-    ),
+      );
+    }),
 });
 
 export interface DropdownItem {
@@ -328,7 +333,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   };
 
   return (
-    <Box m={5}>
+    <Box className={styles.root} m={5}>
       <React.Fragment>
         <Grid container spacing={3}>
           <Grid container item xs={12}>
@@ -376,7 +381,11 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                 required
               >
                 {paramTypes.map(option => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                    data-testid="paramType"
+                  >
                     {option.label}
                   </MenuItem>
                 ))}
@@ -457,7 +466,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               <Paper component="ul" className={classes.chipBox}>
                 {paramChipData.map(data => {
                   return (
-                    <li key={data.key}>
+                    <li key={data.key} data-testid="paramChip">
                       <Chip
                         label={data.label}
                         className={classes.chip}
@@ -500,6 +509,14 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
               <Grid item xs={12}>
                 <TextField
                   id="metricGoalType"
+                  SelectProps={{
+                    SelectDisplayProps: {
+                      // Needed for testing
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                      // @ts-ignore
+                      'data-testid': 'metricGoalType',
+                    },
+                  }}
                   variant="outlined"
                   select
                   label="Goal Type"
@@ -509,7 +526,11 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                   required
                 >
                   {metricGoalTypes.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <MenuItem
+                      key={option.value}
+                      value={option.value}
+                      data-testid="metricItem"
+                    >
                       {option.label}
                     </MenuItem>
                   ))}
@@ -542,7 +563,7 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                 <Paper component="ul" className={classes.chipBox}>
                   {metricChipData.map(data => {
                     return (
-                      <li key={data.key}>
+                      <li key={data.key} data-testid="metricChip">
                         <Chip
                           label={data.label}
                           className={classes.chip}
