@@ -231,6 +231,7 @@ class QueryTextEditor extends React.Component<
         } else if (state === JobState.Fail) {
           this.setState({
             queryState: QueryStates.ERROR,
+            bytesProcessed: null,
             message: response as string,
             ifMsgErr: true,
           });
@@ -251,7 +252,7 @@ class QueryTextEditor extends React.Component<
     this.editor = editor;
 
     this.editor.onKeyUp(() => {
-      this.setState({ message: null, ifMsgErr: false, bytesProcessed: null });
+      this.setState({ bytesProcessed: null, message: null, ifMsgErr: false });
       // eslint-disable-next-line no-extra-boolean-cast
       if (!!this.timeoutAlarm) {
         clearTimeout(this.timeoutAlarm);
@@ -278,6 +279,7 @@ class QueryTextEditor extends React.Component<
           const res = response as string;
 
           this.setState({
+            bytesProcessed: null,
             message: res,
             ifMsgErr: true,
           });
@@ -289,6 +291,7 @@ class QueryTextEditor extends React.Component<
           response = response as QueryResponseType;
           this.setState({
             bytesProcessed: response.bytesProcessed,
+            message: null,
             ifMsgErr: false,
           });
         }
