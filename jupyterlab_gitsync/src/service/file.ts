@@ -4,6 +4,8 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeMirror } from 'codemirror';
 
+import { MergeResolver } from './resolver';
+
 const fs = new ContentsManager();
 
 export class File {
@@ -33,7 +35,53 @@ export class File {
   }
 
   async reload() {
-    await this.context.revert();
+    await this._getRemoteVersion();
+    this._getLocalVersion();
+    console.log('--------------');
+    this._getEditorView();
+    const text = await this.resolve.mergeVersions();
+    if (text) {
+      await this.context.revert();
+      this.doc.setValue(text);
+      this._setEditorView();
+    }
   }
 
+  private async _getInitVersion() {
+    const contents = await fs.get(this.path);
+    this.resolve.addVersion(contents.content, 'base');
+    this.resolve.addVersion(contents.content, 'remote');
+    this.resolve.addVersion(contents.content, 'local');
+  }
+
+  private async _getRemoteVersion() {
+    const contents = await fs.get(this.path);
+    this.resolve.addVersion(contents.content, 'remote');
+  }
+
+  private _getLocalVersion() {
+    const text = this.doc.getValue();
+    this.resolve.addVersion(text, 'local');
+  }
+
+  log() {
+    console.log(this.editor.getScrollInfo());
+    console.log(this.editor.cursorCoords(null, 'page'));
+  }
+
+  private _getEditorView() {
+    const cursor = this.doc.getCursor();
+    this.resolve.setCursorToken(cursor);
+
+    const height = this.editor.getScrollInfo().clientHeight;
+    const top = this.editor.cursorCoords().top;
+    this.margin = height - top + 50;
+  }
+
+  private _setEditorView() {
+    const cursor = this.resolve.getCursor();
+    this.doc.setCursor(cursor);
+
+    this.editor.scrollIntoView(null, this.margin);
+  }
 }
