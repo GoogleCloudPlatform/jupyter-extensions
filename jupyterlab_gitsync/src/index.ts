@@ -21,8 +21,7 @@ async function activate(
   shell: ILabShell,
   editor: IEditorTracker
 ) {
-  // const path = './TESTING';
-  const path = '.';
+  const path = './jupyterlab_gitsync/TEST';
   const git = new GitManager(path);
   const files = new FileTracker(editor);
   const service = new GitSyncService(git, files, editor);
