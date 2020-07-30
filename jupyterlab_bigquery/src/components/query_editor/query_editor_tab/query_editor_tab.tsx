@@ -8,6 +8,8 @@ import {
 
 interface QueryEditorTabProps {
   isVisible: boolean;
+  queryId?: string;
+  iniQuery?: string;
 }
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
@@ -19,7 +21,7 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
       isVisible: props.isVisible,
     };
 
-    this.queryId = generateQueryId();
+    this.queryId = this.props.queryId ?? generateQueryId();
   }
 
   render() {
@@ -32,7 +34,10 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
           height: '100%',
         }}
       >
-        <QueryTextEditor queryId={this.queryId} />
+        <QueryTextEditor
+          queryId={this.queryId}
+          iniQuery={this.props.iniQuery}
+        />
         <QueryResults queryId={this.queryId} />
       </div>
     );
