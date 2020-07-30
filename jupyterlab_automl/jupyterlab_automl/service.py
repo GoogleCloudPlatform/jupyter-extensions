@@ -321,15 +321,14 @@ class AutoMLService:
                                    self._gcs_bucket, key))
 
   def _gcs_to_dataframe(self, uris):
-    return pd.concat((pd.read_csv(uri, index_col=0) for uri in uris),
+    return pd.concat((pd.read_csv(uri) for uri in uris),
                      ignore_index=True)
 
   def _export_bigquery_dataset(self, uri):
-    split = re.split(":|\.", uri)
-    dataset_id, table_id = split[-2], split[-1]
+    _, project, dataset_id, table_id = re.split("://|:|\.", uri) #Split by ://, : or .
     tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
     destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
-    dataset_ref = bigquery.DatasetReference(self._project, dataset_id)
+    dataset_ref = bigquery.DatasetReference(project, dataset_id)
     table_ref = dataset_ref.table(table_id)
     dataset = self._bigquery_client.get_dataset(dataset_ref)
 
