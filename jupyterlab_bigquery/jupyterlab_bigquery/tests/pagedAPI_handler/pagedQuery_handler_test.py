@@ -30,12 +30,13 @@ class TestPagedQueryHandler(unittest.TestCase):
   def test_ctor_client(self):
     self.assertIsNotNone(self.dummy_query_handler.client)
 
+  @patch.object(json, 'dumps')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
-  def test_query_dry(self, fake_job_config, fake_client_query):
+  def test_query_dry(self, fake_job_config, fake_client_query, json_dumps):
     query = MagicMock()
     jobConfig = MagicMock()
     dryRunOnly = True
@@ -67,6 +68,8 @@ class TestPagedQueryHandler(unittest.TestCase):
     self.assertEqual(actual_dry_run_job.job_id, job_id)
     self.assertEqual(actual_job_id, job_id)
 
+    next(gen)
+    json_dumps.assert_called()
     with self.assertRaises(StopIteration):
       next(gen)
 
@@ -141,14 +144,14 @@ class TestPagedQueryHandler(unittest.TestCase):
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
   def test_normal_query(self, fake_job_config, fake_client_query,
-                        fake_format_preview_fields, fake_format_preview_row,
+                        fake_format_preview_fields, fake_format_preview_rows,
                         fake_json_dumps):
     query = MagicMock()
     jobConfig = MagicMock()
@@ -199,14 +202,14 @@ class TestPagedQueryHandler(unittest.TestCase):
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
   def test_err_query(self, fake_job_config, fake_client_query,
-                     fake_format_preview_fields, fake_format_preview_row,
+                     fake_format_preview_fields, fake_format_preview_rows,
                      fake_json_dumps):
     query = MagicMock()
     jobConfig = MagicMock()
@@ -289,7 +292,7 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -297,7 +300,7 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
   @patch.object(bigquery, 'QueryJobConfig')
   def test_maximum_bytes_billed(self, fake_job_config, fake_client_query,
                                 fake_format_preview_fields,
-                                fake_format_preview_row, fake_json_dumps):
+                                fake_format_preview_rows, fake_json_dumps):
     flag = 'maximum_bytes_billed'
     jobConfig = {flag: 0}
 
@@ -323,14 +326,14 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
   def test_legacy_sql(self, fake_job_config, fake_client_query,
-                      fake_format_preview_fields, fake_format_preview_row,
+                      fake_format_preview_fields, fake_format_preview_rows,
                       fake_json_dumps):
     flag = 'use_legacy_sql'
 
@@ -364,14 +367,14 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
 
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
   def test_project(self, fake_job_config, fake_client_query,
-                   fake_format_preview_fields, fake_format_preview_row,
+                   fake_format_preview_fields, fake_format_preview_rows,
                    fake_json_dumps):
     flag = 'project'
 
@@ -392,14 +395,14 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
   @patch.object(google.cloud.bigquery.dbapi._helpers, 'to_query_parameters')
   @patch.object(json, 'dumps')
   @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_row')
+  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
   )
   @patch.object(bigquery, 'QueryJobConfig')
   def test_params(self, fake_job_config, fake_client_query,
-                  fake_format_preview_fields, fake_format_preview_row,
+                  fake_format_preview_fields, fake_format_preview_rows,
                   fake_json_dumps, fake_to_query_parameters):
     flag = 'params'
     processed_flag = 'query_parameters'
