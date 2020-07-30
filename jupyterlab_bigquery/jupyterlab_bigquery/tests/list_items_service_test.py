@@ -79,7 +79,7 @@ class TestListTree(unittest.TestCase):
             'project': 'dummy_project1',
             'reference': None,
             'table_id': 'dummy_table1',
-            'table_type': 'TABLE',
+            'table_type': None,
             'time_partitioning': None,
             'view_use_legacy_sql': None,
             'tableReference': {
@@ -100,6 +100,7 @@ class TestListTree(unittest.TestCase):
           'id': 'dummy_project1.dummy_dataset1.dummy_table1',
           'name': 'dummy_table1',
           'datasetId': 'dummy_dataset1',
+          'type': None,
         }
       },
       'tableIds': ['dummy_project1.dummy_dataset1.dummy_table1']
@@ -190,6 +191,19 @@ class TestListTree(unittest.TestCase):
     ]}
 
     got = bigquery.search_projects('dummy', 'dummy_project')
+    self.assertEqual(wanted, got)
+
+  def testGetProject(self):
+    gcp_project = 'dummy_project1'
+    mock_client = Mock()
+    mock_client.project = gcp_project
+    bigquery = BigQueryService(None)
+
+    wanted = {
+      'id': 'dummy_project1',
+      'name': 'dummy_project1',
+    }
+    got = bigquery.get_project(mock_client)
     self.assertEqual(wanted, got)
 
 if __name__ == '__main__':

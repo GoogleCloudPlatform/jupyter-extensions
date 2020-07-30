@@ -2,6 +2,7 @@ import {
   LinearProgress,
   Typography,
   CircularProgress,
+  Icon,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -27,6 +28,9 @@ import { DatasetDetailsService } from '../details_panel/service/list_dataset_det
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
+import { openSnackbar } from '../../reducers/snackbarSlice';
+
+import '../../../style/index.css';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -38,13 +42,8 @@ const localStyles = stylesheet({
     paddingRight: '8px',
     ...csstips.horizontal,
   },
-  childItem: {
-    alignItems: 'center',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    listStyle: 'none',
-    height: '40px',
-    paddingRight: '8px',
-    paddingLeft: '30px',
+  itemName: {
+    flexDirection: 'row',
     ...csstips.horizontal,
   },
   details: {
@@ -52,19 +51,6 @@ const localStyles = stylesheet({
     paddingLeft: '4px',
     ...csstips.horizontal,
     ...csstips.flex,
-  },
-  wordTime: {
-    color: 'var(--jp-content-font-color2)',
-    fontSize: '9px',
-    textAlign: 'right',
-    ...csstips.flex,
-  },
-  viewLink: {
-    backgroundImage: 'var(--jp-icon-notebook)',
-    backgroundRepeat: 'no-repeat',
-    marginLeft: '5px',
-    padding: '0 6px',
-    textDecoration: 'none',
   },
   icon: {
     padding: '0 0 0 5px',
@@ -75,9 +61,7 @@ const localStyles = stylesheet({
     ...csstips.flex,
   },
   root: {
-    height: 216,
     flexGrow: 1,
-    maxWidth: 400,
   },
   circularProgress: {
     padding: 5,
@@ -92,6 +76,7 @@ interface ProjectProps {
   listDatasetsService: ListDatasetsService;
   listTablesService: ListTablesService;
   listModelsService: ListModelsService;
+  openSnackbar: any;
 }
 
 interface State {
@@ -128,28 +113,72 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
+  const openViewDetails = (event, view) => {
+    event.stopPropagation();
+    // TODO: Create view widget
+  };
+
+  const getIcon = iconType => {
+    return (
+      <Icon style={{ display: 'flex', alignContent: 'center' }}>
+        <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
+      </Icon>
+    );
+  };
+
   const renderTables = table => {
-    const contextMenuItems = [
+    const tableContextMenuItems = [
       {
         label: 'Copy Table ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
+
+    const viewContextMenuItems = [
+      {
+        label: 'Copy View ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+
     return (
-      <TreeItem
-        nodeId={table.id}
-        label={
-          <ContextMenu
-            items={contextMenuItems.map(item => ({
-              label: item.label,
-              onClick: () => item.handler(table),
-            }))}
-          >
-            <Typography>{table.name}</Typography>
-          </ContextMenu>
-        }
-        onDoubleClick={event => openTableDetails(event, table)}
-      />
+      <div>
+        {table.type === 'TABLE' ? (
+          <TreeItem
+            nodeId={table.id}
+            icon={getIcon('Table')}
+            label={
+              <ContextMenu
+                items={tableContextMenuItems.map(item => ({
+                  label: item.label,
+                  onClick: () => item.handler(table),
+                }))}
+              >
+                <Typography>{table.name}</Typography>
+              </ContextMenu>
+            }
+            onDoubleClick={event => openTableDetails(event, table)}
+          />
+        ) : table.type === 'VIEW' ? (
+          <TreeItem
+            nodeId={table.id}
+            icon={getIcon('View')}
+            label={
+              <ContextMenu
+                items={viewContextMenuItems.map(item => ({
+                  label: item.label,
+                  onClick: () => item.handler(table),
+                }))}
+              >
+                <Typography>{table.name}</Typography>
+              </ContextMenu>
+            }
+            onDoubleClick={event => openViewDetails(event, table)}
+          />
+        ) : (
+          <div>Table references an external data source</div>
+        )}
+      </div>
     );
   };
 
@@ -163,6 +192,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     return (
       <TreeItem
         nodeId={model.id}
+        icon={getIcon('Model')}
         label={
           <ContextMenu
             items={contextMenuItems.map(item => ({
@@ -186,7 +216,10 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     ];
 
     return (
-      <div>
+      <div className={localStyles.itemName}>
+        <Icon style={{ display: 'flex', alignContent: 'center' }}>
+          <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+        </Icon>
         <TreeItem
           nodeId={dataset.id}
           label={
@@ -228,7 +261,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     <TreeItem
       nodeId={project.id}
       label={project.name}
-      onIconClick={() => expandProject(project)}
+      onIconClick={expandProject(project)}
     >
       {Array.isArray(project.datasetIds) ? (
         project.datasetIds.map(datasetId => (
@@ -236,6 +269,8 @@ export function BuildTree(project, context, expandProject, expandDataset) {
             {renderDatasets(project.datasets[datasetId])}
           </div>
         ))
+      ) : project.error ? (
+        <div>{project.error}</div>
       ) : (
         <CircularProgress size={20} className={localStyles.circularProgress} />
       )}
@@ -259,43 +294,39 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
     super(props);
   }
 
-  render() {
-    const { dataTree, context } = this.props;
-    if (Array.isArray(dataTree.projectIds)) {
-      return dataTree.projectIds.map(projectId => (
-        <div key={projectId}>
-          {BuildTree(
-            dataTree.projects[projectId],
-            context,
-            this.expandProject,
-            this.expandDataset
-          )}
-        </div>
-      ));
-    } else {
-      return <LinearProgress />;
-    }
-  }
-
   expandProject = project => {
-    if (!Array.isArray(project.datasetIds)) {
+    if (project.error) {
+      this.handleOpenSnackbar(project.error);
+    } else if (!Array.isArray(project.datasetIds)) {
       this.getDatasets(project, this.props.listDatasetsService);
     }
   };
 
   private async getDatasets(project, listDatasetsService) {
+    const newProject = {
+      id: project.id,
+      name: project.name,
+    };
     try {
       await listDatasetsService.listDatasets(project).then((data: Project) => {
-        const newProject = {
-          id: project.id,
-          name: project.name,
-          datasets: data.datasets,
-          datasetIds: data.datasetIds,
-        };
-        this.props.updateProject(newProject);
+        if (data.datasetIds.length === 0) {
+          newProject[
+            'error'
+          ] = `No datasets available for ${project.name}. Check your permissions for this project.`;
+        } else {
+          newProject['datasets'] = data.datasets;
+          newProject['datasetIds'] = data.datasetIds;
+        }
       });
     } catch (err) {
-      console.warn('Error retrieving datasets', err);
+      const fullError = err.response.statusText;
+      console.warn('Error retrieving datasets: ', fullError);
+      const errorMessage =
+        fullError.split('datasets: ')[1] ||
+        'The project does not exist or does not have BigQuery enabled.';
+      newProject['error'] = `Error: ${errorMessage}`;
+    } finally {
+      this.props.updateProject(newProject);
     }
   }
 
@@ -337,12 +368,38 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
       console.warn('Error retrieving dataset children', err);
     }
   }
+
+  handleOpenSnackbar = error => {
+    this.props.openSnackbar(error);
+  };
+
+  render() {
+    const { dataTree, context } = this.props;
+    if (Array.isArray(dataTree.projectIds)) {
+      return dataTree.projectIds.map(projectId => (
+        <div key={projectId}>
+          {BuildTree(
+            dataTree.projects[projectId],
+            context,
+            this.expandProject,
+            this.expandDataset
+          )}
+        </div>
+      ));
+    } else {
+      return <LinearProgress />;
+    }
+  }
 }
 
 const mapStateToProps = state => {
   const dataTree = state.dataTree.data;
   return { dataTree };
 };
-const mapDispatchToProps = { updateProject, updateDataset };
+const mapDispatchToProps = {
+  updateProject,
+  updateDataset,
+  openSnackbar,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListProjectItem);

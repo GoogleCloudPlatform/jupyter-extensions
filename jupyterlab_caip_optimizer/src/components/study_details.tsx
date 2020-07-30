@@ -75,12 +75,12 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
         formattedParam['values'] = param['categoricalValueSpec'].values;
         break;
       case 'DOUBLE':
-        formattedParam['minValue'] = param['doubleValueSpec'].minValue;
-        formattedParam['maxValue'] = param['doubleValueSpec'].maxValue;
+        formattedParam['minValue'] = param['doubleValueSpec'].minValue ?? 0;
+        formattedParam['maxValue'] = param['doubleValueSpec'].maxValue ?? 0;
         break;
       case 'INTEGER':
-        formattedParam['minValue'] = param['integerValueSpec'].minValue;
-        formattedParam['maxValue'] = param['integerValueSpec'].maxValue;
+        formattedParam['minValue'] = param['integerValueSpec'].minValue ?? 0;
+        formattedParam['maxValue'] = param['integerValueSpec'].maxValue ?? 0;
         break;
     }
     return formattedParam;

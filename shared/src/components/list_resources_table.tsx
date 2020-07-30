@@ -98,6 +98,9 @@ interface Props {
   isLoading?: boolean;
   onRowClick?: (rowData: any) => void;
   rowContextMenu?: ContextMenuItem[];
+  paging?: boolean;
+  pageSize?: number;
+  pageSizeOptions?: number[];
 }
 
 const style: CSSProperties = {
@@ -156,8 +159,9 @@ export class ListResourcesTable extends React.PureComponent<Props> {
         options={{
           showTitle: false,
           tableLayout: 'fixed',
-          pageSize: 20,
-          pageSizeOptions: [20],
+          paging: this.props.paging || false,
+          pageSize: this.props.pageSize,
+          pageSizeOptions: this.props.pageSizeOptions,
           search: false,
           sorting: true,
           padding: 'dense',

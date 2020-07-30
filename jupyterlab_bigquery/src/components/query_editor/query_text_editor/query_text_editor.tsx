@@ -1,5 +1,5 @@
 import React from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { monaco, Monaco } from '@monaco-editor/react';
 import { connect } from 'react-redux';
 import {
   updateQueryResult,
@@ -14,6 +14,7 @@ import { Button, CircularProgress, Typography } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
+import { QueryEditorType } from '../query_editor_tab/query_editor_results';
 
 interface QueryTextEditorState {
   buttonState: ButtonStates;
@@ -27,6 +28,8 @@ interface QueryTextEditorProps {
   deleteQueryEntry: any;
   queryId: QueryId;
   iniQuery?: string;
+  editorType?: QueryEditorType;
+  queryFlags?: { [keys: string]: any };
 }
 
 interface QueryResponseType {
@@ -67,10 +70,23 @@ const styleSheet = stylesheet({
   },
   queryTextEditor: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    minHeight: '200px',
+    flex: 1,
+  },
+  queryTextEditorInCell: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     minHeight: '300px',
     height: '30vh',
   },
   wholeEditor: {
+    // 4/9 of panel height (in relation to results)
+    flex: 4,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  wholeEditorInCell: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
   optionalText: {
@@ -103,6 +119,7 @@ class QueryTextEditor extends React.Component<
   QueryTextEditorState
 > {
   editor: editor.IStandaloneCodeEditor;
+  monacoInstance: Monaco;
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
   queryId: QueryId;
@@ -119,6 +136,10 @@ class QueryTextEditor extends React.Component<
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
+
+    monaco
+      .init()
+      .then(monacoInstance => (this.monacoInstance = monacoInstance));
   }
 
   componentWillUnmount() {
@@ -154,7 +175,7 @@ class QueryTextEditor extends React.Component<
     });
 
     this.job = this.pagedQueryService.request(
-      { query, jobConfig: {}, dryRunOnly: false },
+      { query, jobConfig: this.props.queryFlags, dryRunOnly: false },
       (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
@@ -196,6 +217,7 @@ class QueryTextEditor extends React.Component<
         this.setState({ errorMsg: null });
       }
       this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
+      this.resetMarkers();
     });
 
     // initial check
@@ -210,15 +232,98 @@ class QueryTextEditor extends React.Component<
     }
 
     this.pagedQueryService.request(
-      { query, jobConfig: {}, dryRunOnly: true },
+      { query, jobConfig: this.props.queryFlags, dryRunOnly: true },
       (state, _, response) => {
         if (state === JobState.Fail) {
-          this.setState({
-            errorMsg: response as string,
-          });
+          const res = response as string;
+
+          // deal with errors
+          this.handleSyntaxError(res);
+          this.handleNotFound(res);
         }
       }
     );
+  }
+
+  async handleNotFound(response: string) {
+    const prompt = 'Not found:';
+    response = response.trim();
+    if (!response.startsWith(prompt)) {
+      return;
+    }
+
+    const body = response;
+    // response follow the format "not found: [Table, Dataset, etc] xxx:name"
+    const errStr = response
+      .split(' ')[3]
+      .split(':')
+      .pop();
+    const model = this.editor.getModel();
+    const texts = model.getValue().split('\n');
+
+    let line = -1;
+    let pos = -1;
+
+    for (let i = 0; i < texts.length; i++) {
+      const text = texts[i];
+      const indx = text.indexOf(errStr);
+      if (indx !== -1) {
+        line = i + 1;
+        pos = indx;
+      }
+    }
+
+    const startPos = pos;
+    const endPos = pos + errStr.length;
+
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', [
+      {
+        startLineNumber: line,
+        endLineNumber: line,
+        startColumn: startPos,
+        endColumn: endPos,
+        message: body,
+        severity: this.monacoInstance.MarkerSeverity.Error,
+      },
+    ]);
+  }
+
+  async handleSyntaxError(response: string) {
+    const prompt = 'Syntax error:';
+    response = response.trim();
+    if (!response.startsWith(prompt)) {
+      return;
+    }
+
+    // error message follows the format xxxx at [row:column]
+    const body = response.substring(prompt.length, response.lastIndexOf('at'));
+    const posStr = response.substring(
+      response.lastIndexOf('[') + 1,
+      response.lastIndexOf(']')
+    );
+
+    const [line, pos] = posStr.split(':').map(x => parseInt(x, 10));
+    const model = this.editor.getModel();
+    const text = model.getValue().split('\n')[line - 1];
+
+    const startPos = pos;
+    const errLen = text.substring(pos).indexOf(' ');
+    const endPos = errLen !== -1 ? errLen + pos + 1 : text.length + 1;
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', [
+      {
+        startLineNumber: line,
+        endLineNumber: line,
+        startColumn: startPos,
+        endColumn: endPos,
+        message: body,
+        severity: this.monacoInstance.MarkerSeverity.Error,
+      },
+    ]);
+  }
+
+  resetMarkers() {
+    const model = this.editor.getModel();
+    this.monacoInstance.editor.setModelMarkers(model, 'owner', []);
   }
 
   readableBytes(bytes: number) {
@@ -272,6 +377,7 @@ class QueryTextEditor extends React.Component<
         <Typography
           className={styleSheet.optionalText}
           variant="body1"
+          style={{ marginRight: '10px' }}
           {...config}
         >
           {text}
@@ -296,8 +402,20 @@ class QueryTextEditor extends React.Component<
     const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
 
     return (
-      <div className={styleSheet.wholeEditor}>
-        <div className={styleSheet.queryTextEditor}>
+      <div
+        className={
+          this.props.editorType === 'IN_CELL'
+            ? styleSheet.wholeEditorInCell
+            : styleSheet.wholeEditor
+        }
+      >
+        <div
+          className={
+            this.props.editorType === 'IN_CELL'
+              ? styleSheet.queryTextEditorInCell
+              : styleSheet.queryTextEditor
+          }
+        >
           <Editor
             width="100%"
             height="100%"

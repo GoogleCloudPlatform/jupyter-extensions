@@ -201,6 +201,19 @@ class ProxyHandlerTest(tornado.testing.AsyncHTTPTestCase):
     self.assertEqual('DELETE', request.method)
     self.assertEqual(None, request.body)
 
+  def test_patch(self, mock_auth_provider, mock_client):
+    gcp_path = '/services/ml.googleapis.com:reenable'
+    body = json.dumps({'consumerId': 'project:TEST'})
+    self._configure_mock_auth_provider(mock_auth_provider)
+    mock_fetch = self._configure_mock_client(mock_client)
+    response = self.fetch(self._make_url(gcp_path), method='PATCH', body=body)
+    request = mock_fetch.call_args[0][0]
+    self.assertEqual(200, response.code)
+    self.assertEqual(self.RESPONSE_BODY, response.body)
+    self.assertEqual('{}{}'.format(self.GCP_URL, gcp_path), request.url)
+    self.assertEqual('PATCH', request.method)
+    self.assertEqual(body.encode(), request.body)
+
   def test_bad_proxy_url(self, mock_auth_provider, mock_client):
     encoded_path = base64.b64encode(b'http://badrequest.com').decode()
     self._configure_mock_auth_provider(mock_auth_provider)

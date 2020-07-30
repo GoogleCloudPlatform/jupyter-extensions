@@ -41,7 +41,7 @@ class BigQueryService:
     return {'projects': projects_list, 'projectIds': project_ids}
 
   def list_datasets(self, project):
-    datasets = list(self._client.list_datasets())
+    datasets = list(self._client.list_datasets(project))
 
     datasets_list = {}
     dataset_ids = []
@@ -68,6 +68,7 @@ class BigQueryService:
         'id': table_full_id,
         'name': table.table_id,
         'datasetId': dataset_id,
+        'type': table.table_type,
       }
       table_ids.append(table_full_id)
 
@@ -143,3 +144,14 @@ class BigQueryService:
         })
 
     return {'results': fetched_results}
+
+  def create_custom_client(self, project_id):
+    return bigquery.Client(project=project_id)
+
+  def get_project(self, custom_client):
+    project = custom_client.project
+    formatted_project = {
+        'id': format(project),
+        'name': format(project),
+    }
+    return formatted_project
