@@ -152,6 +152,7 @@ class QueryTextEditor extends React.Component<
   job: PagedJob<QueryRequestBodyType, QueryResponseType>;
   timeoutAlarm: NodeJS.Timeout;
   queryId: QueryId;
+  queryFlags: {};
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
@@ -166,6 +167,7 @@ class QueryTextEditor extends React.Component<
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
+    this.queryFlags = !this.props.queryFlags ? {} : this.props.queryFlags;
 
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
@@ -212,7 +214,7 @@ class QueryTextEditor extends React.Component<
     });
 
     this.job = this.pagedQueryService.request(
-      { query, jobConfig: this.props.queryFlags, dryRunOnly: false },
+      { query, jobConfig: this.queryFlags, dryRunOnly: false },
       (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
@@ -270,7 +272,7 @@ class QueryTextEditor extends React.Component<
     }
 
     this.pagedQueryService.request(
-      { query, jobConfig: this.props.queryFlags, dryRunOnly: true },
+      { query, jobConfig: this.queryFlags, dryRunOnly: true },
       (state, _, response) => {
         if (state === JobState.Fail) {
           const res = response as string;
