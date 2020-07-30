@@ -33,10 +33,12 @@ import {
   ACCELERATOR_TYPES,
   Option,
   MACHINE_TYPES,
+  HardwareConfiguration,
 } from '../data';
 
 interface Props {
   onDialogClose?: () => void;
+  onSubmit: (config: HardwareConfiguration) => void;
 }
 
 interface State {
@@ -115,13 +117,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     });
   }
 
-  // TODO: Implement submit functionality
-  //eslint-disable-next-line @typescript-eslint/no-empty-function
-  private submitForm() {}
-
   render() {
-    const { onDialogClose } = this.props;
+    const { onDialogClose, onSubmit } = this.props;
     const { gpuType, gpuCount, attachGpu } = this.state;
+    const config = this.state as HardwareConfiguration;
 
     return (
       <div className={STYLES.container}>
@@ -175,7 +174,9 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
           <SubmitButton
             actionPending={false}
-            onClick={() => this.submitForm()}
+            onClick={() => {
+              onSubmit(config);
+            }}
             text="Submit"
           />
         </ActionBar>

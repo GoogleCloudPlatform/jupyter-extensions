@@ -18,10 +18,12 @@ import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import { HardwareConfiguration } from '../data';
+import { HardwareScalingStatus } from './hardware_scaling_status';
 
 enum View {
   FORM,
   CONFIRMATION,
+  STATUS,
 }
 
 interface Props {
@@ -52,11 +54,27 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
 
   private getDisplay() {
     const { onClose } = this.props;
-    const { view } = this.state;
+    const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
       case View.FORM:
-        return <HardwareScalingForm onDialogClose={onClose} />;
+        return (
+          <HardwareScalingForm
+            onDialogClose={onClose}
+            onSubmit={(config: HardwareConfiguration) => {
+              this.setState({
+                view: View.STATUS,
+                hardwareConfiguration: config,
+              });
+            }}
+          />
+        );
+      case View.STATUS:
+        return (
+          <HardwareScalingStatus
+            hardwareConfiguration={hardwareConfiguration}
+          />
+        );
     }
   }
 }

@@ -27,6 +27,7 @@ import { DetailsDialogBody } from './components/details_dialog_body';
 import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';
+import { HardwareScalingDialog } from './components/hardware_scaling_dialog';
 
 interface Props {
   detailsServer: ServerWrapper;
@@ -36,6 +37,7 @@ interface State {
   details?: Details;
   receivedError: boolean;
   shouldRefresh: boolean;
+  formDisplayed: boolean;
 }
 
 const ICON_CLASS = 'jp-VmStatusIcon';
@@ -50,6 +52,7 @@ export class VmDetails extends React.Component<Props, State> {
       displayedAttributes: [0, 1],
       receivedError: false,
       shouldRefresh: false,
+      formDisplayed: false,
     };
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
@@ -86,6 +89,17 @@ export class VmDetails extends React.Component<Props, State> {
         <span className={classes(STYLES.interactiveHover)}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>
+        <span
+          className={classes(STYLES.icon, ICON_CLASS, STYLES.interactiveHover)}
+          title="Show form"
+          onClick={() => this.setState({ formDisplayed: true })}
+        ></span>
+        {this.state.formDisplayed && (
+          <HardwareScalingDialog
+            open={this.state.formDisplayed}
+            onClose={() => this.setState({ formDisplayed: false })}
+          />
+        )}
       </span>
     );
   }

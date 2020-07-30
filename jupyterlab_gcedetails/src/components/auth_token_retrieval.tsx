@@ -1,4 +1,4 @@
-export function AuthTokenRetrieval(callback) {
+export function AuthTokenRetrieval(callback: (err, credentials) => void) {
   // eslint-disable-next-line prefer-const
   let authPopup: any;
   const listener = (message: MessageEvent) => {
