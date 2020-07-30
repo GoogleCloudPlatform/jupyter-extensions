@@ -18,6 +18,7 @@ import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { updateDataTree, addProject } from '../../reducers/dataTreeSlice';
 import { SnackbarState } from '../../reducers/snackbarSlice';
 import {
@@ -246,9 +247,13 @@ class ListItemsPanel extends React.Component<Props, State> {
             variant="contained"
             className={localStyles.editQueryButton}
             onClick={() => {
+              const queryId = generateQueryId();
               WidgetManager.getInstance().launchWidget(
                 QueryEditorTabWidget,
-                'main'
+                'main',
+                queryId,
+                undefined,
+                [queryId, undefined]
               );
             }}
           >
