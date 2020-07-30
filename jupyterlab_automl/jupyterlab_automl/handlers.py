@@ -72,6 +72,11 @@ def _get_pipeline(args):
   return AutoMLService.get().get_pipeline(args["pipelineId"])
 
 
+@_handler("GET", "pipelines")
+def _get_pipelines(_):
+  return AutoMLService.get().get_training_pipelines()
+
+
 @_handler("GET", "tableInfo")
 def _table_info(args):
   return AutoMLService.get().get_table_specs(args["datasetId"])
@@ -102,11 +107,17 @@ def _project(_):
 @_handler("POST", "createTablesDataset")
 def _create_tables_dataset(args):
   file_source = args.get("fileSource")
+  df_source = args.get("dfSource")
   if file_source:
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=file_source["name"],
         file_data=file_source["data"])
+  elif df_source:
+    AutoMLService.get().create_dataset_from_file(
+        display_name=args["displayName"],
+        file_name=args["displayName"],
+        file_data=df_source)
   else:
     AutoMLService.get().create_dataset(display_name=args["displayName"],
                                        gcs_uri=args.get("gcsSource"),

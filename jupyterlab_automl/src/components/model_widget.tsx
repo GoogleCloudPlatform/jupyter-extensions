@@ -159,7 +159,7 @@ export class ModelWidget extends ReactWidget {
   constructor(private readonly modelMeta: Model) {
     super();
     this.title.label = modelMeta.displayName;
-    this.title.caption = 'Cloud AI Model';
+    this.title.caption = 'Model ' + modelMeta.displayName;
     this.title.closable = true;
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-AutoMLIcon-model';
   }
