@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
 
 .jp-optimizer-icon {
-  background-image: url('./images/storage_24px.svg');
+  transform: rotate(90deg);
+  background-image: url('./images/graph.svg');
   background-size: contain;
 }
