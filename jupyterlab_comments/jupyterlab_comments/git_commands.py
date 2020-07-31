@@ -17,6 +17,7 @@ import json
 from traitlets.config.configurable import Configurable
 from traitlets import Int, Float, Unicode, Bool
 import os
+
 FNULL = open(os.devnull, 'w')
 
 class Git(Configurable):
