@@ -54,6 +54,7 @@ interface State {
   endpoints: Endpoint[];
   inputParameters: object;
   customInput: string;
+  customInputError: boolean;
   generatedCode: string;
   result: JSX.Element;
 }
@@ -77,6 +78,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       inputParameters: {},
       generatedCode: '',
       customInput: '',
+      customInputError: false,
       result: null,
     };
     this.deployModel = this.deployModel.bind(this);
@@ -178,9 +180,8 @@ result = predict("${this.state.endpoints[0].id}", instance)`;
         Object.keys(this.props.model.inputs).length
       );
     } else {
-      return !!this.state.inputParameters;
+      return !!this.state.inputParameters && !this.state.customInputError;
     }
-    return false;
   }
 
   private handleInputChange(event) {
@@ -240,14 +241,14 @@ result = predict("${this.state.endpoints[0].id}", instance)`;
           size="small"
           variant="outlined"
           inputProps={{ style: { fontSize: 'var(--jp-ui-font-size1)' } }}
-          error={this.state.inputParameters !== {}}
+          error={this.state.customInputError}
           onChange={event => {
             const val = event.target.value;
             try {
               const obj = JSON.parse(val);
-              this.setState({ inputParameters: obj });
+              this.setState({ inputParameters: obj, customInputError: false });
             } catch {
-              this.setState({ inputParameters: {} });
+              this.setState({ inputParameters: {}, customInputError: true });
             }
           }}
         />

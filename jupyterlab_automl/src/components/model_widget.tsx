@@ -13,6 +13,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Box,
 } from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { stylesheet } from 'typestyle';
@@ -79,32 +80,34 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
   const modelId = props.model.id.split('/');
 
   return (
-    <div style={{ padding: '16px', overflow: 'auto' }}>
-      <Table size="small" style={{ width: 500 }}>
-        <TableBody>
-          <TableRow key={'ID'}>
-            <TableCell component="th" scope="row">
-              ID
-            </TableCell>
-            <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
-          </TableRow>
-          <TableRow key={'Region'}>
-            <TableCell component="th" scope="row">
-              Region
-            </TableCell>
-            <TableCell align="right">us-central-1</TableCell>
-          </TableRow>
-          <TableRow key={'Created'}>
-            <TableCell component="th" scope="row">
-              Created
-            </TableCell>
-            <TableCell align="right">
-              {props.model.createTime.toLocaleString()}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-      <ModelPredictions model={props.model} value={0} index={0} />
+    <div style={{ overflow: 'auto', height: '100%' }}>
+      <Box p="16px">
+        <Table size="small" style={{ width: 500 }}>
+          <TableBody>
+            <TableRow key={'ID'}>
+              <TableCell component="th" scope="row">
+                ID
+              </TableCell>
+              <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
+            </TableRow>
+            <TableRow key={'Region'}>
+              <TableCell component="th" scope="row">
+                Region
+              </TableCell>
+              <TableCell align="right">us-central-1</TableCell>
+            </TableRow>
+            <TableRow key={'Created'}>
+              <TableCell component="th" scope="row">
+                Created
+              </TableCell>
+              <TableCell align="right">
+                {props.model.createTime.toLocaleString()}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        <ModelPredictions model={props.model} value={0} index={0} />
+      </Box>
     </div>
   );
 }
