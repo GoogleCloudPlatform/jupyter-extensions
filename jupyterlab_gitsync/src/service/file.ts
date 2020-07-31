@@ -11,23 +11,30 @@ const fs = new ContentsManager();
 export class File {
   widget: IDocumentWidget;
   context: DocumentRegistry.Context;
-  path: string;
   editor: CodeMirror;
   doc: CodeMirror.doc;
 
   resolve: MergeResolver;
-  margin;
+  view: { 
+    left: number,
+    top: number, 
+    right: number,
+    bottom: number 
+  }
 
   constructor(widget: IDocumentWidget) {
     this.widget = widget;
     this.context = widget.context;
-    this.path = widget.context.path;
     this.editor = ((widget.content as FileEditor)
       .editor as CodeMirrorEditor).editor;
     this.doc = this.editor.doc;
     this.resolve = new MergeResolver(this.path);
 
     this._getInitVersion();
+  }
+
+  get path() {
+    return this.widget.context.path;
   }
 
   async save() {
@@ -64,24 +71,29 @@ export class File {
     this.resolve.addVersion(text, 'local');
   }
 
-  log() {
-    console.log(this.editor.getScrollInfo());
-    console.log(this.editor.cursorCoords(null, 'page'));
-  }
-
   private _getEditorView() {
     const cursor = this.doc.getCursor();
     this.resolve.setCursorToken(cursor);
+    const scroll = this.editor.getScrollInfo();
+    this.view = {
+      left: scroll.left, 
+      top: scroll.top, 
+      right: scroll.left + scroll.clientWidth,
+      bottom: scroll.top + scroll.clientHeight
+    }
 
-    const height = this.editor.getScrollInfo().clientHeight;
-    const top = this.editor.cursorCoords().top;
-    this.margin = height - top + 50;
+    console.log('Before Change');
+    console.log(this.view);
+    
   }
 
   private _setEditorView() {
     const cursor = this.resolve.getCursor();
     this.doc.setCursor(cursor);
+    this.editor.scrollIntoView(this.view);
 
-    this.editor.scrollIntoView(null, this.margin);
+    console.log('After Change');
+    console.log(this.editor.getScrollInfo());
   }
+
 }

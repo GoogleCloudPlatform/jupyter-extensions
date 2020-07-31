@@ -1,11 +1,13 @@
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { ILabShell } from '@jupyterlab/application';
 
 import { File } from './file';
 
 export class FileTracker {
   /* Member Fields */
+  shell: ILabShell
   editor: IEditorTracker;
   current: File;
   opened: File[] = [];
@@ -13,8 +15,9 @@ export class FileTracker {
   private _saveCompleted: Signal<this, void> = new Signal<this, void>(this);
   private _reloadCompleted: Signal<this, void> = new Signal<this, void>(this);
 
-  constructor(editor: IEditorTracker) {
+  constructor(editor: IEditorTracker, shell: ILabShell) {
     this.editor = editor;
+    this.shell = shell;
     this._addListeners();
   }
 
@@ -43,12 +46,14 @@ export class FileTracker {
   }
 
   private _addListeners() {
-    this.editor.currentChanged.connect(this._updateCurrent, this);
+    this.shell.currentChanged.connect(this._updateCurrent, this);
   }
 
   private _updateCurrent() {
     const current = this.editor.currentWidget;
     if (current) this._updateFiles(current);
+    console.log('editor', this.editor.currentWidget);
+    console.log('shell', this.shell.currentWidget);
   }
 
   private _updateFiles(widget: IDocumentWidget) {
