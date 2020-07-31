@@ -42,6 +42,7 @@ describe('Dropdown list', () => {
 
 describe('Create Study Page', () => {
   it('creates a study and redirects to the study details page', async () => {
+    jest.setTimeout(10000);
     const createStudy = jest.fn((req, res, ctx) => {
       return res(ctx.json(fakeStudy));
     });
