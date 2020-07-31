@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { Icon, Tooltip, IconButton, Portal } from '@material-ui/core';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';

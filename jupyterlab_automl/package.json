@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_automl",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AutoML extension for JupyterLab",
   "keywords": [
     "jupyter",

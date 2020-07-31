@@ -57,6 +57,11 @@ def _list_datasets(_):
   return AutoMLService.get().get_datasets()
 
 
+@_handler("GET", "datasetDetails")
+def _get_dataset_details(args):
+  return AutoMLService.get().get_dataset_details(args["datasetId"])
+
+
 @_handler("GET", "models")
 def _list_models(_):
   return AutoMLService.get().get_models()

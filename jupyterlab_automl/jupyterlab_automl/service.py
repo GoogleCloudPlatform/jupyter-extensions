@@ -7,8 +7,8 @@ import time
 import uuid
 import os
 import pandas as pd
-import re
 from enum import Enum
+import re
 from google.cloud import aiplatform_v1alpha1, bigquery, exceptions, storage
 from google.protobuf.struct_pb2 import Value
 from google.protobuf import json_format
@@ -280,9 +280,6 @@ class AutoMLService:
         })
     return datasets
 
-  def get_table_specs(self, dataset_id):
-    return []
-
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
     input_config = {}
 
@@ -325,7 +322,7 @@ class AutoMLService:
   def create_dataset_from_dataframe(self, display_name, df):
     bucket = self._get_gcs_bucket()
     key = "{}-{}".format(str(uuid.uuid4()), "dataframe")
-    data = df.to_csv().encode("utf-8")
+    data = df.to_csv(index=False).encode("utf-8")
     bucket.blob(key).upload_from_string(data)
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
@@ -471,3 +468,64 @@ class AutoMLService:
                                       container_spec=container_spec)
     return self._model_client.upload_model(parent=self._parent,
                                            model=model)
+
+  def get_dataset_details(self, dataset_id):
+    df = self.export_dataset(dataset_id)
+    columns = list(df.columns)
+    return [{
+      "fieldName": column
+    } for column in columns]
+
+  def create_training_pipeline(
+      self,
+      training_pipeline_name,
+      dataset_id,
+      model_name,
+      target_column,
+      prediction_type,
+      objective,
+      budget_hours,
+      transformations,
+  ):
+    training_task_inputs = {
+        "targetColumn": target_column,
+        "predictionType": prediction_type,
+        "transformations": transformations,
+        "trainBudgetMilliNodeHours": budget_hours * 1000,
+        "disableEarlyStopping": False,
+        "optimizationObjective": objective,
+    }
+    training_pipeline = {
+        "display_name": training_pipeline_name,
+        "training_task_definition": "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
+        "training_task_inputs": json_format.ParseDict(training_task_inputs, Value()),
+        "input_data_config": {
+            "dataset_id": dataset_id,
+            "fraction_split": {
+                "training_fraction": 0.8,
+                "validation_fraction": 0.1,
+                "test_fraction": 0.1,
+            },
+        },
+        "model_to_upload": {"display_name": model_name},
+    }
+    response = self._pipeline_client.create_training_pipeline(
+        parent=self._parent, training_pipeline=training_pipeline
+    )
+    print(" training_display_name:", response.display_name)
+    print(
+        " training_task_inputs:",
+        json_format.MessageToDict(response._pb.training_task_inputs),
+    )
+    print(" state:", response.state)
+    print(" create_time:", response.create_time)
+    input_data_config = response.input_data_config
+    print("  dataset_id:", input_data_config.dataset_id)
+    fraction_split = input_data_config.fraction_split
+    print("  fraction_split")
+    print("   training_fraction:", fraction_split.training_fraction)
+    print("   validation_fraction:", fraction_split.validation_fraction)
+    print("   test_fraction:", fraction_split.test_fraction)
+    model_to_upload = response.model_to_upload
+    print(" model_to_upload")
+    print("  display_name:", model_to_upload.display_name)

@@ -1,15 +1,5 @@
 import { requestAPI } from './api_request';
 
-export type ColumnType =
-  | 'Numerical'
-  | 'Categorical'
-  | 'Array'
-  | 'Timestamp'
-  | 'String'
-  | 'Struct'
-  | 'Unspecified'
-  | 'Unrecognized';
-
 export type DatasetType = 'OTHER' | 'TABLE' | 'IMAGE';
 
 export interface Dataset {
@@ -22,28 +12,8 @@ export interface Dataset {
   metadata: any;
 }
 
-export interface ColumnSpec {
-  id: string;
-  dataType: string;
-  displayName: string;
-  distinctValueCount: number;
-  invalidValueCount: number;
-  nullValueCount: string;
-  nullable: boolean;
-  detailPanel: any;
-}
-
-export interface TableSpec {
-  id: string;
-  rowCount: number;
-  validRowCount: number;
-  columnCount: number;
-  columnSpecs: ColumnSpec[];
-  chartSummary: any[];
-}
-
-export interface TableInfo {
-  tableSpecs: TableSpec[];
+export interface Column {
+  fieldName: string;
 }
 
 export interface TablesDatasetOptions {
@@ -70,6 +40,11 @@ export abstract class DatasetService {
       data[i].updateTime = new Date(data[i].updateTime);
     }
     return data;
+  }
+
+  static async getDatasetDetails(datasetId: string): Promise<Column[]> {
+    const query = '?datasetId=' + datasetId;
+    return await requestAPI<Column[]>('v1/datasetDetails' + query);
   }
 
   static async deleteDataset(datasetId: string): Promise<void> {

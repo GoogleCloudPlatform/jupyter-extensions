@@ -26,3 +26,10 @@ def import_saved_model(display_name: str, model_path: str,
 
 def predict(endpoint_id: str, instance: object):
   return AutoMLService.get().predict_tables(endpoint_id, instance)
+
+
+def create_training_pipeline(training_pipeline_name, dataset_id, model_name,
+    target_column, prediction_type, objective, budget_hours, transformations):
+  return AutoMLService.get().create_training_pipeline(training_pipeline_name,
+      dataset_id, model_name, target_column, prediction_type, objective,
+      budget_hours, transformations,)
