@@ -27,10 +27,12 @@ class TestEnv(object):
         self.dir2 = dir2
         self.not_git_dir = not_git_dir
 
+
 def create_files(num_files, dir_name):
     for i in range(1, num_files + 1):
         with open(os.path.join(dir_name, "test" + str(i) + ".py"), 'a') as test_file:
             test_file.write("# Test file")
+
 
 def setup_repos(working_dir):
     remote_dir = os.path.join(working_dir, "remote")
@@ -54,7 +56,6 @@ def setup_repos(working_dir):
     subprocess.call(['git', 'pull'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
     subprocess.call(['git', 'checkout', 'master'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
 
-
     #Initialize second test directory
     subprocess.call(['git', 'init'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
     subprocess.call(['git', 'remote', 'add', 'origin', str(remote_dir)], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
@@ -64,9 +65,9 @@ def setup_repos(working_dir):
     return TestEnv(remote_dir, dir1, dir2, not_git_dir)
 
 
-
 def add_detached_comment(text, file, cwd):
     subprocess.call(['git', 'appraise', 'comment', '-d', '-m', text, '-f', file], cwd=cwd)
+
 
 def create_code_review(cwd):
     #Creates a new code review and returns the commit hash associated with the review
@@ -80,6 +81,7 @@ def create_code_review(cwd):
 
 def add_review_comment(text, file, id_hash, cwd):
     subprocess.call(['git', 'appraise', 'comment', '-f', file, '-m', text, id_hash], cwd=cwd)
+
 
 def appraise_push(cwd):
     subprocess.call(['git', 'appraise', 'push', 'origin'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
