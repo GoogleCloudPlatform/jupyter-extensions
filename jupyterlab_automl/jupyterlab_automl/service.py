@@ -2,10 +2,13 @@
 
 import base64
 import hashlib
+import time
 import uuid
+import re
+import pandas as pd
 from enum import Enum
-
-from google.cloud import aiplatform_v1alpha1, exceptions, storage
+from google.cloud import aiplatform_v1alpha1, bigquery, exceptions, storage
+from google.protobuf.struct_pb2 import Value
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
@@ -227,9 +230,6 @@ class AutoMLService:
         })
     return datasets
 
-  def get_table_specs(self, dataset_id):
-    return []
-
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
     input_config = {}
 
@@ -251,6 +251,13 @@ class AutoMLService:
                                                   dataset=ds).result()
     return created
 
+  def _get_gcs_bucket(self):
+    try:
+      return self._gcs_client.create_bucket(self._gcs_bucket)
+    except exceptions.Conflict:
+      # Bucket already exists
+      return self._gcs_client.bucket(self._gcs_bucket)
+
   def create_dataset_from_file(self, display_name, file_name, file_data):
     try:
       bucket = self._gcs_client.create_bucket(self._gcs_bucket)
@@ -266,3 +273,117 @@ class AutoMLService:
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
+
+  def create_dataset_from_dataframe(self, display_name, df):
+    bucket = self._get_gcs_bucket()
+    key = "{}-{}".format(str(uuid.uuid4()), "dataframe")
+    data = df.to_csv().encode("utf-8")
+    bucket.blob(key).upload_from_string(data)
+    return self.create_dataset(display_name,
+                               gcs_uri="gs://{}/{}".format(
+                                   self._gcs_bucket, key))
+
+  def _gcs_to_dataframe(self, uris):
+    return pd.concat((pd.read_csv(uri, index_col=0) for uri in uris),
+                     ignore_index=True)
+
+  def _export_bigquery_dataset(self, uri):
+    split = re.split(":|\.", uri)
+    dataset_id, table_id = split[-2], split[-1]
+    tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
+    destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
+    dataset_ref = bigquery.DatasetReference(self._project, dataset_id)
+    table_ref = dataset_ref.table(table_id)
+    dataset = self._bigquery_client.get_dataset(dataset_ref)
+
+    extract_job = self._bigquery_client.extract_table(
+        table_ref,
+        destination_uri,
+        # Location must match that of the source table.
+        location=dataset.location,
+    )
+    exported = extract_job.result()
+    return exported.destination_uris
+
+  def export_dataset(self, dataset_id):
+    dataset = self._dataset_client.get_dataset(name=dataset_id)
+    if parse_dataset_type(dataset) != DatasetType.TABLE:
+      raise ValueError("Dataset provided is not a tables dataset")
+    inputConfig = json_format.MessageToDict(dataset._pb.metadata).get(
+        "inputConfig", {})
+    if "gcsSource" in inputConfig:
+      return self._gcs_to_dataframe(inputConfig["gcsSource"]["uri"])
+    elif "bigquerySource" in inputConfig:
+      tmp_uris = self._export_bigquery_dataset(
+          inputConfig["bigquerySource"]["uri"])
+      df = self._gcs_to_dataframe(tmp_uris)
+      # Delete temp csvs
+      for uri in tmp_uris:
+        blob = storage.blob.Blob.from_string(uri)
+        blob.delete(self._gcs_client)
+      return df
+    else:
+      raise NotImplementedError("Export not implemented for this dataset")
+
+  def get_dataset_details(self, dataset_id):
+    df = self.export_dataset(dataset_id)
+    print(df.head())
+    columns = list(df.columns)
+    return [{
+      "fieldName": column
+    } for column in columns]
+
+  def create_training_pipeline(
+      self,
+      training_pipeline_name,
+      dataset_id,
+      model_name,
+      target_column,
+      prediction_type,
+      objective,
+      budget_hours,
+      transformations,
+  ):
+    training_task_inputs = {
+        "targetColumn": target_column,
+        "predictionType": prediction_type,
+        "transformations": transformations,
+        "trainBudgetMilliNodeHours": budget_hours * 1000,
+        "disableEarlyStopping": False,
+        "optimizationObjective": objective,
+    }
+    training_pipeline = {
+        "display_name": training_pipeline_name,
+        "training_task_definition": "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
+        "training_task_inputs": json_format.ParseDict(training_task_inputs, Value()),
+        "input_data_config": {
+            "dataset_id": dataset_id,
+            "fraction_split": {
+                "training_fraction": 0.8,
+                "validation_fraction": 0.1,
+                "test_fraction": 0.1,
+            },
+        },
+        "model_to_upload": {"display_name": model_name},
+    }
+    response = self._pipeline_client.create_training_pipeline(
+        parent=self._parent, training_pipeline=training_pipeline
+    )
+    print(" training_display_name:", response.display_name)
+    print(
+        " training_task_inputs:",
+        json_format.MessageToDict(response._pb.training_task_inputs),
+    )
+    print(" state:", response.state)
+    print(" create_time:", response.create_time)
+    input_data_config = response.input_data_config
+    print("  dataset_id:", input_data_config.dataset_id)
+    fraction_split = input_data_config.fraction_split
+    print("  fraction_split")
+    print("   training_fraction:", fraction_split.training_fraction)
+    print("   validation_fraction:", fraction_split.validation_fraction)
+    print("   test_fraction:", fraction_split.test_fraction)
+    model_to_upload = response.model_to_upload
+    print(" model_to_upload")
+    print("  display_name:", model_to_upload.display_name)
+    
