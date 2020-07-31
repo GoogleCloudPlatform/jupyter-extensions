@@ -70,7 +70,7 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   render() {
-    const { details, receivedError } = this.state;
+    const { details, receivedError, formDisplayed } = this.state;
     const { detailsServer } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
@@ -94,10 +94,11 @@ export class VmDetails extends React.Component<Props, State> {
           title="Show form"
           onClick={() => this.setState({ formDisplayed: true })}
         ></span>
-        {this.state.formDisplayed && (
+        {formDisplayed && (
           <HardwareScalingDialog
-            open={this.state.formDisplayed}
+            open={formDisplayed}
             onClose={() => this.setState({ formDisplayed: false })}
+            details={details}
           />
         )}
       </span>

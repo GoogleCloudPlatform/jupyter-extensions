@@ -1,16 +1,12 @@
 import * as React from 'react';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import { stylesheet } from 'typestyle';
-import { AuthTokenRetrieval } from './auth_token_retrieval';
-import {
-  makeStyles,
-  createStyles,
-  withStyles,
-  Theme,
-} from '@material-ui/core/styles';
-import { HardwareConfiguration } from '../data';
-import { NotebooksService } from '../service/notebooks_service';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
+import { HardwareConfiguration, Details } from '../data';
+import { NotebooksService } from '../service/notebooks_service';
+import { AuthTokenRetrieval } from './auth_token_retrieval';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -30,39 +26,6 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
   })
 )(LinearProgress);
 
-enum Status {
-  'Authorizing' = 0,
-  'Stopping Instance' = 1,
-  'Reshaping Instance' = 2,
-  'Starting Instance' = 3,
-  'Complete' = 4,
-  'Error' = 5,
-}
-
-interface Props {
-  hardwareConfiguration: HardwareConfiguration;
-}
-
-interface State {
-  status: Status;
-}
-
-const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-  },
-});
-
-function CustomizedProgressBars(props) {
-  const classes = useStyles();
-
-  return (
-    <div className={classes.root}>
-      <BorderLinearProgress variant="determinate" value={props.progressValue} />
-    </div>
-  );
-}
-
 const STYLES = stylesheet({
   flexContainer: {
     width: 500,
@@ -73,24 +36,42 @@ const STYLES = stylesheet({
     alignItems: 'center',
   },
   heading: {
-    marginTop: '50px',
     fontSize: '24px',
   },
   paragraph: {
     height: 60,
     width: 350,
-    paddingBottom: '20px',
     textAlign: 'center',
   },
 });
 
+enum Status {
+  'Authorizing' = 0,
+  'Stopping Instance' = 1,
+  'Reshaping Instance' = 2,
+  'Starting Instance' = 3,
+  'Complete' = 4,
+  'Error' = 5,
+}
+
 const statusInfo = [
   'Getting authorization token to reshape machine. A dialog box should have popped up.',
-  'Shutting down instance for reshaping. You may need to restart the instance manually.',
-  'Reshaping instance to your configuration. You may need to restart the instance manually.',
+  'Shutting down instance for reshaping.',
+  'Reshaping instance to your configuration.',
   'Restarting your instance. Your newly configured machine will be ready very shortly!',
   'Operation complete. Enjoy your newly configured instance! You may now close this dialog.',
+  'An error has occured, please try again later. You may need to restart the instance manually.',
 ];
+
+interface Props {
+  hardwareConfiguration: HardwareConfiguration;
+  onDialogClose: () => void;
+  details: Details;
+}
+
+interface State {
+  status: Status;
+}
 
 export class HardwareScalingStatus extends React.Component<Props, State> {
   private notebookService: NotebooksService;
@@ -101,15 +82,13 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     };
     const clientTransportService = new ClientTransportService();
     this.notebookService = new NotebooksService(clientTransportService);
-    this.notebookService.projectId = 'jupyterlab-interns-sandbox';
-    this.notebookService.locationId = 'us-central1-a';
-    this.notebookService.instanceName = 'tensorflow-2-1-20200605-144102';
+    this.notebookService.projectId = this.props.details.project.projectId;
+    this.notebookService.locationId = this.props.details.instance.zone;
+    this.notebookService.instanceName = this.props.details.instance.name;
   }
 
   private preventPageClose(event) {
-    // Cancel the event as stated by the standard.
     event.preventDefault();
-    // Chrome requires returnValue to be set.
     event.returnValue = '';
   }
 
@@ -134,24 +113,31 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
       gpuCount,
       attachGpu,
     } = this.props.hardwareConfiguration;
-    switch (this.state.status) {
-      case Status['Stopping Instance']:
-        await this.notebookService.stop();
-        this.setState({ status: Status['Reshaping Instance'] });
-        break;
-      case Status['Reshaping Instance']:
-        await this.notebookService.setMachineType(machineType.value as string);
-        if (attachGpu) {
-          await this.notebookService.setAccelerator(gpuType, gpuCount);
-        }
-        this.setState({ status: Status['Starting Instance'] });
-        break;
-      case Status['Starting Instance']:
-        await this.notebookService.start();
-        this.setState({ status: Status.Complete });
-        break;
-      default:
-        break;
+    try {
+      switch (this.state.status) {
+        case Status['Stopping Instance']:
+          await this.notebookService.stop();
+          this.setState({ status: Status['Reshaping Instance'] });
+          break;
+        case Status['Reshaping Instance']:
+          await this.notebookService.setMachineType(
+            machineType.value as string
+          );
+          if (attachGpu) {
+            await this.notebookService.setAccelerator(gpuType, gpuCount);
+          }
+          this.setState({ status: Status['Starting Instance'] });
+          break;
+        case Status['Starting Instance']:
+          await this.notebookService.start();
+          this.setState({ status: Status.Complete });
+          break;
+        default:
+          break;
+      }
+    } catch (err) {
+      this.setState({ status: Status.Error });
+      console.log(err);
     }
   }
 
@@ -161,13 +147,26 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
 
   render() {
     const { status } = this.state;
-    const progressValue = (status / 5) * 100;
+    const progressValue = (status / 4) * 100;
     const { flexContainer, heading, paragraph } = STYLES;
+    const { onDialogClose } = this.props;
     return (
       <div className={flexContainer}>
         <h3 className={heading}>{Status[status]}</h3>
         <p className={paragraph}>{statusInfo[status]}</p>
-        <CustomizedProgressBars progressValue={progressValue} />
+        {status === 4 || status === 5 ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              onDialogClose();
+            }}
+          >
+            Close
+          </Button>
+        ) : (
+          <BorderLinearProgress variant="determinate" value={progressValue} />
+        )}
       </div>
     );
   }

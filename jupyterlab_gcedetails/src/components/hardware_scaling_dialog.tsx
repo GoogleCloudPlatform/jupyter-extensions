@@ -17,7 +17,7 @@
 import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
-import { HardwareConfiguration } from '../data';
+import { HardwareConfiguration, Details } from '../data';
 import { HardwareScalingStatus } from './hardware_scaling_status';
 
 enum View {
@@ -29,6 +29,7 @@ enum View {
 interface Props {
   open: boolean;
   onClose: () => void;
+  details: Details;
 }
 
 interface State {
@@ -53,7 +54,7 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
   }
 
   private getDisplay() {
-    const { onClose } = this.props;
+    const { onClose, details } = this.props;
     const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
@@ -72,7 +73,9 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
       case View.STATUS:
         return (
           <HardwareScalingStatus
+            onDialogClose={onClose}
             hardwareConfiguration={hardwareConfiguration}
+            details={details}
           />
         );
     }
