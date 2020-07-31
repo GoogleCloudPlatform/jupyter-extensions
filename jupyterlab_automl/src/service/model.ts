@@ -19,7 +19,7 @@ export interface Model {
   createTime: Date;
   updateTime: Date;
   etag: string;
-  modelType: string;
+  modelType: ModelType;
   inputs?: object;
   deployedModels?: DeployedModel[];
 }

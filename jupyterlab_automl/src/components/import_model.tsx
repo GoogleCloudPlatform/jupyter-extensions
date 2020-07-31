@@ -2,6 +2,7 @@ import { FormControl } from '@material-ui/core';
 import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { CopyCode } from './copy_code';
 
 interface Props {
   open: boolean;
@@ -30,17 +31,32 @@ export class ImportModel extends React.Component<Props, State> {
     super(props);
     this.state = {
       name: '',
-      framework: '',
+      framework: 'TF_CPU_2_1',
     };
   }
 
   render() {
+    const generated = `from jupyterlab_automl import import_saved_model, ModelFramework
+
+model_path = "my_model"
+
+# Save your model in preferred format to the local path
+# model.save(model_path)
+
+# Import local model to uCAIP
+op = import_saved_model(display_name="${this.state.name}",
+                        model_path=model_path,
+                        framework=ModelFramework.${this.state.framework})
+
+# Get result of import model operation
+op.result()`;
     return (
       <>
         {this.props.open && (
           <DialogComponent
-            header={'Import model'}
+            header={'Import custom model'}
             open={true}
+            cancelLabel="OK"
             onClose={this.props.onClose}
             onCancel={this.props.onClose}
             hideSubmit
@@ -94,6 +110,8 @@ export class ImportModel extends React.Component<Props, State> {
                 }}
               />
             </FormControl>
+            Import a pretrained model to uCAIP using the Python API
+            <CopyCode code={generated} />
           </DialogComponent>
         )}
       </>

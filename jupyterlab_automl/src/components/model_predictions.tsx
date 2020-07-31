@@ -1,22 +1,24 @@
-import * as React from 'react';
-import { Model, ModelService, Endpoint } from '../service/model';
-import {
-  SubmitButton,
-  TextInput,
-  ListResourcesTable,
-} from 'gcp_jupyterlab_shared';
-import Alert from '@material-ui/lab/Alert';
+import { Clipboard } from '@jupyterlab/apputils';
 import {
   Table,
-  TableHead,
   TableBody,
-  TableRow,
   TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Box,
 } from '@material-ui/core';
-import { CopyCode } from './copy_code';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import Alert from '@material-ui/lab/Alert';
+import {
+  ListResourcesTable,
+  SubmitButton,
+  TextInput,
+} from 'gcp_jupyterlab_shared';
+import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { Clipboard } from '@jupyterlab/apputils';
+import { Endpoint, Model, ModelService } from '../service/model';
+import { CopyCode } from './copy_code';
 
 const theme = createMuiTheme({
   overrides: {
@@ -51,7 +53,8 @@ interface State {
   isLoading: boolean;
   endpoints: Endpoint[];
   inputParameters: object;
-  predictReady: boolean;
+  customInput: string;
+  generatedCode: string;
   result: JSX.Element;
 }
 
@@ -72,7 +75,8 @@ export class ModelPredictions extends React.Component<Props, State> {
       isLoading: false,
       endpoints: [],
       inputParameters: {},
-      predictReady: false,
+      generatedCode: '',
+      customInput: '',
       result: null,
     };
     this.deployModel = this.deployModel.bind(this);
@@ -81,7 +85,6 @@ export class ModelPredictions extends React.Component<Props, State> {
     this.handleReset = this.handleReset.bind(this);
     this.isPredictReady = this.isPredictReady.bind(this);
     this.handlePredict = this.handlePredict.bind(this);
-    this.handleGeneratePython = this.handleGeneratePython.bind(this);
     this.getEndpoints = this.getEndpoints.bind(this);
   }
 
@@ -133,23 +136,12 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
   }
 
-  private handleGeneratePython() {
-    let instance = '';
-    const entries = Object.entries(this.state.inputParameters);
-    for (let index = 0; index < entries.length; index++) {
-      const key = entries[index][0];
-      const val = entries[index][1];
-      instance += "  '" + key + "': '" + val + "',\n";
-    }
-    const generated =
-      'from jupyterlab_automl import predict\ninstance = {\n' +
-      instance +
-      "}\npredict('" +
-      this.state.endpoints[0].id +
-      "', instance)";
-    this.setState({
-      result: <CopyCode code={generated} />,
-    });
+  private generatePython() {
+    const instance = JSON.stringify(this.state.inputParameters);
+    const generated = `from jupyterlab_automl import predict
+instance = ${instance}
+result = predict("${this.state.endpoints[0].id}", instance)`;
+    return generated;
   }
 
   private async handlePredict() {
@@ -163,6 +155,9 @@ export class ModelPredictions extends React.Component<Props, State> {
         result: <CopyCode code={JSON.stringify(result)} copy={false} />,
       });
     } catch (err) {
+      this.setState({
+        result: <CopyCode code={err.message} copy={false} />,
+      });
       console.warn('Error predicting result', err);
     } finally {
       this.setState({ isLoading: false });
@@ -172,20 +167,20 @@ export class ModelPredictions extends React.Component<Props, State> {
   private handleReset() {
     this.setState({
       inputParameters: {},
-      predictReady: false,
       result: null,
     });
   }
 
   private isPredictReady() {
-    if (
-      Object.keys(this.state.inputParameters).length ===
-      Object.keys(this.props.model.inputs).length
-    ) {
-      return true;
+    if (this.props.model.modelType === 'TABLE') {
+      return (
+        Object.keys(this.state.inputParameters).length ===
+        Object.keys(this.props.model.inputs).length
+      );
     } else {
-      return false;
+      return !!this.state.inputParameters;
     }
+    return false;
   }
 
   private handleInputChange(event) {
@@ -200,12 +195,69 @@ export class ModelPredictions extends React.Component<Props, State> {
 
     this.setState({
       inputParameters: current,
-      predictReady: this.isPredictReady(),
     });
   }
 
+  private testTablesModelComponent() {
+    return (
+      <ThemeProvider theme={theme}>
+        <Table size="small" style={{ width: 500, marginBottom: '16px' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell align="left">Feature column name</TableCell>
+              <TableCell align="left">Value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Object.keys(this.props.model.inputs).map(option => (
+              <TableRow key={option}>
+                <TableCell>{option}</TableCell>
+                <TableCell>
+                  <TextInput
+                    name={option}
+                    onChange={this.handleInputChange}
+                    value={this.state.inputParameters[option] || ''}
+                    placeholder={
+                      this.props.model.inputs[option]['inputBaselines'][0]
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ThemeProvider>
+    );
+  }
+
+  private testOtherModelComponent() {
+    return (
+      <Box mb="16px">
+        <TextField
+          placeholder='{"some_property": 123}'
+          multiline
+          rows={3}
+          size="small"
+          variant="outlined"
+          inputProps={{ style: { fontSize: 'var(--jp-ui-font-size1)' } }}
+          error={this.state.inputParameters !== {}}
+          onChange={event => {
+            const val = event.target.value;
+            try {
+              const obj = JSON.parse(val);
+              this.setState({ inputParameters: obj });
+            } catch {
+              this.setState({ inputParameters: {} });
+            }
+          }}
+        />
+      </Box>
+    );
+  }
+
   render() {
-    const { endpoints, result } = this.state;
+    const { endpoints } = this.state;
+
     return (
       <div
         hidden={this.props.value !== this.props.index}
@@ -253,42 +305,11 @@ export class ModelPredictions extends React.Component<Props, State> {
             <header className={localStyles.header}>Test your model</header>
             {endpoints[0].deployedModelId !== 'None' ? (
               <div>
-                <ThemeProvider theme={theme}>
-                  <Table
-                    size="small"
-                    style={{ width: 500, marginBottom: '16px' }}
-                  >
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="left">Feature column name</TableCell>
-                        <TableCell align="left">Value</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Object.keys(this.props.model.inputs).map(option => (
-                        <TableRow key={option}>
-                          <TableCell>{option}</TableCell>
-                          <TableCell>
-                            <TextInput
-                              name={option}
-                              onChange={this.handleInputChange}
-                              value={this.state.inputParameters[option] || ''}
-                              placeholder={
-                                this.props.model.inputs[option][
-                                  'inputBaselines'
-                                ][0]
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ThemeProvider>
+                {this.props.model.modelType === 'TABLE'
+                  ? this.testTablesModelComponent()
+                  : this.testOtherModelComponent()}
                 <SubmitButton
-                  actionPending={
-                    !this.state.predictReady || this.state.isLoading
-                  }
+                  actionPending={!this.isPredictReady() || this.state.isLoading}
                   onClick={this.handlePredict}
                   text={'Predict'}
                   style={{ marginRight: '16px' }}
@@ -299,14 +320,7 @@ export class ModelPredictions extends React.Component<Props, State> {
                   text={'Reset'}
                   style={{ marginRight: '16px' }}
                 />
-                <SubmitButton
-                  actionPending={
-                    !this.state.predictReady || this.state.isLoading
-                  }
-                  onClick={this.handleGeneratePython}
-                  text={'Generate Python'}
-                />
-                <div style={{ marginTop: '16px' }}>{result}</div>
+                <div style={{ marginTop: '16px' }}>{this.state.result}</div>
               </div>
             ) : (
               <Alert severity="info">
@@ -314,6 +328,8 @@ export class ModelPredictions extends React.Component<Props, State> {
                 minutes.
               </Alert>
             )}
+            <header className={localStyles.header}>Code sample</header>
+            <CopyCode code={this.generatePython()} />
           </div>
         ) : (
           <div>

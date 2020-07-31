@@ -79,7 +79,7 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
   const modelId = props.model.id.split('/');
 
   return (
-    <div style={{ padding: '16px' }}>
+    <div style={{ padding: '16px', overflow: 'auto' }}>
       <Table size="small" style={{ width: 500 }}>
         <TableBody>
           <TableRow key={'ID'}>
@@ -104,6 +104,7 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
           </TableRow>
         </TableBody>
       </Table>
+      <ModelPredictions model={props.model} value={0} index={0} />
     </div>
   );
 }
