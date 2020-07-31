@@ -14,7 +14,7 @@ export class File {
   editor: CodeMirror;
   doc: CodeMirror.doc;
 
-  resolve: MergeResolver;
+  resolver: MergeResolver;
   view: { 
     left: number,
     top: number, 
@@ -28,7 +28,7 @@ export class File {
     this.editor = ((widget.content as FileEditor)
       .editor as CodeMirrorEditor).editor;
     this.doc = this.editor.doc;
-    this.resolve = new MergeResolver(this.path);
+    this.resolver = new MergeResolver(this);
 
     this._getInitVersion();
   }
@@ -44,9 +44,8 @@ export class File {
   async reload() {
     await this._getRemoteVersion();
     this._getLocalVersion();
-    console.log('--------------');
     this._getEditorView();
-    const text = await this.resolve.mergeVersions();
+    const text = await this.resolver.mergeVersions();
     if (text) {
       await this.context.revert();
       this.doc.setValue(text);
@@ -56,24 +55,24 @@ export class File {
 
   private async _getInitVersion() {
     const contents = await fs.get(this.path);
-    this.resolve.addVersion(contents.content, 'base');
-    this.resolve.addVersion(contents.content, 'remote');
-    this.resolve.addVersion(contents.content, 'local');
+    this.resolver.addVersion(contents.content, 'base');
+    this.resolver.addVersion(contents.content, 'remote');
+    this.resolver.addVersion(contents.content, 'local');
   }
 
   private async _getRemoteVersion() {
     const contents = await fs.get(this.path);
-    this.resolve.addVersion(contents.content, 'remote');
+    this.resolver.addVersion(contents.content, 'remote');
   }
 
   private _getLocalVersion() {
     const text = this.doc.getValue();
-    this.resolve.addVersion(text, 'local');
+    this.resolver.addVersion(text, 'local');
   }
 
   private _getEditorView() {
     const cursor = this.doc.getCursor();
-    this.resolve.setCursorToken(cursor);
+    this.resolver.setCursorToken(cursor);
     const scroll = this.editor.getScrollInfo();
     this.view = {
       left: scroll.left, 
@@ -81,19 +80,12 @@ export class File {
       right: scroll.left + scroll.clientWidth,
       bottom: scroll.top + scroll.clientHeight
     }
-
-    console.log('Before Change');
-    console.log(this.view);
-    
   }
 
   private _setEditorView() {
-    const cursor = this.resolve.getCursor();
+    const cursor = this.resolver.cursor;
     this.doc.setCursor(cursor);
     this.editor.scrollIntoView(this.view);
-
-    console.log('After Change');
-    console.log(this.editor.getScrollInfo());
   }
 
 }
