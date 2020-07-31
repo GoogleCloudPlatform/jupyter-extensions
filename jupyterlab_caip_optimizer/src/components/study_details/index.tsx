@@ -13,12 +13,12 @@ import {
   TableRow,
 } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import * as Types from '../types';
-import { prettifyStudyName } from '../service/optimizer';
+import * as Types from '../../types';
+import { prettifyStudyName } from '../../service/optimizer';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import { dateFormat, makeReadable } from '../utils';
-import { setView } from '../store/view';
+import { dateFormat, makeReadable } from '../../utils';
+import { setView } from '../../store/view';
 
 const StyledTableCell = withStyles(theme => ({
   head: {

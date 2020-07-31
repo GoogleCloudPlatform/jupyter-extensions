@@ -10,12 +10,12 @@ import {
   Grid,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import * as Types from '../types';
 import { connect } from 'react-redux';
-import { createStudy } from '../store/studies';
-import { setView } from '../store/view';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { styles } from '../utils/styles';
+import { createStudy } from '../../store/studies';
+import { setView } from '../../store/view';
+import { styles } from '../../utils/styles';
+import * as Types from '../../types';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
