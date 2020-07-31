@@ -1,5 +1,6 @@
 import { FileTracker } from './tracker';
 import { GitManager } from './git';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  *
@@ -11,77 +12,81 @@ import { GitManager } from './git';
 export class GitSyncService {
   /* Member Fields */
   private _git: GitManager;
-  private _files: FileTracker;
-  private _editor;
-  private _isRunning: boolean;
+  private _tracker: FileTracker;
+  private _service: ReturnType <typeof setInterval>;
+  private _running: boolean;
   syncInterval: number = 20 * 1000;
 
-  constructor(git: GitManager, files: FileTracker, editor) {
+  private _blocked: boolean = false;
+  private _stateChange: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _statusChange: Signal<this, string> = new Signal<this, string>(this);
+
+  constructor(git: GitManager, tracker: FileTracker) {
     this._git = git;
-    this._files = files;
-    this._editor = editor;
+    this._tracker = tracker;
     this._addListeners();
   }
 
   start() {
-    console.log('start git sync service');
-    this._isRunning = true;
-    this._run();
+    if (!this._blocked){
+      console.log('start git sync service');
+      this._running = true;
+      this._service = setInterval(this._run.bind(this), this.syncInterval);
+      this._stateChange.emit(this.running);
+    }
   }
 
   stop() {
-    this._isRunning = false;
-    console.log('stop git sync service');
+    if (!this._blocked){
+      clearInterval(this._service);
+      this._running = false;
+      this._stateChange.emit(this.running);
+      console.log('stop git sync service');
+    }
   }
 
-  get isRunning(): boolean {
-    return this._isRunning;
+  get running(): boolean {
+    return this._running;
   }
 
   get git(): GitManager {
     return this._git;
   }
 
-  get files(): FileTracker {
-    return this._files;
+  get tracker(): FileTracker {
+    return this._tracker;
   }
 
-  get editor() {
-    return this._editor;
+  get stateChange(): ISignal<this, boolean> {
+    return this._stateChange;
   }
 
-  private async _run() {
-    setTimeout(() => {
-      this.files.saveAll();
-    }, 5000);
+  get statusChange(): ISignal<this, string> {
+    return this._statusChange;
   }
 
-  private _resolveConflicts() {
-    // this._conflict = true;
-    this.stop();
-    // this._git.sync();
+  private async _run(): Promise<void> {
+    try{
+      await this.tracker.saveAll();
+      this._statusChange.emit('sync');
+      await this.git.sync();
+      this._statusChange.emit('merge');
+      await this.tracker.reloadAll();
+      this._statusChange.emit('up-to-date');
+    } catch (error) {
+      console.warn(error);
+      this._statusChange.emit('warning')
+    }
   }
 
-  private _addListeners() {
-    this.files.saveCompleted.connect(() => {
-      if (this.isRunning) {
-        this.git.sync();
-      }
-    }, this);
-
-    this.git.mergeConflict.connect(() => {
-      this._resolveConflicts();
-    }, this);
-
-    this.git.syncCompleted.connect(() => {
-      if (this.isRunning) {
-        this.files.reloadAll();
-      }
-    }, this);
-
-    this.files.reloadCompleted.connect(() => {
-      if (this.isRunning) {
-        this.files.saveAll();
+  private _addListeners(): void {
+    this.tracker.stateChange.connect((tracker, resolved) => {
+      if (resolved && !this.running){
+        this._blocked = false;
+        this.start();
+      } else if (!resolved && this.running){
+        this.stop();
+        this._blocked = true;
       }
     }, this);
   }
