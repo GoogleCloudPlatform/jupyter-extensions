@@ -51,14 +51,15 @@ def setup_repos(working_dir):
     #Initialize first test directory
     subprocess.call(['git', 'init'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
     subprocess.call(['git', 'remote', 'add', 'origin', str(remote_dir)], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
-    subprocess.call(['git', 'fetch', 'origin'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
-    subprocess.call(['git', 'checkout', 'origin/master'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'pull'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'checkout', 'master'], cwd=dir1, stdout=FNULL, stderr=subprocess.STDOUT)
+
 
     #Initialize second test directory
     subprocess.call(['git', 'init'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
     subprocess.call(['git', 'remote', 'add', 'origin', str(remote_dir)], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
-    subprocess.call(['git', 'fetch', 'origin'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
-    subprocess.call(['git', 'checkout', 'origin/master'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'pull'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'checkout', 'master'], cwd=dir2, stdout=FNULL, stderr=subprocess.STDOUT)
 
     return TestEnv(remote_dir, dir1, dir2, not_git_dir)
 
@@ -67,8 +68,21 @@ def setup_repos(working_dir):
 def add_detached_comment(text, file, cwd):
     subprocess.call(['git', 'appraise', 'comment', '-d', '-m', text, '-f', file], cwd=cwd)
 
+def create_code_review(cwd):
+    #Creates a new code review and returns the commit hash associated with the review
+    subprocess.call(['git', 'checkout', '-b', 'test'], cwd=cwd)
+    subprocess.call(['git', 'commit', '--allow-empty', '-m', '"empty commit to create a code review for testing"'], cwd=cwd)
+    subprocess.call(['git', 'appraise', 'request'], cwd=cwd)
+    commit_hash = subprocess.check_output(['git', 'log', '-n1', '--format=format:%H'], cwd=cwd)
+    commit_hash = commit_hash.decode('UTF-8')
+    return commit_hash
+
+
+def add_review_comment(text, file, id_hash, cwd):
+    subprocess.call(['git', 'appraise', 'comment', '-f', file, '-m', text, id_hash], cwd=cwd)
+
 def appraise_push(cwd):
-    subprocess.call(['git', 'appraise', 'push'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'appraise', 'push', 'origin'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
 
 
 def create_tornado_app():

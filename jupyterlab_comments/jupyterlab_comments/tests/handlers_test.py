@@ -91,6 +91,33 @@ class TestRemoteDetachedComments(tornado.testing.AsyncHTTPTestCase):
             self.assertIn('Another test comment', str(response.body))
             self.assertEqual(2, len(data))
 
+class TestLocalReviewComments(tornado.testing.AsyncHTTPTestCase):
+
+    def get_app(self):
+        return create_tornado_app()
+
+    def test_single_local_comment(self):
+        with tempfile.TemporaryDirectory() as working_dir:
+            test_env = setup_repos(working_dir)
+            commit_hash = create_code_review(test_env.dir1)
+            add_review_comment("First comment", "test1.py", commit_hash, test_env.dir1)
+            file_path = os.path.join(test_env.dir1, 'test1.py')
+            response = self.fetch('/reviewComments?file_path=' + file_path + '&server_root=' + home, method="GET")
+            data = json.loads(response.body).get("comments")
+            self.assertEqual(1, len(data))
+
+    def test_multiple_local_comments(self):
+        with tempfile.TemporaryDirectory() as working_dir:
+            test_env = setup_repos(working_dir)
+            commit_hash = create_code_review(test_env.dir1)
+            add_review_comment("First comment", "test1.py", commit_hash, test_env.dir1)
+            add_review_comment("Second comment", "test1.py", commit_hash, test_env.dir1)
+            file_path = os.path.join(test_env.dir1, 'test1.py')
+            response = self.fetch('/reviewComments?file_path=' + file_path + '&server_root=' + home, method="GET")
+            data = json.loads(response.body).get("comments")
+            self.assertEqual(2, len(data))
+
+
 class TestNotInGitRepo(tornado.testing.AsyncHTTPTestCase):
 
     def get_app(self):
@@ -188,7 +215,7 @@ class TestReplyComments(tornado.testing.AsyncHTTPTestCase):
 
 
 if __name__ == '__main__':
-    test_classes = [TestLocalDetachedComments, TestRemoteDetachedComments, TestNotInGitRepo, TestReplyComments]
+    test_classes = [TestLocalDetachedComments, TestRemoteDetachedComments, TestNotInGitRepo, TestReplyComments, TestLocalReviewComments]
     test_loader = unittest.TestLoader()
     suites = []
     for test_class in test_classes:
