@@ -1,5 +1,14 @@
 import { Clipboard } from '@jupyterlab/apputils';
-import { Box, Icon, IconButton, ListItem, Toolbar } from '@material-ui/core';
+import {
+  Box,
+  Icon,
+  IconButton,
+  ListItem,
+  Toolbar,
+  Button,
+  Select,
+  MenuItem,
+} from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
 import grey from '@material-ui/core/colors/grey';
@@ -10,7 +19,6 @@ import {
   ColumnType,
   DialogComponent,
   ListResourcesTable,
-  SelectInput,
   TextInput,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
@@ -28,6 +36,7 @@ import { Context } from './automl_widget';
 import { DatasetWidget } from './dataset_widget';
 import { ImageWidget } from './image_widget';
 import { ImportData } from './import_data';
+import { ImportModel } from './import_model';
 import { ModelWidget } from './model_widget';
 import { PipelineWidget } from './pipeline_widget';
 
@@ -52,7 +61,9 @@ interface State {
   pipelines: Pipeline[];
   resourceType: ResourceType;
   searchString: string;
-  importDialogOpen: boolean;
+  showSearch: boolean;
+  importDatasetDialogOpen: boolean;
+  importModelDialogOpen: boolean;
   deleteDialogOpen: boolean;
   deleteSubmitHandler: () => void;
   deleteTargetName: string;
@@ -62,20 +73,25 @@ const FullWidthInput = styled(Box)`
   width: 100%;
   & > div {
     width: 100%;
+    padding: 0;
+    & > input {
+      margin: 0;
+      border: none;
+      border-top: solid 1px var(--jp-border-color1);
+    }
   }
 `;
 
-const ResourceSelect = styled(Box)`
-  & > div {
-    padding: 0;
-    margin: 4px 0;
-  }
+const ResourceSelect = styled(Select)`
+  margin-top: 8px;
+  width: 100%;
+  font-size: 13.6px;
+  font-weight: 500;
 `;
 
 const styles = {
   toolbar: {
-    paddingLeft: 16,
-    paddingRight: 16,
+    padding: '0px 16px 8px 16px',
     minHeight: 0,
   },
   select: {
@@ -104,10 +120,12 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       pipelines: [],
       resourceType: ResourceType.Dataset,
       searchString: '',
+      showSearch: false,
       deleteDialogOpen: false,
       deleteSubmitHandler: null,
       deleteTargetName: '',
-      importDialogOpen: false,
+      importDatasetDialogOpen: false,
+      importModelDialogOpen: false,
     };
   }
 
@@ -137,7 +155,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   private getTableForResourceType(type: ResourceType) {
     const sharedProps = {
       isLoading: this.state.isLoading,
-      height: this.props.height - 80,
+      height: this.props.height - 80 - (this.state.showSearch ? 25 : 0),
       width: this.props.width,
     };
     switch (type) {
@@ -302,29 +320,57 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       <>
         <Box height={1} width={1} bgcolor={'white'} borderRadius={0}>
           <Toolbar variant="dense" style={styles.toolbar}>
-            <ResourceSelect>
-              <SelectInput
-                value={this.state.resourceType}
-                options={[
-                  { text: 'Models', value: ResourceType.Model },
-                  { text: 'Datasets', value: ResourceType.Dataset },
-                  { text: 'Training', value: ResourceType.Training },
-                ]}
-                onChange={event => {
-                  if (this.state.isLoading) return;
-                  this.selectType(event.target.value as ResourceType);
-                }}
-              />
-            </ResourceSelect>
-            <Box flexGrow={1}></Box>
-            <IconButton
-              style={styles.icon}
-              size="small"
-              onClick={_ => {
-                this.setState({ importDialogOpen: true });
+            <ResourceSelect
+              value={this.state.resourceType}
+              onChange={event => {
+                this.selectType(event.target.value as ResourceType);
               }}
             >
-              <Icon>add</Icon>
+              <MenuItem dense value={ResourceType.Dataset}>
+                Datasets
+              </MenuItem>
+              <MenuItem dense value={ResourceType.Model}>
+                Models
+              </MenuItem>
+              <MenuItem dense value={ResourceType.Training}>
+                Training
+              </MenuItem>
+            </ResourceSelect>
+          </Toolbar>
+          <Toolbar variant="dense" style={styles.toolbar}>
+            {this.state.resourceType === ResourceType.Dataset && (
+              <Button
+                color="primary"
+                size="small"
+                startIcon={<Icon>add</Icon>}
+                onClick={_ => {
+                  this.setState({ importDatasetDialogOpen: true });
+                }}
+              >
+                Create
+              </Button>
+            )}
+            {this.state.resourceType === ResourceType.Model && (
+              <Button
+                color="primary"
+                size="small"
+                startIcon={<Icon>publish</Icon>}
+                onClick={_ => {
+                  this.setState({ importModelDialogOpen: true });
+                }}
+              >
+                Import
+              </Button>
+            )}
+            <Box flexGrow={1}></Box>
+            <IconButton
+              disabled={this.state.isLoading}
+              size="small"
+              onClick={_ => {
+                this.setState({ showSearch: !this.state.showSearch });
+              }}
+            >
+              <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
             </IconButton>
             <IconButton
               disabled={this.state.isLoading}
@@ -336,17 +382,20 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               <Icon>refresh</Icon>
             </IconButton>
           </Toolbar>
-          <Toolbar variant="dense" style={styles.toolbar}>
-            <FullWidthInput width={1}>
-              <TextInput
-                placeholder="Search"
-                type="search"
-                onChange={event => {
-                  this.handleSearch(event.target.value);
-                }}
-              />
-            </FullWidthInput>
-          </Toolbar>
+
+          <FullWidthInput
+            width={1}
+            display={this.state.showSearch ? 'inherit' : 'none'}
+          >
+            <TextInput
+              placeholder="Search"
+              type="search"
+              onChange={event => {
+                this.handleSearch(event.target.value);
+              }}
+            />
+          </FullWidthInput>
+
           {this.getTableForResourceType(this.state.resourceType)}
           <DialogComponent
             open={this.state.deleteDialogOpen}
@@ -357,14 +406,20 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             submitLabel={'Ok'}
           />
           <ImportData
-            open={this.state.importDialogOpen}
+            open={this.state.importDatasetDialogOpen}
             onClose={() => {
-              this.setState({ importDialogOpen: false });
+              this.setState({ importDatasetDialogOpen: false });
             }}
             onSuccess={() => {
               this.refresh();
             }}
             context={this.props.context}
+          />
+          <ImportModel
+            open={this.state.importModelDialogOpen}
+            onClose={() => {
+              this.setState({ importModelDialogOpen: false });
+            }}
           />
         </Box>
       </>
@@ -543,6 +598,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
   }
 
   private async refresh() {
+    if (this.state.isLoading) return;
     this.setState({ isLoading: true });
     await Promise.all([
       this.getDatasets(),

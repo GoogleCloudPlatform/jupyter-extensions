@@ -1,9 +1,11 @@
 """Services for AutoML extension that get reponses from the uCAIP API"""
 
 import base64
+import glob
 import hashlib
 import time
 import uuid
+import os
 import pandas as pd
 import re
 from enum import Enum
@@ -36,6 +38,17 @@ def parse_model_type(model):
     if mt.value.lower() in model.metadata_schema_uri:
       return mt.value
   return ModelType.OTHER.value
+
+
+class ModelFramework(Enum):
+  SKLEARN_CPU_0_20 = "sklearn-cpu.0-20"
+  SKLEARN_CPU_0_22 = "sklearn-cpu.0-22"
+  TF_CPU_1_15 = "tf-cpu.1-15"
+  TF_GPU_1_15 = "tf-gpu.1-15"
+  TF_CPU_2_1 = "tf2-cpu.2-1"
+  TF_GPU_2_1 = "tf2-gpu.2-1"
+  XGBOOST_CPU_0_82 = "xgboost-cpu.0-82"
+  XGBOOST_CPU_0_90 = "xgboost-cpu.0-90"
 
 
 class ModelType(Enum):
@@ -319,15 +332,14 @@ class AutoMLService:
                                    self._gcs_bucket, key))
 
   def _gcs_to_dataframe(self, uris):
-    return pd.concat((pd.read_csv(uri, index_col=0) for uri in uris),
+    return pd.concat((pd.read_csv(uri) for uri in uris),
                      ignore_index=True)
 
   def _export_bigquery_dataset(self, uri):
-    split = re.split(":|\.", uri)
-    dataset_id, table_id = split[-2], split[-1]
+    _, project, dataset_id, table_id = re.split("://|:|\.", uri) #Split by ://, : or .
     tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
     destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
-    dataset_ref = bigquery.DatasetReference(self._project, dataset_id)
+    dataset_ref = bigquery.DatasetReference(project, dataset_id)
     table_ref = dataset_ref.table(table_id)
     dataset = self._bigquery_client.get_dataset(dataset_ref)
 
@@ -422,3 +434,40 @@ class AutoMLService:
     instances = [json_format.ParseDict(s, Value()) for s in instances_list]
     response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
     return json_format.MessageToDict(response._pb.predictions[0])
+
+  def _copy_local_directory_to_gcs(self, local_path, bucket, gcs_path):
+    if not os.path.isdir(local_path):
+      raise ValueError("{} is not a valid directory".format(
+          os.path.abspath(local_path)))
+    for local_file in glob.glob(local_path + '/**', recursive=True):
+      if not os.path.isfile(local_file):
+        continue
+      remote_path = os.path.join(gcs_path, local_file[1 + len(local_path):])
+      blob = bucket.blob(remote_path)
+      blob.upload_from_filename(local_file)
+
+  def import_saved_model(self,
+                         display_name,
+                         model_path,
+                         framework):
+    # Strip out non alphanumeric chars of model name and prepend uuid
+    name = "{}-{}".format(re.sub(r'\W+', '', display_name), str(uuid.uuid4()))
+    key = "models/" + name
+    bucket = self._get_gcs_bucket()
+
+    # Upload model artifacts to GCS
+    self._copy_local_directory_to_gcs(model_path, bucket, key)
+
+    # https://pantheon.corp.google.com/gcr/images/cloud-aiplatform/GLOBAL/prediction?gcrImageListsize=30
+    if not isinstance(framework, str):
+      framework = framework.value
+
+    container_spec = aiplatform_v1alpha1.ModelContainerSpec(
+        image_uri="gcr.io/cloud-aiplatform/prediction/{}:latest".format(
+            framework))
+    model = aiplatform_v1alpha1.Model(display_name=display_name,
+                                      artifact_uri="gs://{}/{}".format(
+                                          bucket.name, key),
+                                      container_spec=container_spec)
+    return self._model_client.upload_model(parent=self._parent,
+                                           model=model)
