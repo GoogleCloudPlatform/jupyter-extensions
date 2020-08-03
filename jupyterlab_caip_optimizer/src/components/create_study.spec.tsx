@@ -1,3 +1,4 @@
+jest.setTimeout(15000);
 import * as React from 'react';
 import { createDropdown, DropdownItem, CreateStudy } from './create_study';
 import { rest } from 'msw';
