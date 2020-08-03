@@ -4,17 +4,7 @@ import { ViewDetailsService, ViewDetails } from './service/list_view_details';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
-import { stylesheet } from 'typestyle';
-
-const localStyles = stylesheet({
-  body: {
-    marginBottom: '24px',
-    marginRight: '24px',
-    marginLeft: '24px',
-    height: '100%',
-    overflowY: 'auto',
-  },
-});
+import { localStyles } from './dataset_details_panel';
 
 interface Props {
   viewDetailsService: ViewDetailsService;
@@ -88,7 +78,7 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ height: '100%' }}>
+        <div className={localStyles.container}>
           <Header text={this.props.view_name} />
           <div className={localStyles.body}>
             <DetailsPanel

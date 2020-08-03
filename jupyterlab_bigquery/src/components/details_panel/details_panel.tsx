@@ -36,6 +36,7 @@ export const localStyles = stylesheet({
   detailsBody: {
     fontSize: '13px',
     marginTop: '24px',
+    marginBottom: '24px',
   },
   labelContainer: {
     display: 'flex',
