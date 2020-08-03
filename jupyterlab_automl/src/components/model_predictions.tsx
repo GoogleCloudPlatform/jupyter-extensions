@@ -258,6 +258,15 @@ result = predict("${this.state.endpoints[0].id}", instance)`;
 
   render() {
     const { endpoints } = this.state;
+    const basicEndpoint = `import * from jupyterlab_automl
+
+deploy_model('${this.props.model.id}')`;
+    const customizedEndpoint = `import * from jupyterlab_automl
+
+machine_type = ''
+endpoint_id = ''
+
+deploy_model('${this.props.model.id}', machine_type, endpoint_id)`;
 
     return (
       <div
@@ -344,6 +353,20 @@ result = predict("${this.state.endpoints[0].id}", instance)`;
               Your model must be successfully deployed to an endpoint before you
               can test it.
             </Alert>
+            <header className={localStyles.header}>
+              Deploy model to basic endpoint
+            </header>
+            <p style={{ padding: '8px' }}>
+              <i>Deploys model to an endpoint with a low level machine type.</i>
+            </p>
+            <CopyCode code={basicEndpoint} />
+            <header className={localStyles.header}>
+              Deploy model to customized endpoint
+            </header>
+            <p style={{ padding: '8px' }}>
+              <i>Fill in the machine type and endpoint to deploy to.</i>
+            </p>
+            <CopyCode code={customizedEndpoint} />
           </div>
         )}
       </div>
