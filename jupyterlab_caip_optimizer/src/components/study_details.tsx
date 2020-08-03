@@ -188,32 +188,34 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
         </Typography>
         <Grid container item spacing={1} xs={12}>
           <Grid container item sm={9}>
-            <TableContainer component={Paper}>
-              <Table
-                className={classes.table}
-                aria-label="customized table"
-                size="small"
-              >
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Study Configuration</StyledTableCell>
-                    <StyledTableCell align="right" />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {configRows.map((row: ConfigRow, index: number) => (
-                    <StyledTableRow key={`config-row-${index}`}>
-                      <StyledTableCell component="th" scope="row">
-                        {row.entryName}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.entryValue}
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <Box clone mb={3}>
+              <TableContainer component={Paper}>
+                <Table
+                  className={classes.table}
+                  aria-label="customized table"
+                  size="small"
+                >
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Study Configuration</StyledTableCell>
+                      <StyledTableCell align="right" />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {configRows.map((row: ConfigRow, index: number) => (
+                      <StyledTableRow key={`config-row-${index}`}>
+                        <StyledTableCell component="th" scope="row">
+                          {row.entryName}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.entryValue}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
             <TableContainer component={Paper}>
               <Table
                 className={classes.table}
