@@ -13,6 +13,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
+import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 
 import {
   DataTree,
@@ -33,6 +36,7 @@ import { openSnackbar } from '../../reducers/snackbarSlice';
 import '../../../style/index.css';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 
 const localStyles = stylesheet({
   item: {
@@ -126,11 +130,41 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
+  const queryTable = dataTreeItem => {
+    const notebookTrack = context.notebookTrack as INotebookTracker;
+    const query = `SELECT * FROM ${dataTreeItem.id} LIMIT 100`;
+
+    const curWidget = notebookTrack.currentWidget;
+
+    if (!curWidget || !curWidget.content.isVisible) {
+      // current active tab is NOT notebook
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query]
+      );
+    } else {
+      // current active tab is notebook
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code = '%%bigquery_editor\n\n' + query;
+      cell.model.value.text = code;
+    }
+  };
+
   const renderTables = table => {
     const tableContextMenuItems = [
       {
         label: 'Copy Table ID',
         handler: dataTreeItem => copyID(dataTreeItem),
+      },
+      {
+        label: 'Query Table',
+        handler: queryTable,
       },
     ];
 
