@@ -14,7 +14,24 @@ import { fetchStudies } from './store/studies';
 import { fetchMetadata } from './store/metadata';
 import { createSnack } from './store/snackbar';
 import { SnackbarWidget } from './components/snackbar_widget';
+import { ViewState, ViewType } from './store/view';
+import { prettifyStudyName } from './service/optimizer';
 import { unwrapResult } from '@reduxjs/toolkit';
+
+function viewName(data: ViewType) {
+  switch (data.view) {
+    case 'createStudy':
+      return 'Create Study';
+    case 'dashboard':
+      return 'Dashboard';
+    case 'studyDetails':
+      return `"${prettifyStudyName(data.studyId)}" Details`;
+    case 'suggestTrials':
+      return `"${prettifyStudyName(data.studyId)}" Trials`;
+    case 'visualizeTrials':
+      return `"${prettifyStudyName(data.studyId)}" Visualizations`;
+  }
+}
 
 /**
  * Opens and closes a widget based on redux store's `view.isVisible` property.
@@ -24,7 +41,7 @@ import { unwrapResult } from '@reduxjs/toolkit';
  */
 const createManagedWidget = <
   WIDGET extends Widget,
-  STORE extends Store<{ view: { isVisible: boolean } }>
+  STORE extends Store<{ view: ViewState }>
 >(
   reduxStore: STORE,
   app: JupyterFrontEnd,
@@ -38,12 +55,17 @@ const createManagedWidget = <
     state => state.view.isVisible,
     (previousIsVisible, nextIsVisible) => previousIsVisible === nextIsVisible
   );
-  if (reduxStore.getState().view.isVisible) {
-    app.shell.add(widget, 'main');
-    app.shell.activateById(widget.id);
-  }
+
+  const onViewChange = watch(
+    reduxStore.getState,
+    state => state.view.data,
+    // NOTE: this is a shallow equal (should not matter since the state is
+    // immutable, thus changes to state should trigger a shallow change)
+    (previousView, nextView) => previousView === nextView
+  );
+
   reduxStore.subscribe(
-    onChange(isVisible => {
+    onChange((isVisible, state) => {
       if (isVisible) {
         app.shell.add(widget, 'main');
         app.shell.activateById(widget.id);
@@ -52,14 +74,21 @@ const createManagedWidget = <
         // Setup component for next open
         widget = new widgetComponent(reduxStore);
         widget.id = 'optimizer:main-area';
+        widget.title.label = viewName(state.view.data);
       }
+    })
+  );
+
+  // Refocus component
+  reduxStore.subscribe(
+    onViewChange(view => {
+      widget.title.label = viewName(view);
+      app.shell.activateById(widget.id);
     })
   );
 };
 
 async function activate(app: JupyterFrontEnd) {
-  store.dispatch(fetchStudies());
-
   // Create main area widget
   createManagedWidget(store, app, MainAreaWidget);
 
