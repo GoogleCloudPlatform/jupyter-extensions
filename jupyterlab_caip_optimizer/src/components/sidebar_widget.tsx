@@ -27,7 +27,6 @@ import {
   TableContainer,
   TableRow,
   Typography,
-  ButtonGroup,
   Link,
 } from '@material-ui/core';
 import { RootState, AppDispatch } from '../store/store';
@@ -101,10 +100,20 @@ export const Sidebar = ({
         {/* Spacing Element */}
         <Box style={{ flexGrow: 1 }} />
 
-        <Box>
-          <ButtonGroup color="primary" variant="contained">
-            <Button onClick={() => openDashboard()}>Main Dashboard</Button>
+        <Box display="flex">
+          <Box mr={0.5}>
             <Button
+              color="primary"
+              variant="contained"
+              onClick={() => openDashboard()}
+            >
+              Main Dashboard
+            </Button>
+          </Box>
+          <Box ml={0.5}>
+            <Button
+              color="primary"
+              variant="contained"
               onClick={() =>
                 dispatch(
                   setView({
@@ -116,7 +125,7 @@ export const Sidebar = ({
             >
               Create Study
             </Button>
-          </ButtonGroup>
+          </Box>
         </Box>
       </Box>
 

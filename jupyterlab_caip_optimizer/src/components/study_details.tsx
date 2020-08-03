@@ -11,7 +11,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  ButtonGroup,
 } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import * as Types from '../types';
@@ -265,12 +264,26 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
             </TableContainer>
           </Grid>
           <Grid item>
-            <ButtonGroup variant="contained" color="primary">
-              <Button onClick={() => openVisualizations(studyId)}>
-                See Visualization
-              </Button>
-              <Button onClick={() => openTrials(studyId)}>View Trials</Button>
-            </ButtonGroup>
+            <Box display="flex">
+              <Box mr={0.5} clone>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => openVisualizations(studyId)}
+                >
+                  See Visualization
+                </Button>
+              </Box>
+              <Box ml={0.5} clone>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => openTrials(studyId)}
+                >
+                  View Trials
+                </Button>
+              </Box>
+            </Box>
             {/* <Grid container item justify="center" xs={12}>
               <Button
                 color="primary"
