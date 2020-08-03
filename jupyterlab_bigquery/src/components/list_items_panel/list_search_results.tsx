@@ -1,7 +1,3 @@
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeView from '@material-ui/lab/TreeView';
-import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
 import { stylesheet } from 'typestyle';
@@ -35,14 +31,22 @@ const localStyles = stylesheet({
   },
   root: {
     flexGrow: 1,
-    maxWidth: 400,
   },
   searchResultItem: {
     flexGrow: 1,
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    '&:hover': {
+      cursor: 'pointer',
+      backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+  },
+  searchResultTitle: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
   },
   searchResultSubtitle: {
-    fontSize: 12,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size0)',
     color: 'gray',
   },
 });
@@ -104,22 +108,20 @@ export function BuildSearchResult(result, context) {
           onClick: () => item.handler(table),
         }))}
       >
-        <TreeItem
-          nodeId={table.id}
-          label={
-            <div>
-              <div>{table.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {table.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {table.type}
-              </div>
-            </div>
-          }
+        <div
           onDoubleClick={() => openTableDetails(table)}
           className={localStyles.searchResultItem}
-        />
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{table.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {table.parent}
+            </div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {table.type}
+            </div>
+          </div>
+        </div>
       </ContextMenu>
     );
   };
@@ -138,22 +140,20 @@ export function BuildSearchResult(result, context) {
           onClick: () => item.handler(view),
         }))}
       >
-        <TreeItem
-          nodeId={view.id}
-          label={
-            <div>
-              <div>{view.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {view.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {view.type}
-              </div>
-            </div>
-          }
+        <div
           onDoubleClick={() => openViewDetails(view)}
           className={localStyles.searchResultItem}
-        />
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{view.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {view.parent}
+            </div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {view.type}
+            </div>
+          </div>
+        </div>
       </ContextMenu>
     );
   };
@@ -172,21 +172,17 @@ export function BuildSearchResult(result, context) {
           onClick: () => item.handler(model),
         }))}
       >
-        <TreeItem
-          nodeId={model.id}
-          label={
-            <div>
-              <div>{model.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {model.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {model.type}
-              </div>
+        <div className={localStyles.searchResultItem}>
+          <div>
+            <div className={localStyles.searchResultTitle}>{model.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {model.parent}
             </div>
-          }
-          className={localStyles.searchResultItem}
-        />
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {model.type}
+            </div>
+          </div>
+        </div>
       </ContextMenu>
     );
   };
@@ -205,19 +201,17 @@ export function BuildSearchResult(result, context) {
           onClick: () => item.handler(dataset),
         }))}
       >
-        <TreeItem
-          nodeId={dataset.id}
-          label={
-            <div>
-              <div>{dataset.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {dataset.type}
-              </div>
-            </div>
-          }
+        <div
           onDoubleClick={() => openDatasetDetails(dataset)}
           className={localStyles.searchResultItem}
-        />
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{dataset.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {dataset.type}
+            </div>
+          </div>
+        </div>
       </ContextMenu>
     );
   };
@@ -246,15 +240,9 @@ export default class ListSearchResults extends React.Component<
   render() {
     const { context, searchResults } = this.props;
     return searchResults.map(result => (
-      <TreeView
-        className={localStyles.root}
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpanded={['root']}
-        defaultExpandIcon={<ChevronRightIcon />}
-        key={result.id}
-      >
+      <div key={result.id} className={localStyles.root}>
         {BuildSearchResult(result, context)}
-      </TreeView>
+      </div>
     ));
   }
 }
