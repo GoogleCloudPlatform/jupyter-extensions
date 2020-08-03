@@ -1,3 +1,4 @@
+jest.setTimeout(100000);
 import * as React from 'react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
