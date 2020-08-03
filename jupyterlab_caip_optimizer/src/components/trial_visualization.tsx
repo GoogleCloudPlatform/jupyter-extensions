@@ -1,11 +1,12 @@
 import React from 'react';
 import { Grid, Paper, Radio } from '@material-ui/core';
 import { ParallelCoordinates } from './graphs/parallel_coordinates';
-import { Typography, Slider } from '@material-ui/core/';
+import { Typography, Slider, Box } from '@material-ui/core/';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { fetchTrials } from '../store/studies';
 import * as Types from '../types';
+import { styles } from '../utils/styles';
 
 interface Props {
   studyName: string;
@@ -48,80 +49,6 @@ interface AxisData {
   maxVal?: number;
   values?: string[] | number[];
 }
-
-// const controlPanelLeft = ["trialId", "param_1", "param_2"];
-// const controlPanelRight = ["metric_1", "metric_2"];
-
-// const axesData = [
-//   {
-//     label: "trialId",
-//     type: "INTEGER",
-//     minVal: 1,
-//     maxVal: 10
-//   },
-//   {
-//     label: "param_1",
-//     type: "DOUBLE",
-//     minVal: 1,
-//     maxVal: 100
-//   },
-//   {
-//     label: "param_2",
-//     type: "CATEGORICAL",
-//     values: ["A", "B", "C", "D"]
-//   },
-//   {
-//     label: "metric_1",
-//     type: "DOUBLE",
-//     minVal: 0.0,
-//     maxVal: 1.0
-//   },
-//   {
-//     label: "metric_2",
-//     type: "DOUBLE",
-//     minVal: 0,
-//     maxVal: 30
-//   }
-// ];
-
-// const defaultAxisProps = {
-//   trialId: {
-//     type: "INTEGER",
-//     sliderMin: 1,
-//     sliderMax: 10,
-//     minVal: 1,
-//     maxVal: 10
-//   },
-//   param_1: {
-//     type: "DOUBLE",
-//     sliderMin: 1,
-//     sliderMax: 100,
-//     minVal: 1,
-//     maxVal: 100
-//   },
-//   param_2: {
-//     type: "CATEGORICAL",
-//     values: ["A", "B", "C", "D"],
-//     sliderMinIndex: 0,
-//     sliderMaxIndex: 3,
-//     minIndex: 0,
-//     maxIndex: 3
-//   },
-//   metric_1: {
-//     type: "DOUBLE",
-//     sliderMin: 0.0,
-//     sliderMax: 1.0,
-//     minVal: 0.0,
-//     maxVal: 1.0
-//   },
-//   metric_2: {
-//     type: "DOUBLE",
-//     sliderMin: 0,
-//     sliderMax: 30,
-//     minVal: 0,
-//     maxVal: 30
-//   }
-// };
 
 function createAxesData(
   axisLabelsLeft,
@@ -294,7 +221,6 @@ function createAxisProps(
     }
   });
   const metricMinMax = findMetricMinMax(completedTrials);
-  console.log(metricMinMax);
   metricNameList.forEach(metric => {
     axisPropsList[metric] = {
       type: 'DOUBLE',
@@ -490,32 +416,43 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
 
   React.useEffect(() => {
     if (ref.current) {
-      setWidth(ref.current.offsetWidth);
+      setWidth(ref.current.offsetWidth * 0.9);
       setHeight(Math.round(width * 0.5));
     }
   }, [ref.current, width, height]);
   return (
     <React.Fragment>
-      <Grid container item xs={12} ref={ref}>
-        <Paper>
-          <ParallelCoordinates
-            width={width}
-            height={height}
-            axisPropsList={axisPropsList}
-            lineDataList={lineDataList}
-            axesData={axesData}
-            selectedMetricForColor={selectedMetric}
-          />
-          <Grid container item xs={12} justify="center">
-            <Grid container item xs={5} spacing={2} alignContent="flex-start">
-              {populateSliders(axisLabelsLeft, axisPropsList)}
-            </Grid>
-            <Grid container item xs={5} spacing={1} alignContent="flex-start">
-              {populateSliders(axisLabelsRight, axisPropsList, true)}
-            </Grid>
+      <Box className={styles.root} display="flex" m={5}>
+        <Grid container spacing={3}>
+          <Grid container item xs={12}>
+            <Typography variant="h5" gutterBottom>
+              Visualizations
+            </Typography>
           </Grid>
-        </Paper>
-      </Grid>
+          <Grid container item xs={12} ref={ref}>
+            <Paper>
+              <Box m={5} overflow="scroll">
+                <ParallelCoordinates
+                  width={width}
+                  height={height}
+                  axisPropsList={axisPropsList}
+                  lineDataList={lineDataList}
+                  axesData={axesData}
+                  selectedMetricForColor={selectedMetric}
+                />
+                <Grid container item xs={12} justify="center">
+                  <Grid container item xs={5} spacing={2} alignContent="flex-start">
+                    {populateSliders(axisLabelsLeft, axisPropsList)}
+                  </Grid>
+                  <Grid container item xs={5} spacing={1} alignContent="flex-start">
+                    {populateSliders(axisLabelsRight, axisPropsList, true)}
+                  </Grid>
+                </Grid>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     </React.Fragment>
   );
 };

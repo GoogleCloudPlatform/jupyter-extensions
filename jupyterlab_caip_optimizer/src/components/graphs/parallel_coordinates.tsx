@@ -59,9 +59,6 @@ export const ParallelCoordinates = (props: Props) => {
       width > 0 &&
       height > 0
     ) {
-      console.log(lineDataList);
-      console.log(axesData);
-      console.log(axisPropsList);
       const resetSelectBox = () => {
         setAxisClicked(false);
         setClickedAxisName('none');
@@ -130,6 +127,13 @@ export const ParallelCoordinates = (props: Props) => {
           .attr('class', 'verticalAxis')
           .attr('id', `${axis.label}`)
           .call(verticalAxis);
+        svg
+          .append("text")
+          .attr("x", xScale(axis.label))
+          .attr("y", 20)
+          .attr("font-family", "Roboto")
+          .attr("text-anchor", "middle")
+          .text(axis.label);
       });
 
       const yScaleInvert = (axisLabel, mouseVerticalPos) => {
@@ -201,11 +205,13 @@ export const ParallelCoordinates = (props: Props) => {
 
       const colorLine = lineDataList => {
         if (selectedMetricForColor) {
-          return d3.interpolateRdBu(
-            (lineDataList[selectedMetricForColor] /
-              axisPropsList[selectedMetricForColor]['maxVal']) *
+          const withinSelectedMetricRange = (lineDataList[selectedMetricForColor] >= axisPropsList[selectedMetricForColor]['sliderMin'] && lineDataList[selectedMetricForColor] <= axisPropsList[selectedMetricForColor]['sliderMax']);
+          // normalized for the slider range
+          return withinSelectedMetricRange ? d3.interpolateRdBu(
+            ((lineDataList[selectedMetricForColor] - axisPropsList[selectedMetricForColor]['sliderMin']) /
+              (axisPropsList[selectedMetricForColor]['sliderMax'] - axisPropsList[selectedMetricForColor]['sliderMin'])) *
               1.0
-          );
+          ) : 'rgba(0, 0, 0, 0.1)'; // light gray colored if not within the selected range of metric axis
         }
         return 'rgba(63, 81, 181, 0.8)';
       };
