@@ -27,7 +27,7 @@ import {
   TextField,
 } from '@material-ui/core';
 import { StudyConfig } from '../../types';
-import { Loading } from '../loading';
+import { Loading } from '../misc/loading';
 import { prettifyTrial } from '../../service/optimizer';
 import { MetricsInputs } from './index';
 import { useDispatch } from 'react-redux';

@@ -1,9 +1,6 @@
 import * as React from 'react';
 
-import {
-  DatasetDetailsService,
-  DatasetDetails,
-} from './service/list_dataset_details';
+import { ViewDetailsService, ViewDetails } from './service/list_view_details';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
@@ -20,15 +17,16 @@ const localStyles = stylesheet({
 });
 
 interface Props {
-  datasetDetailsService: DatasetDetailsService;
+  viewDetailsService: ViewDetailsService;
   isVisible: boolean;
-  dataset_id: string;
+  view_id: string;
+  view_name: string;
 }
 
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
-  details: DatasetDetails;
+  details: ViewDetails;
   rows: DetailRow[];
 }
 
@@ -37,13 +35,13 @@ interface DetailRow {
   value: string;
 }
 
-export default class DatasetDetailsPanel extends React.Component<Props, State> {
+export default class ViewDetailsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       hasLoaded: false,
       isLoading: false,
-      details: { details: {} } as DatasetDetails,
+      details: { details: {} } as ViewDetails,
       rows: [],
     };
   }
@@ -64,30 +62,22 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
   private async getDetails() {
     try {
       this.setState({ isLoading: true });
-      const details = await this.props.datasetDetailsService.listDatasetDetails(
-        this.props.dataset_id
+      const details = await this.props.viewDetailsService.listViewDetails(
+        this.props.view_id
       );
 
       const detailsObj = details.details;
       const rows = [
-        { name: 'Dataset ID', value: detailsObj.id },
+        { name: 'View ID', value: detailsObj.id },
         { name: 'Created', value: detailsObj.date_created },
-        {
-          name: 'Default table expiration',
-          value: detailsObj.default_expiration
-            ? this.formatMs(detailsObj.default_expiration)
-            : 'Never',
-        },
         { name: 'Last modified', value: detailsObj.last_modified },
-        {
-          name: 'Data location',
-          value: detailsObj.location ? detailsObj.location : 'None',
-        },
+        { name: 'View expiration', value: detailsObj.expires ?? 'Never' },
+        { name: 'Use Legacy SQL', value: detailsObj.legacy_sql },
       ];
 
       this.setState({ hasLoaded: true, details, rows });
     } catch (err) {
-      console.warn('Error retrieving dataset details', err);
+      console.warn('Error retrieving view details', err);
     } finally {
       this.setState({ isLoading: false });
     }
@@ -99,12 +89,12 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div style={{ height: '100%' }}>
-          <Header text={this.props.dataset_id} />
+          <Header text={this.props.view_name} />
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
               rows={this.state.rows}
-              detailsType="DATASET"
+              detailsType="VIEW"
             />
           </div>
         </div>
