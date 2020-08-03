@@ -35,6 +35,7 @@ NVIDIA_CMD = 'nvidia-smi -q -x'
 # Constants for field names
 CPU = 'cpu'
 CUDA_VERSION = 'cuda_version'
+COUNT = 'count'
 DESCRIPTION = 'description'
 DRIVER_VERSION = 'driver_version'
 GPU = 'gpu'
@@ -100,6 +101,7 @@ async def get_gpu_details():
       NAME: '',
       DRIVER_VERSION: '',
       CUDA_VERSION: '',
+      COUNT: 0,
       GPU: 0,
       MEMORY: 0,
       TEMPERATURE: '',
@@ -119,6 +121,7 @@ async def get_gpu_details():
   details[DRIVER_VERSION] = root.find(DRIVER_VERSION).text
   details[CUDA_VERSION] = root.find(CUDA_VERSION).text
   gpu = root.find(GPU)
+  details[COUNT] = int(root.find('attached_gpus').text)
   details[NAME] = gpu.find('product_name').text
   utilization = gpu.find('utilization')
   details[GPU] = int(utilization.find('gpu_util').text[:-1].strip())
