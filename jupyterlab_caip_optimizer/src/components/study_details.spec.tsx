@@ -43,7 +43,7 @@ describe('Study Details Page', () => {
   it('goes back to dashboard', async () => {
     const { getState } = render(<StudyDetails studyId={fakeStudyName} />);
 
-    userEvent.click(screen.getByText(/go to dashboard/i));
+    userEvent.click(screen.getByText(/back to dashboard/i));
 
     await waitFor(() =>
       expect(getState().view).toEqual({

@@ -88,7 +88,11 @@ export const Sidebar = ({
             Optimizer
           </Typography>
 
-          <Button color="primary" onClick={() => openDashboard()}>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => openDashboard()}
+          >
             Main Dashboard
           </Button>
         </Box>
