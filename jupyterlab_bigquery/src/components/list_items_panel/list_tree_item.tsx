@@ -137,7 +137,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     const curWidget = notebookTrack.currentWidget;
 
     if (!curWidget || !curWidget.content.isVisible) {
-      // current active tab is NOT notebook
+      // no active notebook or not visible
       const queryId = generateQueryId();
       WidgetManager.getInstance().launchWidget(
         QueryEditorTabWidget,
@@ -147,7 +147,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
         [queryId, query]
       );
     } else {
-      // current active tab is notebook
+      // exist notebook and visible
       const notebook = curWidget.content;
       NotebookActions.insertBelow(notebook);
       const cell = notebookTrack.activeCell;
