@@ -1,4 +1,4 @@
-jest.mock('../store/snackbar');
+jest.mock('../../store/snackbar');
 jest.mock('@material-ui/core', () => ({
   Snackbar: ({ children }) => children,
 }));
@@ -6,7 +6,7 @@ jest.mock('@material-ui/lab', () => ({
   Alert: ({ children }) => children,
 }));
 import * as React from 'react';
-import { SnackbarUnwrapped } from './snackbar_widget';
+import { SnackbarUnwrapped } from '.';
 import { mount } from 'enzyme';
 import * as mui from '@material-ui/lab';
 

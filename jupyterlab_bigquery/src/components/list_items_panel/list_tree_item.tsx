@@ -25,6 +25,8 @@ import { TableDetailsService } from '../details_panel/service/list_table_details
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { ViewDetailsWidget } from '../details_panel/view_details_widget';
+import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
@@ -142,7 +144,15 @@ export function BuildTree(project, context, expandProject, expandDataset) {
 
   const openViewDetails = (event, view) => {
     event.stopPropagation();
-    // TODO: Create view widget
+    const service = new ViewDetailsService();
+    const widgetType = ViewDetailsWidget;
+    context.manager.launchWidgetForId(
+      view.id,
+      widgetType,
+      service,
+      view.id,
+      view.name
+    );
   };
 
   const getIcon = iconType => {
