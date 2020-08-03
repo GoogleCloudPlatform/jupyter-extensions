@@ -29,14 +29,14 @@ import {
   Typography,
   Link,
 } from '@material-ui/core';
-import { RootState, AppDispatch } from '../store/store';
-import { Study } from '../types';
-import { setView } from '../store/view';
+import { RootState, AppDispatch } from '../../store/store';
+import { Study } from '../../types';
+import { setView } from '../../store/view';
 import { Store } from 'redux';
-import { prettifyStudyName } from '../service/optimizer';
+import { prettifyStudyName } from '../../service/optimizer';
 import { style } from 'typestyle';
-import { styles } from '../utils/styles';
-import { Loading } from './loading';
+import { styles } from '../../utils/styles';
+import { Loading } from '../misc/loading';
 import AddIcon from '@material-ui/icons/Add';
 
 const rowStyle = style({

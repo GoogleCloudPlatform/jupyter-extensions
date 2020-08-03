@@ -1,7 +1,10 @@
 import * as React from 'react';
-import { screen, render, waitFor } from '../utils/redux_render';
-import { cleanFakeStudyName, fakeStudyName } from '../service/test-constants';
-import { StudyDetails } from './study_details';
+import { screen, render, waitFor } from '../../utils/redux_render';
+import {
+  cleanFakeStudyName,
+  fakeStudyName,
+} from '../../service/test-constants';
+import { StudyDetails } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('Study Details Page', () => {

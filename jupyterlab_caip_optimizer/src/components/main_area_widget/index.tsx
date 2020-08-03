@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { store, RootState } from '../store/store';
+import { store, RootState } from '../../store/store';
 import { Provider, connect } from 'react-redux';
-import { close, ViewType } from '../store/view';
-import { CreateStudy } from './create_study';
-import { Dashboard } from './dashboard';
-import { SuggestTrials } from './suggest_trials';
-import { StudyDetails } from './study_details';
+import { close, ViewType } from '../../store/view';
+import { CreateStudy } from '../create_study';
+import { Dashboard } from '../dashboard';
+import { SuggestTrials } from '../suggest_trials';
+import { StudyDetails } from '../study_details';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
