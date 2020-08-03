@@ -66,21 +66,21 @@ def setup_repos(working_dir):
 
 
 def add_detached_comment(text, file, cwd):
-    subprocess.call(['git', 'appraise', 'comment', '-d', '-m', text, '-f', file], cwd=cwd)
+    subprocess.call(['git', 'appraise', 'comment', '-d', '-m', text, '-f', file], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
 
 
 def create_code_review(cwd):
     #Creates a new code review and returns the commit hash associated with the review
-    subprocess.call(['git', 'checkout', '-b', 'test'], cwd=cwd)
-    subprocess.call(['git', 'commit', '--allow-empty', '-m', '"empty commit to create a code review for testing"'], cwd=cwd)
-    subprocess.call(['git', 'appraise', 'request'], cwd=cwd)
+    subprocess.call(['git', 'checkout', '-b', 'test'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'commit', '--allow-empty', '-m', '"empty commit to create a code review for testing"'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(['git', 'appraise', 'request'], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
     commit_hash = subprocess.check_output(['git', 'log', '-n1', '--format=format:%H'], cwd=cwd)
     commit_hash = commit_hash.decode('UTF-8')
     return commit_hash
 
 
 def add_review_comment(text, file, id_hash, cwd):
-    subprocess.call(['git', 'appraise', 'comment', '-f', file, '-m', text, id_hash], cwd=cwd)
+    subprocess.call(['git', 'appraise', 'comment', '-f', file, '-m', text, id_hash], cwd=cwd, stdout=FNULL, stderr=subprocess.STDOUT)
 
 
 def appraise_push(cwd):

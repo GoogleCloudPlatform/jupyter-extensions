@@ -49,13 +49,11 @@ class Git(Configurable):
 
 	def push_local_comments(self, git_root_dir):
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
-		return_code = subprocess.call(['git', 'appraise', 'push', self.remote], cwd=git_root_dir, stdout=FNULL, stderr=subprocess.STDOUT)
+		return_code = subprocess.call(['git', 'appraise', 'push', self.remote], cwd=git_root_dir)
 		#Retry once if refs fail to get pushed
 		if return_code != 0:
 			self.run(git_root_dir, 'appraise', 'pull', self.remote)
 			self.run(git_root_dir, 'appraise', 'push', self.remote)
-
-
 
 
 	def inside_git_repo(self, path_to_file):
@@ -64,7 +62,7 @@ class Git(Configurable):
 		"""
 		try:
 		  return_code = subprocess.call(['git', 'rev-parse'],
-											  cwd=path_to_file, stdout=FNULL, stderr=subprocess.STDOUT)
+											  cwd=path_to_file)
 		  return return_code == 0
 		except Exception as e:
 		  print("Unexpected error when checking 'git rev-parse' command return code")
