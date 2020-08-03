@@ -1,5 +1,6 @@
 """Request handler classes for the extension"""
 
+import base64
 import json
 
 import tornado.gen as gen
@@ -100,7 +101,8 @@ def _deploy_model(args):
 
 @_handler("POST", "undeployModel")
 def _undeploy_model(args):
-  AutoMLService.get().undeploy_model(deployed_model_id=args["deployedModelId"], endpoint_id=args["endpointId"])
+  AutoMLService.get().undeploy_model(deployed_model_id=args["deployedModelId"],
+                                     endpoint_id=args["endpointId"])
   return {"success": True}
 
 
@@ -112,7 +114,8 @@ def _delete_endpoint(args):
 
 @_handler("POST", "predict")
 def _predict_tables(args):
-  return AutoMLService.get().predict_tables(endpoint_id=args["endpointId"], instance=args["inputs"])
+  return AutoMLService.get().predict_tables(endpoint_id=args["endpointId"],
+                                            instance=args["inputs"])
 
 
 @_handler("GET", "tableInfo")
@@ -147,15 +150,17 @@ def _create_tables_dataset(args):
   file_source = args.get("fileSource")
   df_source = args.get("dfSource")
   if file_source:
+    decoded = base64.decodebytes(file_source["data"])
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=file_source["name"],
-        file_data=file_source["data"])
+        file_data=decoded)
   elif df_source:
+    decoded = base64.decodebytes(df_source)
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=args["displayName"],
-        file_data=df_source)
+        file_data=decoded)
   else:
     AutoMLService.get().create_dataset(display_name=args["displayName"],
                                        gcs_uri=args.get("gcsSource"),

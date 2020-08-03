@@ -63,12 +63,8 @@ export class KernelModel {
     if (!this._session || !this._session.kernel) {
       return;
     }
-    const run =
-      "import jupyterlab_automl; jupyterlab_automl.create_dataset_from_dataframe('" +
-      name +
-      "', " +
-      df +
-      ')';
+    const run = `import jupyterlab_automl
+jupyterlab_automl.create_dataset(display_name="${name}", dataframe=${df})`;
     this.future = this._session.kernel.requestExecute({ code: run });
   }
 

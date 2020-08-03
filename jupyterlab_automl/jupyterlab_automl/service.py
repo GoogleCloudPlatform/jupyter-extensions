@@ -313,8 +313,7 @@ class AutoMLService:
     key = "{}-{}".format(str(uuid.uuid4()), file_name)
     # Possible improvement: prepend md5 hash of file instead of uuid to
     # skip uploading the same existing file
-    decoded = base64.decodebytes(file_data.encode("ascii"))
-    bucket.blob(key).upload_from_string(decoded)
+    bucket.blob(key).upload_from_string(file_data)
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
@@ -408,20 +407,20 @@ class AutoMLService:
       return [self._build_endpoint("None", filtered[0])]
     return []
 
-  def deploy_model(self, model_id, machine_type="n1-standard-2", endpoint_id=None):
+  def deploy_model(self, model_id, machine_type="n1-standard-2", min_replicas=1, endpoint_id=None):
     model = self._get_model(model_id)
     if not endpoint_id:
       endpoint_id = self.create_endpoint(model.display_name).name
     traffic_split = {"0": 100}
     machine_spec = {"machine_type": machine_type}
-    dedicated_resources = {"machine_spec": machine_spec, "min_replica_count": 1}
+    dedicated_resources = {"machine_spec": machine_spec, "min_replica_count": min_replicas}
     deployed_model = {"model": model_id, "display_name": model.display_name, "dedicated_resources": dedicated_resources}
     self._endpoint_client.deploy_model(endpoint=endpoint_id, deployed_model=deployed_model, traffic_split=traffic_split)
 
   def undeploy_model(self, deployed_model_id, endpoint_id):
     try:
       self._endpoint_client.undeploy_model(endpoint=endpoint_id, deployed_model_id=deployed_model_id).result()
-    except:
+    except TypeError:
       print('TypeError when undeploying model. Known error. Fixed in later versions of the API.')
 
   def predict_tables(self, endpoint_id, instance):
