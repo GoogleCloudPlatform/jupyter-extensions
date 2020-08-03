@@ -31,7 +31,7 @@
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
-    "test": "jest --coverage --passWithNoTests",
+    "test": "jest --coverage --passWithNoTests --runInBand",
     "test-python": "../scripts/run_python_tests.sh coverage",
     "test-watch": "jest --watch",
     "watch": "tsc -b -w"
