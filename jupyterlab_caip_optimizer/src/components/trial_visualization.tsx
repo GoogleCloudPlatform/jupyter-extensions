@@ -1,14 +1,14 @@
-import React from "react";
-import { Grid, Paper, Radio } from "@material-ui/core";
-import { ParallelCoordinates } from "./graphs/parallel_coordinates";
-import { Typography, Slider } from "@material-ui/core/";
+import React from 'react';
+import { Grid, Paper, Radio } from '@material-ui/core';
+import { ParallelCoordinates } from './graphs/parallel_coordinates';
+import { Typography, Slider } from '@material-ui/core/';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { fetchTrials } from '../store/studies';
 import * as Types from '../types';
 
 interface Props {
-  studyName: string
+  studyName: string;
 }
 
 type ContinuousAxisProps = {
@@ -18,7 +18,7 @@ type ContinuousAxisProps = {
   minVal: number;
   maxVal: number;
   flip?: boolean;
-}
+};
 
 type DiscontinousAxisProps = {
   type: string;
@@ -27,7 +27,7 @@ type DiscontinousAxisProps = {
   sliderMaxIndex: number;
   minIndex: number;
   maxIndex: number;
-}
+};
 
 export interface AxisPropsList {
   trialId: ContinuousAxisProps;
@@ -35,24 +35,22 @@ export interface AxisPropsList {
 }
 
 interface LineData {
-  trialId: number,
-  name?: string,
-  [key: string]: number | string,
+  trialId: number;
+  name?: string;
+  [key: string]: number | string;
 }
 
 // Needed for populating D3 axis
 interface AxisData {
-  label: string,
-  type: string,
-  minVal?: number,
-  maxVal?: number,
-  values?: string[] | number[],
+  label: string;
+  type: string;
+  minVal?: number;
+  maxVal?: number;
+  values?: string[] | number[];
 }
-
 
 // const controlPanelLeft = ["trialId", "param_1", "param_2"];
 // const controlPanelRight = ["metric_1", "metric_2"];
-
 
 // const axesData = [
 //   {
@@ -125,26 +123,30 @@ interface AxisData {
 //   }
 // };
 
-function createAxesData(axisLabelsLeft, axisLabelsRight, axisPropsList: AxisPropsList): AxisData[] {
+function createAxesData(
+  axisLabelsLeft,
+  axisLabelsRight,
+  axisPropsList: AxisPropsList
+): AxisData[] {
   const axesData = [];
   axisLabelsLeft.forEach(label => {
     const thisAxisProps = axisPropsList[label];
     switch (thisAxisProps.type) {
-      case "DOUBLE":
-      case "INTEGER":
+      case 'DOUBLE':
+      case 'INTEGER':
         axesData.push({
           label,
           type: axisPropsList[label].type,
-          minVal: ("minVal" in thisAxisProps) ? thisAxisProps.minVal : null,
-          maxVal: ('maxVal' in thisAxisProps) ? thisAxisProps.maxVal : null,
+          minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
+          maxVal: 'maxVal' in thisAxisProps ? thisAxisProps.maxVal : null,
         });
         break;
-      case "CATEGORICAL":
-      case "DISCRETE":
+      case 'CATEGORICAL':
+      case 'DISCRETE':
         axesData.push({
           label,
           type: axisPropsList[label].type,
-          values: ('values' in thisAxisProps) ? thisAxisProps.values : null,
+          values: 'values' in thisAxisProps ? thisAxisProps.values : null,
         });
         break;
     }
@@ -154,9 +156,9 @@ function createAxesData(axisLabelsLeft, axisLabelsRight, axisPropsList: AxisProp
     axesData.push({
       label,
       type: axisPropsList[label].type,
-      minVal: ('minVal' in thisAxisProps) ? thisAxisProps.minVal : null,
-      maxVal: ('maxVal' in thisAxisProps) ? thisAxisProps.maxVal : null,
-    })
+      minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
+      maxVal: 'maxVal' in thisAxisProps ? thisAxisProps.maxVal : null,
+    });
   });
   return axesData;
 }
@@ -175,7 +177,7 @@ function getParameterValue(parameter: Types.Parameter) {
 function createLineData(completedTrials: Types.Trial[]): LineData[] {
   return completedTrials.map((trial, i) => {
     const lineData = {
-      trialId: i+1, // starts from 1
+      trialId: i + 1, // starts from 1
     };
     trial.parameters.forEach(param => {
       lineData[param.parameter] = getParameterValue(param);
@@ -190,39 +192,72 @@ function createLineData(completedTrials: Types.Trial[]): LineData[] {
 function findMetricMinMax(completedTrials: Types.Trial[]) {
   const minMaxRecord = {};
   completedTrials.forEach((trial, index) => {
-    trial.finalMeasurement.metrics.forEach((metricObject) => {
-      minMaxRecord[metricObject.metric] = (index !== 0) ? {
-        'min': Math.min(minMaxRecord[metricObject.metric]['min'], metricObject.value),
-        'max': Math.max(minMaxRecord[metricObject.metric]['max'], metricObject.value)
-      } : {
-        'min': metricObject.value,
-        'max': metricObject.value,
-      }
+    trial.finalMeasurement.metrics.forEach(metricObject => {
+      minMaxRecord[metricObject.metric] =
+        index !== 0
+          ? {
+              min: Math.min(
+                minMaxRecord[metricObject.metric]['min'],
+                metricObject.value
+              ),
+              max: Math.max(
+                minMaxRecord[metricObject.metric]['max'],
+                metricObject.value
+              ),
+            }
+          : {
+              min: metricObject.value,
+              max: metricObject.value,
+            };
     });
   });
   return minMaxRecord;
 }
 
-function createAxisProps(completedTrials: Types.Trial[], studyConfig: Types.StudyConfig, metricNameList: string[]): AxisPropsList {
+function createAxisProps(
+  completedTrials: Types.Trial[],
+  studyConfig: Types.StudyConfig,
+  metricNameList: string[]
+): AxisPropsList {
   const axisPropsList = {
     trialId: {
-      type: "INTEGER",
+      type: 'INTEGER',
       sliderMin: 1,
       sliderMax: completedTrials.length,
       minVal: 1,
       maxVal: completedTrials.length,
     },
-  }
+  };
   studyConfig.parameters.forEach(param => {
     switch (param.type) {
-      case "INTEGER":
-      case "DOUBLE":
+      case 'INTEGER':
+      case 'DOUBLE':
         axisPropsList[param.parameter] = {
           type: param.type,
-          sliderMin: ('integerValueSpec' in param) ? Number(param.integerValueSpec.minValue) : ('doubleValueSpec' in param) ? param.doubleValueSpec.minValue : null,
-          sliderMax: ('integerValueSpec' in param) ? Number(param.integerValueSpec.maxValue) : ('doubleValueSpec' in param) ? param.doubleValueSpec.maxValue : null,
-          minVal: ('integerValueSpec' in param) ? Number(param.integerValueSpec.minValue) : ('doubleValueSpec' in param) ? param.doubleValueSpec.minValue : null,
-          maxVal: ('integerValueSpec' in param) ? Number(param.integerValueSpec.maxValue) : ('doubleValueSpec' in param) ? param.doubleValueSpec.maxValue : null,
+          sliderMin:
+            'integerValueSpec' in param
+              ? Number(param.integerValueSpec.minValue)
+              : 'doubleValueSpec' in param
+              ? param.doubleValueSpec.minValue
+              : null,
+          sliderMax:
+            'integerValueSpec' in param
+              ? Number(param.integerValueSpec.maxValue)
+              : 'doubleValueSpec' in param
+              ? param.doubleValueSpec.maxValue
+              : null,
+          minVal:
+            'integerValueSpec' in param
+              ? Number(param.integerValueSpec.minValue)
+              : 'doubleValueSpec' in param
+              ? param.doubleValueSpec.minValue
+              : null,
+          maxVal:
+            'integerValueSpec' in param
+              ? Number(param.integerValueSpec.maxValue)
+              : 'doubleValueSpec' in param
+              ? param.doubleValueSpec.maxValue
+              : null,
         };
         if (axisPropsList[param.parameter]['minVal'] === undefined) {
           // Due to Optimizer API error. Undefined minimum values should be changed to 0.
@@ -230,15 +265,30 @@ function createAxisProps(completedTrials: Types.Trial[], studyConfig: Types.Stud
           axisPropsList[param.parameter]['sliderMin'] = 0;
         }
         break;
-      case "CATEGORICAL":
-      case "DISCRETE":
+      case 'CATEGORICAL':
+      case 'DISCRETE':
         axisPropsList[param.parameter] = {
           type: param.type,
-          values: ('categoricalValueSpec' in param) ? param.categoricalValueSpec.values : ('discreteValueSpec' in param) ? param.discreteValueSpec.values : null,
+          values:
+            'categoricalValueSpec' in param
+              ? param.categoricalValueSpec.values
+              : 'discreteValueSpec' in param
+              ? param.discreteValueSpec.values
+              : null,
           sliderMinIndex: 0,
-          sliderMaxIndex: ('categoricalValueSpec' in param) ? param.categoricalValueSpec.values.length - 1: ('discreteValueSpec' in param) ? param.discreteValueSpec.values.length - 1 : null,
+          sliderMaxIndex:
+            'categoricalValueSpec' in param
+              ? param.categoricalValueSpec.values.length - 1
+              : 'discreteValueSpec' in param
+              ? param.discreteValueSpec.values.length - 1
+              : null,
           minIndex: 0,
-          maxIndex: ('categoricalValueSpec' in param) ? param.categoricalValueSpec.values.length - 1 : ('discreteValueSpec' in param) ? param.discreteValueSpec.values.length - 1 : null,
+          maxIndex:
+            'categoricalValueSpec' in param
+              ? param.categoricalValueSpec.values.length - 1
+              : 'discreteValueSpec' in param
+              ? param.discreteValueSpec.values.length - 1
+              : null,
         };
         break;
     }
@@ -247,22 +297,30 @@ function createAxisProps(completedTrials: Types.Trial[], studyConfig: Types.Stud
   console.log(metricMinMax);
   metricNameList.forEach(metric => {
     axisPropsList[metric] = {
-      type: "DOUBLE",
+      type: 'DOUBLE',
       sliderMin: metricMinMax[metric].min,
       sliderMax: metricMinMax[metric].max,
       minVal: metricMinMax[metric].min,
       maxVal: metricMinMax[metric].max,
-    }
+    };
   });
   return axisPropsList;
 }
 
 function fetchAxisLabels(trials: Types.Trial[]) {
-  const completedTrials = trials.filter(trial => (trial.state === "COMPLETED") && ('finalMeasurement' in trial));
+  const completedTrials = trials.filter(
+    trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial
+  );
   return {
-    axisLabelsLeft: completedTrials ? ['trialId'].concat(completedTrials[0].parameters.map(param => param.parameter)) : [],
-    axisLabelsRight: completedTrials ? completedTrials[0].finalMeasurement.metrics.map(metric => metric.metric) : [],
-  }
+    axisLabelsLeft: completedTrials
+      ? ['trialId'].concat(
+          completedTrials[0].parameters.map(param => param.parameter)
+        )
+      : [],
+    axisLabelsRight: completedTrials
+      ? completedTrials[0].finalMeasurement.metrics.map(metric => metric.metric)
+      : [],
+  };
 }
 
 export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
@@ -271,51 +329,63 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
   const [width, setWidth] = React.useState(0);
   const [height, setHeight] = React.useState(0);
   const [value, setValue] = React.useState([20, 37]);
-  const [selectedMetric, setSelectedMetric] = React.useState("");
+  const [selectedMetric, setSelectedMetric] = React.useState('');
 
   React.useEffect(() => {
     dispatch(fetchTrials(studyName));
   }, [studyName]);
 
-  const {trials, studyConfig} = useSelector<RootState, Types.Study>(state =>
+  const { trials, studyConfig } = useSelector<RootState, Types.Study>(state =>
     state.studies.data?.find(study => study.name === studyName)
-  )
+  );
 
   // TODO: condition for trial undefined, states set as dummy values and then re-set the values once trials populated
-  
+
   if (!trials) return null;
 
-  const completedTrials = trials.filter(trial => (trial.state === "COMPLETED") && ('finalMeasurement' in trial));
+  const completedTrials = trials.filter(
+    trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial
+  );
   const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
   const lineDataList: LineData[] = createLineData(completedTrials);
 
   const handleMetricSelectionChange = event => {
     setSelectedMetric(event.target.value);
   };
-  const [axisPropsList, setAxisPropsList] = React.useState<AxisPropsList>(createAxisProps(completedTrials, studyConfig, axisLabelsRight));
-  const axesData = createAxesData(axisLabelsLeft, axisLabelsRight, axisPropsList);
+  const [axisPropsList, setAxisPropsList] = React.useState<AxisPropsList>(
+    createAxisProps(completedTrials, studyConfig, axisLabelsRight)
+  );
+  const axesData = createAxesData(
+    axisLabelsLeft,
+    axisLabelsRight,
+    axisPropsList
+  );
   const handleTrialIdAxisChange = (event, newValue, item) => {
     if (value !== newValue) setValue(newValue);
-    let newAxisPropsList = axisPropsList;
+    const newAxisPropsList = axisPropsList;
     if (
-      axisPropsList[item]["type"] === "INTEGER" ||
-      axisPropsList[item]["type"] === "DOUBLE"
+      axisPropsList[item]['type'] === 'INTEGER' ||
+      axisPropsList[item]['type'] === 'DOUBLE'
     ) {
-      newAxisPropsList[item]["sliderMin"] = newValue[0];
-      newAxisPropsList[item]["sliderMax"] = newValue[1];
+      newAxisPropsList[item]['sliderMin'] = newValue[0];
+      newAxisPropsList[item]['sliderMax'] = newValue[1];
     } else if (
-      axisPropsList[item]["type"] === "CATEGORICAL" ||
-      axisPropsList[item]["type"] === "DISCRETE"
+      axisPropsList[item]['type'] === 'CATEGORICAL' ||
+      axisPropsList[item]['type'] === 'DISCRETE'
     ) {
-      newAxisPropsList[item]["sliderMinIndex"] = newValue[0];
-      newAxisPropsList[item]["sliderMaxIndex"] = newValue[1];
+      newAxisPropsList[item]['sliderMinIndex'] = newValue[0];
+      newAxisPropsList[item]['sliderMaxIndex'] = newValue[1];
     }
     setAxisPropsList(newAxisPropsList);
   };
 
-  const populateSliders = (axisLabelArray, axisPropsList, rightColumn = false) => {
+  const populateSliders = (
+    axisLabelArray,
+    axisPropsList,
+    rightColumn = false
+  ) => {
     return axisLabelArray.map(item => {
-      if (axisPropsList[item]["type"] === "DOUBLE") {
+      if (axisPropsList[item]['type'] === 'DOUBLE') {
         let radio;
         if (rightColumn) {
           radio = (
@@ -325,7 +395,7 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
                 onChange={handleMetricSelectionChange}
                 value={`${item}`}
                 name="radio-button-demo"
-                inputProps={{ "aria-label": "A" }}
+                inputProps={{ 'aria-label': 'A' }}
                 size="small"
               />
             </Grid>
@@ -341,15 +411,15 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
             <Grid container item xs={5}>
               <Slider
                 value={[
-                  axisPropsList[item]["sliderMin"],
-                  axisPropsList[item]["sliderMax"]
+                  axisPropsList[item]['sliderMin'],
+                  axisPropsList[item]['sliderMax'],
                 ]}
                 onChange={(event, newValue) =>
                   handleTrialIdAxisChange(event, newValue, item)
                 }
                 step={0.001}
-                max={axisPropsList[item]["maxVal"]}
-                min={axisPropsList[item]["minVal"]}
+                max={axisPropsList[item]['maxVal']}
+                min={axisPropsList[item]['minVal']}
                 valueLabelDisplay="auto"
                 aria-labelledby="range-slider"
                 valueLabelFormat={x => x.toPrecision(4)}
@@ -358,7 +428,7 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
             {radio}
           </Grid>
         );
-      } else if (axisPropsList[item]["type"] === "INTEGER") {
+      } else if (axisPropsList[item]['type'] === 'INTEGER') {
         return (
           <Grid container item xs={12} direction="row" alignItems="center">
             <Grid container item xs={5} justify="center">
@@ -369,14 +439,14 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
             <Grid container item xs={5}>
               <Slider
                 value={[
-                  axisPropsList[item]["sliderMin"],
-                  axisPropsList[item]["sliderMax"]
+                  axisPropsList[item]['sliderMin'],
+                  axisPropsList[item]['sliderMax'],
                 ]}
                 onChange={(event, newValue) =>
                   handleTrialIdAxisChange(event, newValue, item)
                 }
-                max={axisPropsList[item]["maxVal"]}
-                min={axisPropsList[item]["minVal"]}
+                max={axisPropsList[item]['maxVal']}
+                min={axisPropsList[item]['minVal']}
                 valueLabelDisplay="auto"
                 aria-labelledby="range-slider"
               />
@@ -384,8 +454,8 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
           </Grid>
         );
       } else if (
-        axisPropsList[item]["type"] === "CATEGORICAL" ||
-        axisPropsList[item]["type"] === "DISCRETE"
+        axisPropsList[item]['type'] === 'CATEGORICAL' ||
+        axisPropsList[item]['type'] === 'DISCRETE'
       ) {
         return (
           <Grid container item xs={12} direction="row" alignItems="center">
@@ -397,19 +467,19 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
             <Grid container item xs={5}>
               <Slider
                 value={[
-                  axisPropsList[item]["sliderMinIndex"],
-                  axisPropsList[item]["sliderMaxIndex"]
+                  axisPropsList[item]['sliderMinIndex'],
+                  axisPropsList[item]['sliderMaxIndex'],
                 ]}
                 onChange={(event, newValue) =>
                   handleTrialIdAxisChange(event, newValue, item)
                 }
                 step={1}
                 marks
-                max={axisPropsList[item]["maxIndex"]}
-                min={axisPropsList[item]["minIndex"]}
+                max={axisPropsList[item]['maxIndex']}
+                min={axisPropsList[item]['minIndex']}
                 valueLabelDisplay="auto"
                 aria-labelledby="range-slider"
-                valueLabelFormat={x => axisPropsList[item]["values"][x]}
+                valueLabelFormat={x => axisPropsList[item]['values'][x]}
               />
             </Grid>
           </Grid>

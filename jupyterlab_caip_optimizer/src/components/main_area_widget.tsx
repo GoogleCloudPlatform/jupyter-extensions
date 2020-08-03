@@ -27,7 +27,7 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
     case 'suggestTrials':
       return <SuggestTrials studyName={data.studyId} />;
     case 'visualizeTrials':
-      return <VisualizeTrials studyName={data.studyId}/>;
+      return <VisualizeTrials studyName={data.studyId} />;
   }
 };
 

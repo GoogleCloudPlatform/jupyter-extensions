@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
-import * as d3 from "d3";
-import { AxisPropsList } from "../trial_visualization";
+import React, { useRef, useEffect } from 'react';
+import * as d3 from 'd3';
+import { AxisPropsList } from '../trial_visualization';
 
 interface Data {
   [key: string]: any;
@@ -24,7 +24,7 @@ function getOrdinalRange(start, end, num) {
   return arr;
 }
 
-interface scaleObject {
+interface ScaleObject {
   [key: string]: any;
 }
 
@@ -43,30 +43,36 @@ export const ParallelCoordinates = (props: Props) => {
   const selectedMetricForColor = props.selectedMetricForColor;
   const verticalAxes = axesData.map(axis => axis.label);
   const [axisClicked, setAxisClicked] = React.useState(false);
-  const [clickedAxisName, setClickedAxisName] = React.useState("none");
+  const [clickedAxisName, setClickedAxisName] = React.useState('none');
   const [selectBoxDetails, setSelectBoxDetails] = React.useState({
     initialValue: 0,
-    currentValue: 0
+    currentValue: 0,
   });
 
   /* The useEffect Hook is for running side effects outside of React,
        for instance inserting elements into the DOM using D3 */
   useEffect(() => {
-    if (props.lineDataList && axesData && d3Container.current && width > 0 && height > 0) {
+    if (
+      props.lineDataList &&
+      axesData &&
+      d3Container.current &&
+      width > 0 &&
+      height > 0
+    ) {
       console.log(lineDataList);
       console.log(axesData);
       console.log(axisPropsList);
       const resetSelectBox = () => {
         setAxisClicked(false);
-        setClickedAxisName("none");
+        setClickedAxisName('none');
         setSelectBoxDetails({
           initialValue: 0,
-          currentValue: 0
+          currentValue: 0,
         });
       };
 
       const svg = d3.select(d3Container.current);
-      svg.selectAll("*").remove();
+      svg.selectAll('*').remove();
 
       const xScale = d3
         .scalePoint()
@@ -74,31 +80,32 @@ export const ParallelCoordinates = (props: Props) => {
         .padding(1)
         .domain(verticalAxes);
 
-      const yScale: scaleObject = {};
-      const yScaleInverted: scaleObject = {};
+      const yScale: ScaleObject = {};
+      const yScaleInverted: ScaleObject = {};
 
       // Populate axis using axesData
       axesData.forEach(axis => {
         let scale;
         switch (axis.type) {
-          case "INTEGER":
-          case "DOUBLE":
-            const axisMin = axisPropsList[axis.label]["sliderMin"]
-              ? axisPropsList[axis.label]["sliderMin"]
+          case 'INTEGER':
+          case 'DOUBLE': {
+            const axisMin = axisPropsList[axis.label]['sliderMin']
+              ? axisPropsList[axis.label]['sliderMin']
               : axis.minVal;
-            const axisMax = axisPropsList[axis.label]["sliderMax"]
-              ? axisPropsList[axis.label]["sliderMax"]
+            const axisMax = axisPropsList[axis.label]['sliderMax']
+              ? axisPropsList[axis.label]['sliderMax']
               : axis.maxVal;
             scale = d3
               .scaleLinear()
               .domain([axisMin, axisMax])
               .range([padding, height - padding]);
             break;
-          case "CATEGORICAL":
-          case "DISCRETE":
-            const minIndex = axisPropsList[axis.label]["sliderMinIndex"];
-            const maxIndex = axisPropsList[axis.label]["sliderMaxIndex"];
-            const valuesInRange = axisPropsList[axis.label]["values"].slice(
+          }
+          case 'CATEGORICAL':
+          case 'DISCRETE': {
+            const minIndex = axisPropsList[axis.label]['sliderMinIndex'];
+            const maxIndex = axisPropsList[axis.label]['sliderMaxIndex'];
+            const valuesInRange = axisPropsList[axis.label]['values'].slice(
               minIndex,
               maxIndex + 1
             );
@@ -113,46 +120,26 @@ export const ParallelCoordinates = (props: Props) => {
               .domain([padding, height - padding])
               .range(valuesInRange);
             break;
+          }
         }
         const verticalAxis = d3.axisLeft().scale(scale);
         yScale[axis.label] = scale;
         svg
-          .append("g")
-          .attr("transform", `translate(${xScale(axis.label)},0)`)
-          .attr("class", "verticalAxis")
-          .attr("id", `${axis.label}`)
+          .append('g')
+          .attr('transform', `translate(${xScale(axis.label)},0)`)
+          .attr('class', 'verticalAxis')
+          .attr('id', `${axis.label}`)
           .call(verticalAxis);
       });
 
-      svg
-        .on("mousemove", function() {
-          if (axisClicked) {
-            const mouseVerticalPos = d3.mouse(this)[1];
-            handleAxisRangeSelect(
-              clickedAxisName,
-              mouseVerticalPos,
-              "mousemove"
-            );
-          }
-        })
-        .on("mouseup", function() {
-          if (axisClicked) {
-            const mouseVerticalPos = d3.mouse(this)[1];
-            handleAxisRangeSelect(clickedAxisName, mouseVerticalPos, "mouseup");
-          }
-        })
-        .on("dblclick", function() {
-          resetSelectBox();
-        });
-
       const yScaleInvert = (axisLabel, mouseVerticalPos) => {
-        const axisType = axisPropsList[axisLabel]["type"];
+        const axisType = axisPropsList[axisLabel]['type'];
         switch (axisType) {
-          case "DOUBLE":
-          case "INTEGER":
+          case 'DOUBLE':
+          case 'INTEGER':
             return yScale[axisLabel].invert(mouseVerticalPos);
-          case "CATEGORICAL":
-          case "DISCRETE":
+          case 'CATEGORICAL':
+          case 'DISCRETE':
             return yScaleInverted[axisLabel](mouseVerticalPos);
         }
       };
@@ -163,27 +150,27 @@ export const ParallelCoordinates = (props: Props) => {
         mousemode: string
       ) => {
         switch (mousemode) {
-          case "mousedown":
+          case 'mousedown':
             setClickedAxisName(axisLabel);
             setAxisClicked(true);
             setSelectBoxDetails({
               initialValue: yScaleInvert(axisLabel, mouseVerticalPos),
-              currentValue: yScaleInvert(axisLabel, mouseVerticalPos)
+              currentValue: yScaleInvert(axisLabel, mouseVerticalPos),
             });
             break;
-          case "mousemove":
+          case 'mousemove':
             if (axisClicked) {
               setSelectBoxDetails({
                 ...selectBoxDetails,
-                currentValue: yScaleInvert(axisLabel, mouseVerticalPos)
+                currentValue: yScaleInvert(axisLabel, mouseVerticalPos),
               });
             }
             break;
-          case "mouseup":
+          case 'mouseup':
             if (axisClicked) {
               setSelectBoxDetails({
                 ...selectBoxDetails,
-                currentValue: yScaleInvert(axisLabel, mouseVerticalPos)
+                currentValue: yScaleInvert(axisLabel, mouseVerticalPos),
               });
             }
             setAxisClicked(false);
@@ -191,15 +178,57 @@ export const ParallelCoordinates = (props: Props) => {
         }
       };
 
+      svg
+        .on('mousemove', function() {
+          if (axisClicked) {
+            const mouseVerticalPos = d3.mouse(this)[1];
+            handleAxisRangeSelect(
+              clickedAxisName,
+              mouseVerticalPos,
+              'mousemove'
+            );
+          }
+        })
+        .on('mouseup', function() {
+          if (axisClicked) {
+            const mouseVerticalPos = d3.mouse(this)[1];
+            handleAxisRangeSelect(clickedAxisName, mouseVerticalPos, 'mouseup');
+          }
+        })
+        .on('dblclick', function() {
+          resetSelectBox();
+        });
+
       const colorLine = lineDataList => {
         if (selectedMetricForColor) {
           return d3.interpolateRdBu(
             (lineDataList[selectedMetricForColor] /
-              axisPropsList[selectedMetricForColor]["maxVal"]) *
+              axisPropsList[selectedMetricForColor]['maxVal']) *
               1.0
           );
         }
-        return "rgba(63, 81, 181, 0.8)";
+        return 'rgba(63, 81, 181, 0.8)';
+      };
+
+      const discontinousOutOfRange = lineDataList => {
+        const axes = Object.keys(axisPropsList);
+        for (const axis of axes) {
+          if (
+            axisPropsList[axis]['type'] === 'CATEGORICAL' ||
+            axisPropsList[axis]['type'] === 'DISCRETE'
+          ) {
+            const thisDataIndex = axisPropsList[axis]['values'].indexOf(
+              lineDataList[axis]
+            );
+            if (
+              thisDataIndex < axisPropsList[axis]['sliderMinIndex'] ||
+              thisDataIndex > axisPropsList[axis]['sliderMaxIndex']
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
       };
 
       const checkLineSelected = lineDataList => {
@@ -209,13 +238,13 @@ export const ParallelCoordinates = (props: Props) => {
          * and the lines will go through the top of the axis, which may confuse viewwers.
          * Therefore, we make the lines with out of range data points for discontinous axes to be invisible.
          */
-        if (discontinousOutOfRange(lineDataList)) return "rgba (0, 0, 0, 0)";
-        if (selectBoxDetails.initialValue !== 0 && clickedAxisName !== "none") {
-          const axisType = axisPropsList[clickedAxisName]["type"];
+        if (discontinousOutOfRange(lineDataList)) return 'rgba (0, 0, 0, 0)';
+        if (selectBoxDetails.initialValue !== 0 && clickedAxisName !== 'none') {
+          const axisType = axisPropsList[clickedAxisName]['type'];
           let withinRange = false;
           switch (axisType) {
-            case "INTEGER":
-            case "DOUBLE":
+            case 'INTEGER':
+            case 'DOUBLE':
               if (
                 lineDataList[clickedAxisName] >
                   Math.min(
@@ -230,84 +259,64 @@ export const ParallelCoordinates = (props: Props) => {
               )
                 withinRange = true;
               break;
-            case "DISCRETE":
-            case "CATEGORICAL":
+            case 'DISCRETE':
+            case 'CATEGORICAL': {
               const initialValueIndex = axisPropsList[clickedAxisName][
-                "values"
+                'values'
               ].indexOf(selectBoxDetails.initialValue);
               const currentValueIndex = axisPropsList[clickedAxisName][
-                "values"
+                'values'
               ].indexOf(selectBoxDetails.currentValue);
               const minIndex = Math.min(initialValueIndex, currentValueIndex);
               const maxIndex = Math.max(initialValueIndex, currentValueIndex);
               const thisDataIndex = axisPropsList[clickedAxisName][
-                "values"
+                'values'
               ].indexOf(lineDataList[clickedAxisName]);
               if (thisDataIndex >= minIndex && thisDataIndex <= maxIndex)
                 withinRange = true;
               break;
+            }
           }
           if (withinRange) return colorLine(lineDataList);
-          return "rgba(0, 0, 0, 0.1)";
+          return 'rgba(0, 0, 0, 0.1)';
         }
         return colorLine(lineDataList);
       };
 
-      const discontinousOutOfRange = lineDataList => {
-        const axes = Object.keys(axisPropsList);
-        for (let axis of axes) {
-          if (
-            axisPropsList[axis]["type"] === "CATEGORICAL" ||
-            axisPropsList[axis]["type"] === "DISCRETE"
-          ) {
-            const thisDataIndex = axisPropsList[axis]["values"].indexOf(
-              lineDataList[axis]
-            );
-            if (
-              thisDataIndex < axisPropsList[axis]["sliderMinIndex"] ||
-              thisDataIndex > axisPropsList[axis]["sliderMaxIndex"]
-            ) {
-              return true;
-            }
-          }
-        }
-        return false;
-      };
-
       // Add mouse click events to axes
       svg
-        .selectAll(".verticalAxis")
-        .attr("stroke-width", "2px")
-        .style("cursor", "pointer")
-        .on("mousedown", function() {
-          const axisLabel = d3.select(this).attr("id");
+        .selectAll('.verticalAxis')
+        .attr('stroke-width', '2px')
+        .style('cursor', 'pointer')
+        .on('mousedown', function() {
+          const axisLabel = d3.select(this).attr('id');
           const mouseVerticalPos = d3.mouse(this)[1];
-          handleAxisRangeSelect(axisLabel, mouseVerticalPos, "mousedown");
+          handleAxisRangeSelect(axisLabel, mouseVerticalPos, 'mousedown');
         })
-        .on("mousemove", function() {
+        .on('mousemove', function() {
           if (axisClicked) {
-            const axisLabel = d3.select(this).attr("id");
+            const axisLabel = d3.select(this).attr('id');
             const mouseVerticalPos = d3.mouse(this)[1];
-            handleAxisRangeSelect(axisLabel, mouseVerticalPos, "mousemove");
+            handleAxisRangeSelect(axisLabel, mouseVerticalPos, 'mousemove');
           }
         })
-        .on("mouseup", function() {
-          const axisLabel = d3.select(this).attr("id");
+        .on('mouseup', function() {
+          const axisLabel = d3.select(this).attr('id');
           const mouseVerticalPos = d3.mouse(this)[1];
-          handleAxisRangeSelect(axisLabel, mouseVerticalPos, "mouseup");
+          handleAxisRangeSelect(axisLabel, mouseVerticalPos, 'mouseup');
         })
         // make tick texts unselectable
-        .selectAll(".tick")
-        .selectAll("text")
-        .style("-webkit-touch-callout", "none")
-        .style("-webkit-user-select", "none")
-        .style("-khtml-user-select", "none")
-        .style("-moz-user-select", "none")
-        .style("-ms-user-select", "none")
-        .style("user-select", "none");
+        .selectAll('.tick')
+        .selectAll('text')
+        .style('-webkit-touch-callout', 'none')
+        .style('-webkit-user-select', 'none')
+        .style('-khtml-user-select', 'none')
+        .style('-moz-user-select', 'none')
+        .style('-ms-user-select', 'none')
+        .style('user-select', 'none');
 
       // Render selection box
-      if (selectBoxDetails.initialValue !== 0 && clickedAxisName !== "none") {
+      if (selectBoxDetails.initialValue !== 0 && clickedAxisName !== 'none') {
         const yPosMax = Math.max(
           yScale[clickedAxisName](selectBoxDetails.initialValue),
           yScale[clickedAxisName](selectBoxDetails.currentValue)
@@ -317,13 +326,13 @@ export const ParallelCoordinates = (props: Props) => {
           yScale[clickedAxisName](selectBoxDetails.currentValue)
         );
         svg
-          .append("rect")
-          .attr("id", "selectBox")
-          .attr("x", xScale(clickedAxisName) - 5)
-          .attr("y", yPosMin)
-          .attr("height", yPosMax - yPosMin)
-          .attr("fill", "rgba(63, 81, 181, 0.5)") // material UI primary color with 0.1 alpha
-          .attr("width", 10);
+          .append('rect')
+          .attr('id', 'selectBox')
+          .attr('x', xScale(clickedAxisName) - 5)
+          .attr('y', yPosMin)
+          .attr('height', yPosMax - yPosMin)
+          .attr('fill', 'rgba(63, 81, 181, 0.5)') // material UI primary color with 0.1 alpha
+          .attr('width', 10);
       }
 
       const path = d => {
@@ -335,19 +344,19 @@ export const ParallelCoordinates = (props: Props) => {
       };
 
       svg
-        .selectAll("myPath")
+        .selectAll('myPath')
         .data(lineDataList)
         .enter()
-        .append("path")
-        .attr("d", function(d) {
+        .append('path')
+        .attr('d', function(d) {
           return path(d);
         })
-        .style("fill", "none")
-        .style("stroke", function(d) {
+        .style('fill', 'none')
+        .style('stroke', function(d) {
           return checkLineSelected(d);
         })
-        .style("opacity", 0.5)
-        .style("stroke-width", 2);
+        .style('opacity', 0.5)
+        .style('stroke-width', 2);
     }
   }, [
     axisPropsList,
@@ -358,7 +367,7 @@ export const ParallelCoordinates = (props: Props) => {
     verticalAxes,
     axisClicked,
     selectBoxDetails,
-    clickedAxisName
+    clickedAxisName,
   ]);
 
   return (
