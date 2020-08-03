@@ -12,10 +12,11 @@ export const watch = <STATE, V>(
   let previousState: V;
   return updateFn => {
     return () => {
-      const newState = select(getState());
+      const state = getState();
+      const newState = select(state);
       if (!same(previousState, newState)) {
         previousState = newState;
-        updateFn(newState, getState());
+        updateFn(newState, state);
       }
     };
   };
