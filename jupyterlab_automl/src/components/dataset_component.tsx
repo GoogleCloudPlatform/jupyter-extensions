@@ -190,8 +190,8 @@ response = client.create_training_pipeline(
               </header>
               <p style={{ padding: '8px' }}>
                 <i>
-                  Code to train a basic classification or regression model on the
-                  dataset.
+                  Code to train a basic classification or regression model on
+                  the dataset.
                 </i>
               </p>
               <div style={{ width: '250px', paddingLeft: '16px' }}>
