@@ -145,7 +145,8 @@ export class SidebarWidget extends ReactWidget {
   constructor(private readonly reduxStore: Store) {
     super();
     this.id = 'optimizer-sidebar';
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-optimizer-icon';
+    this.title.iconClass =
+      'jp-Icon jp-Icon-20 jp-optimizer-icon jp-optimizer-icon-rotate';
     this.title.caption = 'GCP Optimizer';
   }
 

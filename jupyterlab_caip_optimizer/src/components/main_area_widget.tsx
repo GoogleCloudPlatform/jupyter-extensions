@@ -41,6 +41,7 @@ export class MainAreaWidget extends ReactWidget {
     super();
     this.id = 'optimizer:main-area';
     this.title.label = 'GCP Optimizer';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-optimizer-icon';
     this.title.closable = true;
   }
 
