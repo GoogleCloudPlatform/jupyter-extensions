@@ -18,6 +18,10 @@
   background-image: url('./images/model_20px.svg');
   background-size: contain;
 }
+.jp-OpenEditorIcon {
+  background-image: url('./images/open_editor_20px.svg');
+  background-size: contain;
+}
 .jp-OutputArea-child .jp-OutputArea-output {
   overflow: auto;
 }
