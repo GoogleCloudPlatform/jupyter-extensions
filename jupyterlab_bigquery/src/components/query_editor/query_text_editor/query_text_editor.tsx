@@ -102,7 +102,6 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    // borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     border: '1px solid rgb(218, 220, 224)',
   },
   message: {
@@ -114,7 +113,6 @@ const styleSheet = stylesheet({
     marginRight: '0.5rem',
   },
   wholeEditorInCell: {
-    // borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     border: '1px solid rgb(218, 220, 224)',
   },
   pendingStatus: {
@@ -131,8 +129,6 @@ const styleSheet = stylesheet({
     paddingLeft: '10px',
     paddingRight: '10px',
     backgroundColor: 'rgb(248, 249, 250)',
-    // borderBlockColor: 'rgb(218, 220, 224)',
-    // borderStyle: 'solid',
     borderBottom: '1px solid rgb(218, 220, 224)',
   },
 });
