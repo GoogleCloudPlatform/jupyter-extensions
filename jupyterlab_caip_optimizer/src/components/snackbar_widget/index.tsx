@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Snackbar as MaterialSnackbar } from '@material-ui/core';
 import { Alert as MaterialAlert, AlertProps } from '@material-ui/lab';
-import { SnackbarState, snackbarSlice } from '../store/snackbar';
+import { SnackbarState, snackbarSlice } from '../../store/snackbar';
 import { connect, Provider } from 'react-redux';
-import { RootState, AppDispatch } from '../store/store';
+import { RootState, AppDispatch } from '../../store/store';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { Store } from 'redux';
 

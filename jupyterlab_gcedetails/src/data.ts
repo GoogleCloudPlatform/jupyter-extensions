@@ -51,6 +51,7 @@ interface Gpu {
   name: string;
   driver_version: string;
   cuda_version: string;
+  count: string;
   gpu: number;
   memory: number;
   temperature: number;
@@ -74,6 +75,23 @@ export interface HardwareConfiguration {
   attachGpu: boolean;
   gpuType: string;
   gpuCount: string;
+}
+
+export function detailsToHardwareConfiguration(
+  details: Details
+): HardwareConfiguration {
+  const { instance, gpu } = details;
+  const machineType: Option = {
+    value: instance.machineType.name,
+    text: instance.machineType.description,
+  };
+
+  return {
+    machineType,
+    attachGpu: Boolean(gpu.name),
+    gpuType: gpu.name,
+    gpuCount: gpu.count,
+  };
 }
 
 interface AttributeMapper {
@@ -147,29 +165,6 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
  * AI Platform Machine types.
  * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
  */
-export const MASTER_TYPES: Option[] = [
-  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
-  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
-  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
-  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
-  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
-  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
-
-  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
-  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
-  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
-  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
-  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
-
-  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
-  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
-  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
-  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
-];
-
-/* CPU to Memory mappings for the Compute Engine machine types */
 export interface MachineTypeConfiguration {
   base: Option;
   configurations: Option[];

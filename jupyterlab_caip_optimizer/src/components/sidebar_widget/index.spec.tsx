@@ -1,12 +1,20 @@
 import * as React from 'react';
-import { WrappedSidebar, SidebarWidget } from './sidebar_widget';
+import { WrappedSidebar, SidebarWidget } from '.';
 import {
   render as noProviderRender,
   screen as noProviderScreen,
 } from '@testing-library/react';
-import { render, screen, initialState, reducer } from '../utils/redux_render';
+import {
+  render,
+  screen,
+  initialState,
+  reducer,
+} from '../../utils/redux_render';
 import userEvent from '@testing-library/user-event';
-import { cleanFakeStudyName, fakeStudyName } from '../service/test-constants';
+import {
+  cleanFakeStudyName,
+  fakeStudyName,
+} from '../../service/test-constants';
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 
 describe('Sidebar', () => {

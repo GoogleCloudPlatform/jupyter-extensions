@@ -1,14 +1,8 @@
 import * as React from 'react';
-import {
-  screen,
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '../../utils/redux_render';
+import { screen, render, waitFor } from '../../utils/redux_render';
 import {
   cleanFakeStudyName,
   fakeStudyName,
-  fakeStudyNameTree,
 } from '../../service/test-constants';
 import { StudyDetails } from '.';
 import userEvent from '@testing-library/user-event';
@@ -52,7 +46,7 @@ describe('Study Details Page', () => {
   it('goes back to dashboard', async () => {
     const { getState } = render(<StudyDetails studyId={fakeStudyName} />);
 
-    userEvent.click(screen.getByText(/go to dashboard/i));
+    userEvent.click(screen.getByText(/back to dashboard/i));
 
     await waitFor(() =>
       expect(getState().view).toEqual({
@@ -77,64 +71,5 @@ describe('Study Details Page', () => {
         isVisible: true,
       })
     );
-  });
-
-  describe('Parameter Tree', () => {
-    it('shows root and all child nodes', () => {
-      render(<StudyDetails studyId={fakeStudyNameTree} />);
-
-      // Root
-      expect(screen.getByTestId('root')).toBeInTheDocument();
-
-      // Categorical
-      expect(screen.getByTestId('root/param-categorical')).toBeInTheDocument();
-      // Categorical Children
-      expect(
-        screen.getByTestId('root/param-categorical/deep_learning_rate')
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId('root/param-categorical/learning_rate')
-      ).toBeInTheDocument();
-
-      // Discrete
-      expect(screen.getByTestId('root/param-discrete')).toBeInTheDocument();
-      // Discrete Children
-      expect(
-        screen.getByTestId('root/param-discrete/small_model')
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId('root/param-discrete/big_model')
-      ).toBeInTheDocument();
-
-      // Integer
-      expect(screen.getByTestId('root/param-integer')).toBeInTheDocument();
-      // Integer Children
-      expect(screen.getByTestId('root/param-integer/low')).toBeInTheDocument();
-      expect(screen.getByTestId('root/param-integer/high')).toBeInTheDocument();
-    });
-    it('opens a details dialog that shows name, type, and valid values, and closes', async () => {
-      render(<StudyDetails studyId={fakeStudyNameTree} />);
-
-      // Click on node
-      userEvent.click(screen.getByTestId('root/param-integer/low'));
-
-      // Wait for dialog
-      await waitFor(() => screen.getByTestId('parameterDetailsDialog'));
-
-      // See details
-      expect(screen.getByTestId('parameterDetailsName')).toBeInTheDocument();
-      expect(screen.getByTestId('parameterDetailsType')).toBeInTheDocument();
-      expect(
-        screen.getByText('min: 1, max: 10', { exact: false })
-      ).toBeInTheDocument();
-
-      // Close dialog
-      userEvent.click(screen.getByText(/exit/i));
-
-      // Wait for dialog close
-      await waitForElementToBeRemoved(() =>
-        screen.getByTestId('parameterDetailsDialog')
-      );
-    });
   });
 });

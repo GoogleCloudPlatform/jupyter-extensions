@@ -23,8 +23,10 @@ const localStyles = stylesheet({
     color: 'black',
   },
   tableCell: {
-    border: 'var(--jp-border-width) solid var(--jp-border-color2)',
     whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    maxWidth: '500px',
   },
   pagination: {
     backgroundColor: 'white',
@@ -38,6 +40,10 @@ const localStyles = stylesheet({
     flex: 1,
     minHeight: 0,
     overflow: 'auto',
+  },
+  null: {
+    fontStyle: 'italic',
+    color: 'gray',
   },
 });
 
@@ -159,7 +165,7 @@ export class BQTable extends React.Component<Props, State> {
                         className={localStyles.tableCell}
                         key={'table_row_' + indexRow + '_cell' + indexCell}
                       >
-                        {cell}
+                        {cell ?? <div className={localStyles.null}>null</div>}
                       </TableCell>
                     ))}
                   </TableRow>

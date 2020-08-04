@@ -27,6 +27,7 @@ import { RootState } from '../../store/store';
 import { setView } from '../../store/view';
 import { CreateTrial } from './create_trial';
 import { styles } from '../../utils/styles';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 
 export interface MetricsInputs {
   [metricName: string]: string;
@@ -75,6 +76,7 @@ export const SuggestTrials: React.FC<Props> = ({ studyName }) => {
                   })
                 )
               }
+              startIcon={<ArrowBack />}
             >
               Back To Study
             </Button>

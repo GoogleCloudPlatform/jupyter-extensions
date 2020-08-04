@@ -23,6 +23,7 @@ import { CommonNode } from '../parameter_spec_tree/common_node';
 import { styles } from '../../utils/styles';
 import { ParameterSpecTree } from '../parameter_spec_tree';
 import ParameterDetailsDialog from '../parameter_details_dialog';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -196,37 +197,52 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
   return (
     <Box m={3} className={styles.root}>
       <React.Fragment>
-        <Typography variant="h5" gutterBottom align="left">
-          {studyToDisplay.name}
-        </Typography>
-        <Grid container item spacing={1} xs={12}>
-          <Grid container item sm={9}>
-            <TableContainer component={Paper}>
-              <Table
-                className={classes.table}
-                aria-label="customized table"
-                size="small"
-              >
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Study Configuration</StyledTableCell>
-                    <StyledTableCell align="right" />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {configRows.map((row: ConfigRow, index: number) => (
-                    <StyledTableRow key={`config-row-${index}`}>
-                      <StyledTableCell component="th" scope="row">
-                        {row.entryName}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.entryValue}
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        <Box display="flex">
+          <Typography variant="h4" gutterBottom>
+            {studyToDisplay.name}
+          </Typography>
+          <Box ml="auto">
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => openDashboard()}
+              startIcon={<ArrowBack />}
+            >
+              Back to Dashboard
+            </Button>
+          </Box>
+        </Box>
+
+        <Grid container item spacing={2} xs={12}>
+          <Grid container item>
+            <Box clone mb={3}>
+              <TableContainer component={Paper}>
+                <Table
+                  className={classes.table}
+                  aria-label="customized table"
+                  size="small"
+                >
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Study Configuration</StyledTableCell>
+                      <StyledTableCell align="right" />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {configRows.map((row: ConfigRow, index: number) => (
+                      <StyledTableRow key={`config-row-${index}`}>
+                        <StyledTableCell component="th" scope="row">
+                          {row.entryName}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.entryValue}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
             <TableContainer component={Paper}>
               <Table
                 className={classes.table}
@@ -260,25 +276,27 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
               </Table>
             </TableContainer>
           </Grid>
-          <Grid item sm={3}>
-            <Grid container item justify="center" xs={12}>
-              <Button
-                color="primary"
-                onClick={() => openVisualizations(studyId)}
-              >
-                See Visualization
-              </Button>
-            </Grid>
-            <Grid container item justify="center" xs={12}>
-              <Button color="primary" onClick={() => openDashboard()}>
-                Go to Dashboard
-              </Button>
-            </Grid>
-            <Grid container item justify="center" xs={12}>
-              <Button color="primary" onClick={() => openTrials(studyId)}>
-                View Trials
-              </Button>
-            </Grid>
+          <Grid item>
+            <Box display="flex">
+              <Box mr={0.5} clone>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => openVisualizations(studyId)}
+                >
+                  See Visualization
+                </Button>
+              </Box>
+              <Box ml={0.5} clone>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => openTrials(studyId)}
+                >
+                  View Trials
+                </Button>
+              </Box>
+            </Box>
           </Grid>
         </Grid>
 
