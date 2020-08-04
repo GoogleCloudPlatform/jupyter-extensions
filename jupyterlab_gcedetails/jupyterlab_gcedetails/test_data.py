@@ -460,5 +460,5 @@ DETAILS_RESPONSE_BODY = (
     b'{"authenticate": {"sessions": {}}}, "project": {"attributes": {}, '
     b'"numericProjectId": 123456, "projectId": "test-project"}, "utilization":'
     b' {"cpu": 50, "memory": 16}, "gpu": {"cuda_version": "10.1", '
-    b'"driver_version": "418.87.01", "gpu": 100, "memory": 6, "name": "Tesla '
+    b'"driver_version": "418.87.01", "gpu": 100, "count": 1, "memory": 6, "name": "Tesla '
     b'K80", "temperature": "42 C"}}')

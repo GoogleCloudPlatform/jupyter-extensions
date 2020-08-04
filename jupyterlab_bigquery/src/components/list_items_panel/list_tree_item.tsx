@@ -30,6 +30,8 @@ import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
+import { ViewDetailsWidget } from '../details_panel/view_details_widget';
+import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
@@ -119,7 +121,15 @@ export function BuildTree(project, context, expandProject, expandDataset) {
 
   const openViewDetails = (event, view) => {
     event.stopPropagation();
-    // TODO: Create view widget
+    const service = new ViewDetailsService();
+    const widgetType = ViewDetailsWidget;
+    context.manager.launchWidgetForId(
+      view.id,
+      widgetType,
+      service,
+      view.id,
+      view.name
+    );
   };
 
   const getIcon = iconType => {
