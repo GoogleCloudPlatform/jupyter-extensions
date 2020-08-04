@@ -15,10 +15,11 @@ import {
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import * as Types from '../types';
 import { prettifyStudyName } from '../service/optimizer';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import moment from 'moment';
 import { dateFormat, makeReadable } from '../utils';
 import { setView } from '../store/view';
+import { fetchTrials } from '../store/studies';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -90,6 +91,7 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
 interface Props {
   studyId: string;
   studyToDisplay: FormattedStudy;
+  trials: any[];
   openTrials: (studyName: string) => void;
   openVisualizations: (studyName: string) => void;
   openDashboard: () => void;
@@ -112,8 +114,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     studyId: study.name,
     studyToDisplay,
-    // TODO: add trials
-    // trialsToDisplay
+    trials: study.trials,
   };
 };
 
@@ -173,13 +174,16 @@ function createParamRows(study: FormattedStudy): ParamRow[] {
 export const StudyDetailsUnwrapped: React.FC<Props> = ({
   studyId,
   studyToDisplay,
+  trials,
   openTrials,
   openVisualizations,
   openDashboard,
 }) => {
+  const dispatch = useDispatch();
   const classes = useStyles();
   const configRows = createConfigRows(studyToDisplay);
   const paramRows = createParamRows(studyToDisplay);
+  if (!trials) dispatch(fetchTrials(studyId));
   return (
     <Box m={3}>
       <React.Fragment>

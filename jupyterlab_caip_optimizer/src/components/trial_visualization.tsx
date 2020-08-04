@@ -1,15 +1,17 @@
 import React from 'react';
 import { Grid, Paper, Radio } from '@material-ui/core';
 import { ParallelCoordinates } from './graphs/parallel_coordinates';
-import { Typography, Slider, Box } from '@material-ui/core/';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store/store';
+import { Typography, Slider, Box, Button } from '@material-ui/core/';
+import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
+import { setView } from '../store/view';
 import * as Types from '../types';
 import { styles } from '../utils/styles';
 
 interface Props {
   studyName: string;
+  trials: any;
+  studyConfig: any;
 }
 
 type ContinuousAxisProps = {
@@ -159,38 +161,37 @@ function createAxisProps(
     switch (param.type) {
       case 'INTEGER':
       case 'DOUBLE':
+        /**
+         * Due to Optimizer API error (zero-values being erased in studyConfig),
+         * default value is set to 0.
+         */
         axisPropsList[param.parameter] = {
           type: param.type,
           sliderMin:
-            'integerValueSpec' in param
+            'integerValueSpec' in param && 'minValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.minValue)
-              : 'doubleValueSpec' in param
+              : 'doubleValueSpec' in param && 'minValue' in param.doubleValueSpec
               ? param.doubleValueSpec.minValue
-              : null,
+              : 0,
           sliderMax:
-            'integerValueSpec' in param
+            'integerValueSpec' in param && 'maxValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.maxValue)
-              : 'doubleValueSpec' in param
+              : 'doubleValueSpec' in param && 'maxValue' in param.doubleValueSpec
               ? param.doubleValueSpec.maxValue
-              : null,
+              : 0,
           minVal:
-            'integerValueSpec' in param
+            'integerValueSpec' in param && 'minValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.minValue)
-              : 'doubleValueSpec' in param
+              : 'doubleValueSpec' in param && 'minValue' in param.doubleValueSpec
               ? param.doubleValueSpec.minValue
-              : null,
+              : 0,
           maxVal:
-            'integerValueSpec' in param
+            'integerValueSpec' in param && 'maxValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.maxValue)
-              : 'doubleValueSpec' in param
+              : 'doubleValueSpec' in param && 'maxValue' in param.doubleValueSpec
               ? param.doubleValueSpec.maxValue
-              : null,
+              : 0,
         };
-        if (axisPropsList[param.parameter]['minVal'] === undefined) {
-          // Due to Optimizer API error. Undefined minimum values should be changed to 0.
-          axisPropsList[param.parameter]['minVal'] = 0;
-          axisPropsList[param.parameter]['sliderMin'] = 0;
-        }
         break;
       case 'CATEGORICAL':
       case 'DISCRETE':
@@ -249,29 +250,36 @@ function fetchAxisLabels(trials: Types.Trial[]) {
   };
 }
 
-export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
+const mapStateToProps = (state, ownProps) => {
+  const study: Types.Study = state.studies.data?.find(
+    study => study.name === ownProps.studyName
+  );
+  return {
+    trials: study.trials,
+    studyName: study.name,
+    studyConfig: study.studyConfig,
+  };
+};
+
+export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, studyConfig }) => {
   const dispatch = useDispatch();
   const ref = React.useRef<HTMLHeadingElement>(null);
   const [width, setWidth] = React.useState(0);
   const [height, setHeight] = React.useState(0);
-  const [value, setValue] = React.useState([20, 37]);
+  const [value, setValue] = React.useState([0, 1]); // Placeholder value for slider changes
   const [selectedMetric, setSelectedMetric] = React.useState('');
 
-  React.useEffect(() => {
+  if (!trials) {
     dispatch(fetchTrials(studyName));
-  }, [studyName]);
-
-  const { trials, studyConfig } = useSelector<RootState, Types.Study>(state =>
-    state.studies.data?.find(study => study.name === studyName)
-  );
+  };
 
   // TODO: condition for trial undefined, states set as dummy values and then re-set the values once trials populated
 
   if (!trials) return null;
 
   const completedTrials = trials.filter(
-    trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial
-  );
+    trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial && 'value' in trial.finalMeasurement.metrics[0]
+  ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
   const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
   const lineDataList: LineData[] = createLineData(completedTrials);
 
@@ -422,37 +430,56 @@ export const VisualizeTrials: React.FC<Props> = ({ studyName }) => {
   }, [ref.current, width, height]);
   return (
     <React.Fragment>
-      <Box className={styles.root} display="flex" m={5}>
-        <Grid container spacing={3}>
-          <Grid container item xs={12}>
-            <Typography variant="h5" gutterBottom>
-              Visualizations
-            </Typography>
-          </Grid>
-          <Grid container item xs={12} ref={ref}>
-            <Paper>
-              <Box m={5} overflow="scroll">
-                <ParallelCoordinates
-                  width={width}
-                  height={height}
-                  axisPropsList={axisPropsList}
-                  lineDataList={lineDataList}
-                  axesData={axesData}
-                  selectedMetricForColor={selectedMetric}
-                />
-                <Grid container item xs={12} justify="center">
-                  <Grid container item xs={5} spacing={2} alignContent="flex-start">
-                    {populateSliders(axisLabelsLeft, axisPropsList)}
+      <Box className={styles.root} m={5}>
+        <Box display="flex">
+          <Typography variant="h5" gutterBottom>
+            Visualizations
+          </Typography>
+          <Box mx="auto" />
+          <Button
+              variant="contained"
+              color="primary"
+              onClick={() =>
+                dispatch(
+                  setView({
+                    view: 'studyDetails',
+                    studyId: studyName,
+                  })
+                )
+              }
+            >
+              Back To Study
+            </Button>
+        </Box>
+        <Box display="flex" my={3}>
+          <Grid container spacing={3}>
+            <Grid container item xs={12} ref={ref}>
+              <Paper>
+                <Box m={5} overflow="scroll">
+                  <ParallelCoordinates
+                    width={width}
+                    height={height}
+                    axisPropsList={axisPropsList}
+                    lineDataList={lineDataList}
+                    axesData={axesData}
+                    selectedMetricForColor={selectedMetric}
+                  />
+                  <Grid container item xs={12} justify="center">
+                    <Grid container item xs={5} spacing={2} alignContent="flex-start">
+                      {populateSliders(axisLabelsLeft, axisPropsList)}
+                    </Grid>
+                    <Grid container item xs={5} spacing={1} alignContent="flex-start">
+                      {populateSliders(axisLabelsRight, axisPropsList, true)}
+                    </Grid>
                   </Grid>
-                  <Grid container item xs={5} spacing={1} alignContent="flex-start">
-                    {populateSliders(axisLabelsRight, axisPropsList, true)}
-                  </Grid>
-                </Grid>
-              </Box>
-            </Paper>
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Box>
     </React.Fragment>
   );
 };
+
+export const VisualizeTrials = connect(mapStateToProps, null)(VisualizeTrialsUnWrapped);
