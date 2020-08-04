@@ -152,7 +152,7 @@ export class MergeResolver {
       }
       if (result.button.label === 'Resolve Conflicts') {
         console.log('do something');
-        // TO DO: open an editor for 3 way merging
+        // TO DO (ashleyswang) : open an editor for 3 way merging
       }
     });
   }
