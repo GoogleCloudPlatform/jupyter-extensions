@@ -17,7 +17,7 @@ jest.mock('../create_study', () => ({
 jest.mock('../study_details', () => ({
   StudyDetails: () => <div>Study Details Component</div>,
 }));
-jest.mock('./trial_visualization', () => ({
+jest.mock('../trial_visualization', () => ({
   VisualizeTrials: () => <div>Trial Visualization Component</div>,
 }));
 import * as React from 'react';
