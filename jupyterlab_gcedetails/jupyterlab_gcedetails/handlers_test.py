@@ -147,6 +147,7 @@ class GetGpuDetailsTest(tornado.testing.AsyncTestCase):
             'cuda_version': '10.1',
             'driver_version': '418.87.01',
             'gpu': 100,
+            'count': 1,
             'memory': 6,
             'name': 'Tesla K80',
             'temperature': '42 C'
@@ -166,6 +167,7 @@ class GetGpuDetailsTest(tornado.testing.AsyncTestCase):
             'cuda_version': '',
             'driver_version': '',
             'gpu': 0,
+            'count': 0,
             'memory': 0,
             'name': '',
             'temperature': ''
@@ -197,6 +199,7 @@ class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
         'cuda_version': '10.1',
         'driver_version': '418.87.01',
         'gpu': 100,
+        'count': 1,
         'memory': 6,
         'name': 'Tesla K80',
         'temperature': '42 C'
