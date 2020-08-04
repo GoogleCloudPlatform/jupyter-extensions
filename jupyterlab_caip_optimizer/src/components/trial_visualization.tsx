@@ -273,10 +273,6 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, s
     dispatch(fetchTrials(studyName));
   };
 
-  // TODO: condition for trial undefined, states set as dummy values and then re-set the values once trials populated
-
-  if (!trials) return null;
-
   const completedTrials = trials.filter(
     trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial && 'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
