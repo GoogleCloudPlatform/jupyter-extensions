@@ -170,25 +170,29 @@ function createAxisProps(
           sliderMin:
             'integerValueSpec' in param && 'minValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.minValue)
-              : 'doubleValueSpec' in param && 'minValue' in param.doubleValueSpec
+              : 'doubleValueSpec' in param &&
+                'minValue' in param.doubleValueSpec
               ? param.doubleValueSpec.minValue
               : 0,
           sliderMax:
             'integerValueSpec' in param && 'maxValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.maxValue)
-              : 'doubleValueSpec' in param && 'maxValue' in param.doubleValueSpec
+              : 'doubleValueSpec' in param &&
+                'maxValue' in param.doubleValueSpec
               ? param.doubleValueSpec.maxValue
               : 0,
           minVal:
             'integerValueSpec' in param && 'minValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.minValue)
-              : 'doubleValueSpec' in param && 'minValue' in param.doubleValueSpec
+              : 'doubleValueSpec' in param &&
+                'minValue' in param.doubleValueSpec
               ? param.doubleValueSpec.minValue
               : 0,
           maxVal:
             'integerValueSpec' in param && 'maxValue' in param.integerValueSpec
               ? Number(param.integerValueSpec.maxValue)
-              : 'doubleValueSpec' in param && 'maxValue' in param.doubleValueSpec
+              : 'doubleValueSpec' in param &&
+                'maxValue' in param.doubleValueSpec
               ? param.doubleValueSpec.maxValue
               : 0,
         };
@@ -261,7 +265,11 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, studyConfig }) => {
+export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
+  trials,
+  studyName,
+  studyConfig,
+}) => {
   const dispatch = useDispatch();
   const ref = React.useRef<HTMLHeadingElement>(null);
   const [width, setWidth] = React.useState(0);
@@ -271,10 +279,13 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, s
 
   if (!trials) {
     dispatch(fetchTrials(studyName));
-  };
+  }
 
   const completedTrials = trials.filter(
-    trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial && 'value' in trial.finalMeasurement.metrics[0]
+    trial =>
+      trial.state === 'COMPLETED' &&
+      'finalMeasurement' in trial &&
+      'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
   const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
   const lineDataList: LineData[] = createLineData(completedTrials);
@@ -433,19 +444,19 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, s
           </Typography>
           <Box mx="auto" />
           <Button
-              variant="contained"
-              color="primary"
-              onClick={() =>
-                dispatch(
-                  setView({
-                    view: 'studyDetails',
-                    studyId: studyName,
-                  })
-                )
-              }
-            >
-              Back To Study
-            </Button>
+            variant="contained"
+            color="primary"
+            onClick={() =>
+              dispatch(
+                setView({
+                  view: 'studyDetails',
+                  studyId: studyName,
+                })
+              )
+            }
+          >
+            Back To Study
+          </Button>
         </Box>
         <Box display="flex" my={3}>
           <Grid container spacing={3}>
@@ -461,10 +472,22 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, s
                     selectedMetricForColor={selectedMetric}
                   />
                   <Grid container item xs={12} justify="center">
-                    <Grid container item xs={5} spacing={2} alignContent="flex-start">
+                    <Grid
+                      container
+                      item
+                      xs={5}
+                      spacing={2}
+                      alignContent="flex-start"
+                    >
                       {populateSliders(axisLabelsLeft, axisPropsList)}
                     </Grid>
-                    <Grid container item xs={5} spacing={1} alignContent="flex-start">
+                    <Grid
+                      container
+                      item
+                      xs={5}
+                      spacing={1}
+                      alignContent="flex-start"
+                    >
                       {populateSliders(axisLabelsRight, axisPropsList, true)}
                     </Grid>
                   </Grid>
@@ -478,4 +501,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({ trials, studyName, s
   );
 };
 
-export const VisualizeTrials = connect(mapStateToProps, null)(VisualizeTrialsUnWrapped);
+export const VisualizeTrials = connect(
+  mapStateToProps,
+  null
+)(VisualizeTrialsUnWrapped);
