@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
   Button,
 } from '@material-ui/core';
@@ -26,13 +25,10 @@ const ParameterDetailsDialog: React.FC<Props> = ({ spec, onClose }) => {
         <>
           <DialogTitle>Parameter "{spec.parameter}"</DialogTitle>
           <DialogContent>
-            <DialogContentText>
-              The study config parameter specification.
-            </DialogContentText>
             <ParameterDetails spec={spec} />
           </DialogContent>
           <DialogActions>
-            <Button onClick={onClose} color="primary" variant="contained">
+            <Button onClick={onClose} color="primary">
               Exit
             </Button>
           </DialogActions>

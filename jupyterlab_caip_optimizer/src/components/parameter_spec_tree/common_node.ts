@@ -1,5 +1,6 @@
 import { ParameterSpec } from '../../types';
 import { TreeNode } from 'react-tree-graph';
+import { styles } from '../../utils/styles';
 
 function isString(value: unknown): value is string {
   return typeof value === 'string';
@@ -165,7 +166,7 @@ export class CommonNode {
     return {
       id: pathString,
       name,
-      gProps: { className: 'noClick', 'data-testid': pathString },
+      gProps: { className: styles.noClick, 'data-testid': pathString },
       children: categoryChildren,
     };
   }
@@ -202,7 +203,7 @@ export class CommonNode {
       );
     }
 
-    const gProps = { className: 'node', 'data-testid': pathString };
+    const gProps = { className: styles.node, 'data-testid': pathString };
 
     if ('onClick' in options) {
       gProps['onClick'] = () => options.onClick(this.spec);
@@ -230,7 +231,7 @@ export class CommonNode {
     return {
       id: 'root',
       name: 'root',
-      gProps: { className: 'noClick', 'data-testid': 'root' },
+      gProps: { className: styles.noClick, 'data-testid': 'root' },
       children: parameterSpecs.map(spec =>
         new CommonNode(spec).toReactTreeGraph(options, ['root'], valueSubNodes)
       ),

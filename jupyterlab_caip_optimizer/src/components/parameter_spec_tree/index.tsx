@@ -3,6 +3,7 @@ import Tree from 'react-tree-graph';
 import useResizeAware from 'react-resize-aware';
 import { ParameterSpec } from '../../types';
 import { CommonNode } from './common_node';
+import { styles } from '../../utils/styles';
 
 interface Props {
   specs: ParameterSpec[];
@@ -13,7 +14,10 @@ export const ParameterSpecTree: React.FC<Props> = ({ specs, onClick }) => {
   const [resizeListener, sizes] = useResizeAware();
   const rootNode = CommonNode.createReactTreeGraph(specs, { onClick }, false);
   return (
-    <div style={{ position: 'relative', width: '100%', height: '50vh' }}>
+    <div
+      style={{ position: 'relative', width: '100%', height: '50vh' }}
+      className={styles.tree}
+    >
       {resizeListener}
       <Tree
         data={rootNode}
