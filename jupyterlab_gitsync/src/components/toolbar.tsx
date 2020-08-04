@@ -10,9 +10,9 @@ import {
 
 import { toolbarClass } from '../style/toolbar';
 
-import { Props, State } from './panel';
+import { Props } from './panel';
 
-export class Toolbar extends React.Component<Props, State> {
+export class Toolbar extends React.Component<Props> {
   /**
    * Returns a React component for rendering a panel toolbar.
    *
@@ -21,10 +21,6 @@ export class Toolbar extends React.Component<Props, State> {
    */
   constructor(props: Props) {
     super(props);
-
-    this.state = {
-      state: 'Running',
-    };
   }
 
   /**

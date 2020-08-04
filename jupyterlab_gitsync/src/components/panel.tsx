@@ -15,16 +15,9 @@ export interface Props {
   service: GitSyncService;
 }
 
-export interface State {
-  state: string;
-}
-
-export class Panel extends React.Component<Props, State> {
+export class Panel extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      state: 'Running',
-    };
   }
 
   render() {

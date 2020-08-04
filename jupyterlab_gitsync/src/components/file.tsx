@@ -5,11 +5,7 @@ export interface Props {
   path: string;
 }
 
-export interface State {
-  serviceState: string;
-}
-
-export class File extends React.Component<Props, State> {
+export class File extends React.Component<Props> {
   /**
    * Returns a React component for rendering a panel toolbar.
    *
@@ -19,9 +15,6 @@ export class File extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = {
-      serviceState: 'Running',
-    };
   }
 
   /**
