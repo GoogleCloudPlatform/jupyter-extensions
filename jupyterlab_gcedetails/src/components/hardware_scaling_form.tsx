@@ -121,8 +121,6 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     });
   }
 
-  // TODO: Implement submit functionality
-  //eslint-disable-next-line @typescript-eslint/no-empty-function
   private submitForm() {
     const configuration = { ...this.state.configuration };
     this.props.onSubmit(configuration);
