@@ -67,6 +67,6 @@ export class ToolbarButton extends React.Component<Props, State> {
   }
 
   protected _onClick = (): void => {
-    console.log('');
+    return;
   };
 }
