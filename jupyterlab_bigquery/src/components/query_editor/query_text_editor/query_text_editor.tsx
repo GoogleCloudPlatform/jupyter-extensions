@@ -185,6 +185,7 @@ class QueryTextEditor extends React.Component<
   }
 
   componentDidMount() {
+    // Delay rendering of monaco editor to avoid mal-size
     setTimeout(() => {
       this.setState({ renderMonacoEditor: true });
     }, 100);
