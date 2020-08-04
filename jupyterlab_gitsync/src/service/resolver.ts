@@ -105,6 +105,7 @@ export class MergeResolver {
       text = this._removeCursorToken(text);
       this.addVersion(text, 'base');
     }
+    this._updateState(true);
     return this._versions.base;
   }
 
@@ -154,6 +155,16 @@ export class MergeResolver {
     return ret;
   }
 
+  private _updateState(state?: boolean){
+    if (state === null || state === undefined){
+      this._resolved = !this.resolved;
+      this._stateChange.emit(this.resolved);
+    } else if (state != this.resolved){
+      this._resolved = state;
+      this._stateChange.emit(this.resolved);
+    }
+  }
+
   private async _resolveDialog(result): Promise<void> {
     const body = 
       `"${this.path}" has a conflict. Would you like to revert to a previous version?\
@@ -180,8 +191,7 @@ export class MergeResolver {
         // TO DO (ashleyswang) : open an editor for 3 way merging
       }
       if (result.button.label === 'Ignore') {
-        this._resolved = false;
-        this._stateChange.emit(this.resolved);
+        this._updateState(false);
         throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
       }
     });

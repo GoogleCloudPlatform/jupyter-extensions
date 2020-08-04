@@ -38,7 +38,12 @@ export class File {
   }
 
   async save() {
-    await this.context.save();
+    try{
+      await this.context.save();
+    } catch (error) {
+      console.warn(error);
+    }
+    
   }
 
   async reload() {
@@ -61,8 +66,12 @@ export class File {
   }
 
   private async _getRemoteVersion() {
-    const contents = await fs.get(this.path);
-    this.resolver.addVersion(contents.content, 'remote');
+    try{
+      const contents = await fs.get(this.path);
+      this.resolver.addVersion(contents.content, 'remote');
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   private _getLocalVersion() {
