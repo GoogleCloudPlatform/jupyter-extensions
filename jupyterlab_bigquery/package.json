@@ -45,7 +45,7 @@
     "@jupyterlab/docregistry": "^1.2.1",
     "@jupyterlab/filebrowser": "^1.2.1",
     "@jupyterlab/launcher": "^1.2.1",
-    "@jupyterlab/notebook": "^2.2.1",
+    "@jupyterlab/notebook": "^1.2.9",
     "@jupyterlab/services": "^4.2.2",
     "@jupyterlab/statusbar": "^1.2.1",
     "@jupyterlab/ui-components": "^1.2.1",

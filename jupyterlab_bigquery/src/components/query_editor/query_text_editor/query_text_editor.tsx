@@ -34,6 +34,7 @@ interface QueryTextEditorState {
   bytesProcessed: number | null;
   message: string | null;
   ifMsgErr: boolean;
+  renderMonacoEditor: boolean;
 }
 
 interface QueryTextEditorProps {
@@ -159,6 +160,7 @@ class QueryTextEditor extends React.Component<
       bytesProcessed: null,
       message: null,
       ifMsgErr: false,
+      renderMonacoEditor: false,
     };
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
@@ -180,6 +182,12 @@ class QueryTextEditor extends React.Component<
 
   componentWillUnmount() {
     this.props.deleteQueryEntry(this.queryId);
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState({ renderMonacoEditor: true });
+    }, 100);
   }
 
   handleButtonClick() {
@@ -553,15 +561,17 @@ class QueryTextEditor extends React.Component<
               : styleSheet.queryTextEditor
           }
         >
-          <Editor
-            width="100%"
-            height="100%"
-            theme={'sqlTheme'}
-            language={'sql'}
-            value={queryValue}
-            editorDidMount={this.handleEditorDidMount.bind(this)}
-            options={SQL_EDITOR_OPTIONS}
-          />
+          {this.state.renderMonacoEditor && (
+            <Editor
+              width="100%"
+              height="100%"
+              theme={'sqlTheme'}
+              language={'sql'}
+              value={queryValue}
+              editorDidMount={this.handleEditorDidMount.bind(this)}
+              options={SQL_EDITOR_OPTIONS}
+            />
+          )}
         </div>
       </div>
     );
