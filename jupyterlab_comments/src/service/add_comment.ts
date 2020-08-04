@@ -55,3 +55,24 @@ export async function newDetachedCommentReply(
     console.log(response);
   });
 }
+
+export async function newReviewCommentThread(
+  currFilePath,
+  serverRoot,
+  commentString,
+  reviewHash
+) {
+  const body: Record<string, string> = {
+    comment: commentString,
+    reviewHash: reviewHash,
+  };
+  httpGitRequest(
+    'addReviewComment',
+    'POST',
+    currFilePath,
+    serverRoot,
+    body
+  ).then(response => {
+    console.log(response);
+  });
+}

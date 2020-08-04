@@ -36,14 +36,13 @@ const style = {
   },
 };
 
-export function CommentEditor(props) {
+export function DetachedCommentEditor(props) {
   const [comment, setComment] = useState('Start a new comment thread');
 
   const handleSubmit = event => {
     event.preventDefault();
-    console.log(comment);
     newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
-    setComment(''); //clear comment text field
+    setComment(''); //clear comment editor field
   };
   return (
     <form
@@ -88,6 +87,6 @@ export function CommentEditor(props) {
 
 export class NewCommentThread extends React.Component<Props> {
   render() {
-    return <CommentEditor {...this.props} />;
+    return <DetachedCommentEditor {...this.props} />;
   }
 }
