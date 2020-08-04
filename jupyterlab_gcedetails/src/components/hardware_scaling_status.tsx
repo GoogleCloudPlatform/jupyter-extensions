@@ -3,10 +3,9 @@ import { stylesheet } from 'typestyle';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { ClientTransportService } from 'gcp_jupyterlab_shared';
-import { HardwareConfiguration, Details } from '../data';
+import { HardwareConfiguration } from '../data';
 import { NotebooksService } from '../service/notebooks_service';
-import { AuthTokenRetrieval } from './auth_token_retrieval';
+import { authTokenRetrieval } from './auth_token_retrieval';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -55,7 +54,7 @@ enum Status {
 }
 
 const statusInfo = [
-  'Getting authorization token to reshape machine. A dialog box should have popped up.',
+  'Getting authorization token to reshape machine. Please complete the OAuth 2.0 authorization steps in the popup',
   'Shutting down instance for reshaping.',
   'Reshaping instance to your configuration.',
   'Restarting your instance. Your newly configured machine will be ready very shortly!',
@@ -65,8 +64,8 @@ const statusInfo = [
 
 interface Props {
   hardwareConfiguration: HardwareConfiguration;
+  notebookService: NotebooksService;
   onDialogClose: () => void;
-  details: Details;
 }
 
 interface State {
@@ -74,17 +73,11 @@ interface State {
 }
 
 export class HardwareScalingStatus extends React.Component<Props, State> {
-  private notebookService: NotebooksService;
   constructor(props: Props) {
     super(props);
     this.state = {
       status: Status.Authorizing,
     };
-    const clientTransportService = new ClientTransportService();
-    this.notebookService = new NotebooksService(clientTransportService);
-    this.notebookService.projectId = this.props.details.project.projectId;
-    this.notebookService.locationId = this.props.details.instance.zone;
-    this.notebookService.instanceName = this.props.details.instance.name;
   }
 
   private preventPageClose(event) {
@@ -92,44 +85,40 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     event.returnValue = '';
   }
 
-  componentDidMount() {
-    AuthTokenRetrieval((err, token) => {
-      if (err) {
-        this.setState({ status: Status.Error });
-      } else {
-        this.setState({
-          status: Status['Stopping Instance'],
-        });
-        this.notebookService.setAuthToken(token);
-      }
-    });
+  async componentDidMount() {
+    const { notebookService } = this.props;
+    try {
+      const token = await authTokenRetrieval();
+      this.setState({
+        status: Status['Stopping Instance'],
+      });
+      notebookService.setAuthToken(token);
+    } catch (err) {
+      this.setState({ status: Status.Error });
+      console.log(err);
+    }
     window.addEventListener('beforeunload', this.preventPageClose);
   }
 
   async componentDidUpdate() {
-    const {
-      machineType,
-      gpuType,
-      gpuCount,
-      attachGpu,
-    } = this.props.hardwareConfiguration;
+    const { hardwareConfiguration, notebookService } = this.props;
+    const { machineType, gpuType, gpuCount, attachGpu } = hardwareConfiguration;
+
     try {
       switch (this.state.status) {
         case Status['Stopping Instance']:
-          await this.notebookService.stop();
+          await notebookService.stop();
           this.setState({ status: Status['Reshaping Instance'] });
           break;
         case Status['Reshaping Instance']:
-          await this.notebookService.setMachineType(
-            machineType.value as string
-          );
+          await notebookService.setMachineType(machineType.value as string);
           if (attachGpu) {
-            await this.notebookService.setAccelerator(gpuType, gpuCount);
+            await notebookService.setAccelerator(gpuType, gpuCount);
           }
           this.setState({ status: Status['Starting Instance'] });
           break;
         case Status['Starting Instance']:
-          await this.notebookService.start();
+          await notebookService.start();
           this.setState({ status: Status.Complete });
           break;
         default:

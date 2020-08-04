@@ -28,9 +28,12 @@ import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';
 import { HardwareScalingDialog } from './components/hardware_scaling_dialog';
+import { NotebooksService } from './service/notebooks_service';
+import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
 interface Props {
   detailsServer: ServerWrapper;
+  notebookService: NotebooksService;
 }
 interface State {
   displayedAttributes: [number, number];
@@ -71,7 +74,7 @@ export class VmDetails extends React.Component<Props, State> {
 
   render() {
     const { details, receivedError, formDisplayed } = this.state;
-    const { detailsServer } = this.props;
+    const { detailsServer, notebookService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -98,7 +101,7 @@ export class VmDetails extends React.Component<Props, State> {
           <HardwareScalingDialog
             open={formDisplayed}
             onClose={() => this.setState({ formDisplayed: false })}
-            details={details}
+            notebookService={notebookService}
           />
         )}
       </span>
@@ -106,9 +109,13 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async getAndSetDetailsFromServer() {
+    const { notebookService, detailsServer } = this.props;
     try {
-      const details = await this.props.detailsServer.getUtilizationData();
-      this.setState({ details: details as Details });
+      const details = (await detailsServer.getUtilizationData()) as Details;
+      this.setState({ details: details });
+      notebookService.projectId = details.project.projectId;
+      notebookService.locationId = details.instance.zone;
+      notebookService.instanceName = details.instance.name;
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
@@ -174,7 +181,16 @@ export class VmDetails extends React.Component<Props, State> {
 export class VmDetailsWidget extends ReactWidget {
   private readonly detailsUrl = `gcp/v1/details`;
   private readonly detailsServer = new ServerWrapper(this.detailsUrl);
+  private readonly clientTransportService = new ClientTransportService();
+  private readonly notebookService = new NotebooksService(
+    this.clientTransportService
+  );
   render() {
-    return <VmDetails detailsServer={this.detailsServer} />;
+    return (
+      <VmDetails
+        detailsServer={this.detailsServer}
+        notebookService={this.notebookService}
+      />
+    );
   }
 }
