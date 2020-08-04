@@ -50,7 +50,7 @@ class SetupHandler(APIHandler):
 
   def add_sync_command(self):
     cwd = os.getcwd()
-    ex_path = 'jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes'
+    ex_path = 'jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes/git-sync-changes'
     return os.path.join(cwd, ex_path)
 
   @gen.coroutine
