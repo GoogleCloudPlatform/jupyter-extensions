@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "jupyter.lab.setting-icon-class": "jp-Commenting",
+  "jupyter.lab.setting-icon-label": "Commenting",
+  "title": "Notebook Comments in Git",
+  "description": "Notebook Comments in Git Extension for JupterLab",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "title": "Notebook Comments in Git",
+      "description": "Notebook Comments in Git Extension for JupterLab"
+    }
+  }
+}

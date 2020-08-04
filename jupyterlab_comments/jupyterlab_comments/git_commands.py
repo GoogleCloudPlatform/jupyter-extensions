@@ -53,8 +53,6 @@ class Git(Configurable):
 			self.run(git_root_dir, 'appraise', 'push', self.remote)
 
 
-
-
 	def inside_git_repo(self, path_to_file):
 		"""
 		Return true if the path is inside a git repository.

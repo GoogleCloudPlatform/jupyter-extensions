@@ -1,17 +1,17 @@
 jest.setTimeout(100000);
 import * as React from 'react';
-import { createDropdown, DropdownItem, CreateStudy } from './create_study';
+import { createDropdown, DropdownItem, CreateStudy } from '.';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import * as Types from '../types';
+import * as Types from '../../types';
 import {
   screen,
   render,
   waitFor,
   waitForElementToBeRemoved,
-} from '../utils/redux_render';
-import { proxyUrl, createStudyUrl } from '../utils/urls';
-import { fakeStudy, cleanFakeStudyName } from '../service/test-constants';
+} from '../../utils/redux_render';
+import { proxyUrl, createStudyUrl } from '../../utils/urls';
+import { fakeStudy, cleanFakeStudyName } from '../../service/test-constants';
 import userEvent from '@testing-library/user-event';
 
 const server = setupServer();
@@ -43,6 +43,7 @@ describe('Dropdown list', () => {
 
 describe('Create Study Page', () => {
   it('creates a study and redirects to the study details page', async () => {
+    jest.setTimeout(10000);
     const createStudy = jest.fn((req, res, ctx) => {
       return res(ctx.json(fakeStudy));
     });

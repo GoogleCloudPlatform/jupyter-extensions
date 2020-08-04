@@ -4,17 +4,17 @@ jest.mock('react-redux', () => ({
   connect: (mapStateToProps: any) => (component: any) => MockViewManager,
   Provider: ({ store, children }: any) => children,
 }));
-jest.mock('../store/view');
-jest.mock('./dashboard', () => ({
+jest.mock('../../store/view');
+jest.mock('../dashboard', () => ({
   Dashboard: () => <div>Dashboard Component</div>,
 }));
-jest.mock('./suggest_trials', () => ({
+jest.mock('../suggest_trials', () => ({
   SuggestTrials: () => <div>Suggest Trials Component</div>,
 }));
-jest.mock('./create_study', () => ({
+jest.mock('../create_study', () => ({
   CreateStudy: () => <div>Create Study Component</div>,
 }));
-jest.mock('./study_details', () => ({
+jest.mock('../study_details', () => ({
   StudyDetails: () => <div>Study Details Component</div>,
 }));
 jest.mock('./trial_visualization', () => ({
@@ -22,8 +22,8 @@ jest.mock('./trial_visualization', () => ({
 }));
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import { close as reduxClose } from '../store/view';
-import { ViewManager, MainAreaWidget } from './main_area_widget';
+import { close as reduxClose } from '../../store/view';
+import { ViewManager, MainAreaWidget } from '../main_area_widget';
 
 describe('ViewManager', () => {
   it('renders dashboard page', () => {

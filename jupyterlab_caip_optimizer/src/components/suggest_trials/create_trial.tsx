@@ -16,7 +16,7 @@ import {
   Checkbox,
 } from '@material-ui/core';
 import { prettifyStudyName } from '../../service/optimizer';
-import { Loading } from '../loading';
+import { Loading } from '../misc/loading';
 import { MetricInputs } from './metric_inputs';
 import { useDispatch } from 'react-redux';
 import { MetricsInputs } from '.';
