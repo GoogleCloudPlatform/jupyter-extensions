@@ -1,4 +1,4 @@
-import { LinearProgress, Button, Switch, Portal } from '@material-ui/core';
+import { LinearProgress, Button, Portal } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import * as csstips from 'csstips';
 import * as React from 'react';
@@ -26,7 +26,7 @@ import {
   SearchResult,
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
-import { DialogComponent } from 'gcp_jupyterlab_shared';
+import { DialogComponent, COLORS } from 'gcp_jupyterlab_shared';
 import CustomSnackbar from './snackbar';
 
 interface Props {
@@ -52,6 +52,7 @@ export interface Context {
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
+  isLoadingSearch: boolean;
   searchToggled: boolean;
   searchEnabled: boolean;
   dialogOpen: boolean;
@@ -66,20 +67,81 @@ const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     fontWeight: 600,
+    fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size0, 11px)',
     letterSpacing: '1px',
     margin: 0,
     padding: '8px 12px',
     textTransform: 'uppercase',
+    flexDirection: 'row',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+  },
+  resources: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    padding: '8px 12px',
+    display: 'flex',
     flexDirection: 'column',
+    flexGrow: 1,
+    overflow: 'hidden',
+  },
+  resourcesTitle: {
+    fontWeight: 600,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size0, 11px)',
+    letterSpacing: '1px',
+    margin: 0,
+    textTransform: 'uppercase',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: '8px',
+  },
+  search: {
+    marginBottom: '8px',
+  },
+  buttonContainer: {
+    flexGrow: 1,
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
   editQueryButton: {
     margin: 'auto',
     flexGrow: 0,
   },
+  pinProjectsButton: {
+    margin: 'auto',
+    flexGrow: 0,
+    padding: 0,
+  },
   list: {
     margin: 0,
-    overflowY: 'scroll',
+    flexDirection: 'column',
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gridTemplateRows: '1fr',
+    flexGrow: 1,
+    overflow: 'scroll',
+    padding: 0,
+    ...csstips.flex,
+  },
+  resourceTree: {
+    gridColumnStart: 1,
+    gridRowStart: 1,
+  },
+  hidden: {
+    display: 'none',
+    margin: 0,
+    padding: 0,
+    ...csstips.flex,
+  },
+  showing: {
+    zIndex: 1,
+    gridColumnStart: 1,
+    gridRowStart: 1,
+    backgroundColor: 'white',
+    margin: 0,
     padding: 0,
     ...csstips.flex,
   },
@@ -103,6 +165,12 @@ const localStyles = stylesheet({
     display: 'flex',
     alignItems: 'center',
   },
+  buttonLabel: {
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
+    textTransform: 'initial',
+  },
 });
 
 class ListItemsPanel extends React.Component<Props, State> {
@@ -111,6 +179,7 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.state = {
       hasLoaded: false,
       isLoading: false,
+      isLoadingSearch: false,
       searchToggled: false,
       searchEnabled: false,
       dialogOpen: false,
@@ -167,13 +236,13 @@ class ListItemsPanel extends React.Component<Props, State> {
       const searchKey = event.target.value;
       this.setState({ searchResults: [] });
       if (projectIds.length !== 0) {
-        this.setState({ isLoading: true, isSearching: true });
+        this.setState({ isLoadingSearch: true, isSearching: true });
         await Promise.all(
           projectIds.map(async project => {
             await this.search(searchKey, project);
           })
         );
-        this.setState({ isLoading: false });
+        this.setState({ isLoadingSearch: false });
       } else {
         console.warn(
           'Error searching, wait until data tree loads and try again'
@@ -239,86 +308,97 @@ class ListItemsPanel extends React.Component<Props, State> {
   render() {
     const {
       isLoading,
+      isLoadingSearch,
       isSearching,
       searchResults,
-      searchToggled,
       searchEnabled,
       dialogOpen,
       pinProjectDialogOpen,
       loadingPinnedProject,
     } = this.state;
     const { snackbar } = this.props;
+
+    const showSearchResults = isSearching
+      ? localStyles.showing
+      : localStyles.hidden;
     return (
       <div className={localStyles.panel}>
         <Portal>
           <CustomSnackbar open={snackbar.open} message={snackbar.message} />
         </Portal>
         <header className={localStyles.header}>
-          BigQuery in Notebooks
-          <Button
-            color="primary"
-            size="small"
-            variant="contained"
-            className={localStyles.editQueryButton}
-            onClick={() => {
-              const queryId = generateQueryId();
-              WidgetManager.getInstance().launchWidget(
-                QueryEditorTabWidget,
-                'main',
-                queryId,
-                undefined,
-                [queryId, undefined]
-              );
-            }}
-          >
-            Edit Query
-          </Button>
-          <Button
-            color="primary"
-            size="small"
-            className={localStyles.editQueryButton}
-            onClick={this.handleOpenPinProject}
-          >
-            <div className={localStyles.buttonWithIcon}>
-              <AddIcon color="primary" />
-              Pin Project
+          BigQuery Extension
+          <div className={localStyles.buttonContainer}>
+            <Button
+              style={{ color: COLORS.blue }}
+              size="small"
+              variant="outlined"
+              className={localStyles.editQueryButton}
+              onClick={() => {
+                const queryId = generateQueryId();
+                WidgetManager.getInstance().launchWidget(
+                  QueryEditorTabWidget,
+                  'main',
+                  queryId,
+                  undefined,
+                  [queryId, undefined]
+                );
+              }}
+            >
+              <div className={localStyles.buttonLabel}>Open SQL editor</div>
+            </Button>
+          </div>
+        </header>
+        <div className={localStyles.resources}>
+          <div className={localStyles.resourcesTitle}>
+            <div>Resources</div>
+            <div className={localStyles.buttonContainer}>
+              <Button
+                size="small"
+                variant="outlined"
+                className={localStyles.pinProjectsButton}
+                onClick={this.handleOpenPinProject}
+                startIcon={<AddIcon />}
+              >
+                <div className={localStyles.buttonLabel}>Pin project</div>
+              </Button>
             </div>
-          </Button>
-          {searchEnabled ? (
+          </div>
+          <div
+            className={localStyles.search}
+            onClick={searchEnabled ? null : this.handleOpenSearchDialog}
+          >
             <SearchBar
               handleKeyPress={this.handleKeyPress}
               handleClear={this.handleClear}
               defaultText={'Search...'}
             />
+          </div>
+          {isLoading ? (
+            <LinearProgress />
           ) : (
-            <div className={localStyles.enableSearch}>
-              <Switch
-                checked={searchToggled}
-                onClick={this.handleOpenSearchDialog}
-              />
-              <div style={{ alignSelf: 'center' }}>Enable Searching</div>
-            </div>
+            <ul className={localStyles.list}>
+              <div className={localStyles.resourceTree}>
+                <ListProjectItem
+                  context={this.props.context}
+                  listDatasetsService={this.props.listDatasetsService}
+                  listTablesService={this.props.listTablesService}
+                  listModelsService={this.props.listModelsService}
+                />
+              </div>
+              <div className={showSearchResults}>
+                {isLoadingSearch ? (
+                  <LinearProgress />
+                ) : (
+                  <ListSearchResults
+                    context={this.props.context}
+                    searchResults={searchResults}
+                  />
+                )}
+              </div>
+            </ul>
           )}
-        </header>
-        {isLoading ? (
-          <LinearProgress />
-        ) : isSearching ? (
-          <ul className={localStyles.list}>
-            <ListSearchResults
-              context={this.props.context}
-              searchResults={searchResults}
-            />
-          </ul>
-        ) : (
-          <ul className={localStyles.list}>
-            <ListProjectItem
-              context={this.props.context}
-              listDatasetsService={this.props.listDatasetsService}
-              listTablesService={this.props.listTablesService}
-              listModelsService={this.props.listModelsService}
-            />
-          </ul>
-        )}
+        </div>
         <DialogComponent
           header="Requirements to Enable Searching"
           open={dialogOpen}
