@@ -115,7 +115,9 @@ export class VmDetails extends React.Component<Props, State> {
       this.setState({ details: details });
       notebookService.projectId = details.project.projectId;
       notebookService.locationId = details.instance.zone;
-      notebookService.instanceName = details.instance.name;
+      const instanceNameSplit = details.instance.name.split('/');
+      notebookService.instanceName =
+        instanceNameSplit[instanceNameSplit.length - 1];
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
