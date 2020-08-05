@@ -31,6 +31,7 @@ interface Props {
   formData: HardwareConfiguration;
   onDialogClose: () => void;
   currentConfiguration?: HardwareConfiguration;
+  onSubmit: () => void;
 }
 
 export const STYLES = stylesheet({
@@ -85,12 +86,8 @@ function displayConfiguration(
   );
 }
 
-// TODO: Implement submit functionality
-//eslint-disable-next-line @typescript-eslint/no-empty-function
-function submitForm() {}
-
 export function ConfirmationPage(props: Props) {
-  const { onDialogClose, formData, currentConfiguration } = props;
+  const { onDialogClose, formData, currentConfiguration, onSubmit } = props;
 
   return (
     <div className={STYLES.container}>
@@ -107,7 +104,7 @@ export function ConfirmationPage(props: Props) {
       <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
         <SubmitButton
           actionPending={false}
-          onClick={() => submitForm()}
+          onClick={() => onSubmit()}
           text="Submit"
         />
       </ActionBar>

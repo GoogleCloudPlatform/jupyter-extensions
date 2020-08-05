@@ -17,6 +17,8 @@
 import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
+import { HardwareScalingStatus } from './hardware_scaling_status';
+import { NotebooksService } from '../service/notebooks_service';
 import {
   HardwareConfiguration,
   Details,
@@ -27,11 +29,13 @@ import { ConfirmationPage } from './confirmation_page';
 enum View {
   FORM,
   CONFIRMATION,
+  STATUS,
 }
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  notebookService: NotebooksService;
   details?: Details;
 }
 
@@ -56,15 +60,8 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
     return <Dialog open={open}>{this.getDisplay()}</Dialog>;
   }
 
-  private onFormSubmit(newConfiguration: HardwareConfiguration) {
-    this.setState({
-      view: View.CONFIRMATION,
-      hardwareConfiguration: newConfiguration,
-    });
-  }
-
   private getDisplay() {
-    const { onClose, details } = this.props;
+    const { onClose, notebookService, details } = this.props;
     const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
@@ -72,9 +69,12 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
         return (
           <HardwareScalingForm
             onDialogClose={onClose}
-            onSubmit={(configuration: HardwareConfiguration) =>
-              this.onFormSubmit(configuration)
-            }
+            onSubmit={(config: HardwareConfiguration) => {
+              this.setState({
+                view: View.CONFIRMATION,
+                hardwareConfiguration: config,
+              });
+            }}
           />
         );
       case View.CONFIRMATION:
@@ -85,6 +85,19 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
             currentConfiguration={
               details && detailsToHardwareConfiguration(details)
             }
+            onSubmit={() => {
+              this.setState({
+                view: View.STATUS,
+              });
+            }}
+          />
+        );
+      case View.STATUS:
+        return (
+          <HardwareScalingStatus
+            onDialogClose={onClose}
+            hardwareConfiguration={hardwareConfiguration}
+            notebookService={notebookService}
           />
         );
     }
