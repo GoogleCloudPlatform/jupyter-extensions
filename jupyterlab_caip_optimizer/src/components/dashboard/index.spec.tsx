@@ -1,18 +1,18 @@
-jest.mock('../store/view', () => ({
+jest.mock('../../store/view', () => ({
   setView: jest.fn(),
 }));
-jest.mock('../store/studies', () => ({
+jest.mock('../../store/studies', () => ({
   deleteStudy: jest.fn(),
 }));
-jest.mock('../service/optimizer', () => ({
+jest.mock('../../service/optimizer', () => ({
   prettifyStudyName: name => name,
 }));
 import * as React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { fakeStudyResponseActive } from '../service/test-constants';
 import MaterialTable from 'material-table';
-import { DashboardUnwrapped } from './dashboard';
+import { DashboardUnwrapped } from '../dashboard';
 import { Button } from '@material-ui/core';
+import { fakeStudyResponseActive } from '../../service/test-constants';
 
 describe('Dashboard', () => {
   let component: ShallowWrapper<any, any, React.Component<{}, {}, any>>;

@@ -2,6 +2,12 @@
   "NotebookApp": {
     "nbserver_extensions": {
       "jupyterlab_comments": true
+    },
+    "Refresh": {
+        "interval": 5
+    },
+    "Git": {
+        "remote": "origin"
     }
   }
 }

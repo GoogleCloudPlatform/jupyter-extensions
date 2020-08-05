@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { withStyles, Tabs, Tab } from '@material-ui/core';
+import { withStyles, Tabs, Tab, Button } from '@material-ui/core';
+import { Code } from '@material-ui/icons';
 
 import {
   TableDetailsService,
@@ -9,6 +10,9 @@ import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import TableDetailsPanel from './table_details_panel';
 import TablePreviewPanel from './table_preview';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { stylesheet } from 'typestyle';
 
 const localStyles = stylesheet({
@@ -132,7 +136,27 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
     } else {
       return (
         <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
-          <Header text={this.props.table_name} />
+          <Header
+            text={this.props.table_name}
+            buttons={[
+              <Button
+                onClick={() => {
+                  const queryId = generateQueryId();
+                  WidgetManager.getInstance().launchWidget(
+                    QueryEditorTabWidget,
+                    'main',
+                    queryId,
+                    undefined,
+                    [queryId, `SELECT * FROM \`${this.props.table_id}\``]
+                  );
+                }}
+                startIcon={<Code />}
+                style={{ textTransform: 'none', color: '#1A73E8' }}
+              >
+                Query table
+              </Button>,
+            ]}
+          ></Header>
           <div className={localStyles.body}>
             <StyledTabs
               value={this.state.currentTab}

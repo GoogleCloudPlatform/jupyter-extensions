@@ -1,65 +1,23 @@
-# jupyterlab_comments
+# Notebook Comments in Git Extension
 
-Notebooks comments in git
+This extension provides support for document comments for Notebooks and other files stored in Git repositories.
 
+## Prerequisites
 
+Install [git-appraise](https://github.com/google/git-appraise#installation)
 
-## Requirements
+## Development
 
-* JupyterLab >= 2.0
+1. Follow the [instructions](https://github.com/GoogleCloudPlatform/jupyter-extensions#development) from the root of the repository.
 
-## Install
+### Configuration
 
-```bash
-jupyter labextension install jupyterlab-comments
-```
-### Install
+The following attributes can be configured by modifying the [Jupyter config file](https://github.com/GoogleCloudPlatform/jupyter-extensions/blob/master/jupyterlab_comments/jupyter-config/jupyter_notebook_config.d/jupyterlab_comments.json)
 
-The `jlpm` command is JupyterLab's pinned version of
-[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
-`yarn` or `npm` in lieu of `jlpm` below.
+1) The name of the remote repository to connect. The default name is 'origin'.
 
-```bash
-# Clone the repo to your local environment
-# Move to jupyterlab_comments directory
+2) A constant interval at which to pull new comments from the remote repository. The default is every 10 seconds.
 
-# Install dependencies
-jlpm
-# Build Typescript source
-jlpm build
-# Link your development version of the extension with JupyterLab
-jupyter labextension link .
-# Rebuild Typescript source after making changes
-jlpm build
-# Rebuild JupyterLab after making any changes
-jupyter lab build
-```
-
-You can watch the source directory and run JupyterLab in watch mode to watch for changes in the extension's source and automatically rebuild the extension and application.
-
-```bash
-# Watch the source directory in another terminal tab
-jlpm watch
-# Run jupyterlab in watch mode in one terminal tab
-jupyter lab --watch
-```
-
-### Uninstall
-
-```bash
-
-jupyter labextension uninstall jupyterlab-comments
-```
-
-### Usage
-Add the following lines to your Jupyter config file (e.g. jupyter_notebook_config.py):
-```bash
-c.Git.remote = '${NAME_OF_REMOTE_REPOSITORY}'
-
-c.Refresh.interval = '${REFRESH_INTERVAL_SECONDS}'
-```
-1) The name of the remote repository defaults to 'origin' if no value is configured.
-
-2) New comments are pulled from the current repository at a constant interval which can be configured. The default interval is 10 seconds.
+If you change these attributes, you will need to run 'npm run install-extension' again.
 
 

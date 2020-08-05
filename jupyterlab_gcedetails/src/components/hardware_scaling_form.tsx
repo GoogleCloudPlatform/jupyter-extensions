@@ -31,21 +31,17 @@ import { SelectInput } from './select_input';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
   ACCELERATOR_TYPES,
-  Option,
   MACHINE_TYPES,
   HardwareConfiguration,
 } from '../data';
 
 interface Props {
-  onDialogClose?: () => void;
-  onSubmit: (config: HardwareConfiguration) => void;
+  onSubmit: (configuration: HardwareConfiguration) => void;
+  onDialogClose: () => void;
 }
 
 interface State {
-  machineType: Option;
-  attachGpu: boolean;
-  gpuType: string;
-  gpuCount: string;
+  configuration: HardwareConfiguration;
 }
 
 export const STYLES = stylesheet({
@@ -89,38 +85,50 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      machineType: DEFAULT_MACHINE_TYPE,
-      attachGpu: false,
-      gpuType: NO_ACCELERATOR,
-      gpuCount: '',
+      configuration: {
+        machineType: DEFAULT_MACHINE_TYPE,
+        attachGpu: false,
+        gpuType: NO_ACCELERATOR,
+        gpuCount: '',
+      },
     };
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      attachGpu: event.target.checked,
-      gpuType: event.target.checked
-        ? (ACCELERATOR_TYPES[1].value as string)
-        : NO_ACCELERATOR,
-      gpuCount: event.target.checked
-        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-        : '',
+      configuration: {
+        ...this.state.configuration,
+        attachGpu: event.target.checked,
+        gpuType: event.target.checked
+          ? (ACCELERATOR_TYPES[1].value as string)
+          : NO_ACCELERATOR,
+        gpuCount: event.target.checked
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+          : '',
+      },
     });
   }
 
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      gpuType: event.target.value,
-      gpuCount: event.target.value
-        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-        : '',
+      configuration: {
+        ...this.state.configuration,
+        gpuType: event.target.value,
+        gpuCount: event.target.value
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+          : '',
+      },
     });
   }
 
+  private submitForm() {
+    const configuration = { ...this.state.configuration };
+    this.props.onSubmit(configuration);
+  }
+
   render() {
-    const { onDialogClose, onSubmit } = this.props;
-    const { gpuType, gpuCount, attachGpu } = this.state;
-    const config = this.state as HardwareConfiguration;
+    const { onDialogClose } = this.props;
+    const { gpuType, gpuCount, attachGpu } = this.state.configuration;
 
     return (
       <div className={STYLES.container}>
@@ -134,7 +142,11 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 header: machineType.base,
                 options: machineType.configurations,
               }))}
-              onChange={machineType => this.setState({ machineType })}
+              onChange={machineType =>
+                this.setState({
+                  configuration: { ...this.state.configuration, machineType },
+                })
+              }
             />
             <div className={STYLES.checkboxContainer}>
               <CheckboxInput
@@ -164,7 +176,14 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     name="gpuCount"
                     value={gpuCount}
                     options={ACCELERATOR_COUNTS_1_2_4_8}
-                    onChange={e => this.setState({ gpuCount: e.target.value })}
+                    onChange={e =>
+                      this.setState({
+                        configuration: {
+                          ...this.state.configuration,
+                          gpuCount: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -174,10 +193,8 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
           <SubmitButton
             actionPending={false}
-            onClick={() => {
-              onSubmit(config);
-            }}
-            text="Submit"
+            onClick={() => this.submitForm()}
+            text="Next"
           />
         </ActionBar>
       </div>
