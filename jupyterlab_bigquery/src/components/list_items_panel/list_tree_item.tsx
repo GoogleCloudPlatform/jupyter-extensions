@@ -103,17 +103,6 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
-  const queryResource = dataTreeItem => {
-    const queryId = generateQueryId();
-    WidgetManager.getInstance().launchWidget(
-      QueryEditorTabWidget,
-      'main',
-      queryId,
-      undefined,
-      [queryId, `SELECT * FROM \`${dataTreeItem.id}\``]
-    );
-  };
-
   const copyBoilerplateQuery = dataTreeItem => {
     Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
   };
@@ -166,7 +155,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
 
   const queryTable = dataTreeItem => {
     const notebookTrack = context.notebookTrack as INotebookTracker;
-    const query = `SELECT * FROM ${dataTreeItem.id} LIMIT 100`;
+    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
 
     const curWidget = notebookTrack.currentWidget;
 
@@ -193,8 +182,8 @@ export function BuildTree(project, context, expandProject, expandDataset) {
   const renderTables = table => {
     const tableContextMenuItems = [
       {
-        label: 'Query table',
-        handler: dataTreeItem => queryResource(dataTreeItem),
+        label: 'Query Table',
+        handler: queryTable,
       },
       {
         label: 'Copy table ID',
@@ -203,10 +192,6 @@ export function BuildTree(project, context, expandProject, expandDataset) {
       {
         label: 'Copy boilerplate query',
         handler: dataTreeItem => copyBoilerplateQuery(dataTreeItem),
-      },
-      {
-        label: 'Query Table',
-        handler: queryTable,
       },
     ];
 
