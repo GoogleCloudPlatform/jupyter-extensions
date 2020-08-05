@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { Typography, Button, Box } from '@material-ui/core';
 import MaterialTable from 'material-table';
-import { deleteStudy } from '../store/studies';
-import { setView } from '../store/view';
-import { Study } from '../types';
 import moment from 'moment';
 import { Launch } from '@material-ui/icons';
-import { prettifyStudyName } from '../service/optimizer';
 import { connect } from 'react-redux';
 import AddIcon from '@material-ui/icons/Add';
-import { dateFormat, makeReadable } from '../utils';
-import { styles } from '../utils/styles';
-import { tableIcons } from '../utils/table_icons';
-import { Loading } from './loading';
+import { prettifyStudyName } from '../../service/optimizer';
+import { dateFormat, makeReadable } from '../../utils';
+import { Study } from '../../types';
+import { setView } from '../../store/view';
+import { deleteStudy } from '../../store/studies';
+import { styles } from '../../utils/styles';
+import { Loading } from '../misc/loading';
+import { tableIcons } from '../../utils/table_icons';
 
 const columns = [
   {

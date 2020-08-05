@@ -23,7 +23,6 @@ const localStyles = stylesheet({
     color: 'black',
   },
   tableCell: {
-    border: 'var(--jp-border-width) solid var(--jp-border-color2)',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     overflow: 'hidden',

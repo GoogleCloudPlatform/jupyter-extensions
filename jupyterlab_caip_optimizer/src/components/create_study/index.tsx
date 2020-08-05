@@ -10,12 +10,12 @@ import {
   Grid,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import * as Types from '../types';
 import { connect } from 'react-redux';
-import { createStudy } from '../store/studies';
-import { setView } from '../store/view';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { styles } from '../utils/styles';
+import { createStudy } from '../../store/studies';
+import { setView } from '../../store/view';
+import { styles } from '../../utils/styles';
+import * as Types from '../../types';
 
 const useStyles = makeStyles(theme => ({
   chipBox: {
@@ -333,244 +333,150 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
   };
 
   return (
-    <Box className={styles.root} m={5}>
-      <React.Fragment>
-        <Grid container spacing={3}>
-          <Grid container item xs={12}>
-            <Typography variant="h5" gutterBottom>
-              Create New Study
-            </Typography>
-          </Grid>
-          <Grid container item xs={12}>
-            <TextField
-              required
-              variant="outlined"
-              id="studyName"
-              name="studyName"
-              label="Study Name"
-              value={studyName}
-              onChange={e => setStudyName(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid container item spacing={1} xs={12} md={6}>
-            <Typography align="center" variant="h6" gutterBottom>
-              Parameter Configuration
-            </Typography>
-            <Grid item xs={12}>
+    <Box className={styles.root}>
+      <Box m={5}>
+        <React.Fragment>
+          <Grid container spacing={3}>
+            <Grid container item xs={12}>
+              <Typography variant="h5" gutterBottom>
+                Create New Study
+              </Typography>
+            </Grid>
+            <Grid container item xs={12}>
               <TextField
                 required
                 variant="outlined"
-                id="paramName"
-                name="paramName"
-                label="Parameter Name"
+                id="studyName"
+                name="studyName"
+                label="Study Name"
+                value={studyName}
+                onChange={e => setStudyName(e.target.value)}
                 fullWidth
-                value={paramName}
-                onChange={e => setParamName(e.target.value)}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="paramType"
-                variant="outlined"
-                select
-                label="Parameter Type"
-                value={paramType}
-                onChange={handleParamTypeChange}
-                fullWidth
-                required
-              >
-                {paramTypes.map(option => (
-                  <MenuItem
-                    key={option.value}
-                    value={option.value}
-                    data-testid="paramType"
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                required
-                id="paramMinVal"
-                variant="outlined"
-                name="paramMinVal"
-                label="Min Value"
-                helperText="For Double and Integer types."
-                fullWidth
-                disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
-                value={paramMinVal}
-                onChange={e => setParamMinVal(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                required
-                id="paramMaxVal"
-                variant="outlined"
-                name="paramMaxVal"
-                label="Max Value"
-                fullWidth
-                disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
-                value={paramMaxVal}
-                onChange={e => setParamMaxVal(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                id="paramVals"
-                variant="outlined"
-                name="paramVals"
-                label="List of possible values"
-                helperText="For Categorical and Discrete types. Separate values by comma (e.g. 1,2,3,4,5)"
-                fullWidth
-                disabled={
-                  paramType !== 'CATEGORICAL' && paramType !== 'DISCRETE'
-                }
-                value={paramValListString}
-                onChange={handleParamValListChange}
-              />
-            </Grid>
-            <Grid container item justify="space-evenly" xs={12}>
-              <Button
-                color="primary"
-                disabled={paramIsNew}
-                onClick={handleSaveParam}
-              >
-                SAVE PARAM
-              </Button>
-              <Button
-                color="primary"
-                disabled={paramIsNew}
-                onClick={handleDeleteParam}
-              >
-                DELETE PARAM
-              </Button>
-              <Button
-                color="primary"
-                disabled={
-                  !paramType ||
-                  !paramName ||
-                  (!paramMinVal && !paramMaxVal && paramValList.length === 0) ||
-                  !paramIsNew
-                }
-                onClick={handleAddParam}
-              >
-                ADD PARAM
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Paper component="ul" className={classes.chipBox}>
-                {paramChipData.map(data => {
-                  return (
-                    <li key={data.key} data-testid="paramChip">
-                      <Chip
-                        label={data.label}
-                        className={classes.chip}
-                        clickable
-                        onClick={handleParamChipClick}
-                        color={
-                          data.label === paramName ? 'secondary' : 'default'
-                        }
-                      />
-                    </li>
-                  );
-                })}
-              </Paper>
-            </Grid>
-          </Grid>
-          <Grid
-            container
-            item
-            spacing={3}
-            xs={12}
-            md={6}
-            alignContent="flex-start"
-          >
-            <Grid container item spacing={1} alignContent="flex-start">
+            <Grid container item spacing={1} xs={12} md={6}>
               <Typography align="center" variant="h6" gutterBottom>
-                Metric Configuration
+                Parameter Configuration
               </Typography>
               <Grid item xs={12}>
                 <TextField
                   required
                   variant="outlined"
-                  id="metricName"
-                  name="metricName"
-                  label="Metric Name"
+                  id="paramName"
+                  name="paramName"
+                  label="Parameter Name"
                   fullWidth
-                  value={metricName}
-                  onChange={e => setMetricName(e.target.value)}
+                  value={paramName}
+                  onChange={e => setParamName(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  id="metricGoalType"
-                  SelectProps={{
-                    SelectDisplayProps: {
-                      // Needed for testing
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                      // @ts-ignore
-                      'data-testid': 'metricGoalType',
-                    },
-                  }}
+                  id="paramType"
                   variant="outlined"
                   select
-                  label="Goal Type"
-                  value={metricGoalType}
-                  onChange={handleMetricGoalTypeChange}
+                  label="Parameter Type"
+                  value={paramType}
+                  onChange={handleParamTypeChange}
                   fullWidth
                   required
                 >
-                  {metricGoalTypes.map(option => (
+                  {paramTypes.map(option => (
                     <MenuItem
                       key={option.value}
                       value={option.value}
-                      data-testid="metricItem"
+                      data-testid="paramType"
                     >
                       {option.label}
                     </MenuItem>
                   ))}
                 </TextField>
               </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  required
+                  id="paramMinVal"
+                  variant="outlined"
+                  name="paramMinVal"
+                  label="Min Value"
+                  helperText="For Double and Integer types."
+                  fullWidth
+                  disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
+                  value={paramMinVal}
+                  onChange={e => setParamMinVal(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  required
+                  id="paramMaxVal"
+                  variant="outlined"
+                  name="paramMaxVal"
+                  label="Max Value"
+                  fullWidth
+                  disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
+                  value={paramMaxVal}
+                  onChange={e => setParamMaxVal(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  id="paramVals"
+                  variant="outlined"
+                  name="paramVals"
+                  label="List of possible values"
+                  helperText="For Categorical and Discrete types. Separate values by comma (e.g. 1,2,3,4,5)"
+                  fullWidth
+                  disabled={
+                    paramType !== 'CATEGORICAL' && paramType !== 'DISCRETE'
+                  }
+                  value={paramValListString}
+                  onChange={handleParamValListChange}
+                />
+              </Grid>
               <Grid container item justify="space-evenly" xs={12}>
                 <Button
                   color="primary"
-                  disabled={metricIsNew}
-                  onClick={handleSaveMetric}
+                  disabled={paramIsNew}
+                  onClick={handleSaveParam}
                 >
-                  SAVE METRIC
+                  SAVE PARAM
                 </Button>
                 <Button
                   color="primary"
-                  disabled={metricIsNew}
-                  onClick={handleDeleteMetric}
+                  disabled={paramIsNew}
+                  onClick={handleDeleteParam}
                 >
-                  DELETE METRIC
+                  DELETE PARAM
                 </Button>
                 <Button
                   color="primary"
-                  disabled={!metricName || !metricGoalType || !metricIsNew}
-                  onClick={handleAddMetric}
+                  disabled={
+                    !paramType ||
+                    !paramName ||
+                    (!paramMinVal &&
+                      !paramMaxVal &&
+                      paramValList.length === 0) ||
+                    !paramIsNew
+                  }
+                  onClick={handleAddParam}
                 >
-                  ADD METRIC
+                  ADD PARAM
                 </Button>
               </Grid>
               <Grid item xs={12}>
                 <Paper component="ul" className={classes.chipBox}>
-                  {metricChipData.map(data => {
+                  {paramChipData.map(data => {
                     return (
-                      <li key={data.key} data-testid="metricChip">
+                      <li key={data.key} data-testid="paramChip">
                         <Chip
                           label={data.label}
                           className={classes.chip}
                           clickable
-                          onClick={handleMetricChipClick}
+                          onClick={handleParamChipClick}
                           color={
-                            data.label === metricName ? 'secondary' : 'default'
+                            data.label === paramName ? 'secondary' : 'default'
                           }
                         />
                       </li>
@@ -579,44 +485,144 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
                 </Paper>
               </Grid>
             </Grid>
-            <Grid container item spacing={1} alignContent="flex-start">
-              <Typography align="center" variant="h6" gutterBottom>
-                Algorithm
-              </Typography>
-              <Grid item xs={12}>
-                <TextField
-                  id="algorithmType"
-                  variant="outlined"
-                  select
-                  label="Algorithm Type"
-                  value={algorithmType}
-                  onChange={handleAlgorithmTypeChange}
-                  fullWidth
-                  required
-                >
-                  {algorithmTypes.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+            <Grid
+              container
+              item
+              spacing={3}
+              xs={12}
+              md={6}
+              alignContent="flex-start"
+            >
+              <Grid container item spacing={1} alignContent="flex-start">
+                <Typography align="center" variant="h6" gutterBottom>
+                  Metric Configuration
+                </Typography>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    variant="outlined"
+                    id="metricName"
+                    name="metricName"
+                    label="Metric Name"
+                    fullWidth
+                    value={metricName}
+                    onChange={e => setMetricName(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    id="metricGoalType"
+                    SelectProps={{
+                      SelectDisplayProps: {
+                        // Needed for testing
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                        // @ts-ignore
+                        'data-testid': 'metricGoalType',
+                      },
+                    }}
+                    variant="outlined"
+                    select
+                    label="Goal Type"
+                    value={metricGoalType}
+                    onChange={handleMetricGoalTypeChange}
+                    fullWidth
+                    required
+                  >
+                    {metricGoalTypes.map(option => (
+                      <MenuItem
+                        key={option.value}
+                        value={option.value}
+                        data-testid="metricItem"
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid container item justify="space-evenly" xs={12}>
+                  <Button
+                    color="primary"
+                    disabled={metricIsNew}
+                    onClick={handleSaveMetric}
+                  >
+                    SAVE METRIC
+                  </Button>
+                  <Button
+                    color="primary"
+                    disabled={metricIsNew}
+                    onClick={handleDeleteMetric}
+                  >
+                    DELETE METRIC
+                  </Button>
+                  <Button
+                    color="primary"
+                    disabled={!metricName || !metricGoalType || !metricIsNew}
+                    onClick={handleAddMetric}
+                  >
+                    ADD METRIC
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Paper component="ul" className={classes.chipBox}>
+                    {metricChipData.map(data => {
+                      return (
+                        <li key={data.key} data-testid="metricChip">
+                          <Chip
+                            label={data.label}
+                            className={classes.chip}
+                            clickable
+                            onClick={handleMetricChipClick}
+                            color={
+                              data.label === metricName
+                                ? 'secondary'
+                                : 'default'
+                            }
+                          />
+                        </li>
+                      );
+                    })}
+                  </Paper>
+                </Grid>
+              </Grid>
+              <Grid container item spacing={1} alignContent="flex-start">
+                <Typography align="center" variant="h6" gutterBottom>
+                  Algorithm
+                </Typography>
+                <Grid item xs={12}>
+                  <TextField
+                    id="algorithmType"
+                    variant="outlined"
+                    select
+                    label="Algorithm Type"
+                    value={algorithmType}
+                    onChange={handleAlgorithmTypeChange}
+                    fullWidth
+                    required
+                  >
+                    {algorithmTypes.map(option => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
               </Grid>
             </Grid>
+            <Grid container item spacing={3} justify="flex-end">
+              <Button
+                size="large"
+                variant="contained"
+                color="primary"
+                id="createStudyButton"
+                disabled={!studyName}
+                onClick={() => createStudyAndLoad(getStudyObject())}
+              >
+                Create Study
+              </Button>
+            </Grid>
           </Grid>
-          <Grid container item spacing={3} justify="flex-end">
-            <Button
-              size="large"
-              variant="contained"
-              color="primary"
-              id="createStudyButton"
-              disabled={!studyName}
-              onClick={() => createStudyAndLoad(getStudyObject())}
-            >
-              Create Study
-            </Button>
-          </Grid>
-        </Grid>
-      </React.Fragment>
+        </React.Fragment>
+      </Box>
     </Box>
   );
 };

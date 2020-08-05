@@ -104,7 +104,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
             <DetailsPanel
               details={this.state.details.details}
               rows={this.state.rows}
-              detailsType="dataset"
+              detailsType="DATASET"
             />
           </div>
         </div>
