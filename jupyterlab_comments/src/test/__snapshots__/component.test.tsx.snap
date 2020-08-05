@@ -182,6 +182,7 @@ exports[`Basic Comment Component Rendering review comment should render correctl
 
 exports[`Comment editor components should render correctly should render new comment thread editor 1`] = `
 <DetachedCommentEditor
+  commentType="detached"
   currFilePath="fake/path"
   serverRoot="fake/path"
 />
