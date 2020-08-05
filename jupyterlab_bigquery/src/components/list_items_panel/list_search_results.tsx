@@ -9,6 +9,11 @@ import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
+import { ViewDetailsWidget } from '../details_panel/view_details_widget';
+import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -89,16 +94,47 @@ export function BuildSearchResult(result, context) {
     );
   };
 
-  const openViewDetails = view => {
+  const openViewDetails = (event, view) => {
     event.stopPropagation();
-    // TODO: Create view widget
+    const service = new ViewDetailsService();
+    const widgetType = ViewDetailsWidget;
+    context.manager.launchWidgetForId(
+      view.id,
+      widgetType,
+      service,
+      view.id,
+      view.name
+    );
+  };
+
+  const queryResource = dataTreeItem => {
+    const queryId = generateQueryId();
+    WidgetManager.getInstance().launchWidget(
+      QueryEditorTabWidget,
+      'main',
+      queryId,
+      undefined,
+      [queryId, `SELECT * FROM \`${dataTreeItem.id}\``]
+    );
+  };
+
+  const copyBoilerplateQuery = dataTreeItem => {
+    Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
   };
 
   const renderTable = table => {
     const contextMenuItems = [
       {
-        label: 'Copy Table ID',
+        label: 'Query table',
+        handler: dataTreeItem => queryResource(dataTreeItem),
+      },
+      {
+        label: 'Copy table ID',
         handler: dataTreeItem => copyID(dataTreeItem),
+      },
+      {
+        label: 'Copy boilerplate query',
+        handler: dataTreeItem => copyBoilerplateQuery(dataTreeItem),
       },
     ];
     return (
@@ -129,7 +165,7 @@ export function BuildSearchResult(result, context) {
   const renderView = view => {
     const contextMenuItems = [
       {
-        label: 'Copy View ID',
+        label: 'Copy view ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
@@ -141,7 +177,7 @@ export function BuildSearchResult(result, context) {
         }))}
       >
         <div
-          onDoubleClick={() => openViewDetails(view)}
+          onDoubleClick={event => openViewDetails(event, view)}
           className={localStyles.searchResultItem}
         >
           <div>
@@ -161,7 +197,7 @@ export function BuildSearchResult(result, context) {
   const renderModel = model => {
     const contextMenuItems = [
       {
-        label: 'Copy Model ID',
+        label: 'Copy model ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
@@ -190,7 +226,7 @@ export function BuildSearchResult(result, context) {
   const renderDataset = dataset => {
     const contextMenuItems = [
       {
-        label: 'Copy Dataset ID',
+        label: 'Copy dataset ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
