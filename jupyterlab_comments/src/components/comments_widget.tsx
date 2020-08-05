@@ -130,10 +130,18 @@ export class CommentsComponent extends React.Component<Props, State> {
     ));
     const reviewCommentsList = this.state.reviewComments.map(
       reviewCommentsArr => (
-        <CodeReview
-          reviewRequest={reviewCommentsArr[0]}
-          commentsList={reviewCommentsArr[1]}
-        />
+        <>
+          <CodeReview
+            reviewRequest={reviewCommentsArr[0]}
+            commentsList={reviewCommentsArr[1]}
+          />
+          <NewCommentThread
+            serverRoot={this.state.serverRoot}
+            currFilePath={currFilePath}
+            commentType="review"
+            reviewHash={reviewCommentsArr[0].reviewHash}
+          />
+        </>
       )
     );
     return (
@@ -183,6 +191,7 @@ export class CommentsComponent extends React.Component<Props, State> {
               <NewCommentThread
                 serverRoot={this.state.serverRoot}
                 currFilePath={currFilePath}
+                commentType="detached"
               />
               <List className={localStyles.commentsList}>
                 {' '}

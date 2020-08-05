@@ -36,7 +36,7 @@ export class CodeReview extends React.Component<Props> {
     return (
       <List
         subheader={
-          <ListSubheader>
+          <ListSubheader component="div" id="nested-list-subheader">
             {'Review requested by ' +
               this.props.reviewRequest.requester +
               ':  ' +
