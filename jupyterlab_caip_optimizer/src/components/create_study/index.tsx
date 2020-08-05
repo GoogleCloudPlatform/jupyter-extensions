@@ -15,70 +15,15 @@ import * as Types from '../../types';
 import { ParameterList } from './parameter_list';
 import { MetricList } from './metric_list';
 import { useAppDispatch } from '../../store/store';
-
-export interface DropdownItem {
-  value: string;
-  label: string;
-}
-
-export type TemporaryParameterBase = {
-  name: string;
-};
-
-export type TemporaryParameterUnspecifiedMetadata = {};
-export type TemporaryParameterUnspecified = TemporaryParameterBase & {
-  type: 'PARAMETER_TYPE_UNSPECIFIED';
-  metadata: TemporaryParameterUnspecifiedMetadata;
-};
-
-export type TemporaryParameterDoubleMetadata = {
-  minValue: string;
-  maxValue: string;
-};
-export type TemporaryParameterDouble = TemporaryParameterBase & {
-  type: 'DOUBLE';
-  metadata: TemporaryParameterDoubleMetadata;
-};
-
-export type TemporaryParameterIntegerMetadata = {
-  minValue: string;
-  maxValue: string;
-};
-export type TemporaryParameterInteger = TemporaryParameterBase & {
-  type: 'INTEGER';
-  metadata: TemporaryParameterIntegerMetadata;
-};
-
-export type TemporaryParameterDiscreteMetadata = {
-  // NOTE: this is a string list not a number list!
-  valueList: string[];
-};
-export type TemporaryParameterDiscrete = TemporaryParameterBase & {
-  type: 'DISCRETE';
-  metadata: TemporaryParameterDiscreteMetadata;
-};
-
-export type TemporaryParameterCategoricalMetadata = {
-  valueList: string[];
-};
-export type TemporaryParameterCategorical = TemporaryParameterBase & {
-  type: 'CATEGORICAL';
-  metadata: TemporaryParameterCategoricalMetadata;
-};
-
-export type TemporaryParameterMetadata =
-  | TemporaryParameterUnspecifiedMetadata
-  | TemporaryParameterDoubleMetadata
-  | TemporaryParameterIntegerMetadata
-  | TemporaryParameterDiscreteMetadata
-  | TemporaryParameterCategoricalMetadata;
-
-export type TemporaryParameter =
-  | TemporaryParameterUnspecified
-  | TemporaryParameterDouble
-  | TemporaryParameterInteger
-  | TemporaryParameterDiscrete
-  | TemporaryParameterCategorical;
+import {
+  DropdownItem,
+  TemporaryParameter,
+  TemporaryParameterDoubleMetadata,
+  TemporaryParameterIntegerMetadata,
+  TemporaryParameterCategoricalMetadata,
+  TemporaryParameterDiscreteMetadata,
+  TemporaryParameterChildMetadata,
+} from './types';
 
 export const createDropdown = (
   items: ReadonlyArray<string>
@@ -91,6 +36,121 @@ export const createDropdown = (
   return dropdownList;
 };
 
+const createPartialSpec = (parameter: TemporaryParameter) => {
+  const parameterSpec: Partial<Types.ParameterSpec> = {};
+  parameterSpec['parameter'] = parameter.name;
+  parameterSpec['type'] = parameter.type;
+  switch (parameterSpec.type) {
+    case 'DOUBLE': {
+      const {
+        minValue,
+        maxValue,
+      } = parameter.metadata as TemporaryParameterDoubleMetadata;
+      parameterSpec['doubleValueSpec'] = {
+        minValue: Number(minValue),
+        maxValue: Number(maxValue),
+      } as Types.DoubleValueSpec;
+      break;
+    }
+    case 'INTEGER': {
+      const {
+        minValue,
+        maxValue,
+      } = parameter.metadata as TemporaryParameterIntegerMetadata;
+      parameterSpec['integerValueSpec'] = {
+        minValue: minValue,
+        maxValue: maxValue,
+      } as Types.IntegerValueSpec;
+      break;
+    }
+    case 'CATEGORICAL': {
+      const {
+        valueList,
+      } = parameter.metadata as TemporaryParameterCategoricalMetadata;
+      parameterSpec['categoricalValueSpec'] = {
+        values: valueList,
+      } as Types.CategoricalValueSpec;
+      break;
+    }
+    case 'DISCRETE': {
+      const {
+        valueList,
+      } = parameter.metadata as TemporaryParameterDiscreteMetadata;
+      parameterSpec['discreteValueSpec'] = {
+        values: valueList.map((valueString: string): number =>
+          Number(valueString)
+        ),
+      } as Types.DiscreteValueSpec;
+      break;
+    }
+  }
+  return parameterSpec as Types.ParameterSpec;
+};
+
+const temporaryParametersToSpecs = (
+  parameters: TemporaryParameter[]
+): Types.ParameterSpec[] => {
+  const specs = new Map<
+    string,
+    { spec: Types.ParameterSpec; parent?: TemporaryParameterChildMetadata }
+  >();
+
+  parameters.forEach(parameter => {
+    const spec = createPartialSpec(parameter);
+    specs.set(parameter.name, { spec, parent: parameter.parent });
+  });
+
+  specs.forEach(({ spec, parent }) => {
+    if (parent) {
+      if (!specs.has(parent.name)) {
+        throw new TypeError(
+          `Parent with name "${parent.name}" does not exist!`
+        );
+      }
+      const { spec: parentSpec } = specs.get(parent.name);
+
+      // add to parent children
+      switch (parentSpec.type) {
+        case 'CATEGORICAL':
+        case 'DISCRETE':
+        case 'INTEGER':
+          if (!parentSpec.childParameterSpecs) {
+            parentSpec.childParameterSpecs = [];
+          }
+          parentSpec.childParameterSpecs.push(spec);
+          break;
+        default:
+          throw new TypeError(
+            `Parent of type "${parentSpec.type}" can not have children`
+          );
+      }
+
+      // add valid values for spec
+      switch (parentSpec.type) {
+        case 'CATEGORICAL':
+          // TODO: fixing typings
+          (spec as any).parentCategoricalValues = parent.validFor;
+          break;
+        case 'DISCRETE':
+          (spec as any).parentDiscreteValues = parent.validFor.map(
+            stringValue => parseInt(stringValue, 10)
+          );
+          break;
+        case 'INTEGER':
+          (spec as any).parentIntValues = parent.validFor.map(stringValue =>
+            parseInt(stringValue, 10)
+          );
+          break;
+      }
+    }
+  });
+
+  const specsArray = Array.from(specs.values());
+
+  // return root spec nodes
+  return specsArray.filter(item => !item.parent).map(item => item.spec);
+};
+
 export const CreateStudy: React.FC = () => {
   const dispatch = useAppDispatch();
   const [studyName, setStudyName] = React.useState('');
@@ -101,65 +161,10 @@ export const CreateStudy: React.FC = () => {
   const [parameters, setParameters] = React.useState<TemporaryParameter[]>([]);
   const [metrics, setMetrics] = React.useState<Types.MetricSpec[]>([]);
 
-  const getParameterSpecList = (): Types.ParameterSpec[] => {
-    return parameters.map(parameter => {
-      const parameterSpec: Partial<Types.ParameterSpec> = {};
-      parameterSpec['parameter'] = parameter.name;
-      parameterSpec['type'] = parameter.type;
-      switch (parameterSpec.type) {
-        case 'DOUBLE': {
-          const {
-            minValue,
-            maxValue,
-          } = parameter.metadata as TemporaryParameterDoubleMetadata;
-          parameterSpec['doubleValueSpec'] = {
-            minValue: Number(minValue),
-            maxValue: Number(maxValue),
-          } as Types.DoubleValueSpec;
-          break;
-        }
-        case 'INTEGER': {
-          const {
-            minValue,
-            maxValue,
-          } = parameter.metadata as TemporaryParameterIntegerMetadata;
-          parameterSpec['integerValueSpec'] = {
-            minValue: minValue,
-            maxValue: maxValue,
-          } as Types.IntegerValueSpec;
-          break;
-        }
-        case 'CATEGORICAL': {
-          const {
-            valueList,
-          } = parameter.metadata as TemporaryParameterCategoricalMetadata;
-          parameterSpec['categoricalValueSpec'] = {
-            values: valueList,
-          } as Types.CategoricalValueSpec;
-          break;
-        }
-        case 'DISCRETE': {
-          const {
-            valueList,
-          } = parameter.metadata as TemporaryParameterDiscreteMetadata;
-          parameterSpec['discreteValueSpec'] = {
-            values: valueList.map((valueString: string): number =>
-              Number(valueString)
-            ),
-          } as Types.DiscreteValueSpec;
-          break;
-        }
-      }
-      const finalParameterSpec = parameterSpec as Types.ParameterSpec;
-      return finalParameterSpec;
-    });
-  };
-
   const getStudyObject = (): Types.Study => {
-    const parameters = getParameterSpecList();
     const studyConfig: Types.StudyConfig = {
       metrics,
-      parameters,
+      parameters: temporaryParametersToSpecs(parameters),
       algorithm: algorithmType,
     };
     const study: Types.Study = {

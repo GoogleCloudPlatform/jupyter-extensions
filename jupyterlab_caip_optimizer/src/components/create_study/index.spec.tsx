@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createDropdown, DropdownItem, CreateStudy } from '.';
+import { createDropdown, CreateStudy } from '.';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import * as Types from '../../types';
@@ -12,6 +12,7 @@ import {
 import { proxyUrl, createStudyUrl } from '../../utils/urls';
 import { fakeStudy, cleanFakeStudyName } from '../../service/test-constants';
 import userEvent from '@testing-library/user-event';
+import { DropdownItem } from './types';
 
 const server = setupServer();
 
