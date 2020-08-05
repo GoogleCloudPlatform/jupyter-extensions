@@ -129,17 +129,21 @@ const temporaryParametersToSpecs = (
       switch (parentSpec.type) {
         case 'CATEGORICAL':
           // TODO: fixing typings
-          (spec as any).parentCategoricalValues = parent.validFor;
+          (spec as any).parentCategoricalValues = { values: parent.validFor };
           break;
         case 'DISCRETE':
-          (spec as any).parentDiscreteValues = parent.validFor.map(
-            stringValue => parseInt(stringValue, 10)
-          );
+          (spec as any).parentDiscreteValues = {
+            values: parent.validFor.map(stringValue =>
+              parseInt(stringValue, 10)
+            ),
+          };
           break;
         case 'INTEGER':
-          (spec as any).parentIntValues = parent.validFor.map(stringValue =>
-            parseInt(stringValue, 10)
-          );
+          (spec as any).parentIntValues = {
+            values: parent.validFor.map(stringValue =>
+              parseInt(stringValue, 10)
+            ),
+          };
           break;
       }
     }
