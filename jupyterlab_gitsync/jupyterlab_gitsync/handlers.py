@@ -48,7 +48,7 @@ class SetupHandler(APIHandler):
     return_code = subprocess.call(['git', 'rev-parse'], cwd=path)
     return return_code == 0
 
-  def add_sync_command(self):
+  def get_sync_path(self):
     cwd = os.getcwd()
     ex_path = 'jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes'
     return os.path.join(cwd, ex_path)
@@ -60,7 +60,7 @@ class SetupHandler(APIHandler):
 
     try:
       self.inside_git_repo(path)
-      msg = self.add_sync_command()
+      msg = self.get_sync_path()
       self.finish({'message': msg})
     except Exception as e:
       self.finish({'error': str(e)})
