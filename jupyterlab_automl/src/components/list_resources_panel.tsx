@@ -152,6 +152,37 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     }
   }
 
+  private getButtonForResourceType(type: ResourceType) {
+    switch (type) {
+      case ResourceType.Model:
+        return (
+          <Button
+            color="primary"
+            size="small"
+            startIcon={<Icon>publish</Icon>}
+            onClick={_ => {
+              this.setState({ importModelDialogOpen: true });
+            }}
+          >
+            Import
+          </Button>
+        );
+      case ResourceType.Dataset:
+        return (
+          <Button
+            color="primary"
+            size="small"
+            startIcon={<Icon>add</Icon>}
+            onClick={_ => {
+              this.setState({ importDatasetDialogOpen: true });
+            }}
+          >
+            Create
+          </Button>
+        );
+    }
+  }
+
   private getTableForResourceType(type: ResourceType) {
     const sharedProps = {
       isLoading: this.state.isLoading,
@@ -338,30 +369,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             </ResourceSelect>
           </Toolbar>
           <Toolbar variant="dense" style={styles.toolbar}>
-            {this.state.resourceType === ResourceType.Dataset && (
-              <Button
-                color="primary"
-                size="small"
-                startIcon={<Icon>add</Icon>}
-                onClick={_ => {
-                  this.setState({ importDatasetDialogOpen: true });
-                }}
-              >
-                Create
-              </Button>
-            )}
-            {this.state.resourceType === ResourceType.Model && (
-              <Button
-                color="primary"
-                size="small"
-                startIcon={<Icon>publish</Icon>}
-                onClick={_ => {
-                  this.setState({ importModelDialogOpen: true });
-                }}
-              >
-                Import
-              </Button>
-            )}
+            {this.getButtonForResourceType(this.state.resourceType)}
             <Box flexGrow={1}></Box>
             <IconButton
               disabled={this.state.isLoading}
@@ -395,7 +403,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               }}
             />
           </FullWidthInput>
-
           {this.getTableForResourceType(this.state.resourceType)}
           <DialogComponent
             open={this.state.deleteDialogOpen}

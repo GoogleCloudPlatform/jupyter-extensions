@@ -75,7 +75,7 @@ def _list_model_evaluations(args):
 
 @_handler("GET", "pipeline")
 def _get_pipeline(args):
-  return AutoMLService.get().get_pipeline(args["pipelineId"])
+  return AutoMLService.get().get_training_pipeline(args["pipelineId"])
 
 
 @_handler("GET", "pipelines")
@@ -148,18 +148,11 @@ def _project(_):
 @_handler("POST", "createTablesDataset")
 def _create_tables_dataset(args):
   file_source = args.get("fileSource")
-  df_source = args.get("dfSource")
   if file_source:
     decoded = base64.decodebytes(file_source["data"])
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=file_source["name"],
-        file_data=decoded)
-  elif df_source:
-    decoded = base64.decodebytes(df_source)
-    AutoMLService.get().create_dataset_from_file(
-        display_name=args["displayName"],
-        file_name=args["displayName"],
         file_data=decoded)
   else:
     AutoMLService.get().create_dataset(display_name=args["displayName"],

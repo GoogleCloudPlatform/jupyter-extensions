@@ -25,20 +25,17 @@ export class ModelProperties extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading } = this.state;
-    return (
-      <div
-        hidden={this.props.value !== this.props.index}
-        style={{ margin: '16px' }}
-      >
-        {isLoading ? (
-          <LinearProgress />
-        ) : (
-          <PipelineProperties
-            pipeline={this.props.pipeline}
-          ></PipelineProperties>
-        )}
-      </div>
-    );
+    if (this.state.isLoading) {
+      return <LinearProgress />;
+    } else {
+      return (
+        <div
+          hidden={this.props.value !== this.props.index}
+          style={{ margin: '16px' }}
+        >
+          <PipelineProperties pipeline={this.props.pipeline} />
+        </div>
+      );
+    }
   }
 }

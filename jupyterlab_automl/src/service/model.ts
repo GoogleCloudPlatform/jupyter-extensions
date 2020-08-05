@@ -2,6 +2,7 @@ import { requestAPI } from './api_request';
 import humanizeDuration from 'humanize-duration';
 
 export type ModelType = 'OTHER' | 'TABLE' | 'IMAGE';
+
 export type PipelineState =
   | 'CANCELLED'
   | 'CANCELLING'
@@ -12,6 +13,7 @@ export type PipelineState =
   | 'RUNNING'
   | 'SUCCEEDED'
   | 'UNSPECIFIED';
+
 export interface Model {
   id: string;
   displayName: string;
@@ -22,17 +24,6 @@ export interface Model {
   modelType: ModelType;
   inputs?: object;
   deployedModels?: DeployedModel[];
-}
-
-export interface ClassificationPrediction {
-  Scores: number[];
-  Classes: number[];
-}
-
-export interface RegressionPrediction {
-  Value: number;
-  UpperBound: number;
-  LowerBound: number;
 }
 
 export interface DeployedModel {
@@ -116,6 +107,13 @@ function formatTime(data: Model | Pipeline) {
   }
 }
 
+function createRequest(body: object): RequestInit {
+  return {
+    body: JSON.stringify(body),
+    method: 'POST',
+  };
+}
+
 export abstract class ModelService {
   static async listModels(): Promise<Model[]> {
     const data = await requestAPI<Model[]>('v1/models');
@@ -129,11 +127,7 @@ export abstract class ModelService {
     const body = {
       modelId: modelId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    await requestAPI('v1/deleteModel', requestInit);
+    await requestAPI('v1/deleteModel', createRequest(body));
   }
 
   static async getPipeline(pipelineId: string): Promise<Pipeline> {
@@ -164,11 +158,10 @@ export abstract class ModelService {
     const body = {
       modelId: modelId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    const data = await requestAPI<Endpoint[]>('v1/getEndpoints', requestInit);
+    const data = await requestAPI<Endpoint[]>(
+      'v1/getEndpoints',
+      createRequest(body)
+    );
     for (let i = 0; i < data.length; ++i) {
       data[i].updateTime = new Date(data[i].updateTime);
     }
@@ -179,11 +172,10 @@ export abstract class ModelService {
     const body = {
       modelName: model.displayName,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    const data = await requestAPI<Endpoint[]>('v1/checkDeploying', requestInit);
+    const data = await requestAPI<Endpoint[]>(
+      'v1/checkDeploying',
+      createRequest(body)
+    );
     for (let i = 0; i < data.length; ++i) {
       data[i].updateTime = new Date(data[i].updateTime);
     }
@@ -194,11 +186,7 @@ export abstract class ModelService {
     const body = {
       modelId: modelId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    await requestAPI('v1/deployModel', requestInit);
+    await requestAPI('v1/deployModel', createRequest(body));
   }
 
   static async undeployModel(
@@ -209,36 +197,21 @@ export abstract class ModelService {
       deployedModelId: deployedModelId,
       endpointId: endpointId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    await requestAPI('v1/undeployModel', requestInit);
+    await requestAPI('v1/undeployModel', createRequest(body));
   }
 
   static async deleteEndpoint(endpointId: string): Promise<void> {
     const body = {
       endpointId: endpointId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    await requestAPI('v1/deleteEndpoint', requestInit);
+    await requestAPI('v1/deleteEndpoint', createRequest(body));
   }
 
-  static async predict(
-    endpointId: string,
-    inputs: object
-  ): Promise<RegressionPrediction | ClassificationPrediction> {
+  static async predict(endpointId: string, inputs: object): Promise<object> {
     const body = {
       endpointId: endpointId,
       inputs: inputs,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    return await requestAPI('v1/predict', requestInit);
+    return await requestAPI('v1/predict', createRequest(body));
   }
 }

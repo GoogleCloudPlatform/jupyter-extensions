@@ -27,6 +27,39 @@ export default function Toast(props: React.PropsWithChildren<Props>) {
     }
     props.onClose();
   };
+
+  const getAction = () => {
+    if (!props.error) {
+      return (
+        <React.Fragment>
+          {props.children}
+          {props.closeButton && (
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={handleClose}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          )}
+        </React.Fragment>
+      );
+    }
+    return null;
+  };
+
+  const getError = () => {
+    if (props.error) {
+      return (
+        <Alert onClose={handleClose} severity="error">
+          {props.children}
+        </Alert>
+      );
+    }
+    return null;
+  };
+
   return (
     <Snackbar
       anchorOrigin={{
@@ -36,30 +69,10 @@ export default function Toast(props: React.PropsWithChildren<Props>) {
       open={props.open}
       onClose={handleClose}
       message={props.message}
-      action={
-        !props.error && (
-          <React.Fragment>
-            {props.children}
-            {props.closeButton && (
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={handleClose}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            )}
-          </React.Fragment>
-        )
-      }
+      action={getAction()}
       autoHideDuration={props.autoHideDuration}
     >
-      {props.error && (
-        <Alert onClose={handleClose} severity="error">
-          {props.children}
-        </Alert>
-      )}
+      {getError()}
     </Snackbar>
   );
 }

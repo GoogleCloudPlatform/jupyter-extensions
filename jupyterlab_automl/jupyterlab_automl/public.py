@@ -16,7 +16,7 @@ def list_models():
   return AutoMLService.get().get_models()
 
 
-def create_dataset(display_name,
+def create_dataset(display_name: str,
                    dataframe: pd.DataFrame = None,
                    file_path: str = None,
                    gcs_uri: str = None,
@@ -25,6 +25,10 @@ def create_dataset(display_name,
     return AutoMLService.get().create_dataset_from_dataframe(display_name, dataframe)
   elif file_path is not None:
     file_name = os.path.basename(file_path)
+    if not os.path.exists(file_path):
+      raise APIError(
+          "File path " + file_path + " not found."
+      )
     with open(file_path, "rb") as f:
       return AutoMLService.get().create_dataset_from_file(
           display_name, file_name, f.read())

@@ -122,22 +122,25 @@ class AutoMLService:
       cls._instance = AutoMLService()
     return cls._instance
 
+  def _build_model(self, model):
+    json_formatted = json_format.MessageToDict(model._pb)
+    return {
+        "id": model.name,
+        "displayName": model.display_name,
+        "pipelineId": model.training_pipeline,
+        "createTime": get_milli_time(model.create_time),
+        "updateTime": get_milli_time(model.update_time),
+        "etag": model.etag,
+        "modelType": parse_model_type(model),
+        "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
+        "deployedModels": json_formatted.get("deployedModels"),
+    }
+
   def get_models(self):
     response = self._model_client.list_models(parent=self._parent).models
     models = []
     for model in response:
-      json_formatted = json_format.MessageToDict(model._pb)
-      models.append({
-          "id": model.name,
-          "displayName": model.display_name,
-          "pipelineId": model.training_pipeline,
-          "createTime": get_milli_time(model.create_time),
-          "updateTime": get_milli_time(model.update_time),
-          "etag": model.etag,
-          "modelType": parse_model_type(model),
-          "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
-          "deployedModels": json_formatted.get("deployedModels"),
-      })
+      models.append(self._build_model(model))
     return models
 
   def _build_feature_importance(self, model_explanation):
@@ -213,25 +216,19 @@ class AutoMLService:
         })
     return transformations
 
-  def _build_training_pipeline(self, pipeline):
-    optional_fields = [
-        "targetColumn", "predictionType", "optimizationObjective",
-        "budgetMilliNodeHours", "trainBudgetMilliNodeHours"
-    ]
-    training_task_inputs = json_format.MessageToDict(
-        pipeline._pb.training_task_inputs)
+  def _get_training_pipeline(self, pipeline):
     objective = "unknown"
-
     # Detect training model type from gcs uri
     for ob in ["tables", "image_classification", "image_object_detection"]:
       if ob in pipeline.training_task_definition:
         objective = ob
         break
 
-    end_time = pipeline.end_time.timestamp() if pipeline.end_time else int(
-        time.time())
+    end_time = int(time.time())
+    if pipeline.end_time:
+      end_time = pipeline.end_time.timestamp()
 
-    training_pipeline = {
+    return {
         "id": pipeline.name,
         "displayName": pipeline.display_name,
         "createTime": get_milli_time(pipeline.create_time),
@@ -241,7 +238,18 @@ class AutoMLService:
         "state": pipeline.state.name.split("_")[-1],
         "error": pipeline.error.message,
         "objective": objective
-    }
+    } 
+
+  def _build_training_pipeline(self, pipeline):
+    optional_fields = [
+        "targetColumn", "predictionType", "optimizationObjective",
+        "budgetMilliNodeHours", "trainBudgetMilliNodeHours"
+    ]
+    training_task_inputs = json_format.MessageToDict(
+        pipeline._pb.training_task_inputs)
+
+    training_pipeline = self._get_training_pipeline(pipeline)
+
     if "transformations" in training_task_inputs:
       transformation_options = self._build_feature_transformations(
           training_task_inputs["transformations"])
@@ -250,7 +258,7 @@ class AutoMLService:
       training_pipeline[field] = training_task_inputs.get(field)
     return training_pipeline
 
-  def get_pipeline(self, pipeline_id):
+  def get_training_pipeline(self, pipeline_id):
     pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
     return self._build_training_pipeline(pipeline)
 
@@ -475,17 +483,23 @@ class AutoMLService:
       "fieldName": column
     } for column in columns]
 
-  def create_training_pipeline(
-      self,
-      training_pipeline_name,
-      dataset_id,
-      model_name,
-      target_column,
-      prediction_type,
-      objective,
-      budget_hours,
-      transformations,
-  ):
+  def _build_create_training_pipeline_response(self, response):
+    return {
+        "training_display_name": response.display_name,
+        "training_task_inputs": json_format.MessageToDict(response._pb.training_task_inputs),
+        "state": response.state,
+        "create_time": response.create_time,
+        "dataset_id": response.input_data_config.dataset_id,
+        "training_fraction": response.input_data_config.fraction_split.training_fraction,
+        "validation_fraction": response.input_data_config.fraction_split.validation_fraction,
+        "test_fraction": response.input_data_config.fraction_split.test_fraction,
+        "model_display_name": response.model_to_upload.display_name
+    }
+
+  def create_training_pipeline(self, training_pipeline_name, dataset_id, 
+                               model_name, target_column, prediction_type,
+                               objective, budget_hours, transformations):
+    
     training_task_inputs = {
         "targetColumn": target_column,
         "predictionType": prediction_type,
@@ -494,6 +508,7 @@ class AutoMLService:
         "disableEarlyStopping": False,
         "optimizationObjective": objective,
     }
+
     training_pipeline = {
         "display_name": training_pipeline_name,
         "training_task_definition": "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
@@ -508,23 +523,9 @@ class AutoMLService:
         },
         "model_to_upload": {"display_name": model_name},
     }
+
     response = self._pipeline_client.create_training_pipeline(
         parent=self._parent, training_pipeline=training_pipeline
     )
-    print(" training_display_name:", response.display_name)
-    print(
-        " training_task_inputs:",
-        json_format.MessageToDict(response._pb.training_task_inputs),
-    )
-    print(" state:", response.state)
-    print(" create_time:", response.create_time)
-    input_data_config = response.input_data_config
-    print("  dataset_id:", input_data_config.dataset_id)
-    fraction_split = input_data_config.fraction_split
-    print("  fraction_split")
-    print("   training_fraction:", fraction_split.training_fraction)
-    print("   validation_fraction:", fraction_split.validation_fraction)
-    print("   test_fraction:", fraction_split.test_fraction)
-    model_to_upload = response.model_to_upload
-    print(" model_to_upload")
-    print("  display_name:", model_to_upload.display_name)
+
+    return self._build_create_training_pipeline_response(response)

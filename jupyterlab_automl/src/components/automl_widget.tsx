@@ -97,6 +97,24 @@ export class AutoMLWidget extends ReactWidget {
     this.resizeSignal.emit(msg);
   }
 
+  private async checkServices() {
+    const services = await ManagementService.listManagedServices();
+    const enabledServices = new Set(services.map(m => m.serviceName));
+    const enabled = REQUIRED_SERVICES.map(service => ({
+      service,
+      enabled: enabledServices.has(service.endpoint),
+    }));
+    const requiredServicesEnabled = enabled
+      .filter(s => !s.service.isOptional)
+      .every(s => s.enabled);
+    if (requiredServicesEnabled === false) {
+      const project = await ManagementService.getProject();
+      this._project += project;
+      this.alertSignal.emit(true);
+    }
+    return requiredServicesEnabled;
+  }
+
   render() {
     return (
       <ThemeProvider theme={theme}>
@@ -136,23 +154,5 @@ export class AutoMLWidget extends ReactWidget {
         </UseSignal>
       </ThemeProvider>
     );
-  }
-
-  async checkServices() {
-    const services = await ManagementService.listManagedServices();
-    const enabledServices = new Set(services.map(m => m.serviceName));
-    const enabled = REQUIRED_SERVICES.map(service => ({
-      service,
-      enabled: enabledServices.has(service.endpoint),
-    }));
-    const requiredServicesEnabled = enabled
-      .filter(s => !s.service.isOptional)
-      .every(s => s.enabled);
-    if (requiredServicesEnabled === false) {
-      const project = await ManagementService.getProject();
-      this._project += project;
-      this.alertSignal.emit(true);
-    }
-    return requiredServicesEnabled;
   }
 }
