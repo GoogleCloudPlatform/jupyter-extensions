@@ -7,6 +7,7 @@ import {
   resetQueryResult,
   deleteQueryEntry,
   QueryId,
+  generateQueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
@@ -17,6 +18,7 @@ import {
   CheckCircleOutline,
   ErrorOutlineOutlined,
   FileCopyOutlined,
+  FullscreenOutlined,
 } from '@material-ui/icons';
 import {
   Button,
@@ -28,6 +30,8 @@ import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
 import { QueryEditorType } from '../query_editor_tab/query_editor_results';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
+import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -533,7 +537,7 @@ class QueryTextEditor extends React.Component<
     }
   }
 
-  renderButtonCopyButton() {
+  renderCopyButton() {
     return (
       <IconButton
         size="small"
@@ -547,18 +551,39 @@ class QueryTextEditor extends React.Component<
     );
   }
 
+  renderOpenTabQueryEditorButton() {
+    return (
+      <IconButton
+        size="small"
+        onClick={_ => {
+          const query = this.editor.getValue();
+          const queryId = generateQueryId();
+          WidgetManager.getInstance().launchWidget(
+            QueryEditorTabWidget,
+            'main',
+            queryId,
+            undefined,
+            [queryId, query]
+          );
+        }}
+      >
+        <FullscreenOutlined />
+      </IconButton>
+    );
+  }
+
   render() {
     const { iniQuery } = this.props;
 
     // eslint-disable-next-line no-extra-boolean-cast
     const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
 
+    const ifIncell = this.props.editorType === 'IN_CELL';
+
     return (
       <div
         className={
-          this.props.editorType === 'IN_CELL'
-            ? styleSheet.wholeEditorInCell
-            : styleSheet.wholeEditor
+          ifIncell ? styleSheet.wholeEditorInCell : styleSheet.wholeEditor
         }
       >
         <div className={styleSheet.buttonInfoBar}>
@@ -574,13 +599,14 @@ class QueryTextEditor extends React.Component<
             }}
           >
             {this.renderMessage()}
-            {this.renderButtonCopyButton()}
+            {this.renderCopyButton()}
+            {ifIncell && this.renderOpenTabQueryEditorButton()}
           </div>
         </div>
 
         <div
           className={
-            this.props.editorType === 'IN_CELL'
+            ifIncell
               ? styleSheet.queryTextEditorInCell
               : styleSheet.queryTextEditor
           }
