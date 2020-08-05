@@ -9,8 +9,6 @@ import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
 import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
-import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 
 import {
   DataTree,
@@ -36,7 +34,6 @@ import { openSnackbar } from '../../reducers/snackbarSlice';
 import '../../../style/index.css';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
-import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 
 const localStyles = stylesheet({
   item: {

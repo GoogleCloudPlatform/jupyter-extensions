@@ -188,6 +188,11 @@ class QueryTextEditor extends React.Component<
 
   componentDidMount() {
     window.addEventListener('resize', this.updateDimensions.bind(this));
+
+    // Delay rendering of monaco editor to avoid mal-size
+    setTimeout(() => {
+      this.setState({ renderMonacoEditor: true });
+    }, 100);
   }
 
   componentWillUnmount() {
@@ -209,13 +214,6 @@ class QueryTextEditor extends React.Component<
         height: this.state.height,
       });
     }
-  }
-
-  componentDidMount() {
-    // Delay rendering of monaco editor to avoid mal-size
-    setTimeout(() => {
-      this.setState({ renderMonacoEditor: true });
-    }, 100);
   }
 
   handleButtonClick() {
