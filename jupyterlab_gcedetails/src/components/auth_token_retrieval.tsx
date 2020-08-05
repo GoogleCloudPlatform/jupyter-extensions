@@ -12,8 +12,9 @@ export function authTokenRetrieval(): Promise<string> {
         window.removeEventListener('message', listener);
         if (message.data['error']) {
           reject('Failed to get authentication token');
+        } else {
+          resolve(message.data['credentials']);
         }
-        resolve(message.data['credentials']);
       }
     };
     window.addEventListener('message', listener);
