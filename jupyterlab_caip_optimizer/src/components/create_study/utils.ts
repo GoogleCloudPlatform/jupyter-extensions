@@ -19,7 +19,7 @@ export function getOptions(parameter: TemporaryParentParameter): string[] {
       const list: string[] = [];
       const min = parseInt(parameter.metadata.minValue, 10);
       const max = parseInt(parameter.metadata.maxValue, 10);
-      for (let i = min; i < max; ++i) {
+      for (let i = min; i <= max; ++i) {
         list.push(i.toString(10));
       }
       return list;

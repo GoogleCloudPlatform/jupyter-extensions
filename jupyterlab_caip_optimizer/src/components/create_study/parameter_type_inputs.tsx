@@ -7,7 +7,13 @@ import {
   TemporaryParameterChildMetadata,
   TemporaryParentParameter,
 } from './types';
-import { TextField, Grid, FormControlLabel, Checkbox } from '@material-ui/core';
+import {
+  TextField,
+  Grid,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+} from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { getOptions } from './utils';
 
@@ -64,6 +70,16 @@ export const ParameterParentInput: React.FC<{
               getOptionLabel={(parameter: string | TemporaryParentParameter) =>
                 typeof parameter === 'string' ? parameter : parameter.name
               }
+              // for testing
+              renderOption={(parameter: string | TemporaryParentParameter) => {
+                const option =
+                  typeof parameter === 'string' ? parameter : parameter.name;
+                return (
+                  <Typography noWrap data-testid={`parent-${option}`}>
+                    {option}
+                  </Typography>
+                );
+              }}
               fullWidth
               renderInput={params => (
                 <TextField
@@ -96,6 +112,12 @@ export const ParameterParentInput: React.FC<{
                 id="parentSelect"
                 options={getOptions(parent)}
                 getOptionLabel={option => option}
+                // for testing
+                renderOption={option => (
+                  <Typography noWrap data-testid={`parentValue-${option}`}>
+                    {option}
+                  </Typography>
+                )}
                 value={metadata.validFor}
                 filterSelectedOptions
                 renderInput={params => (

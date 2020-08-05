@@ -14,6 +14,7 @@ export type TemporaryParameterParentMetadata = {
   validFor: string[];
 };
 
+// TODO: add id for children with same name, but different parents
 export type TemporaryParameterBase = {
   name: string;
   parent?: TemporaryParameterChildMetadata;
