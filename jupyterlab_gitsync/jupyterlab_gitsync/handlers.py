@@ -59,9 +59,11 @@ class SetupHandler(APIHandler):
     path = recv['path'] if recv['path'] else '.'
 
     try:
-      self.inside_git_repo(path)
-      msg = self.add_sync_command()
-      self.finish({'message': msg})
+      if self.inside_git_repo(path):
+        ex_path = self.add_sync_command()
+        self.finish({'ex_path': ex_path})
+      else:
+        self.finish({'error': 'Given path is not a git repository.'})
     except Exception as e:
       self.finish({'error': str(e)})
 

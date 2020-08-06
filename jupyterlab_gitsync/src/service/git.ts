@@ -12,12 +12,17 @@ export class GitManager {
   // Member Fields
   private _path: string;
   private _executablePath: string;
+  private _options: string[] = [];
   private _fileConflicts: string[] = undefined;
   private _syncCompleted: Signal<this, void> = new Signal<this, void>(this);
   private _mergeConflict: Signal<this, void> = new Signal<this, void>(this);
 
-  constructor(path: string) {
+  constructor(path: string, options?: {remote: string, worktree:string}) {
     this._setup(path);
+    if (options){
+      this._options[0] = options.remote;
+      this._options[1] = options.worktree;
+    }
   }
 
   get path(): string {
@@ -42,7 +47,7 @@ export class GitManager {
       body: JSON.stringify({
         path: this._path,
         ex_path: this._executablePath,
-        options: ['origin', 'ashleyswang/master'],
+        options: this._options,
       }),
     };
 
@@ -65,9 +70,9 @@ export class GitManager {
     };
 
     const response = await requestAPI('v1/setup', init);
-    if (response.message) {
+    if (response.ex_path) {
       this._path = path;
-      this._executablePath = response.message;
+      this._executablePath = response.ex_path;
     } else {
       throw Error(response.error);
     }

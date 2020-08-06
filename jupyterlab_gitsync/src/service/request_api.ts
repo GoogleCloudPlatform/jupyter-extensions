@@ -21,11 +21,10 @@ export async function requestAPI(extension = '', init: RequestInit = {}) {
     throw new ServerConnection.NetworkError(error);
   }
 
-  const data = await response.json();
-
   if (!response.ok) {
     throw new ServerConnection.ResponseError(response, data.message || data);
   }
 
+  const data = await response.json();
   return data;
 }
