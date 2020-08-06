@@ -1,11 +1,6 @@
-import {
-  LinearProgress,
-  Typography,
-  CircularProgress,
-  Icon,
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { LinearProgress, CircularProgress, Icon } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
@@ -13,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
+import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
 
 import {
   DataTree,
@@ -27,6 +23,9 @@ import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
@@ -68,6 +67,20 @@ const localStyles = stylesheet({
   circularProgress: {
     padding: 5,
   },
+  resourceName: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
+  },
+  resourceIcons: {
+    display: 'flex',
+    alignContent: 'center',
+    color: 'var(--jp-layout-color3)',
+  },
+  datasetName: {
+    flexDirection: 'row',
+    display: 'flex',
+    alignItems: 'center',
+  },
 });
 
 interface ProjectProps {
@@ -88,6 +101,10 @@ interface State {
 export function BuildTree(project, context, expandProject, expandDataset) {
   const copyID = dataTreeItem => {
     Clipboard.copyToSystem(dataTreeItem.id);
+  };
+
+  const copyBoilerplateQuery = dataTreeItem => {
+    Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
   };
 
   const openDatasetDetails = (event, dataset) => {
@@ -130,23 +147,57 @@ export function BuildTree(project, context, expandProject, expandDataset) {
 
   const getIcon = iconType => {
     return (
-      <Icon style={{ display: 'flex', alignContent: 'center' }}>
+      <Icon className={localStyles.resourceIcons}>
         <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
       </Icon>
     );
   };
 
+  const queryTable = dataTreeItem => {
+    const notebookTrack = context.notebookTrack as INotebookTracker;
+    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
+
+    const curWidget = notebookTrack.currentWidget;
+
+    if (!curWidget || !curWidget.content.isVisible) {
+      // no active notebook or not visible
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query]
+      );
+    } else {
+      // exist notebook and visible
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code = '%%bigquery_editor\n\n' + query;
+      cell.model.value.text = code;
+    }
+  };
+
   const renderTables = table => {
     const tableContextMenuItems = [
       {
-        label: 'Copy Table ID',
+        label: 'Query Table',
+        handler: queryTable,
+      },
+      {
+        label: 'Copy table ID',
         handler: dataTreeItem => copyID(dataTreeItem),
+      },
+      {
+        label: 'Copy boilerplate query',
+        handler: dataTreeItem => copyBoilerplateQuery(dataTreeItem),
       },
     ];
 
     const viewContextMenuItems = [
       {
-        label: 'Copy View ID',
+        label: 'Copy view ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
@@ -164,7 +215,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
                   onClick: () => item.handler(table),
                 }))}
               >
-                <Typography>{table.name}</Typography>
+                <div className={localStyles.resourceName}>{table.name}</div>
               </ContextMenu>
             }
             onDoubleClick={event => openTableDetails(event, table)}
@@ -180,7 +231,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
                   onClick: () => item.handler(table),
                 }))}
               >
-                <Typography>{table.name}</Typography>
+                <div className={localStyles.resourceName}>{table.name}</div>
               </ContextMenu>
             }
             onDoubleClick={event => openViewDetails(event, table)}
@@ -195,7 +246,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
   const renderModels = model => {
     const contextMenuItems = [
       {
-        label: 'Copy Model ID',
+        label: 'Copy model ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
@@ -210,7 +261,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
               onClick: () => item.handler(model),
             }))}
           >
-            <Typography>{model.name}</Typography>
+            <div className={localStyles.resourceName}>{model.name}</div>
           </ContextMenu>
         }
       />
@@ -220,16 +271,13 @@ export function BuildTree(project, context, expandProject, expandDataset) {
   const renderDatasets = dataset => {
     const contextMenuItems = [
       {
-        label: 'Copy Dataset ID',
+        label: 'Copy dataset ID',
         handler: dataTreeItem => copyID(dataTreeItem),
       },
     ];
 
     return (
       <div className={localStyles.itemName}>
-        <Icon style={{ display: 'flex', alignContent: 'center' }}>
-          <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
-        </Icon>
         <TreeItem
           nodeId={dataset.id}
           label={
@@ -239,7 +287,12 @@ export function BuildTree(project, context, expandProject, expandDataset) {
                 onClick: () => item.handler(dataset),
               }))}
             >
-              <Typography>{dataset.name}</Typography>
+              <div className={localStyles.datasetName}>
+                <Icon style={{ display: 'flex', alignContent: 'center' }}>
+                  <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+                </Icon>
+                <div className={localStyles.resourceName}>{dataset.name}</div>
+              </div>
             </ContextMenu>
           }
           onDoubleClick={event => openDatasetDetails(event, dataset)}
@@ -248,14 +301,14 @@ export function BuildTree(project, context, expandProject, expandDataset) {
         >
           {Array.isArray(dataset.tableIds) &&
           Array.isArray(dataset.modelIds) ? (
-            <div>
+            <ul>
               {dataset.tableIds.map(tableId => (
                 <div key={tableId}>{renderTables(dataset.tables[tableId])}</div>
               ))}
               {dataset.modelIds.map(modelId => (
                 <div key={modelId}>{renderModels(dataset.models[modelId])}</div>
               ))}
-            </div>
+            </ul>
           ) : (
             <CircularProgress
               size={20}
@@ -267,32 +320,54 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
-  const renderProjects = project => (
-    <TreeItem
-      nodeId={project.id}
-      label={project.name}
-      onIconClick={expandProject(project)}
-    >
-      {Array.isArray(project.datasetIds) ? (
-        project.datasetIds.map(datasetId => (
-          <div key={datasetId}>
-            {renderDatasets(project.datasets[datasetId])}
-          </div>
-        ))
-      ) : project.error ? (
-        <div>{project.error}</div>
-      ) : (
-        <CircularProgress size={20} className={localStyles.circularProgress} />
-      )}
-    </TreeItem>
-  );
+  const renderProjects = project => {
+    const contextMenuItems = [
+      {
+        label: 'Copy Project ID',
+        handler: dataTreeItem => copyID(dataTreeItem),
+      },
+    ];
+
+    return (
+      <TreeItem
+        nodeId={project.id}
+        label={
+          <ContextMenu
+            items={contextMenuItems.map(item => ({
+              label: item.label,
+              onClick: () => item.handler(project),
+            }))}
+          >
+            <div className={localStyles.resourceName}>{project.name}</div>
+          </ContextMenu>
+        }
+        onIconClick={expandProject(project)}
+        onLabelClick={event => event.preventDefault()}
+      >
+        {Array.isArray(project.datasetIds) ? (
+          project.datasetIds.map(datasetId => (
+            <div key={datasetId}>
+              {renderDatasets(project.datasets[datasetId])}
+            </div>
+          ))
+        ) : project.error ? (
+          <div>{project.error}</div>
+        ) : (
+          <CircularProgress
+            size={20}
+            className={localStyles.circularProgress}
+          />
+        )}
+      </TreeItem>
+    );
+  };
 
   return (
     <TreeView
       className={localStyles.root}
-      defaultCollapseIcon={<ExpandMoreIcon />}
+      defaultCollapseIcon={<ArrowDropDownIcon fontSize="small" />}
       defaultExpanded={['root']}
-      defaultExpandIcon={<ChevronRightIcon />}
+      defaultExpandIcon={<ArrowRightIcon fontSize="small" />}
     >
       {renderProjects(project)}
     </TreeView>
