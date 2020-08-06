@@ -32,21 +32,48 @@ interface Props {
 const style = {
   editor: {
     padding: 10,
+    width: 400,
   },
 };
 
-export function DetachedReplyEditor(props) {
+function SendButton(props) {
+  return (
+    <Button
+      type="submit"
+      color="primary"
+      size="small"
+      endIcon={<Icon>send</Icon>}
+      className="sendReply"
+    >
+      Send
+    </Button>);
+}
+
+function ReplyEditor(props) {
   const [comment, setComment] = useState('');
   const serverRoot = getServerRoot();
 
   const handleSubmit = event => {
     event.preventDefault();
-    newDetachedCommentReply(
-      props.currFilePath,
-      serverRoot,
-      comment,
-      props.hash
-    );
+    switch (props.commentType) {
+      case 'review':
+        newReviewCommentReply(
+          props.currFilePath,
+          serverRoot,
+          comment,
+          props.hash,
+          props.reviewHash
+        );
+        break;
+      case 'detached':
+        newDetachedCommentReply(
+          props.currFilePath,
+          serverRoot,
+          comment,
+          props.hash
+        );
+        break;
+    }
     setComment(''); //clear comment text field
   };
   return (
@@ -64,6 +91,7 @@ export function DetachedReplyEditor(props) {
           <TextField
             label="Reply to this comment"
             value={comment}
+            rows={3}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
             size="small"
@@ -72,83 +100,16 @@ export function DetachedReplyEditor(props) {
           />
         </Grid>
         <Grid item>
-          <Button
-            type="submit"
-            color="primary"
-            size="small"
-            endIcon={<Icon>send</Icon>}
-            className="sendReply"
-          >
-            Send
-          </Button>
+          <SendButton/>
         </Grid>
       </Grid>
     </form>
   );
 }
 
-export function ReviewReplyEditor(props) {
-  const [comment, setComment] = useState('');
-  const serverRoot = getServerRoot();
-
-  const handleSubmit = event => {
-    event.preventDefault();
-    newReviewCommentReply(
-      props.currFilePath,
-      serverRoot,
-      comment,
-      props.hash,
-      props.reviewHash
-    );
-    setComment(''); //clear comment text field
-  };
-  return (
-    <form
-      onSubmit={handleSubmit}
-      style={style.editor}
-      className="commentSubmit"
-    >
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      />
-      <Grid container direction="row" spacing={0}>
-        <Grid item>
-          <TextField
-            label="Reply to this comment"
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            variant="outlined"
-            size="small"
-            style={{ margin: 2 }}
-            className="replyCommentTextField"
-          />
-        </Grid>
-        <Grid item>
-          <Button
-            type="submit"
-            color="primary"
-            size="small"
-            endIcon={<Icon>send</Icon>}
-            className="sendReply"
-          >
-            Send
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
-  );
-}
 
 export class NewReplyComment extends React.Component<Props> {
   render() {
-    switch (this.props.commentType) {
-      case 'review':
-        return <ReviewReplyEditor {...this.props} />;
-        break;
-      case 'detached':
-        return <DetachedReplyEditor {...this.props} />;
-        break;
-    }
+    return <ReplyEditor {...this.props} />;
   }
 }
