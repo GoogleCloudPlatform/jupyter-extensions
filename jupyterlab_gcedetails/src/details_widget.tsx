@@ -102,6 +102,7 @@ export class VmDetails extends React.Component<Props, State> {
             open={formDisplayed}
             onClose={() => this.setState({ formDisplayed: false })}
             notebookService={notebookService}
+            onCompletion={() => this.getAndSetDetailsFromServer()}
           />
         )}
       </span>
@@ -114,10 +115,8 @@ export class VmDetails extends React.Component<Props, State> {
       const details = (await detailsServer.getUtilizationData()) as Details;
       this.setState({ details: details });
       notebookService.projectId = details.project.projectId;
-      notebookService.locationId = details.instance.zone;
-      const instanceNameSplit = details.instance.name.split('/');
-      notebookService.instanceName =
-        instanceNameSplit[instanceNameSplit.length - 1];
+      notebookService.locationId = details.instance.zone.split('/').pop();
+      notebookService.instanceName = details.instance.name.split('/').pop();
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });

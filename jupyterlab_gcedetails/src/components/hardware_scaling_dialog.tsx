@@ -36,6 +36,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   notebookService: NotebooksService;
+  onCompletion: () => void;
   details?: Details;
 }
 
@@ -61,7 +62,7 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
   }
 
   private getDisplay() {
-    const { onClose, notebookService, details } = this.props;
+    const { onClose, notebookService, details, onCompletion } = this.props;
     const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
@@ -98,6 +99,7 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
             onDialogClose={onClose}
             hardwareConfiguration={hardwareConfiguration}
             notebookService={notebookService}
+            onCompletion={onCompletion}
           />
         );
     }

@@ -66,6 +66,7 @@ interface Props {
   hardwareConfiguration: HardwareConfiguration;
   notebookService: NotebooksService;
   onDialogClose: () => void;
+  onCompletion: () => void;
 }
 
 interface State {
@@ -101,7 +102,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   async componentDidUpdate() {
-    const { hardwareConfiguration, notebookService } = this.props;
+    const { hardwareConfiguration, notebookService, onCompletion } = this.props;
     const { machineType, gpuType, gpuCount, attachGpu } = hardwareConfiguration;
 
     try {
@@ -120,6 +121,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         case Status['Starting Instance']:
           await notebookService.start();
           this.setState({ status: Status.Complete });
+          onCompletion();
           break;
         default:
           break;
