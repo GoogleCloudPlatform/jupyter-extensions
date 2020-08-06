@@ -2,7 +2,7 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Dataset, DatasetService, Column } from '../service/dataset';
-import { CopyCode } from './copy_code';
+import { CodeComponent } from './copy_code';
 import { ListResourcesTable, SelectInput } from 'gcp_jupyterlab_shared';
 import { LinearProgress } from '@material-ui/core';
 
@@ -65,6 +65,7 @@ export class DatasetComponent extends React.Component<Props, State> {
       objective: 'minimize-log-loss',
     };
     this.getColumnString = this.getColumnString.bind(this);
+    this.getBasicString = this.getBasicString.bind(this);
   }
 
   async componentDidMount() {
@@ -72,29 +73,156 @@ export class DatasetComponent extends React.Component<Props, State> {
     this.getDatasetSource();
   }
 
-  render() {
-    const { columns, source, isLoading } = this.state;
+  private async getDatasetDetails() {
+    try {
+      this.setState({ isLoading: true });
+      const columns = await DatasetService.getDatasetDetails(
+        this.props.dataset.id
+      );
+      this.setState({
+        columns: columns,
+        targetColumn: columns[0].fieldName,
+      });
+    } catch (err) {
+      console.warn('Error retrieving dataset details', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  private getDatasetSource() {
+    let source = '';
+    const inputConfig = this.props.dataset.metadata['inputConfig'];
+    if ('gcsSource' in inputConfig) {
+      source = inputConfig['gcsSource']['uri'];
+    } else if ('bigquerySource' in inputConfig) {
+      source = inputConfig['bigquerySource']['uri'];
+    }
+    this.setState({
+      source: source,
+    });
+  }
+
+  private getColumnString(): string {
+    let columnString = '';
+    for (let i = 0; i < this.state.columns.length; i++) {
+      if (this.state.columns[i].fieldName !== this.state.targetColumn) {
+        columnString +=
+          "    'columnName': '" + this.state.columns[i].fieldName + "',\n";
+      }
+    }
+    return columnString;
+  }
+
+  private getBasicString(): string {
     const datasetId = this.props.dataset.id.split('/');
-    const exportDataset = `from jupyterlab_automl import *
-    
-df = export_dataset('${this.props.dataset.id}')`.trim();
-    const columnString = this.getColumnString();
-    const basics = `training_pipeline_name = '${
-      this.props.dataset.displayName
-    }_training'
+    const displayName = this.props.dataset.displayName;
+
+    return `training_pipeline_name = '${displayName}_training'
 dataset_id = '${datasetId[datasetId.length - 1]}'
-model_name = '${this.props.dataset.displayName}_model'
+model_name = '${displayName}_model'
 target_column = '${this.state.targetColumn}'
 prediction_type = '${this.state.predictionType}'
 objective = '${this.state.objective}'
 budget_hours = 1
 transformations = [{
   'auto': {
-${columnString} }
+${this.getColumnString()} }
 }]`;
-    const trainModel = `from jupyterlab_automl import *
+  }
 
-${basics}
+  private getParentString(): string {
+    return this.props.dataset.id
+      .split('/')
+      .slice(0, 4)
+      .join('/');
+  }
+
+  render() {
+    const { columns, source, isLoading } = this.state;
+    if (isLoading) {
+      return <LinearProgress />;
+    } else {
+      return (
+        <div className={localStyles.panel}>
+          <ul className={localStyles.list}>
+            <header className={localStyles.header}>
+              {this.props.dataset.displayName}
+            </header>
+            <div className={localStyles.paper}>
+              <header className={localStyles.title}>Dataset Info</header>
+              <p style={{ padding: '8px' }}>
+                Created: {this.props.dataset.createTime.toLocaleString()}
+              </p>
+              <p style={{ padding: '8px' }}>Total columns: {columns.length}</p>
+              <p style={{ padding: '8px' }}>Dataset location: {source}</p>
+              <header className={localStyles.title}>Columns</header>
+              <div style={{ width: '500px' }}>
+                <ListResourcesTable
+                  columns={[
+                    {
+                      field: 'fieldName',
+                      title: 'Field Name',
+                    },
+                  ]}
+                  data={columns}
+                  height={columns.length * 40 + 40}
+                  width={200}
+                />
+              </div>
+              <header className={localStyles.title}>
+                Export Dataset to Dataframe
+              </header>
+              <CodeComponent>
+                {`from jupyterlab_automl import *
+df = export_dataset('${this.props.dataset.id}')`}
+              </CodeComponent>
+              <header className={localStyles.title}>
+                Train Model on Dataset
+              </header>
+              <p style={{ padding: '8px' }}>
+                <i>
+                  Code to train a basic classification or regression model on
+                  the dataset.
+                </i>
+              </p>
+              <div style={{ width: '250px', paddingLeft: '16px' }}>
+                <SelectInput
+                  label={'Target column'}
+                  options={columns.map(column => ({
+                    text: column.fieldName,
+                    value: column.fieldName,
+                  }))}
+                  onChange={event => {
+                    this.setState({ targetColumn: event.target.value });
+                  }}
+                />
+                <SelectInput
+                  label={'Prediction type'}
+                  options={[
+                    {
+                      text: 'classification',
+                      value: 'classification',
+                    },
+                    {
+                      text: 'regression',
+                      value: 'regression',
+                    },
+                  ]}
+                  onChange={event => {
+                    this.setState({ predictionType: event.target.value });
+                    if (event.target.value === 'regression') {
+                      this.setState({ objective: 'minimize-rmse' });
+                    } else {
+                      this.setState({ objective: 'minimize-log-loss' });
+                    }
+                  }}
+                />
+              </div>
+              <CodeComponent>
+                {`from jupyterlab_automl import *
+
+${this.getBasicString()}
 
 create_training_pipeline(
   training_pipeline_name,
@@ -105,13 +233,24 @@ create_training_pipeline(
   objective,
   budget_hours,
   transformations,
-)`.trim();
-    const expandedTrainModel = `from google.cloud import aiplatform_v1alpha1
+)`}
+              </CodeComponent>
+              <header className={localStyles.title}>
+                Train Model on Dataset Expanded
+              </header>
+              <p style={{ padding: '8px' }}>
+                <i>
+                  Expanded version of the code above which allows for more model
+                  training customization.
+                </i>
+              </p>
+              <CodeComponent>
+                {`from google.cloud import aiplatform_v1alpha1
 from google.protobuf.struct_pb2 import Value
 from google.protobuf import json_format
 
-${basics}
-parent = '${datasetId.slice(0, 4).join('/')}'
+${this.getBasicString()}
+parent = '${this.getParentString()}'
 client_options = dict(api_endpoint="us-central1-aiplatform.googleapis.com")
 client = aiplatform_v1alpha1.PipelineServiceClient(client_options=client_options)
 
@@ -150,140 +289,12 @@ training_pipeline = {
 
 response = client.create_training_pipeline(
     parent=parent, training_pipeline=training_pipeline
-)`;
-    if (isLoading) {
-      return <LinearProgress />;
-    } else {
-      return (
-        <div className={localStyles.panel}>
-          <ul className={localStyles.list}>
-            <header className={localStyles.header}>
-              {this.props.dataset.displayName}
-            </header>
-            <div className={localStyles.paper}>
-              <header className={localStyles.title}>Dataset Info</header>
-              <p style={{ padding: '8px' }}>
-                Created: {this.props.dataset.createTime.toLocaleString()}
-              </p>
-              <p style={{ padding: '8px' }}>Total columns: {columns.length}</p>
-              <p style={{ padding: '8px' }}>Dataset location: {source}</p>
-              <header className={localStyles.title}>Columns</header>
-              <div style={{ width: '500px' }}>
-                <ListResourcesTable
-                  columns={[
-                    {
-                      field: 'fieldName',
-                      title: 'Field Name',
-                    },
-                  ]}
-                  data={columns}
-                  height={columns.length * 40 + 40}
-                  width={200}
-                />
-              </div>
-              <header className={localStyles.title}>
-                Export Dataset to Dataframe
-              </header>
-              <CopyCode code={exportDataset} />
-              <header className={localStyles.title}>
-                Train Model on Dataset
-              </header>
-              <p style={{ padding: '8px' }}>
-                <i>
-                  Code to train a basic classification or regression model on
-                  the dataset.
-                </i>
-              </p>
-              <div style={{ width: '250px', paddingLeft: '16px' }}>
-                <SelectInput
-                  label={'Target column'}
-                  options={this.state.columns.map(column => ({
-                    text: column.fieldName,
-                    value: column.fieldName,
-                  }))}
-                  onChange={event => {
-                    this.setState({ targetColumn: event.target.value });
-                  }}
-                />
-                <SelectInput
-                  label={'Prediction type'}
-                  options={[
-                    {
-                      text: 'classification',
-                      value: 'classification',
-                    },
-                    {
-                      text: 'regression',
-                      value: 'regression',
-                    },
-                  ]}
-                  onChange={event => {
-                    this.setState({ predictionType: event.target.value });
-                    if (event.target.value === 'regression') {
-                      this.setState({ objective: 'minimize-rmse' });
-                    } else {
-                      this.setState({ objective: 'minimize-log-loss' });
-                    }
-                  }}
-                />
-              </div>
-              <CopyCode code={trainModel} />
-              <header className={localStyles.title}>
-                Train Model on Dataset Expanded
-              </header>
-              <p style={{ padding: '8px' }}>
-                <i>
-                  Expanded version of the code above which allows for more model
-                  training customization.
-                </i>
-              </p>
-              <CopyCode code={expandedTrainModel} />
+)`}
+              </CodeComponent>
             </div>
           </ul>
         </div>
       );
     }
-  }
-
-  private getDatasetSource() {
-    let source = '';
-    if ('gcsSource' in this.props.dataset.metadata['inputConfig']) {
-      source = this.props.dataset.metadata['inputConfig']['gcsSource']['uri'];
-    } else if ('bigquerySource' in this.props.dataset.metadata['inputConfig']) {
-      source = this.props.dataset.metadata['inputConfig']['bigquerySource'][
-        'uri'
-      ];
-    }
-    this.setState({
-      source: source,
-    });
-  }
-
-  private async getDatasetDetails() {
-    try {
-      this.setState({ isLoading: true });
-      const columns = await DatasetService.getDatasetDetails(
-        this.props.dataset.id
-      );
-      this.setState({
-        columns: columns,
-        targetColumn: columns[0].fieldName,
-      });
-    } catch (err) {
-      console.warn('Error retrieving pipeline', err);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
-
-  private getColumnString(): string {
-    let columnString = '';
-    for (let i = 0; i < this.state.columns.length; i++) {
-      if (this.state.columns[i].fieldName !== this.state.targetColumn) {
-        columnString +=
-          "    'columnName': '" + this.state.columns[i].fieldName + "',\n";
-      }
-    }
-    return columnString;
   }
 }

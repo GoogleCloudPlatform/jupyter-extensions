@@ -140,14 +140,21 @@ export class PipelineProperties extends React.Component<Props> {
     return pipelineDetails;
   }
 
+  private getError(): JSX.Element {
+    if (this.props.pipeline.error) {
+      return (
+        <Alert severity="error">
+          Training failed with message: {this.props.pipeline.error}
+        </Alert>
+      );
+    }
+    return null;
+  }
+
   render() {
     return (
       <>
-        {this.props.pipeline.error && (
-          <Alert severity="error">
-            Training failed with message: {this.props.pipeline.error}
-          </Alert>
-        )}
+        {this.getError()}
         <Table size="small" style={{ width: 500 }}>
           <TableBody>
             {this.getPipelineDetails(this.props.pipeline).map(row =>

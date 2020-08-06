@@ -107,6 +107,7 @@ export class ImportData extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.submit = this.submit.bind(this);
+    this.toggleImport = this.toggleImport.bind(this);
     this.state = {
       from: 'computer',
       source: null,
@@ -246,6 +247,68 @@ export class ImportData extends React.Component<Props, State> {
     }
   }
 
+  private toggleImport(event: any) {
+    this.setState({
+      from: event.target.value as SourceType,
+      source: null,
+      error: null,
+    });
+    if (event.target.value === 'dataframe') {
+      this.getSessions();
+    }
+  }
+
+  private getDialog(): JSX.Element {
+    if (this.props.open) {
+      return (
+        <DialogComponent
+          header={'Import Data to Tables Dataset'}
+          open={true}
+          onClose={this.props.onClose}
+          onCancel={this.props.onClose}
+          submitLabel={'Import Data'}
+          onSubmit={this.submit}
+          submitDisabled={
+            this.state.loading ||
+            this.state.error !== null ||
+            !this.state.name ||
+            !this.state.source
+          }
+        >
+          <RadioInput
+            value={this.state.from}
+            options={SOURCES}
+            onChange={this.toggleImport}
+          />
+          <div style={{ paddingTop: '16px' }}>
+            <FormControl
+              error={this.state.error !== null}
+              className={localStyles.form}
+            >
+              <p className={localStyles.title}>
+                {
+                  SOURCES.filter(el => {
+                    return el.value === this.state.from;
+                  })[0].text
+                }
+              </p>
+              <TextInput
+                placeholder="my_dataset"
+                label="Name"
+                onChange={event => {
+                  this.setState({ name: event.target.value });
+                }}
+              />
+              {this.getDialogContent()}
+              {this.getDialogError()}
+            </FormControl>
+          </div>
+        </DialogComponent>
+      );
+    }
+    return null;
+  }
+
   private getDialogContent(): JSX.Element {
     const { from } = this.state;
     if (from === 'computer') {
@@ -323,6 +386,13 @@ export class ImportData extends React.Component<Props, State> {
     return null;
   }
 
+  private getDialogError(): JSX.Element {
+    if (this.state.error) {
+      return <FormHelperText>{this.state.error}</FormHelperText>;
+    }
+    return null;
+  }
+
   render() {
     return (
       <>
@@ -350,62 +420,7 @@ export class ImportData extends React.Component<Props, State> {
             {this.state.error}
           </Toast>
         </Portal>
-        {this.props.open && (
-          <DialogComponent
-            header={'Import Data to Tables Dataset'}
-            open={true}
-            onClose={this.props.onClose}
-            onCancel={this.props.onClose}
-            submitLabel={'Import Data'}
-            onSubmit={this.submit}
-            submitDisabled={
-              this.state.loading ||
-              this.state.error !== null ||
-              !this.state.name ||
-              !this.state.source
-            }
-          >
-            <RadioInput
-              value={this.state.from}
-              options={SOURCES}
-              onChange={event => {
-                this.setState({
-                  from: event.target.value as SourceType,
-                  source: null,
-                  error: null,
-                });
-                if (event.target.value === 'dataframe') {
-                  this.getSessions();
-                }
-              }}
-            />
-            <div style={{ paddingTop: '16px' }}>
-              <FormControl
-                error={this.state.error !== null}
-                className={localStyles.form}
-              >
-                <p className={localStyles.title}>
-                  {
-                    SOURCES.filter(el => {
-                      return el.value === this.state.from;
-                    })[0].text
-                  }
-                </p>
-                <TextInput
-                  placeholder="my_dataset"
-                  label="Name"
-                  onChange={event => {
-                    this.setState({ name: event.target.value });
-                  }}
-                />
-                {this.getDialogContent()}
-                {this.state.error && (
-                  <FormHelperText>{this.state.error}</FormHelperText>
-                )}
-              </FormControl>
-            </div>
-          </DialogComponent>
-        )}
+        {this.getDialog()}
       </>
     );
   }

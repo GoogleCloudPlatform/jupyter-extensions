@@ -99,7 +99,7 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
     return sum;
   }
 
-  private getConfusionMatrix(): any[] {
+  private getConfusionMatrix(): JSX.Element[] {
     const matrix = [];
     const sum = this.getConfusionMatrixSum();
     const rowWidth = this.props.confusionMatrix.length * 170;
@@ -159,12 +159,15 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
   }
 
   render() {
-    return (
-      <Grid item xs={12} key={'confusionMatrix'}>
-        <header className={localStyles.header}>Confusion Matrix</header>
-        {this.getConfusionMatrix()}
-      </Grid>
-    );
+    if (this.props.confusionMatrix) {
+      return (
+        <Grid item xs={12} key={'confusionMatrix'}>
+          <header className={localStyles.header}>Confusion Matrix</header>
+          {this.getConfusionMatrix()}
+        </Grid>
+      );
+    }
+    return null;
   }
 }
 
@@ -174,33 +177,36 @@ export class FeatureImportance extends React.Component<FeatureImportanceProps> {
   }
 
   render() {
-    return (
-      <Grid item xs={12}>
-        <header className={localStyles.header}>Feature Importance</header>
-        <BarChart
-          width={500}
-          height={35 * this.props.featureImportance.length}
-          data={this.props.featureImportance}
-          layout="vertical"
-          margin={{
-            top: 5,
-            bottom: 5,
-            left: 100,
-            right: 5,
-          }}
-        >
-          <YAxis
-            type="category"
-            dataKey="name"
-            tickLine={false}
-            tick={{ fill: 'black' }}
-          />
-          <XAxis type="number" domain={[0, 100]} tick={false} hide={true} />
-          <Tooltip />
-          <Bar dataKey="Percentage" fill="#3366CC" />
-        </BarChart>
-      </Grid>
-    );
+    if (this.props.featureImportance) {
+      return (
+        <Grid item xs={12}>
+          <header className={localStyles.header}>Feature Importance</header>
+          <BarChart
+            width={500}
+            height={35 * this.props.featureImportance.length}
+            data={this.props.featureImportance}
+            layout="vertical"
+            margin={{
+              top: 5,
+              bottom: 5,
+              left: 100,
+              right: 5,
+            }}
+          >
+            <YAxis
+              type="category"
+              dataKey="name"
+              tickLine={false}
+              tick={{ fill: 'black' }}
+            />
+            <XAxis type="number" domain={[0, 100]} tick={false} hide={true} />
+            <Tooltip />
+            <Bar dataKey="Percentage" fill="#3366CC" />
+          </BarChart>
+        </Grid>
+      );
+    }
+    return null;
   }
 }
 
@@ -224,86 +230,6 @@ export class EvaluationTable extends React.Component<Props, State> {
     this.getModelEvaluations();
   }
 
-  render() {
-    const {
-      isLoading,
-      evaluationTable,
-      confidenceMetrics,
-      sliderMarks,
-      modelEvaluation,
-      currentThreshold,
-      featureImportance,
-      confusionMatrix,
-    } = this.state;
-    return (
-      <div
-        hidden={this.props.value !== this.props.index}
-        style={{ marginTop: '16px' }}
-      >
-        {isLoading ? (
-          <LinearProgress />
-        ) : (
-          <Grid
-            container
-            style={{ margin: '0px', width: '100%' }}
-            spacing={3}
-            direction="column"
-          >
-            <Grid item xs={12}>
-              {sliderMarks && (
-                <p style={{ marginBottom: 16, marginLeft: 16 }}>
-                  Confidence Threshold
-                  <Slider
-                    step={null}
-                    marks={sliderMarks}
-                    style={{
-                      width: 200,
-                      margin: '0 24px 0 24px',
-                      paddingBottom: 5,
-                    }}
-                    onChange={(event, value) => {
-                      const formatted = ((value as number) / 100).toFixed(2);
-                      if (formatted !== currentThreshold) {
-                        this.setState({
-                          currentThreshold: formatted,
-                        });
-                      }
-                    }}
-                    onChangeCommitted={(event, value) => {
-                      const metric = confidenceMetrics.filter(
-                        metric => metric.confidenceThreshold === value
-                      )[0];
-                      this.updateEvaluationTable(metric, modelEvaluation);
-                    }}
-                  />
-                  {currentThreshold}
-                </p>
-              )}
-              <Table size="small" style={{ width: 500 }}>
-                <TableBody>
-                  {evaluationTable.map(row => (
-                    <TableRow key={row.key}>
-                      <TableCell component="th" scope="row">
-                        {row.key}
-                      </TableCell>
-                      <TableCell align="right">{row.val}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Grid>
-            {featureImportance && (
-              <FeatureImportance featureImportance={featureImportance} />
-            )}
-            {confusionMatrix && (
-              <ConfusionMatrix confusionMatrix={confusionMatrix} />
-            )}
-          </Grid>
-        )}
-      </div>
-    );
-  }
-
   private createData(key: string, val: number | string | Date) {
     return { key, val };
   }
@@ -316,6 +242,41 @@ export class EvaluationTable extends React.Component<Props, State> {
       });
     }
     return sliderMarks;
+  }
+
+  private getConfidenceSlider(sliderMarks: any[]): JSX.Element {
+    if (sliderMarks) {
+      return (
+        <p style={{ marginBottom: 16, marginLeft: 16 }}>
+          Confidence Threshold
+          <Slider
+            step={null}
+            marks={sliderMarks}
+            style={{
+              width: 200,
+              margin: '0 24px 0 24px',
+              paddingBottom: 5,
+            }}
+            onChange={(event, value) => {
+              const formatted = ((value as number) / 100).toFixed(2);
+              if (formatted !== this.state.currentThreshold) {
+                this.setState({
+                  currentThreshold: formatted,
+                });
+              }
+            }}
+            onChangeCommitted={(event, value) => {
+              const metric = this.state.confidenceMetrics.filter(
+                metric => metric.confidenceThreshold === value
+              )[0];
+              this.updateEvaluationTable(metric, this.state.modelEvaluation);
+            }}
+          />
+          {this.state.currentThreshold}
+        </p>
+      );
+    }
+    return null;
   }
 
   private getConfidenceMetricRows(metric): any[] {
@@ -391,5 +352,50 @@ export class EvaluationTable extends React.Component<Props, State> {
     } finally {
       this.setState({ isLoading: false });
     }
+  }
+
+  render() {
+    const {
+      isLoading,
+      evaluationTable,
+      sliderMarks,
+      featureImportance,
+      confusionMatrix,
+    } = this.state;
+    return (
+      <div
+        hidden={this.props.value !== this.props.index}
+        style={{ marginTop: '16px' }}
+      >
+        {isLoading ? (
+          <LinearProgress />
+        ) : (
+          <Grid
+            container
+            style={{ margin: '0px', width: '100%' }}
+            spacing={3}
+            direction="column"
+          >
+            <Grid item xs={12}>
+              {this.getConfidenceSlider(sliderMarks)}
+              <Table size="small" style={{ width: 500 }}>
+                <TableBody>
+                  {evaluationTable.map(row => (
+                    <TableRow key={row.key}>
+                      <TableCell component="th" scope="row">
+                        {row.key}
+                      </TableCell>
+                      <TableCell align="right">{row.val}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Grid>
+            <FeatureImportance featureImportance={featureImportance} />
+            <ConfusionMatrix confusionMatrix={confusionMatrix} />
+          </Grid>
+        )}
+      </div>
+    );
   }
 }
