@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
+import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
 
 import {
   DataTree,
@@ -102,17 +103,6 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
-  const queryResource = dataTreeItem => {
-    const queryId = generateQueryId();
-    WidgetManager.getInstance().launchWidget(
-      QueryEditorTabWidget,
-      'main',
-      queryId,
-      undefined,
-      [queryId, `SELECT * FROM \`${dataTreeItem.id}\``]
-    );
-  };
-
   const copyBoilerplateQuery = dataTreeItem => {
     Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
   };
@@ -163,11 +153,37 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
+  const queryTable = dataTreeItem => {
+    const notebookTrack = context.notebookTrack as INotebookTracker;
+    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
+
+    const curWidget = notebookTrack.currentWidget;
+
+    if (!curWidget || !curWidget.content.isVisible) {
+      // no active notebook or not visible
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query]
+      );
+    } else {
+      // exist notebook and visible
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code = '%%bigquery_editor\n\n' + query;
+      cell.model.value.text = code;
+    }
+  };
+
   const renderTables = table => {
     const tableContextMenuItems = [
       {
-        label: 'Query table',
-        handler: dataTreeItem => queryResource(dataTreeItem),
+        label: 'Query Table',
+        handler: queryTable,
       },
       {
         label: 'Copy table ID',
