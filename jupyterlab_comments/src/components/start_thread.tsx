@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Icon } from '@material-ui/core';
 import {
@@ -24,7 +23,7 @@ import {
 interface Props {
   serverRoot: string;
   currFilePath: string;
-  commentType: string;
+  commentType: 'detached' | 'review';
   reviewHash?: string;
 }
 

@@ -76,3 +76,26 @@ export async function newReviewCommentThread(
     console.log(response);
   });
 }
+
+export async function newReviewCommentReply(
+  currFilePath,
+  serverRoot,
+  commentString,
+  parentHash,
+  reviewHash
+) {
+  const body: Record<string, string> = {
+    comment: commentString,
+    parent: parentHash,
+    reviewHash: reviewHash,
+  };
+  httpGitRequest(
+    'addReviewComment',
+    'POST',
+    currFilePath,
+    serverRoot,
+    body
+  ).then(response => {
+    console.log(response);
+  });
+}
