@@ -27,7 +27,7 @@ import {
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
-import { QueryEditorType } from './query_editor_results';
+import { QueryEditorType } from '../query_editor_tab/query_editor_results';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -43,12 +43,10 @@ interface QueryTextEditorProps {
   resetQueryResult: any;
   deleteQueryEntry: any;
   queryId: QueryId;
-  queries: { [key: string]: QueryResult };
   iniQuery?: string;
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   width?: number;
-  onFinishQuery?: (QueryResult) => void;
 }
 
 interface QueryResponseType {
@@ -274,10 +272,6 @@ class QueryTextEditor extends React.Component<
           }, 2000);
         } else if (state === JobState.Done) {
           this.setState({ queryState: QueryStates.READY });
-
-          if (this.props.onFinishQuery) {
-            this.props.onFinishQuery(this.props.queries[this.props.queryId]);
-          }
         }
       },
       2000
@@ -623,8 +617,8 @@ class QueryTextEditor extends React.Component<
   }
 }
 
-const mapStateToProps = state => {
-  return { queries: state.queryEditorTab.queries };
+const mapStateToProps = _ => {
+  return {};
 };
 
 const mapDispatchToProps = {
