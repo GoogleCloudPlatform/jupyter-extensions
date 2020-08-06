@@ -3,7 +3,7 @@ import QueryTextEditor, {
   QueryResult,
 } from '../query_text_editor/query_text_editor';
 import { connect } from 'react-redux';
-import QueryResults from '../query_editor_tab/query_editor_results';
+import QueryResults from '../query_text_editor/query_editor_results';
 import {
   QueryId,
   generateQueryId,

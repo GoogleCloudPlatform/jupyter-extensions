@@ -14,18 +14,20 @@ const localStyles = stylesheet({
 });
 
 export class QueryEditorTabWidget extends ReduxReactWidget {
+  static editorCount = 0;
   id = 'query-editor-tab';
+  private resizeSignal = new Signal<this, Widget.ResizeMessage>(this);
 
-  constructor(
-    private editorNumber: number,
-    private queryId: string,
-    private iniQuery: string
-  ) {
+  constructor(private queryId: string, private iniQuery: string) {
     super();
-    this.title.label = `Query Editor ${this.editorNumber}`;
+    this.title.label = `Query Editor ${QueryEditorTabWidget.addAndGetEditorNum()}`;
     this.title.closable = true;
   }
-  private resizeSignal = new Signal<this, Widget.ResizeMessage>(this);
+
+  private static addAndGetEditorNum() {
+    QueryEditorTabWidget.editorCount += 1;
+    return QueryEditorTabWidget.editorCount;
+  }
 
   onResize(msg: Widget.ResizeMessage) {
     this.resizeSignal.emit(msg);

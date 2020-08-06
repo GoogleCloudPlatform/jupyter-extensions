@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
-import { QueryResult } from '../query_text_editor/query_text_editor';
+import { QueryResult } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';

@@ -27,7 +27,7 @@ import {
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
-import { QueryEditorType } from '../query_editor_tab/query_editor_results';
+import { QueryEditorType } from './query_editor_results';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
