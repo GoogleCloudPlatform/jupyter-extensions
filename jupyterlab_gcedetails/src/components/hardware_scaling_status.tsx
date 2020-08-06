@@ -111,7 +111,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           this.setState({ status: Status['Reshaping Instance'] });
           break;
         case Status['Reshaping Instance']:
-          await notebookService.setMachineType(machineType.value as string);
+          await notebookService.setMachineType(machineType.name);
           if (attachGpu) {
             await notebookService.setAccelerator(gpuType, gpuCount);
           }

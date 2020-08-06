@@ -27,7 +27,7 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option, TEXT_STYLE } from '../data';
+import { Option, TEXT_STYLE, TEXT_LABEL_STYLE } from '../data';
 
 const STYLES = stylesheet({
   itemGroup: {
@@ -217,6 +217,7 @@ interface NestedSelectProps {
   nestedOptionsList: NestedOptions[];
   onChange?: (value: Option) => void;
   label?: string;
+  value?: Option;
 }
 
 interface NestedSelectState {
@@ -232,7 +233,7 @@ export class NestedSelect extends React.Component<
     super(props);
 
     this.state = {
-      value: props.nestedOptionsList[0].options[0],
+      value: props.value ? props.value : props.nestedOptionsList[0].options[0],
       anchorEl: null,
     };
   }
@@ -270,8 +271,12 @@ export class NestedSelect extends React.Component<
 
     return (
       <div className={STYLES.nestedSelect}>
-        {label && <label>{label}</label>}
+        {/* {label && <label>{label}</label>} */}
         <TextField
+          InputLabelProps={{
+            style: TEXT_LABEL_STYLE,
+          }}
+          label={label}
           className={STYLES.input}
           value={this.displayValue(value)}
           margin="dense"

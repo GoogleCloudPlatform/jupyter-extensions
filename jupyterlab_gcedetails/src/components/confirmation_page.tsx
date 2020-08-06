@@ -60,8 +60,8 @@ export const STYLES = stylesheet({
   },
 });
 
-const INFO_MESSAGE =
-  'Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.';
+const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.
+  If you have chosen to attach GPUs to your instance, the NVIDIA GPU driver will be installed automatically on the next startup.`;
 
 function getGpuTypeText(value: string) {
   return ACCELERATOR_TYPES.find(option => option.value === value).text;
@@ -76,7 +76,7 @@ function displayConfiguration(
   return (
     <div>
       <span className={classes(STYLES.title, STYLES.topPadding)}>{title}</span>
-      <div className={STYLES.text}>Machine type: {machineType.text}</div>
+      <div className={STYLES.text}>Machine type: {machineType.description}</div>
       {attachGpu && (
         <div className={STYLES.text}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
