@@ -4,4 +4,4 @@ The JupyterLab Git Sync extension provides a real-time editing feature on Jupyte
 
 ## Development
 
-1. Follow the [instructions](../#Development) from the root of the repository.
+1. Follow the [instructions](../README.md) from the root of the repository.
