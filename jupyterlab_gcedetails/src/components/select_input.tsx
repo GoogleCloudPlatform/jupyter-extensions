@@ -49,7 +49,6 @@ export function SelectInput(props: Props) {
 
   return (
     <div>
-      {/* {label && <label>{label}</label>} */}
       <TextField
         InputLabelProps={{
           style: TEXT_LABEL_STYLE,

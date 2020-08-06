@@ -271,7 +271,6 @@ export class NestedSelect extends React.Component<
 
     return (
       <div className={STYLES.nestedSelect}>
-        {/* {label && <label>{label}</label>} */}
         <TextField
           InputLabelProps={{
             style: TEXT_LABEL_STYLE,
