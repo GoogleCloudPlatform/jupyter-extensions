@@ -10,6 +10,14 @@ import {
 } from '../../../reducers/queryEditorTabSlice';
 import { DOMWidgetView } from '@jupyter-widgets/base';
 import ReactResizeDetector from 'react-resize-detector';
+import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
+
+const localStyles = stylesheet({
+  inCellEditorRoot: {
+    ...BASE_FONT,
+  },
+});
 
 interface QueryEditorInCellProps {
   queries: { [key: string]: QueryResult };
@@ -44,7 +52,7 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
       <ReactResizeDetector>
         {({ width }) => {
           return (
-            <div>
+            <div className={localStyles.inCellEditorRoot}>
               <QueryTextEditor
                 queryId={this.queryId}
                 iniQuery={this.iniQuery}

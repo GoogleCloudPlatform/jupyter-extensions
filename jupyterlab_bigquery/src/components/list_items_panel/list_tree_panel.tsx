@@ -39,7 +39,7 @@ import {
   SearchResult,
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
-import { DialogComponent, COLORS } from 'gcp_jupyterlab_shared';
+import { DialogComponent, COLORS, BASE_FONT } from 'gcp_jupyterlab_shared';
 import CustomSnackbar from './snackbar';
 
 interface Props {
@@ -83,7 +83,6 @@ const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     fontWeight: 600,
-    fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size0, 11px)',
     letterSpacing: '1px',
     margin: 0,
@@ -107,7 +106,6 @@ const localStyles = stylesheet({
   },
   resourcesTitle: {
     fontWeight: 600,
-    fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size0, 11px)',
     letterSpacing: '1px',
     margin: 0,
@@ -134,7 +132,6 @@ const localStyles = stylesheet({
   },
   buttonLabel: {
     fontWeight: 400,
-    fontFamily: 'var(--jp-ui-font-family)',
     fontSize: 'var(--jp-ui-font-size1)',
     textTransform: 'initial',
     overflow: 'hidden',
@@ -183,9 +180,8 @@ const localStyles = stylesheet({
   },
   panel: {
     backgroundColor: 'white',
-    //color: COLORS.base,
     height: '100%',
-    //...BASE_FONT,
+    ...BASE_FONT,
     ...csstips.vertical,
   },
   enableSearch: {

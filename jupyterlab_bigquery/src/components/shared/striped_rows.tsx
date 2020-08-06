@@ -9,6 +9,9 @@ const localStyles = stylesheet({
   rowTitle: {
     width: '200px',
   },
+  bold: {
+    fontWeight: 500,
+  },
 });
 
 export const getStripedStyle = index => {
@@ -25,7 +28,7 @@ export const StripedRows = props => {
           style={{ ...getStripedStyle(index) }}
         >
           <div className={localStyles.rowTitle}>
-            <b>{row.name}</b>
+            <div className={localStyles.bold}>{row.name}</div>
           </div>
           <div>{row.value}</div>
         </div>
