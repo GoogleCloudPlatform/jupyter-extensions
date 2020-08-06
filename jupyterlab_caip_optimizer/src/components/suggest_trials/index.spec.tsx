@@ -162,7 +162,16 @@ describe('Suggest Trials Page', () => {
       expect(screen.getByText('101')).toBeInTheDocument();
       expect(screen.getByText('666')).toBeInTheDocument();
     });
-    it.todo('shows children parameters as columns');
+    it('shows children parameters as columns', () => {
+      render(<SuggestTrials studyName={fakeStudyNameTree} />);
+
+      // child parameter specs
+      expect(screen.getByText(/deep_learning_rate/i));
+      expect(screen.getByText(/small_model/i));
+      expect(screen.getByText(/big_model/i));
+      expect(screen.getByText(/low/i));
+      expect(screen.getByText(/high/i));
+    });
     it('opens a add measurement window', async () => {
       render(<SuggestTrials studyName={fakeStudyName} />);
 
