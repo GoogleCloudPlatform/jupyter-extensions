@@ -216,6 +216,33 @@ class TestRemoteReviewComments(tornado.testing.AsyncHTTPTestCase):
       self.assertTrue(commit_hash2 == data[1].get("revision") or commit_hash2 == data[0].get("revision"))
       self.assertFalse(commit_hash2 == commit_hash1)
 
+  def test_add_review_comment(self):
+    with tempfile.TemporaryDirectory() as working_dir:
+      test_env = setup_repos(working_dir)
+      file_path_dir1 = os.path.join(test_env.dir1, 'test1.py')
+      file_path_dir2 = os.path.join(test_env.dir2, 'test1.py')
+      commit_hash1 = create_code_review(test_env.dir1, 'test1')
+      self.fetch('/addReviewComment?file_path=' + file_path_dir1 + '&server_root=' +
+               home,
+               method="POST",
+               body=json.dumps({
+                "reviewHash": commit_hash1,
+                "comment": "Adding a new comment",
+                }))
+      self.fetch('/remotePull?file_path=' + file_path_dir2 + '&server_root=' +
+               home,
+               method="POST",
+               body=json.dumps({}))
+      response = self.fetch('/reviewComments?file_path=' + file_path_dir2 +
+                          '&server_root=' + home,
+                          method="GET")
+      data = json.loads(response.body)
+      self.assertEqual(1, len(data))
+      comments = data[0].get("comments")
+      self.assertEqual(1, len(comments))
+      self.assertEqual(commit_hash1, data[0].get("revision"))
+      self.assertEqual("Adding a new comment", comments[0].get("comment").get("description"))
+
 
 class TestNotInGitRepo(tornado.testing.AsyncHTTPTestCase):
 
@@ -254,7 +281,7 @@ class TestNotInGitRepo(tornado.testing.AsyncHTTPTestCase):
                      method="GET"))
 
 
-class TestReplyComments(tornado.testing.AsyncHTTPTestCase):
+class TestDetachedReplyComments(tornado.testing.AsyncHTTPTestCase):
 
   def get_app(self):
     return create_tornado_app()
@@ -396,7 +423,7 @@ class TestReplyComments(tornado.testing.AsyncHTTPTestCase):
 if __name__ == '__main__':
   test_classes = [
       TestLocalDetachedComments, TestRemoteDetachedComments, TestNotInGitRepo,
-      TestReplyComments, TestLocalReviewComments, TestRemoteReviewComments
+      TestDetachedReplyComments, TestLocalReviewComments, TestRemoteReviewComments
   ]
   test_loader = unittest.TestLoader()
   suites = []

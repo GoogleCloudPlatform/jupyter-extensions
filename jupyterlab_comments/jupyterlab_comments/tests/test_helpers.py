@@ -95,5 +95,6 @@ def create_tornado_app():
         ('/detachedComments', handlers.DetachedCommentsHandler),
         ('/remotePull', handlers.PullFromRemoteRepoHandler),
         ('/addDetachedComment', handlers.AddDetachedCommentHandler),
-        ('/reviewComments', handlers.ReviewCommentsHandler)])
+        ('/reviewComments', handlers.ReviewCommentsHandler),
+        ('/addReviewComment', handlers.AddReviewCommentHandler)])
     return app
