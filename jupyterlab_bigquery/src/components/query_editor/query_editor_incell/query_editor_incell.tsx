@@ -30,15 +30,18 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     this.queryFlags = JSON.parse(rawQueryFlags);
   }
 
+  sendQueryToPython(query) {
+    const val = query ? JSON.stringify(query) : '';
+    this.props.ipyView.model.set('result', val);
+    this.props.ipyView.touch();
+  }
+
   render() {
     const { queries } = this.props;
 
     const queryResult = queries[this.queryId];
     // eslint-disable-next-line no-extra-boolean-cast
     const showResult = !!queryResult && queryResult.content.length > 0;
-    const val = showResult ? JSON.stringify(queryResult) : '';
-    this.props.ipyView.model.set('result', val);
-    this.props.ipyView.touch();
 
     return (
       <ReactResizeDetector>
@@ -51,6 +54,7 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
                 editorType="IN_CELL"
                 queryFlags={this.queryFlags}
                 width={width}
+                onFinishQuery={this.sendQueryToPython.bind(this)}
               />
               {showResult ? (
                 <QueryResults queryId={this.queryId} editorType="IN_CELL" />

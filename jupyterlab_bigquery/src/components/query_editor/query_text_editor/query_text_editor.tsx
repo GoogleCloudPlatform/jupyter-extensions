@@ -43,10 +43,12 @@ interface QueryTextEditorProps {
   resetQueryResult: any;
   deleteQueryEntry: any;
   queryId: QueryId;
+  queries: { [key: string]: QueryResult };
   iniQuery?: string;
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   width?: number;
+  onFinishQuery?: (QueryResult) => void;
 }
 
 interface QueryResponseType {
@@ -272,6 +274,10 @@ class QueryTextEditor extends React.Component<
           }, 2000);
         } else if (state === JobState.Done) {
           this.setState({ queryState: QueryStates.READY });
+
+          if (this.props.onFinishQuery) {
+            this.props.onFinishQuery(this.props.queries[this.props.queryId]);
+          }
         }
       },
       2000
@@ -610,8 +616,8 @@ class QueryTextEditor extends React.Component<
   }
 }
 
-const mapStateToProps = _ => {
-  return {};
+const mapStateToProps = state => {
+  return { queries: state.queryEditorTab.queries };
 };
 
 const mapDispatchToProps = {
