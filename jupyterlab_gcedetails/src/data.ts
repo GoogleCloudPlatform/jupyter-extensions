@@ -23,6 +23,12 @@ interface MachineType {
   description: string;
 }
 
+export interface Accelerator {
+  name: string;
+  description: string;
+  maximumCardsPerInstance: number;
+}
+
 interface Instance {
   attributes: {
     framework: string;
@@ -62,6 +68,7 @@ export interface Details {
   project: Project;
   utilization: Utilization;
   gpu: Gpu;
+  acceleratorTypes: Accelerator[];
 }
 
 export interface Option {
