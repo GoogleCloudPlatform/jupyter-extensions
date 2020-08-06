@@ -194,6 +194,10 @@ export class MergeResolver {
         this._updateState(false);
         throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
       }
+      if (result.button.label === 'Ignore') {
+        this._updateState(false);
+        throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
+      }
     });
   }
 
