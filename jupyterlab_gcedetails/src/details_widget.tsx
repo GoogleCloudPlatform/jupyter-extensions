@@ -27,15 +27,20 @@ import { DetailsDialogBody } from './components/details_dialog_body';
 import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';
+import { HardwareScalingDialog } from './components/hardware_scaling_dialog';
+import { NotebooksService } from './service/notebooks_service';
+import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
 interface Props {
   detailsServer: ServerWrapper;
+  notebookService: NotebooksService;
 }
 interface State {
   displayedAttributes: [number, number];
   details?: Details;
   receivedError: boolean;
   shouldRefresh: boolean;
+  formDisplayed: boolean;
 }
 
 const ICON_CLASS = 'jp-VmStatusIcon';
@@ -50,6 +55,7 @@ export class VmDetails extends React.Component<Props, State> {
       displayedAttributes: [0, 1],
       receivedError: false,
       shouldRefresh: false,
+      formDisplayed: false,
     };
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
@@ -67,8 +73,8 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   render() {
-    const { details, receivedError } = this.state;
-    const { detailsServer } = this.props;
+    const { details, receivedError, formDisplayed } = this.state;
+    const { detailsServer, notebookService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -86,14 +92,32 @@ export class VmDetails extends React.Component<Props, State> {
         <span className={classes(STYLES.interactiveHover)}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>
+        <span
+          className={classes(STYLES.icon, ICON_CLASS, STYLES.interactiveHover)}
+          title="Show form"
+          onClick={() => this.setState({ formDisplayed: true })}
+        ></span>
+        {formDisplayed && (
+          <HardwareScalingDialog
+            open={formDisplayed}
+            onClose={() => this.setState({ formDisplayed: false })}
+            notebookService={notebookService}
+          />
+        )}
       </span>
     );
   }
 
   private async getAndSetDetailsFromServer() {
+    const { notebookService, detailsServer } = this.props;
     try {
-      const details = await this.props.detailsServer.getUtilizationData();
-      this.setState({ details: details as Details });
+      const details = (await detailsServer.getUtilizationData()) as Details;
+      this.setState({ details: details });
+      notebookService.projectId = details.project.projectId;
+      notebookService.locationId = details.instance.zone;
+      const instanceNameSplit = details.instance.name.split('/');
+      notebookService.instanceName =
+        instanceNameSplit[instanceNameSplit.length - 1];
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
@@ -159,7 +183,16 @@ export class VmDetails extends React.Component<Props, State> {
 export class VmDetailsWidget extends ReactWidget {
   private readonly detailsUrl = `gcp/v1/details`;
   private readonly detailsServer = new ServerWrapper(this.detailsUrl);
+  private readonly clientTransportService = new ClientTransportService();
+  private readonly notebookService = new NotebooksService(
+    this.clientTransportService
+  );
   render() {
-    return <VmDetails detailsServer={this.detailsServer} />;
+    return (
+      <VmDetails
+        detailsServer={this.detailsServer}
+        notebookService={this.notebookService}
+      />
+    );
   }
 }

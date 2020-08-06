@@ -23,12 +23,18 @@ import { VmDetails } from './details_widget';
 import { STYLES } from './data';
 import { ServerWrapper } from './components/server_wrapper';
 import { DETAILS_RESPONSE } from './test_helpers';
+import { NotebooksService } from './service/notebooks_service';
+import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
   } as unknown) as ServerWrapper;
+  const mockClientTransportationService = new ClientTransportService();
+  const mockNotebookService = new NotebooksService(
+    mockClientTransportationService
+  );
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -43,7 +49,12 @@ describe('VmDetails', () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
-    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    const vmDetails = shallow(
+      <VmDetails
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+      />
+    );
     expect(vmDetails).toMatchSnapshot('Retrieving');
     await resolveValue;
 
@@ -56,10 +67,15 @@ describe('VmDetails', () => {
       throw new Error();
     });
 
-    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    const vmDetails = shallow(
+      <VmDetails
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+      />
+    );
 
     expect(vmDetails).toMatchSnapshot('Received Error');
-    vmDetails.find(`span.${STYLES.icon}`).simulate('click');
+    vmDetails.find('[title="Show all details"]').simulate('click');
     expect(showDialog).toHaveBeenCalledWith({
       title: 'Notebook VM Details',
       body: 'Unable to retrieve GCE VM details, please check your server logs',
@@ -70,10 +86,15 @@ describe('VmDetails', () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
-    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    const vmDetails = shallow(
+      <VmDetails
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+      />
+    );
     await resolveValue;
 
-    vmDetails.find(`span.${STYLES.icon}`).simulate('click');
+    vmDetails.find('[title="Show all details"]').simulate('click');
     expect(showDialog).toHaveBeenCalled();
     expect(ReactWidget.create).toHaveBeenCalled();
   });
@@ -82,7 +103,12 @@ describe('VmDetails', () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
-    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    const vmDetails = shallow(
+      <VmDetails
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+      />
+    );
     await resolveValue;
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
@@ -117,7 +143,12 @@ describe('VmDetails', () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
-    const vmDetails = shallow(<VmDetails detailsServer={mockServerWrapper} />);
+    const vmDetails = shallow(
+      <VmDetails
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+      />
+    );
     await resolveValue;
 
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
