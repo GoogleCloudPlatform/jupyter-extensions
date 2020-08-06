@@ -189,7 +189,8 @@ exports[`Comment editor components should render correctly should render new com
 `;
 
 exports[`Comment editor components should render correctly should render new reply comment editor 1`] = `
-<ReplyEditor
+<DetachedReplyEditor
+  commentType="detached"
   currFilePath="fake/path"
   hash="hash"
 />

@@ -183,7 +183,11 @@ describe('Comment editor components should render correctly', () => {
 
   it('should render new reply comment editor', () => {
     const replyEditor = shallow(
-      <NewReplyComment currFilePath="fake/path" hash="hash" />
+      <NewReplyComment
+        currFilePath="fake/path"
+        hash="hash"
+        commentType="detached"
+      />
     );
     expect(replyEditor).toMatchSnapshot();
   });
@@ -223,7 +227,7 @@ describe('Behavior for comment input field', () => {
 
   it('should display send button for reply editor', () => {
     const component = shallow(
-      <NewReplyComment hash="hash" currFilePath="path" />
+      <NewReplyComment hash="hash" currFilePath="path" commentType="detached" />
     );
     const submit = component.dive().find('.sendReply');
     expect(submit).toHaveLength(1);
@@ -231,7 +235,7 @@ describe('Behavior for comment input field', () => {
 
   it('should store the value of the comment (reply)', () => {
     const component = mount(
-      <NewReplyComment hash="hash" currFilePath="path" />
+      <NewReplyComment hash="hash" currFilePath="path" commentType="detached" />
     );
     const input = component.find('.replyCommentTextField').first();
     expect(input.props().value).toEqual('');
