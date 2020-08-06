@@ -2,8 +2,6 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import TextField from '@material-ui/core/TextField';
-import InputAdornment from '@material-ui/core/InputAdornment';
 
 interface Props {
   handleKeyPress: (e) => void;
@@ -15,13 +13,29 @@ const searchStyle = stylesheet({
   search: {
     display: 'flex',
     flexDirection: 'row',
+    flexGrow: 1,
+    borderStyle: 'solid',
+    borderRadius: '1px',
+    borderWidth: 'thin',
+    borderColor: '#d3d3d3',
+  },
+  searchIcon: {
+    padding: '2px',
+    color: 'var(--jp-layout-color3)',
   },
   clearIcon: {
     textTransform: 'none',
+    alignSelf: 'center',
+    color: 'var(--jp-layout-color3)',
     '&:hover': {
       cursor: 'pointer',
       opacity: 1,
     },
+  },
+  searchPlaceholder: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
+    minWidth: 0,
   },
 });
 
@@ -48,34 +62,24 @@ export function SearchBar(props: Props) {
 
   return (
     <div className={searchStyle.search}>
-      <TextField
-        id="standard-search"
-        value={searchKey}
-        placeholder={props.defaultText || 'Search...'}
-        margin="normal"
+      <SearchIcon className={searchStyle.searchIcon} />
+      <input
         onKeyPress={e => props.handleKeyPress(e)}
         onChange={e => handleOnChange(e)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              {showClearIcon ? (
-                <ClearIcon
-                  className={searchStyle.clearIcon}
-                  fontSize="small"
-                  onClick={() => handleClickClear()}
-                />
-              ) : (
-                <div />
-              )}
-            </InputAdornment>
-          ),
-        }}
+        className={searchStyle.searchPlaceholder}
+        placeholder="Search for your tables and datasets"
+        value={searchKey}
+        style={{ borderWidth: 0, flexGrow: 1 }}
       />
+      {showClearIcon ? (
+        <ClearIcon
+          className={searchStyle.clearIcon}
+          fontSize="small"
+          onClick={() => handleClickClear()}
+        />
+      ) : (
+        <div />
+      )}
     </div>
   );
 }

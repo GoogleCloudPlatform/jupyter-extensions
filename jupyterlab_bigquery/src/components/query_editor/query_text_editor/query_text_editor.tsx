@@ -34,6 +34,7 @@ interface QueryTextEditorState {
   bytesProcessed: number | null;
   message: string | null;
   ifMsgErr: boolean;
+  height: number;
 }
 
 interface QueryTextEditorProps {
@@ -44,6 +45,7 @@ interface QueryTextEditorProps {
   iniQuery?: string;
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
+  width?: number;
 }
 
 interface QueryResponseType {
@@ -67,7 +69,6 @@ interface QueryRequestBodyType {
 
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   lineNumbers: 'on',
-  automaticLayout: true,
   formatOnType: true,
   formatOnPaste: true,
   wordWrap: 'on',
@@ -159,6 +160,7 @@ class QueryTextEditor extends React.Component<
       bytesProcessed: null,
       message: null,
       ifMsgErr: false,
+      height: 0,
     };
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
@@ -178,8 +180,33 @@ class QueryTextEditor extends React.Component<
     });
   }
 
+  updateDimensions() {
+    this.editor.layout();
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.updateDimensions.bind(this));
+  }
+
   componentWillUnmount() {
     this.props.deleteQueryEntry(this.queryId);
+    window.removeEventListener('resize', this.updateDimensions.bind(this));
+  }
+
+  componentDidUpdate(
+    prevProps: QueryTextEditorProps,
+    prevState: QueryTextEditorState
+  ) {
+    if (
+      (prevProps.width !== this.props.width ||
+        prevState.height !== this.state.height) &&
+      this.editor
+    ) {
+      this.editor.layout({
+        width: this.props.width,
+        height: this.state.height,
+      });
+    }
   }
 
   handleButtonClick() {
@@ -245,6 +272,9 @@ class QueryTextEditor extends React.Component<
   }
 
   handleEditorDidMount(_, editor) {
+    if (this.editorRef.current) {
+      this.setState({ height: this.editorRef.current.clientHeight });
+    }
     this.editor = editor;
 
     this.editor.onKeyUp(() => {
@@ -462,6 +492,8 @@ class QueryTextEditor extends React.Component<
     return undefined;
   }
 
+  private editorRef = React.createRef<HTMLDivElement>();
+
   renderMessage() {
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
@@ -552,6 +584,7 @@ class QueryTextEditor extends React.Component<
               ? styleSheet.queryTextEditorInCell
               : styleSheet.queryTextEditor
           }
+          ref={this.editorRef}
         >
           <Editor
             width="100%"
