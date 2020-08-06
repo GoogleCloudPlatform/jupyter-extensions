@@ -39,16 +39,37 @@ export interface ValidateParameterInputs {
   [parameterName: string]: ErrorCheckFunction<string>;
 }
 
+function parametersToColumnsTree(
+  parameters: ParameterSpec[],
+  list: TrialColumn[] = []
+): TrialColumn[] {
+  parameters.forEach(parameter => {
+    list.push({
+      // Attach parameter to name to avoid name collision with other columns properties like state and name
+      field: `${parameter.parameter}Parameter`,
+      title: parameter.parameter,
+    });
+    switch (parameter.type) {
+      case 'CATEGORICAL':
+      case 'DISCRETE':
+      case 'INTEGER':
+        if (parameter.childParameterSpecs) {
+          parametersToColumnsTree(parameter.childParameterSpecs, list);
+        }
+    }
+  });
+  return list;
+}
+
 /**
- * Converts a paramter to a valid column for `material-table`
- * @param parameter The parameter to make into a column.
+ * Converts a list of parameters to valid columns for `material-table`.
+ * It handles parameter trees as well.
+ * @param parameters The parameter list to convert into a columns.
  */
-export function parameterToColumn(parameter: ParameterSpec): TrialColumn {
-  return {
-    // Attach parameter to name to avoid name collision with other properties like state and name
-    field: `${parameter.parameter}Parameter`,
-    title: parameter.parameter,
-  };
+export function parametersToColumns(
+  parameters: ParameterSpec[]
+): TrialColumn[] {
+  return parametersToColumnsTree(parameters);
 }
 
 /**

@@ -162,6 +162,7 @@ describe('Suggest Trials Page', () => {
       expect(screen.getByText('101')).toBeInTheDocument();
       expect(screen.getByText('666')).toBeInTheDocument();
     });
+    it.todo('shows children parameters as columns');
     it('opens a add measurement window', async () => {
       render(<SuggestTrials studyName={fakeStudyName} />);
 
