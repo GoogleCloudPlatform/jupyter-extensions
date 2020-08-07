@@ -25,6 +25,7 @@ async function activate(
   const path = './jupyterlab_gitsync/TEST';
   const options = {remote: 'origin', worktree: 'ashleyswang/master'};
   
+  // TO DO (ashleyswang): change so service creates git/files instead of passing in
   const git = new GitManager(path, options);
   const files = new FileTracker(editor, shell);
   const service = new GitSyncService(git, files);
