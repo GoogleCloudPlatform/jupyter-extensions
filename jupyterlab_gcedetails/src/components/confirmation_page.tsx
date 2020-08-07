@@ -28,7 +28,7 @@ import { HardwareConfiguration, ACCELERATOR_TYPES } from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 
 interface Props {
-  formData: HardwareConfiguration;
+  formData?: HardwareConfiguration;
   onDialogClose: () => void;
   currentConfiguration?: HardwareConfiguration;
   onSubmit: () => void;

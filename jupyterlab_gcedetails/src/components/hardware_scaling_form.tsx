@@ -24,6 +24,7 @@ import {
   BASE_FONT,
   ActionBar,
   SubmitButton,
+  Option,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
 import { NestedSelect } from './machine_type_select';
@@ -34,10 +35,12 @@ import {
   MACHINE_TYPES,
   HardwareConfiguration,
   optionToMachineType,
+  machineTypeToOption,
+  getGpuTypeOptionsList,
   NO_ACCELERATOR,
+  getGpuCountOptionsList,
   Details,
   detailsToHardwareConfiguration,
-  machineTypeToOption,
 } from '../data';
 
 interface Props {
@@ -48,6 +51,7 @@ interface Props {
 
 interface State {
   configuration: HardwareConfiguration;
+  gpuCountOptions: Option[];
 }
 
 export const STYLES = stylesheet({
@@ -83,6 +87,9 @@ export const STYLES = stylesheet({
   description: {
     paddingBottom: '10px',
   },
+  infoMessage: {
+    margin: '20px 16px 0px 16px',
+  },
   topPadding: {
     paddingTop: '10px',
   },
@@ -91,6 +98,7 @@ export const STYLES = stylesheet({
   },
 });
 
+const N1_MACHINE_PREFIX = 'n1-';
 const DEFAULT_MACHINE_TYPE = optionToMachineType(
   MACHINE_TYPES[0].configurations[0]
 );
@@ -99,6 +107,8 @@ the available GPU types and the minimum number of GPUs that can be selected may 
 const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
 
 export class HardwareScalingForm extends React.Component<Props, State> {
+  private gpuTypeOptions: Option[];
+
   constructor(props: Props) {
     super(props);
 
@@ -109,9 +119,32 @@ export class HardwareScalingForm extends React.Component<Props, State> {
             machineType: DEFAULT_MACHINE_TYPE,
             attachGpu: false,
             gpuType: NO_ACCELERATOR,
-            gpuCount: '',
+            gpuCount: NO_ACCELERATOR,
           },
+      // update the gpu count options based on the selected gpu type
+      gpuCountOptions: props.details
+        ? getGpuCountOptionsList(
+            props.details.acceleratorTypes,
+            props.details.gpu.name
+          )
+        : ACCELERATOR_COUNTS_1_2_4_8,
     };
+
+    this.gpuTypeOptions = props.details
+      ? getGpuTypeOptionsList(
+          props.details.acceleratorTypes,
+          props.details.instance.cpuPlatform
+        )
+      : ACCELERATOR_TYPES;
+  }
+
+  /*
+   * If this returns false, the GPU fields in the form will be disabled and
+   * the user will not be able to attach a GPU to their configuration.
+   * Currently only N1 general-purpose machines support GPUs: https://cloud.google.com/compute/docs/gpus#restrictions
+   */
+  private canAttachGpu(machineTypeName: string): boolean {
+    return machineTypeName.startsWith(N1_MACHINE_PREFIX);
   }
 
   private gpuRestrictionMessage() {
@@ -124,45 +157,62 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { gpuType, gpuCount } = this.state.configuration;
     this.setState({
       configuration: {
         ...this.state.configuration,
         attachGpu: event.target.checked,
-        gpuType: event.target.checked
-          ? (ACCELERATOR_TYPES[1].value as string)
-          : NO_ACCELERATOR,
-        gpuCount: event.target.checked
-          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-          : '',
+        gpuType:
+          gpuType === NO_ACCELERATOR
+            ? (ACCELERATOR_TYPES[0].value as string)
+            : gpuType,
+        gpuCount:
+          gpuCount === NO_ACCELERATOR
+            ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+            : gpuCount,
       },
     });
   }
 
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const newGpuCountOptions = getGpuCountOptionsList(
+      this.props.details.acceleratorTypes,
+      event.target.value
+    );
     this.setState({
       configuration: {
         ...this.state.configuration,
         gpuType: event.target.value,
-        gpuCount: event.target.value
-          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-          : '',
+        gpuCount: newGpuCountOptions[0].value as string,
+      },
+      gpuCountOptions: newGpuCountOptions,
+    });
+  }
+
+  private onMachineTypeChange(newMachineType: Option) {
+    const canAttachGpu = this.canAttachGpu(newMachineType.value as string);
+    this.setState({
+      configuration: {
+        ...this.state.configuration,
+        machineType: optionToMachineType(newMachineType),
+        attachGpu: this.state.configuration.attachGpu && canAttachGpu,
       },
     });
   }
 
   private submitForm() {
     const configuration = { ...this.state.configuration };
+    if (!configuration.attachGpu) {
+      configuration.gpuType = NO_ACCELERATOR;
+      configuration.gpuCount = NO_ACCELERATOR;
+    }
     this.props.onSubmit(configuration);
   }
 
   render() {
     const { onDialogClose } = this.props;
-    const {
-      gpuType,
-      gpuCount,
-      attachGpu,
-      machineType,
-    } = this.state.configuration;
+    const { configuration, gpuCountOptions } = this.state;
+    const { gpuType, gpuCount, attachGpu, machineType } = configuration;
 
     return (
       <div className={STYLES.container}>
@@ -177,14 +227,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 header: machineType.base,
                 options: machineType.configurations,
               }))}
-              onChange={newMachineType =>
-                this.setState({
-                  configuration: {
-                    ...this.state.configuration,
-                    machineType: optionToMachineType(newMachineType),
-                  },
-                })
-              }
+              onChange={machineType => this.onMachineTypeChange(machineType)}
               value={machineTypeToOption(machineType)}
             />
             <span className={STYLES.subtitle}>GPUs</span>
@@ -194,11 +237,12 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                 label="Attach GPUs"
                 className={STYLES.checkbox}
                 name="attachGpu"
-                checked={attachGpu}
+                checked={attachGpu && this.canAttachGpu(machineType.name)}
                 onChange={e => this.onAttachGpuChange(e)}
+                disabled={!this.canAttachGpu(machineType.name)}
               />
             </div>
-            {attachGpu && (
+            {attachGpu && this.canAttachGpu(machineType.name) && (
               <div
                 className={classes(css.scheduleBuilderRow, STYLES.topPadding)}
               >
@@ -207,7 +251,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     label="GPU type"
                     name="gpuType"
                     value={gpuType}
-                    options={ACCELERATOR_TYPES.slice(1)}
+                    options={this.gpuTypeOptions}
                     onChange={e => this.onGpuTypeChange(e)}
                   />
                 </div>
@@ -216,7 +260,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     label="Number of GPUs"
                     name="gpuCount"
                     value={gpuCount}
-                    options={ACCELERATOR_COUNTS_1_2_4_8}
+                    options={gpuCountOptions}
                     onChange={e =>
                       this.setState({
                         configuration: {
