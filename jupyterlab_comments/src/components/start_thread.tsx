@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Icon } from '@material-ui/core';
-import { newDetachedCommentThread } from '../service/add_comment';
+import {
+  newDetachedCommentThread,
+  newReviewCommentThread,
+} from '../service/add_comment';
 
 interface Props {
   serverRoot: string;
   currFilePath: string;
+  commentType: 'detached' | 'review';
+  reviewHash?: string;
 }
 
 const style = {
@@ -32,18 +36,17 @@ const style = {
     display: 'inlineBlock',
   },
   textField: {
-    width: 300,
+    width: 400,
   },
 };
 
-export function CommentEditor(props) {
-  const [comment, setComment] = useState('Start a new comment thread');
+export function DetachedCommentEditor(props) {
+  const [comment, setComment] = useState('');
 
   const handleSubmit = event => {
     event.preventDefault();
-    console.log(comment);
     newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
-    setComment(''); //clear comment text field
+    setComment(''); //clear comment editor field
   };
   return (
     <form
@@ -60,8 +63,60 @@ export function CommentEditor(props) {
           <TextField
             multiline
             rows={3}
-            id="outlined-helperText"
-            label="Add a new comment"
+            label="Start a new comment thread"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            variant="outlined"
+            size="medium"
+            style={style.textField}
+            className="newThreadTextField"
+          />
+        </Grid>
+        <Grid item style={style.submit}>
+          <Button
+            type="submit"
+            color="primary"
+            size="medium"
+            endIcon={<Icon>send</Icon>}
+            className="sendThread"
+          >
+            Send
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
+  );
+}
+
+export function ReviewCommentEditor(props) {
+  const [comment, setComment] = useState('');
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    newReviewCommentThread(
+      props.currFilePath,
+      props.serverRoot,
+      comment,
+      props.reviewHash
+    );
+    setComment(''); //clear comment editor field
+  };
+  return (
+    <form
+      onSubmit={handleSubmit}
+      style={style.editor}
+      className="commentSubmit"
+    >
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      />
+      <Grid container direction="column">
+        <Grid item>
+          <TextField
+            multiline
+            rows={3}
+            label="Start a new comment thread on this code review"
             value={comment}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
@@ -88,6 +143,13 @@ export function CommentEditor(props) {
 
 export class NewCommentThread extends React.Component<Props> {
   render() {
-    return <CommentEditor {...this.props} />;
+    switch (this.props.commentType) {
+      case 'review':
+        return <ReviewCommentEditor {...this.props} />;
+        break;
+      case 'detached':
+        return <DetachedCommentEditor {...this.props} />;
+        break;
+    }
   }
 }

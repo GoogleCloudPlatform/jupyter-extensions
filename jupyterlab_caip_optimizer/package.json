@@ -63,6 +63,8 @@
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
     "react-redux": "^7.2.0",
+    "react-resize-aware": "^3.0.1",
+    "react-tree-graph": "^5.1.0",
     "redux": "^4.0.5",
     "typestyle": "^2.1.0",
     "yaml": "^1.7.2"

@@ -1,19 +1,23 @@
 """Services for AutoML extension that get reponses from the uCAIP API"""
 
 import base64
+import glob
 import hashlib
+import time
 import uuid
+import os
 import pandas as pd
-import re
 from enum import Enum
-
+import re
 from google.cloud import aiplatform_v1alpha1, bigquery, exceptions, storage
+from google.protobuf.struct_pb2 import Value
 from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
 
 # TODO: Add ability to programatically set region
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
+PREDICTION_ENDPOINT = "us-central1-prediction-aiplatform.googleapis.com"
 TABLES_METADATA_SCHEMA = "gs://google-cloud-aiplatform/schema/dataset/metadata/tables_1.0.0.yaml"
 
 
@@ -34,6 +38,17 @@ def parse_model_type(model):
     if mt.value.lower() in model.metadata_schema_uri:
       return mt.value
   return ModelType.OTHER.value
+
+
+class ModelFramework(Enum):
+  SKLEARN_CPU_0_20 = "sklearn-cpu.0-20"
+  SKLEARN_CPU_0_22 = "sklearn-cpu.0-22"
+  TF_CPU_1_15 = "tf-cpu.1-15"
+  TF_GPU_1_15 = "tf-gpu.1-15"
+  TF_CPU_2_1 = "tf2-cpu.2-1"
+  TF_GPU_2_1 = "tf2-gpu.2-1"
+  XGBOOST_CPU_0_82 = "xgboost-cpu.0-82"
+  XGBOOST_CPU_0_90 = "xgboost-cpu.0-90"
 
 
 class ModelType(Enum):
@@ -83,6 +98,10 @@ class AutoMLService:
     self._pipeline_client = aiplatform_v1alpha1.PipelineServiceClient(
         client_options=client_options)
     self._bigquery_client = bigquery.Client()
+    self._endpoint_client = aiplatform_v1alpha1.EndpointServiceClient(
+        client_options=client_options)
+    self._prediction_client = aiplatform_v1alpha1.PredictionServiceClient(
+        client_options={"api_endpoint": PREDICTION_ENDPOINT})
     self._gcs_client = storage.Client()
     self._project = AuthProvider.get().project
     self._parent = "projects/{}/locations/us-central1".format(self._project)
@@ -103,17 +122,26 @@ class AutoMLService:
       cls._instance = AutoMLService()
     return cls._instance
 
-  def get_models(self):
-    models = self._model_client.list_models(parent=self._parent).models
-    return [{
+  def _build_model(self, model):
+    json_formatted = json_format.MessageToDict(model._pb)
+    return {
         "id": model.name,
         "displayName": model.display_name,
         "pipelineId": model.training_pipeline,
         "createTime": get_milli_time(model.create_time),
         "updateTime": get_milli_time(model.update_time),
         "etag": model.etag,
-        "modelType": parse_model_type(model)
-    } for model in models]
+        "modelType": parse_model_type(model),
+        "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
+        "deployedModels": json_formatted.get("deployedModels"),
+    }
+
+  def get_models(self):
+    response = self._model_client.list_models(parent=self._parent).models
+    models = []
+    for model in response:
+      models.append(self._build_model(model))
+    return models
 
   def _build_feature_importance(self, model_explanation):
     features = model_explanation["meanAttributions"][0][
@@ -169,7 +197,7 @@ class AutoMLService:
       model_eval["confidenceMetrics"] = self._build_confidence_metrics(
           metrics["confidenceMetrics"])
     for field in optional_fields:
-      model_eval[field] = metrics.get(field, None)
+      model_eval[field] = metrics.get(field)
     return model_eval
 
   def get_model_evaluation(self, model_id):
@@ -188,29 +216,59 @@ class AutoMLService:
         })
     return transformations
 
-  def get_pipeline(self, pipeline_id):
-    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+  def _get_training_pipeline(self, pipeline):
+    objective = "unknown"
+    # Detect training model type from gcs uri
+    for ob in ["tables", "image_classification", "image_object_detection"]:
+      if ob in pipeline.training_task_definition:
+        objective = ob
+        break
+
+    end_time = int(time.time())
+    if pipeline.end_time:
+      end_time = pipeline.end_time.timestamp()
+
+    return {
+        "id": pipeline.name,
+        "displayName": pipeline.display_name,
+        "createTime": get_milli_time(pipeline.create_time),
+        "updateTime": get_milli_time(pipeline.update_time),
+        "elapsedTime": end_time - pipeline.start_time.timestamp(),
+        "datasetId": pipeline.input_data_config.dataset_id,
+        "state": pipeline.state.name.split("_")[-1],
+        "error": pipeline.error.message,
+        "objective": objective
+    } 
+
+  def _build_training_pipeline(self, pipeline):
     optional_fields = [
         "targetColumn", "predictionType", "optimizationObjective",
         "budgetMilliNodeHours", "trainBudgetMilliNodeHours"
     ]
     training_task_inputs = json_format.MessageToDict(
         pipeline._pb.training_task_inputs)
-    training_pipeline = {
-        "id": pipeline.name,
-        "displayName": pipeline.display_name,
-        "createTime": get_milli_time(pipeline.create_time),
-        "updateTime": get_milli_time(pipeline.update_time),
-        "elapsedTime": (pipeline.end_time - pipeline.start_time).seconds,
-        "datasetId": pipeline.input_data_config.dataset_id,
-    }
+
+    training_pipeline = self._get_training_pipeline(pipeline)
+
     if "transformations" in training_task_inputs:
       transformation_options = self._build_feature_transformations(
           training_task_inputs["transformations"])
       training_pipeline["transformationOptions"] = transformation_options
     for field in optional_fields:
-      training_pipeline[field] = training_task_inputs.get(field, None)
+      training_pipeline[field] = training_task_inputs.get(field)
     return training_pipeline
+
+  def get_training_pipeline(self, pipeline_id):
+    pipeline = self._pipeline_client.get_training_pipeline(name=pipeline_id)
+    return self._build_training_pipeline(pipeline)
+
+  def get_training_pipelines(self):
+    pipelines = []
+    for pipeline in self._pipeline_client.list_training_pipelines(
+        parent=self._parent):
+      pipelines.append(self._build_training_pipeline(pipeline))
+
+    return pipelines
 
   def get_datasets(self):
     datasets = []
@@ -229,9 +287,6 @@ class AutoMLService:
             "metadata": json_format.MessageToDict(dataset._pb.metadata),
         })
     return datasets
-
-  def get_table_specs(self, dataset_id):
-    return []
 
   def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
     input_config = {}
@@ -266,8 +321,7 @@ class AutoMLService:
     key = "{}-{}".format(str(uuid.uuid4()), file_name)
     # Possible improvement: prepend md5 hash of file instead of uuid to
     # skip uploading the same existing file
-    decoded = base64.decodebytes(file_data.encode("ascii"))
-    bucket.blob(key).upload_from_string(decoded)
+    bucket.blob(key).upload_from_string(file_data)
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
@@ -275,22 +329,21 @@ class AutoMLService:
   def create_dataset_from_dataframe(self, display_name, df):
     bucket = self._get_gcs_bucket()
     key = "{}-{}".format(str(uuid.uuid4()), "dataframe")
-    data = df.to_csv().encode("utf-8")
+    data = df.to_csv(index=False).encode("utf-8")
     bucket.blob(key).upload_from_string(data)
     return self.create_dataset(display_name,
                                gcs_uri="gs://{}/{}".format(
                                    self._gcs_bucket, key))
 
   def _gcs_to_dataframe(self, uris):
-    return pd.concat((pd.read_csv(uri, index_col=0) for uri in uris),
+    return pd.concat((pd.read_csv(uri) for uri in uris),
                      ignore_index=True)
 
   def _export_bigquery_dataset(self, uri):
-    split = re.split(":|\.", uri)
-    dataset_id, table_id = split[-2], split[-1]
+    _, project, dataset_id, table_id = re.split("://|:|\.", uri) #Split by ://, : or .
     tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
     destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
-    dataset_ref = bigquery.DatasetReference(self._project, dataset_id)
+    dataset_ref = bigquery.DatasetReference(project, dataset_id)
     table_ref = dataset_ref.table(table_id)
     dataset = self._bigquery_client.get_dataset(dataset_ref)
 
@@ -322,3 +375,157 @@ class AutoMLService:
       return df
     else:
       raise NotImplementedError("Export not implemented for this dataset")
+  
+  def _get_model(self, model_id):
+    return self._model_client.get_model(name=model_id)
+  
+  def create_endpoint(self, name):
+    display_name = "ucaip-extension/" + name
+    endpoint = {"display_name": display_name}
+    return self._endpoint_client.create_endpoint(parent=self._parent, endpoint=endpoint).result()
+  
+  def delete_endpoint(self, endpoint_id):
+    self._endpoint_client.delete_endpoint(name=endpoint_id).result()
+
+  def _build_endpoint(self, deployed_model_id, endpoint):
+    return {
+        "deployedModelId": deployed_model_id,
+        "id": endpoint.name,
+        "displayName": endpoint.display_name,
+        "models": len(endpoint.deployed_models),
+        "updateTime": get_milli_time(endpoint.update_time),
+    }
+
+  def get_endpoints(self, model_id):
+    model = self._get_model(model_id)
+    endpoints = []
+    if model.deployed_models:
+      for deployed_model in model.deployed_models:
+        endpoint = self._endpoint_client.get_endpoint(name=deployed_model.endpoint)
+        built = self._build_endpoint(deployed_model.deployed_model_id, endpoint)
+        endpoints.append(built)
+    return endpoints
+
+  def check_deploying(self, model_name):
+    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    name = "ucaip-extension/" + model_name
+    filtered = filter(lambda x: name == x.display_name, endpoints)
+    filtered = list(filtered)
+    if len(filtered) > 0:
+      return [self._build_endpoint("None", filtered[0])]
+    return []
+
+  def deploy_model(self, model_id, machine_type="n1-standard-2", min_replicas=1, endpoint_id=None):
+    model = self._get_model(model_id)
+    if not endpoint_id:
+      endpoint_id = self.create_endpoint(model.display_name).name
+    traffic_split = {"0": 100}
+    machine_spec = {"machine_type": machine_type}
+    dedicated_resources = {"machine_spec": machine_spec, "min_replica_count": min_replicas}
+    deployed_model = {"model": model_id, "display_name": model.display_name, "dedicated_resources": dedicated_resources}
+    self._endpoint_client.deploy_model(endpoint=endpoint_id, deployed_model=deployed_model, traffic_split=traffic_split)
+
+  def undeploy_model(self, deployed_model_id, endpoint_id):
+    try:
+      self._endpoint_client.undeploy_model(endpoint=endpoint_id, deployed_model_id=deployed_model_id).result()
+    except TypeError:
+      print('TypeError when undeploying model. Known error. Fixed in later versions of the API.')
+
+  def predict_tables(self, endpoint_id, instance):
+    parameters_dict = {}
+    parameters = json_format.ParseDict(parameters_dict, Value())
+    instances_list = [instance]
+    instances = [json_format.ParseDict(s, Value()) for s in instances_list]
+    response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
+    return json_format.MessageToDict(response._pb.predictions[0])
+
+  def _copy_local_directory_to_gcs(self, local_path, bucket, gcs_path):
+    if not os.path.isdir(local_path):
+      raise ValueError("{} is not a valid directory".format(
+          os.path.abspath(local_path)))
+    for local_file in glob.glob(local_path + '/**', recursive=True):
+      if not os.path.isfile(local_file):
+        continue
+      remote_path = os.path.join(gcs_path, local_file[1 + len(local_path):])
+      blob = bucket.blob(remote_path)
+      blob.upload_from_filename(local_file)
+
+  def import_saved_model(self,
+                         display_name,
+                         model_path,
+                         framework):
+    # Strip out non alphanumeric chars of model name and prepend uuid
+    name = "{}-{}".format(re.sub(r'\W+', '', display_name), str(uuid.uuid4()))
+    key = "models/" + name
+    bucket = self._get_gcs_bucket()
+
+    # Upload model artifacts to GCS
+    self._copy_local_directory_to_gcs(model_path, bucket, key)
+
+    # https://pantheon.corp.google.com/gcr/images/cloud-aiplatform/GLOBAL/prediction?gcrImageListsize=30
+    if not isinstance(framework, str):
+      framework = framework.value
+
+    container_spec = aiplatform_v1alpha1.ModelContainerSpec(
+        image_uri="gcr.io/cloud-aiplatform/prediction/{}:latest".format(
+            framework))
+    model = aiplatform_v1alpha1.Model(display_name=display_name,
+                                      artifact_uri="gs://{}/{}".format(
+                                          bucket.name, key),
+                                      container_spec=container_spec)
+    return self._model_client.upload_model(parent=self._parent,
+                                           model=model)
+
+  def get_dataset_details(self, dataset_id):
+    df = self.export_dataset(dataset_id)
+    columns = list(df.columns)
+    return [{
+      "fieldName": column
+    } for column in columns]
+
+  def _build_create_training_pipeline_response(self, response):
+    return {
+        "training_display_name": response.display_name,
+        "training_task_inputs": json_format.MessageToDict(response._pb.training_task_inputs),
+        "state": response.state,
+        "create_time": response.create_time,
+        "dataset_id": response.input_data_config.dataset_id,
+        "training_fraction": response.input_data_config.fraction_split.training_fraction,
+        "validation_fraction": response.input_data_config.fraction_split.validation_fraction,
+        "test_fraction": response.input_data_config.fraction_split.test_fraction,
+        "model_display_name": response.model_to_upload.display_name
+    }
+
+  def create_training_pipeline(self, training_pipeline_name, dataset_id, 
+                               model_name, target_column, prediction_type,
+                               objective, budget_hours, transformations):
+    
+    training_task_inputs = {
+        "targetColumn": target_column,
+        "predictionType": prediction_type,
+        "transformations": transformations,
+        "trainBudgetMilliNodeHours": budget_hours * 1000,
+        "disableEarlyStopping": False,
+        "optimizationObjective": objective,
+    }
+
+    training_pipeline = {
+        "display_name": training_pipeline_name,
+        "training_task_definition": "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
+        "training_task_inputs": json_format.ParseDict(training_task_inputs, Value()),
+        "input_data_config": {
+            "dataset_id": dataset_id,
+            "fraction_split": {
+                "training_fraction": 0.8,
+                "validation_fraction": 0.1,
+                "test_fraction": 0.1,
+            },
+        },
+        "model_to_upload": {"display_name": model_name},
+    }
+
+    response = self._pipeline_client.create_training_pipeline(
+        parent=self._parent, training_pipeline=training_pipeline
+    )
+
+    return self._build_create_training_pipeline_response(response)

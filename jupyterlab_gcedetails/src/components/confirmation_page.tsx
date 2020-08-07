@@ -31,6 +31,7 @@ interface Props {
   formData: HardwareConfiguration;
   onDialogClose: () => void;
   currentConfiguration?: HardwareConfiguration;
+  onSubmit: () => void;
 }
 
 export const STYLES = stylesheet({
@@ -59,8 +60,8 @@ export const STYLES = stylesheet({
   },
 });
 
-const INFO_MESSAGE =
-  'Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.';
+const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.
+  If you have chosen to attach GPUs to your instance, the NVIDIA GPU driver will be installed automatically on the next startup.`;
 
 function getGpuTypeText(value: string) {
   return ACCELERATOR_TYPES.find(option => option.value === value).text;
@@ -75,7 +76,7 @@ function displayConfiguration(
   return (
     <div>
       <span className={classes(STYLES.title, STYLES.topPadding)}>{title}</span>
-      <div className={STYLES.text}>Machine type: {machineType.text}</div>
+      <div className={STYLES.text}>Machine type: {machineType.description}</div>
       {attachGpu && (
         <div className={STYLES.text}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
@@ -85,12 +86,8 @@ function displayConfiguration(
   );
 }
 
-// TODO: Implement submit functionality
-//eslint-disable-next-line @typescript-eslint/no-empty-function
-function submitForm() {}
-
 export function ConfirmationPage(props: Props) {
-  const { onDialogClose, formData, currentConfiguration } = props;
+  const { onDialogClose, formData, currentConfiguration, onSubmit } = props;
 
   return (
     <div className={STYLES.container}>
@@ -107,7 +104,7 @@ export function ConfirmationPage(props: Props) {
       <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
         <SubmitButton
           actionPending={false}
-          onClick={() => submitForm()}
+          onClick={() => onSubmit()}
           text="Submit"
         />
       </ActionBar>

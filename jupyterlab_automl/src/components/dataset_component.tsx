@@ -1,41 +1,22 @@
-import { Box, Grid, LinearProgress } from '@material-ui/core';
-import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import * as csstips from 'csstips';
-import { ColumnType } from 'gcp_jupyterlab_shared';
-import MaterialTable from 'material-table';
 import * as React from 'react';
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { stylesheet } from 'typestyle';
-import { Dataset, TableSpec } from '../service/dataset';
-
-interface DetailPanelProps {
-  dataType: string;
-  chartInfo: any[];
-}
-
-interface SummaryProps {
-  tableSpec: TableSpec;
-}
+import { Dataset, DatasetService, Column } from '../service/dataset';
+import { CodeComponent } from './copy_code';
+import { ListResourcesTable, SelectInput } from 'gcp_jupyterlab_shared';
+import { LinearProgress } from '@material-ui/core';
 
 interface Props {
   dataset: Dataset;
 }
 
 interface State {
-  hasLoaded: boolean;
   isLoading: boolean;
-  tableSpecs: TableSpec[];
   source: string;
+  columns: Column[];
+  targetColumn: string;
+  predictionType: string;
+  objective: string;
 }
 
 const localStyles = stylesheet({
@@ -58,489 +39,262 @@ const localStyles = stylesheet({
     height: '100%',
     ...csstips.vertical,
   },
-  list: {
-    margin: 0,
-    overflowY: 'scroll',
-    padding: 0,
-    ...csstips.flex,
-  },
   paper: {
     padding: '16px',
     textAlign: 'left',
     fontSize: 'var(--jp-ui-font-size1)',
   },
+  list: {
+    margin: 0,
+    overflowY: 'scroll',
+    padding: 0,
+    ...csstips.flex,
+    height: '550px',
+  },
 });
-
-const style: CSSProperties = {
-  table: {
-    borderRadius: 0,
-    boxShadow: 'none',
-    borderTop: '1px solid var(--jp-border-color2)',
-  },
-  tableCell: {
-    fontSize: 'var(--jp-ui-font-size1)',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    padding: '5px 8px',
-  },
-  headerCell: {
-    fontSize: 'var(--jp-ui-font-size1)',
-    whiteSpace: 'nowrap',
-    padding: '0px 8px',
-  },
-  tableRow: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-};
-
-const columns = [
-  {
-    title: 'Column name',
-    field: 'displayName',
-    type: ColumnType.String,
-  },
-  {
-    title: 'Data Type',
-    field: 'dataType',
-    type: ColumnType.String,
-  },
-  {
-    title: 'Nullable',
-    field: 'nullable',
-    type: ColumnType.Boolean,
-  },
-  {
-    title: 'Missing Values (%)',
-    field: 'nullValueCount',
-    type: ColumnType.String,
-  },
-  {
-    title: 'Invalid Values',
-    field: 'invalidValueCount',
-    type: ColumnType.Numeric,
-  },
-  {
-    title: 'Distinct Value Count',
-    field: 'distinctValueCount',
-    type: ColumnType.Numeric,
-  },
-];
-
-export class DatasetSummary extends React.Component<SummaryProps> {
-  constructor(props: SummaryProps) {
-    super(props);
-  }
-
-  render() {
-    const getColor = (dataType: string) => {
-      switch (dataType) {
-        case 'Numeric': {
-          return '#4285F4';
-        }
-        case 'Categorical': {
-          return '#34A853';
-        }
-        case 'Timestamp': {
-          return '#9C39F8';
-        }
-        default: {
-          return '#DC3912';
-        }
-      }
-    };
-    return (
-      <Grid item xs={12}>
-        <Box component="div" overflow="auto" className={localStyles.paper}>
-          <b>Summary</b>
-          <p>Total Columns: {this.props.tableSpec.columnCount}</p>
-          <p>Total Rows: {this.props.tableSpec.rowCount}</p>
-          <BarChart
-            width={300}
-            height={30 + 30 * this.props.tableSpec.chartSummary.length}
-            data={this.props.tableSpec.chartSummary}
-            layout="vertical"
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <YAxis
-              type="category"
-              dataKey="name"
-              tickLine={false}
-              tick={{ fill: 'black' }}
-            />
-            <XAxis type="number" tickCount={3} tick={{ fill: 'black' }} />
-            <Tooltip />
-            <Bar dataKey="Number of Instances">
-              {this.props.tableSpec.chartSummary.map(item => (
-                <Cell key={item.name} fill={getColor(item.name)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </Box>
-      </Grid>
-    );
-  }
-}
-
-export class DetailPanel extends React.Component<DetailPanelProps> {
-  constructor(props: DetailPanelProps) {
-    super(props);
-  }
-
-  renderColorfulLegendText(value) {
-    if (value.length >= 12) {
-      return <span>{value.substring(0, 11)}</span>;
-    } else {
-      return <span>{value}</span>;
-    }
-  }
-
-  render() {
-    if (this.props.dataType === 'Numeric') {
-      return (
-        <div style={{ padding: '15px' }}>
-          <p>Mean: {this.props.chartInfo[1]}</p>
-          <p>Standard Deviation: {this.props.chartInfo[2]}</p>
-          <div style={{ paddingTop: '15px' }}>
-            <b>Distribution</b>
-            <BarChart
-              width={300}
-              height={180}
-              data={this.props.chartInfo[0]}
-              margin={{
-                top: 20,
-                right: 5,
-                left: 5,
-                bottom: 20,
-              }}
-            >
-              <XAxis dataKey="name" interval="preserveEnd" />
-              <YAxis
-                tick={{ fill: 'black' }}
-                label={{
-                  value: 'Number of Instances',
-                  angle: -90,
-                  position: 'insideBottomLeft',
-                }}
-              />
-              <Tooltip />
-              <Bar dataKey="Number of Instances" fill="#3366CC" />
-            </BarChart>
-          </div>
-        </div>
-      );
-    } else if (this.props.dataType === 'Categorical') {
-      const COLORS = [
-        '#3366CC',
-        '#DC3912',
-        '#FF9900',
-        '#109618',
-        '#990099',
-        '#0099C6',
-      ];
-      const RADIAN = Math.PI / 180;
-      const renderCustomizedLabel = ({
-        cx,
-        cy,
-        midAngle,
-        innerRadius,
-        outerRadius,
-        percent,
-      }) => {
-        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-        const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-        if (percent >= 0.05) {
-          return (
-            <text
-              x={x}
-              y={y}
-              fill="white"
-              textAnchor={x > cx ? 'start' : 'end'}
-              dominantBaseline="central"
-            >
-              {`${(percent * 100).toFixed(0)}%`}
-            </text>
-          );
-        } else {
-          return (
-            <text
-              x={x}
-              y={y}
-              fill="white"
-              textAnchor={x > cx ? 'start' : 'end'}
-              dominantBaseline="central"
-            ></text>
-          );
-        }
-      };
-      return (
-        <div style={{ padding: '15px' }}>
-          <p>Most Common: {this.props.chartInfo[1]}</p>
-          <div style={{ paddingTop: '15px' }}>
-            <b>Distribution</b>
-            <PieChart width={400} height={200}>
-              <Pie
-                dataKey="Number of Instances"
-                isAnimationActive={false}
-                labelLine={false}
-                label={renderCustomizedLabel}
-                data={this.props.chartInfo[0]}
-                cx={125}
-                cy={100}
-                innerRadius={25}
-                outerRadius={90}
-                fill="#3366CC"
-              >
-                {this.props.chartInfo[0].map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend
-                formatter={this.renderColorfulLegendText}
-                layout={'vertical'}
-                verticalAlign={'middle'}
-                height={200}
-                wrapperStyle={{
-                  overflow: 'scroll',
-                  paddingTop: '10px',
-                }}
-                align={'right'}
-              />
-            </PieChart>
-          </div>
-        </div>
-      );
-    } else if (this.props.dataType === 'Timestamp') {
-      return (
-        <div style={{ padding: '15px' }}>
-          <Grid container spacing={0}>
-            <Grid item xs={4}>
-              <b>Month</b>
-              <BarChart
-                width={300}
-                height={250}
-                data={this.props.chartInfo[0]}
-                layout="vertical"
-                margin={{
-                  right: 5,
-                  left: 5,
-                }}
-              >
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tickLine={false}
-                  tick={{ fill: 'black' }}
-                />
-                <XAxis
-                  type="number"
-                  tick={{ fill: 'black' }}
-                  interval="preserveEnd"
-                />
-                <Tooltip />
-                <Bar dataKey="Number of Instances" fill="#3366CC" />
-              </BarChart>
-            </Grid>
-            <Grid item xs={4}>
-              <b>Day of the week</b>
-              <BarChart
-                width={300}
-                height={250}
-                data={this.props.chartInfo[1]}
-                layout="vertical"
-                margin={{
-                  right: 5,
-                  left: 5,
-                }}
-              >
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tickLine={false}
-                  tick={{ fill: 'black' }}
-                />
-                <XAxis
-                  type="number"
-                  tick={{ fill: 'black' }}
-                  interval="preserveEnd"
-                />
-                <Tooltip />
-                <Bar dataKey="Number of Instances" fill="#3366CC" />
-              </BarChart>
-            </Grid>
-            <Grid item xs={4}>
-              <b>Hour</b>
-              <BarChart
-                width={300}
-                height={250}
-                data={this.props.chartInfo[2]}
-                layout="vertical"
-                margin={{
-                  right: 5,
-                  left: 5,
-                }}
-              >
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tickLine={false}
-                  tick={{ fill: 'black' }}
-                />
-                <XAxis
-                  type="number"
-                  tick={{ fill: 'black' }}
-                  interval="preserveEnd"
-                />
-                <Tooltip />
-                <Bar dataKey="Number of Instances" fill="#3366CC" />
-              </BarChart>
-            </Grid>
-          </Grid>
-        </div>
-      );
-    } else {
-      return (
-        <div style={{ padding: '15px' }}>
-          <p>This data type does not have supported visualizations.</p>
-        </div>
-      );
-    }
-  }
-}
 
 export class DatasetComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      hasLoaded: false,
       isLoading: false,
-      tableSpecs: [],
       source: '',
+      columns: [],
+      targetColumn: '',
+      predictionType: 'classification',
+      objective: 'minimize-log-loss',
     };
+    this.getColumnString = this.getColumnString.bind(this);
+    this.getBasicString = this.getBasicString.bind(this);
   }
 
   async componentDidMount() {
-    this.getTableDetails();
+    this.getDatasetDetails();
+    this.getDatasetSource();
+  }
+
+  private async getDatasetDetails() {
+    try {
+      this.setState({ isLoading: true });
+      const columns = await DatasetService.getDatasetDetails(
+        this.props.dataset.id
+      );
+      this.setState({
+        columns: columns,
+        targetColumn: columns[0].fieldName,
+      });
+    } catch (err) {
+      console.warn('Error retrieving dataset details', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  private getDatasetSource() {
+    let source = '';
+    const inputConfig = this.props.dataset.metadata['inputConfig'];
+    if ('gcsSource' in inputConfig) {
+      source = inputConfig['gcsSource']['uri'];
+    } else if ('bigquerySource' in inputConfig) {
+      source = inputConfig['bigquerySource']['uri'];
+    }
+    this.setState({
+      source: source,
+    });
+  }
+
+  private getColumnString(): string {
+    let columnString = '';
+    for (let i = 0; i < this.state.columns.length; i++) {
+      if (this.state.columns[i].fieldName !== this.state.targetColumn) {
+        columnString +=
+          "    'columnName': '" + this.state.columns[i].fieldName + "',\n";
+      }
+    }
+    return columnString;
+  }
+
+  private getBasicString(): string {
+    const datasetId = this.props.dataset.id.split('/');
+    const displayName = this.props.dataset.displayName;
+
+    return `training_pipeline_name = '${displayName}_training'
+dataset_id = '${datasetId[datasetId.length - 1]}'
+model_name = '${displayName}_model'
+target_column = '${this.state.targetColumn}'
+prediction_type = '${this.state.predictionType}'
+objective = '${this.state.objective}'
+budget_hours = 1
+transformations = [{
+  'auto': {
+${this.getColumnString()} }
+}]`;
+  }
+
+  private getParentString(): string {
+    return this.props.dataset.id
+      .split('/')
+      .slice(0, 4)
+      .join('/');
   }
 
   render() {
-    const { isLoading, tableSpecs, source } = this.state;
-    return (
-      <div className={localStyles.panel}>
-        <header className={localStyles.header}>
-          {this.props.dataset.displayName}
-        </header>
-        {isLoading ? (
-          <LinearProgress />
-        ) : tableSpecs.length === 0 ? (
-          <div className={localStyles.paper}>
-            <header className={localStyles.title}>Dataset Info</header>
-            <p style={{ padding: '8px' }}>
-              Created: {this.props.dataset.createTime.toLocaleString()}
-            </p>
-            <p style={{ padding: '8px' }}>
-              Dataset type: {this.props.dataset.datasetType}
-            </p>
-            <p style={{ padding: '8px' }}>Dataset location: {source}</p>
-          </div>
-        ) : (
+    const { columns, source, isLoading } = this.state;
+    if (isLoading) {
+      return <LinearProgress />;
+    } else {
+      return (
+        <div className={localStyles.panel}>
           <ul className={localStyles.list}>
-            {tableSpecs.map(tableSpec => (
-              <div key={tableSpec.id}>
-                <Grid container spacing={0} direction="column">
-                  <DatasetSummary tableSpec={tableSpec} />
-                  <Grid item xs={12}>
-                    <MaterialTable
-                      columns={columns.map((col: any) => {
-                        return {
-                          field: col.field,
-                          title: col.title,
-                          type: col.type,
-                          // width: col.title == 'p' ? 45 : undefined,
-                          cellStyle: {
-                            ...(style.tableCell as object),
-                            padding: '5 px 16px 5px 16px',
-                          },
-                          headerStyle: style.headerCell,
-                        };
-                      })}
-                      data={tableSpec.columnSpecs}
-                      options={{
-                        showTitle: false,
-                        search: false,
-                        sorting: true,
-                        padding: 'dense',
-                        toolbar: false,
-                        paging: false,
-                        rowStyle: style.tableRow,
-                      }}
-                      style={style.table}
-                      isLoading={this.state.isLoading}
-                      detailPanel={[
-                        {
-                          render: rowData => {
-                            return (
-                              <DetailPanel
-                                dataType={rowData.dataType}
-                                chartInfo={
-                                  tableSpec.columnSpecs.filter(
-                                    columnSpec => columnSpec.id === rowData.id
-                                  )[0].detailPanel
-                                }
-                              />
-                            );
-                          },
-                        },
-                      ]}
-                      onRowClick={(event, rowData, togglePanel) =>
-                        togglePanel()
-                      }
-                    />
-                  </Grid>
-                </Grid>
+            <header className={localStyles.header}>
+              {this.props.dataset.displayName}
+            </header>
+            <div className={localStyles.paper}>
+              <header className={localStyles.title}>Dataset Info</header>
+              <p style={{ padding: '8px' }}>
+                Created: {this.props.dataset.createTime.toLocaleString()}
+              </p>
+              <p style={{ padding: '8px' }}>Total columns: {columns.length}</p>
+              <p style={{ padding: '8px' }}>Dataset location: {source}</p>
+              <header className={localStyles.title}>Columns</header>
+              <div style={{ width: '500px' }}>
+                <ListResourcesTable
+                  columns={[
+                    {
+                      field: 'fieldName',
+                      title: 'Field Name',
+                    },
+                  ]}
+                  data={columns}
+                  height={columns.length * 40 + 40}
+                  width={200}
+                />
               </div>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
+              <header className={localStyles.title}>
+                Export Dataset to Dataframe
+              </header>
+              <CodeComponent>
+                {`from jupyterlab_automl import *
+df = export_dataset('${this.props.dataset.id}')`}
+              </CodeComponent>
+              <header className={localStyles.title}>
+                Train Model on Dataset
+              </header>
+              <p style={{ padding: '8px' }}>
+                <i>
+                  Code to train a basic classification or regression model on
+                  the dataset.
+                </i>
+              </p>
+              <div style={{ width: '250px', paddingLeft: '16px' }}>
+                <SelectInput
+                  label={'Target column'}
+                  options={columns.map(column => ({
+                    text: column.fieldName,
+                    value: column.fieldName,
+                  }))}
+                  onChange={event => {
+                    this.setState({ targetColumn: event.target.value });
+                  }}
+                />
+                <SelectInput
+                  label={'Prediction type'}
+                  options={[
+                    {
+                      text: 'classification',
+                      value: 'classification',
+                    },
+                    {
+                      text: 'regression',
+                      value: 'regression',
+                    },
+                  ]}
+                  onChange={event => {
+                    this.setState({ predictionType: event.target.value });
+                    if (event.target.value === 'regression') {
+                      this.setState({ objective: 'minimize-rmse' });
+                    } else {
+                      this.setState({ objective: 'minimize-log-loss' });
+                    }
+                  }}
+                />
+              </div>
+              <CodeComponent>
+                {`from jupyterlab_automl import *
 
-  private async getTableDetails() {
-    try {
-      this.setState({ isLoading: true });
-      const tableSpecs = [];
-      let source = '';
-      if ('gcsSource' in this.props.dataset.metadata['inputConfig']) {
-        source = this.props.dataset.metadata['inputConfig']['gcsSource']['uri'];
-      } else if (
-        'bigquerySource' in this.props.dataset.metadata['inputConfig']
-      ) {
-        source = this.props.dataset.metadata['inputConfig']['bigquerySource'][
-          'uri'
-        ];
-      }
-      this.setState({
-        hasLoaded: true,
-        tableSpecs: tableSpecs,
-        source: source,
-      });
-    } catch (err) {
-      console.warn('Error retrieving table details', err);
-    } finally {
-      this.setState({ isLoading: false });
+${this.getBasicString()}
+
+create_training_pipeline(
+  training_pipeline_name,
+  dataset_id,
+  model_name,
+  target_column,
+  prediction_type,
+  objective,
+  budget_hours,
+  transformations,
+)`}
+              </CodeComponent>
+              <header className={localStyles.title}>
+                Train Model on Dataset Expanded
+              </header>
+              <p style={{ padding: '8px' }}>
+                <i>
+                  Expanded version of the code above which allows for more model
+                  training customization.
+                </i>
+              </p>
+              <CodeComponent>
+                {`from google.cloud import aiplatform_v1alpha1
+from google.protobuf.struct_pb2 import Value
+from google.protobuf import json_format
+
+${this.getBasicString()}
+parent = '${this.getParentString()}'
+client_options = dict(api_endpoint="us-central1-aiplatform.googleapis.com")
+client = aiplatform_v1alpha1.PipelineServiceClient(client_options=client_options)
+
+training_task_inputs = {
+  "targetColumn": target_column,
+  # supported prediction types:
+  # regression, classification
+  "predictionType": prediction_type,
+  "transformations": transformations,
+  "trainBudgetMilliNodeHours": budget_hours * 1000,
+  "disableEarlyStopping": False,
+  # supported binary classification optimisation objectives:
+  # maximize-au-roc, minimize-log-loss, maximize-au-prc,
+  # supported multi-class classification optimisation objective:
+  # minimize-log-loss
+  # supported regression optimization objectives:
+  # minimize-rmse, minimize-mae, minimize-rmsle
+  "optimizationObjective": objective,
+}
+
+training_pipeline = {
+  "display_name": training_pipeline_name,
+  "training_task_definition": 
+    "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
+  "training_task_inputs": json_format.ParseDict(training_task_inputs, Value()),
+  "input_data_config": {
+    "dataset_id": dataset_id,
+    "fraction_split": {
+      "training_fraction": 0.8,
+      "validation_fraction": 0.1,
+      "test_fraction": 0.1,
+    },
+  },
+  "model_to_upload": {"display_name": model_name},
+}
+
+response = client.create_training_pipeline(
+    parent=parent, training_pipeline=training_pipeline
+)`}
+              </CodeComponent>
+            </div>
+          </ul>
+        </div>
+      );
     }
   }
 }

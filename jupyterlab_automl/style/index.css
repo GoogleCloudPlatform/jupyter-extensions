@@ -24,3 +24,8 @@
   background-image: url('./images/emoji_objects-24px.svg');
   background-size: contain;
 }
+
+.jp-AutoMLIcon-training {
+  background-image: url('./images/model_training-24px.svg');
+  background-size: contain;
+}

@@ -6,6 +6,7 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
+import { INotebookTracker } from '@jupyterlab/notebook';
 import * as QueryEditorInCellWidgetsExport from './components/query_editor/query_editor_incell/query_editor_incell_widget';
 
 import ListItemsWidget from './components/list_items_panel/list_tree_item_widget';
@@ -20,11 +21,16 @@ import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
 async function activate(
   app: JupyterFrontEnd,
-  registry: IJupyterWidgetRegistry
+  registry: IJupyterWidgetRegistry,
+  notebookTrack: INotebookTracker
 ) {
   WidgetManager.initInstance(app);
   const manager = WidgetManager.getInstance();
-  const context = { app: app, manager: manager };
+  const context = {
+    app: app,
+    manager: manager,
+    notebookTrack: notebookTrack,
+  };
   const listProjectsService = new ListProjectsService();
   const listDatasetsService = new ListDatasetsService();
   const listTablesService = new ListTablesService();
@@ -59,7 +65,7 @@ async function activate(
 const BigQueryPlugin: JupyterFrontEndPlugin<void> = {
   id: 'bigquery:bigquery',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  requires: [IJupyterWidgetRegistry as any],
+  requires: [IJupyterWidgetRegistry as any, INotebookTracker],
   activate: activate,
   autoStart: true,
 };

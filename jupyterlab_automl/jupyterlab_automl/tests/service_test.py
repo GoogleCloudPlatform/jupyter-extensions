@@ -91,26 +91,28 @@ class TestAutoMLExtension(unittest.TestCase):
     automl = service.AutoMLService.get()
     automl._model_client = mock_client
 
-    wanted = [
-        {
-            "id": "dummy_model1",
-            "displayName": "dummy_model1",
-            "pipelineId": "pipeline1",
-            "createTime": 0.0,
-            "updateTime": 60000.0,
-            "etag": "ETAG1234",
-            "modelType": "OTHER",
-        },
-        {
-            "id": "dummy_model2",
-            "displayName": "dummy_model2",
-            "pipelineId": "pipeline2",
-            "createTime": 60000.0,
-            "updateTime": 0.0,
-            "etag": "1234ETAG",
-            "modelType": "OTHER",
-        },
-    ]
+    wanted = [{
+        "id": "dummy_model1",
+        "displayName": "dummy_model1",
+        "pipelineId": "pipeline1",
+        "createTime": 0.0,
+        "updateTime": 60000.0,
+        "etag": "ETAG1234",
+        "modelType": "OTHER",
+        "inputs": None,
+        "deployedModels": None
+    }, {
+        "id": "dummy_model2",
+        "displayName": "dummy_model2",
+        "pipelineId": "pipeline2",
+        "createTime": 60000.0,
+        "updateTime": 0.0,
+        "etag": "1234ETAG",
+        "modelType": "OTHER",
+        "inputs": None,
+        "deployedModels": None
+    }]
+
     got = automl.get_models()
     self.assertEqual(wanted, got)
 
@@ -172,17 +174,29 @@ class TestAutoMLExtension(unittest.TestCase):
         "displayName": "dummy_pipeline1",
         "createTime": 0.0,
         "updateTime": 60000.0,
-        "elapsedTime": 60,
-        "trainBudgetMilliNodeHours": "1000",
-        "budgetMilliNodeHours": None,
+        "elapsedTime": 60.0,
         "datasetId": "dummy_dataset_id",
+        "state": "UNSPECIFIED",
+        "error": "",
+        "objective": "unknown",
+        "transformationOptions": [{
+            "dataType": "Numeric",
+            "columnName": "Column1"
+        }, {
+            "dataType": "Categorical",
+            "columnName": "Column2"
+        }],
         "targetColumn": "Column2",
-        "transformationOptions": transformation_options,
         "predictionType": "classification",
         "optimizationObjective": "minimize_loss",
+        "budgetMilliNodeHours": None,
+        "trainBudgetMilliNodeHours": "1000"
     }
-    got = automl.get_pipeline('pipeline_id')
+
+    got = automl.get_training_pipeline("pipeline_id")
+
     self.assertEqual(wanted, got)
+
 
 if __name__ == "__main__":
   unittest.main()

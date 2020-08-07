@@ -1,21 +1,29 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { AxisPropsList } from '../trial_visualization';
-
-interface Data {
-  [key: string]: any;
-}
+import { AxisPropsList, TrialData, AxisData } from '../trial_visualization';
 
 interface Props {
   width: number;
   height: number;
   axisPropsList: AxisPropsList;
-  lineDataList: Data[];
-  axesData: Data[];
+  trialDataList: TrialData[];
+  axesData: AxisData[];
   selectedMetricForColor: string;
 }
 
-function getOrdinalRange(start, end, num) {
+interface Data {
+  [key: string]: any
+}
+
+/**
+ * Creates a list of ordinal range. 
+ * Used for getting "num" number of positions in the between "start" and "end".
+ * Needed for calculating the positions for the tick positions of discontinouso axes.
+ * @param start Number indicating the start of the list
+ * @param end Number indicating the end of the list
+ * @param num Number of items in the list
+ */
+function getOrdinalRange(start: number, end: number, num: number) {
   const diff = ((end - start) * 1.0) / (num - 1);
   const arr = new Array(num);
   for (let i = 0; i < num; i++) {
@@ -28,17 +36,17 @@ interface ScaleObject {
   [key: string]: any;
 }
 
-/* Component */
 export const ParallelCoordinates = (props: Props) => {
-  /* The useRef Hook creates a variable that "holds on" to a value across rendering
-       passes. In this case it will hold our component's SVG DOM element. It's
-       initialized null and React will assign it later (see the return statement) */
+  /**
+   * We use the useRef React Hook to make a variable that holds on to the SVG DOM component across renders.
+   * It's initialized null and assigned later in the return statement.
+   */
   const d3Container = useRef(null);
   const axisPropsList = props.axisPropsList;
   const width = props.width;
   const height = props.height;
   const padding = 50;
-  const lineDataList = props.lineDataList;
+  const trialDataList = props.trialDataList;
   const axesData = props.axesData;
   const selectedMetricForColor = props.selectedMetricForColor;
   const verticalAxes = axesData.map(axis => axis.label);
@@ -49,11 +57,9 @@ export const ParallelCoordinates = (props: Props) => {
     currentValue: 0,
   });
 
-  /* The useEffect Hook is for running side effects outside of React,
-       for instance inserting elements into the DOM using D3 */
   useEffect(() => {
     if (
-      props.lineDataList &&
+      props.trialDataList &&
       axesData &&
       d3Container.current &&
       width > 0 &&
@@ -69,20 +75,37 @@ export const ParallelCoordinates = (props: Props) => {
       };
 
       const svg = d3.select(d3Container.current);
-      svg.selectAll('*').remove();
+      svg.selectAll('*').remove(); // Initialize the SVG element by removing all the child elements
 
+      /**
+       * Scale for the horizontal (x) positions of the axes.
+       * Maps the axis labels (trial ID, parameters, metrics, etc..) to the horizontal positions.
+       * Refer to https://github.com/d3/d3-scale#d3-scale for detailed explanation on scales in D3
+       */
       const xScale = d3
         .scalePoint()
         .range([0, width])
         .padding(1)
         .domain(verticalAxes);
 
+      /**
+       * Dictionary of scales for all the vertical positions of axes.
+       * Key: axis labels (trial ID, parameters, metrics, etc...)
+       * Value: D3 scale mapping the data value of the trial to the vertical position
+       */
       const yScale: ScaleObject = {};
+
+      /**
+       * Dictionary of inverted scales for all the vertical positions of axes.
+       * Key: axis labels
+       * Value: Inverted scale mapping the vertical positions to the data value of the trial
+       * These inverted scales are needed to calculate the values of the range boxes created by user clicks
+       */
       const yScaleInverted: ScaleObject = {};
 
       // Populate axis using axesData
-      axesData.forEach(axis => {
-        let scale;
+      axesData.forEach((axis: Data) => {
+        let scale; // Vertical scale mapping the data value of the trial to the vertical positions
         switch (axis.type) {
           case 'INTEGER':
           case 'DOUBLE': {
@@ -93,7 +116,7 @@ export const ParallelCoordinates = (props: Props) => {
               ? axisPropsList[axis.label]['sliderMax']
               : axis.maxVal;
             scale = d3
-              .scaleLinear()
+              .scaleLinear() // linear scale is used since the axes values are continous
               .domain([axisMin, axisMax])
               .range([padding, height - padding]);
             break;
@@ -107,20 +130,22 @@ export const ParallelCoordinates = (props: Props) => {
               maxIndex + 1
             );
             scale = d3
-              .scaleOrdinal()
+              .scaleOrdinal() // ordinal scale is used since the axes values are discontinous
               .domain(valuesInRange)
               .range(
                 getOrdinalRange(padding, height - padding, valuesInRange.length)
               );
             yScaleInverted[axis.label] = d3
-              .scaleQuantize()
+              .scaleQuantize() // Quantize scales used for continous domain (vertical position) and discontinous range (values)
               .domain([padding, height - padding])
               .range(valuesInRange);
             break;
           }
         }
-        const verticalAxis = d3.axisLeft().scale(scale);
+        // Store the scale in the yScale dictionary
         yScale[axis.label] = scale;
+        // Make the actual axis from scale and append to SVG
+        const verticalAxis = d3.axisLeft().scale(scale);
         svg
           .append('g')
           .attr('transform', `translate(${xScale(axis.label)},0)`)
@@ -136,7 +161,15 @@ export const ParallelCoordinates = (props: Props) => {
           .text(axis.label);
       });
 
-      const yScaleInvert = (axisLabel, mouseVerticalPos) => {
+      /**
+       * Returns the inverted yScale for the selected axis
+       * @param axisLabel Name of the axis selected
+       * @param mouseVerticalPos Vertical position of the mouse along the axis
+       * This function is needed because while it is easy to invert yScale for continous axes,
+       * it is hard to do so for discontinous axes, and thus we made a separate inverted yScale dictionary
+       * and we need to check where to look at to retrieve inverted yScale.
+       */
+      const yScaleInvert = (axisLabel: string, mouseVerticalPos: number) => {
         const axisType = axisPropsList[axisLabel]['type'];
         switch (axisType) {
           case 'DOUBLE':
@@ -148,9 +181,16 @@ export const ParallelCoordinates = (props: Props) => {
         }
       };
 
+      /**
+       * Changes the React Hooks states when the user clicks and selects a range along the axis
+       * so that the graph could be re-rendered with the selected box appearing
+       * @param axisLabel Name of the axis selected
+       * @param mouseVerticalPos Vertical position of the mouse click
+       * @param mousemode Indicates the type of mouse action (down/up/move)
+       */
       const handleAxisRangeSelect = (
-        axisLabel,
-        mouseVerticalPos,
+        axisLabel: string,
+        mouseVerticalPos: number,
         mousemode: string
       ) => {
         switch (mousemode) {
@@ -182,6 +222,11 @@ export const ParallelCoordinates = (props: Props) => {
         }
       };
 
+      /**
+       * Attaches mouse action to the whole SVG element
+       * so that mouse cursor can move away from the axis while being pressed
+       * and the selection would still work
+       */
       svg
         .on('mousemove', function() {
           if (axisClicked) {
@@ -203,17 +248,22 @@ export const ParallelCoordinates = (props: Props) => {
           resetSelectBox();
         });
 
-      const colorLine = lineDataList => {
+      /**
+       * Trials (curved lines) passed to this function has to be displayed.
+       * Returns red-blue color scheme color or default color
+       * @param lineData Data for a line (i.e. trial)
+       */
+      const colorLine = (lineData: Data) => {
         if (selectedMetricForColor) {
           const withinSelectedMetricRange =
-            lineDataList[selectedMetricForColor] >=
+            lineData[selectedMetricForColor] >=
               axisPropsList[selectedMetricForColor]['sliderMin'] &&
-            lineDataList[selectedMetricForColor] <=
+              lineData[selectedMetricForColor] <=
               axisPropsList[selectedMetricForColor]['sliderMax'];
           // normalized for the slider range
           return withinSelectedMetricRange
             ? d3.interpolateRdBu(
-                ((lineDataList[selectedMetricForColor] -
+                ((lineData[selectedMetricForColor] -
                   axisPropsList[selectedMetricForColor]['sliderMin']) /
                   (axisPropsList[selectedMetricForColor]['sliderMax'] -
                     axisPropsList[selectedMetricForColor]['sliderMin'])) *
@@ -221,10 +271,14 @@ export const ParallelCoordinates = (props: Props) => {
               )
             : 'rgba(0, 0, 0, 0.1)'; // light gray colored if not within the selected range of metric axis
         }
-        return 'rgba(63, 81, 181, 0.8)';
+        return 'rgba(63, 81, 181, 0.8)'; // material UI primary color with 0.8 alpha value (20% transparency)
       };
 
-      const discontinousOutOfRange = lineDataList => {
+      /**
+       * Check if line bleeds out of the graph becuase of axes being zoomed in/out
+       * @param lineData Data for a line (i.e. trial)
+       */
+      const lineOutOfAxisRange = (lineData: Data) => {
         const axes = Object.keys(axisPropsList);
         for (const axis of axes) {
           if (
@@ -232,7 +286,7 @@ export const ParallelCoordinates = (props: Props) => {
             axisPropsList[axis]['type'] === 'DISCRETE'
           ) {
             const thisDataIndex = axisPropsList[axis]['values'].indexOf(
-              lineDataList[axis]
+              lineData[axis]
             );
             if (
               thisDataIndex < axisPropsList[axis]['sliderMinIndex'] ||
@@ -240,19 +294,29 @@ export const ParallelCoordinates = (props: Props) => {
             ) {
               return true;
             }
+          } else if (axisPropsList[axis]['type'] === 'DOUBLE' || axisPropsList[axis]['type'] === 'INTEGER') {
+            const thisDataValue = lineData[axis];
+            if (thisDataValue < axisPropsList[axis]['sliderMin'] || thisDataValue > axisPropsList[axis]['sliderMax']) {
+              return true;
+            }
           }
         }
         return false;
       };
 
-      const checkLineSelected = lineDataList => {
+      /**
+       * Check if line is within the zoomed range of axes and also whether it goes through the selection box.
+       * If so, returns the color of the line, and if not, make it invisible
+       * @param lineData Data for a single line (i.e. trial)
+       */
+      const checkLineSelected = (lineData: Data) => {
         /**
          * Discontinous parameters (categorical, discrete) have ordinal scales in D3.
          * Thus, when certain values are out of the axis range, it doesn't get interpolated nicely
          * and the lines will go through the top of the axis, which may confuse viewwers.
          * Therefore, we make the lines with out of range data points for discontinous axes to be invisible.
          */
-        if (discontinousOutOfRange(lineDataList)) return 'rgba (0, 0, 0, 0)';
+        if (lineOutOfAxisRange(lineData)) return 'rgba (0, 0, 0, 0)';
         if (selectBoxDetails.initialValue !== 0 && clickedAxisName !== 'none') {
           const axisType = axisPropsList[clickedAxisName]['type'];
           let withinRange = false;
@@ -260,12 +324,12 @@ export const ParallelCoordinates = (props: Props) => {
             case 'INTEGER':
             case 'DOUBLE':
               if (
-                lineDataList[clickedAxisName] >
+                lineData[clickedAxisName] >
                   Math.min(
                     selectBoxDetails.initialValue,
                     selectBoxDetails.currentValue
                   ) &&
-                lineDataList[clickedAxisName] <
+                  lineData[clickedAxisName] <
                   Math.max(
                     selectBoxDetails.initialValue,
                     selectBoxDetails.currentValue
@@ -285,16 +349,16 @@ export const ParallelCoordinates = (props: Props) => {
               const maxIndex = Math.max(initialValueIndex, currentValueIndex);
               const thisDataIndex = axisPropsList[clickedAxisName][
                 'values'
-              ].indexOf(lineDataList[clickedAxisName]);
+              ].indexOf(lineData[clickedAxisName]);
               if (thisDataIndex >= minIndex && thisDataIndex <= maxIndex)
                 withinRange = true;
               break;
             }
           }
-          if (withinRange) return colorLine(lineDataList);
+          if (withinRange) return colorLine(lineData);
           return 'rgba(0, 0, 0, 0.1)';
         }
-        return colorLine(lineDataList);
+        return colorLine(lineData);
       };
 
       // Add mouse click events to axes
@@ -345,7 +409,7 @@ export const ParallelCoordinates = (props: Props) => {
           .attr('x', xScale(clickedAxisName) - 5)
           .attr('y', yPosMin)
           .attr('height', yPosMax - yPosMin)
-          .attr('fill', 'rgba(63, 81, 181, 0.5)') // material UI primary color with 0.1 alpha
+          .attr('fill', 'rgba(63, 81, 181, 0.5)') // material UI primary color with 0.5 alpha value (50% transparency)
           .attr('width', 10);
       }
 
@@ -359,7 +423,7 @@ export const ParallelCoordinates = (props: Props) => {
 
       svg
         .selectAll('myPath')
-        .data(lineDataList)
+        .data(trialDataList)
         .enter()
         .append('path')
         .attr('d', function(d) {
@@ -377,7 +441,7 @@ export const ParallelCoordinates = (props: Props) => {
     height,
     width,
     axesData,
-    lineDataList,
+    trialDataList,
     verticalAxes,
     axisClicked,
     selectBoxDetails,

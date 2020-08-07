@@ -37,14 +37,14 @@ export interface AxisPropsList {
   [key: string]: ContinuousAxisProps | DiscontinousAxisProps;
 }
 
-interface LineData {
+export interface TrialData {
   trialId: number;
-  name?: string;
+  name?: any;
   [key: string]: number | string;
 }
 
 // Needed for populating D3 axis
-interface AxisData {
+export interface AxisData {
   label: string;
   type: string;
   minVal?: number;
@@ -99,22 +99,22 @@ function getParameterValue(parameter: Types.Parameter) {
 }
 
 /**
- * Creates a list of LineData objects retrieved from only the completed studies with final measurements
+ * Creates a list of TrialData objects retrieved from only the completed studies with final measurements
  * as it is impossible to plot the trials with missing final measurement values.
  * @param trials List of all the trials in the study
  */
-function createLineData(completedTrials: Types.Trial[]): LineData[] {
+function createTrialData(completedTrials: Types.Trial[]): TrialData[] {
   return completedTrials.map((trial, i) => {
-    const lineData = {
+    const trialData = {
       trialId: i + 1, // starts from 1
     };
     trial.parameters.forEach(param => {
-      lineData[param.parameter] = getParameterValue(param);
+      trialData[param.parameter] = getParameterValue(param);
     });
     trial.finalMeasurement.metrics.forEach(metric => {
-      lineData[metric.metric] = metric.value;
+      trialData[metric.metric] = metric.value;
     });
-    return lineData;
+    return trialData;
   });
 }
 
@@ -288,7 +288,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
       'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
   const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
-  const lineDataList: LineData[] = createLineData(completedTrials);
+  const trialDataList: TrialData[] = createTrialData(completedTrials);
 
   const handleMetricSelectionChange = event => {
     setSelectedMetric(event.target.value);
@@ -467,7 +467,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                     width={width}
                     height={height}
                     axisPropsList={axisPropsList}
-                    lineDataList={lineDataList}
+                    trialDataList={trialDataList}
                     axesData={axesData}
                     selectedMetricForColor={selectedMetric}
                   />

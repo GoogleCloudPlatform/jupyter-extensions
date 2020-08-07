@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Button,
@@ -17,9 +17,13 @@ import * as Types from '../../types';
 import { prettifyStudyName } from '../../service/optimizer';
 import { connect, useDispatch } from 'react-redux';
 import moment from 'moment';
-import { dateFormat, makeReadable } from '../../utils';
+import { makeReadable, dateFormat } from '../../utils';
 import { setView } from '../../store/view';
 import { fetchTrials } from '../../store/studies';
+import { CommonNode } from '../parameter_spec_tree/common_node';
+import { styles } from '../../utils/styles';
+import { ParameterSpecTree } from '../parameter_spec_tree';
+import ParameterDetailsDialog from '../parameter_details_dialog';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 
 const StyledTableCell = withStyles(theme => ({
@@ -93,6 +97,7 @@ interface Props {
   studyId: string;
   studyToDisplay: FormattedStudy;
   trials: any[];
+  parameterSpecs: Types.ParameterSpec[];
   openTrials: (studyName: string) => void;
   openVisualizations: (studyName: string) => void;
   openDashboard: () => void;
@@ -116,6 +121,7 @@ const mapStateToProps = (state, ownProps) => {
     studyId: study.name,
     studyToDisplay,
     trials: study.trials,
+    parameterSpecs: study.studyConfig.parameters,
   };
 };
 
@@ -176,6 +182,7 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
   studyId,
   studyToDisplay,
   trials,
+  parameterSpecs,
   openTrials,
   openVisualizations,
   openDashboard,
@@ -185,8 +192,14 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
   const configRows = createConfigRows(studyToDisplay);
   const paramRows = createParamRows(studyToDisplay);
   if (!trials) dispatch(fetchTrials(studyId));
+  const [selectedParameterSpec, setSelectedParameterSpec] = React.useState<
+    undefined | Types.ParameterSpec
+  >(undefined);
+  const parametersAreTree = useMemo(() => CommonNode.isTree(parameterSpecs), [
+    parameterSpecs,
+  ]);
   return (
-    <Box m={3}>
+    <Box m={3} className={styles.root}>
       <React.Fragment>
         <Box display="flex">
           <Typography variant="h4" gutterBottom>
@@ -288,35 +301,24 @@ export const StudyDetailsUnwrapped: React.FC<Props> = ({
                 </Button>
               </Box>
             </Box>
-            {/* <Grid container item justify="center" xs={12}>
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() => openVisualizations(studyId)}
-              >
-                See Visualization
-              </Button>
-            </Grid> */}
-            {/* <Grid container item justify="center" xs={12}>
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() => openDashboard()}
-              >
-                Go to Dashboard
-              </Button>
-            </Grid>
-            <Grid container item justify="center" xs={12}>
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() => openTrials(studyId)}
-              >
-                View Trials
-              </Button>
-            </Grid> */}
           </Grid>
         </Grid>
+
+        {parametersAreTree && (
+          <>
+            <Box mt={3}>
+              <ParameterSpecTree
+                specs={parameterSpecs}
+                onClick={spec => setSelectedParameterSpec(spec)}
+              />
+            </Box>
+
+            <ParameterDetailsDialog
+              spec={selectedParameterSpec}
+              onClose={() => setSelectedParameterSpec(undefined)}
+            />
+          </>
+        )}
       </React.Fragment>
     </Box>
   );

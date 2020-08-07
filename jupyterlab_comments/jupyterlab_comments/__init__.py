@@ -18,6 +18,7 @@ from jupyterlab_comments.handlers import ReviewCommentsHandler
 from jupyterlab_comments.handlers import RefreshIntervalHandler
 from jupyterlab_comments.handlers import PullFromRemoteRepoHandler
 from jupyterlab_comments.handlers import AddDetachedCommentHandler
+from jupyterlab_comments.handlers import AddReviewCommentHandler
 
 
 def load_jupyter_server_extension(nb_server_app):
@@ -36,7 +37,7 @@ def load_jupyter_server_extension(nb_server_app):
   refresh_interval_route_pattern = url_path_join(base_url, '/refreshInterval')
   remote_pull_route_pattern = url_path_join(base_url, '/remotePull')
   add_detached_route_pattern = url_path_join(base_url, '/addDetachedComment')
-
+  add_review_route_pattern = url_path_join(base_url, '/addReviewComment')
 
 
   web_app.add_handlers(host_pattern, [
@@ -45,4 +46,5 @@ def load_jupyter_server_extension(nb_server_app):
       (refresh_interval_route_pattern, RefreshIntervalHandler),
       (remote_pull_route_pattern, PullFromRemoteRepoHandler),
       (add_detached_route_pattern, AddDetachedCommentHandler),
+      (add_review_route_pattern, AddReviewCommentHandler),
   ])

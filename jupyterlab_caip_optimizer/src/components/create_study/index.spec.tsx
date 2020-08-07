@@ -20,6 +20,107 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+// Test helpers
+const openParameterBox = async () => {
+  userEvent.click(screen.getByText(/add parameter/i));
+  await waitFor(() => screen.getByText(/save/i));
+};
+
+const createIntegerParameter = async () => {
+  await openParameterBox();
+  // Integer
+  userEvent.type(screen.getByLabelText(/parameter name/i), 'intValue');
+  userEvent.click(screen.getByLabelText(/parameter type/i));
+  const integerOption = await waitFor(() => screen.getByText('INTEGER'));
+  userEvent.click(integerOption);
+  // Wait for Parameter dropdown to close
+  await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
+  userEvent.type(screen.getByLabelText(/min value/i), '1');
+  userEvent.type(screen.getByLabelText(/max value/i), '5');
+  userEvent.click(screen.getByText(/save/i));
+};
+
+const createDoubleParameter = async () => {
+  await openParameterBox();
+  // Double
+  userEvent.type(screen.getByLabelText(/parameter name/i), 'doubValue');
+  userEvent.click(screen.getByLabelText(/parameter type/i));
+  const doubleOption = await waitFor(() => screen.getByText('DOUBLE'));
+  userEvent.click(doubleOption);
+  // Wait for parameter dropdown to close
+  await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
+  userEvent.type(screen.getByLabelText(/min value/i), '-10');
+  userEvent.type(screen.getByLabelText(/max value/i), '15');
+  userEvent.click(screen.getByText(/save/i));
+};
+
+const createDiscreteParameter = async () => {
+  await openParameterBox();
+  userEvent.type(screen.getByLabelText(/parameter name/i), 'disValue');
+  userEvent.click(screen.getByLabelText(/parameter type/i));
+  const discreteOption = await waitFor(() => screen.getByText('DISCRETE'));
+  userEvent.click(discreteOption);
+  // Wait for Parameter dropdown to close
+  await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
+  await waitFor(() =>
+    expect(screen.getByLabelText(/list of possible values/i)).not.toBeDisabled()
+  );
+  userEvent.type(
+    screen.getByLabelText(/list of possible values/i),
+    '-2,-1,0,1,2,666,42'
+  );
+  userEvent.click(screen.getByText(/save/i));
+};
+
+const createCategoricalParameter = async () => {
+  await openParameterBox();
+  userEvent.type(screen.getByLabelText(/parameter name/i), 'catValue');
+  userEvent.click(screen.getByLabelText(/parameter type/i));
+  const categoricalOption = await waitFor(() =>
+    screen.getByText('CATEGORICAL')
+  );
+  userEvent.click(categoricalOption);
+  // Wait for Parameter dropdown to close
+  await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
+  await waitFor(() =>
+    expect(screen.getByLabelText(/list of possible values/i)).not.toBeDisabled()
+  );
+  userEvent.type(
+    screen.getByLabelText(/list of possible values/i),
+    'small,medium,large'
+  );
+  userEvent.click(screen.getByText(/save/i));
+};
+
+const openMetricBox = async () => {
+  userEvent.click(screen.getByText(/add metric/i));
+  await waitFor(() => screen.getByText(/save/i));
+};
+
+const createMinimizedMetric = async () => {
+  await openMetricBox();
+  // Metric name
+  userEvent.type(screen.getByLabelText(/metric name/i), 'goLow');
+  // Goal type for metric
+  userEvent.click(screen.getByTestId('metricGoalType'));
+  const firstGoalType = await waitFor(() => screen.getByText(/minimize/i));
+  userEvent.click(firstGoalType);
+  // Add metric to list
+  userEvent.click(screen.getByText(/save/i));
+};
+
+const createMaximizedMetric = async () => {
+  await openMetricBox();
+  // Metric name
+  userEvent.type(screen.getByLabelText(/metric name/i), 'goHigh');
+  // Goal type for metric
+  userEvent.click(screen.getByTestId('metricGoalType'));
+  const secondGoalType = await waitFor(() => screen.getByText(/maximize/i));
+  userEvent.click(secondGoalType);
+  // Add metric to list
+  userEvent.click(screen.getByText(/save/i));
+};
+
 describe('Dropdown list', () => {
   it('receives readonly string array and renders as dropdown menu', () => {
     const dropdown = createDropdown(Types.GoalTypeList);
@@ -55,91 +156,14 @@ describe('Create Study Page', () => {
     userEvent.type(screen.getByLabelText(/study name/i), cleanFakeStudyName);
 
     // Add all types of parameters
-    // Integer
-    userEvent.type(screen.getByLabelText(/parameter name/i), 'intValue');
-    userEvent.click(screen.getByLabelText(/parameter type/i));
-    const integerOption = await waitFor(() => screen.getByText('INTEGER'));
-    userEvent.click(integerOption);
-    // Wait for Parameter dropdown to close
-    await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
-    await waitFor(() =>
-      expect(screen.getByLabelText(/min value/i)).not.toBeDisabled()
-    );
-    expect(screen.getByLabelText(/max value/i)).not.toBeDisabled();
-    userEvent.type(screen.getByLabelText(/min value/i), '1');
-    userEvent.type(screen.getByLabelText(/max value/i), '5');
-    userEvent.click(screen.getByText(/add param/i));
-    // Double
-    userEvent.type(screen.getByLabelText(/parameter name/i), 'doubValue');
-    userEvent.click(screen.getByLabelText(/parameter type/i));
-    const doubleOption = await waitFor(() => screen.getByText('DOUBLE'));
-    userEvent.click(doubleOption);
-    // Wait for Parameter dropdown to close
-    await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
-    await waitFor(() =>
-      expect(screen.getByLabelText(/min value/i)).not.toBeDisabled()
-    );
-    expect(screen.getByLabelText(/max value/i)).not.toBeDisabled();
-    userEvent.type(screen.getByLabelText(/min value/i), '-10');
-    userEvent.type(screen.getByLabelText(/max value/i), '15');
-    userEvent.click(screen.getByText(/add param/i));
-    // Discrete
-    userEvent.type(screen.getByLabelText(/parameter name/i), 'disValue');
-    userEvent.click(screen.getByLabelText(/parameter type/i));
-    const discreteOption = await waitFor(() => screen.getByText('DISCRETE'));
-    userEvent.click(discreteOption);
-    // Wait for Parameter dropdown to close
-    await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
-    await waitFor(() =>
-      expect(
-        screen.getByLabelText(/list of possible values/i)
-      ).not.toBeDisabled()
-    );
-    userEvent.type(
-      screen.getByLabelText(/list of possible values/i),
-      '-2,-1,0,1,2,666,42'
-    );
-    userEvent.click(screen.getByText(/add param/i));
-    // Categorical
-    userEvent.type(screen.getByLabelText(/parameter name/i), 'catValue');
-    userEvent.click(screen.getByLabelText(/parameter type/i));
-    const categoricalOption = await waitFor(() =>
-      screen.getByText('CATEGORICAL')
-    );
-    userEvent.click(categoricalOption);
-    // Wait for Parameter dropdown to close
-    await waitForElementToBeRemoved(() => screen.queryAllByTestId('paramType'));
-    await waitFor(() =>
-      expect(
-        screen.getByLabelText(/list of possible values/i)
-      ).not.toBeDisabled()
-    );
-    userEvent.type(
-      screen.getByLabelText(/list of possible values/i),
-      'small,medium,large'
-    );
-    userEvent.click(screen.getByText(/add param/i));
+    await createIntegerParameter();
+    await createDoubleParameter();
+    await createDiscreteParameter();
+    await createCategoricalParameter();
 
-    // Add both types of metrics
-    // First Metric
-    // Metric name
-    userEvent.type(screen.getByLabelText(/metric name/i), 'goLow');
-    // Goal type for metric
-    userEvent.click(screen.getByTestId('metricGoalType'));
-    const firstGoalType = await waitFor(() => screen.getByText(/minimize/i));
-    userEvent.click(firstGoalType);
-    // Add metric to list
-    userEvent.click(screen.getByText(/add metric/i));
-
-    // Second metric
-    // Metric name
-    userEvent.type(screen.getByLabelText(/metric name/i), 'goHigh');
-    // Goal type for metric
-    userEvent.click(screen.getByTestId('metricGoalType'));
-    const secondGoalType = await waitFor(() => screen.getByText(/maximize/i));
-    userEvent.click(secondGoalType);
-    // Add metric to list
-    userEvent.click(screen.getByText(/add metric/i));
+    // Add metrics
+    await createMinimizedMetric();
+    await createMaximizedMetric();
 
     // Pick an Algorithm
     userEvent.click(screen.getByLabelText(/algorithm type/i));
@@ -150,7 +174,7 @@ describe('Create Study Page', () => {
     userEvent.click(randomSearchOption);
 
     // Submit
-    const submit = screen.getByText(/create study/i);
+    const submit = screen.getByTestId('createStudy');
     expect(submit).not.toBeDisabled();
     userEvent.click(submit);
 
@@ -232,49 +256,14 @@ describe('Create Study Page', () => {
     beforeEach(async () => {
       render(<CreateStudy />);
 
-      // Create two parameters
-      // Integer
-      userEvent.type(screen.getByLabelText(/parameter name/i), 'intValue');
-      userEvent.click(screen.getByLabelText(/parameter type/i));
-      const integerOption = await waitFor(() => screen.getByText('INTEGER'));
-      userEvent.click(integerOption);
-      // Wait for Parameter dropdown to close
-      await waitForElementToBeRemoved(() =>
-        screen.queryAllByTestId('paramType')
-      );
-      await waitFor(() =>
-        expect(screen.getByLabelText(/min value/i)).not.toBeDisabled()
-      );
-      expect(screen.getByLabelText(/max value/i)).not.toBeDisabled();
-      userEvent.type(screen.getByLabelText(/min value/i), '1');
-      userEvent.type(screen.getByLabelText(/max value/i), '5');
-      userEvent.click(screen.getByText(/add param/i));
-      // Double
-      userEvent.type(screen.getByLabelText(/parameter name/i), 'doubValue');
-      userEvent.click(screen.getByLabelText(/parameter type/i));
-      const doubleOption = await waitFor(() => screen.getByText('DOUBLE'));
-      userEvent.click(doubleOption);
-      // Wait for parameter dropdown to close
-      await waitForElementToBeRemoved(() =>
-        screen.queryAllByTestId('paramType')
-      );
-      await waitFor(() =>
-        expect(screen.getByLabelText(/min value/i)).not.toBeDisabled()
-      );
-      expect(screen.getByLabelText(/max value/i)).not.toBeDisabled();
-      userEvent.type(screen.getByLabelText(/min value/i), '-10');
-      userEvent.type(screen.getByLabelText(/max value/i), '15');
-      userEvent.click(screen.getByText(/add param/i));
+      await createIntegerParameter();
+      await createDoubleParameter();
     });
 
     it('can remove a parameter', async () => {
       expect(screen.getAllByTestId('paramChip')).toHaveLength(2);
-      userEvent.click(screen.getByText('doubValue'));
-      // Wait for animation
-      await waitFor(() =>
-        expect(screen.getByText(/delete param/i)).not.toBeDisabled()
-      );
-      userEvent.click(screen.getByText(/delete param/i));
+
+      userEvent.click(screen.getAllByTestId('deleteParameter')[0]);
       // Wait for animation
       await waitFor(() =>
         expect(screen.getAllByTestId('paramChip')).toHaveLength(1)
@@ -297,44 +286,13 @@ describe('Create Study Page', () => {
     beforeEach(async () => {
       render(<CreateStudy />);
 
-      // Add both types of metrics
-      // First Metric
-      // Metric name
-      userEvent.type(screen.getByLabelText(/metric name/i), 'goLow');
-      // Goal type for metric
-      userEvent.click(screen.getByTestId('metricGoalType'));
-      const firstGoalType = await waitFor(() => screen.getByText(/minimize/i));
-      userEvent.click(firstGoalType);
-      // Add metric to list
-      userEvent.click(screen.getByText(/add metric/i));
-      // Wait for dropdown to close
-      await waitForElementToBeRemoved(() =>
-        screen.queryAllByTestId('metricItem')
-      );
-
-      // Second metric
-      // Metric name
-      userEvent.type(screen.getByLabelText(/metric name/i), 'goHigh');
-      // Goal type for metric
-      userEvent.click(screen.getByTestId('metricGoalType'));
-      const secondGoalType = await waitFor(() => screen.getByText(/maximize/i));
-      userEvent.click(secondGoalType);
-      // Add metric to list
-      userEvent.click(screen.getByText(/add metric/i));
-      // Wait for dropdown to close
-      await waitForElementToBeRemoved(() =>
-        screen.queryAllByTestId('metricItem')
-      );
+      await createMinimizedMetric();
+      await createMaximizedMetric();
     });
 
     it('can remove a metric', async () => {
       expect(screen.getAllByTestId('metricChip')).toHaveLength(2);
-      userEvent.click(screen.getByText('goHigh'));
-      // Wait for animation
-      await waitFor(() =>
-        expect(screen.getByText(/add metric/i)).not.toBeDisabled()
-      );
-      userEvent.click(screen.getByText(/delete metric/i));
+      userEvent.click(screen.getAllByTestId('deleteMetric')[0]);
       // Wait for animation
       await waitFor(() =>
         expect(screen.getAllByTestId('metricChip')).toHaveLength(1)
