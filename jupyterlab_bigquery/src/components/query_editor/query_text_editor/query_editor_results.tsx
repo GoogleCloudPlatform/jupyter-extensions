@@ -2,10 +2,14 @@
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
-import { QueryResult } from '../query_text_editor/query_text_editor';
+import { QueryResult } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
+import { Button, Typography } from '@material-ui/core';
+import { ContextMenu } from 'gcp_jupyterlab_shared';
+import DropDown from '../../shared/dropdown';
+import { Equalizer, ArrowDropDown } from '@material-ui/icons';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -51,6 +55,25 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     const fields = this.props.queryResult.labels;
     const rows = this.props.queryResult.content;
 
+    console.log(this.props.queryResult.project);
+    console.log(this.props.queryResult.query);
+    console.log(this.props.queryResult);
+
+    const exploreContextMenuItems = [
+      {
+        label: 'Explore with Sheets',
+        onClick: () => {
+          console.log('sheet');
+        },
+      },
+      {
+        label: 'Explore with Data Studio',
+        onClick: () => {
+          console.log('studio');
+        },
+      },
+    ];
+
     return (
       <div
         className={
@@ -59,7 +82,23 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
             : localStyles.resultsContainer
         }
       >
-        <Header text="Query results" />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Header text="Query results" />
+          <DropDown
+            items={exploreContextMenuItems}
+            label="Explore Data"
+            buttonArgs={{
+              startIcon: <Equalizer fontSize="small" />,
+              endIcon: <ArrowDropDown fontSize="small" />,
+            }}
+          />
+        </div>
         {fields.length > 0 ? <BQTable fields={fields} rows={rows} /> : <></>}
       </div>
     );

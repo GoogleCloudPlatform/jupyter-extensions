@@ -27,7 +27,7 @@ import {
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
-import { QueryEditorType } from '../query_editor_tab/query_editor_results';
+import { QueryEditorType } from './query_editor_results';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -60,6 +60,8 @@ export interface QueryResult {
   labels: Array<string>;
   bytesProcessed: number;
   queryId: QueryId;
+  project: string;
+  query: string;
 }
 
 interface QueryRequestBodyType {
@@ -256,6 +258,7 @@ class QueryTextEditor extends React.Component<
           this.setState({ bytesProcessed: response.bytesProcessed });
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
+          processed.query = query;
 
           this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
