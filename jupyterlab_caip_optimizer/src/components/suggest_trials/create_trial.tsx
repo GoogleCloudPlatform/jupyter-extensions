@@ -14,6 +14,7 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  Box,
 } from '@material-ui/core';
 import { prettifyStudyName } from '../../service/optimizer';
 import { Loading } from '../misc/loading';
@@ -27,6 +28,7 @@ import {
   parameterSpecToValidateInput,
   inputValuesToParameterList,
   metricsToMeasurement,
+  flattenParameterSpecTree,
 } from './utils';
 import { StudyConfig, ParameterSpec, TrialState } from '../../types';
 import { ErrorState } from '../../utils/use_error_state';
@@ -38,15 +40,16 @@ import {
 import { createTrial } from '../../store/studies';
 
 interface BaseInput {
+  id: string;
   label: string;
   input: ErrorState<string>;
   onChange: (value: string) => void;
 }
 
-const NumberInput: React.FC<BaseInput> = ({ label, input, onChange }) => {
+const NumberInput: React.FC<BaseInput> = ({ id, label, input, onChange }) => {
   return (
     <TextField
-      margin="dense"
+      id={id}
       variant="outlined"
       label={label}
       type="number"
@@ -63,6 +66,7 @@ const NumberInput: React.FC<BaseInput> = ({ label, input, onChange }) => {
 };
 
 const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
+  id,
   label,
   input,
   onChange,
@@ -70,9 +74,9 @@ const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
 }) => {
   return (
     <FormControl variant="outlined" fullWidth>
-      <InputLabel id={label}>{label}</InputLabel>
+      <InputLabel id={id}>{label}</InputLabel>
       <Select
-        labelId={label}
+        labelId={id}
         value={input.value}
         onChange={event => onChange(event.target.value as string)}
         label={label}
@@ -91,6 +95,10 @@ const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
   );
 };
 
+// const ParameterInputContainer: React.FC<{title: string, childInputs: JSX.Element[] }> = ({title, childInputs}) => {
+//   return <Box mt=></Box>
+// }
+
 /**
  * Creates inputs for the various types of parameters with error handling.
  * @param values The map of input values and errors.
@@ -105,39 +113,107 @@ function parameterSpecToInputs(
   return parameterSpecs.map(spec => {
     const name = spec.parameter;
     const label = `"${name}" Parameter`;
+    const input = values[name];
+    let children: JSX.Element[] = [];
     switch (spec.type) {
-      case 'CATEGORICAL':
+      case 'CATEGORICAL': {
+        if (spec.childParameterSpecs) {
+          const validChildren = spec.childParameterSpecs.filter(
+            child =>
+              !input.error &&
+              child.parentCategoricalValues!.values.includes(input.value)
+          );
+          children = parameterSpecToInputs(values, onChange, validChildren);
+        }
+
         return (
-          <SelectionInput
-            key={name}
-            label={label}
-            input={values[name]}
-            onChange={value => onChange(name, value)}
-            // TODO: fix typing
-            validValues={(spec as any).categoricalValueSpec.values as string[]}
-          />
+          <Box mt={2} key={name}>
+            {children.length > 0 && (
+              <Box mb={2}>
+                <Typography>{label} Tree</Typography>
+              </Box>
+            )}
+            <SelectionInput
+              id={name}
+              label={label}
+              input={input}
+              onChange={value => onChange(name, value)}
+              validValues={spec.categoricalValueSpec.values}
+            />
+            {children}
+          </Box>
         );
-      case 'DISCRETE':
+      }
+      case 'DISCRETE': {
+        if (spec.childParameterSpecs) {
+          const validChildren = spec.childParameterSpecs.filter(
+            child =>
+              !input.error &&
+              child.parentDiscreteValues!.values.includes(
+                parseFloat(input.value)
+              )
+          );
+          children = parameterSpecToInputs(values, onChange, validChildren);
+        }
+
         return (
-          <SelectionInput
-            key={name}
-            label={label}
-            input={values[name]}
-            onChange={value => onChange(name, value)}
-            // TODO: fix typing
-            validValues={((spec as any).discreteValueSpec
-              .values as number[]).map(value => value.toString(10))}
-          />
+          <Box mt={2} key={name}>
+            {children.length > 0 && (
+              <Box mb={2}>
+                <Typography>{label} Tree</Typography>
+              </Box>
+            )}
+            <SelectionInput
+              id={name}
+              label={label}
+              input={input}
+              onChange={value => onChange(name, value)}
+              validValues={spec.discreteValueSpec.values.map(value =>
+                value.toString(10)
+              )}
+            />
+            {children}
+          </Box>
         );
+      }
+      case 'INTEGER': {
+        if (spec.childParameterSpecs) {
+          const validChildren = spec.childParameterSpecs.filter(
+            child =>
+              !input.error &&
+              child.parentIntValues!.values.includes(input.value)
+          );
+          children = parameterSpecToInputs(values, onChange, validChildren);
+        }
+
+        return (
+          <Box mt={2} key={name}>
+            {children.length > 0 && (
+              <Box mb={2}>
+                <Typography>{label} Tree</Typography>
+              </Box>
+            )}
+            <NumberInput
+              id={name}
+              label={label}
+              input={values[name]}
+              onChange={value => onChange(name, value)}
+            />
+            {children}
+          </Box>
+        );
+      }
       case 'DOUBLE':
-      case 'INTEGER':
         return (
-          <NumberInput
-            key={name}
-            label={label}
-            input={values[name]}
-            onChange={value => onChange(name, value)}
-          />
+          <Box mt={2}>
+            <NumberInput
+              id={name}
+              key={name}
+              label={label}
+              input={values[name]}
+              onChange={value => onChange(name, value)}
+            />
+          </Box>
         );
       default:
         return null;
@@ -164,11 +240,15 @@ export const CreateTrial: React.FC<Props> = ({
   );
   const [requested, setRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const flattenParameterSpecs = React.useMemo(
+    () => flattenParameterSpecTree(studyConfig.parameters),
+    [studyConfig.parameters]
+  );
   // Creates parameter default values of '' and setups input error handling
   // using the custom hook
   const [map, setInput] = useErrorStateMap(
-    parameterSpecToInputsValues(studyConfig.parameters),
-    parameterSpecToValidateInput(studyConfig.parameters)
+    parameterSpecToInputsValues(flattenParameterSpecs),
+    parameterSpecToValidateInput(flattenParameterSpecs)
   );
 
   const handleClose = () => {

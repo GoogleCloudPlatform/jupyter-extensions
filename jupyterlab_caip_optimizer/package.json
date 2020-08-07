@@ -37,6 +37,7 @@
     "watch": "tsc -b -w"
   },
   "dependencies": {
+    "@blakeembrey/deque": "^1.0.5",
     "@jupyterlab/application": "^1.2.1",
     "@jupyterlab/apputils": "^1.2.1",
     "@jupyterlab/coreutils": "^3.2.0",
