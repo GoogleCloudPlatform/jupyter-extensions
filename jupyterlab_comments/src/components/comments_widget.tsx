@@ -128,6 +128,9 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
+    const numDetachedComments = this.state.detachedComments.length;
+    const detachedLabel : string = "Detached (" + numDetachedComments.toString() + ")"
+
     const reviewCommentsList = this.state.reviewComments.map(
       reviewCommentsArr => (
         <>
@@ -165,7 +168,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             className={localStyles.tabs}
           >
             <Tab label="Review" value={0} />
-            <Tab label="Detached" value={1} />
+            <Tab label={detachedLabel} value={1} />
           </Tabs>
         </AppBar>
 
@@ -271,7 +274,6 @@ export class CommentsComponent extends React.Component<Props, State> {
               });
             }
           }
-          console.log(reviews);
           this.setState({
             reviewComments: reviews,
             fileName: shortenedFilePath,

@@ -20,9 +20,18 @@ import { Comment } from '../components/comment';
 import { Divider, ListSubheader } from '@material-ui/core';
 import List from '@material-ui/core/List';
 
+
 interface Props {
   commentsList: Array<CodeReviewComment>;
   reviewRequest: ReviewRequest;
+}
+
+const style = {
+  commentListHeader: {
+    fontSize: 15,
+    weight: 'bold',
+    color: 'black',
+  },
 }
 
 export class CodeReview extends React.Component<Props> {
@@ -36,7 +45,7 @@ export class CodeReview extends React.Component<Props> {
     return (
       <List
         subheader={
-          <ListSubheader component="div" id="nested-list-subheader">
+          <ListSubheader component="div" color="primary" style={style.commentListHeader}>
             {'Review requested by ' +
               this.props.reviewRequest.requester +
               ':  ' +
