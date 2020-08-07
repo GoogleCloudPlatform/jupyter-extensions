@@ -1,7 +1,7 @@
 import { LinearProgress } from '@material-ui/core';
 import * as React from 'react';
-import { Model, Pipeline } from '../service/model';
-import { PipelineProperties } from './pipeline_properties';
+import { Model, Pipeline } from '../../service/model';
+import { PipelineProperties } from '../pipelines/pipeline_properties';
 
 interface Props {
   model: Model;

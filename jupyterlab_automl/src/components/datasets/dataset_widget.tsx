@@ -1,6 +1,6 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { Dataset } from '../service/dataset';
+import { Dataset } from '../../service/dataset';
 import { DatasetComponent } from './dataset_component';
 
 /** Widget to be registered in the left-side panel. */

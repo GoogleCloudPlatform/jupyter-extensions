@@ -17,8 +17,8 @@ import {
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Endpoint, Model, ModelService } from '../service/model';
-import { CodeComponent } from './copy_code';
+import { Endpoint, Model, ModelService } from '../../service/model';
+import { CodeComponent } from '../copy_code';
 
 const theme = createMuiTheme({
   overrides: {
@@ -310,7 +310,7 @@ deploy_model('${this.props.model.id}', machine_type, endpoint_id)`}
         <CodeComponent>
           {`from jupyterlab_automl import predict
 instance = ${JSON.stringify(this.state.inputParameters)}
-result = predict("${this.state.endpoints[0].id}", instance)`}
+predict("${this.state.endpoints[0].id}", instance)`}
         </CodeComponent>
       </div>
     );

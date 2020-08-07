@@ -130,7 +130,6 @@ class AutoMLService:
         "pipelineId": model.training_pipeline,
         "createTime": get_milli_time(model.create_time),
         "updateTime": get_milli_time(model.update_time),
-        "etag": model.etag,
         "modelType": parse_model_type(model),
         "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
         "deployedModels": json_formatted.get("deployedModels"),
@@ -283,7 +282,6 @@ class AutoMLService:
             "createTime": get_milli_time(dataset.create_time),
             "updateTime": get_milli_time(dataset.update_time),
             "datasetType": dataset_type.value,
-            "etag": dataset.etag,
             "metadata": json_format.MessageToDict(dataset._pb.metadata),
         })
     return datasets

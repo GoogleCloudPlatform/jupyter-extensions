@@ -11,7 +11,7 @@ import {
 import Alert from '@material-ui/lab/Alert';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 import * as React from 'react';
-import { Pipeline } from '../service/model';
+import { Pipeline } from '../../service/model';
 
 interface Props {
   pipeline: Pipeline;

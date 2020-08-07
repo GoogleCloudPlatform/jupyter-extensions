@@ -1,8 +1,8 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Dataset, DatasetService, Column } from '../service/dataset';
-import { CodeComponent } from './copy_code';
+import { Dataset, DatasetService, Column } from '../../service/dataset';
+import { CodeComponent } from '../copy_code';
 import { ListResourcesTable, SelectInput } from 'gcp_jupyterlab_shared';
 import { LinearProgress } from '@material-ui/core';
 

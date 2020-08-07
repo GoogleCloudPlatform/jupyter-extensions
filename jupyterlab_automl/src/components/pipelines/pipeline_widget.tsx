@@ -1,6 +1,6 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { Pipeline } from '../service/model';
+import { Pipeline } from '../../service/model';
 import { PipelineProperties } from './pipeline_properties';
 import { stylesheet } from 'typestyle';
 

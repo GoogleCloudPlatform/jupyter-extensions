@@ -20,7 +20,6 @@ export interface Model {
   pipelineId: string;
   createTime: Date;
   updateTime: Date;
-  etag: string;
   modelType: ModelType;
   inputs?: object;
   deployedModels?: DeployedModel[];
@@ -46,15 +45,15 @@ export interface Pipeline {
   updateTime: Date;
   elapsedTime: number | string;
   datasetId: string;
-  trainBudgetMilliNodeHours: number | null;
-  budgetMilliNodeHours: number | null;
-  targetColumn: string | null;
-  transformationOptions: any | null;
-  predictionType: string | null;
-  optimizationObjective: string | null;
+  trainBudgetMilliNodeHours?: number;
+  budgetMilliNodeHours?: number;
+  targetColumn?: string;
+  transformationOptions?: any;
+  predictionType?: string;
+  optimizationObjective?: string;
   objective: string;
   state: string;
-  error: string | null;
+  error?: string;
 }
 
 export interface ModelMetrics {

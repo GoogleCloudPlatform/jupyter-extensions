@@ -31,14 +31,13 @@ import {
   Pipeline,
   PipelineState,
 } from '../service/model';
-import { debounce } from '../util';
 import { Context } from './automl_widget';
-import { DatasetWidget } from './dataset_widget';
-import { ImageWidget } from './image_widget';
-import { ImportData } from './import_data';
-import { ImportModel } from './import_model';
-import { ModelWidget } from './model_widget';
-import { PipelineWidget } from './pipeline_widget';
+import { DatasetWidget } from './datasets/dataset_widget';
+import { ImageWidget } from './datasets/image_widget';
+import { ImportData } from './datasets/import_data';
+import { ImportModel } from './models/import_model';
+import { ModelWidget } from './models/model_widget';
+import { PipelineWidget } from './pipelines/pipeline_widget';
 
 interface Props {
   isVisible: boolean;
@@ -82,7 +81,7 @@ const FullWidthInput = styled(Box)`
   }
 `;
 
-const ResourceSelect = styled(Select)`
+export const ResourceSelect = styled(Select)`
   margin-top: 8px;
   width: 100%;
   font-size: 13.6px;
@@ -561,9 +560,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     );
   }
 
-  private handleSearch = debounce((value: string) => {
+  private handleSearch = (value: string) => {
     this.setState({ searchString: value });
-  }, 250);
+  };
 
   private filterResources<T>(resources: T[]): T[] {
     const searchFields = {

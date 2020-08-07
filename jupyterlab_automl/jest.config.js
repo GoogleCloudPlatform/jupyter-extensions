@@ -11,8 +11,8 @@ module.exports = {
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {
-      tsConfig: 'tsconfig.json'
-    }
+      tsConfig: 'tsconfig.json',
+    },
   },
   snapshotSerializers: ['enzyme-to-json/serializer'],
 };

@@ -2,7 +2,7 @@ import { FormControl } from '@material-ui/core';
 import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { CodeComponent } from './copy_code';
+import { CodeComponent } from '../copy_code';
 
 interface Props {
   open: boolean;

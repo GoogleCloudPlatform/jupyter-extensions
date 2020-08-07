@@ -1,6 +1,6 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { Model, ModelService, Pipeline } from '../service/model';
+import { Model, ModelService, Pipeline } from '../../service/model';
 import { EvaluationTable } from './model_evaluation';
 import { ModelProperties } from './model_properties';
 import { ModelPredictions } from './model_predictions';

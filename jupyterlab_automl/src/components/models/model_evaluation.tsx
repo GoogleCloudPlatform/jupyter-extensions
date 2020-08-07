@@ -15,7 +15,7 @@ import {
   ModelMetrics,
   ModelService,
   ModelEvaluation,
-} from '../service/model';
+} from '../../service/model';
 import { stylesheet } from 'typestyle';
 
 interface Props {

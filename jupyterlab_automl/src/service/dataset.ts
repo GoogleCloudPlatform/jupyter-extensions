@@ -7,7 +7,6 @@ export interface Dataset {
   displayName: string;
   createTime: Date;
   updateTime: Date;
-  etag: string;
   datasetType: DatasetType;
   metadata: any;
 }

@@ -17,11 +17,11 @@ import {
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { DatasetService } from '../service/dataset';
-import { Context } from './automl_widget';
+import { DatasetService } from '../../service/dataset';
+import { Context } from '../automl_widget';
 import { ClientSession } from '@jupyterlab/apputils';
-import { KernelModel } from '../service/kernel_model';
-import Toast from './toast';
+import { KernelModel } from '../../service/kernel_model';
+import Toast from '../toast';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
 
