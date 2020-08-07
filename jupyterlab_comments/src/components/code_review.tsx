@@ -15,11 +15,11 @@
  */
 
 import * as React from 'react';
+import { Divider, Grid, List, Typography } from '@material-ui/core';
+import RateReviewIcon from '@material-ui/icons/RateReview';
 import { CodeReviewComment, ReviewRequest } from '../service/comment';
 import { Comment } from '../components/comment';
-import { Divider, ListSubheader } from '@material-ui/core';
-import List from '@material-ui/core/List';
-
+import { timeAgo } from '../service/timestamp';
 
 interface Props {
   commentsList: Array<CodeReviewComment>;
@@ -28,11 +28,21 @@ interface Props {
 
 const style = {
   commentListHeader: {
-    fontSize: 15,
+    fontSize: 19,
     weight: 'bold',
     color: 'black',
+    backgroundColor: 'primary',
+    paddingLeft: 10,
   },
-}
+  commentListDescription: {
+    fontSize: 13,
+    color: 'grey',
+    paddingLeft: 10,
+  },
+  reviewIcon: {
+    paddingLeft: 10,
+  },
+};
 
 export class CodeReview extends React.Component<Props> {
   render() {
@@ -42,15 +52,43 @@ export class CodeReview extends React.Component<Props> {
         <Divider />
       </>
     ));
+    const reviewTimeStamp = timeAgo(
+      new Date().getTime(),
+      this.props.reviewRequest.timestamp
+    );
     return (
       <List
         subheader={
-          <ListSubheader component="div" color="primary" style={style.commentListHeader}>
-            {'Review requested by ' +
-              this.props.reviewRequest.requester +
-              ':  ' +
-              this.props.reviewRequest.description}
-          </ListSubheader>
+          <Grid container direction="column" spacing={0}>
+            <Grid container direction="row" spacing={0}>
+              <Grid item style={style.reviewIcon}>
+                <RateReviewIcon color="primary" />
+              </Grid>
+              <Grid item>
+                <Typography
+                  color="primary"
+                  style={style.commentListHeader}
+                  gutterBottom
+                >
+                  {'Review requested: ' + this.props.reviewRequest.description}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Grid item>
+              <Typography
+                color="primary"
+                style={style.commentListDescription}
+                gutterBottom
+              >
+                {'Requested by: ' + this.props.reviewRequest.requester}
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Typography color="primary" style={style.commentListDescription}>
+                {'Opened ' + reviewTimeStamp}
+              </Typography>
+            </Grid>
+          </Grid>
         }
       >
         {' '}

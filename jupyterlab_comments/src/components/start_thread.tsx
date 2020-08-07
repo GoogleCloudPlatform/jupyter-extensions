@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import { TextField, Button, Grid, Icon } from '@material-ui/core';
+import { TextField, Grid } from '@material-ui/core';
 import {
   newDetachedCommentThread,
   newReviewCommentThread,
 } from '../service/add_comment';
+import { SendButton } from './send_button';
 
 interface Props {
   serverRoot: string;
@@ -85,15 +86,7 @@ export function CommentEditor(props) {
           />
         </Grid>
         <Grid item style={style.submit}>
-          <Button
-            type="submit"
-            color="primary"
-            size="medium"
-            endIcon={<Icon>send</Icon>}
-            className="sendThread"
-          >
-            Send
-          </Button>
+          <SendButton type="sendThread" />
         </Grid>
       </Grid>
     </form>

@@ -14,13 +14,13 @@
  * limitations under the License.
  **/
 import React, { useState } from 'react';
-import { TextField, Button, Grid } from '@material-ui/core';
+import { TextField, Grid } from '@material-ui/core';
 import {
   newDetachedCommentReply,
   newReviewCommentReply,
 } from '../service/add_comment';
-import Icon from '@material-ui/core/Icon';
 import { getServerRoot } from '../service/jupyterConfig';
+import { SendButton } from './send_button';
 
 interface Props {
   currFilePath: string;
@@ -32,22 +32,16 @@ interface Props {
 const style = {
   editor: {
     padding: 10,
+  },
+  textField: {
+    margin: 2,
     width: 400,
   },
+  submit: {
+    paddingLeft: 320,
+    display: 'inlineBlock',
+  },
 };
-
-function SendButton(props) {
-  return (
-    <Button
-      type="submit"
-      color="primary"
-      size="small"
-      endIcon={<Icon>send</Icon>}
-      className="sendReply"
-    >
-      Send
-    </Button>);
-}
 
 function ReplyEditor(props) {
   const [comment, setComment] = useState('');
@@ -86,27 +80,27 @@ function ReplyEditor(props) {
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
       />
-      <Grid container direction="row" spacing={0}>
+      <Grid container direction="column">
         <Grid item>
           <TextField
+            multiline
             label="Reply to this comment"
             value={comment}
-            rows={3}
+            rows={2}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
-            size="small"
-            style={{ margin: 2 }}
+            size="medium"
+            style={style.textField}
             className="replyCommentTextField"
           />
         </Grid>
         <Grid item>
-          <SendButton/>
+          <SendButton type="sendReply" style={style.submit} />
         </Grid>
       </Grid>
     </form>
   );
 }
-
 
 export class NewReplyComment extends React.Component<Props> {
   render() {
