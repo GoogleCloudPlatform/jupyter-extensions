@@ -30,7 +30,10 @@ export async function requestAPI<T>(
   const data: any = await response.json();
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message || data);
+    throw new ServerConnection.ResponseError(
+      response,
+      data.message || JSON.stringify(data)
+    );
   }
 
   return data;
