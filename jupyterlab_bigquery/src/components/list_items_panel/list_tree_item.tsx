@@ -1,11 +1,6 @@
-import {
-  LinearProgress,
-  Typography,
-  CircularProgress,
-  Icon,
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { LinearProgress, CircularProgress, Icon } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
@@ -13,11 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
+import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
 
 import {
   DataTree,
   Project,
   Dataset,
+  Table,
+  Model,
   ListDatasetsService,
   ListTablesService,
   ListModelsService,
@@ -27,6 +25,13 @@ import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
 import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { ViewDetailsWidget } from '../details_panel/view_details_widget';
+import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { ModelDetailsWidget } from '../details_panel/model_details_widget';
+import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
@@ -66,45 +71,177 @@ const localStyles = stylesheet({
   circularProgress: {
     padding: 5,
   },
+  resourceName: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
+  },
+  resourceIcons: {
+    display: 'flex',
+    alignContent: 'center',
+    color: 'var(--jp-layout-color3)',
+  },
+  datasetName: {
+    flexDirection: 'row',
+    display: 'flex',
+    alignItems: 'center',
+  },
 });
 
-interface ProjectProps {
+interface ResourceListProps {
   context: Context;
   dataTree: DataTree;
   updateProject: any;
   updateDataset: any;
-  listDatasetsService: ListDatasetsService;
-  listTablesService: ListTablesService;
-  listModelsService: ListModelsService;
   openSnackbar: any;
 }
 
-interface State {
-  expanded: boolean;
+interface ResourceProps {
+  context: Context;
+  updateProject?: any;
+  updateDataset?: any;
+  openSnackbar?: any;
 }
 
-export function BuildTree(project, context, expandProject, expandDataset) {
-  const copyID = dataTreeItem => {
+export interface ModelProps extends ResourceProps {
+  model: Model;
+}
+
+export interface TableProps extends ResourceProps {
+  table: Table;
+}
+
+export interface DatasetProps extends ResourceProps {
+  dataset: Dataset;
+  updateDataset?: any;
+}
+
+export interface ProjectProps extends ResourceProps {
+  project: Project;
+  updateProject: any;
+  updateDataset: any;
+}
+
+interface State {
+  expanded: [];
+}
+
+interface ResourceState {
+  expanded: string[];
+  loading: boolean;
+}
+
+export class Resource<T extends ResourceProps> extends React.Component<
+  T,
+  ResourceState
+> {
+  constructor(props) {
+    super(props);
+  }
+
+  handleOpenSnackbar = error => {
+    this.props.openSnackbar(error);
+  };
+
+  copyID = dataTreeItem => {
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
-  const openDatasetDetails = (event, dataset) => {
-    const service = new DatasetDetailsService();
-    const widgetType = DatasetDetailsWidget;
-    context.manager.launchWidgetForId(
-      dataset.id,
+  copyBoilerplateQuery = dataTreeItem => {
+    Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
+  };
+
+  getIcon = iconType => {
+    return (
+      <Icon className={localStyles.resourceIcons}>
+        <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
+      </Icon>
+    );
+  };
+}
+
+export class ModelResource extends Resource<ModelProps> {
+  constructor(props) {
+    super(props);
+  }
+
+  openModelDetails = (event, model) => {
+    event.stopPropagation();
+    const service = new ModelDetailsService();
+    const widgetType = ModelDetailsWidget;
+    this.props.context.manager.launchWidgetForId(
+      model.id,
       widgetType,
       service,
-      dataset.id,
-      dataset.name
+      model.id,
+      model.name
     );
   };
 
-  const openTableDetails = (event, table) => {
+  contextMenuItems = [
+    {
+      label: 'Copy model ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+  ];
+
+  render() {
+    const { model } = this.props;
+    return (
+      <TreeItem
+        nodeId={model.id}
+        icon={this.getIcon('Model')}
+        label={
+          <ContextMenu
+            items={this.contextMenuItems.map(item => ({
+              label: item.label,
+              onClick: () => item.handler(model),
+            }))}
+          >
+            <div className={localStyles.resourceName}>{model.name}</div>
+          </ContextMenu>
+        }
+        onDoubleClick={event => this.openModelDetails(event, model)}
+      />
+    );
+  }
+}
+
+export class TableResource extends Resource<TableProps> {
+  constructor(props) {
+    super(props);
+  }
+
+  queryTable = dataTreeItem => {
+    const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
+    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
+
+    const curWidget = notebookTrack.currentWidget;
+
+    if (!curWidget || !curWidget.content.isVisible) {
+      // no active notebook or not visible
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query]
+      );
+    } else {
+      // exist notebook and visible
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code = '%%bigquery_editor\n\n' + query;
+      cell.model.value.text = code;
+    }
+  };
+
+  openTableDetails = (event, table) => {
     event.stopPropagation();
     const service = new TableDetailsService();
     const widgetType = TableDetailsWidget;
-    context.manager.launchWidgetForId(
+    this.props.context.manager.launchWidgetForId(
       table.id,
       widgetType,
       service,
@@ -113,139 +250,217 @@ export function BuildTree(project, context, expandProject, expandDataset) {
     );
   };
 
-  const openViewDetails = (event, view) => {
+  openViewDetails = (event, view) => {
     event.stopPropagation();
-    // TODO: Create view widget
-  };
-
-  const getIcon = iconType => {
-    return (
-      <Icon style={{ display: 'flex', alignContent: 'center' }}>
-        <div className={`jp-Icon jp-Icon-20 jp-${iconType}Icon`} />
-      </Icon>
+    const service = new ViewDetailsService();
+    const widgetType = ViewDetailsWidget;
+    this.props.context.manager.launchWidgetForId(
+      view.id,
+      widgetType,
+      service,
+      view.id,
+      view.name
     );
   };
 
-  const renderTables = table => {
-    const tableContextMenuItems = [
-      {
-        label: 'Copy Table ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
+  tableContextMenuItems = [
+    {
+      label: 'Query table',
+      handler: dataTreeItem => this.queryTable(dataTreeItem),
+    },
+    {
+      label: 'Copy table ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Copy boilerplate query',
+      handler: dataTreeItem => this.copyBoilerplateQuery(dataTreeItem),
+    },
+  ];
 
-    const viewContextMenuItems = [
-      {
-        label: 'Copy View ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
+  public viewContextMenuItems = [
+    {
+      label: 'Copy view ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+  ];
 
+  render() {
+    const { table } = this.props;
     return (
       <div>
         {table.type === 'TABLE' ? (
           <TreeItem
             nodeId={table.id}
-            icon={getIcon('Table')}
+            icon={this.getIcon('Table')}
             label={
               <ContextMenu
-                items={tableContextMenuItems.map(item => ({
+                items={this.tableContextMenuItems.map(item => ({
                   label: item.label,
                   onClick: () => item.handler(table),
                 }))}
               >
-                <Typography>{table.name}</Typography>
+                <div className={localStyles.resourceName}>{table.name}</div>
               </ContextMenu>
             }
-            onDoubleClick={event => openTableDetails(event, table)}
+            onDoubleClick={event => this.openTableDetails(event, table)}
           />
         ) : table.type === 'VIEW' ? (
           <TreeItem
             nodeId={table.id}
-            icon={getIcon('View')}
+            icon={this.getIcon('View')}
             label={
               <ContextMenu
-                items={viewContextMenuItems.map(item => ({
+                items={this.viewContextMenuItems.map(item => ({
                   label: item.label,
                   onClick: () => item.handler(table),
                 }))}
               >
-                <Typography>{table.name}</Typography>
+                <div className={localStyles.resourceName}>{table.name}</div>
               </ContextMenu>
             }
-            onDoubleClick={event => openViewDetails(event, table)}
+            onDoubleClick={event => this.openViewDetails(event, table)}
           />
         ) : (
           <div>Table references an external data source</div>
         )}
       </div>
     );
-  };
+  }
+}
 
-  const renderModels = model => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Model ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <TreeItem
-        nodeId={model.id}
-        icon={getIcon('Model')}
-        label={
-          <ContextMenu
-            items={contextMenuItems.map(item => ({
-              label: item.label,
-              onClick: () => item.handler(model),
-            }))}
-          >
-            <Typography>{model.name}</Typography>
-          </ContextMenu>
-        }
-      />
+export class DatasetResource extends Resource<DatasetProps> {
+  constructor(props: ProjectProps) {
+    super(props);
+    this.state = {
+      expanded: [],
+      loading: true,
+    };
+  }
+
+  listTablesService = new ListTablesService();
+  listModelsService = new ListModelsService();
+
+  expandDataset = dataset => {
+    this.getDatasetChildren(
+      dataset,
+      this.listTablesService,
+      this.listModelsService
     );
   };
 
-  const renderDatasets = dataset => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Dataset ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
+  private async getDatasetChildren(
+    dataset,
+    listTablesService,
+    listModelsService
+  ) {
+    const newDataset = {
+      id: dataset.id,
+      name: dataset.name,
+      projectId: dataset.projectId,
+      tables: {},
+      tableIds: [],
+      models: {},
+      modelIds: [],
+    };
+    try {
+      this.setState({ loading: true });
+      await listTablesService.listTables(dataset.id).then((data: Dataset) => {
+        newDataset.tables = data.tables;
+        newDataset.tableIds = data.tableIds;
+      });
+      await listModelsService.listModels(dataset.id).then((data: Dataset) => {
+        newDataset.models = data.models;
+        newDataset.modelIds = data.modelIds;
+      });
+      this.props.updateDataset(newDataset);
+    } catch (err) {
+      console.warn('Error retrieving dataset children', err);
+    } finally {
+      this.setState({ loading: false });
+    }
+  }
 
+  handleExpandDataset = dataset => {
+    if (!Array.isArray(dataset.tableIds) || !Array.isArray(dataset.modelIds)) {
+      this.expandDataset(dataset);
+    }
+  };
+
+  private async handleRefreshDataset(dataset) {
+    await this.expandDataset(dataset);
+  }
+
+  openDatasetDetails = (event, dataset) => {
+    const service = new DatasetDetailsService();
+    const widgetType = DatasetDetailsWidget;
+    this.props.context.manager.launchWidgetForId(
+      dataset.id,
+      widgetType,
+      service,
+      dataset.id,
+      dataset.name
+    );
+  };
+
+  contextMenuItems = [
+    {
+      label: 'Copy dataset ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Refresh dataset',
+      handler: () => this.handleRefreshDataset(this.props.dataset),
+    },
+  ];
+
+  render() {
+    const { dataset } = this.props;
+    const { loading } = this.state;
     return (
       <div className={localStyles.itemName}>
-        <Icon style={{ display: 'flex', alignContent: 'center' }}>
-          <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
-        </Icon>
         <TreeItem
           nodeId={dataset.id}
           label={
             <ContextMenu
-              items={contextMenuItems.map(item => ({
+              items={this.contextMenuItems.map(item => ({
                 label: item.label,
                 onClick: () => item.handler(dataset),
               }))}
             >
-              <Typography>{dataset.name}</Typography>
+              <div className={localStyles.datasetName}>
+                <Icon style={{ display: 'flex', alignContent: 'center' }}>
+                  <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+                </Icon>
+                <div className={localStyles.resourceName}>{dataset.name}</div>
+              </div>
             </ContextMenu>
           }
-          onDoubleClick={event => openDatasetDetails(event, dataset)}
+          onDoubleClick={event => this.openDatasetDetails(event, dataset)}
           onLabelClick={event => event.preventDefault()}
-          onIconClick={() => expandDataset(dataset)}
+          onIconClick={() => this.handleExpandDataset(dataset)}
         >
           {Array.isArray(dataset.tableIds) &&
-          Array.isArray(dataset.modelIds) ? (
-            <div>
+          Array.isArray(dataset.modelIds) &&
+          !loading ? (
+            <ul>
               {dataset.tableIds.map(tableId => (
-                <div key={tableId}>{renderTables(dataset.tables[tableId])}</div>
+                <div key={tableId}>
+                  <TableResource
+                    context={this.props.context}
+                    table={dataset.tables[tableId]}
+                  />
+                </div>
               ))}
               {dataset.modelIds.map(modelId => (
-                <div key={modelId}>{renderModels(dataset.models[modelId])}</div>
+                <div key={modelId}>
+                  <ModelResource
+                    context={this.props.context}
+                    model={dataset.models[modelId]}
+                  />
+                </div>
               ))}
-            </div>
+            </ul>
           ) : (
             <CircularProgress
               size={20}
@@ -255,50 +470,25 @@ export function BuildTree(project, context, expandProject, expandDataset) {
         </TreeItem>
       </div>
     );
-  };
-
-  const renderProjects = project => (
-    <TreeItem
-      nodeId={project.id}
-      label={project.name}
-      onIconClick={expandProject(project)}
-    >
-      {Array.isArray(project.datasetIds) ? (
-        project.datasetIds.map(datasetId => (
-          <div key={datasetId}>
-            {renderDatasets(project.datasets[datasetId])}
-          </div>
-        ))
-      ) : project.error ? (
-        <div>{project.error}</div>
-      ) : (
-        <CircularProgress size={20} className={localStyles.circularProgress} />
-      )}
-    </TreeItem>
-  );
-
-  return (
-    <TreeView
-      className={localStyles.root}
-      defaultCollapseIcon={<ExpandMoreIcon />}
-      defaultExpanded={['root']}
-      defaultExpandIcon={<ChevronRightIcon />}
-    >
-      {renderProjects(project)}
-    </TreeView>
-  );
+  }
 }
 
-class ListProjectItem extends React.Component<ProjectProps, State> {
+export class ProjectResource extends Resource<ProjectProps> {
   constructor(props: ProjectProps) {
     super(props);
+    this.state = {
+      expanded: [],
+      loading: true,
+    };
   }
+
+  listDatasetsService = new ListDatasetsService();
 
   expandProject = project => {
     if (project.error) {
       this.handleOpenSnackbar(project.error);
-    } else if (!Array.isArray(project.datasetIds)) {
-      this.getDatasets(project, this.props.listDatasetsService);
+    } else {
+      this.getDatasets(project, this.listDatasetsService);
     }
   };
 
@@ -308,6 +498,7 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
       name: project.name,
     };
     try {
+      this.setState({ loading: true });
       await listDatasetsService.listDatasets(project).then((data: Project) => {
         if (data.datasetIds.length === 0) {
           newProject[
@@ -327,63 +518,108 @@ class ListProjectItem extends React.Component<ProjectProps, State> {
       newProject['error'] = `Error: ${errorMessage}`;
     } finally {
       this.props.updateProject(newProject);
+      this.setState({ loading: false });
     }
   }
 
-  expandDataset = dataset => {
-    if (!Array.isArray(dataset.tableIds) || !Array.isArray(dataset.modelIds)) {
-      this.getDatasetChildren(
-        dataset,
-        this.props.listTablesService,
-        this.props.listModelsService
-      );
+  handleExpandProject = project => {
+    if (!Array.isArray(project.datasetIds)) {
+      this.setState({ loading: true });
+      this.expandProject(project);
     }
+    this.setState({ loading: false });
   };
 
-  private async getDatasetChildren(
-    dataset,
-    listTablesService,
-    listModelsService
-  ) {
-    const newDataset = {
-      id: dataset.id,
-      name: dataset.name,
-      projectId: dataset.projectId,
-      tables: {},
-      tableIds: [],
-      models: {},
-      modelIds: [],
+  private async handleRefreshProject(project) {
+    await this.expandProject(project);
+    this.setState({ expanded: [project.id] });
+  }
+
+  handleToggle = (event, nodeIds) => {
+    this.setState({ expanded: nodeIds });
+  };
+
+  contextMenuItems = [
+    {
+      label: 'Copy Project ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Refresh project',
+      handler: () => this.handleRefreshProject(this.props.project),
+    },
+  ];
+
+  render() {
+    const { project } = this.props;
+    const { loading } = this.state;
+    return (
+      <TreeView
+        className={localStyles.root}
+        defaultCollapseIcon={<ArrowDropDownIcon fontSize="small" />}
+        defaultExpanded={['root']}
+        defaultExpandIcon={<ArrowRightIcon fontSize="small" />}
+        expanded={this.state.expanded}
+        onNodeToggle={this.handleToggle}
+      >
+        <TreeItem
+          nodeId={project.id}
+          label={
+            <ContextMenu
+              items={this.contextMenuItems.map(item => ({
+                label: item.label,
+                onClick: () => item.handler(project),
+              }))}
+            >
+              <div className={localStyles.resourceName}>{project.name}</div>
+            </ContextMenu>
+          }
+          onIconClick={() => this.handleExpandProject(project)}
+          onLabelClick={event => event.preventDefault()}
+        >
+          {Array.isArray(project.datasetIds) && !loading ? (
+            project.datasetIds.map(datasetId => (
+              <div key={datasetId}>
+                <DatasetResource
+                  context={this.props.context}
+                  dataset={project.datasets[datasetId]}
+                  updateDataset={this.props.updateDataset}
+                />
+              </div>
+            ))
+          ) : project.error ? (
+            <div>{project.error}</div>
+          ) : (
+            <CircularProgress
+              size={20}
+              className={localStyles.circularProgress}
+            />
+          )}
+        </TreeItem>
+      </TreeView>
+    );
+  }
+}
+
+class ListProjectItem extends React.Component<ResourceListProps, State> {
+  constructor(props: ResourceListProps) {
+    super(props);
+    this.state = {
+      expanded: [],
     };
-    try {
-      await listTablesService.listTables(dataset.id).then((data: Dataset) => {
-        newDataset.tables = data.tables;
-        newDataset.tableIds = data.tableIds;
-      });
-      await listModelsService.listModels(dataset.id).then((data: Dataset) => {
-        newDataset.models = data.models;
-        newDataset.modelIds = data.modelIds;
-      });
-      this.props.updateDataset(newDataset);
-    } catch (err) {
-      console.warn('Error retrieving dataset children', err);
-    }
   }
-
-  handleOpenSnackbar = error => {
-    this.props.openSnackbar(error);
-  };
 
   render() {
     const { dataTree, context } = this.props;
     if (Array.isArray(dataTree.projectIds)) {
       return dataTree.projectIds.map(projectId => (
         <div key={projectId}>
-          {BuildTree(
-            dataTree.projects[projectId],
-            context,
-            this.expandProject,
-            this.expandDataset
-          )}
+          <ProjectResource
+            project={dataTree.projects[projectId]}
+            context={context}
+            updateProject={this.props.updateProject}
+            updateDataset={this.props.updateDataset}
+          />
         </div>
       ));
     } else {

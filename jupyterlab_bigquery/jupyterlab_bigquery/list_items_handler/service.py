@@ -103,14 +103,13 @@ class BigQueryService:
       resource = result.linked_resource
       result_type = format(result.search_result_subtype)
       if result_type == 'entry.dataset':
-        res = re.search('projects/(.*)/datasets/(.*)', resource)
-        project = res.group(1)
-        dataset = res.group(2)
+        res = re.search('datasets/(.*)', resource)
+        dataset = res.group(1)
         fetched_results.append({
             'type': 'dataset',
-            'parent': project,
+            'parent': project_id,
             'name': dataset,
-            'id': '{}.{}'.format(project, dataset)
+            'id': '{}.{}'.format(project_id, dataset)
         })
       elif result_type == 'entry.table':
         res = re.search('datasets/(.*)/tables/(.*)', resource)
@@ -120,7 +119,7 @@ class BigQueryService:
             'type': 'table',
             'parent': dataset,
             'name': table,
-            'id': '{}.{}'.format(dataset, table)
+            'id': '{}.{}.{}'.format(project_id, dataset, table)
         })
       elif result_type == 'entry.table.view':
         res = re.search('datasets/(.*)/tables/(.*)', resource)
@@ -130,7 +129,7 @@ class BigQueryService:
             'type': 'view',
             'parent': dataset,
             'name': view,
-            'id': '{}.{}'.format(dataset, view)
+            'id': '{}.{}.{}'.format(project_id, dataset, view)
         })
       elif result_type == 'entry.model':
         res = re.search('datasets/(.*)/models/(.*)', resource)
@@ -140,7 +139,7 @@ class BigQueryService:
             'type': 'model',
             'parent': dataset,
             'name': model,
-            'id': '{}.{}'.format(dataset, model)
+            'id': '{}.{}.{}'.format(project_id, dataset, model)
         })
 
     return {'results': fetched_results}

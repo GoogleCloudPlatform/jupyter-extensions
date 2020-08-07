@@ -31,7 +31,7 @@
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
-    "test": "jest --coverage --passWithNoTests",
+    "test": "jest --coverage --passWithNoTests --runInBand",
     "test-python": "../scripts/run_python_tests.sh coverage",
     "test-watch": "jest --watch",
     "watch": "tsc -b -w"
@@ -62,6 +62,8 @@
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
     "react-redux": "^7.2.0",
+    "react-resize-aware": "^3.0.1",
+    "react-tree-graph": "^5.1.0",
     "redux": "^4.0.5",
     "typestyle": "^2.1.0",
     "yaml": "^1.7.2"

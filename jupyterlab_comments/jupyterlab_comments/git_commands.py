@@ -39,6 +39,7 @@ class Git(Configurable):
 		return status
 
 	def appraise_pull(self, git_root_dir):
+		self.run(git_root_dir, 'fetch', self.remote)
 		self.run(git_root_dir, 'appraise', 'pull', self.remote)
 
 	def appraise_push(self, git_root_dir):
@@ -51,8 +52,6 @@ class Git(Configurable):
 		if return_code != 0:
 			self.run(git_root_dir, 'appraise', 'pull', self.remote)
 			self.run(git_root_dir, 'appraise', 'push', self.remote)
-
-
 
 
 	def inside_git_repo(self, path_to_file):
@@ -84,7 +83,7 @@ class Git(Configurable):
 		comments_json = json.loads(comments_string)
 		return comments_json
 
-	def get_code_review_comments(self, file_path_from_repo_root, git_root_dir):
+	def get_current_code_review_comments(self, file_path_from_repo_root, git_root_dir):
 		"""
 		Returns the JSON for the current code review with comments for the requested file path.
 
@@ -93,7 +92,7 @@ class Git(Configurable):
 		review_string = self.run(git_root_dir, 'appraise', 'show',
 									'-json')
 		if review_string is None:
-			print('No open code reviews')
+			print('No current code review')
 			return None
 
 		review_json = json.loads(review_string)
@@ -111,12 +110,43 @@ class Git(Configurable):
 		return review_json
 
 
+	def get_all_code_review_comments(self, file_path_from_repo_root, git_root_dir):
+		review_string = self.run(git_root_dir, 'appraise', 'list',
+									'-json')
+		if review_string is None:
+			print('No open code reviews')
+			return None
+
+		reviews_list = json.loads(review_string)
+		if not reviews_list:
+			return None
+
+		for review in reviews_list:
+			review_comments = review.get("comments", [])
+			comments_on_file = []
+			for item in review_comments:
+				location = item["comment"]["location"]
+				if location.get("path", "") == file_path_from_repo_root:
+					comments_on_file.append(item)
+
+			review["comments"] = comments_on_file
+		return reviews_list
+
+
 	def add_detached_comment(self, file_path_from_repo_root, git_root_dir, comment_string):
 		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root)
 		self.push_local_comments(git_root_dir)
 
 	def add_detached_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent):
 		self.run(git_root_dir, 'appraise', 'comment', '-d', '-p', parent,'-m', comment_string, '-f', file_path_from_repo_root)
+		self.push_local_comments(git_root_dir)
+
+	def add_review_comment(self, file_path_from_repo_root, git_root_dir, comment_string, review_hash):
+		self.run(git_root_dir, 'appraise', 'comment', '-f', file_path_from_repo_root, '-m', comment_string, review_hash)
+		self.push_local_comments(git_root_dir)
+
+	def add_review_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent, review_hash):
+		self.run(git_root_dir, 'appraise', 'comment', '-p', parent, '-f', file_path_from_repo_root, '-m', comment_string, review_hash)
 		self.push_local_comments(git_root_dir)
 
 	def get_previous_names(self, file_path, server_root):
