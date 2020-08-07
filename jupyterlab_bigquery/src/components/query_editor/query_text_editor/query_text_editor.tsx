@@ -585,6 +585,12 @@ class QueryTextEditor extends React.Component<
     );
   }
 
+  handleKeyPress(evt) {
+    if ((evt.ctrlKey || evt.metaKey) && evt.key === 'Enter') {
+      this.handleButtonClick();
+    }
+  }
+
   render() {
     const { iniQuery } = this.props;
 
@@ -598,6 +604,7 @@ class QueryTextEditor extends React.Component<
         className={
           ifIncell ? styleSheet.wholeEditorInCell : styleSheet.wholeEditor
         }
+        onKeyPress={this.handleKeyPress.bind(this)}
       >
         <div className={styleSheet.buttonInfoBar}>
           <div>
