@@ -1,17 +1,22 @@
-import { LinearProgress, Button, Portal } from '@material-ui/core';
+import {
+  LinearProgress,
+  Button,
+  Portal,
+  IconButton,
+  Tooltip,
+} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 import {
   ListProjectsService,
   DataTree,
-  ListDatasetsService,
-  ListTablesService,
-  ListModelsService,
   GetProjectService,
 } from './service/list_items';
 import ListProjectItem from './list_tree_item';
@@ -31,9 +36,6 @@ import CustomSnackbar from './snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;
-  listDatasetsService: ListDatasetsService;
-  listTablesService: ListTablesService;
-  listModelsService: ListModelsService;
   isVisible: boolean;
   context: Context;
   updateDataTree: any;
@@ -47,6 +49,7 @@ interface Props {
 export interface Context {
   app: JupyterFrontEnd;
   manager: WidgetManager;
+  notebookTrack: INotebookTracker;
 }
 
 interface State {
@@ -76,7 +79,6 @@ const localStyles = stylesheet({
     flexDirection: 'row',
     display: 'flex',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
   },
   resources: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
@@ -95,7 +97,6 @@ const localStyles = stylesheet({
     textTransform: 'uppercase',
     display: 'flex',
     flexDirection: 'row',
-    flexWrap: 'wrap',
     marginBottom: '8px',
   },
   search: {
@@ -105,15 +106,32 @@ const localStyles = stylesheet({
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  },
+  buttonWithIcon: {
+    flexDirection: 'row',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  buttonLabel: {
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
+    textTransform: 'initial',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   editQueryButton: {
     margin: 'auto',
     flexGrow: 0,
+    minWidth: 0,
   },
   pinProjectsButton: {
     margin: 'auto',
     flexGrow: 0,
     padding: 0,
+    minWidth: 0,
   },
   list: {
     margin: 0,
@@ -159,17 +177,6 @@ const localStyles = stylesheet({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  buttonWithIcon: {
-    flexDirection: 'row',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  buttonLabel: {
-    fontWeight: 400,
-    fontFamily: 'var(--jp-ui-font-family)',
-    fontSize: 'var(--jp-ui-font-size1)',
-    textTransform: 'initial',
   },
 });
 
@@ -289,6 +296,10 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.setState({ pinProjectDialogOpen: false });
   };
 
+  handleRefreshAll = () => {
+    this.getProjects();
+  };
+
   async componentWillMount() {
     try {
       //empty
@@ -327,41 +338,56 @@ class ListItemsPanel extends React.Component<Props, State> {
           <CustomSnackbar open={snackbar.open} message={snackbar.message} />
         </Portal>
         <header className={localStyles.header}>
-          BigQuery Extension
+          <div>BigQuery Extension</div>
           <div className={localStyles.buttonContainer}>
-            <Button
-              style={{ color: COLORS.blue }}
-              size="small"
-              variant="outlined"
-              className={localStyles.editQueryButton}
-              onClick={() => {
-                const queryId = generateQueryId();
-                WidgetManager.getInstance().launchWidget(
-                  QueryEditorTabWidget,
-                  'main',
-                  queryId,
-                  undefined,
-                  [queryId, undefined]
-                );
-              }}
-            >
-              <div className={localStyles.buttonLabel}>Open SQL editor</div>
-            </Button>
+            <Tooltip title="Open SQL editor">
+              <Button
+                style={{ color: COLORS.blue }}
+                size="small"
+                variant="outlined"
+                className={localStyles.editQueryButton}
+                onClick={() => {
+                  const queryId = generateQueryId();
+                  WidgetManager.getInstance().launchWidget(
+                    QueryEditorTabWidget,
+                    'main',
+                    queryId,
+                    undefined,
+                    [queryId, undefined]
+                  );
+                }}
+              >
+                <div className={localStyles.buttonLabel}>Open SQL editor</div>
+              </Button>
+            </Tooltip>
           </div>
         </header>
         <div className={localStyles.resources}>
           <div className={localStyles.resourcesTitle}>
             <div>Resources</div>
             <div className={localStyles.buttonContainer}>
-              <Button
-                size="small"
-                variant="outlined"
-                className={localStyles.pinProjectsButton}
-                onClick={this.handleOpenPinProject}
-                startIcon={<AddIcon />}
-              >
-                <div className={localStyles.buttonLabel}>Pin project</div>
-              </Button>
+              <Tooltip title="Refresh">
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={this.handleRefreshAll}
+                >
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Pin project">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  style={{ minWidth: 0 }}
+                  className={localStyles.pinProjectsButton}
+                  onClick={this.handleOpenPinProject}
+                  startIcon={<AddIcon />}
+                >
+                  <div className={localStyles.buttonLabel}>Pin project</div>
+                </Button>
+              </Tooltip>
             </div>
           </div>
           <div
@@ -379,12 +405,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           ) : (
             <ul className={localStyles.list}>
               <div className={localStyles.resourceTree}>
-                <ListProjectItem
-                  context={this.props.context}
-                  listDatasetsService={this.props.listDatasetsService}
-                  listTablesService={this.props.listTablesService}
-                  listModelsService={this.props.listModelsService}
-                />
+                <ListProjectItem context={this.props.context} />
               </div>
               <div className={showSearchResults}>
                 {isLoadingSearch ? (
