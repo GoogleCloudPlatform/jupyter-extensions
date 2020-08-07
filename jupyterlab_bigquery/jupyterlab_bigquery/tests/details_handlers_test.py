@@ -455,7 +455,7 @@ class TestViewDetails(unittest.TestCase):
               }
             ],
             'query': 'SELECT * FROM `project_id.dataset_id.table_id LIMIT 200',
-            'legacy_sql': 'false'
+            'legacy_sql': False
         }
     }
 

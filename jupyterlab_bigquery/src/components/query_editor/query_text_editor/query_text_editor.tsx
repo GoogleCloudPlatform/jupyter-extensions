@@ -81,6 +81,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   wrappingIndent: 'same',
   wrappingStrategy: 'advanced',
   minimap: { enabled: false },
+  cursorStyle: 'line-thin',
 };
 
 const styleSheet = stylesheet({
@@ -595,7 +596,7 @@ class QueryTextEditor extends React.Component<
     const { iniQuery } = this.props;
 
     // eslint-disable-next-line no-extra-boolean-cast
-    const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
+    const queryValue = !!iniQuery ? iniQuery : '';
 
     const ifIncell = this.props.editorType === 'IN_CELL';
 
