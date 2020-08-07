@@ -5,6 +5,9 @@ export interface Props {
   path: string;
 }
 
+// TO DO: implement file list of conflicting files
+
+
 export class File extends React.Component<Props> {
   /**
    * Returns a React component for rendering a panel toolbar.

@@ -12,6 +12,8 @@ export interface Props {
   service: GitSyncService;
 }
 
+// TO DO: Implement Git Repo setup for sync configuration
+
 export class GitSetup extends React.Component<Props> {
   /**
    * Returns a React component for rendering a panel toolbar.

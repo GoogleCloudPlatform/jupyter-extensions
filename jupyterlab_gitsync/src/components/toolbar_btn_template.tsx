@@ -14,6 +14,8 @@ export interface State {
   options?: any;
 }
 
+// TO DO: Don't use inheritance with React
+
 export class ToolbarButton extends React.Component<Props, State> {
   constructor(
     props: Props,
