@@ -1,49 +1,39 @@
 import * as React from 'react';
-
 import {
-  DatasetDetailsService,
-  DatasetDetails,
-} from './service/list_dataset_details';
-import { Header } from '../shared/header';
+  ModelDetailsService,
+  ModelDetails,
+} from './service/list_model_details';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
-import { stylesheet } from 'typestyle';
-
-export const localStyles = stylesheet({
-  body: {
-    marginBottom: '24px',
-    marginRight: '24px',
-    marginLeft: '24px',
-    height: '100%',
-    overflowY: 'auto',
-  },
-});
+import { Header } from '../shared/header';
+import { localStyles } from './dataset_details_panel';
 
 interface Props {
-  datasetDetailsService: DatasetDetailsService;
+  modelDetailsService: ModelDetailsService;
   isVisible: boolean;
-  dataset_id: string;
+  modelId: string;
+  modelName: string;
 }
 
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
-  details: DatasetDetails;
+  details: ModelDetails;
   rows: DetailRow[];
 }
 
 interface DetailRow {
   name: string;
-  value: string;
+  value: string | number;
 }
 
-export default class DatasetDetailsPanel extends React.Component<Props, State> {
+export default class ModelDetailsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       hasLoaded: false,
       isLoading: false,
-      details: { details: {} } as DatasetDetails,
+      details: { details: {} } as ModelDetails,
       rows: [],
     };
   }
@@ -56,38 +46,37 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     }
   }
 
-  formatMs(ms) {
-    const days = ms / 86400000;
-    return `${days} day${days > 1 ? 's' : ''} 0 hr`;
-  }
-
   private async getDetails() {
     try {
       this.setState({ isLoading: true });
-      const details = await this.props.datasetDetailsService.listDatasetDetails(
-        this.props.dataset_id
+      const details = await this.props.modelDetailsService.listModelDetails(
+        this.props.modelId
       );
 
       const detailsObj = details.details;
       const rows = [
-        { name: 'Dataset ID', value: detailsObj.id },
-        { name: 'Created', value: detailsObj.date_created },
+        { name: 'Model ID', value: detailsObj.id },
+        { name: 'Date created', value: detailsObj.date_created },
         {
-          name: 'Default table expiration',
-          value: detailsObj.default_expiration
-            ? this.formatMs(detailsObj.default_expiration)
-            : 'Never',
+          name: 'Model expiration',
+          value: detailsObj.expires ? detailsObj.expires : 'Never',
         },
-        { name: 'Last modified', value: detailsObj.last_modified },
+        {
+          name: 'Date modified',
+          value: detailsObj.last_modified,
+        },
         {
           name: 'Data location',
           value: detailsObj.location ? detailsObj.location : 'None',
         },
+        {
+          name: 'Model type',
+          value: detailsObj.model_type,
+        },
       ];
-
       this.setState({ hasLoaded: true, details, rows });
     } catch (err) {
-      console.warn('Error retrieving dataset details', err);
+      console.warn('Error retrieving model details', err);
     } finally {
       this.setState({ isLoading: false });
     }
@@ -99,12 +88,12 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div style={{ height: '100%' }}>
-          <Header text={this.props.dataset_id} />
+          <Header text={this.props.modelName} />
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
               rows={this.state.rows}
-              detailsType="DATASET"
+              detailsType="MODEL"
             />
           </div>
         </div>
