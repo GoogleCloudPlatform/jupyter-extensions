@@ -104,6 +104,7 @@ export class VmDetails extends React.Component<Props, State> {
             notebookService={notebookService}
             onCompletion={() => this.getAndSetDetailsFromServer()}
             detailsServer={detailsServer}
+            details={details}
           />
         )}
       </span>
