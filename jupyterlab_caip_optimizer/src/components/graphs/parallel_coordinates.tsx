@@ -12,11 +12,11 @@ interface Props {
 }
 
 interface Data {
-  [key: string]: any
+  [key: string]: any;
 }
 
 /**
- * Creates a list of ordinal range. 
+ * Creates a list of ordinal range.
  * Used for getting "num" number of positions in the between "start" and "end".
  * Needed for calculating the positions for the tick positions of discontinouso axes.
  * @param start Number indicating the start of the list
@@ -258,7 +258,7 @@ export const ParallelCoordinates = (props: Props) => {
           const withinSelectedMetricRange =
             lineData[selectedMetricForColor] >=
               axisPropsList[selectedMetricForColor]['sliderMin'] &&
-              lineData[selectedMetricForColor] <=
+            lineData[selectedMetricForColor] <=
               axisPropsList[selectedMetricForColor]['sliderMax'];
           // normalized for the slider range
           return withinSelectedMetricRange
@@ -294,9 +294,15 @@ export const ParallelCoordinates = (props: Props) => {
             ) {
               return true;
             }
-          } else if (axisPropsList[axis]['type'] === 'DOUBLE' || axisPropsList[axis]['type'] === 'INTEGER') {
+          } else if (
+            axisPropsList[axis]['type'] === 'DOUBLE' ||
+            axisPropsList[axis]['type'] === 'INTEGER'
+          ) {
             const thisDataValue = lineData[axis];
-            if (thisDataValue < axisPropsList[axis]['sliderMin'] || thisDataValue > axisPropsList[axis]['sliderMax']) {
+            if (
+              thisDataValue < axisPropsList[axis]['sliderMin'] ||
+              thisDataValue > axisPropsList[axis]['sliderMax']
+            ) {
               return true;
             }
           }
@@ -329,7 +335,7 @@ export const ParallelCoordinates = (props: Props) => {
                     selectBoxDetails.initialValue,
                     selectBoxDetails.currentValue
                   ) &&
-                  lineData[clickedAxisName] <
+                lineData[clickedAxisName] <
                   Math.max(
                     selectBoxDetails.initialValue,
                     selectBoxDetails.currentValue

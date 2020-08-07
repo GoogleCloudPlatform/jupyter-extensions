@@ -1,4 +1,3 @@
-jest.setTimeout(100000);
 import * as React from 'react';
 import { createDropdown, DropdownItem, CreateStudy } from '.';
 import { rest } from 'msw';
@@ -254,6 +253,7 @@ describe('Create Study Page', () => {
   });
   describe('parameter list', () => {
     beforeEach(async () => {
+      jest.setTimeout(100000);
       render(<CreateStudy />);
 
       await createIntegerParameter();
@@ -284,6 +284,7 @@ describe('Create Study Page', () => {
 
   describe('metric list', () => {
     beforeEach(async () => {
+      jest.setTimeout(100000);
       render(<CreateStudy />);
 
       await createMinimizedMetric();

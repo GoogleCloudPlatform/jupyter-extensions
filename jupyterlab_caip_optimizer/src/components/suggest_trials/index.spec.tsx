@@ -1,4 +1,3 @@
-jest.setTimeout(100000);
 import * as React from 'react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -37,6 +36,7 @@ afterAll(() => server.close());
 
 describe('Suggest Trials Page', () => {
   beforeEach(() => {
+    jest.setTimeout(50000);
     // snackbar messages
     jest.useFakeTimers();
 
