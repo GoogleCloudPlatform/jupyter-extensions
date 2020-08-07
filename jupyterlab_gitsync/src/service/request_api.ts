@@ -22,7 +22,7 @@ export async function requestAPI(extension = '', init: RequestInit = {}) {
   }
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message || data);
+    throw new ServerConnection.ResponseError(response);
   }
 
   const data = await response.json();

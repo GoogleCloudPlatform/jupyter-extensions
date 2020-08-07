@@ -65,8 +65,8 @@
     "typestyle": "^2.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.7",
-    "@babel/preset-env": "^7.8.7",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
     "@jupyterlab/testutils": "^1.2.2",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
