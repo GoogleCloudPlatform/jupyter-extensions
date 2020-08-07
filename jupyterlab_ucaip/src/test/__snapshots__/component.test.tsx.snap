@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Rendering of Copy Code Component Renders initial state correctly 1`] = `
+exports[`Rendering of CopyCode Component Renders initial state correctly 1`] = `
 <div>
   <WithStyles(ForwardRef(Tooltip))
     title="Copy"
@@ -32,7 +32,7 @@ exports[`Rendering of Copy Code Component Renders initial state correctly 1`] = 
 </div>
 `;
 
-exports[`Rendering of Copy Code Component Renders initial state correctly 2`] = `
+exports[`Rendering of CopyCode Component Renders initial state correctly 2`] = `
 <div
   style={
     Object {
@@ -164,7 +164,7 @@ exports[`Rendering of Copy Code Component Renders initial state correctly 2`] = 
 </div>
 `;
 
-exports[`Rendering of Import Data Renders initial state correctly 1`] = `
+exports[`Rendering of ExportData Component Renders initial state correctly 1`] = `
 <Fragment>
   <ForwardRef(Portal)>
     <Toast
@@ -186,13 +186,13 @@ exports[`Rendering of Import Data Renders initial state correctly 1`] = `
     />
   </ForwardRef(Portal)>
   <DialogComponent
-    header="Import Data to Tables Dataset"
+    header="Export Data to uCAIP Tables Dataset"
     onCancel={null}
     onClose={null}
     onSubmit={[Function]}
     open={true}
     submitDisabled={true}
-    submitLabel="Import Data"
+    submitLabel="Export Data"
   >
     <RadioInput
       onChange={[Function]}
@@ -582,7 +582,7 @@ exports[`Rendering of Import Data Renders initial state correctly 1`] = `
 </Fragment>
 `;
 
-exports[`Rendering of ListResourcePanel Renders initial state correctly 1`] = `
+exports[`Rendering of ListResourcePanel Component Renders initial state correctly 1`] = `
 <Fragment>
   <Styled(MuiBox)
     bgcolor="white"
@@ -733,165 +733,16 @@ exports[`Rendering of ListResourcePanel Renders initial state correctly 1`] = `
       open={false}
       submitLabel="Ok"
     />
-    <ImportData
+    <ExportData
       context={null}
       onClose={[Function]}
       onSuccess={[Function]}
       open={false}
     />
-    <ImportModel
+    <ExportModel
       onClose={[Function]}
       open={false}
     />
   </Styled(MuiBox)>
 </Fragment>
-`;
-
-exports[`Rendering of shared List Resources Table Renders initial state correctly 1`] = `
-<WithStyles(Component)
-  columns={
-    Array [
-      Object {
-        "cellStyle": Object {
-          "fontSize": "var(--jp-ui-font-size1)",
-          "overflow": "hidden",
-          "padding": "5px 8px",
-          "textOverflow": "ellipsis",
-          "whiteSpace": "nowrap",
-        },
-        "field": "displayName",
-        "filtering": false,
-        "headerStyle": Object {
-          "fontSize": "var(--jp-ui-font-size1)",
-          "padding": "0px 8px",
-          "whiteSpace": "nowrap",
-        },
-        "hidden": false,
-        "lookup": undefined,
-        "render": undefined,
-        "sorting": true,
-        "title": "Name",
-        "type": undefined,
-        "width": undefined,
-      },
-    ]
-  }
-  components={
-    Object {
-      "Row": [Function],
-    }
-  }
-  data={
-    Array [
-      Object {
-        "createTime": 2020-08-07T16:14:31.753Z,
-        "datasetType": "TABLE",
-        "displayName": "string",
-        "etag": "string",
-        "id": "string",
-        "metadata": "any",
-        "updateTime": 2020-08-07T16:14:31.753Z,
-      },
-    ]
-  }
-  icons={
-    Object {
-      "Add": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Check": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Clear": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Delete": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "DetailPanel": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Edit": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Export": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Filter": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "FirstPage": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "LastPage": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "NextPage": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "PreviousPage": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "ResetSearch": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "Search": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "SortArrow": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "ThirdStateCheck": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-      "ViewColumn": Object {
-        "$$typeof": Symbol(react.forward_ref),
-        "render": [Function],
-      },
-    }
-  }
-  onRowClick={[Function]}
-  options={
-    Object {
-      "maxBodyHeight": -2,
-      "minBodyHeight": -2,
-      "padding": "dense",
-      "pageSize": undefined,
-      "pageSizeOptions": undefined,
-      "paging": false,
-      "rowStyle": Object {
-        "overflow": "hidden",
-        "textOverflow": "ellipsis",
-      },
-      "search": false,
-      "showTitle": false,
-      "sorting": true,
-      "tableLayout": "fixed",
-      "toolbar": false,
-    }
-  }
-  style={
-    Object {
-      "borderRadius": 0,
-      "borderTop": "1px solid var(--jp-border-color2)",
-      "boxShadow": "none",
-    }
-  }
-/>
 `;

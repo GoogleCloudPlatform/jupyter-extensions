@@ -1,8 +1,8 @@
-# Google Cloud Platform AutoML Extension
+# Google Cloud Platform uCAIP Extension
 
-`jupyterlab_ucaip` - Provides a JupyterLab interface for using Google's structured data [Cloud AutoML](https://cloud.google.com/automl) services.
+`jupyterlab_ucaip` - Provides a JupyterLab interface for using Google's structured data [Cloud](https://cloud.google.com/ai-platform-unified) services.
 
-End-user documentation can be found [here]https://cloud.google.com/automl-tables/docs/beginners-guide.
+End-user documentation can be found [here](https://cloud.google.com/ai-platform-unified/docs).
 
 ## Development
 
@@ -23,4 +23,4 @@ machine.
 
 ### enabled APIs
 
-The extension utilizes the [Cloud AutoML API](https://cloud.google.com/automl). Make sure this API is enabled on your project in the GCP console.
+The extension utilizes the [Cloud uCAIP API](https://cloud.google.com/ai-platform-unified). Make sure this API is enabled on your project in the GCP console.
