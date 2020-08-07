@@ -23,6 +23,7 @@ import {
   createDetachedCommentFromJSON,
   CodeReviewComment,
   createReviewCommentFromJSON,
+  ReviewRequest,
 } from '../service/comment';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
@@ -40,6 +41,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
 import { getServerRoot } from '../service/jupyterConfig';
+import { CodeReview } from '../components/code_review';
 
 interface Props {
   context: Context;
@@ -47,7 +49,7 @@ interface Props {
 
 interface State {
   detachedComments: DetachedComment[];
-  reviewComments: CodeReviewComment[];
+  reviewComments: Array<[ReviewRequest, Array<CodeReviewComment>]>;
   fileName: string;
   serverRoot: string;
   activeTab: number;
@@ -126,12 +128,22 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
-    const reviewCommentsList = this.state.reviewComments.map(comment => (
-      <>
-        <Comment reviewComment={comment} />
-        <Divider />
-      </>
-    ));
+    const reviewCommentsList = this.state.reviewComments.map(
+      reviewCommentsArr => (
+        <>
+          <CodeReview
+            reviewRequest={reviewCommentsArr[0]}
+            commentsList={reviewCommentsArr[1]}
+          />
+          <NewCommentThread
+            serverRoot={this.state.serverRoot}
+            currFilePath={currFilePath}
+            commentType="review"
+            reviewHash={reviewCommentsArr[0].reviewHash}
+          />
+        </>
+      )
+    );
     return (
       <div className={localStyles.root}>
         <CssBaseline />
@@ -169,14 +181,17 @@ export class CommentsComponent extends React.Component<Props, State> {
         )}
         {!this.state.errorMessage &&
           (this.state.activeTab === 0 ? (
-            <List className={localStyles.commentsList}>
-              {reviewCommentsList}{' '}
-            </List>
+            <>
+              <List className={localStyles.commentsList}>
+                {reviewCommentsList}{' '}
+              </List>
+            </>
           ) : (
             <>
               <NewCommentThread
                 serverRoot={this.state.serverRoot}
                 currFilePath={currFilePath}
+                commentType="detached"
               />
               <List className={localStyles.commentsList}>
                 {' '}
@@ -217,13 +232,15 @@ export class CommentsComponent extends React.Component<Props, State> {
     );
   }
 
-  private async getCodeReviewComments(serverRoot: string, filePath: string) {
+  private async getAllCodeReviewComments(serverRoot: string, filePath: string) {
     httpGitRequest('reviewComments', 'GET', filePath, serverRoot).then(
       response =>
         response.json().then(data => {
-          const comments: Array<CodeReviewComment> = new Array<
-            CodeReviewComment
-          >();
+          //Each Array<CodeReviewComment> stores all the comments on this file for a different code review
+          const reviews: Array<[
+            ReviewRequest,
+            Array<CodeReviewComment>
+          ]> = new Array<[ReviewRequest, Array<CodeReviewComment>]>();
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
@@ -234,21 +251,29 @@ export class CommentsComponent extends React.Component<Props, State> {
               });
             } else {
               this.setState({ errorMessage: '' }); //remove error message
-              if (data.comments) {
-                data.comments.forEach(function(obj) {
-                  const comment = createReviewCommentFromJSON(
-                    obj,
-                    data.revision,
-                    data.request,
-                    filePath
-                  );
-                  comments.push(comment);
-                });
-              }
+              data.forEach(function(review) {
+                const request = review.request;
+                const comments: Array<CodeReviewComment> = new Array<
+                  CodeReviewComment
+                >();
+                if (review.comments) {
+                  review.comments.forEach(function(commentObj) {
+                    const comment = createReviewCommentFromJSON(
+                      commentObj,
+                      review.revision,
+                      review.request,
+                      filePath
+                    );
+                    comments.push(comment);
+                  });
+                  reviews.push([request, comments]);
+                }
+              });
             }
           }
+          console.log(reviews);
           this.setState({
-            reviewComments: comments,
+            reviewComments: reviews,
             fileName: shortenedFilePath,
           });
         })
@@ -297,7 +322,8 @@ export class CommentsComponent extends React.Component<Props, State> {
     filePath: any
   ) {
     this.getDetachedComments(serverRoot, filePath);
-    this.getCodeReviewComments(serverRoot, filePath);
+    this.getAllCodeReviewComments(serverRoot, filePath);
+    // this.getCurrentCodeReviewComments(serverRoot, filePath);
   }
 
   private clearComments() {

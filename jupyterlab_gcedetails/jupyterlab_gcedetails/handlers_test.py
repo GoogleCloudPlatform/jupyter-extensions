@@ -62,6 +62,53 @@ class GetMetadataTest(tornado.testing.AsyncTestCase):
     mock_fetch.assert_called_once()
     self.assertEqual(metadata, {})
 
+@patch('asyncio.create_subprocess_shell')
+class GetGpuListTest(tornado.testing.AsyncTestCase):
+
+  @tornado.testing.gen_test
+  async def test_get_gpu_list(self, mock_create_subprocess):
+    mock_process = MagicMock()
+    mock_process.returncode = 0
+    mock_process.communicate = MagicMock(
+        return_value=async_return((test_data.ACCELERATOR_LIST_STDOUT, '')))
+    mock_create_subprocess.return_value = async_return(mock_process)
+
+    gpu_list = await handlers.get_gpu_list(
+        test_data.ZONE)
+    self.assertEqual([
+        {
+          "creationTimestamp": "1969-12-31T16:00:00.000-08:00",
+          "description": "NVIDIA Tesla K80",
+          "id": "10002",
+          "kind": "compute#acceleratorType",
+          "maximumCardsPerInstance": 8,
+          "name": "nvidia-tesla-k80",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b/acceleratorTypes/nvidia-tesla-k80",
+          "zone": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b"
+        }
+      ], gpu_list)
+    self.assertEqual(
+        handlers.ACCELERATOR_TYPES_CMD +
+        ' --filter="zone:us-west1-b"',
+        mock_create_subprocess.call_args[0][0])
+
+  @tornado.testing.gen_test
+  async def test_get_gpu_list_is_empty_on_err(
+      self, mock_create_subprocess):
+    mock_process = MagicMock()
+    mock_process.returncode = -1
+    mock_process.communicate = MagicMock(
+        return_value=async_return(('', 'gcloud failed')))
+    mock_create_subprocess.return_value = async_return(mock_process)
+
+    gpu_list = await handlers.get_gpu_list(
+        test_data.ZONE)
+    self.assertEqual([], gpu_list)
+    self.assertEqual(
+        handlers.ACCELERATOR_TYPES_CMD +
+        ' --filter="zone:us-west1-b"',
+        mock_create_subprocess.call_args[0][0])
+
 
 @patch('asyncio.create_subprocess_shell')
 class GetMachineTypeDetailsTest(tornado.testing.AsyncTestCase):
@@ -176,6 +223,7 @@ class GetGpuDetailsTest(tornado.testing.AsyncTestCase):
 
 @patch(__name__ + '.handlers.get_resource_utilization')
 @patch(__name__ + '.handlers.get_gpu_details')
+@patch(__name__ + '.handlers.get_gpu_list')
 @patch(__name__ + '.handlers.get_machine_type_details')
 @patch(__name__ + '.handlers.get_metadata')
 class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
@@ -187,7 +235,7 @@ class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
         (PATH, handlers.VmDetailsHandler, dict(gce_details={})),
     ])
 
-  def test_get(self, mock_get_metadata, mock_get_machine_type_details,
+  def test_get(self, mock_get_metadata, mock_get_machine_type_details, mock_get_gpu_list,
                mock_get_gpu_details, mock_get_resource_utilization):
     mock_get_metadata.return_value = async_return(
         json.loads(test_data.METADATA_RESPONSE_BODY))
@@ -195,6 +243,8 @@ class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
         'name': 'n1-standard-4',
         'description': '4 vCPU, 15 GB RAM'
     })
+    mock_get_gpu_list.return_value = async_return(
+      json.loads(test_data.ACCELERATOR_LIST_STDOUT))
     mock_get_gpu_details.return_value = async_return({
         'cuda_version': '10.1',
         'driver_version': '418.87.01',
@@ -213,9 +263,11 @@ class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
         'projects/123456/zones/us-west1-b',
         'projects/123456/machineTypes/n1-standard-1')
     mock_get_gpu_details.assert_called_once()
+    mock_get_gpu_list.assert_called_once_with(
+    'projects/123456/zones/us-west1-b')
     mock_get_resource_utilization.assert_called_once()
 
-    # Second call should use cached metadata and machine type details
+    # Second call should use cached metadata, gpu list and machine type details
     response = self.fetch(PATH)
     self.assertEqual(200, response.code)
     self.assertEqual(test_data.DETAILS_RESPONSE_BODY, response.body)
@@ -223,6 +275,8 @@ class VmDetailsHandlerTest(tornado.testing.AsyncHTTPTestCase):
     mock_get_machine_type_details.assert_called_once_with(
         'projects/123456/zones/us-west1-b',
         'projects/123456/machineTypes/n1-standard-1')
+    mock_get_gpu_list.assert_called_once_with(
+      'projects/123456/zones/us-west1-b')
     self.assertEqual(2, mock_get_gpu_details.call_count)
     self.assertEqual(2, mock_get_resource_utilization.call_count)
 

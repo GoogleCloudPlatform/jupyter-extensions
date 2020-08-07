@@ -72,15 +72,18 @@ interface Props {
 interface State {
   expandThread: boolean;
   showCommentEditor: boolean;
+  commentType: 'detached' | 'review';
 }
 
 //React component to render a single comment thread
 export class Comment extends React.Component<Props, State> {
   constructor(props) {
     super(props);
+    const commentType = this.props.detachedComment ? 'detached' : 'review';
     this.state = {
       expandThread: false,
       showCommentEditor: false,
+      commentType: commentType,
     };
   }
 
@@ -88,6 +91,7 @@ export class Comment extends React.Component<Props, State> {
     const data = this.props.detachedComment
       ? this.props.detachedComment
       : this.props.reviewComment;
+
     return (
       <>
         <ListItem key={data.hash} alignItems="flex-start">
@@ -126,9 +130,21 @@ export class Comment extends React.Component<Props, State> {
             {' '}
             Reply{' '}
           </Button>
-          {this.state.showCommentEditor && (
-            <NewReplyComment currFilePath={data.filePath} hash={data.hash} />
-          )}
+          {this.state.showCommentEditor &&
+            (this.state.commentType === 'detached' ? (
+              <NewReplyComment
+                currFilePath={data.filePath}
+                hash={data.hash}
+                commentType={this.state.commentType}
+              />
+            ) : (
+              <NewReplyComment
+                currFilePath={data.filePath}
+                hash={data.hash}
+                commentType={this.state.commentType}
+                reviewHash={this.props.reviewComment.request.reviewHash}
+              />
+            ))}
           {data.children && (
             <Button
               size="small"

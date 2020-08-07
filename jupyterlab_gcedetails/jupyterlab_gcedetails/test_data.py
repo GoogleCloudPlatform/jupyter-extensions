@@ -421,6 +421,21 @@ NVIDIA_SMI_STDOUT = b"""<?xml version="1.0" ?>
 </nvidia_smi_log>
 """
 
+ACCELERATOR_LIST_STDOUT = b"""
+[
+  {
+    "creationTimestamp": "1969-12-31T16:00:00.000-08:00",
+    "description": "NVIDIA Tesla K80",
+    "id": "10002",
+    "kind": "compute#acceleratorType",
+    "maximumCardsPerInstance": 8,
+    "name": "nvidia-tesla-k80",
+    "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b/acceleratorTypes/nvidia-tesla-k80",
+    "zone": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b"
+  }
+]
+"""
+
 DETAILS_RESPONSE_BODY = (
     b'{"instance": {"attributes": {"framework": "PyTorch:1.4", '
     b'"install-nvidia-driver": "True", "notebooks-api": "PROD", "proxy-mode": '
@@ -458,7 +473,13 @@ DETAILS_RESPONSE_BODY = (
     b'["deeplearning-vm", "notebook-instance"], "virtualClock": {"driftToken":'
     b' "0"}, "zone": "projects/123456/zones/us-west1-b"}, "oslogin": '
     b'{"authenticate": {"sessions": {}}}, "project": {"attributes": {}, '
-    b'"numericProjectId": 123456, "projectId": "test-project"}, "utilization":'
-    b' {"cpu": 50, "memory": 16}, "gpu": {"cuda_version": "10.1", '
-    b'"driver_version": "418.87.01", "gpu": 100, "count": 1, "memory": 6, "name": "Tesla '
-    b'K80", "temperature": "42 C"}}')
+    b'"numericProjectId": 123456, "projectId": "test-project"}, '
+	b'"acceleratorTypes": [{"creationTimestamp": "1969-12-31T16:00:00.000-08:00",'
+	b' "description": "NVIDIA Tesla K80", "id": "10002", "kind":'
+	b' "compute#acceleratorType", "maximumCardsPerInstance": 8,'
+	b' "name": "nvidia-tesla-k80", "selfLink": '
+	b'"https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b/acceleratorTypes/nvidia-tesla-k80",'
+    b' "zone": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-b"'
+  	b'}], "utilization": {"cpu": 50, "memory": 16}, "gpu": {"cuda_version":'
+	b' "10.1", "driver_version": "418.87.01", "gpu": 100, "count": 1, "memory":'
+	b' 6, "name": "Tesla K80", "temperature": "42 C"}}')
