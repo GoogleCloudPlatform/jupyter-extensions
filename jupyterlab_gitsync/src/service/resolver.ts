@@ -1,6 +1,9 @@
 import { CodeMirror } from 'codemirror';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { ISignal, Signal } from '@lumino/signaling';
 import { default as merge } from 'diff3';
+
+import { File } from './File';
 
 function token() {
   let token = '';
@@ -15,28 +18,53 @@ interface Versions {
   base: string;
   local: string;
   remote: string;
+  local_tok: string;
 }
 
 export class MergeResolver {
-  _path: string;
+  _file: File;
   _token: string = token();
   _cursor: CodeMirror.Pos;
-  _versions: Versions = {
+  private _versions: Versions = {
     base: undefined,
     local: undefined,
     remote: undefined,
+    local_tok: undefined,
   };
 
-  constructor(path: string) {
-    this._path = path;
+  private _resolved: boolean;
+  private _stateChange: Signal<this, boolean> = new Signal<this, boolean>(this);
+
+  constructor(file: File) {
+    this._file = file;
   }
 
-  getCursor() {
+  get file() {
+    return this._file;
+  }
+
+  get path() {
+    return this._file.path;
+  }
+
+  get cursor() {
     return this._cursor;
   }
 
+  get resolved() {
+    return this._resolved;
+  }
+
+  get versions() {
+    return this._versions;
+  }
+
+  get stateChange(): ISignal<this, boolean> {
+    return this._stateChange;
+  }
+
   setCursorToken(pos: CodeMirror.Pos) {
-    const text = this._versions.local.split('\n');
+    const text = this.versions.local.split('\n');
     let line = text[pos.line];
 
     const before = line.slice(0, pos.ch);
@@ -44,7 +72,7 @@ export class MergeResolver {
     line = before + this._token + after;
 
     text[pos.line] = line;
-    this._versions.local = text.join('\n');
+    this.addVersion(text.join('\n'), 'local_tok');
   }
 
   private _removeCursorToken(input: string) {
@@ -60,16 +88,16 @@ export class MergeResolver {
     return input.replace(this._token, '');
   }
 
-  addVersion(text: string, origin: 'base' | 'local' | 'remote'): void {
+  addVersion(text: string, origin: 'base' | 'local' | 'remote' | 'local_tok'): void {
     this._versions[origin] = text;
   }
 
   async mergeVersions(): Promise<string> {
-    const merged = merge(
-      this._versions.remote,
-      this._versions.base,
-      this._versions.local
-    );
+    if (this.versions.local == this.versions.remote){
+      this.addVersion(this.versions.local, 'base');
+      return undefined;
+    }
+    const merged = merge(this.versions.remote, this.versions.base, this.versions.local_tok);
     if (this._isConflict(merged)) {
       await this._resolveConflicts(merged);
     } else {
@@ -77,6 +105,7 @@ export class MergeResolver {
       text = this._removeCursorToken(text);
       this.addVersion(text, 'base');
     }
+    this._updateState(true);
     return this._versions.base;
   }
 
@@ -116,14 +145,8 @@ export class MergeResolver {
     let ret = undefined;
     const local_raw = local.replace(this._token, '');
 
-    if (
-      base === '' &&
-      (local_raw.startsWith(remote) || remote.startsWith(local_raw))
-    )
-      ret = (local_raw.startsWith(remote) ? local_raw : remote).replace(
-        local_raw,
-        local
-      );
+    if (base === '' &&(local_raw.startsWith(remote) || remote.startsWith(local_raw)))
+      ret = (local_raw.startsWith(remote) ? local_raw : remote).replace(local_raw, local);
     else {
       console.log(base);
       console.log(local);
@@ -132,15 +155,28 @@ export class MergeResolver {
     return ret;
   }
 
+  private _updateState(state?: boolean){
+    if (state === null || state === undefined){
+      this._resolved = !this.resolved;
+      this._stateChange.emit(this.resolved);
+    } else if (state != this.resolved){
+      this._resolved = state;
+      this._stateChange.emit(this.resolved);
+    }
+  }
+
   private async _resolveDialog(result): Promise<void> {
-    const body = `"${this._path}" has a conflict. Would you like to revert to a previous version or resolve the conflict?`;
-    const resolveBtn = Dialog.okButton({ label: 'Resolve Conflicts' });
+    const body = 
+      `"${this.path}" has a conflict. Would you like to revert to a previous version?\
+      \n(Note that ignoring conflicts will stop git sync.)`;
+    // const resolveBtn = Dialog.okButton({ label: 'Resolve Conflicts' });
     const localBtn = Dialog.okButton({ label: 'Revert to Local' });
     const remoteBtn = Dialog.okButton({ label: 'Revert to Remote' });
+    const ignoreBtn = Dialog.warnButton({ label: 'Ignore Conflict' })
     return showDialog({
       title: 'Merge Conflicts',
       body,
-      buttons: [remoteBtn, localBtn, resolveBtn],
+      buttons: [ignoreBtn, remoteBtn, localBtn],
     }).then(result => {
       if (result.button.label === 'Revert to Local') {
         const text = this._removeCursorToken(this._versions.local);
@@ -154,6 +190,15 @@ export class MergeResolver {
         console.log('do something');
         // TO DO (ashleyswang) : open an editor for 3 way merging
       }
+      if (result.button.label === 'Ignore') {
+        this._updateState(false);
+        throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
+      }
+      if (result.button.label === 'Ignore') {
+        this._updateState(false);
+        throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
+      }
     });
   }
+
 }

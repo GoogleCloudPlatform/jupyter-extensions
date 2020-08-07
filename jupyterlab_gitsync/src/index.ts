@@ -22,12 +22,12 @@ async function activate(
   editor: IEditorTracker
 ) {
   // TO DO (ashleyswang): add config method to determine path and options for git sync 
-  const path = '.';
+  const path = './jupyterlab_gitsync/TEST';
   const options = {remote: 'origin', worktree: 'ashleyswang/master'};
   
   const git = new GitManager(path, options);
-  const files = new FileTracker(editor);
-  const service = new GitSyncService(git, files, editor);
+  const files = new FileTracker(editor, shell);
+  const service = new GitSyncService(git, files);
 
   const widget = new GitSyncWidget(service);
   widget.addClass('jp-CookiesIcon');
