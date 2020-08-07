@@ -5,12 +5,8 @@ import * as React from 'react';
 import { GitSyncService } from '../service/service';
 import { Toolbar } from './toolbar';
 import { GitSetup } from './setup';
-// import { SetViewButton } from './dev';
 
-import {
-  // NOTE: keep in alphabetical order
-  panel,
-} from '../style/panel';
+import { panel } from '../style/panel';
 
 export interface Props {
   service: GitSyncService;

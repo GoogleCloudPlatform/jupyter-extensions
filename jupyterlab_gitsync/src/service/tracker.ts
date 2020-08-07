@@ -61,8 +61,6 @@ export class FileTracker {
   private _updateCurrent() {
     const current = this.editor.currentWidget;
     if (current) this._updateFiles(current);
-    // console.log('editor', this.editor.currentWidget);
-    // console.log('shell', this.shell.currentWidget);
   }
 
   private _updateFiles(widget: IDocumentWidget) {

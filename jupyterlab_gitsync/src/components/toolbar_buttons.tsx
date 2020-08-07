@@ -1,6 +1,7 @@
 import { style } from 'typestyle';
 import { ToolbarButton } from './toolbar_btn_template';
 
+// TO DO: Change to non-inheritance implementation of React Component
 
 export class ControlButton extends ToolbarButton {
   constructor(props) {
@@ -54,6 +55,7 @@ export class ControlButton extends ToolbarButton {
 }
 
 export class StatusButton extends ToolbarButton {
+  // TO DO: add status indicator icon to show state of repo 
   constructor(props) {
     super(
       props,

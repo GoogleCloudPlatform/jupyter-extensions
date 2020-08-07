@@ -43,7 +43,6 @@ export class File {
     } catch (error) {
       console.warn(error);
     }
-    
   }
 
   async reload() {
