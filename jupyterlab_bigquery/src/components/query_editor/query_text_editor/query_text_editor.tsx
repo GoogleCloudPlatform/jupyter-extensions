@@ -47,6 +47,7 @@ interface QueryTextEditorProps {
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   width?: number;
+  onQueryChange?: (string) => void;
 }
 
 interface QueryResponseType {
@@ -285,6 +286,11 @@ class QueryTextEditor extends React.Component<
     this.editor = editor;
 
     this.editor.onKeyUp(() => {
+      if (this.props.onQueryChange) {
+        const query = this.editor.getValue();
+        this.props.onQueryChange(query);
+      }
+
       this.setState({ bytesProcessed: null, message: null, ifMsgErr: false });
       // eslint-disable-next-line no-extra-boolean-cast
       if (!!this.timeoutAlarm) {
