@@ -102,6 +102,7 @@ export class VmDetails extends React.Component<Props, State> {
             open={formDisplayed}
             onClose={() => this.setState({ formDisplayed: false })}
             notebookService={notebookService}
+            details={details}
           />
         )}
       </span>

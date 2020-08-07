@@ -55,3 +55,47 @@ export async function newDetachedCommentReply(
     console.log(response);
   });
 }
+
+export async function newReviewCommentThread(
+  currFilePath,
+  serverRoot,
+  commentString,
+  reviewHash
+) {
+  const body: Record<string, string> = {
+    comment: commentString,
+    reviewHash: reviewHash,
+  };
+  httpGitRequest(
+    'addReviewComment',
+    'POST',
+    currFilePath,
+    serverRoot,
+    body
+  ).then(response => {
+    console.log(response);
+  });
+}
+
+export async function newReviewCommentReply(
+  currFilePath,
+  serverRoot,
+  commentString,
+  parentHash,
+  reviewHash
+) {
+  const body: Record<string, string> = {
+    comment: commentString,
+    parent: parentHash,
+    reviewHash: reviewHash,
+  };
+  httpGitRequest(
+    'addReviewComment',
+    'POST',
+    currFilePath,
+    serverRoot,
+    body
+  ).then(response => {
+    console.log(response);
+  });
+}

@@ -3,7 +3,7 @@ from notebook.utils import url_path_join
 
 
 from jupyterlab_bigquery.list_items_handler import Handlers
-from jupyterlab_bigquery.details_handler import DatasetDetailsHandler, TablePreviewHandler, TableDetailsHandler, ViewDetailsHandler
+from jupyterlab_bigquery.details_handler import DatasetDetailsHandler, TablePreviewHandler, TableDetailsHandler, ViewDetailsHandler, ModelDetailsHandler
 from jupyterlab_bigquery.version import VERSION
 from jupyterlab_bigquery.pagedAPI_handler import PagedQueryHandler
 from jupyterlab_bigquery.query_incell_editor import QueryIncellEditor, _cell_magic
@@ -43,6 +43,7 @@ def load_jupyter_server_extension(nb_server_app):
         make_endpoint('tabledetails', TableDetailsHandler),
         make_endpoint('tablepreview', TablePreviewHandler),
         make_endpoint('viewdetails', ViewDetailsHandler),
+        make_endpoint('modeldetails', ModelDetailsHandler),
         make_endpoint('query', PagedQueryHandler)
     ])
 

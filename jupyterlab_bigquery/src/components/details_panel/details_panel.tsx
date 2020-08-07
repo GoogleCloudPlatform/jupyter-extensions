@@ -15,6 +15,8 @@ import Editor from '@monaco-editor/react';
 import { monaco } from '@monaco-editor/react';
 
 import { SchemaField } from './service/list_table_details';
+import { ModelSchema } from './service/list_model_details';
+import { StripedRows } from '../shared/striped_rows';
 
 export const localStyles = stylesheet({
   header: {
@@ -53,15 +55,11 @@ export const localStyles = stylesheet({
   },
 });
 
-const TableHeadCell = withStyles({
+export const TableHeadCell: React.ComponentType<any> = withStyles({
   root: {
     backgroundColor: '#f0f0f0',
   },
 })(TableCell);
-
-const getStripedStyle = index => {
-  return { background: index % 2 ? 'white' : '#fafafa' };
-};
 
 const formatFieldName = name => {
   if (name.includes('.')) {
@@ -84,13 +82,15 @@ interface SharedDetails {
   name: string;
   schema?: SchemaField[];
   query?: string;
+  schema_labels?: ModelSchema[];
+  feature_columns?: ModelSchema[];
 }
 
 interface Props {
   details: SharedDetails;
   rows: any[];
   // TODO(cxjia): figure out a shared typing for these rows
-  detailsType: 'DATASET' | 'TABLE' | 'VIEW';
+  detailsType: 'DATASET' | 'TABLE' | 'VIEW' | 'MODEL';
 }
 
 const getTitle = type => {
@@ -101,6 +101,8 @@ const getTitle = type => {
       return 'Table info';
     case 'VIEW':
       return 'View info';
+    case 'MODEL':
+      return 'Model details';
   }
 };
 
@@ -166,18 +168,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
 
           <Grid item xs={12}>
             <div className={localStyles.title}>{getTitle(detailsType)}</div>
-            {rows.map((row, index) => (
-              <div
-                key={index}
-                className={localStyles.row}
-                style={{ ...getStripedStyle(index) }}
-              >
-                <div className={localStyles.rowTitle}>
-                  <b>{row.name}</b>
-                </div>
-                <div>{row.value}</div>
-              </div>
-            ))}
+            <StripedRows rows={rows} />
           </Grid>
         </Grid>
 
@@ -245,6 +236,72 @@ export const DetailsPanel: React.SFC<Props> = props => {
               }}
               editorDidMount={handleEditorDidMount}
             />
+          </div>
+        )}
+
+        {detailsType === 'MODEL' && (
+          <div>
+            <div className={localStyles.title} style={{ marginTop: '32px' }}>
+              Label columns
+            </div>
+            <div>
+              {details.schema_labels && details.schema_labels.length > 0 ? (
+                <Table
+                  size="small"
+                  style={{ width: 'auto', tableLayout: 'auto' }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableHeadCell>Field name</TableHeadCell>
+                      <TableHeadCell>Type</TableHeadCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {details.schema_labels.map((field, index) => {
+                      return (
+                        <TableRow key={`schema_label_row_${index}`}>
+                          <TableCell>{field.name}</TableCell>
+                          <TableCell>{field.type}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                'Model does not have any label columns.'
+              )}
+            </div>
+
+            <div className={localStyles.title} style={{ marginTop: '24px' }}>
+              Feature columns
+            </div>
+            <div>
+              {details.feature_columns && details.feature_columns.length > 0 ? (
+                <Table
+                  size="small"
+                  style={{ width: 'auto', tableLayout: 'auto' }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableHeadCell>Field name</TableHeadCell>
+                      <TableHeadCell>Type</TableHeadCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {details.feature_columns.map((field, index) => {
+                      return (
+                        <TableRow key={`schema_feature_row_${index}`}>
+                          <TableCell>{field.name}</TableCell>
+                          <TableCell>{field.type}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                'Model does not have any feature columns.'
+              )}
+            </div>
           </div>
         )}
       </div>

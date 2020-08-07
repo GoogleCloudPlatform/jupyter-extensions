@@ -28,6 +28,8 @@ import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { ModelDetailsWidget } from '../details_panel/model_details_widget';
+import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
@@ -142,6 +144,19 @@ export function BuildTree(project, context, expandProject, expandDataset) {
       service,
       view.id,
       view.name
+    );
+  };
+
+  const openModelDetails = (event, model) => {
+    event.stopPropagation();
+    const service = new ModelDetailsService();
+    const widgetType = ModelDetailsWidget;
+    context.manager.launchWidgetForId(
+      model.id,
+      widgetType,
+      service,
+      model.id,
+      model.name
     );
   };
 
@@ -264,6 +279,7 @@ export function BuildTree(project, context, expandProject, expandDataset) {
             <div className={localStyles.resourceName}>{model.name}</div>
           </ContextMenu>
         }
+        onDoubleClick={event => openModelDetails(event, model)}
       />
     );
   };
