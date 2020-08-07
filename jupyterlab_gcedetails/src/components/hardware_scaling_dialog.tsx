@@ -25,6 +25,7 @@ import {
   detailsToHardwareConfiguration,
 } from '../data';
 import { ConfirmationPage } from './confirmation_page';
+import { ServerWrapper } from './server_wrapper';
 
 enum View {
   FORM,
@@ -38,6 +39,7 @@ interface Props {
   notebookService: NotebooksService;
   onCompletion: () => void;
   details?: Details;
+  detailsServer: ServerWrapper;
 }
 
 interface State {
@@ -62,7 +64,13 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
   }
 
   private getDisplay() {
-    const { onClose, notebookService, details, onCompletion } = this.props;
+    const {
+      onClose,
+      notebookService,
+      details,
+      onCompletion,
+      detailsServer,
+    } = this.props;
     const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
@@ -100,6 +108,7 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
             hardwareConfiguration={hardwareConfiguration}
             notebookService={notebookService}
             onCompletion={onCompletion}
+            detailsServer={detailsServer}
           />
         );
     }

@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { HardwareConfiguration } from '../data';
 import { NotebooksService } from '../service/notebooks_service';
 import { authTokenRetrieval } from './auth_token_retrieval';
+import { ServerWrapper } from './server_wrapper';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -67,6 +68,7 @@ interface Props {
   notebookService: NotebooksService;
   onDialogClose: () => void;
   onCompletion: () => void;
+  detailsServer: ServerWrapper;
 }
 
 interface State {
@@ -120,6 +122,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           break;
         case Status['Starting Instance']:
           await notebookService.start();
+          await this.serverStartup();
           this.setState({ status: Status.Complete });
           onCompletion();
           break;
@@ -160,5 +163,27 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         )}
       </div>
     );
+  }
+
+  private async serverStartup(): Promise<boolean> {
+    let attempt = 0;
+    const numRetries = 20;
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(async () => {
+        try {
+          await this.props.detailsServer.getUtilizationData();
+          clearInterval(interval);
+          resolve(true);
+        } catch (err) {
+          if (++attempt === numRetries) {
+            console.error(
+              `Unable to connect to Jupyterlab Server after ${attempt} attempts`
+            );
+            clearInterval(interval);
+            reject(err);
+          }
+        }
+      }, 5000);
+    });
   }
 }
