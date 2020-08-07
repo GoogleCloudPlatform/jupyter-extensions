@@ -75,6 +75,7 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
                 hardwareConfiguration: config,
               });
             }}
+            details={details}
           />
         );
       case View.CONFIRMATION:

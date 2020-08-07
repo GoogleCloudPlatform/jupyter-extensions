@@ -78,23 +78,34 @@ export interface Option {
 }
 
 export interface HardwareConfiguration {
-  machineType: Option;
+  machineType: MachineType;
   attachGpu: boolean;
   gpuType: string;
   gpuCount: string;
+}
+
+export function optionToMachineType(option: Option): MachineType {
+  return {
+    name: option.value as string,
+    description: option.text,
+  };
+}
+
+export function machineTypeToOption(machineType: MachineType): Option {
+  return {
+    value: machineType.name,
+    text: machineType.description,
+    disabled: false,
+  };
 }
 
 export function detailsToHardwareConfiguration(
   details: Details
 ): HardwareConfiguration {
   const { instance, gpu } = details;
-  const machineType: Option = {
-    value: instance.machineType.name,
-    text: instance.machineType.description,
-  };
 
   return {
-    machineType,
+    machineType: instance.machineType,
     attachGpu: Boolean(gpu.name),
     gpuType: gpu.name,
     gpuCount: gpu.count,
@@ -167,6 +178,8 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
   { value: '4', text: '4' },
   { value: '8', text: '8' },
 ];
+
+export const NO_ACCELERATOR = '';
 
 /**
  * AI Platform Machine types.
@@ -350,4 +363,11 @@ export const STYLES = stylesheet({
 export const TEXT_STYLE = {
   fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
+};
+
+export const TEXT_LABEL_STYLE = {
+  ...TEXT_STYLE,
+  fontSize: '15px',
+  paddingRight: '2px',
+  backgroundColor: '#FFFFFF',
 };
