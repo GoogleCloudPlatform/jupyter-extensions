@@ -76,6 +76,8 @@ interface State {
 }
 
 export class HardwareScalingStatus extends React.Component<Props, State> {
+  private readonly NUM_RETRIES = 20;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -122,7 +124,18 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           break;
         case Status['Starting Instance']:
           await notebookService.start();
-          await this.serverStartup();
+          // Wait for server to come back up
+          for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
+            try {
+              await this.props.detailsServer.getUtilizationData();
+              break;
+            } catch (err) {
+              if (tries === this.NUM_RETRIES - 1) {
+                throw err;
+              }
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+          }
           this.setState({ status: Status.Complete });
           onCompletion();
           break;
@@ -163,27 +176,5 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         )}
       </div>
     );
-  }
-
-  private async serverStartup(): Promise<boolean> {
-    let attempt = 0;
-    const numRetries = 20;
-    return new Promise((resolve, reject) => {
-      const interval = setInterval(async () => {
-        try {
-          await this.props.detailsServer.getUtilizationData();
-          clearInterval(interval);
-          resolve(true);
-        } catch (err) {
-          if (++attempt === numRetries) {
-            console.error(
-              `Unable to connect to Jupyterlab Server after ${attempt} attempts`
-            );
-            clearInterval(interval);
-            reject(err);
-          }
-        }
-      }, 5000);
-    });
   }
 }
