@@ -6,12 +6,21 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
+import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { AutoMLWidget } from './components/automl_widget';
 import { WidgetManager } from 'gcp_jupyterlab_shared';
 
-async function activate(app: JupyterFrontEnd) {
+async function activate(
+  app: JupyterFrontEnd,
+  notebookTracker: INotebookTracker
+) {
   const manager = new WidgetManager(app);
-  const context = { app: app, manager: manager };
+  const context = {
+    app: app,
+    manager: manager,
+    notebookTracker: notebookTracker,
+  };
   const listWidget = new AutoMLWidget(context);
   listWidget.addClass('jp-AutoMLIcon');
   app.shell.add(listWidget, 'left', { rank: 100 });
@@ -22,7 +31,7 @@ async function activate(app: JupyterFrontEnd) {
  */
 const AutoMLPlugin: JupyterFrontEndPlugin<void> = {
   id: 'automl:automl',
-  requires: [],
+  requires: [INotebookTracker],
   activate: activate,
   autoStart: true,
 };

@@ -1,10 +1,11 @@
+import { LinearProgress } from '@material-ui/core';
 import * as csstips from 'csstips';
+import { ListResourcesTable, SelectInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Dataset, DatasetService, Column } from '../service/dataset';
+import { CodeGenService } from '../service/code_gen';
+import { Column, Dataset, DatasetService } from '../service/dataset';
 import { CodeComponent } from './copy_code';
-import { ListResourcesTable, SelectInput } from 'gcp_jupyterlab_shared';
-import { LinearProgress } from '@material-ui/core';
 
 interface Props {
   dataset: Dataset;
@@ -174,8 +175,7 @@ ${this.getColumnString()} }
                 Export Dataset to Dataframe
               </header>
               <CodeComponent>
-                {`from jupyterlab_automl import *
-df = export_dataset('${this.props.dataset.id}')`}
+                {CodeGenService.importDatasetCode(this.props.dataset.id)}
               </CodeComponent>
               <header className={localStyles.title}>
                 Train Model on Dataset

@@ -1,12 +1,13 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { INotebookTracker } from '@jupyterlab/notebook';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
-import { WidgetManager, DialogComponent, COLORS } from 'gcp_jupyterlab_shared';
-import { ListResourcesPanel } from './list_resources_panel';
-import { ManagementService } from '../service/management';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { COLORS, DialogComponent, WidgetManager } from 'gcp_jupyterlab_shared';
+import * as React from 'react';
+import { ManagementService } from '../service/management';
+import { ListResourcesPanel } from './list_resources_panel';
 
 const theme = createMuiTheme({
   palette: {
@@ -19,6 +20,7 @@ const theme = createMuiTheme({
 export interface Context {
   app: JupyterFrontEnd;
   manager: WidgetManager;
+  notebookTracker: INotebookTracker;
 }
 
 interface ResizeOrVisible {

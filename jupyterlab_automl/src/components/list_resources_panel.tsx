@@ -1,13 +1,13 @@
 import { Clipboard } from '@jupyterlab/apputils';
 import {
   Box,
+  Button,
   Icon,
   IconButton,
   ListItem,
-  Toolbar,
-  Button,
-  Select,
   MenuItem,
+  Select,
+  Toolbar,
 } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
@@ -23,6 +23,7 @@ import {
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import styled from 'styled-components';
+import { CodeGenService } from '../service/code_gen';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
 import {
   Model,
@@ -246,6 +247,19 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   Clipboard.copyToSystem(rowData.id);
                 },
               },
+              {
+                label: 'Import to notebook',
+                handler: rowData => {
+                  CodeGenService.generateCodeCell(
+                    this.props.context,
+                    CodeGenService.importDatasetCode(rowData.id),
+                    // Fallback to dataset dialog
+                    _ => {
+                      this.setState({ importDatasetDialogOpen: true });
+                    }
+                  );
+                },
+              },
             ]}
             paging={true}
             pageSize={20}
@@ -423,6 +437,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             context={this.props.context}
           />
           <ImportModel
+            context={this.props.context}
             open={this.state.importModelDialogOpen}
             onClose={() => {
               this.setState({ importModelDialogOpen: false });
