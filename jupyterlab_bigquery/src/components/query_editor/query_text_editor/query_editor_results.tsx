@@ -69,7 +69,18 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
       {
         label: 'Explore with Data Studio',
         onClick: () => {
-          console.log('studio');
+          const { query, project } = this.props.queryResult;
+          const config = {
+            sql: query.replace(' ', '+'),
+            billingProjectId: project,
+            projectId: project,
+            connectorType: 'BIG_QUERY',
+            sqlType: 'STANDARD_SQL',
+          };
+          const url =
+            'https://datastudio.google.com/c/u/0/linking/setupAnalysis?config=' +
+            JSON.stringify(config);
+          window.open(url);
         },
       },
     ];
