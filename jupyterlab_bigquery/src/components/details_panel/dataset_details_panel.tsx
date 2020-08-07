@@ -11,11 +11,17 @@ import { stylesheet } from 'typestyle';
 
 export const localStyles = stylesheet({
   body: {
-    marginBottom: '24px',
     marginRight: '24px',
     marginLeft: '24px',
-    height: '100%',
+    flex: 1,
+    minHeight: 0,
     overflowY: 'auto',
+    overflowX: 'hidden',
+  },
+  container: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
 });
 
@@ -98,7 +104,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ height: '100%' }}>
+        <div className={localStyles.container}>
           <Header text={this.props.dataset_id} />
           <div className={localStyles.body}>
             <DetailsPanel
