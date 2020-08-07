@@ -57,7 +57,7 @@ const NumberInput: React.FC<BaseInput> = ({ id, label, input, onChange }) => {
       value={input.value}
       helperText={input.helperText}
       error={input.error}
-      onChange={event => onChange(event.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       inputProps={{
         'data-testid': 'numberInput',
       }}
@@ -78,14 +78,14 @@ const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
       <Select
         labelId={id}
         value={input.value}
-        onChange={event => onChange(event.target.value as string)}
+        onChange={(event) => onChange(event.target.value as string)}
         label={label}
         // Needed for testing
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         SelectDisplayProps={{ 'data-testid': 'selectionInput' }}
       >
-        {validValues.map(value => (
+        {validValues.map((value) => (
           <MenuItem key={value} value={value} data-testid={`${value}-menuItem`}>
             {value}
           </MenuItem>
@@ -94,10 +94,6 @@ const SelectionInput: React.FC<BaseInput & { validValues: string[] }> = ({
     </FormControl>
   );
 };
-
-// const ParameterInputContainer: React.FC<{title: string, childInputs: JSX.Element[] }> = ({title, childInputs}) => {
-//   return <Box mt=></Box>
-// }
 
 /**
  * Creates inputs for the various types of parameters with error handling.
@@ -110,44 +106,38 @@ function parameterSpecToInputs(
   onChange: (name: string, value: string) => void,
   parameterSpecs: ParameterSpec[]
 ) {
-  return parameterSpecs.map(spec => {
+  return parameterSpecs.map((spec) => {
     const name = spec.parameter;
     const label = `"${name}" Parameter`;
     const input = values[name];
+    let inputElement: JSX.Element;
     let children: JSX.Element[] = [];
     switch (spec.type) {
       case 'CATEGORICAL': {
         if (spec.childParameterSpecs) {
           const validChildren = spec.childParameterSpecs.filter(
-            child =>
+            (child) =>
               !input.error &&
               child.parentCategoricalValues!.values.includes(input.value)
           );
           children = parameterSpecToInputs(values, onChange, validChildren);
         }
 
-        return (
-          <Box mt={2} key={name}>
-            {children.length > 0 && (
-              <Box mb={2}>
-                <Typography>{label} Tree</Typography>
-              </Box>
-            )}
-            <SelectionInput
-              id={name}
-              label={label}
-              input={input}
-              onChange={value => onChange(name, value)}
-              validValues={spec.categoricalValueSpec.values}
-            />
-            {children}
-          </Box>
+        inputElement = (
+          <SelectionInput
+            id={name}
+            label={label}
+            input={input}
+            onChange={(value) => onChange(name, value)}
+            validValues={spec.categoricalValueSpec.values}
+          />
         );
+        break;
       }
       case 'DISCRETE': {
         if (spec.childParameterSpecs) {
           const validChildren = spec.childParameterSpecs.filter(
-            child =>
+            (child) =>
               !input.error &&
               child.parentDiscreteValues!.values.includes(
                 parseFloat(input.value)
@@ -156,68 +146,59 @@ function parameterSpecToInputs(
           children = parameterSpecToInputs(values, onChange, validChildren);
         }
 
-        return (
-          <Box mt={2} key={name}>
-            {children.length > 0 && (
-              <Box mb={2}>
-                <Typography>{label} Tree</Typography>
-              </Box>
+        inputElement = (
+          <SelectionInput
+            id={name}
+            label={label}
+            input={input}
+            onChange={(value) => onChange(name, value)}
+            validValues={spec.discreteValueSpec.values.map((value) =>
+              value.toString(10)
             )}
-            <SelectionInput
-              id={name}
-              label={label}
-              input={input}
-              onChange={value => onChange(name, value)}
-              validValues={spec.discreteValueSpec.values.map(value =>
-                value.toString(10)
-              )}
-            />
-            {children}
-          </Box>
+          />
         );
+        break;
       }
       case 'INTEGER': {
         if (spec.childParameterSpecs) {
           const validChildren = spec.childParameterSpecs.filter(
-            child =>
+            (child) =>
               !input.error &&
               child.parentIntValues!.values.includes(input.value)
           );
           children = parameterSpecToInputs(values, onChange, validChildren);
         }
 
-        return (
-          <Box mt={2} key={name}>
-            {children.length > 0 && (
-              <Box mb={2}>
-                <Typography>{label} Tree</Typography>
-              </Box>
-            )}
-            <NumberInput
-              id={name}
-              label={label}
-              input={values[name]}
-              onChange={value => onChange(name, value)}
-            />
-            {children}
-          </Box>
+        inputElement = (
+          <NumberInput
+            id={name}
+            label={label}
+            input={values[name]}
+            onChange={(value) => onChange(name, value)}
+          />
         );
+        break;
       }
       case 'DOUBLE':
-        return (
-          <Box mt={2}>
-            <NumberInput
-              id={name}
-              key={name}
-              label={label}
-              input={values[name]}
-              onChange={value => onChange(name, value)}
-            />
-          </Box>
+        inputElement = (
+          <NumberInput
+            id={name}
+            key={name}
+            label={label}
+            input={values[name]}
+            onChange={(value) => onChange(name, value)}
+          />
         );
+        break;
       default:
         return null;
     }
+    return (
+      <React.Fragment key={name}>
+        <Box mt={2}>{inputElement}</Box>
+        {children}
+      </React.Fragment>
+    );
   });
 }
 
@@ -246,7 +227,7 @@ export const CreateTrial: React.FC<Props> = ({
   );
   // Creates parameter default values of '' and setups input error handling
   // using the custom hook
-  const [map, setInput] = useErrorStateMap(
+  const [inputs, setInput] = useErrorStateMap(
     parameterSpecToInputsValues(flattenParameterSpecs),
     parameterSpecToValidateInput(flattenParameterSpecs)
   );
@@ -267,7 +248,7 @@ export const CreateTrial: React.FC<Props> = ({
           trial: {
             state: TrialState.REQUESTED,
             parameters: inputValuesToParameterList(
-              errorStateMapToValueObject(map),
+              errorStateMapToValueObject(inputs),
               studyConfig.parameters
             ),
             measurements: [],
@@ -281,7 +262,7 @@ export const CreateTrial: React.FC<Props> = ({
           trial: {
             state: TrialState.COMPLETED,
             parameters: inputValuesToParameterList(
-              errorStateMapToValueObject(map),
+              errorStateMapToValueObject(inputs),
               studyConfig.parameters
             ),
             finalMeasurement: metricsToMeasurement(metrics),
@@ -312,7 +293,7 @@ export const CreateTrial: React.FC<Props> = ({
             <Checkbox
               data-testid="requestedTrial"
               checked={requested}
-              onChange={event => setRequested(event.target.checked)}
+              onChange={(event) => setRequested(event.target.checked)}
               color="primary"
             />
           }
@@ -320,7 +301,7 @@ export const CreateTrial: React.FC<Props> = ({
         />
         {/* Parameter inputs */}
         <Typography component="h3">Parameters</Typography>
-        {parameterSpecToInputs(map, setInput, studyConfig.parameters)}
+        {parameterSpecToInputs(inputs, setInput, studyConfig.parameters)}
         {!requested && (
           <>
             <Typography component="h3">Metrics</Typography>
