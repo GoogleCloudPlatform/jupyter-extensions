@@ -34,9 +34,10 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+jest.setTimeout(50000);
+
 describe('Suggest Trials Page', () => {
   beforeEach(() => {
-    jest.setTimeout(50000);
     // snackbar messages
     jest.useFakeTimers();
 
