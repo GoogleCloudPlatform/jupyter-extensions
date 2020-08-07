@@ -4,7 +4,7 @@ from notebook.utils import url_path_join
 from jupyterlab_automl.handlers import handlers
 from jupyterlab_automl.version import VERSION
 from jupyterlab_automl.public import *
-from jupyterlab_automl.service import ModelFramework
+from jupyterlab_automl.types import *
 
 __version__ = VERSION
 
