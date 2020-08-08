@@ -14,9 +14,9 @@ export interface State {
   options?: any;
 }
 
-// TO DO: Change to non-inheritance implementation of React Component
+// TO DO (ashleyswang): Change to non-inheritance implementation of React Component
 
-export class ToolbarButton extends React.Component<Props, State> {
+export abstract class ToolbarButton extends React.Component<Props, State> {
   constructor(
     props: Props,
     init_label: string,
@@ -60,7 +60,6 @@ export class ToolbarButton extends React.Component<Props, State> {
                 this.state.style
               )}
             >
-              {' '}
             </span>
           </span>
         </button>
@@ -69,6 +68,7 @@ export class ToolbarButton extends React.Component<Props, State> {
   }
 
   protected _onClick = (): void => {
+    // TO DO (ashleyswang): pass in _onClick function as props
     return;
   };
 }
