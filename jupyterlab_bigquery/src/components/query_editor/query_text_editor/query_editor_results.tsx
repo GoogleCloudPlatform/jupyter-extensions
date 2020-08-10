@@ -51,39 +51,24 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     this.queryId = props.queryId;
   }
 
+  handleDatastudioExploreButton() {
+    const { query, project } = this.props.queryResult;
+    const config = {
+      sql: query.replace(' ', '+'),
+      billingProjectId: project,
+      projectId: project,
+      connectorType: 'BIG_QUERY',
+      sqlType: 'STANDARD_SQL',
+    };
+    const url =
+      'https://datastudio.google.com/c/u/0/linking/setupAnalysis?config=' +
+      JSON.stringify(config);
+    window.open(url);
+  }
+
   render() {
     const fields = this.props.queryResult.labels;
     const rows = this.props.queryResult.content;
-
-    console.log(this.props.queryResult.project);
-    console.log(this.props.queryResult.query);
-    console.log(this.props.queryResult);
-
-    const exploreContextMenuItems = [
-      {
-        label: 'Explore with Sheets',
-        onClick: () => {
-          console.log('sheet');
-        },
-      },
-      {
-        label: 'Explore with Data Studio',
-        onClick: () => {
-          const { query, project } = this.props.queryResult;
-          const config = {
-            sql: query.replace(' ', '+'),
-            billingProjectId: project,
-            projectId: project,
-            connectorType: 'BIG_QUERY',
-            sqlType: 'STANDARD_SQL',
-          };
-          const url =
-            'https://datastudio.google.com/c/u/0/linking/setupAnalysis?config=' +
-            JSON.stringify(config);
-          window.open(url);
-        },
-      },
-    ];
 
     return (
       <div
@@ -101,14 +86,12 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
           }}
         >
           <Header text="Query results" />
-          <DropDown
-            items={exploreContextMenuItems}
-            label="Explore Data"
-            buttonArgs={{
-              startIcon: <Equalizer fontSize="small" />,
-              endIcon: <ArrowDropDown fontSize="small" />,
-            }}
-          />
+          <Button
+            startIcon={<Equalizer fontSize="small" />}
+            onClick={this.handleDatastudioExploreButton.bind(this)}
+          >
+            Explore with Data Studio
+          </Button>
         </div>
         {fields.length > 0 ? <BQTable fields={fields} rows={rows} /> : <></>}
       </div>
