@@ -37,4 +37,21 @@ describe('GCE Details Extension', () => {
       await expect(page).toClick('button', { text: 'OK' });
     });
   });
+
+  it('Opens utilization graphs', async () => {
+    await retry(async () => {
+      await expect(page).toClick('span.jp-UtilizationGraphsIcon');
+      await expect(page).toMatch('CPU Usage', { timeout: 500 });
+      await expect(page).toMatch('Memory Usage');
+      await expect(page).toClick('span.jp-UtilizationGraphsIcon');
+    });
+  });
+
+  it('Opens reshaping dialog', async () => {
+    await retry(async () => {
+      await expect(page).toClick('span[title="Show form"]');
+      await expect(page).toMatch('Hardware Scaling Limits', { timeout: 500 });
+      await expect(page).toClick('button', { text: 'Next' });
+    });
+  });
 });
