@@ -28,7 +28,7 @@ export abstract class CodeGenService {
   }
 
   static importDatasetCode(datasetId: string) {
-    return `from jupyterlab_automl import *
+    return `from jupyterlab_automl import export_dataset
 df = export_dataset('${datasetId}')`;
   }
 
