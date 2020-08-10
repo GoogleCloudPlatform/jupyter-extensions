@@ -262,11 +262,11 @@ export class ExportData extends React.Component<Props, State> {
     if (this.props.open) {
       return (
         <DialogComponent
-          header={'Export Data to uCAIP Tables Dataset'}
+          header={'Create new uCAIP Tables Dataset'}
           open={true}
           onClose={this.props.onClose}
           onCancel={this.props.onClose}
-          submitLabel={'Export Data'}
+          submitLabel={'Create dataset'}
           onSubmit={this.submit}
           submitDisabled={
             this.state.loading ||

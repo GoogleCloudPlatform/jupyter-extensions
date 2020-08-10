@@ -116,20 +116,21 @@ describe('Rendering of ListResourcePanel Component', () => {
     expect(listResourcesPanel.state('searchString')).toEqual('');
     expect(listResourcesPanel.state('showSearch')).toEqual(false);
     expect(listResourcesPanel.state('deleteDialogOpen')).toEqual(false);
-    expect(listResourcesPanel.state('exportDatasetDialogOpen')).toEqual(false);
+    expect(listResourcesPanel.state('createDatasetDialogOpen')).toEqual(false);
     expect(listResourcesPanel.state('exportModelDialogOpen')).toEqual(false);
   });
-  it('Create button opens import dataset dialog', async () => {
+  it('Create button opens export dataset dialog', async () => {
     const createButton = listResourcesPanel.find(Button);
     createButton.simulate('click');
-    expect(listResourcesPanel.state('exportDatasetDialogOpen')).toEqual(true);
+    expect(listResourcesPanel.state('createDatasetDialogOpen')).toEqual(true);
   });
   it('Toggling to models changed the resource type and toolbar button', async () => {
     const selectResource = listResourcesPanel.find(ResourceSelect);
     selectResource.simulate('change', { target: { value: 'model' } });
     expect(listResourcesPanel.state('resourceType')).toEqual('model');
-    const importButton = listResourcesPanel.find(Button);
-    importButton.simulate('click');
+    const exportButton = listResourcesPanel.find(Button);
+    exportButton.simulate('click');
+
     expect(listResourcesPanel.state('exportModelDialogOpen')).toEqual(true);
   });
   it('Clicking search opens search bar and changes search state on type', async () => {

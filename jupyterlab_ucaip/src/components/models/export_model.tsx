@@ -95,7 +95,7 @@ export class ExportModel extends React.Component<Props, State> {
               }}
             />
           </FormControl>
-          Import a pretrained model to uCAIP using the Python API
+          Export a pretrained model to uCAIP using the Python API
           <CodeComponent>
             {`from jupyterlab_ucaip import export_saved_model, ModelFramework
 
@@ -106,7 +106,7 @@ framework = ModelFramework.${this.state.framework}
 # Save your model in preferred format to the local path
 # model.save(model_path)
 
-# Import local model to uCAIP
+# Export local model to uCAIP
 op = export_saved_model(display_name="${this.state.name}",
                         model_path=model_path,
                         framework=framework)

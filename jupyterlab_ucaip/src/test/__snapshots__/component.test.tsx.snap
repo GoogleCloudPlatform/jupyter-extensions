@@ -186,13 +186,14 @@ exports[`Rendering of ExportData Component Renders initial state correctly 1`] =
     />
   </ForwardRef(Portal)>
   <DialogComponent
-    header="Export Data to uCAIP Tables Dataset"
+    header="Create new uCAIP Tables Dataset"
+    height="460px"
     onCancel={null}
     onClose={null}
     onSubmit={[Function]}
     open={true}
     submitDisabled={true}
-    submitLabel="Export Data"
+    submitLabel="Create dataset"
   >
     <RadioInput
       onChange={[Function]}
@@ -632,18 +633,23 @@ exports[`Rendering of ListResourcePanel Component Renders initial state correctl
       }
       variant="dense"
     >
-      <WithStyles(ForwardRef(Button))
-        color="primary"
-        onClick={[Function]}
-        size="small"
-        startIcon={
-          <ForwardRef(WithStyles)>
-            add
-          </ForwardRef(WithStyles)>
-        }
+      <WithStyles(ForwardRef(Tooltip))
+        title="Create new dataset"
       >
-        Create
-      </WithStyles(ForwardRef(Button))>
+        <WithStyles(ForwardRef(Button))
+          color="secondary"
+          disabled={false}
+          onClick={[Function]}
+          size="small"
+          startIcon={
+            <ForwardRef(WithStyles)>
+              add
+            </ForwardRef(WithStyles)>
+          }
+        >
+          Create
+        </WithStyles(ForwardRef(Button))>
+      </WithStyles(ForwardRef(Tooltip))>
       <Styled(MuiBox)
         flexGrow={1}
       />
@@ -652,18 +658,26 @@ exports[`Rendering of ListResourcePanel Component Renders initial state correctl
         onClick={[Function]}
         size="small"
       >
-        <WithStyles(ForwardRef(Icon))>
-          search
-        </WithStyles(ForwardRef(Icon))>
+        <WithStyles(ForwardRef(Tooltip))
+          title="Search"
+        >
+          <WithStyles(ForwardRef(Icon))>
+            search
+          </WithStyles(ForwardRef(Icon))>
+        </WithStyles(ForwardRef(Tooltip))>
       </WithStyles(ForwardRef(IconButton))>
       <WithStyles(ForwardRef(IconButton))
         disabled={false}
         onClick={[Function]}
         size="small"
       >
-        <WithStyles(ForwardRef(Icon))>
-          refresh
-        </WithStyles(ForwardRef(Icon))>
+        <WithStyles(ForwardRef(Tooltip))
+          title="Refresh"
+        >
+          <WithStyles(ForwardRef(Icon))>
+            refresh
+          </WithStyles(ForwardRef(Icon))>
+        </WithStyles(ForwardRef(Tooltip))>
       </WithStyles(ForwardRef(IconButton))>
     </WithStyles(ForwardRef(Toolbar))>
     <Styled(Styled(MuiBox))

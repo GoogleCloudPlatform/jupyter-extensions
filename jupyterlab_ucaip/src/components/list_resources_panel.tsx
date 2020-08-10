@@ -62,7 +62,7 @@ interface State {
   resourceType: ResourceType;
   searchString: string;
   showSearch: boolean;
-  exportDatasetDialogOpen: boolean;
+  createDatasetDialogOpen: boolean;
   exportModelDialogOpen: boolean;
   deleteDialogOpen: boolean;
   deleteSubmitHandler: () => void;
@@ -124,7 +124,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteDialogOpen: false,
       deleteSubmitHandler: null,
       deleteTargetName: '',
-      exportDatasetDialogOpen: false,
+      createDatasetDialogOpen: false,
       exportModelDialogOpen: false,
     };
   }
@@ -163,10 +163,10 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               size="small"
               startIcon={<Icon>publish</Icon>}
               onClick={_ => {
-                this.setState({ exportDatasetDialogOpen: true });
+                this.setState({ exportModelDialogOpen: true });
               }}
             >
-              Import
+              Export
             </Button>
           </Tooltip>
         );
@@ -179,7 +179,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               size="small"
               startIcon={<Icon>add</Icon>}
               onClick={_ => {
-                this.setState({ exportDatasetDialogOpen: true });
+                this.setState({ createDatasetDialogOpen: true });
               }}
             >
               Create
@@ -425,9 +425,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             submitLabel={'Ok'}
           />
           <ExportData
-            open={this.state.exportDatasetDialogOpen}
+            open={this.state.createDatasetDialogOpen}
             onClose={() => {
-              this.setState({ exportDatasetDialogOpen: false });
+              this.setState({ createDatasetDialogOpen: false });
             }}
             onSuccess={() => {
               this.refresh();
