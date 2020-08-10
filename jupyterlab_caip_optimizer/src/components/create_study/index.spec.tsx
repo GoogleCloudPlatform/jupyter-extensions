@@ -143,7 +143,7 @@ describe('Dropdown list', () => {
 
 describe('Create Study Page', () => {
   it('creates a study and redirects to the study details page', async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(100000);
     const createStudy = jest.fn((req, res, ctx) => {
       return res(ctx.json(fakeStudy));
     });
@@ -253,6 +253,7 @@ describe('Create Study Page', () => {
   });
   describe('parameter list', () => {
     beforeEach(async () => {
+      jest.setTimeout(100000);
       render(<CreateStudy />);
 
       await createIntegerParameter();
@@ -283,6 +284,7 @@ describe('Create Study Page', () => {
 
   describe('metric list', () => {
     beforeEach(async () => {
+      jest.setTimeout(100000);
       render(<CreateStudy />);
 
       await createMinimizedMetric();
