@@ -48,5 +48,5 @@ export const styles = stylesheet({
   },
   paper: {
     width: '100%',
-  }
+  },
 });

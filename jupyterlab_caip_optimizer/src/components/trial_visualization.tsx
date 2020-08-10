@@ -3,7 +3,17 @@ import { Grid, Paper, Radio } from '@material-ui/core';
 import { LineGraph } from './graphs/line_graph';
 import { Scatterplot } from './graphs/scatterplot';
 import { ParallelCoordinates } from './graphs/parallel_coordinates';
-import { Typography, Slider, Box, Button, TextField, MenuItem, FormControl, FormControlLabel, RadioGroup } from '@material-ui/core/';
+import {
+  Typography,
+  Slider,
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+} from '@material-ui/core/';
 import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
 import { setView } from '../store/view';
@@ -279,22 +289,22 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [value, setValue] = React.useState([0, 1]); // Placeholder value for slider changes
   const [selectedMetric, setSelectedMetric] = React.useState('');
   const [selectedParamOnDropdown, setSelectedParamOnDropdown] = React.useState(
-    ""
+    ''
   );
   const [
     selectedMetricOnDropdown,
-    setSelectedMetricOnDropdown
-  ] = React.useState("");
-  const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState("");
+    setSelectedMetricOnDropdown,
+  ] = React.useState('');
+  const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState('');
 
-  const handleLineGraphRadioChange = (event) => {
+  const handleLineGraphRadioChange = event => {
     setLineGraphYAxisMetric(event.target.value);
   };
 
-  const handleParamDropdownSelect = (event) => {
+  const handleParamDropdownSelect = event => {
     setSelectedParamOnDropdown(event.target.value);
   };
-  const handleMetricDropdownSelect = (event) => {
+  const handleMetricDropdownSelect = event => {
     setSelectedMetricOnDropdown(event.target.value);
   };
 
@@ -482,7 +492,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
         <Box display="flex" my={3}>
           <Grid container spacing={3}>
             <Grid container item xs={12} ref={ref}>
-            <Paper className={styles.paper}>
+              <Paper className={styles.paper}>
                 <Grid container item xs={12} alignItems="center">
                   <Grid container item xs={12}>
                     <Typography variant="h6">Study Overview</Typography>
@@ -493,7 +503,11 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       height={height * ((10 / 12) * 0.5)}
                       axisProps={axisPropsList}
                       trialData={trialDataList}
-                      selectedMetric={lineGraphYAxisMetric ? lineGraphYAxisMetric : axisLabelsRight[0]}
+                      selectedMetric={
+                        lineGraphYAxisMetric
+                          ? lineGraphYAxisMetric
+                          : axisLabelsRight[0]
+                      }
                       metricList={axisLabelsRight}
                     />
                   </Grid>
@@ -506,7 +520,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         onChange={handleLineGraphRadioChange}
                         defaultValue={axisLabelsRight[0]}
                       >
-                        {axisLabelsRight.map((metric) => {
+                        {axisLabelsRight.map(metric => {
                           return (
                             <FormControlLabel
                               value={metric}
@@ -538,7 +552,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         fullWidth
                         required
                       >
-                        {axisLabelsLeft.map((item) => (
+                        {axisLabelsLeft.map(item => (
                           <MenuItem key={item} value={item}>
                             {item}
                           </MenuItem>
@@ -557,7 +571,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         fullWidth
                         required
                       >
-                        {axisLabelsRight.map((item) => (
+                        {axisLabelsRight.map(item => (
                           <MenuItem key={item} value={item}>
                             {item}
                           </MenuItem>
