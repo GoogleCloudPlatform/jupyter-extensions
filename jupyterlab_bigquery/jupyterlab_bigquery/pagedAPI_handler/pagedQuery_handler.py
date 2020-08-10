@@ -70,7 +70,8 @@ class PagedQueryHandler(PagedAPIHandler):
     total_bytes_processed = dry_run_job.total_bytes_processed
 
     if dryRunOnly:
-      yield dry_run_job, dry_run_job.job_id
+      job_id = 'dry_run' if dry_run_job.job_id is None else  dry_run_job.job_id
+      yield dry_run_job, job_id
       yield {
         'content': json.dumps(None),
         'labels': json.dumps(None),
