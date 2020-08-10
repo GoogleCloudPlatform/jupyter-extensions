@@ -20,10 +20,13 @@ import { classes, stylesheet } from 'typestyle';
 import { css } from '../styles';
 import { Progress } from './progress';
 import { RedError, BlueInfo } from './status_icons';
+import { LearnMoreLink } from './learn_more_link';
 
 interface Props {
   asError?: boolean;
   asActivity?: boolean;
+  link?: string;
+  linkText?: string;
   text: string;
 }
 
@@ -63,7 +66,12 @@ export function Message(props: Props): JSX.Element {
       ) : (
         <BlueInfo />
       )}
-      <span className={localStyles.text}>{props.text}</span>
+      <span className={localStyles.text}>
+        {props.text}
+        {props.link && (
+          <LearnMoreLink href={props.link} text={props.linkText} />
+        )}
+      </span>
     </div>
   );
 }

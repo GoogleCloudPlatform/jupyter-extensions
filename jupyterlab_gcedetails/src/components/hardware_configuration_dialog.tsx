@@ -18,7 +18,7 @@ import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import { HardwareScalingStatus } from './hardware_scaling_status';
-import { NotebooksService } from '../service/notebooks_service';
+import { NotebooksService, Instance } from '../service/notebooks_service';
 import {
   HardwareConfiguration,
   Details,
@@ -27,12 +27,27 @@ import {
 import { ConfirmationPage } from './confirmation_page';
 import { ServerWrapper } from './server_wrapper';
 import { DetailsDialogBody } from './details_dialog_body';
+import { ErrorPage } from './error_page';
 
 enum View {
   DETAILS,
   FORM,
   CONFIRMATION,
   STATUS,
+  ERROR,
+}
+
+export enum ErrorType {
+  STOP = 'Stop',
+  RESHAPING = 'Reshape',
+  START = 'Start',
+  REFRESH = 'Refresh',
+}
+
+export interface ConfigurationError {
+  errorType: ErrorType;
+  errorValue: any;
+  instanceDetails?: Instance;
 }
 
 interface Props {
@@ -48,15 +63,16 @@ interface Props {
 interface State {
   view: View;
   hardwareConfiguration: HardwareConfiguration;
+  error: ConfigurationError;
 }
 
-/** Funtional Component for a common dialog interface with cancel and submit buttons. */
 export class HardwareConfigurationDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       view: View.DETAILS,
       hardwareConfiguration: null,
+      error: null,
     };
   }
 
@@ -64,6 +80,20 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
     const { open } = this.props;
 
     return <Dialog open={open}>{this.getDisplay()}</Dialog>;
+  }
+
+  private onError(
+    errorValue,
+    errorType: ErrorType,
+    instanceDetails?: Instance
+  ) {
+    this.setState({
+      error: {
+        errorValue,
+        errorType,
+        instanceDetails,
+      },
+    });
   }
 
   private getDisplay() {
@@ -75,7 +105,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
       detailsServer,
       receivedError,
     } = this.props;
-    const { view, hardwareConfiguration } = this.state;
+    const { view, hardwareConfiguration, error } = this.state;
 
     switch (view) {
       case View.DETAILS:
@@ -104,6 +134,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             details={details}
           />
         );
+
       case View.CONFIRMATION:
         return (
           <ConfirmationPage
@@ -119,6 +150,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             }}
           />
         );
+
       case View.STATUS:
         return (
           <HardwareScalingStatus
@@ -127,8 +159,19 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             notebookService={notebookService}
             onCompletion={onCompletion}
             detailsServer={detailsServer}
+            onError={(err, errorType, instanceDetails?) =>
+              this.onError(err, errorType, instanceDetails)
+            }
+            showErrorPage={() => {
+              this.setState({
+                view: View.ERROR,
+              });
+            }}
           />
         );
+
+      case View.ERROR:
+        return <ErrorPage onDialogClose={onClose} error={error} />;
     }
   }
 }

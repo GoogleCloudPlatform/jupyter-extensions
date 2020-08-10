@@ -17,13 +17,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import {
-  handleApiError,
   ClientTransportService,
   InstanceMetadata,
   getMetadata,
   PATCH,
   POST,
   ApiRequest,
+  // handleApiError,
 } from 'gcp_jupyterlab_shared';
 
 const POLL_INTERVAL = 5000;
@@ -52,16 +52,13 @@ type Operation = gapi.client.servicemanagement.Operation;
 
 export const NOTEBOOKS_API_PATH = 'https://notebooks.googleapis.com/v1beta1';
 
-const GOOGLE_API_UNAUTHENITCATED_CODE = 16;
-
-export function isUnauthorized(err: any) {
-  // Check for Google API Error structure and Unauthenticated error code
+export function handleError(err: any) {
+  // Check for Google API Error structure
   // https://cloud.google.com/apis/design/errors#error_codes
   if (err.result && err.result.error) {
-    return err.result.error.code === GOOGLE_API_UNAUTHENITCATED_CODE;
+    throw `${err.result.error.message}`;
   }
-
-  return false;
+  throw err;
 }
 
 /**
@@ -252,7 +249,7 @@ export class NotebooksService {
     try {
       const { zone } = await this._getMetadata();
       // extract the location from the zone resource name
-      const locationId = zone.split('/')[3];
+      const locationId = zone.split('/').pop();
       this.locationIdPromise = Promise.resolve(locationId);
       return this.locationIdPromise;
     } catch (err) {
@@ -298,7 +295,7 @@ export class NotebooksService {
       return finishedOperation.response as Instance;
     } catch (err) {
       console.error(errorMessage);
-      handleApiError(err);
+      handleError(err);
     }
   }
 
