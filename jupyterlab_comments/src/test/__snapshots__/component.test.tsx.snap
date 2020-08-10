@@ -181,14 +181,16 @@ exports[`Basic Comment Component Rendering review comment should render correctl
 `;
 
 exports[`Comment editor components should render correctly should render new comment thread editor 1`] = `
-<CommentEditor
+<DetachedCommentEditor
+  commentType="detached"
   currFilePath="fake/path"
   serverRoot="fake/path"
 />
 `;
 
 exports[`Comment editor components should render correctly should render new reply comment editor 1`] = `
-<ReplyEditor
+<DetachedReplyEditor
+  commentType="detached"
   currFilePath="fake/path"
   hash="hash"
 />

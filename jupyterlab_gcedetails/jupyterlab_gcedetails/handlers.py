@@ -30,11 +30,14 @@ METADATA_SERVER = os.environ.get(
     'http://metadata.google.internal') + '/computeMetadata/v1/?recursive=true'
 METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 MACHINE_TYPE_CMD = 'gcloud compute machine-types describe'
+ACCELERATOR_TYPES_CMD = 'gcloud compute accelerator-types list --format="json"'
 NVIDIA_CMD = 'nvidia-smi -q -x'
 
 # Constants for field names
+ACCELERATOR_TYPES = 'acceleratorTypes'
 CPU = 'cpu'
 CUDA_VERSION = 'cuda_version'
+COUNT = 'count'
 DESCRIPTION = 'description'
 DRIVER_VERSION = 'driver_version'
 GPU = 'gpu'
@@ -100,6 +103,7 @@ async def get_gpu_details():
       NAME: '',
       DRIVER_VERSION: '',
       CUDA_VERSION: '',
+      COUNT: 0,
       GPU: 0,
       MEMORY: 0,
       TEMPERATURE: '',
@@ -109,7 +113,7 @@ async def get_gpu_details():
       NVIDIA_CMD,
       stdout=asyncio.subprocess.PIPE,
       stderr=asyncio.subprocess.PIPE)
-  stdout, err = await process.communicate()
+  stdout, _ = await process.communicate()
 
   if process.returncode != 0:
     app_log.warning('Unable to determine GPU information')
@@ -119,6 +123,7 @@ async def get_gpu_details():
   details[DRIVER_VERSION] = root.find(DRIVER_VERSION).text
   details[CUDA_VERSION] = root.find(CUDA_VERSION).text
   gpu = root.find(GPU)
+  details[COUNT] = int(root.find('attached_gpus').text)
   details[NAME] = gpu.find('product_name').text
   utilization = gpu.find('utilization')
   details[GPU] = int(utilization.find('gpu_util').text[:-1].strip())
@@ -126,6 +131,24 @@ async def get_gpu_details():
   details[TEMPERATURE] = gpu.find(TEMPERATURE).find('gpu_temp').text
 
   return details
+
+async def get_gpu_list(zone):
+  """Uses gcloud to return a list of available Accelerator Types."""
+  accelerator_types = []
+  zone = zone[zone.rindex('/') + 1:]
+  app_log.debug('Getting Accelerator Types from gcloud')
+  process = await asyncio.create_subprocess_shell(
+      '{} --filter="zone:{}"'.format(ACCELERATOR_TYPES_CMD, zone),
+      stdout=asyncio.subprocess.PIPE,
+      stderr=asyncio.subprocess.PIPE)
+  stdout, _ = await process.communicate()
+
+  if process.returncode != 0:
+    app_log.error('Unable to obtain Accelerator Types from gcloud')
+    return accelerator_types
+
+  accelerator_types = json.loads(stdout.decode())
+  return accelerator_types
 
 
 class VmDetailsHandler(APIHandler):
@@ -145,6 +168,7 @@ class VmDetailsHandler(APIHandler):
       zone = instance.get(ZONE, '')
       instance[MACHINE_TYPE] = await get_machine_type_details(
           zone, machine_type)
+      metadata[ACCELERATOR_TYPES] = await get_gpu_list(zone)
       self.details.update(metadata)
 
     self.details[UTILIZATION] = get_resource_utilization()

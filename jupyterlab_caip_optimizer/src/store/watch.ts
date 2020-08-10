@@ -8,14 +8,15 @@ export const watch = <STATE, V>(
   getState: () => STATE,
   select: (state: STATE) => V,
   same: (oldValue: V, newValue: V) => boolean
-): ((updateFn: (selected: V) => void) => () => void) => {
+): ((updateFn: (selected: V, state: STATE) => void) => () => void) => {
   let previousState: V;
   return updateFn => {
     return () => {
-      const newState = select(getState());
+      const state = getState();
+      const newState = select(state);
       if (!same(previousState, newState)) {
         previousState = newState;
-        updateFn(newState);
+        updateFn(newState, state);
       }
     };
   };

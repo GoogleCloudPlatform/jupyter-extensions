@@ -49,6 +49,11 @@ exports[`VmDetails Renders with details: Details 1`] = `
       test-project
     </span>
   </span>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show form"
+  />
 </span>
 `;
 
@@ -85,6 +90,11 @@ exports[`VmDetails Renders with details: Retrieving 1`] = `
   >
     Retrieving VM Details...
   </span>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show form"
+  />
 </span>
 `;
 
@@ -121,5 +131,10 @@ exports[`VmDetails Renders with error: Received Error 1`] = `
   >
     Error retrieving VM Details
   </span>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show form"
+  />
 </span>
 `;

@@ -14,6 +14,8 @@ import datetime
 from collections import namedtuple
 from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
+from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
+from google.cloud.bigquery_v2.gapic.enums import Model
 
 from jupyterlab_bigquery.version import VERSION
 
@@ -23,6 +25,8 @@ SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 def create_bigquery_client():
   return bigquery.Client()
 
+def format_date(date):
+  return date.isoformat().__str__()
 
 def get_dataset_details(client, dataset_id):
   dataset = client.get_dataset(dataset_id)
@@ -39,15 +43,13 @@ def get_dataset_details(client, dataset_id):
               for label, value in dataset.labels.items()
           ] if dataset.labels else None,
           'date_created':
-              json.dumps(dataset.created.strftime('%b %e, %G, %l:%M:%S %p'))
-              [1:-1],
+              format_date(dataset.created),
           'default_expiration':
               dataset.default_table_expiration_ms,
           'location':
               dataset.location,
           'last_modified':
-              json.dumps(dataset.modified.strftime('%b %e, %G, %l:%M:%S %p'))
-              [1:-1],
+              format_date(dataset.modified),
           'project':
               dataset.project,
           'link':
@@ -99,16 +101,13 @@ def get_table_details(client, table_id):
               for label, value in table.labels.items()
           ] if table.labels else None,
           'date_created':
-              json.dumps(table.created.strftime('%b %e, %G, %l:%M:%S %p'))
-              [1:-1],
+              format_date(table.created),
           'expires':
-              json.dumps(table.expires.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1]
-              if table.expires else None,
+              format_date(table.expires) if table.expires else None,
           'location':
               table.location,
           'last_modified':
-              json.dumps(table.modified.strftime('%b %e, %G, %l:%M:%S %p'))
-              [1:-1],
+              format_date(table.modified),
           'project':
               table.project,
           'dataset':
@@ -193,13 +192,11 @@ def get_view_details(client, view_id):
               for label, value in view.labels.items()
           ] if view.labels else None,
           'date_created':
-              json.dumps(view.created.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1],
+              format_date(view.created),
           'last_modified':
-              json.dumps(view.modified.strftime('%b %e, %G, %l:%M:%S %p'))
-              [1:-1],
+              format_date(view.modified),
           'expires':
-              json.dumps(view.expires.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1]
-              if view.expires else None,
+              format_date(view.expires) if view.expires else None,
           'project':
               view.project,
           'dataset':
@@ -213,6 +210,40 @@ def get_view_details(client, view_id):
       }
   }
 
+
+def get_model_details(client, model_id):
+  model = client.get_model(model_id)
+  return {
+      'details': {
+          'id':
+              "{}.{}.{}".format(model.project, model.dataset_id,
+                                model.model_id),
+          'name':
+              model.model_id,
+          'description':
+              model.description,
+          'labels': [
+              "{}: {}".format(label, value)
+              for label, value in model.labels.items()
+          ] if model.labels else None,
+          'date_created':
+              format_date(model.created),
+          'last_modified':
+              format_date(model.modified),
+          'expires':
+              format_date(model.expires) if model.expires else None,
+          'location':
+              model.location,
+          'model_type':
+              Model.ModelType(model.model_type).name,
+          'schema_labels': [
+              {'name': label_col.name, 'type': SqlTypeNames[StandardSqlDataTypes(label_col.type.type_kind).name].name} for label_col in model.label_columns
+          ],
+          'feature_columns': [
+              {'name': feat_col.name, 'type': SqlTypeNames[StandardSqlDataTypes(feat_col.type.type_kind).name].name} for feat_col in model.feature_columns
+          ]
+      }
+  }
 
 def format_preview_rows(rows, fields):
   formatted_rows = []
@@ -311,6 +342,24 @@ class ViewDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_view_details(self.bigquery_client, post_body['viewId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({'error': {'message': str(e)}})
+
+
+class ModelDetailsHandler(APIHandler):
+  """Handles requests for model metadata."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_model_details(self.bigquery_client, post_body['modelId']))
 
     except Exception as e:
       app_log.exception(str(e))

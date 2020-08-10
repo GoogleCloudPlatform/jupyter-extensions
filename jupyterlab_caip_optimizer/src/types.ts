@@ -87,33 +87,59 @@ export interface MatchingParentCategoricalValueSpec {
   values: string[];
 }
 
-export type ParameterSpec = ParameterSpecBase &
-  (
-    | {
-        doubleValueSpec: DoubleValueSpec;
-      }
-    | {
-        integerValueSpec: IntegerValueSpec;
-      }
-    | {
-        categoricalValueSpec: CategoricalValueSpec;
-      }
-    | {
-        discreteValueSpec: DiscreteValueSpec;
-      }
-  ) &
-  (
-    | {
-        parentDiscreteValues: MatchingParentDiscreteValueSpec;
-      }
-    | {
-        parentIntValues: MatchingParentIntValueSpec;
-      }
-    | {
-        parentCategoricalValues: MatchingParentCategoricalValueSpec;
-      }
-    | {}
-  );
+export interface ParameterSpecChildren {
+  childParameterSpecs?: ParameterSpec[];
+}
+
+export type ParameterSpecParent =
+  | {
+      parentDiscreteValues: MatchingParentDiscreteValueSpec;
+    }
+  | {
+      parentIntValues: MatchingParentIntValueSpec;
+    }
+  | {
+      parentCategoricalValues: MatchingParentCategoricalValueSpec;
+    }
+  | {};
+
+export type UnspecifiedParameter = ParameterBase & {
+  type: 'PARAMETER_TYPE_UNSPECIFIED';
+};
+
+export type DoubleParameterSpec = ParameterSpecBase &
+  ParameterSpecParent & {
+    type: 'DOUBLE';
+    doubleValueSpec: DoubleValueSpec;
+  };
+
+export type IntegerParameterSpec = ParameterSpecBase &
+  ParameterSpecChildren &
+  ParameterSpecParent & {
+    type: 'INTEGER';
+    integerValueSpec: IntegerValueSpec;
+  };
+
+export type CategoricalParameterSpec = ParameterSpecBase &
+  ParameterSpecChildren &
+  ParameterSpecParent & {
+    type: 'CATEGORICAL';
+    categoricalValueSpec: CategoricalValueSpec;
+  };
+
+export type DiscreteParameterSpec = ParameterSpecBase &
+  ParameterSpecChildren &
+  ParameterSpecParent & {
+    type: 'DISCRETE';
+    discreteValueSpec: DiscreteValueSpec;
+  };
+
+export type ParameterSpec =
+  | UnspecifiedParameter
+  | DoubleParameterSpec
+  | IntegerParameterSpec
+  | CategoricalParameterSpec
+  | DiscreteParameterSpec;
 
 export interface DecayCurveAutomatedStoppingConfig {
   useElapsedTime: boolean;

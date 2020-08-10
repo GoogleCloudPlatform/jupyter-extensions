@@ -1,5 +1,5 @@
 import { FormControl } from '@material-ui/core';
-import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
+import { SelectInput, TextInput, DialogComponent } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { CodeComponent } from '../copy_code';
@@ -99,7 +99,9 @@ export class ExportModel extends React.Component<Props, State> {
           <CodeComponent>
             {`from jupyterlab_ucaip import export_saved_model, ModelFramework
 
+display_name= "${this.state.name}"
 model_path = "my_model"
+framework = ModelFramework.${this.state.framework}
 
 # Save your model in preferred format to the local path
 # model.save(model_path)
@@ -107,7 +109,7 @@ model_path = "my_model"
 # Import local model to uCAIP
 op = export_saved_model(display_name="${this.state.name}",
                         model_path=model_path,
-                        framework=ModelFramework.${this.state.framework})
+                        framework=framework)
 
 # Get result of export model operation
 op.result()`}
