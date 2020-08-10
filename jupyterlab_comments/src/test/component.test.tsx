@@ -43,6 +43,7 @@ describe('Basic Comment Component Rendering', () => {
         requester: 'none',
         description: 'none',
         baseCommit: 'none',
+        reviewHash: 'none',
       },
       filePath: 'fake/path',
     };
@@ -171,14 +172,22 @@ describe('Comment Component Expand Threads Button', () => {
 describe('Comment editor components should render correctly', () => {
   it('should render new comment thread editor', () => {
     const newThreadEditor = shallow(
-      <NewCommentThread serverRoot="fake/path" currFilePath="fake/path" />
+      <NewCommentThread
+        serverRoot="fake/path"
+        currFilePath="fake/path"
+        commentType="detached"
+      />
     );
     expect(newThreadEditor).toMatchSnapshot();
   });
 
   it('should render new reply comment editor', () => {
     const replyEditor = shallow(
-      <NewReplyComment currFilePath="fake/path" hash="hash" />
+      <NewReplyComment
+        currFilePath="fake/path"
+        hash="hash"
+        commentType="detached"
+      />
     );
     expect(replyEditor).toMatchSnapshot();
   });
@@ -205,24 +214,28 @@ describe('Reply button behavior', () => {
 
 describe('Behavior for comment input field', () => {
   it('should display send button for new thread editor', () => {
-    const component = shallow(
-      <NewCommentThread serverRoot="root" currFilePath="path" />
+    const component = mount(
+      <NewCommentThread
+        serverRoot="root"
+        currFilePath="path"
+        commentType="review"
+      />
     );
-    const submit = component.dive().find('.sendThread');
-    expect(submit).toHaveLength(1);
+    const submit = component.find('.sendThread');
+    expect(submit).not.toHaveLength(0);
   });
 
   it('should display send button for reply editor', () => {
-    const component = shallow(
-      <NewReplyComment hash="hash" currFilePath="path" />
+    const component = mount(
+      <NewReplyComment hash="hash" currFilePath="path" commentType="detached" />
     );
-    const submit = component.dive().find('.sendReply');
-    expect(submit).toHaveLength(1);
+    const submit = component.find('.sendReply');
+    expect(submit).not.toHaveLength(0);
   });
 
   it('should store the value of the comment (reply)', () => {
     const component = mount(
-      <NewReplyComment hash="hash" currFilePath="path" />
+      <NewReplyComment hash="hash" currFilePath="path" commentType="detached" />
     );
     const input = component.find('.replyCommentTextField').first();
     expect(input.props().value).toEqual('');
@@ -234,10 +247,13 @@ describe('Behavior for comment input field', () => {
 
   it('should store the value of the comment (new thread)', () => {
     const component = mount(
-      <NewCommentThread serverRoot="root" currFilePath="path" />
+      <NewCommentThread
+        serverRoot="root"
+        currFilePath="path"
+        commentType="review"
+      />
     );
     const input = component.find('.newThreadTextField').first();
-    expect(input.props().value).toEqual('Start a new comment thread');
     input.props().value = 'new comment';
     expect(input.props().value).toEqual('new comment');
     const submit = component.find('.commentSubmit');
