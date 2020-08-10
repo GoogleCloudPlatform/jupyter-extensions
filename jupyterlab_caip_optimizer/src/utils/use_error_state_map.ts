@@ -7,7 +7,8 @@ export type ErrorStateMap<V> = {
 
 export type ErrorStateArrayReturn<O, V> = [
   ErrorStateMap<V>,
-  (name: keyof O, value: V) => void
+  (name: keyof O, value: V) => void,
+  () => void
 ];
 
 export type ErrorCheckFunction<V> = (
@@ -74,5 +75,9 @@ export function useErrorStateMap<O extends object, V = O[keyof O]>(
     }
   };
 
-  return [map, setValue];
+  const clear = () => {
+    setMap(getDefaultState(defaultValues));
+  };
+
+  return [map, setValue, clear];
 }
