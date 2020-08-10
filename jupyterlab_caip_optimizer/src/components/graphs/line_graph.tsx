@@ -2,7 +2,9 @@ import * as React from 'react';
 import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 import { AxisPropsList } from '../trial_visualization';
+import { getTooltipHTML, colorScheme } from './graph_utils';
 
+// D3 Tooltip library: https://github.com/caged/d3-tip
 d3.tip = d3Tip;
 
 interface Data {
@@ -17,8 +19,6 @@ interface Props {
   selectedMetric: string;
   metricList: string[];
 }
-
-const colorScheme = ['darkblue', 'crimson', 'green', 'yellow'];
 
 export const LineGraph = (props: Props) => {
   const d3ContainerLineGraph = React.useRef(null);
@@ -38,10 +38,17 @@ export const LineGraph = (props: Props) => {
       width > 0 &&
       height > 0
     ) {
+      /**
+       * We use the useRef React Hook to make a variable that holds on to the SVG DOM component across renders.
+       * It's initialized null and assigned later in the return statement.
+       */
       const svg = d3.select(d3ContainerLineGraph.current);
       svg.selectAll('*').remove();
 
-      // Set the D3 scales (both for horizontal & vertical)
+      /**
+       * Set the D3 scales (both for horizontal & vertical)
+       * Refer to https://github.com/d3/d3-scale#d3-scale for detailed explanation on scales in D3
+       */
       const xScale = d3
         .scaleLinear()
         .domain([
@@ -50,12 +57,11 @@ export const LineGraph = (props: Props) => {
         ])
         .range([padding, width - padding]);
 
-      // dictionary of all the trials
-      const trialDict = {};
-      trialData.forEach(trial => {
-        trialDict[trial.trialId] = trial;
-      });
-
+      /**
+       * Dictionary of scales for all the metrics.
+       * Key: metric names
+       * Value: D3 scale mapping the metric value of the trial to the vertical position
+       */
       const yScaleDict = {};
       metricList.forEach(metric => {
         const scale = d3
@@ -82,7 +88,12 @@ export const LineGraph = (props: Props) => {
         .attr('id', `${selectedMetric}`)
         .call(yAxis);
 
-      const addColorMarker = (metric, index) => {
+      /**
+       * Add markers to indicate corresponding colors for each metric
+       * @param metric String indicating name of the metric
+       * @param index Index of the metric in the metric list. Used for getting the corresponding color.
+       */
+      const addColorMarker = (metric: string, index) => {
         const xPosition = padding + 10;
         const yPositionUnit = topPadding / 3;
         const yPosition = yPositionUnit * (index + 1);
@@ -164,7 +175,6 @@ export const LineGraph = (props: Props) => {
                 localMax.push(trial);
             }
           });
-          console.log(localMax);
           localMax.forEach((localMaxTrial, localMaxIndex) => {
             svg
               .append('rect')
@@ -197,12 +207,6 @@ export const LineGraph = (props: Props) => {
         addColorMarker(metric, index);
       });
 
-      const getTooltipHTML = data => {
-        const keys = Object.keys(data);
-        const dataList = keys.map(key => `${key}: ${data[key]}`);
-        return dataList.join('<br/>');
-      };
-
       // Set up tooltip
       const tip = d3
         .tip()
@@ -216,8 +220,6 @@ export const LineGraph = (props: Props) => {
         .append('g')
         .attr('class', 'focus')
         .style('display', 'none');
-
-      // focus.append("circle").attr("r", 5).attr("fill");
 
       // Black vertical line following mouse cursor
       svg

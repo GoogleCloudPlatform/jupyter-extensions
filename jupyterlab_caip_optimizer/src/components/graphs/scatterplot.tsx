@@ -2,7 +2,9 @@ import * as React from 'react';
 import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 import { AxisPropsList } from '../trial_visualization';
+import { getTooltipHTML } from './graph_utils';
 
+// D3 Tooltip library: https://github.com/caged/d3-tip
 d3.tip = d3Tip;
 
 interface Data {
@@ -17,8 +19,6 @@ interface Props {
   selectedParam: string;
   selectedMetric: string;
 }
-
-// TODO - move these duplicate setup's to common graphs-util folder
 
 export const Scatterplot = (props: Props) => {
   const d3ContainerScatterplot = React.useRef(null);
@@ -40,11 +40,18 @@ export const Scatterplot = (props: Props) => {
       width > 0 &&
       height > 0
     ) {
+      /**
+       * We use the useRef React Hook to make a variable that holds on to the SVG DOM component across renders.
+       * It's initialized null and assigned later in the return statement.
+       */
       const svg = d3.select(d3ContainerScatterplot.current);
       svg.selectAll('*').remove();
 
+      /**
+       * Populate the parameter axis (x-axis)
+       * Refer to https://github.com/d3/d3-scale#d3-scale for detailed explanation on scales in D3
+       */
       let xScale;
-      // populate the parameter axis (x-axis)
       const paramInfo = axisProps[selectedParam];
       switch (paramInfo.type) {
         case 'INTEGER':
@@ -76,6 +83,7 @@ export const Scatterplot = (props: Props) => {
         .attr('class', 'xAxis')
         .attr('id', `${selectedParam}`)
         .call(xAxis);
+      
       // populate the metric axis (y-axis)
       const yScale = d3
         .scaleLinear()
@@ -91,12 +99,6 @@ export const Scatterplot = (props: Props) => {
         .attr('class', 'yAxis')
         .attr('id', `${selectedMetric}`)
         .call(yAxis);
-
-      const getTooltipHTML = data => {
-        const keys = Object.keys(data);
-        const dataList = keys.map(key => `${key}: ${data[key]}`);
-        return dataList.join('<br/>');
-      };
 
       // Set up tooltip
       const tip = d3
@@ -123,6 +125,7 @@ export const Scatterplot = (props: Props) => {
         .attr('fill', 'rgba(63, 81, 181, 0.5)')
         .on('mouseenter', tip.show)
         .on('mouseleave', tip.hide);
+
       // Tooltip style & add to svg
       tip
         .style('font-size', '12px')
@@ -131,6 +134,7 @@ export const Scatterplot = (props: Props) => {
         .style('padding', '5px')
         .style('border-radius', '8px');
       svg.call(tip);
+
       // label for axes
       svg
         .append('text')
