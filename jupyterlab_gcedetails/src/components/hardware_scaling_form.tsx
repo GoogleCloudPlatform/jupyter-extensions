@@ -31,19 +31,23 @@ import { SelectInput } from './select_input';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
   ACCELERATOR_TYPES,
-  Option,
   MACHINE_TYPES,
+  HardwareConfiguration,
+  optionToMachineType,
+  NO_ACCELERATOR,
+  Details,
+  detailsToHardwareConfiguration,
+  machineTypeToOption,
 } from '../data';
 
 interface Props {
-  onDialogClose?: () => void;
+  onSubmit: (configuration: HardwareConfiguration) => void;
+  onDialogClose: () => void;
+  details?: Details;
 }
 
 interface State {
-  machineType: Option;
-  attachGpu: boolean;
-  gpuType: string;
-  gpuCount: string;
+  configuration: HardwareConfiguration;
 }
 
 export const STYLES = stylesheet({
@@ -51,13 +55,21 @@ export const STYLES = stylesheet({
     marginRight: '10px',
   },
   checkboxContainer: {
-    paddingTop: '10px',
     paddingBottom: '8px',
   },
   title: {
     ...BASE_FONT,
     fontWeight: 500,
     fontSize: '15px',
+    marginBottom: '5px',
+    ...csstips.horizontal,
+    ...csstips.flex,
+  },
+  subtitle: {
+    ...BASE_FONT,
+    fontWeight: 500,
+    fontSize: '15px',
+    marginTop: '10px',
     marginBottom: '5px',
     ...csstips.horizontal,
     ...csstips.flex,
@@ -79,49 +91,78 @@ export const STYLES = stylesheet({
   },
 });
 
-const NO_ACCELERATOR = ACCELERATOR_TYPES[0].value as string;
-const DEFAULT_MACHINE_TYPE = MACHINE_TYPES[0].configurations[0];
+const DEFAULT_MACHINE_TYPE = optionToMachineType(
+  MACHINE_TYPES[0].configurations[0]
+);
+const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance, 
+the available GPU types and the minimum number of GPUs that can be selected may vary. `;
+const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
 
 export class HardwareScalingForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      machineType: DEFAULT_MACHINE_TYPE,
-      attachGpu: false,
-      gpuType: NO_ACCELERATOR,
-      gpuCount: '',
+      configuration: props.details
+        ? detailsToHardwareConfiguration(props.details)
+        : {
+            machineType: DEFAULT_MACHINE_TYPE,
+            attachGpu: false,
+            gpuType: NO_ACCELERATOR,
+            gpuCount: '',
+          },
     };
+  }
+
+  private gpuRestrictionMessage() {
+    return (
+      <p className={classes(css.noTopMargin, STYLES.description)}>
+        {GPU_RESTRICTION_MESSAGE}
+        <LearnMoreLink href={GPU_RESTRICTION_LINK} />
+      </p>
+    );
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      attachGpu: event.target.checked,
-      gpuType: event.target.checked
-        ? (ACCELERATOR_TYPES[1].value as string)
-        : NO_ACCELERATOR,
-      gpuCount: event.target.checked
-        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-        : '',
+      configuration: {
+        ...this.state.configuration,
+        attachGpu: event.target.checked,
+        gpuType: event.target.checked
+          ? (ACCELERATOR_TYPES[1].value as string)
+          : NO_ACCELERATOR,
+        gpuCount: event.target.checked
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+          : '',
+      },
     });
   }
 
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      gpuType: event.target.value,
-      gpuCount: event.target.value
-        ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-        : '',
+      configuration: {
+        ...this.state.configuration,
+        gpuType: event.target.value,
+        gpuCount: event.target.value
+          ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
+          : '',
+      },
     });
   }
 
-  // TODO: Implement submit functionality
-  //eslint-disable-next-line @typescript-eslint/no-empty-function
-  private submitForm() {}
+  private submitForm() {
+    const configuration = { ...this.state.configuration };
+    this.props.onSubmit(configuration);
+  }
 
   render() {
     const { onDialogClose } = this.props;
-    const { gpuType, gpuCount, attachGpu } = this.state;
+    const {
+      gpuType,
+      gpuCount,
+      attachGpu,
+      machineType,
+    } = this.state.configuration;
 
     return (
       <div className={STYLES.container}>
@@ -129,14 +170,25 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.title}>Hardware Scaling Limits</span>
           <form>
             <HardwareConfigurationDescription />
+            <span className={STYLES.subtitle}>Machine Configuration</span>
             <NestedSelect
               label="Machine type"
               nestedOptionsList={MACHINE_TYPES.map(machineType => ({
                 header: machineType.base,
                 options: machineType.configurations,
               }))}
-              onChange={machineType => this.setState({ machineType })}
+              onChange={newMachineType =>
+                this.setState({
+                  configuration: {
+                    ...this.state.configuration,
+                    machineType: optionToMachineType(newMachineType),
+                  },
+                })
+              }
+              value={machineTypeToOption(machineType)}
             />
+            <span className={STYLES.subtitle}>GPUs</span>
+            {this.gpuRestrictionMessage()}
             <div className={STYLES.checkboxContainer}>
               <CheckboxInput
                 label="Attach GPUs"
@@ -165,7 +217,14 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                     name="gpuCount"
                     value={gpuCount}
                     options={ACCELERATOR_COUNTS_1_2_4_8}
-                    onChange={e => this.setState({ gpuCount: e.target.value })}
+                    onChange={e =>
+                      this.setState({
+                        configuration: {
+                          ...this.state.configuration,
+                          gpuCount: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -176,7 +235,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <SubmitButton
             actionPending={false}
             onClick={() => this.submitForm()}
-            text="Submit"
+            text="Next"
           />
         </ActionBar>
       </div>

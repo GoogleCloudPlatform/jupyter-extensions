@@ -20,7 +20,7 @@ async function activate(app: JupyterFrontEnd) {
 
   // Create Sidebar
   const sidebarWidget = new SidebarWidget(store);
-  app.shell.add(sidebarWidget, 'left', { rank: 100 });
+  app.shell.add(sidebarWidget, 'left', { rank: 1000 });
   app.shell.add(new SnackbarWidget(store), 'header');
 
   // Fetch Metadata for project id, region and then load studies

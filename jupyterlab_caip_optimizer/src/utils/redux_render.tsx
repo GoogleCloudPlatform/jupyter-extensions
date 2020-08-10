@@ -9,6 +9,7 @@ import { studiesSlice } from '../store/studies';
 import {
   fakeProjectId,
   fakeRegion,
+  fakeStudyTree,
   fakeStudyResponseActive,
 } from '../service/test-constants';
 
@@ -33,7 +34,7 @@ export const initialState = {
     severity: 'info',
   },
   studies: {
-    data: [fakeStudyResponseActive],
+    data: [fakeStudyResponseActive, fakeStudyTree],
     loading: false,
     error: undefined,
   },

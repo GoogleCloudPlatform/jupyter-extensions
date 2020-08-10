@@ -31,13 +31,20 @@ const UTILIZATION_CHART_PROPERTIES = {
   },
 };
 
+interface GpuUtilization {
+  gpu: number;
+  memory: number;
+}
+
 interface Props {
   detailsServer: ServerWrapper;
 }
 
 interface State {
-  data?: Utilization[];
+  data: Utilization[];
+  gpuData: GpuUtilization[];
   receivedError: boolean;
+  showGpu: boolean;
 }
 
 const STYLES = stylesheet({
@@ -48,6 +55,9 @@ const STYLES = stylesheet({
   utilizationChartsContainer: {
     padding: '10px 20px 20px 0px',
   },
+  flexspan: {
+    display: 'flex',
+  },
 });
 
 export class ResourceUtilizationCharts extends React.Component<Props, State> {
@@ -57,12 +67,16 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const data = [];
+    const gpuData = [];
     for (let i = 0; i < this.NUM_DATA_POINTS; i++) {
       data.push({ cpu: 0, memory: 0 });
+      gpuData.push({ gpu: 0, memory: 0 });
     }
     this.state = {
       data,
+      gpuData,
       receivedError: false,
+      showGpu: false,
     };
   }
 
@@ -77,28 +91,51 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
   }
 
   render() {
+    const { data, receivedError, showGpu, gpuData } = this.state;
     return (
       <div className={STYLES.utilizationChartsContainer}>
-        {this.state.receivedError ? (
+        {receivedError ? (
           'Unable to retrieve GCE VM details, please check your server logs'
         ) : (
-          <span>
-            <AreaChartWrapper
-              title="CPU Usage"
-              titleClass={STYLES.chartTitleSmall}
-              dataKey="cpu"
-              data={this.state.data}
-              chartColor={AREA_CHART_ORANGE}
-              {...UTILIZATION_CHART_PROPERTIES}
-            />
-            <AreaChartWrapper
-              title="Memory Usage"
-              titleClass={STYLES.chartTitleSmall}
-              dataKey="memory"
-              data={this.state.data}
-              chartColor={AREA_CHART_BLUE}
-              {...UTILIZATION_CHART_PROPERTIES}
-            />
+          <span className={STYLES.flexspan}>
+            <span>
+              <AreaChartWrapper
+                title="CPU Usage"
+                titleClass={STYLES.chartTitleSmall}
+                dataKey="cpu"
+                data={data}
+                chartColor={AREA_CHART_ORANGE}
+                {...UTILIZATION_CHART_PROPERTIES}
+              />
+              <AreaChartWrapper
+                title="Memory Usage"
+                titleClass={STYLES.chartTitleSmall}
+                dataKey="memory"
+                data={data}
+                chartColor={AREA_CHART_BLUE}
+                {...UTILIZATION_CHART_PROPERTIES}
+              />
+            </span>
+            {showGpu && (
+              <span>
+                <AreaChartWrapper
+                  title="GPU Usage"
+                  titleClass={STYLES.chartTitleSmall}
+                  dataKey="gpu"
+                  data={gpuData}
+                  chartColor={AREA_CHART_ORANGE}
+                  {...UTILIZATION_CHART_PROPERTIES}
+                />
+                <AreaChartWrapper
+                  title="GPU Memory Usage"
+                  titleClass={STYLES.chartTitleSmall}
+                  dataKey="memory"
+                  data={gpuData}
+                  chartColor={AREA_CHART_BLUE}
+                  {...UTILIZATION_CHART_PROPERTIES}
+                />
+              </span>
+            )}
           </span>
         )}
       </div>
@@ -110,7 +147,13 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
       const details = await this.props.detailsServer.getUtilizationData();
       const data = this.state.data.slice(1);
       data.push(details.utilization);
-      this.setState({ data });
+      if (details.gpu.name) {
+        const gpuData = this.state.gpuData.slice(1);
+        gpuData.push({ gpu: details.gpu.gpu, memory: details.gpu.memory });
+        this.setState({ data, gpuData, showGpu: true });
+      } else {
+        this.setState({ data, showGpu: false });
+      }
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });

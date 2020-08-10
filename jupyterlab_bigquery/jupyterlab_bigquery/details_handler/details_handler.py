@@ -14,6 +14,8 @@ import datetime
 from collections import namedtuple
 from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
+from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
+from google.cloud.bigquery_v2.gapic.enums import Model
 
 from jupyterlab_bigquery.version import VERSION
 
@@ -214,6 +216,43 @@ def get_view_details(client, view_id):
   }
 
 
+def get_model_details(client, model_id):
+  model = client.get_model(model_id)
+  return {
+      'details': {
+          'id':
+              "{}.{}.{}".format(model.project, model.dataset_id,
+                                model.model_id),
+          'name':
+              model.model_id,
+          'description':
+              model.description,
+          'labels': [
+              "{}: {}".format(label, value)
+              for label, value in model.labels.items()
+          ] if model.labels else None,
+          'date_created':
+              json.dumps(model.created.strftime('%b %e, %G, %l:%M:%S %p'))
+              [1:-1],
+          'last_modified':
+              json.dumps(model.modified.strftime('%b %e, %G, %l:%M:%S %p'))
+              [1:-1],
+          'expires':
+              json.dumps(model.expires.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1]
+              if model.expires else None,
+          'location':
+              model.location,
+          'model_type':
+              Model.ModelType(model.model_type).name,
+          'schema_labels': [
+              {'name': label_col.name, 'type': SqlTypeNames[StandardSqlDataTypes(label_col.type.type_kind).name].name} for label_col in model.label_columns
+          ],
+          'feature_columns': [
+              {'name': feat_col.name, 'type': SqlTypeNames[StandardSqlDataTypes(feat_col.type.type_kind).name].name} for feat_col in model.feature_columns
+          ]
+      }
+  }
+
 def format_preview_rows(rows, fields):
   formatted_rows = []
   for row in rows:
@@ -311,6 +350,24 @@ class ViewDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_view_details(self.bigquery_client, post_body['viewId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({'error': {'message': str(e)}})
+
+
+class ModelDetailsHandler(APIHandler):
+  """Handles requests for model metadata."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_model_details(self.bigquery_client, post_body['modelId']))
 
     except Exception as e:
       app_log.exception(str(e))

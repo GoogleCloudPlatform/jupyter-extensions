@@ -17,16 +17,26 @@
 import { Dialog } from '@material-ui/core';
 import * as React from 'react';
 import { HardwareScalingForm } from './hardware_scaling_form';
-import { HardwareConfiguration } from '../data';
+import { HardwareScalingStatus } from './hardware_scaling_status';
+import { NotebooksService } from '../service/notebooks_service';
+import {
+  HardwareConfiguration,
+  Details,
+  detailsToHardwareConfiguration,
+} from '../data';
+import { ConfirmationPage } from './confirmation_page';
 
 enum View {
   FORM,
   CONFIRMATION,
+  STATUS,
 }
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  notebookService: NotebooksService;
+  details?: Details;
 }
 
 interface State {
@@ -51,12 +61,46 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
   }
 
   private getDisplay() {
-    const { onClose } = this.props;
-    const { view } = this.state;
+    const { onClose, notebookService, details } = this.props;
+    const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
       case View.FORM:
-        return <HardwareScalingForm onDialogClose={onClose} />;
+        return (
+          <HardwareScalingForm
+            onDialogClose={onClose}
+            onSubmit={(config: HardwareConfiguration) => {
+              this.setState({
+                view: View.CONFIRMATION,
+                hardwareConfiguration: config,
+              });
+            }}
+            details={details}
+          />
+        );
+      case View.CONFIRMATION:
+        return (
+          <ConfirmationPage
+            onDialogClose={onClose}
+            formData={hardwareConfiguration}
+            currentConfiguration={
+              details && detailsToHardwareConfiguration(details)
+            }
+            onSubmit={() => {
+              this.setState({
+                view: View.STATUS,
+              });
+            }}
+          />
+        );
+      case View.STATUS:
+        return (
+          <HardwareScalingStatus
+            onDialogClose={onClose}
+            hardwareConfiguration={hardwareConfiguration}
+            notebookService={notebookService}
+          />
+        );
     }
   }
 }

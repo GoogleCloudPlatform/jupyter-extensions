@@ -23,6 +23,12 @@ interface MachineType {
   description: string;
 }
 
+export interface Accelerator {
+  name: string;
+  description: string;
+  maximumCardsPerInstance: number;
+}
+
 interface Instance {
   attributes: {
     framework: string;
@@ -51,6 +57,7 @@ interface Gpu {
   name: string;
   driver_version: string;
   cuda_version: string;
+  count: string;
   gpu: number;
   memory: number;
   temperature: number;
@@ -61,6 +68,7 @@ export interface Details {
   project: Project;
   utilization: Utilization;
   gpu: Gpu;
+  acceleratorTypes: Accelerator[];
 }
 
 export interface Option {
@@ -70,10 +78,38 @@ export interface Option {
 }
 
 export interface HardwareConfiguration {
-  machineType: Option;
+  machineType: MachineType;
   attachGpu: boolean;
   gpuType: string;
   gpuCount: string;
+}
+
+export function optionToMachineType(option: Option): MachineType {
+  return {
+    name: option.value as string,
+    description: option.text,
+  };
+}
+
+export function machineTypeToOption(machineType: MachineType): Option {
+  return {
+    value: machineType.name,
+    text: machineType.description,
+    disabled: false,
+  };
+}
+
+export function detailsToHardwareConfiguration(
+  details: Details
+): HardwareConfiguration {
+  const { instance, gpu } = details;
+
+  return {
+    machineType: instance.machineType,
+    attachGpu: Boolean(gpu.name),
+    gpuType: gpu.name,
+    gpuCount: gpu.count,
+  };
 }
 
 interface AttributeMapper {
@@ -143,33 +179,12 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
   { value: '8', text: '8' },
 ];
 
+export const NO_ACCELERATOR = '';
+
 /**
  * AI Platform Machine types.
  * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
  */
-export const MASTER_TYPES: Option[] = [
-  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
-  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
-  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
-  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
-  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
-  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
-
-  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
-  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
-  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
-  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
-  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
-
-  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
-  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
-  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
-  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
-];
-
-/* CPU to Memory mappings for the Compute Engine machine types */
 export interface MachineTypeConfiguration {
   base: Option;
   configurations: Option[];
@@ -348,4 +363,11 @@ export const STYLES = stylesheet({
 export const TEXT_STYLE = {
   fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
+};
+
+export const TEXT_LABEL_STYLE = {
+  ...TEXT_STYLE,
+  fontSize: '15px',
+  paddingRight: '2px',
+  backgroundColor: '#FFFFFF',
 };

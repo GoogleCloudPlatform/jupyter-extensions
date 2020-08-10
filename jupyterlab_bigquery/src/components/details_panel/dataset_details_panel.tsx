@@ -9,7 +9,7 @@ import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { stylesheet } from 'typestyle';
 
-const localStyles = stylesheet({
+export const localStyles = stylesheet({
   body: {
     marginBottom: '24px',
     marginRight: '24px',
