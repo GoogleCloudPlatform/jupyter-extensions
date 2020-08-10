@@ -14,13 +14,13 @@
  * limitations under the License.
  **/
 import React, { useState } from 'react';
-import { TextField, Button, Grid } from '@material-ui/core';
+import { TextField, Grid } from '@material-ui/core';
 import {
   newDetachedCommentReply,
   newReviewCommentReply,
 } from '../service/add_comment';
-import Icon from '@material-ui/core/Icon';
 import { getServerRoot } from '../service/jupyterConfig';
+import { SendButton } from './send_button';
 
 interface Props {
   currFilePath: string;
@@ -33,20 +33,41 @@ const style = {
   editor: {
     padding: 10,
   },
+  textField: {
+    margin: 2,
+    width: 400,
+  },
+  submit: {
+    paddingLeft: 320,
+    display: 'inlineBlock',
+  },
 };
 
-export function DetachedReplyEditor(props) {
+function ReplyEditor(props) {
   const [comment, setComment] = useState('');
   const serverRoot = getServerRoot();
 
   const handleSubmit = event => {
     event.preventDefault();
-    newDetachedCommentReply(
-      props.currFilePath,
-      serverRoot,
-      comment,
-      props.hash
-    );
+    switch (props.commentType) {
+      case 'review':
+        newReviewCommentReply(
+          props.currFilePath,
+          serverRoot,
+          comment,
+          props.hash,
+          props.reviewHash
+        );
+        break;
+      case 'detached':
+        newDetachedCommentReply(
+          props.currFilePath,
+          serverRoot,
+          comment,
+          props.hash
+        );
+        break;
+    }
     setComment(''); //clear comment text field
   };
   return (
@@ -59,81 +80,22 @@ export function DetachedReplyEditor(props) {
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
       />
-      <Grid container direction="row" spacing={0}>
+      <Grid container direction="column">
         <Grid item>
           <TextField
+            multiline
             label="Reply to this comment"
             value={comment}
+            rows={2}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
-            size="small"
-            style={{ margin: 2 }}
+            size="medium"
+            style={style.textField}
             className="replyCommentTextField"
           />
         </Grid>
         <Grid item>
-          <Button
-            type="submit"
-            color="primary"
-            size="small"
-            endIcon={<Icon>send</Icon>}
-            className="sendReply"
-          >
-            Send
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
-  );
-}
-
-export function ReviewReplyEditor(props) {
-  const [comment, setComment] = useState('');
-  const serverRoot = getServerRoot();
-
-  const handleSubmit = event => {
-    event.preventDefault();
-    newReviewCommentReply(
-      props.currFilePath,
-      serverRoot,
-      comment,
-      props.hash,
-      props.reviewHash
-    );
-    setComment(''); //clear comment text field
-  };
-  return (
-    <form
-      onSubmit={handleSubmit}
-      style={style.editor}
-      className="commentSubmit"
-    >
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      />
-      <Grid container direction="row" spacing={0}>
-        <Grid item>
-          <TextField
-            label="Reply to this comment"
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            variant="outlined"
-            size="small"
-            style={{ margin: 2 }}
-            className="replyCommentTextField"
-          />
-        </Grid>
-        <Grid item>
-          <Button
-            type="submit"
-            color="primary"
-            size="small"
-            endIcon={<Icon>send</Icon>}
-            className="sendReply"
-          >
-            Send
-          </Button>
+          <SendButton type="sendReply" style={style.submit} />
         </Grid>
       </Grid>
     </form>
@@ -142,13 +104,6 @@ export function ReviewReplyEditor(props) {
 
 export class NewReplyComment extends React.Component<Props> {
   render() {
-    switch (this.props.commentType) {
-      case 'review':
-        return <ReviewReplyEditor {...this.props} />;
-        break;
-      case 'detached':
-        return <DetachedReplyEditor {...this.props} />;
-        break;
-    }
+    return <ReplyEditor {...this.props} />;
   }
 }
