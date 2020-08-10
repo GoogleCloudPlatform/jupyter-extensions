@@ -48,7 +48,6 @@ class TestuCAIPExtension(unittest.TestCase):
             "createTime": 0.0,
             "updateTime": 60000.0,
             "datasetType": "TABLE",
-            "etag": "ETAG1234",
             "metadata": "",
         },
         {
@@ -57,7 +56,6 @@ class TestuCAIPExtension(unittest.TestCase):
             "createTime": 60000.0,
             "updateTime": 0.0,
             "datasetType": "IMAGE",
-            "etag": "1234ETAG",
             "metadata": metadata,
         },
     ]
@@ -97,7 +95,6 @@ class TestuCAIPExtension(unittest.TestCase):
         "pipelineId": "pipeline1",
         "createTime": 0.0,
         "updateTime": 60000.0,
-        "etag": "ETAG1234",
         "modelType": "OTHER",
         "inputs": None,
         "deployedModels": None
@@ -107,7 +104,6 @@ class TestuCAIPExtension(unittest.TestCase):
         "pipelineId": "pipeline2",
         "createTime": 60000.0,
         "updateTime": 0.0,
-        "etag": "1234ETAG",
         "modelType": "OTHER",
         "inputs": None,
         "deployedModels": None
@@ -194,7 +190,6 @@ class TestuCAIPExtension(unittest.TestCase):
     }
 
     got = ucaip.get_training_pipeline("pipeline_id")
-
     self.assertEqual(wanted, got)
 
 

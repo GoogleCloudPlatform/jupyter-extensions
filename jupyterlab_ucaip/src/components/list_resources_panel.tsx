@@ -8,6 +8,7 @@ import {
   MenuItem,
   Select,
   Toolbar,
+  Tooltip,
 } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
@@ -32,13 +33,13 @@ import {
   Pipeline,
   PipelineState,
 } from '../service/model';
-import { Context } from './ucaip_widget';
 import { DatasetWidget } from './datasets/dataset_widget';
-import { ImageWidget } from './datasets/image_widget';
 import { ExportData } from './datasets/export_data';
+import { ImageWidget } from './datasets/image_widget';
 import { ExportModel } from './models/export_model';
 import { ModelWidget } from './models/model_widget';
 import { PipelineWidget } from './pipelines/pipeline_widget';
+import { Context } from './ucaip_widget';
 
 interface Props {
   isVisible: boolean;
@@ -62,7 +63,7 @@ interface State {
   resourceType: ResourceType;
   searchString: string;
   showSearch: boolean;
-  exportDatasetDialogOpen: boolean;
+  createDatasetDialogOpen: boolean;
   exportModelDialogOpen: boolean;
   deleteDialogOpen: boolean;
   deleteSubmitHandler: () => void;
@@ -124,7 +125,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteDialogOpen: false,
       deleteSubmitHandler: null,
       deleteTargetName: '',
-      exportDatasetDialogOpen: false,
+      createDatasetDialogOpen: false,
       exportModelDialogOpen: false,
     };
   }
@@ -156,29 +157,35 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     switch (type) {
       case ResourceType.Model:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>publish</Icon>}
-            onClick={_ => {
-              this.setState({ exportModelDialogOpen: true });
-            }}
-          >
-            Export
-          </Button>
+          <Tooltip title="Export custom model">
+            <Button
+              disabled={this.state.isLoading}
+              color="secondary"
+              size="small"
+              startIcon={<Icon>publish</Icon>}
+              onClick={_ => {
+                this.setState({ exportModelDialogOpen: true });
+              }}
+            >
+              Export
+            </Button>
+          </Tooltip>
         );
       case ResourceType.Dataset:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>add</Icon>}
-            onClick={_ => {
-              this.setState({ exportDatasetDialogOpen: true });
-            }}
-          >
-            Create
-          </Button>
+          <Tooltip title="Create new dataset">
+            <Button
+              disabled={this.state.isLoading}
+              color="secondary"
+              size="small"
+              startIcon={<Icon>add</Icon>}
+              onClick={_ => {
+                this.setState({ createDatasetDialogOpen: true });
+              }}
+            >
+              Create
+            </Button>
+          </Tooltip>
         );
     }
   }
@@ -252,9 +259,13 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                   CodeGenService.generateCodeCell(
                     this.props.context,
                     CodeGenService.importDatasetCode(rowData.id),
-                    // Fallback to dataset dialog
+                    // Fallback to dataset view
                     _ => {
-                      this.setState({ importDatasetDialogOpen: true });
+                      this.props.context.manager.launchWidgetForId(
+                        DatasetWidget,
+                        rowData.id,
+                        rowData
+                      );
                     }
                   );
                 },
@@ -391,7 +402,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.setState({ showSearch: !this.state.showSearch });
               }}
             >
-              <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              <Tooltip
+                title={this.state.showSearch ? 'Close Search' : 'Search'}
+              >
+                <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              </Tooltip>
             </IconButton>
             <IconButton
               disabled={this.state.isLoading}
@@ -400,7 +415,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.refresh();
               }}
             >
-              <Icon>refresh</Icon>
+              <Tooltip title="Refresh">
+                <Icon>refresh</Icon>
+              </Tooltip>
             </IconButton>
           </Toolbar>
 
@@ -426,9 +443,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             submitLabel={'Ok'}
           />
           <ExportData
-            open={this.state.exportDatasetDialogOpen}
+            open={this.state.createDatasetDialogOpen}
             onClose={() => {
-              this.setState({ exportDatasetDialogOpen: false });
+              this.setState({ createDatasetDialogOpen: false });
             }}
             onSuccess={() => {
               this.refresh();
@@ -496,9 +513,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     };
     return (
       <ListItem dense style={{ padding: 0 }}>
-        <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
-          {icons[datasetType].icon}
-        </Icon>
+        <Tooltip title={datasetType.toLowerCase() + ' dataset'}>
+          <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
+            {icons[datasetType].icon}
+          </Icon>
+        </Tooltip>
       </ListItem>
     );
   }

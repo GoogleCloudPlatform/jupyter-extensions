@@ -33,7 +33,8 @@
     "prepack": "npm run clean && npm run build",
     "test": "jest --coverage --passWithNoTests",
     "test-watch": "jest --watch",
-    "watch": "tsc -b -w"
+    "watch": "tsc -b -w",
+    "docs": "cd jupyterlab_ucaip && pydoc-markdown -m jupyterlab_ucaip.public -m jupyterlab_ucaip.types > README.md"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.0.2",

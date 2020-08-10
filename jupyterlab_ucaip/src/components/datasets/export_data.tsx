@@ -9,11 +9,11 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
   COLORS,
-  DialogComponent,
   Option,
   RadioInput,
   TextInput,
   SelectInput,
+  DialogComponent,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
@@ -262,11 +262,11 @@ export class ExportData extends React.Component<Props, State> {
     if (this.props.open) {
       return (
         <DialogComponent
-          header={'Export Data to uCAIP Tables Dataset'}
+          header={'Create new uCAIP Tables Dataset'}
           open={true}
           onClose={this.props.onClose}
           onCancel={this.props.onClose}
-          submitLabel={'Export Data'}
+          submitLabel={'Create dataset'}
           onSubmit={this.submit}
           submitDisabled={
             this.state.loading ||
@@ -274,6 +274,7 @@ export class ExportData extends React.Component<Props, State> {
             !this.state.name ||
             !this.state.source
           }
+          height={'460px'}
         >
           <RadioInput
             value={this.state.from}

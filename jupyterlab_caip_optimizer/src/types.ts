@@ -103,15 +103,15 @@ export type ParameterSpecParent =
     }
   | {};
 
-export type UnspecifiedParameter = ParameterBase &
-  ParameterSpecParent & {
-    type: 'PARAMETER_TYPE_UNSPECIFIED';
-  };
-
-export type DoubleParameterSpec = ParameterSpecBase & {
-  type: 'DOUBLE';
-  doubleValueSpec: DoubleValueSpec;
+export type UnspecifiedParameter = ParameterBase & {
+  type: 'PARAMETER_TYPE_UNSPECIFIED';
 };
+
+export type DoubleParameterSpec = ParameterSpecBase &
+  ParameterSpecParent & {
+    type: 'DOUBLE';
+    doubleValueSpec: DoubleValueSpec;
+  };
 
 export type IntegerParameterSpec = ParameterSpecBase &
   ParameterSpecChildren &

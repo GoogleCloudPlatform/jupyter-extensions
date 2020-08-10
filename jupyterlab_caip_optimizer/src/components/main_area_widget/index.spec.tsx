@@ -17,6 +17,9 @@ jest.mock('../create_study', () => ({
 jest.mock('../study_details', () => ({
   StudyDetails: () => <div>Study Details Component</div>,
 }));
+jest.mock('../trial_visualization', () => ({
+  VisualizeTrials: () => <div>Trial Visualization Component</div>,
+}));
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { close as reduxClose } from '../../store/view';

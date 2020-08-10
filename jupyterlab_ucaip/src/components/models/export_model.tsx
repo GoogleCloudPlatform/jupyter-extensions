@@ -1,5 +1,5 @@
 import { FormControl } from '@material-ui/core';
-import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
+import { SelectInput, TextInput, DialogComponent } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { CodeComponent } from '../copy_code';
@@ -52,7 +52,7 @@ export class ExportModel extends React.Component<Props, State> {
     if (this.props.open) {
       return (
         <DialogComponent
-          header={'Import custom model'}
+          header={'Export custom model'}
           open={true}
           cancelLabel="OK"
           onClose={this.props.onClose}
@@ -128,7 +128,7 @@ export class ExportModel extends React.Component<Props, State> {
               }}
             />
           </FormControl>
-          Import a pretrained model to uCAIP using the Python API
+          Export a pretrained model to uCAIP using the Python API
           <CodeComponent>{this.getExportCode()}</CodeComponent>
         </DialogComponent>
       );
