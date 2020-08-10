@@ -19,15 +19,9 @@ import { ModelSchema } from './service/list_model_details';
 import { StripedRows } from '../shared/striped_rows';
 
 export const localStyles = stylesheet({
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '18px',
-    margin: 0,
-    padding: '8px 12px 8px 24px',
-  },
   title: {
     fontSize: '16px',
-    marginBottom: '8px',
+    marginBottom: '10px',
   },
   panel: {
     backgroundColor: 'white',
@@ -44,7 +38,8 @@ export const localStyles = stylesheet({
     display: 'flex',
     flexWrap: 'wrap',
     '& > *': {
-      margin: '4px',
+      marginRight: '8px',
+      marginBottom: '8px',
     },
   },
   rowTitle: {
@@ -61,6 +56,13 @@ export const TableHeadCell: React.ComponentType<any> = withStyles({
     backgroundColor: '#f0f0f0',
   },
 })(TableCell);
+
+const StyledChip = withStyles({
+  root: {
+    color: '#1967D2',
+    backgroundColor: 'rgba(25, 103, 210, 0.1)',
+  },
+})(Chip);
 
 const formatFieldName = name => {
   if (name.includes('.')) {
@@ -158,7 +160,9 @@ export const DetailsPanel: React.SFC<Props> = props => {
               {details.labels ? (
                 <div className={localStyles.labelContainer}>
                   {details.labels.map((value, index) => {
-                    return <Chip size="small" key={index} label={value} />;
+                    return (
+                      <StyledChip size="small" key={index} label={value} />
+                    );
                   })}
                 </div>
               ) : (

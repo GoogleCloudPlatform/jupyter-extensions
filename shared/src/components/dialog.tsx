@@ -5,6 +5,7 @@ import { stylesheet } from 'typestyle';
 import { BASE_FONT, COLORS } from '../styles';
 import { ActionBar } from './action_bar';
 import { SubmitButton } from './submit_button';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface Props {
   header?: string;
@@ -18,6 +19,7 @@ interface Props {
   submitDisabled?: boolean;
   hideSubmit?: boolean;
   keepMounted?: boolean;
+  height?: string;
 }
 
 const dialogStyle = stylesheet({
@@ -39,10 +41,27 @@ const dialogStyle = stylesheet({
   },
 });
 
+function getPaper(height: string) {
+  let classes = null;
+  if (height) {
+    classes = makeStyles({
+      paper: {
+        minHeight: height,
+      },
+    });
+    return classes().paper;
+  }
+  return null;
+}
+
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
 export function DialogComponent(props: Props) {
   return (
-    <Dialog keepMounted={props.keepMounted} open={props.open}>
+    <Dialog
+      keepMounted={props.keepMounted}
+      open={props.open}
+      classes={{ paper: getPaper(props.height) }}
+    >
       {props.header && (
         <header className={dialogStyle.header}>{props.header}</header>
       )}
