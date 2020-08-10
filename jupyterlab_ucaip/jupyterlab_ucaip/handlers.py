@@ -95,12 +95,12 @@ def _get_all_endpoints(args):
 
 @_handler("POST", "checkDeploying")
 def _check_deploying(args):
-  return UCAIPService.get().check_deploying(model_name=args["modelName"])
+  return UCAIPService.get().check_deploying(model_name=args["modelName"], endpoint_id=args["endpointId"])
 
 
 @_handler("POST", "deployModel")
 def _deploy_model(args):
-  UCAIPService.get().deploy_model(model_id=args["modelId"])
+  UCAIPService.get().deploy_model(model_id=args["modelId"], machine_type=args["machineType"], endpoint_id=args["endpointId"])
   return {"success": True}
 
 

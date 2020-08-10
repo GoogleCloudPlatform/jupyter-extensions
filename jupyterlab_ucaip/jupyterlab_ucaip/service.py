@@ -412,11 +412,15 @@ class UCAIPService:
       endpoints.append(built)
     return endpoints
 
-  def check_deploying(self, model_name):
+  def check_deploying(self, model_name, endpoint_id):
     endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
-    name = "ucaip-extension/" + model_name
-    filtered = filter(lambda x: name == x.display_name, endpoints)
-    filtered = list(filtered)
+    if endpoint_id != "":
+      filtered = filter(lambda x: endpoint_id == x.name, endpoints)
+      filtered = list(filtered)
+    else:
+      name = "ucaip-extension/" + model_name
+      filtered = filter(lambda x: name == x.display_name, endpoints)
+      filtered = list(filtered)
     if len(filtered) > 0:
       return [self._build_endpoint("None", filtered[0])]
     return []

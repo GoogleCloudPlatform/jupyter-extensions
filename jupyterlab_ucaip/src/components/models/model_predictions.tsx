@@ -8,7 +8,6 @@ import {
   TextField,
   IconButton,
   Button,
-  Tooltip,
   FormControl,
   FormHelperText,
   Select,
@@ -112,6 +111,8 @@ export class ModelPredictions extends React.Component<Props, State> {
     this.isPredictReady = this.isPredictReady.bind(this);
     this.handlePredict = this.handlePredict.bind(this);
     this.getEndpoints = this.getEndpoints.bind(this);
+    this.getCodeString = this.getCodeString.bind(this);
+    this.getInstanceString = this.getInstanceString.bind(this);
   }
 
   async componentDidMount() {
@@ -124,7 +125,10 @@ export class ModelPredictions extends React.Component<Props, State> {
       let endpoints = await ModelService.getEndpoints(this.props.model.id);
       let allEndpoints = [];
       if (endpoints.length === 0) {
-        endpoints = await ModelService.checkDeploying(this.props.model);
+        endpoints = await ModelService.checkDeploying(
+          this.props.model,
+          this.state.endpointId
+        );
       }
       if (endpoints.length === 0) {
         allEndpoints = await ModelService.getAllEndpoints();
@@ -143,7 +147,11 @@ export class ModelPredictions extends React.Component<Props, State> {
   private async deployModel() {
     try {
       this.setState({ isLoading: true });
-      await ModelService.deployModel(this.props.model.id);
+      await ModelService.deployModel(
+        this.props.model.id,
+        this.state.machineType,
+        this.state.endpointId
+      );
       this.getEndpoints();
     } catch (err) {
       console.warn('Error deploying model', err);
@@ -159,6 +167,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       if (endpoint.displayName.includes('ucaip-extension')) {
         await ModelService.deleteEndpoint(endpoint.id);
       }
+      this.setState({ endpointId: '' });
       this.getEndpoints();
     } catch (err) {
       console.warn('Error undeploying model', err);
@@ -207,6 +216,28 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
   }
 
+  private getInstanceString(): string {
+    let instanceString = `{\n`;
+    for (const [key, value] of Object.entries(this.state.inputParameters)) {
+      instanceString += `  '${key}': '${value}',\n`;
+    }
+    instanceString += `}`;
+    return instanceString;
+  }
+
+  private getCodeString(): string {
+    let codeString = `from jupyterlab_ucaip import deploy_model
+
+deploy_model(model_id='${this.props.model.id}',
+             machine_type='${this.state.machineType}'`;
+    if (this.state.endpointId !== '') {
+      codeString += `,
+             endpoint_id='${this.state.endpointId}'`;
+    }
+    codeString += `)`;
+    return codeString;
+  }
+
   private handleInputChange(event) {
     const target = event.target;
     const current = this.state.inputParameters;
@@ -225,25 +256,11 @@ export class ModelPredictions extends React.Component<Props, State> {
   private needToDeploy(): JSX.Element {
     return (
       <div>
-        <Tooltip title="Deploys model to a basic endpoint">
-          <Button
-            disabled={this.state.isLoading}
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={this.deployModel}
-            style={{ marginBottom: '16px' }}
-          >
-            Deploy Model
-          </Button>
-        </Tooltip>
         <Alert severity="info">
           Your model must be successfully deployed to an endpoint before you can
           test it.
         </Alert>
-        <header className={localStyles.header}>
-          Deploy model to customized endpoint
-        </header>
+        <header className={localStyles.header}>Deploy model to endpoint</header>
         <p style={{ paddingLeft: '8px' }}>
           <i>Select the machine type and endpoint to deploy to.</i>
         </p>
@@ -282,22 +299,17 @@ export class ModelPredictions extends React.Component<Props, State> {
           </Select>
           <FormHelperText>Endpoint</FormHelperText>
         </FormControl>
-        {this.state.endpointId !== '' ? (
-          <CodeComponent>
-            {`from jupyterlab_ucaip import deploy_model
-     
-deploy_model('${this.props.model.id}',
-             '${this.state.machineType}',
-             '${this.state.endpointId}')`}
-          </CodeComponent>
-        ) : (
-          <CodeComponent>
-            {`from jupyterlab_ucaip import deploy_model
-
-deploy_model('${this.props.model.id}',
-             '${this.state.machineType}')`}
-          </CodeComponent>
-        )}
+        <CodeComponent>{this.getCodeString()}</CodeComponent>
+        <Button
+          disabled={this.state.isLoading}
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={this.deployModel}
+          style={{ marginBottom: '16px' }}
+        >
+          Deploy Model
+        </Button>
       </div>
     );
   }
@@ -331,8 +343,8 @@ deploy_model('${this.props.model.id}',
           <div style={{ marginTop: '16px' }}>{this.state.result}</div>
           <header className={localStyles.header}>Code sample</header>
           <CodeComponent>
-{`from jupyterlab_ucaip import predict
-instance = ${JSON.stringify(this.state.inputParameters)}
+            {`from jupyterlab_ucaip import predict
+instance = ${this.getInstanceString()}
 predict("${this.state.endpoints[0].id}", instance)`}
           </CodeComponent>
         </div>

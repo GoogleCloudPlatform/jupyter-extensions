@@ -175,9 +175,13 @@ export abstract class ModelService {
     return data;
   }
 
-  static async checkDeploying(model: Model): Promise<Endpoint[]> {
+  static async checkDeploying(
+    model: Model,
+    endpointId: string
+  ): Promise<Endpoint[]> {
     const body = {
       modelName: model.displayName,
+      endpointId: endpointId,
     };
     const data = await requestAPI<Endpoint[]>(
       'v1/checkDeploying',
@@ -189,9 +193,15 @@ export abstract class ModelService {
     return data;
   }
 
-  static async deployModel(modelId: string): Promise<void> {
+  static async deployModel(
+    modelId: string,
+    machineType: string,
+    endpointId: string
+  ): Promise<void> {
     const body = {
       modelId: modelId,
+      machineType: machineType,
+      endpointId: endpointId !== '' ? endpointId : null,
     };
     await requestAPI('v1/deployModel', createRequest(body));
   }
