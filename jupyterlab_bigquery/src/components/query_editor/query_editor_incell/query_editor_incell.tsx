@@ -51,6 +51,10 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
                 editorType="IN_CELL"
                 queryFlags={this.queryFlags}
                 width={width}
+                onQueryChange={query => {
+                  this.props.ipyView.model.set('query', query);
+                  this.props.ipyView.touch();
+                }}
               />
               {showResult ? (
                 <QueryResults queryId={this.queryId} editorType="IN_CELL" />

@@ -14,11 +14,12 @@ import {
 } from '@material-ui/core';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import * as Types from '../../types';
-import { connect } from 'react-redux';
-import moment from 'moment';
 import { prettifyStudyName } from '../../service/optimizer';
+import { connect, useDispatch } from 'react-redux';
+import moment from 'moment';
 import { makeReadable, dateFormat } from '../../utils';
 import { setView } from '../../store/view';
+import { fetchTrials } from '../../store/studies';
 import { CommonNode } from '../parameter_spec_tree/common_node';
 import { styles } from '../../utils/styles';
 import { ParameterSpecTree } from '../parameter_spec_tree';
@@ -95,6 +96,7 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
 interface Props {
   studyId: string;
   studyToDisplay: FormattedStudy;
+  trials: any[];
   parameterSpecs: Types.ParameterSpec[];
   openTrials: (studyName: string) => void;
   openVisualizations: (studyName: string) => void;
@@ -118,9 +120,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     studyId: study.name,
     studyToDisplay,
+    trials: study.trials,
     parameterSpecs: study.studyConfig.parameters,
-    // TODO: add trials
-    // trialsToDisplay
   };
 };
 
@@ -180,14 +181,17 @@ function createParamRows(study: FormattedStudy): ParamRow[] {
 export const StudyDetailsUnwrapped: React.FC<Props> = ({
   studyId,
   studyToDisplay,
+  trials,
   parameterSpecs,
   openTrials,
   openVisualizations,
   openDashboard,
 }) => {
+  const dispatch = useDispatch();
   const classes = useStyles();
   const configRows = createConfigRows(studyToDisplay);
   const paramRows = createParamRows(studyToDisplay);
+  if (!trials) dispatch(fetchTrials(studyId));
   const [selectedParameterSpec, setSelectedParameterSpec] = React.useState<
     undefined | Types.ParameterSpec
   >(undefined);

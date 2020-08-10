@@ -9,15 +9,18 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
   COLORS,
-  DialogComponent,
   Option,
   RadioInput,
-  SelectInput,
   TextInput,
+  SelectInput,
+  DialogComponent,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { DatasetService } from '../service/dataset';
+import { Context } from './automl_widget';
+import { ClientSession } from '@jupyterlab/apputils';
+import { KernelModel } from '../service/kernel_model';
 import Toast from './toast';
 
 type SourceType = 'computer' | 'bigquery' | 'gcs' | 'dataframe';
@@ -26,6 +29,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  context: Context;
 }
 
 interface State {
@@ -34,6 +38,10 @@ interface State {
   name: string;
   error: string | null;
   loading: boolean;
+  sessions: Option[];
+  // TODO @josiegarza make this a part of source
+  kernelId: string;
+  errorOpen: boolean;
 }
 
 const theme = createMuiTheme({
@@ -99,12 +107,16 @@ export class ImportData extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.submit = this.submit.bind(this);
+    this.toggleImport = this.toggleImport.bind(this);
     this.state = {
       from: 'computer',
       source: null,
       name: '',
       error: null,
       loading: false,
+      sessions: null,
+      kernelId: null,
+      errorOpen: false,
     };
   }
 
@@ -129,6 +141,7 @@ export class ImportData extends React.Component<Props, State> {
           });
           break;
         case 'dataframe':
+          this.initializeSession(this.state.kernelId);
           break;
         default:
       }
@@ -139,11 +152,79 @@ export class ImportData extends React.Component<Props, State> {
         error: 'There was an error creating the dataset: ' + err,
       });
     } finally {
-      this.setState({ loading: false });
-      if (!this.state.error) {
-        this.props.onSuccess();
+      if (this.state.from !== 'dataframe') {
+        this.setState({ loading: false });
+        if (!this.state.error) {
+          this.props.onSuccess();
+        }
       }
     }
+  }
+
+  private getSessions() {
+    const manager = this.props.context.app.serviceManager;
+    const running = manager.sessions.running();
+    const sessions: Option[] = [];
+    let current = running.next();
+    this.setState({ kernelId: current['kernel']['id'] });
+    while (current) {
+      if (current.name !== '') {
+        sessions.push({
+          text: current['name'],
+          value: current['kernel']['id'],
+        });
+      }
+      current = running.next();
+    }
+    this.setState({ sessions: sessions });
+  }
+
+  private initializeSession(kernelId: string) {
+    const manager = this.props.context.app.serviceManager;
+    const kernelPreference = {
+      id: kernelId,
+    };
+    const session = new ClientSession({
+      manager: manager.sessions,
+      kernelPreference: kernelPreference,
+    });
+    session
+      .initialize()
+      .catch(reason => {
+        console.error(`Failed to initialize the session.\n${reason}`);
+      })
+      .then(() => {
+        this.createKernelModel(session);
+      });
+  }
+
+  private createKernelModel(session: ClientSession) {
+    const model = new KernelModel(
+      session,
+      () => {
+        this.props.onSuccess();
+        this.setState({ loading: false });
+      },
+      error => {
+        this.setState({ error: error, loading: false, errorOpen: true });
+      }
+    );
+    model.receivedSuccess.connect(this.refresh);
+    model.receivedError.connect(this.uploadDataFrameError);
+    model.createCSV(this.state.name, this.state.source);
+  }
+
+  private refresh(emitter: KernelModel) {
+    emitter.refresh();
+  }
+
+  private uploadDataFrameError(emitter: KernelModel, title: string) {
+    const error =
+      title +
+      ': ' +
+      emitter.output +
+      '. Make sure the variable you entered is a pandas dataframe.';
+    emitter.onError(error);
   }
 
   private validateGCS(source: string) {
@@ -164,6 +245,69 @@ export class ImportData extends React.Component<Props, State> {
     } else {
       this.setState({ error: 'Invalid BigQuery uri' });
     }
+  }
+
+  private toggleImport(event: any) {
+    this.setState({
+      from: event.target.value as SourceType,
+      source: null,
+      error: null,
+    });
+    if (event.target.value === 'dataframe') {
+      this.getSessions();
+    }
+  }
+
+  private getDialog(): JSX.Element {
+    if (this.props.open) {
+      return (
+        <DialogComponent
+          header={'Import Data to Tables Dataset'}
+          open={true}
+          onClose={this.props.onClose}
+          onCancel={this.props.onClose}
+          submitLabel={'Import Data'}
+          onSubmit={this.submit}
+          submitDisabled={
+            this.state.loading ||
+            this.state.error !== null ||
+            !this.state.name ||
+            !this.state.source
+          }
+          height={'460px'}
+        >
+          <RadioInput
+            value={this.state.from}
+            options={SOURCES}
+            onChange={this.toggleImport}
+          />
+          <div style={{ paddingTop: '16px' }}>
+            <FormControl
+              error={this.state.error !== null}
+              className={localStyles.form}
+            >
+              <p className={localStyles.title}>
+                {
+                  SOURCES.filter(el => {
+                    return el.value === this.state.from;
+                  })[0].text
+                }
+              </p>
+              <TextInput
+                placeholder="my_dataset"
+                label="Name"
+                onChange={event => {
+                  this.setState({ name: event.target.value });
+                }}
+              />
+              {this.getDialogContent()}
+              {this.getDialogError()}
+            </FormControl>
+          </div>
+        </DialogComponent>
+      );
+    }
+    return null;
   }
 
   private getDialogContent(): JSX.Element {
@@ -220,7 +364,32 @@ export class ImportData extends React.Component<Props, State> {
         />
       );
     } else if (from === 'dataframe') {
-      return <SelectInput />;
+      return (
+        <>
+          <SelectInput
+            label={'Select file'}
+            options={this.state.sessions}
+            onChange={event => {
+              this.setState({ kernelId: event.target.value });
+            }}
+          />
+          <TextInput
+            placeholder="df"
+            label="Dataframe variable from selected kernel"
+            onChange={event => {
+              const source = event.target.value;
+              this.setState({ source: source });
+            }}
+          />
+        </>
+      );
+    }
+    return null;
+  }
+
+  private getDialogError(): JSX.Element {
+    if (this.state.error) {
+      return <FormHelperText>{this.state.error}</FormHelperText>;
     }
     return null;
   }
@@ -239,59 +408,20 @@ export class ImportData extends React.Component<Props, State> {
             <CircularProgress size={24}></CircularProgress>
           </Toast>
         </Portal>
-        {this.props.open && (
-          <DialogComponent
-            header={'Import Data'}
-            open={true}
-            onClose={this.props.onClose}
-            onCancel={this.props.onClose}
-            submitLabel={'Import Data'}
-            onSubmit={this.submit}
-            submitDisabled={
-              this.state.loading ||
-              this.state.error !== null ||
-              !this.state.name ||
-              !this.state.source
-            }
+        <Portal>
+          <Toast
+            open={this.state.errorOpen}
+            onClose={() => {
+              this.setState({ errorOpen: false });
+              this.setState({ error: null });
+            }}
+            error={true}
+            autoHideDuration={6000}
           >
-            <RadioInput
-              value={this.state.from}
-              options={SOURCES}
-              onChange={event => {
-                this.setState({
-                  from: event.target.value as SourceType,
-                  source: null,
-                  error: null,
-                });
-              }}
-            />
-            <div style={{ paddingTop: '16px' }}>
-              <FormControl
-                error={this.state.error !== null}
-                className={localStyles.form}
-              >
-                <p className={localStyles.title}>
-                  {
-                    SOURCES.filter(el => {
-                      return el.value === this.state.from;
-                    })[0].text
-                  }
-                </p>
-                <TextInput
-                  placeholder="my_dataset"
-                  label="Name"
-                  onChange={event => {
-                    this.setState({ name: event.target.value });
-                  }}
-                />
-                {this.getDialogContent()}
-                {this.state.error && (
-                  <FormHelperText>{this.state.error}</FormHelperText>
-                )}
-              </FormControl>
-            </div>
-          </DialogComponent>
-        )}
+            {this.state.error}
+          </Toast>
+        </Portal>
+        {this.getDialog()}
       </>
     );
   }

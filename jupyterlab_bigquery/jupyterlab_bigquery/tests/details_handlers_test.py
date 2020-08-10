@@ -4,7 +4,9 @@ import unittest
 import datetime
 from unittest.mock import Mock, MagicMock, patch
 
-from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview, get_view_details
+from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview, get_view_details, get_model_details
+from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
+from google.cloud.bigquery_v2.gapic.enums import Model
 
 class TestDatasetDetails(unittest.TestCase):
   def testGetDatasetDetailsFull(self):
@@ -28,10 +30,10 @@ class TestDatasetDetails(unittest.TestCase):
             'name': 'dataset_id',
             'description': 'description of dataset',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'default_expiration': 17280000000,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
@@ -60,16 +62,17 @@ class TestDatasetDetails(unittest.TestCase):
             'name': 'dataset_id',
             'description': None,
             'labels': None,
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'default_expiration': None,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
     }
 
     result = get_dataset_details(client, 'some_dataset_id')
+    self.maxDiff = None
     self.assertEqual(expected, result)
 
 class TestTableDetails(unittest.TestCase):
@@ -113,10 +116,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': 'description of table',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -166,10 +169,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': None,
             'labels': None,
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'expires': None,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -223,10 +226,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': 'description of table',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -250,7 +253,7 @@ class TestTableDetails(unittest.TestCase):
     result = get_table_details(client, 'some_table_id')
     self.assertEqual(expected, result)
   
-class TestTablePreviewPreview(unittest.TestCase):
+class TestTablePreview(unittest.TestCase):
     def testNestedTable(self):
         # ensures records schema names are properly displayed and items
         # within records are properly separated
@@ -389,7 +392,6 @@ class TestTablePreviewPreview(unittest.TestCase):
         }
 
         result = get_table_preview(client, 'some_table_id')
-        self.maxDiff = None
         self.assertEqual(expected, result)
 
 class TestViewDetails(unittest.TestCase):
@@ -434,9 +436,9 @@ class TestViewDetails(unittest.TestCase):
             'name': 'view_id',
             'description': 'description of view',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id/view_id',
@@ -458,8 +460,97 @@ class TestViewDetails(unittest.TestCase):
     }
 
     result = get_view_details(client, 'some_view_id')
-    self.maxDiff = None
     self.assertEqual(expected, result)
+
+
+class TestModelDetails(unittest.TestCase):
+    def testGetModelDetailsFull(self):
+        client = Mock()
+
+        label_col_0 = Mock()
+        label_col_0.name = 'schema_label_0'
+        label_col_0.type = Mock(type_kind = 7)
+        label_col_1 = Mock()
+        label_col_1.name = 'schema_label_1'
+        label_col_1.type = Mock(type_kind = 9)
+
+        feature_col_0 = Mock()
+        feature_col_0.name = 'feature_col_0'
+        feature_col_0.type = Mock(type_kind = 8)
+    
+        model = Mock(
+            project = 'project_id',
+            dataset_id = 'dataset_id',
+            model_id = 'model_id',
+            description = 'description of model',
+            labels = {'label_0': 'value_0', 'label_1': 'value_1'},
+            created = datetime.datetime(2020, 7, 14, 13, 23, 45, 67, tzinfo=None),
+            expires = datetime.datetime(2021, 7, 14, 13, 23, 45, 67, tzinfo=None),
+            location = 'US',
+            modified = datetime.datetime(2020, 7, 15, 15, 11, 23, 32, tzinfo=None),
+            model_type = 0,
+            label_columns = [label_col_0, label_col_1],
+            feature_columns = [feature_col_0]
+        )
+        client.get_model = Mock(return_value = model)
+
+        expected = {
+            'details': {
+                'id': 'project_id.dataset_id.model_id',
+                'name': 'model_id',
+                'description': 'description of model',
+                'labels': ['label_0: value_0', 'label_1: value_1'],
+                'date_created': '2020-07-14T13:23:45.000067',
+                'expires': '2021-07-14T13:23:45.000067',
+                'location': 'US',
+                'last_modified': '2020-07-15T15:11:23.000032',
+                'model_type': Model.ModelType(0).name,
+                'schema_labels': [{'name': 'schema_label_0', 'type': SqlTypeNames[StandardSqlDataTypes(7).name].name}, {'name': 'schema_label_1', 'type': StandardSqlDataTypes(9).name}],
+                'feature_columns': [{'name': 'feature_col_0', 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name}]
+            }
+        }
+
+        result = get_model_details(client, 'some_model_id')
+        self.assertEqual(expected, result)
+
+    def testGetModelDetailsEmptyFields(self):
+        client = Mock()
+
+        model = Mock(
+            project = 'project_id',
+            dataset_id = 'dataset_id',
+            model_id = 'model_id',
+            description = None,
+            labels = {},
+            created = datetime.datetime(2020, 7, 14, 13, 23, 45, 67, tzinfo=None),
+            expires = datetime.datetime(2021, 7, 14, 13, 23, 45, 67, tzinfo=None),
+            location = 'US',
+            modified = datetime.datetime(2020, 7, 15, 15, 11, 23, 32, tzinfo=None),
+            model_type = 0,
+            label_columns = [],
+            feature_columns = []
+        )
+        client.get_model = Mock(return_value = model)
+
+        expected = {
+            'details': {
+                'id': 'project_id.dataset_id.model_id',
+                'name': 'model_id',
+                'description': None,
+                'labels': None,
+                'date_created': '2020-07-14T13:23:45.000067',
+                'expires': '2021-07-14T13:23:45.000067',
+                'location': 'US',
+                'last_modified': '2020-07-15T15:11:23.000032',
+                'model_type': Model.ModelType(0).name,
+                'schema_labels': [],
+                'feature_columns': []
+            }
+        }
+
+        result = get_model_details(client, 'some_model_id')
+        self.assertEqual(expected, result)
+
 
 if __name__ == '__main__':
   unittest.main()

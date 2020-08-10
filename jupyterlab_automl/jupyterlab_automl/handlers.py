@@ -1,5 +1,6 @@
 """Request handler classes for the extension"""
 
+import base64
 import json
 
 import tornado.gen as gen
@@ -57,6 +58,11 @@ def _list_datasets(_):
   return AutoMLService.get().get_datasets()
 
 
+@_handler("GET", "datasetDetails")
+def _get_dataset_details(args):
+  return AutoMLService.get().get_dataset_details(args["datasetId"])
+
+
 @_handler("GET", "models")
 def _list_models(_):
   return AutoMLService.get().get_models()
@@ -69,7 +75,47 @@ def _list_model_evaluations(args):
 
 @_handler("GET", "pipeline")
 def _get_pipeline(args):
-  return AutoMLService.get().get_pipeline(args["pipelineId"])
+  return AutoMLService.get().get_training_pipeline(args["pipelineId"])
+
+
+@_handler("GET", "pipelines")
+def _get_pipelines(_):
+  return AutoMLService.get().get_training_pipelines()
+
+
+@_handler("POST", "getEndpoints")
+def _get_endpoints(args):
+  return AutoMLService.get().get_endpoints(model_id=args["modelId"])
+
+
+@_handler("POST", "checkDeploying")
+def _check_deploying(args):
+  return AutoMLService.get().check_deploying(model_name=args["modelName"])
+
+
+@_handler("POST", "deployModel")
+def _deploy_model(args):
+  AutoMLService.get().deploy_model(model_id=args["modelId"])
+  return {"success": True}
+
+
+@_handler("POST", "undeployModel")
+def _undeploy_model(args):
+  AutoMLService.get().undeploy_model(deployed_model_id=args["deployedModelId"],
+                                     endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "deleteEndpoint")
+def _delete_endpoint(args):
+  AutoMLService.get().delete_endpoint(endpoint_id=args["endpointId"])
+  return {"success": True}
+
+
+@_handler("POST", "predict")
+def _predict_tables(args):
+  return AutoMLService.get().predict_tables(endpoint_id=args["endpointId"],
+                                            instance=args["inputs"])
 
 
 @_handler("GET", "tableInfo")
@@ -103,10 +149,11 @@ def _project(_):
 def _create_tables_dataset(args):
   file_source = args.get("fileSource")
   if file_source:
+    decoded = base64.decodebytes(file_source["data"])
     AutoMLService.get().create_dataset_from_file(
         display_name=args["displayName"],
         file_name=file_source["name"],
-        file_data=file_source["data"])
+        file_data=decoded)
   else:
     AutoMLService.get().create_dataset(display_name=args["displayName"],
                                        gcs_uri=args.get("gcsSource"),

@@ -1,4 +1,4 @@
-import React, { FormEvent } from 'react';
+import React, { FormEvent, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -15,14 +15,17 @@ import {
   TemporaryParameterIntegerMetadata,
   TemporaryParameterDoubleMetadata,
   TemporaryParameterDiscreteMetadata,
-} from '.';
+  TemporaryParentParameter,
+  TemporaryParameterChildMetadata,
+} from './types';
 import { makeStyles } from '@material-ui/core/styles';
 import { ParameterTypeList, ParameterType } from '../../types';
 import {
-  ParameterNumberInput,
   ParameterListInput,
+  ParameterNumberInput,
 } from './parameter_type_inputs';
 import { ChipBox, ChipBoxHeader, ChipBoxBody } from '../misc/ChipBox';
+import { isParentParameter } from './utils';
 
 const useStyles = makeStyles(theme => ({
   chip: {
@@ -48,12 +51,22 @@ export const ParameterList: React.FC<Props> = ({
   const [type, setType] = React.useState<ParameterType>(
     'PARAMETER_TYPE_UNSPECIFIED'
   );
+  const [parentMetadata, setParentMetadata] = React.useState<
+    undefined | TemporaryParameterChildMetadata
+  >(undefined);
   // specific to parameter type
   const [metadata, setMetadata] = React.useState<TemporaryParameterMetadata>(
     {}
   );
 
   // computed
+  const validParentParameters = useMemo(
+    () =>
+      parameters.filter(
+        parameter => parameter.name !== name && isParentParameter(parameter)
+      ) as TemporaryParentParameter[],
+    [parameters]
+  );
 
   // functions
   const removeParameter = (name: string) => {
@@ -66,6 +79,7 @@ export const ParameterList: React.FC<Props> = ({
     setEditing(false);
     setName('');
     setType('PARAMETER_TYPE_UNSPECIFIED');
+    setParentMetadata(undefined);
   };
 
   const selectParameter = (name: string) => {
@@ -74,6 +88,7 @@ export const ParameterList: React.FC<Props> = ({
       setName(found.name);
       setType(found.type);
       setMetadata(found.metadata);
+      setParentMetadata(found.parent);
       setEditing(true);
     }
   };
@@ -86,6 +101,7 @@ export const ParameterList: React.FC<Props> = ({
         name,
         type,
         metadata,
+        parent: parentMetadata,
       } as unknown) as TemporaryParameter;
 
       const existingIndex = parameters.findIndex(
@@ -148,24 +164,30 @@ export const ParameterList: React.FC<Props> = ({
       case 'INTEGER':
         return (
           <ParameterNumberInput
-            value={
+            metadata={
               metadata as
                 | TemporaryParameterDoubleMetadata
                 | TemporaryParameterIntegerMetadata
             }
             onChange={setMetadata}
+            parentParameters={validParentParameters}
+            parentMetadata={parentMetadata}
+            onChangeParentMetadata={setParentMetadata}
           />
         );
       case 'CATEGORICAL':
       case 'DISCRETE':
         return (
           <ParameterListInput
-            value={
+            metadata={
               metadata as
                 | TemporaryParameterDiscreteMetadata
-                | TemporaryParameterDiscreteMetadata
+                | TemporaryParameterCategoricalMetadata
             }
             onChange={setMetadata}
+            parentParameters={validParentParameters}
+            parentMetadata={parentMetadata}
+            onChangeParentMetadata={setParentMetadata}
           />
         );
       default:
