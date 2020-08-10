@@ -404,6 +404,14 @@ class UCAIPService:
         endpoints.append(built)
     return endpoints
 
+  def get_all_endpoints(self):
+    gcp_endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    endpoints = []
+    for endpoint in gcp_endpoints:
+      built = self._build_endpoint("None", endpoint)
+      endpoints.append(built)
+    return endpoints
+
   def check_deploying(self, model_name):
     endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
     name = "ucaip-extension/" + model_name
@@ -506,6 +514,11 @@ class UCAIPService:
         "disableEarlyStopping": False,
         "optimizationObjective": objective,
     }
+
+    if objective == "maximize-precision-at-recall":
+      training_task_inputs["optimizationObjectiveRecallValue"] = 0.5
+    if objective == "maximize-recall-at-precision":
+      training_task_inputs["optimizationObjectivePrecisionValue"] = 0.5
 
     training_pipeline = {
         "display_name": training_pipeline_name,

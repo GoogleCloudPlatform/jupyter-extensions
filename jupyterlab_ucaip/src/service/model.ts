@@ -167,6 +167,14 @@ export abstract class ModelService {
     return data;
   }
 
+  static async getAllEndpoints(): Promise<Endpoint[]> {
+    const data = await requestAPI<Endpoint[]>('v1/getAllEndpoints');
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
+    return data;
+  }
+
   static async checkDeploying(model: Model): Promise<Endpoint[]> {
     const body = {
       modelName: model.displayName,

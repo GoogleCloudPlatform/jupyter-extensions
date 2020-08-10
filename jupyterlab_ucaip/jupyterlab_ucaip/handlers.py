@@ -88,6 +88,11 @@ def _get_endpoints(args):
   return UCAIPService.get().get_endpoints(model_id=args["modelId"])
 
 
+@_handler("GET", "getAllEndpoints")
+def _get_all_endpoints(args):
+  return UCAIPService.get().get_all_endpoints()
+
+
 @_handler("POST", "checkDeploying")
 def _check_deploying(args):
   return UCAIPService.get().check_deploying(model_name=args["modelName"])
