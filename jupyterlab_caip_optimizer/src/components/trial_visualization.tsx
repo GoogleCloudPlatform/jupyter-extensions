@@ -1,7 +1,9 @@
 import React from 'react';
 import { Grid, Paper, Radio } from '@material-ui/core';
+import { LineGraph } from './graphs/line_graph';
+import { Scatterplot } from './graphs/scatterplot';
 import { ParallelCoordinates } from './graphs/parallel_coordinates';
-import { Typography, Slider, Box, Button } from '@material-ui/core/';
+import { Typography, Slider, Box, Button, TextField, MenuItem, FormControl, FormControlLabel, RadioGroup } from '@material-ui/core/';
 import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
 import { setView } from '../store/view';
@@ -276,6 +278,25 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [height, setHeight] = React.useState(0);
   const [value, setValue] = React.useState([0, 1]); // Placeholder value for slider changes
   const [selectedMetric, setSelectedMetric] = React.useState('');
+  const [selectedParamOnDropdown, setSelectedParamOnDropdown] = React.useState(
+    ""
+  );
+  const [
+    selectedMetricOnDropdown,
+    setSelectedMetricOnDropdown
+  ] = React.useState("");
+  const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState("");
+
+  const handleLineGraphRadioChange = (event) => {
+    setLineGraphYAxisMetric(event.target.value);
+  };
+
+  const handleParamDropdownSelect = (event) => {
+    setSelectedParamOnDropdown(event.target.value);
+  };
+  const handleMetricDropdownSelect = (event) => {
+    setSelectedMetricOnDropdown(event.target.value);
+  };
 
   if (!trials) {
     dispatch(fetchTrials(studyName));
@@ -461,7 +482,102 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
         <Box display="flex" my={3}>
           <Grid container spacing={3}>
             <Grid container item xs={12} ref={ref}>
-              <Paper>
+            <Paper className={styles.paper}>
+                <Grid container item xs={12} alignItems="center">
+                  <Grid container item xs={12}>
+                    <Typography variant="h6">Study Overview</Typography>
+                  </Grid>
+                  <Grid container item xs={10}>
+                    <LineGraph
+                      width={width * ((10 / 12) * 1.0)}
+                      height={height * ((10 / 12) * 0.5)}
+                      axisProps={axisPropsList}
+                      trialData={trialDataList}
+                      selectedMetric={lineGraphYAxisMetric ? lineGraphYAxisMetric : axisLabelsRight[0]}
+                      metricList={axisLabelsRight}
+                    />
+                  </Grid>
+                  <Grid container item xs={2}>
+                    <FormControl component="fieldset">
+                      <RadioGroup
+                        aria-label="yAxis"
+                        name="yAxis"
+                        value={lineGraphYAxisMetric}
+                        onChange={handleLineGraphRadioChange}
+                        defaultValue={axisLabelsRight[0]}
+                      >
+                        {axisLabelsRight.map((metric) => {
+                          return (
+                            <FormControlLabel
+                              value={metric}
+                              control={<Radio size="small" />}
+                              label={metric}
+                            />
+                          );
+                        })}
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </Paper>
+              <Paper className={styles.paper}>
+                <Grid container item xs={12} alignItems="center">
+                  <Grid container item xs={12}>
+                    <Typography variant="h6">Scatterplot Analysis</Typography>
+                  </Grid>
+                  <Grid container item xs={6} spacing={1}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        id="scatterplotParam"
+                        variant="outlined"
+                        select
+                        label="Select Parameter"
+                        value={selectedParamOnDropdown}
+                        onChange={handleParamDropdownSelect}
+                        size="small"
+                        fullWidth
+                        required
+                      >
+                        {axisLabelsLeft.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        id="scatterplotMetric"
+                        variant="outlined"
+                        select
+                        label="Select Metric"
+                        value={selectedMetricOnDropdown}
+                        onChange={handleMetricDropdownSelect}
+                        size="small"
+                        fullWidth
+                        required
+                      >
+                        {axisLabelsRight.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                  </Grid>
+                  <Grid container item xs={6}>
+                    <Scatterplot
+                      width={width * 0.5}
+                      height={height * 0.8}
+                      axisProps={axisPropsList}
+                      trialData={trialDataList}
+                      selectedParam={selectedParamOnDropdown}
+                      selectedMetric={selectedMetricOnDropdown}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+              <Paper className={styles.paper}>
                 <Box m={5} overflow="scroll">
                   <ParallelCoordinates
                     width={width}
