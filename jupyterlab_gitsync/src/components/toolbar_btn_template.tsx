@@ -8,6 +8,18 @@ import {
 
 import { Props } from './panel';
 
+/* Note for "options" attribute in state:
+
+ * This attribute is used for subclasses of the ToolbarButton
+ * that may need other state attributes (such as running). Since
+ * different children may need different additional attributes,
+ * we can pass in an 'options' parameter that can be used to 
+ * include additional parameters. 
+
+ * This will be changed once the class is refactored to be 
+ * implemented without inheritance.
+ */
+
 export interface State {
   label: string;
   style: ReturnType<typeof style>;
