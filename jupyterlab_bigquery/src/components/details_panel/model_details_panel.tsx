@@ -87,7 +87,7 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ height: '100%' }}>
+        <div className={localStyles.container}>
           <Header text={this.props.modelName} />
           <div className={localStyles.body}>
             <DetailsPanel
