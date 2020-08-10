@@ -8,6 +8,7 @@ import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { stylesheet } from 'typestyle';
+import { formatDate } from '../../utils/formatters';
 
 export const localStyles = stylesheet({
   body: {
@@ -77,14 +78,17 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
       const detailsObj = details.details;
       const rows = [
         { name: 'Dataset ID', value: detailsObj.id },
-        { name: 'Created', value: detailsObj.date_created },
+        { name: 'Created', value: formatDate(detailsObj.date_created) },
         {
           name: 'Default table expiration',
           value: detailsObj.default_expiration
             ? this.formatMs(detailsObj.default_expiration)
             : 'Never',
         },
-        { name: 'Last modified', value: detailsObj.last_modified },
+        {
+          name: 'Last modified',
+          value: formatDate(detailsObj.last_modified),
+        },
         {
           name: 'Data location',
           value: detailsObj.location ? detailsObj.location : 'None',

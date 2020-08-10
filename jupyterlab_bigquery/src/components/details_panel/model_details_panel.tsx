@@ -7,6 +7,7 @@ import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { Header } from '../shared/header';
 import { localStyles } from './dataset_details_panel';
+import { formatDate } from '../../utils/formatters';
 
 interface Props {
   modelDetailsService: ModelDetailsService;
@@ -56,14 +57,14 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
       const detailsObj = details.details;
       const rows = [
         { name: 'Model ID', value: detailsObj.id },
-        { name: 'Date created', value: detailsObj.date_created },
+        { name: 'Date created', value: formatDate(detailsObj.date_created) },
         {
           name: 'Model expiration',
-          value: detailsObj.expires ? detailsObj.expires : 'Never',
+          value: detailsObj.expires ? formatDate(detailsObj.expires) : 'Never',
         },
         {
           name: 'Date modified',
-          value: detailsObj.last_modified,
+          value: formatDate(detailsObj.last_modified),
         },
         {
           name: 'Data location',
@@ -87,7 +88,7 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ height: '100%' }}>
+        <div className={localStyles.container}>
           <Header text={this.props.modelName} />
           <div className={localStyles.body}>
             <DetailsPanel

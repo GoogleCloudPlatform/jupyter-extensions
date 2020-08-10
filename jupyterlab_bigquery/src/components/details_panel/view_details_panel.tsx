@@ -5,6 +5,7 @@ import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { localStyles } from './dataset_details_panel';
+import { formatDate } from '../../utils/formatters';
 
 interface Props {
   viewDetailsService: ViewDetailsService;
@@ -59,9 +60,12 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
       const detailsObj = details.details;
       const rows = [
         { name: 'View ID', value: detailsObj.id },
-        { name: 'Created', value: detailsObj.date_created },
-        { name: 'Last modified', value: detailsObj.last_modified },
-        { name: 'View expiration', value: detailsObj.expires ?? 'Never' },
+        { name: 'Created', value: formatDate(detailsObj.date_created) },
+        { name: 'Last modified', value: formatDate(detailsObj.last_modified) },
+        {
+          name: 'View expiration',
+          value: detailsObj.expires ? formatDate(detailsObj.expires) : 'Never',
+        },
         { name: 'Use Legacy SQL', value: detailsObj.legacy_sql },
       ];
 
