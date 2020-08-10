@@ -10,12 +10,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import * as QueryEditorInCellWidgetsExport from './components/query_editor/query_editor_incell/query_editor_incell_widget';
 
 import ListItemsWidget from './components/list_items_panel/list_tree_item_widget';
-import {
-  ListProjectsService,
-  ListDatasetsService,
-  ListTablesService,
-  ListModelsService,
-} from './components/list_items_panel/service/list_items';
+import { ListProjectsService } from './components/list_items_panel/service/list_items';
 import { WidgetManager } from './utils/widgetManager/widget_manager';
 import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
@@ -32,9 +27,6 @@ async function activate(
     notebookTrack: notebookTrack,
   };
   const listProjectsService = new ListProjectsService();
-  const listDatasetsService = new ListDatasetsService();
-  const listTablesService = new ListTablesService();
-  const listModelsService = new ListModelsService();
   manager.launchWidget(
     ListItemsWidget,
     'left',
@@ -42,13 +34,7 @@ async function activate(
     (widget: ReduxReactWidget) => {
       widget.addClass('jp-BigQueryIcon');
     },
-    [
-      listProjectsService,
-      listDatasetsService,
-      listTablesService,
-      listModelsService,
-      context,
-    ],
+    [listProjectsService, context],
     { rank: 100 }
   );
 
