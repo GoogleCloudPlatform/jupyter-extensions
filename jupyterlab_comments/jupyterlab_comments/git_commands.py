@@ -125,8 +125,8 @@ class Git(Configurable):
 			review_comments = review.get("comments", [])
 			comments_on_file = []
 			for item in review_comments:
-				location = item["comment"]["location"]
-				if location.get("path", "") == file_path_from_repo_root:
+				location = item["comment"].get("location", "")
+				if location and location.get("path", "") == file_path_from_repo_root:
 					comments_on_file.append(item)
 
 			review["comments"] = comments_on_file
