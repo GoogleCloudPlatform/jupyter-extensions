@@ -7,9 +7,7 @@ import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
 import { Button, Typography } from '@material-ui/core';
-import { ContextMenu } from 'gcp_jupyterlab_shared';
-import DropDown from '../../shared/dropdown';
-import { Equalizer, ArrowDropDown } from '@material-ui/icons';
+import { Equalizer } from '@material-ui/icons';
 
 const localStyles = stylesheet({
   resultsContainer: {
