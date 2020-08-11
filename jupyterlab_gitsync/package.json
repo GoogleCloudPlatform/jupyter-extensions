@@ -65,8 +65,8 @@
     "typestyle": "^2.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.7",
-    "@babel/preset-env": "^7.8.7",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
     "@jupyterlab/testutils": "^1.2.2",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
@@ -81,7 +81,7 @@
     "enzyme-to-json": "^3.4.4",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
-    "rimraf": "^3.0.0",
+    "rimraf": "^3.0.2",
     "ts-jest": "^24.3.0",
     "typescript": "^3.8.3"
   },
