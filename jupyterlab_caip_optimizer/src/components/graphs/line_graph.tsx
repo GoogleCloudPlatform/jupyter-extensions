@@ -74,7 +74,10 @@ export const LineGraph = (props: Props) => {
 
       // Populate the axes
       const xAxis = d3.axisBottom().scale(xScale);
-      const yAxis = d3.axisLeft().scale(yScale).ticks(5); // Only 5 ticks will be displayed along the yAxis;
+      const yAxis = d3
+        .axisLeft()
+        .scale(yScale)
+        .ticks(5); // Only 5 ticks will be displayed along the yAxis;
       svg
         .append('g')
         .attr('transform', `translate(0,${height - padding})`)
@@ -103,7 +106,10 @@ export const LineGraph = (props: Props) => {
           .attr('cy', yPositionUnit * (index + 1))
           .attr('r', 5)
           .attr('fill', colorScheme[index]);
-        const markerText = "goal" in axisProps[metric] ? `${metric}: ${axisProps[metric]["goal"].toLowerCase()}` : metric;
+        const markerText =
+          'goal' in axisProps[metric]
+            ? `${metric}: ${axisProps[metric]['goal'].toLowerCase()}`
+            : metric;
         svg
           .append('text')
           .attr('x', xPosition + 10)
@@ -168,59 +174,59 @@ export const LineGraph = (props: Props) => {
           .attr('fill', colorScheme[index])
           .attr('r', 3);
 
-          /**
-           * Draw background color boxes to indicate the local max/min trials
-           * for the selected metric
-           */
-          if (metric === selectedMetric) {
-            // find list of local maximum/minimum
-            const localBest = [];
-            const objective =
-              "goal" in axisProps[metric]
-                ? axisProps[metric]["goal"]
-                : "MAXIMIZE";
-            trialData.forEach((trial, trialIndex) => {
-              if (trialIndex === 0) localBest.push(trial);
-              else {
-                if (
-                  (objective === "MAXIMIZE" &&
-                    trial[selectedMetric] >
-                      localBest[localBest.length - 1][selectedMetric]) ||
-                  (objective === "MINIMIZE" &&
-                    trial[selectedMetric] <
-                      localBest[localBest.length - 1][selectedMetric])
-                )
-                  localBest.push(trial);
-              }
-            });
-            localBest.forEach((localBestTrial, localBestIndex) => {
-              svg
-                .append("rect")
-                .style("fill", colorScheme[index])
-                .attr("width", function () {
-                  if (localBestIndex === localBest.length - 1) {
-                    return (
-                      xScale(axisProps["trialId"]["maxVal"]) -
-                      xScale(localBestTrial["trialId"])
-                    );
-                  }
+        /**
+         * Draw background color boxes to indicate the local max/min trials
+         * for the selected metric
+         */
+        if (metric === selectedMetric) {
+          // find list of local maximum/minimum
+          const localBest = [];
+          const objective =
+            'goal' in axisProps[metric]
+              ? axisProps[metric]['goal']
+              : 'MAXIMIZE';
+          trialData.forEach((trial, trialIndex) => {
+            if (trialIndex === 0) localBest.push(trial);
+            else {
+              if (
+                (objective === 'MAXIMIZE' &&
+                  trial[selectedMetric] >
+                    localBest[localBest.length - 1][selectedMetric]) ||
+                (objective === 'MINIMIZE' &&
+                  trial[selectedMetric] <
+                    localBest[localBest.length - 1][selectedMetric])
+              )
+                localBest.push(trial);
+            }
+          });
+          localBest.forEach((localBestTrial, localBestIndex) => {
+            svg
+              .append('rect')
+              .style('fill', colorScheme[index])
+              .attr('width', function() {
+                if (localBestIndex === localBest.length - 1) {
                   return (
-                    xScale(localBest[localBestIndex + 1]["trialId"]) -
-                    xScale(localBestTrial["trialId"])
+                    xScale(axisProps['trialId']['maxVal']) -
+                    xScale(localBestTrial['trialId'])
                   );
-                })
-                .attr("height", function () {
-                  return (
-                    height -
-                    padding -
-                    yScaleDict[metric](localBestTrial[selectedMetric])
-                  );
-                })
-                .attr("x", xScale(localBestTrial["trialId"]))
-                .attr("y", yScaleDict[metric](localBestTrial[selectedMetric]))
-                .style("opacity", 0.2);
-            });
-          }
+                }
+                return (
+                  xScale(localBest[localBestIndex + 1]['trialId']) -
+                  xScale(localBestTrial['trialId'])
+                );
+              })
+              .attr('height', function() {
+                return (
+                  height -
+                  padding -
+                  yScaleDict[metric](localBestTrial[selectedMetric])
+                );
+              })
+              .attr('x', xScale(localBestTrial['trialId']))
+              .attr('y', yScaleDict[metric](localBestTrial[selectedMetric]))
+              .style('opacity', 0.2);
+          });
+        }
         // Add color marker
         addColorMarker(metric, index);
       });
@@ -274,12 +280,12 @@ export const LineGraph = (props: Props) => {
        */
       // Append the dotted line
       svg
-      .append('path')
-      .attr('class', 'mouse-line')
-      .style('stroke', 'black')
-      .style('stroke-width', '1px')
-      .style('opacity', '0')
-      .style('stroke-dasharray', '5,5');
+        .append('path')
+        .attr('class', 'mouse-line')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px')
+        .style('opacity', '0')
+        .style('stroke-dasharray', '5,5');
       // Attach interactivity
       svg
         .on('mouseenter', function() {

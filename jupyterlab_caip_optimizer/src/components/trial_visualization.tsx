@@ -271,7 +271,7 @@ function createAxisPropsList(
   // Store metric goals in axisPropsList
   studyConfig.metrics.forEach(metricSpec => {
     axisPropsList[metricSpec.metric]['goal'] = metricSpec.goal;
-  })
+  });
   return axisPropsList;
 }
 
