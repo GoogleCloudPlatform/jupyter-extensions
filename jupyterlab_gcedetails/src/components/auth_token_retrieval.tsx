@@ -1,7 +1,6 @@
 export function authTokenRetrieval(): Promise<string> {
-  // eslint-disable-next-line prefer-const
-  let authPopup: any;
-  let timer: any;
+  let authPopup: Window;
+  let timer: number;
   const authOrigin = 'https://jupyterlab-interns-sandbox.uc.r.appspot.com';
   return new Promise<string>((resolve, reject) => {
     const listener = (message: MessageEvent) => {
@@ -25,9 +24,9 @@ export function authTokenRetrieval(): Promise<string> {
       '_authPopup',
       'left=100,top=100,width=400,height=400'
     );
-    timer = setInterval(function() {
+    timer = window.setInterval(function() {
       if (authPopup.closed) {
-        clearInterval(timer);
+        window.clearInterval(timer);
         window.removeEventListener('message', listener);
         reject('User exited authentication flow');
       }
