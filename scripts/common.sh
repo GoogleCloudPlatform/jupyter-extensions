@@ -16,7 +16,7 @@
 PYTHON_PACKAGES=(
   shared
   jupyter-gcs-contents-manager
-  jupyterlab_automl
+  jupyterlab_ucaip
   jupyterlab_bigquery
   jupyterlab_caip_optimizer
   jupyterlab_comments

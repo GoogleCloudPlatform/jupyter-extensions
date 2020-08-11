@@ -119,7 +119,7 @@ function nvidiaNameToEnum(name: string): string {
     accelerator.text.endsWith(name)
   );
 
-  return accelerator ? NO_ACCELERATOR : (accelerator.value as string);
+  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR;
 }
 
 /**
@@ -423,11 +423,4 @@ export const STYLES = stylesheet({
 export const TEXT_STYLE = {
   fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
-};
-
-export const TEXT_LABEL_STYLE = {
-  ...TEXT_STYLE,
-  fontSize: '15px',
-  paddingRight: '2px',
-  backgroundColor: '#FFFFFF',
 };
