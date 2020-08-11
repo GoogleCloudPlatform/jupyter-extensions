@@ -83,7 +83,7 @@ export const Scatterplot = (props: Props) => {
         .attr('class', 'xAxis')
         .attr('id', `${selectedParam}`)
         .call(xAxis);
-      
+
       // populate the metric axis (y-axis)
       const yScale = d3
         .scaleLinear()

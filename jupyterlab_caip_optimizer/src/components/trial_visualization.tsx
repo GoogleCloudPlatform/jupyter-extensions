@@ -44,6 +44,11 @@ type DiscontinousAxisProps = {
   maxIndex: number;
 };
 
+/**
+ * List of all the axisProps.
+ * AxisProps is an object that has all the properties of a parameter/metric
+ * and is used across all the visualizations.
+ */
 export interface AxisPropsList {
   trialId: ContinuousAxisProps;
   [key: string]: ContinuousAxisProps | DiscontinousAxisProps;
@@ -55,8 +60,11 @@ export interface TrialData {
   [key: string]: number | string;
 }
 
-// Needed for populating D3 axis
-export interface AxisData {
+/**
+ * AxisData needed for parallel coordinates.
+ * (PCP is short term for parallel coordinates)
+ */
+export interface PCPAxisData {
   label: string;
   type: string;
   minVal?: number;
@@ -64,18 +72,24 @@ export interface AxisData {
   values?: string[] | number[];
 }
 
-function createAxesData(
-  axisLabelsLeft,
-  axisLabelsRight,
+/**
+ * Populates list of axis data for parallel coordinates.
+ * @param paramLabelList List of parameter names
+ * @param metricLabelList List of metric names
+ * @param axisPropsList List of axisProps
+ */
+function createPCPAxisDataList(
+  paramLabelList: string[],
+  metricLabelList: string[],
   axisPropsList: AxisPropsList
-): AxisData[] {
-  const axesData = [];
-  axisLabelsLeft.forEach(label => {
+): PCPAxisData[] {
+  const PCPAxisDataList = [];
+  paramLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
     switch (thisAxisProps.type) {
       case 'DOUBLE':
       case 'INTEGER':
-        axesData.push({
+        PCPAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
@@ -84,7 +98,7 @@ function createAxesData(
         break;
       case 'CATEGORICAL':
       case 'DISCRETE':
-        axesData.push({
+        PCPAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           values: 'values' in thisAxisProps ? thisAxisProps.values : null,
@@ -92,16 +106,16 @@ function createAxesData(
         break;
     }
   });
-  axisLabelsRight.forEach(label => {
+  metricLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
-    axesData.push({
+    PCPAxisDataList.push({
       label,
       type: axisPropsList[label].type,
       minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
       maxVal: 'maxVal' in thisAxisProps ? thisAxisProps.maxVal : null,
     });
   });
-  return axesData;
+  return PCPAxisDataList;
 }
 
 function getParameterValue(parameter: Types.Parameter) {
@@ -130,6 +144,12 @@ function createTrialData(completedTrials: Types.Trial[]): TrialData[] {
   });
 }
 
+/**
+ * Retrieves min and max value of all the metrics.
+ * This function is needed because we do not have a pre-set min/max values for metrics
+ * and thus depend on the actual final measurements of completed trials.
+ * @param completedTrials List of completed trials (guranteed to have finalMeasurement)
+ */
 function findMetricMinMax(completedTrials: Types.Trial[]) {
   const minMaxRecord = {};
   completedTrials.forEach((trial, index) => {
@@ -155,7 +175,7 @@ function findMetricMinMax(completedTrials: Types.Trial[]) {
   return minMaxRecord;
 }
 
-function createAxisProps(
+function createAxisPropsList(
   completedTrials: Types.Trial[],
   studyConfig: Types.StudyConfig,
   metricNameList: string[]
@@ -250,17 +270,22 @@ function createAxisProps(
   return axisPropsList;
 }
 
+/**
+ * Finds all the labels for parameters & metrics and make it into a list of strings
+ * Note that trialId is included as one of the paramLabels, though it isn't essentially a parameter
+ * @param trials List of all the trials
+ */
 function fetchAxisLabels(trials: Types.Trial[]) {
   const completedTrials = trials.filter(
     trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial
   );
   return {
-    axisLabelsLeft: completedTrials
+    paramLabelList: completedTrials
       ? ['trialId'].concat(
           completedTrials[0].parameters.map(param => param.parameter)
         )
       : [],
-    axisLabelsRight: completedTrials
+    metricLabelList: completedTrials
       ? completedTrials[0].finalMeasurement.metrics.map(metric => metric.metric)
       : [],
   };
@@ -318,18 +343,18 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
       'finalMeasurement' in trial &&
       'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
-  const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
+  const { paramLabelList, metricLabelList } = fetchAxisLabels(completedTrials);
   const trialDataList: TrialData[] = createTrialData(completedTrials);
 
   const handleMetricSelectionChange = event => {
     setSelectedMetric(event.target.value);
   };
   const [axisPropsList, setAxisPropsList] = React.useState<AxisPropsList>(
-    createAxisProps(completedTrials, studyConfig, axisLabelsRight)
+    createAxisPropsList(completedTrials, studyConfig, metricLabelList)
   );
-  const axesData = createAxesData(
-    axisLabelsLeft,
-    axisLabelsRight,
+  const PCPAxisDataList = createPCPAxisDataList(
+    paramLabelList,
+    metricLabelList,
     axisPropsList
   );
   const handleTrialIdAxisChange = (event, newValue, item) => {
@@ -506,9 +531,9 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       selectedMetric={
                         lineGraphYAxisMetric
                           ? lineGraphYAxisMetric
-                          : axisLabelsRight[0]
+                          : metricLabelList[0]
                       }
-                      metricList={axisLabelsRight}
+                      metricList={metricLabelList}
                     />
                   </Grid>
                   <Grid container item xs={2}>
@@ -518,9 +543,9 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         name="yAxis"
                         value={lineGraphYAxisMetric}
                         onChange={handleLineGraphRadioChange}
-                        defaultValue={axisLabelsRight[0]}
+                        defaultValue={metricLabelList[0]}
                       >
-                        {axisLabelsRight.map(metric => {
+                        {metricLabelList.map(metric => {
                           return (
                             <FormControlLabel
                               value={metric}
@@ -552,7 +577,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         fullWidth
                         required
                       >
-                        {axisLabelsLeft.map(item => (
+                        {paramLabelList.map(item => (
                           <MenuItem key={item} value={item}>
                             {item}
                           </MenuItem>
@@ -571,7 +596,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                         fullWidth
                         required
                       >
-                        {axisLabelsRight.map(item => (
+                        {metricLabelList.map(item => (
                           <MenuItem key={item} value={item}>
                             {item}
                           </MenuItem>
@@ -592,13 +617,18 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                 </Grid>
               </Paper>
               <Paper className={styles.paper}>
-                <Box m={5} overflow="scroll">
+                <Grid container item xs={12}>
+                    <Typography variant="h6">
+                      Parallel Coordinates Analysis
+                    </Typography>
+                  </Grid>
+                <Box m={5}>
                   <ParallelCoordinates
                     width={width}
                     height={height}
                     axisPropsList={axisPropsList}
                     trialDataList={trialDataList}
-                    axesData={axesData}
+                    axisDataList={PCPAxisDataList}
                     selectedMetricForColor={selectedMetric}
                   />
                   <Grid container item xs={12} justify="center">
@@ -609,7 +639,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       spacing={2}
                       alignContent="flex-start"
                     >
-                      {populateSliders(axisLabelsLeft, axisPropsList)}
+                      {populateSliders(paramLabelList, axisPropsList)}
                     </Grid>
                     <Grid
                       container
@@ -618,7 +648,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       spacing={1}
                       alignContent="flex-start"
                     >
-                      {populateSliders(axisLabelsRight, axisPropsList, true)}
+                      {populateSliders(metricLabelList, axisPropsList, true)}
                     </Grid>
                   </Grid>
                 </Box>
