@@ -74,7 +74,7 @@ export const LineGraph = (props: Props) => {
 
       // Populate the axes
       const xAxis = d3.axisBottom().scale(xScale);
-      const yAxis = d3.axisLeft().scale(yScale);
+      const yAxis = d3.axisLeft().scale(yScale).ticks(5); // Only 5 ticks will be displayed along the yAxis;
       svg
         .append('g')
         .attr('transform', `translate(0,${height - padding})`)
@@ -103,6 +103,7 @@ export const LineGraph = (props: Props) => {
           .attr('cy', yPositionUnit * (index + 1))
           .attr('r', 5)
           .attr('fill', colorScheme[index]);
+        const markerText = "goal" in axisProps[metric] ? `${metric}: ${axisProps[metric]["goal"].toLowerCase()}` : metric;
         svg
           .append('text')
           .attr('x', xPosition + 10)
@@ -110,7 +111,7 @@ export const LineGraph = (props: Props) => {
           .attr('font-family', 'Roboto')
           .attr('text-anchor', 'start')
           .attr('font-size', '12px')
-          .text(metric);
+          .text(markerText);
       };
 
       // label for axes
@@ -131,6 +132,10 @@ export const LineGraph = (props: Props) => {
         .attr('text-anchor', 'middle')
         .text(selectedMetric);
 
+      /**
+       * Draw line on the chart for each metric.
+       * Dots (small circles) are placed on each point on the line, which indicates trials
+       */
       metricList.forEach((metric, index) => {
         const line = d3
           .line()
@@ -188,7 +193,6 @@ export const LineGraph = (props: Props) => {
                   localBest.push(trial);
               }
             });
-            console.log(localBest);
             localBest.forEach((localBestTrial, localBestIndex) => {
               svg
                 .append("rect")
@@ -225,24 +229,21 @@ export const LineGraph = (props: Props) => {
       const tip = d3
         .tip()
         .attr('class', 'd3-tip')
+        .offset([-5, 0])
+        .style('font-size', '12px')
+        .style('font-family', 'Roboto')
+        .style('background', 'rgba(199, 199, 199, 1)')
+        .style('padding', '5px')
+        .style('border-radius', '8px')
         .html(function(d) {
           return getTooltipHTML(d);
         });
       svg.call(tip);
-      // tooltip
-      const focus = svg
-        .append('g')
-        .attr('class', 'focus')
-        .style('display', 'none');
 
-      // Black vertical line following mouse cursor
-      svg
-        .append('path')
-        .attr('class', 'mouse-line')
-        .style('stroke', 'black')
-        .style('stroke-width', '1px')
-        .style('opacity', '0')
-        .style('stroke-dasharray', '5,5');
+      /**
+       * Create invisible rectangular boxes for each trialId to display tooltips on mouse hover.
+       * This is needed to retrieve the trialId from the mouse position and then make the tooltips visible.
+       */
       svg
         .selectAll('.cover-group')
         .data(trialData)
@@ -266,20 +267,25 @@ export const LineGraph = (props: Props) => {
           );
         })
         .on('mouseleave', tip.hide);
-      tip
-        .offset([-5, 0])
-        .style('font-size', '12px')
-        .style('font-family', 'Roboto')
-        .style('background', 'rgba(199, 199, 199, 1)')
-        .style('padding', '5px')
-        .style('border-radius', '8px');
+
+      /**
+       * Create black dotted line that serves as a visual cue to whick trial's info (tooltip) is being shown.
+       * Trial nearest to the mouse position is selected.
+       */
+      // Append the dotted line
+      svg
+      .append('path')
+      .attr('class', 'mouse-line')
+      .style('stroke', 'black')
+      .style('stroke-width', '1px')
+      .style('opacity', '0')
+      .style('stroke-dasharray', '5,5');
+      // Attach interactivity
       svg
         .on('mouseenter', function() {
-          focus.style('display', null);
           svg.select('.mouse-line').style('opacity', '1');
         })
         .on('mouseleave', function() {
-          focus.style('display', 'none');
           svg.select('.mouse-line').style('opacity', '0');
         })
         .on('mousemove', function() {
@@ -297,11 +303,6 @@ export const LineGraph = (props: Props) => {
             pos += ' ' + xScale(currentTrialId) + ',' + topPadding;
             // move line
             svg.select('.mouse-line').attr('d', pos);
-            // move tooltip
-            focus
-              .select('.tooltip')
-              .attr('x', xScale(currentTrialId))
-              .attr('y', height - padding * 2);
           } else {
             svg.select('.mouse-line').style('opacity', '0');
           }
