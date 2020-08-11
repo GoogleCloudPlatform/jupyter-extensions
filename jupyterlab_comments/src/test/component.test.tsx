@@ -214,23 +214,23 @@ describe('Reply button behavior', () => {
 
 describe('Behavior for comment input field', () => {
   it('should display send button for new thread editor', () => {
-    const component = shallow(
+    const component = mount(
       <NewCommentThread
         serverRoot="root"
         currFilePath="path"
         commentType="review"
       />
     );
-    const submit = component.dive().find('.sendThread');
-    expect(submit).toHaveLength(1);
+    const submit = component.find('.sendThread');
+    expect(submit).not.toHaveLength(0);
   });
 
   it('should display send button for reply editor', () => {
-    const component = shallow(
+    const component = mount(
       <NewReplyComment hash="hash" currFilePath="path" commentType="detached" />
     );
-    const submit = component.dive().find('.sendReply');
-    expect(submit).toHaveLength(1);
+    const submit = component.find('.sendReply');
+    expect(submit).not.toHaveLength(0);
   });
 
   it('should store the value of the comment (reply)', () => {

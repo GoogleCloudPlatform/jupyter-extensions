@@ -9,11 +9,11 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   BASE_FONT,
   COLORS,
-  DialogComponent,
   Option,
   RadioInput,
   TextInput,
   SelectInput,
+  DialogComponent,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
@@ -274,6 +274,7 @@ export class ImportData extends React.Component<Props, State> {
             !this.state.name ||
             !this.state.source
           }
+          height={'460px'}
         >
           <RadioInput
             value={this.state.from}

@@ -15,7 +15,6 @@
  */
 
 jest.mock('@jupyterlab/apputils');
-import { showDialog, ReactWidget } from '@jupyterlab/apputils';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
@@ -25,6 +24,7 @@ import { ServerWrapper } from './components/server_wrapper';
 import { DETAILS_RESPONSE } from './test_helpers';
 import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
+import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
 
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
@@ -76,10 +76,13 @@ describe('VmDetails', () => {
 
     expect(vmDetails).toMatchSnapshot('Received Error');
     vmDetails.find('[title="Show all details"]').simulate('click');
-    expect(showDialog).toHaveBeenCalledWith({
-      title: 'Notebook VM Details',
-      body: 'Unable to retrieve GCE VM details, please check your server logs',
-    });
+    vmDetails.update();
+    expect(vmDetails.state('dialogDisplayed')).toEqual(true);
+    expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
+    const hardwareConfigurationDialog = vmDetails.find(
+      HardwareConfigurationDialog
+    );
+    expect(hardwareConfigurationDialog.props().receivedError).toEqual(true);
   });
 
   it('Opens dialog when icon is clicked', async () => {
@@ -95,8 +98,9 @@ describe('VmDetails', () => {
     await resolveValue;
 
     vmDetails.find('[title="Show all details"]').simulate('click');
-    expect(showDialog).toHaveBeenCalled();
-    expect(ReactWidget.create).toHaveBeenCalled();
+    vmDetails.update();
+    expect(vmDetails.state('dialogDisplayed')).toEqual(true);
+    expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
   });
 
   it('Cycles through attributes when clicked', async () => {

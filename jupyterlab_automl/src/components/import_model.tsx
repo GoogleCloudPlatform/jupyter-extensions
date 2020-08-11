@@ -1,5 +1,5 @@
 import { FormControl } from '@material-ui/core';
-import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
+import { SelectInput, TextInput, DialogComponent } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { CodeComponent } from './copy_code';
@@ -97,17 +97,19 @@ export class ImportModel extends React.Component<Props, State> {
           </FormControl>
           Import a pretrained model to uCAIP using the Python API
           <CodeComponent>
-            {`from jupyterlab_automl import import_saved_model, ModelFramework
+            {`from jupyterlab_automl import *
 
+display_name= "${this.state.name}"
 model_path = "my_model"
+framework = ModelFramework.${this.state.framework}
 
 # Save your model in preferred format to the local path
 # model.save(model_path)
 
 # Import local model to uCAIP
-op = import_saved_model(display_name="${this.state.name}",
+op = import_saved_model(display_name=display_name,
                         model_path=model_path,
-                        framework=ModelFramework.${this.state.framework})
+                        framework=framework)
 
 # Get result of import model operation
 op.result()`}

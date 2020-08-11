@@ -5,6 +5,7 @@ import {
   IconButton,
   ListItem,
   Toolbar,
+  Tooltip,
   Button,
   Select,
   MenuItem,
@@ -156,29 +157,35 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     switch (type) {
       case ResourceType.Model:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>publish</Icon>}
-            onClick={_ => {
-              this.setState({ importModelDialogOpen: true });
-            }}
-          >
-            Import
-          </Button>
+          <Tooltip title="Import custom model">
+            <Button
+              disabled={this.state.isLoading}
+              color="secondary"
+              size="small"
+              startIcon={<Icon>publish</Icon>}
+              onClick={_ => {
+                this.setState({ importModelDialogOpen: true });
+              }}
+            >
+              Import
+            </Button>
+          </Tooltip>
         );
       case ResourceType.Dataset:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>add</Icon>}
-            onClick={_ => {
-              this.setState({ importDatasetDialogOpen: true });
-            }}
-          >
-            Create
-          </Button>
+          <Tooltip title="Create new dataset">
+            <Button
+              disabled={this.state.isLoading}
+              color="secondary"
+              size="small"
+              startIcon={<Icon>add</Icon>}
+              onClick={_ => {
+                this.setState({ importDatasetDialogOpen: true });
+              }}
+            >
+              Create
+            </Button>
+          </Tooltip>
         );
     }
   }
@@ -378,7 +385,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.setState({ showSearch: !this.state.showSearch });
               }}
             >
-              <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              <Tooltip
+                title={this.state.showSearch ? 'Close Search' : 'Search'}
+              >
+                <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              </Tooltip>
             </IconButton>
             <IconButton
               disabled={this.state.isLoading}
@@ -387,7 +398,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.refresh();
               }}
             >
-              <Icon>refresh</Icon>
+              <Tooltip title="Refresh">
+                <Icon>refresh</Icon>
+              </Tooltip>
             </IconButton>
           </Toolbar>
 
@@ -482,9 +495,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     };
     return (
       <ListItem dense style={{ padding: 0 }}>
-        <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
-          {icons[datasetType].icon}
-        </Icon>
+        <Tooltip title={datasetType.toLowerCase() + ' dataset'}>
+          <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
+            {icons[datasetType].icon}
+          </Icon>
+        </Tooltip>
       </ListItem>
     );
   }
