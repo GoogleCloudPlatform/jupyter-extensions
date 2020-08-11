@@ -20,10 +20,12 @@ import RateReviewIcon from '@material-ui/icons/RateReview';
 import { CodeReviewComment, ReviewRequest } from '../service/comment';
 import { Comment } from '../components/comment';
 import { timeAgo } from '../service/timestamp';
+import { File } from '../service/file';
 
 interface Props {
   commentsList: Array<CodeReviewComment>;
   reviewRequest: ReviewRequest;
+  file: File,
 }
 
 const style = {
@@ -48,7 +50,7 @@ export class CodeReview extends React.Component<Props> {
   render() {
     const comments = this.props.commentsList.map(comment => (
       <>
-        <Comment reviewComment={comment} />
+        <Comment reviewComment={comment} file={this.props.file}/>
         <Divider />
       </>
     ));
