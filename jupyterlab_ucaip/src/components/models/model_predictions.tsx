@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
-import { ListResourcesTable, TextInput } from 'gcp_jupyterlab_shared';
+import { ListResourcesTable } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Endpoint, Model, ModelService } from '../../service/model';
@@ -438,13 +438,16 @@ predict("${this.state.endpoints[0].id}", instance)`}
               <TableRow key={option}>
                 <TableCell>{option}</TableCell>
                 <TableCell>
-                  <TextInput
+                  <TextField
                     name={option}
                     onChange={this.handleInputChange}
                     value={this.state.inputParameters[option] || ''}
                     placeholder={
                       this.props.model.inputs[option]['inputBaselines'][0]
                     }
+                    inputProps={{
+                      style: { fontSize: 'var(--jp-ui-font-size1)' },
+                    }}
                   />
                 </TableCell>
               </TableRow>

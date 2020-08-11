@@ -3,8 +3,14 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Dataset, DatasetService, Column } from '../../service/dataset';
 import { CodeComponent } from '../copy_code';
-import { ListResourcesTable, SelectInput, Option } from 'gcp_jupyterlab_shared';
-import { LinearProgress } from '@material-ui/core';
+import { ListResourcesTable } from 'gcp_jupyterlab_shared';
+import {
+  LinearProgress,
+  FormControl,
+  MenuItem,
+  Select,
+  FormHelperText,
+} from '@material-ui/core';
 
 interface Props {
   dataset: Dataset;
@@ -131,45 +137,17 @@ ${this.getColumnString()} }
 }]`;
   }
 
-  private getObjectivesForPredictionType(predictionType: string): Option[] {
+  private getObjectivesForPredictionType(predictionType: string): string[] {
     if (predictionType === 'classification') {
       return [
-        {
-          text: 'minimize-log-loss',
-          value: 'minimize-log-loss',
-        },
-        {
-          text: 'maximize-au-roc',
-          value: 'maximize-au-roc',
-        },
-        {
-          text: 'maximize-au-prc',
-          value: 'maximize-au-prc',
-        },
-        {
-          text: 'maximize-precision-at-recall',
-          value: 'maximize-precision-at-recall',
-        },
-        {
-          text: 'maximize-recall-at-precision',
-          value: 'maximize-recall-at-precision',
-        },
+        'minimize-log-loss',
+        'maximize-au-roc',
+        'maximize-au-prc',
+        'maximize-precision-at-recall',
+        'maximize-recall-at-precision',
       ];
     } else {
-      return [
-        {
-          text: 'minimize-rmse',
-          value: 'minimize-rmse',
-        },
-        {
-          text: 'minimize-mae',
-          value: 'minimize-mae',
-        },
-        {
-          text: 'minimize-rmsle',
-          value: 'minimize-rmsle',
-        },
-      ];
+      return ['minimize-rmse', 'minimize-mae', 'minimize-rmsle'];
     }
   }
 
@@ -206,63 +184,76 @@ ${this.getColumnString()} }
                 />
               </div>
               <header className={localStyles.title}>
-                Import Dataset as Pandas Dataframe
-              </header>
-              <CodeComponent>
-                {`from jupyterlab_ucaip import import_dataset
-df = import_dataset('${this.props.dataset.id}')`}
-              </CodeComponent>
-              <header className={localStyles.title}>
-                Code Sample to Train Model on Dataset
+                Train Model on Dataset
               </header>
               <p style={{ padding: '8px' }}>
                 <i>
                   Select the target column, type of model, and optimization
-                  objective. Then run the generated code in a notebook cell to
-                  create a training pipeline.
+                  objective. Click button or run the generated code in a
+                  notebook cell to create a training pipeline.
                 </i>
               </p>
-              <div style={{ width: '250px', paddingLeft: '16px' }}>
-                <SelectInput
-                  label={'Target column'}
-                  options={columns.map(column => ({
-                    text: column.fieldName,
-                    value: column.fieldName,
-                  }))}
-                  onChange={event => {
-                    this.setState({ targetColumn: event.target.value });
-                  }}
-                />
-                <SelectInput
-                  label={'Prediction type'}
-                  options={[
-                    {
-                      text: 'classification',
-                      value: 'classification',
-                    },
-                    {
-                      text: 'regression',
-                      value: 'regression',
-                    },
-                  ]}
-                  onChange={event => {
-                    const predictionType = event.target.value;
-                    const objectives = this.getObjectivesForPredictionType(
-                      predictionType
-                    );
-                    this.setState({ predictionType: predictionType });
-                    this.setState({ objective: objectives[0].text });
-                  }}
-                />
-                <SelectInput
-                  label={'Objective'}
-                  options={this.getObjectivesForPredictionType(
-                    this.state.predictionType
-                  )}
-                  onChange={event => {
-                    this.setState({ objective: event.target.value });
-                  }}
-                />
+              <div style={{ paddingLeft: '16px' }}>
+                <FormControl>
+                  <Select
+                    value={this.state.targetColumn}
+                    onChange={event => {
+                      this.setState({
+                        targetColumn: event.target.value as string,
+                      });
+                    }}
+                    displayEmpty
+                  >
+                    {columns.map(column => (
+                      <MenuItem key={column.fieldName} value={column.fieldName}>
+                        {column.fieldName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Target column</FormHelperText>
+                </FormControl>
+                <FormControl style={{ paddingLeft: '24px' }}>
+                  <Select
+                    value={this.state.predictionType}
+                    onChange={event => {
+                      const predictionType = event.target.value as string;
+                      const objectives = this.getObjectivesForPredictionType(
+                        predictionType
+                      );
+                      this.setState({ predictionType: predictionType });
+                      this.setState({ objective: objectives[0] });
+                    }}
+                    displayEmpty
+                  >
+                    <MenuItem key={'classification'} value={'classification'}>
+                      {'classification'}
+                    </MenuItem>
+                    <MenuItem key={'regression'} value={'regression'}>
+                      {'regression'}
+                    </MenuItem>
+                  </Select>
+                  <FormHelperText>Prediction type</FormHelperText>
+                </FormControl>
+                <FormControl style={{ paddingLeft: '24px' }}>
+                  <Select
+                    value={this.state.objective}
+                    onChange={event => {
+                      this.setState({
+                        objective: event.target.value as string,
+                      });
+                    }}
+                    displayEmpty
+                  >
+                    {this.getObjectivesForPredictionType(
+                      this.state.predictionType
+                    ).map(objective => (
+                      <MenuItem key={objective} value={objective}>
+                        {objective}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Objective</FormHelperText>
+                </FormControl>
               </div>
               <CodeComponent>
                 {`from jupyterlab_ucaip import create_training_pipeline
