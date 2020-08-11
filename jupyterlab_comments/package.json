@@ -2,17 +2,17 @@
   "private": true,
   "name": "jupyterlab_comments",
   "version": "0.1.0",
-  "description": "Collaboration in Git Notebook Extension",
+  "description": "Notebook Comments in Git Extension",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
   "license": "Apache",
-  "author": "mkalil",
+  "author": "GCP AI Platform Notebooks Frontend Team",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "schema/gcpsettings.json",
+    "schema/*.json",
     "style/*.css",
     "style/images/*.png"
   ],

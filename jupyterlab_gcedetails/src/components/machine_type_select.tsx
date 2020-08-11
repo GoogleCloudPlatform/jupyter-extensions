@@ -27,7 +27,7 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option, TEXT_STYLE, TEXT_LABEL_STYLE } from '../data';
+import { Option, TEXT_STYLE } from '../data';
 
 const STYLES = stylesheet({
   itemGroup: {
@@ -45,7 +45,7 @@ const STYLES = stylesheet({
     paddingBottom: '8px',
   },
   input: {
-    marginTop: '4px',
+    marginTop: '2px',
   },
 });
 
@@ -271,11 +271,8 @@ export class NestedSelect extends React.Component<
 
     return (
       <div className={STYLES.nestedSelect}>
+        {label && <label>{label}</label>}
         <TextField
-          InputLabelProps={{
-            style: TEXT_LABEL_STYLE,
-          }}
-          label={label}
           className={STYLES.input}
           value={this.displayValue(value)}
           margin="dense"

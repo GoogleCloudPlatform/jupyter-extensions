@@ -25,7 +25,7 @@ interface DetailRow {
   value: string | number;
 }
 
-function formatBytes(numBytes, numDecimals = 2) {
+export function formatBytes(numBytes, numDecimals = 2) {
   if (numBytes === 0) return '0 Bytes';
   const d = Math.floor(Math.log(numBytes) / Math.log(1024));
   return (

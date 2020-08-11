@@ -12,12 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ **/
+import React from 'react';
+import { Button } from '@material-ui/core';
+import Icon from '@material-ui/core/Icon';
 
-import * as Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import 'jest-canvas-mock';
-
-Enzyme.configure({
-  adapter: new Adapter(),
-});
+export function SendButton(props) {
+  return (
+    <Button
+      type="submit"
+      color="primary"
+      size="small"
+      endIcon={<Icon>send</Icon>}
+      className={props.type}
+    >
+      Send
+    </Button>
+  );
+}

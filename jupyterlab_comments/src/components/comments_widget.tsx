@@ -35,7 +35,10 @@ import {
   Tabs,
   Tab,
   AppBar,
+  Grid,
 } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import CommentIcon from '@material-ui/icons/Comment';
 import { ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment';
@@ -77,6 +80,17 @@ const localStyles = stylesheet({
   commentsList: {
     flexDirection: 'column',
     minHeight: '100vh',
+  },
+});
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#3f51b5',
+    },
+    secondary: {
+      main: '#002984',
+    },
   },
 });
 
@@ -128,6 +142,9 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
+    const numDetachedComments = this.state.detachedComments.length;
+    const detachedLabel: string =
+      'Detached (' + numDetachedComments.toString() + ')';
     const reviewCommentsList = this.state.reviewComments.map(
       reviewCommentsArr => (
         <>
@@ -145,61 +162,71 @@ export class CommentsComponent extends React.Component<Props, State> {
       )
     );
     return (
-      <div className={localStyles.root}>
-        <CssBaseline />
-        {!this.state.errorMessage && (
-          <Typography
-            color="primary"
-            variant="h5"
-            className={localStyles.header}
-            gutterBottom
-          >
-            Comments for {this.state.fileName}
-          </Typography>
-        )}
+      <ThemeProvider theme={theme}>
+        <div className={localStyles.root}>
+          <CssBaseline />
+          {!this.state.errorMessage && (
+            <Grid
+              container
+              direction="row"
+              spacing={1}
+              className={localStyles.header}
+            >
+              <Grid item>
+                <CommentIcon color="primary" />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5">
+                  Comments for {this.state.fileName}
+                </Typography>
+              </Grid>
+            </Grid>
+          )}
 
-        <AppBar position="static">
-          <Tabs
-            value={activeTab}
-            onChange={this.tabChange}
-            className={localStyles.tabs}
-          >
-            <Tab label="Review" value={0} />
-            <Tab label="Detached" value={1} />
-          </Tabs>
-        </AppBar>
+          <AppBar position="static">
+            <Tabs
+              value={activeTab}
+              onChange={this.tabChange}
+              indicatorColor="secondary"
+              className={localStyles.tabs}
+            >
+              <Tab label="Code Reviews" value={0} />
+              <Tab label={detachedLabel} value={1} />
+            </Tabs>
+          </AppBar>
 
-        {this.state.errorMessage && (
-          <Typography
-            variant="subtitle1"
-            className={localStyles.header}
-            gutterBottom
-          >
-            {' '}
-            {this.state.errorMessage}
-          </Typography>
-        )}
-        {!this.state.errorMessage &&
-          (this.state.activeTab === 0 ? (
-            <>
-              <List className={localStyles.commentsList}>
-                {reviewCommentsList}{' '}
-              </List>
-            </>
-          ) : (
-            <>
-              <NewCommentThread
-                serverRoot={this.state.serverRoot}
-                currFilePath={currFilePath}
-                commentType="detached"
-              />
-              <List className={localStyles.commentsList}>
-                {' '}
-                {detachedCommentsList}{' '}
-              </List>
-            </>
-          ))}
-      </div>
+          {this.state.errorMessage && (
+            <Typography
+              variant="subtitle1"
+              className={localStyles.header}
+              gutterBottom
+            >
+              {' '}
+              {this.state.errorMessage}
+            </Typography>
+          )}
+          {!this.state.errorMessage &&
+            (this.state.activeTab === 0 ? (
+              <>
+                <List className={localStyles.commentsList}>
+                  {reviewCommentsList}{' '}
+                </List>
+              </>
+            ) : (
+              <>
+                <NewCommentThread
+                  serverRoot={this.state.serverRoot}
+                  currFilePath={currFilePath}
+                  commentType="detached"
+                />
+                <List className={localStyles.commentsList}>
+                  {' '}
+                  {detachedCommentsList}{' '}
+                </List>
+              </>
+            ))}
+        </div>
+      </ThemeProvider>
     );
   }
 
@@ -271,7 +298,6 @@ export class CommentsComponent extends React.Component<Props, State> {
               });
             }
           }
-          console.log(reviews);
           this.setState({
             reviewComments: reviews,
             fileName: shortenedFilePath,
