@@ -24,7 +24,7 @@ import { ServerWrapper } from './components/server_wrapper';
 import { DETAILS_RESPONSE } from './test_helpers';
 import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
-import { HardwareScalingDialog } from './components/hardware_scaling_dialog';
+import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
 
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
@@ -77,10 +77,12 @@ describe('VmDetails', () => {
     expect(vmDetails).toMatchSnapshot('Received Error');
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
-    expect(vmDetails.state('formDisplayed')).toEqual(true);
-    expect(vmDetails.find(HardwareScalingDialog)).toHaveLength(1);
-    const hardwareScalingDialog = vmDetails.find(HardwareScalingDialog);
-    expect(hardwareScalingDialog.props().receivedError).toEqual(true);
+    expect(vmDetails.state('dialogDisplayed')).toEqual(true);
+    expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
+    const hardwareConfigurationDialog = vmDetails.find(
+      HardwareConfigurationDialog
+    );
+    expect(hardwareConfigurationDialog.props().receivedError).toEqual(true);
   });
 
   it('Opens dialog when icon is clicked', async () => {
@@ -97,8 +99,8 @@ describe('VmDetails', () => {
 
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
-    expect(vmDetails.state('formDisplayed')).toEqual(true);
-    expect(vmDetails.find(HardwareScalingDialog)).toHaveLength(1);
+    expect(vmDetails.state('dialogDisplayed')).toEqual(true);
+    expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
   });
 
   it('Cycles through attributes when clicked', async () => {

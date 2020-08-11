@@ -26,7 +26,7 @@ import {
 import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';
-import { HardwareScalingDialog } from './components/hardware_scaling_dialog';
+import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
 import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
@@ -39,7 +39,7 @@ interface State {
   details?: Details;
   receivedError: boolean;
   shouldRefresh: boolean;
-  formDisplayed: boolean;
+  dialogDisplayed: boolean;
 }
 
 const ICON_CLASS = 'jp-VmStatusIcon';
@@ -54,7 +54,7 @@ export class VmDetails extends React.Component<Props, State> {
       displayedAttributes: [0, 1],
       receivedError: false,
       shouldRefresh: false,
-      formDisplayed: false,
+      dialogDisplayed: false,
     };
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
@@ -72,7 +72,7 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   render() {
-    const { details, receivedError, formDisplayed } = this.state;
+    const { details, receivedError, dialogDisplayed } = this.state;
     const { detailsServer, notebookService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
@@ -83,7 +83,7 @@ export class VmDetails extends React.Component<Props, State> {
         <span
           className={classes(STYLES.icon, ICON_CLASS, STYLES.interactiveHover)}
           title="Show all details"
-          onClick={() => this.setState({ formDisplayed: true })}
+          onClick={() => this.setState({ dialogDisplayed: true })}
         ></span>
         <WidgetPopup>
           <ResourceUtilizationCharts detailsServer={detailsServer} />
@@ -91,10 +91,10 @@ export class VmDetails extends React.Component<Props, State> {
         <span className={classes(STYLES.interactiveHover)}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>
-        {formDisplayed && (
-          <HardwareScalingDialog
-            open={formDisplayed}
-            onClose={() => this.setState({ formDisplayed: false })}
+        {dialogDisplayed && (
+          <HardwareConfigurationDialog
+            open={dialogDisplayed}
+            onClose={() => this.setState({ dialogDisplayed: false })}
             notebookService={notebookService}
             onCompletion={() => this.getAndSetDetailsFromServer()}
             detailsServer={detailsServer}

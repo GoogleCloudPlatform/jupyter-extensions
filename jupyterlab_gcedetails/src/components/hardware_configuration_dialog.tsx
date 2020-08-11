@@ -51,7 +51,7 @@ interface State {
 }
 
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
-export class HardwareScalingDialog extends React.Component<Props, State> {
+export class HardwareConfigurationDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
