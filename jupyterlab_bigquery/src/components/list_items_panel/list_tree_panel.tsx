@@ -19,6 +19,8 @@ import {
   DataTree,
   GetProjectService,
 } from './service/list_items';
+import { QueryHistoryService } from '../query_history/service/query_history';
+import { QueryHistoryWidget } from '../query_history/query_history_widget';
 import ListProjectItem from './list_tree_item';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import ListSearchResults from './list_search_results';
@@ -169,14 +171,26 @@ const localStyles = stylesheet({
     height: '100%',
     //...BASE_FONT,
     ...csstips.vertical,
-    marginTop: '5px',
-    marginBottom: '5px',
   },
   enableSearch: {
     ...csstips.flex,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  queryHistory: {
+    fontWeight: 600,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size0, 11px)',
+    letterSpacing: '1px',
+    margin: 0,
+    padding: '8px 12px',
+    textTransform: 'uppercase',
+    '&:hover': {
+      backgroundColor: '#e8e8e8',
+      opacity: 1,
+      cursor: 'pointer',
+    },
   },
 });
 
@@ -300,6 +314,17 @@ class ListItemsPanel extends React.Component<Props, State> {
     this.getProjects();
   };
 
+  openQueryHistory = async () => {
+    const service = new QueryHistoryService();
+    WidgetManager.getInstance().launchWidget(
+      QueryHistoryWidget,
+      'main',
+      'QueryHistoryWidget',
+      undefined,
+      [service]
+    );
+  };
+
   async componentWillMount() {
     try {
       //empty
@@ -419,6 +444,12 @@ class ListItemsPanel extends React.Component<Props, State> {
               </div>
             </ul>
           )}
+        </div>
+        <div
+          className={localStyles.queryHistory}
+          onClick={this.openQueryHistory}
+        >
+          Query History
         </div>
         <DialogComponent
           header="Requirements to Enable Searching"

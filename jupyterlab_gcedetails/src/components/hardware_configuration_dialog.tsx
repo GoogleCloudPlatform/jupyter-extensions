@@ -26,8 +26,10 @@ import {
 } from '../data';
 import { ConfirmationPage } from './confirmation_page';
 import { ServerWrapper } from './server_wrapper';
+import { DetailsDialogBody } from './details_dialog_body';
 
 enum View {
+  DETAILS,
   FORM,
   CONFIRMATION,
   STATUS,
@@ -40,6 +42,7 @@ interface Props {
   onCompletion: () => void;
   details?: Details;
   detailsServer: ServerWrapper;
+  receivedError: boolean;
 }
 
 interface State {
@@ -48,11 +51,11 @@ interface State {
 }
 
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
-export class HardwareScalingDialog extends React.Component<Props, State> {
+export class HardwareConfigurationDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      view: View.FORM,
+      view: View.DETAILS,
       hardwareConfiguration: null,
     };
   }
@@ -70,10 +73,24 @@ export class HardwareScalingDialog extends React.Component<Props, State> {
       details,
       onCompletion,
       detailsServer,
+      receivedError,
     } = this.props;
     const { view, hardwareConfiguration } = this.state;
 
     switch (view) {
+      case View.DETAILS:
+        return (
+          <DetailsDialogBody
+            onDialogClose={onClose}
+            reshapeForm={() => {
+              this.setState({
+                view: View.FORM,
+              });
+            }}
+            details={details}
+            receivedError={receivedError}
+          />
+        );
       case View.FORM:
         return (
           <HardwareScalingForm
