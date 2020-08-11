@@ -22,8 +22,6 @@ import {
   CheckboxInput,
   LearnMoreLink,
   BASE_FONT,
-  ActionBar,
-  SubmitButton,
   Option,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
@@ -42,6 +40,7 @@ import {
   Details,
   detailsToHardwareConfiguration,
 } from '../data';
+import { ActionBar } from './action_bar';
 
 interface Props {
   onSubmit: (configuration: HardwareConfiguration) => void;
@@ -59,7 +58,7 @@ export const STYLES = stylesheet({
     marginRight: '10px',
   },
   checkboxContainer: {
-    paddingBottom: '8px',
+    padding: '8px 0px 8px 0px',
   },
   title: {
     ...BASE_FONT,
@@ -272,13 +271,12 @@ export class HardwareScalingForm extends React.Component<Props, State> {
             )}
           </form>
         </div>
-        <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
-          <SubmitButton
-            actionPending={false}
-            onClick={() => this.submitForm()}
-            text="Next"
-          />
-        </ActionBar>
+        <ActionBar
+          primaryLabel="Next"
+          onPrimaryClick={() => this.submitForm()}
+          secondaryLabel="Cancel"
+          onSecondaryClick={onDialogClose}
+        />
       </div>
     );
   }
