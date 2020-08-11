@@ -162,47 +162,61 @@ export const LineGraph = (props: Props) => {
           })
           .attr('fill', colorScheme[index])
           .attr('r', 3);
-        if (metric === selectedMetric) {
-          // find list of local maximum
-          const localMax = [];
-          trialData.forEach((trial, trialIndex) => {
-            if (trialIndex === 0) localMax.push(trial);
-            else {
-              if (
-                trial[selectedMetric] >
-                localMax[localMax.length - 1][selectedMetric]
-              )
-                localMax.push(trial);
-            }
-          });
-          localMax.forEach((localMaxTrial, localMaxIndex) => {
-            svg
-              .append('rect')
-              .style('fill', colorScheme[index])
-              .attr('width', function() {
-                if (localMaxIndex === localMax.length - 1) {
+
+          /**
+           * Draw background color boxes to indicate the local max/min trials
+           * for the selected metric
+           */
+          if (metric === selectedMetric) {
+            // find list of local maximum/minimum
+            const localBest = [];
+            const objective =
+              "goal" in axisProps[metric]
+                ? axisProps[metric]["goal"]
+                : "MAXIMIZE";
+            trialData.forEach((trial, trialIndex) => {
+              if (trialIndex === 0) localBest.push(trial);
+              else {
+                if (
+                  (objective === "MAXIMIZE" &&
+                    trial[selectedMetric] >
+                      localBest[localBest.length - 1][selectedMetric]) ||
+                  (objective === "MINIMIZE" &&
+                    trial[selectedMetric] <
+                      localBest[localBest.length - 1][selectedMetric])
+                )
+                  localBest.push(trial);
+              }
+            });
+            console.log(localBest);
+            localBest.forEach((localBestTrial, localBestIndex) => {
+              svg
+                .append("rect")
+                .style("fill", colorScheme[index])
+                .attr("width", function () {
+                  if (localBestIndex === localBest.length - 1) {
+                    return (
+                      xScale(axisProps["trialId"]["maxVal"]) -
+                      xScale(localBestTrial["trialId"])
+                    );
+                  }
                   return (
-                    xScale(axisProps['trialId']['maxVal']) -
-                    xScale(localMaxTrial['trialId'])
+                    xScale(localBest[localBestIndex + 1]["trialId"]) -
+                    xScale(localBestTrial["trialId"])
                   );
-                }
-                return (
-                  xScale(localMax[localMaxIndex + 1]['trialId']) -
-                  xScale(localMaxTrial['trialId'])
-                );
-              })
-              .attr('height', function() {
-                return (
-                  height -
-                  padding -
-                  yScaleDict[metric](localMaxTrial[selectedMetric])
-                );
-              })
-              .attr('x', xScale(localMaxTrial['trialId']))
-              .attr('y', yScaleDict[metric](localMaxTrial[selectedMetric]))
-              .style('opacity', 0.2);
-          });
-        }
+                })
+                .attr("height", function () {
+                  return (
+                    height -
+                    padding -
+                    yScaleDict[metric](localBestTrial[selectedMetric])
+                  );
+                })
+                .attr("x", xScale(localBestTrial["trialId"]))
+                .attr("y", yScaleDict[metric](localBestTrial[selectedMetric]))
+                .style("opacity", 0.2);
+            });
+          }
         // Add color marker
         addColorMarker(metric, index);
       });

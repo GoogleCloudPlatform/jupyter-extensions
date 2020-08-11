@@ -33,6 +33,7 @@ type ContinuousAxisProps = {
   minVal: number;
   maxVal: number;
   flip?: boolean;
+  goal?: string;
 };
 
 type DiscontinousAxisProps = {
@@ -267,6 +268,10 @@ function createAxisPropsList(
       maxVal: metricMinMax[metric].max,
     };
   });
+  // Store metric goals in axisPropsList
+  studyConfig.metrics.forEach(metricSpec => {
+    axisPropsList[metricSpec.metric]['goal'] = metricSpec.goal;
+  })
   return axisPropsList;
 }
 
