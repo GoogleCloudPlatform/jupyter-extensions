@@ -69,6 +69,7 @@ class BigQueryService:
         'name': table.table_id,
         'datasetId': dataset_id,
         'type': table.table_type,
+        'partitioned': True if table.partitioning_type else False,
       }
       table_ids.append(table_full_id)
 
