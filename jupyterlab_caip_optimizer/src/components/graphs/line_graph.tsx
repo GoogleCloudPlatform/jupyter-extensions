@@ -262,11 +262,11 @@ export const LineGraph = (props: Props) => {
       svg
         .on('mouseenter', function() {
           focus.style('display', null);
-          d3.select('.mouse-line').style('opacity', '1');
+          svg.select('.mouse-line').style('opacity', '1');
         })
         .on('mouseleave', function() {
           focus.style('display', 'none');
-          d3.select('.mouse-line').style('opacity', '0');
+          svg.select('.mouse-line').style('opacity', '0');
         })
         .on('mousemove', function() {
           // mouse moving over canvas
@@ -277,19 +277,19 @@ export const LineGraph = (props: Props) => {
             mouse[1] > topPadding &&
             mouse[1] < height - padding
           ) {
-            d3.select('.mouse-line').style('opacity', '1');
+            svg.select('.mouse-line').style('opacity', '1');
             const currentTrialId = Math.round(xScale.invert(mouse[0]));
             let pos = 'M' + xScale(currentTrialId) + ',' + (height - padding);
             pos += ' ' + xScale(currentTrialId) + ',' + topPadding;
             // move line
-            d3.select('.mouse-line').attr('d', pos);
+            svg.select('.mouse-line').attr('d', pos);
             // move tooltip
             focus
               .select('.tooltip')
               .attr('x', xScale(currentTrialId))
               .attr('y', height - padding * 2);
           } else {
-            d3.select('.mouse-line').style('opacity', '0');
+            svg.select('.mouse-line').style('opacity', '0');
           }
         });
     }

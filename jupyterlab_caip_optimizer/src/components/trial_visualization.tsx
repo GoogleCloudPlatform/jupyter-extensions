@@ -618,10 +618,10 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
               </Paper>
               <Paper className={styles.paper}>
                 <Grid container item xs={12}>
-                    <Typography variant="h6">
-                      Parallel Coordinates Analysis
-                    </Typography>
-                  </Grid>
+                  <Typography variant="h6">
+                    Parallel Coordinates Analysis
+                  </Typography>
+                </Grid>
                 <Box m={5}>
                   <ParallelCoordinates
                     width={width}

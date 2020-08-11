@@ -108,6 +108,53 @@ export const Scatterplot = (props: Props) => {
           return getTooltipHTML(d);
         });
 
+      // Vertical & horizontal dotted lines following the mouse cursor
+      svg
+        .append('path')
+        .attr('class', 'mouse-line')
+        .attr('id', 'mouse-line-vertical')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px')
+        .style('opacity', '0')
+        .style('stroke-dasharray', '5,5');
+      svg
+        .append('path')
+        .attr('class', 'mouse-line')
+        .attr('id', 'mouse-line-horizontal')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px')
+        .style('opacity', '0')
+        .style('stroke-dasharray', '5,5');
+
+      // Make the dotted lines appear/disappear depending on mouse action
+      svg
+        .on('mouseenter', function() {
+          svg.selectAll('.mouse-line').style('opacity', '1');
+        })
+        .on('mouseleave', function() {
+          svg.selectAll('.mouse-line').style('opacity', '0');
+        })
+        .on('mousemove', function() {
+          // mouse moving over canvas
+          const mouse = d3.mouse(this);
+          if (
+            mouse[0] > padding &&
+            mouse[0] < width - padding &&
+            mouse[1] > topPadding &&
+            mouse[1] < height - padding
+          ) {
+            svg.selectAll('.mouse-line').style('opacity', '1');
+            let verticalLinePos = 'M' + mouse[0] + ',' + (height - padding);
+            verticalLinePos += ' ' + mouse[0] + ',' + topPadding;
+            svg.select('#mouse-line-vertical').attr('d', verticalLinePos);
+            let horizontalLinePos = 'M' + (width - padding) + ',' + mouse[1];
+            horizontalLinePos += ' ' + padding + ',' + mouse[1];
+            svg.select('#mouse-line-horizontal').attr('d', horizontalLinePos);
+          } else {
+            svg.selectAll('.mouse-line').style('opacity', '0');
+          }
+        });
+
       // plot the trials
       svg
         .append('g')
