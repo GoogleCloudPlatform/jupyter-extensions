@@ -38,6 +38,21 @@ beforeAll(() => {
     }
     return originalError(...args);
   });
+
+  // https://github.com/mui-org/material-ui/issues/15726#issuecomment-493124813
+  // TODO: remove upgrading to jest v26
+  global.document.createRange = () => ({
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    setStart: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    setEnd: () => {},
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    commonAncestorContainer: {
+      nodeName: 'BODY',
+      ownerDocument: document,
+    },
+  });
 });
 
 afterAll(() => {

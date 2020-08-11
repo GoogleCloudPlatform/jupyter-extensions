@@ -30,10 +30,10 @@ class TestDatasetDetails(unittest.TestCase):
             'name': 'dataset_id',
             'description': 'description of dataset',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'default_expiration': 17280000000,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
@@ -62,16 +62,17 @@ class TestDatasetDetails(unittest.TestCase):
             'name': 'dataset_id',
             'description': None,
             'labels': None,
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'default_expiration': None,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
     }
 
     result = get_dataset_details(client, 'some_dataset_id')
+    self.maxDiff = None
     self.assertEqual(expected, result)
 
 class TestTableDetails(unittest.TestCase):
@@ -115,10 +116,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': 'description of table',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -168,10 +169,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': None,
             'labels': None,
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
             'expires': None,
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -225,10 +226,10 @@ class TestTableDetails(unittest.TestCase):
             'name': 'table_id',
             'description': 'description of table',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
             'location': 'US',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id',
@@ -391,7 +392,6 @@ class TestTablePreview(unittest.TestCase):
         }
 
         result = get_table_preview(client, 'some_table_id')
-        self.maxDiff = None
         self.assertEqual(expected, result)
 
 class TestViewDetails(unittest.TestCase):
@@ -436,9 +436,9 @@ class TestViewDetails(unittest.TestCase):
             'name': 'view_id',
             'description': 'description of view',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': 'Jul 14, 2020,  1:23:45 PM',
-            'expires': 'Jul 14, 2021,  1:23:45 PM',
-            'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+            'date_created': '2020-07-14T13:23:45.000067',
+            'expires': '2021-07-14T13:23:45.000067',
+            'last_modified': '2020-07-15T15:11:23.000032',
             'project': 'project_id',
             'dataset': 'dataset_id',
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id/view_id',
@@ -500,10 +500,10 @@ class TestModelDetails(unittest.TestCase):
                 'name': 'model_id',
                 'description': 'description of model',
                 'labels': ['label_0: value_0', 'label_1: value_1'],
-                'date_created': 'Jul 14, 2020,  1:23:45 PM',
-                'expires': 'Jul 14, 2021,  1:23:45 PM',
+                'date_created': '2020-07-14T13:23:45.000067',
+                'expires': '2021-07-14T13:23:45.000067',
                 'location': 'US',
-                'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+                'last_modified': '2020-07-15T15:11:23.000032',
                 'model_type': Model.ModelType(0).name,
                 'schema_labels': [{'name': 'schema_label_0', 'type': SqlTypeNames[StandardSqlDataTypes(7).name].name}, {'name': 'schema_label_1', 'type': StandardSqlDataTypes(9).name}],
                 'feature_columns': [{'name': 'feature_col_0', 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name}]
@@ -538,10 +538,10 @@ class TestModelDetails(unittest.TestCase):
                 'name': 'model_id',
                 'description': None,
                 'labels': None,
-                'date_created': 'Jul 14, 2020,  1:23:45 PM',
-                'expires': 'Jul 14, 2021,  1:23:45 PM',
+                'date_created': '2020-07-14T13:23:45.000067',
+                'expires': '2021-07-14T13:23:45.000067',
                 'location': 'US',
-                'last_modified': 'Jul 15, 2020,  3:11:23 PM',
+                'last_modified': '2020-07-15T15:11:23.000032',
                 'model_type': Model.ModelType(0).name,
                 'schema_labels': [],
                 'feature_columns': []

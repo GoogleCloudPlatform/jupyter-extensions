@@ -19,7 +19,7 @@ import { stylesheet } from 'typestyle';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Option, TEXT_STYLE, TEXT_LABEL_STYLE } from '../data';
+import { Option, TEXT_STYLE } from '../data';
 
 interface Props {
   label?: string;
@@ -32,7 +32,7 @@ interface Props {
 export const STYLES = stylesheet({
   select: {
     display: 'block',
-    marginTop: '4px',
+    marginTop: '2px',
   },
   icon: {
     right: '14px',
@@ -49,11 +49,8 @@ export function SelectInput(props: Props) {
 
   return (
     <div>
+      {label && <label>{label}</label>}
       <TextField
-        InputLabelProps={{
-          style: TEXT_LABEL_STYLE,
-        }}
-        label={label}
         className={STYLES.select}
         select
         value={value}

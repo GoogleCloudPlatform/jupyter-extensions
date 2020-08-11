@@ -25,10 +25,10 @@ export function timeAgo(current, previous) {
 
   if (elapsed < msPerMinute) {
     time = Math.round(elapsed / 1000);
-    if (time === 1) {
-      return time + ' second ago';
+    if (time <= 30) {
+      return 'a few seconds ago';
     } else {
-      return time + ' seconds ago';
+      return 'less than a minute ago';
     }
   } else if (elapsed < msPerHour) {
     time = Math.round(elapsed / msPerMinute);
@@ -52,6 +52,6 @@ export function timeAgo(current, previous) {
       return time + ' days ago';
     }
   } else {
-    return '> 1 month ago';
+    return 'more than 1 month ago';
   }
 }

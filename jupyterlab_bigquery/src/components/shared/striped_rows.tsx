@@ -17,7 +17,7 @@ export const getStripedStyle = index => {
 
 export const StripedRows = props => {
   return (
-    <div>
+    <div style={{ width: '100%' }}>
       {props.rows.map((row, index) => (
         <div
           key={index}
