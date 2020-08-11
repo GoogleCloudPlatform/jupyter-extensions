@@ -39,7 +39,7 @@ export class ExportModel extends React.Component<Props, State> {
     if (this.props.open) {
       return (
         <DialogComponent
-          header={'Import custom model'}
+          header={'Export custom model'}
           open={true}
           cancelLabel="OK"
           onClose={this.props.onClose}
