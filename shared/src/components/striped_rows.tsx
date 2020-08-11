@@ -14,7 +14,7 @@ const localStyles = stylesheet({
   },
 });
 
-export const getStripedStyle = index => {
+const getStripedStyle = index => {
   return { background: index % 2 ? 'white' : '#fafafa' };
 };
 

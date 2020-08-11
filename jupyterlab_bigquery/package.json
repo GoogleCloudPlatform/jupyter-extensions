@@ -66,7 +66,7 @@
     "@reduxjs/toolkit": "^1.4.0",
     "copy-to-clipboard": "^3.3.1",
     "csstips": "1.2.0",
-    "gcp_jupyterlab_shared": "^1.0.0",
+    "gcp_jupyterlab_shared": "^1.0.6",
     "luxon": "^1.24.1",
     "monaco-editor": "^0.20.0",
     "react-redux": "^7.2.0",

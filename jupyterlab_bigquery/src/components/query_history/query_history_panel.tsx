@@ -11,7 +11,7 @@ import {
 } from './service/query_history';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
-import { StripedRows } from '../shared/striped_rows';
+import { StripedRows } from 'gcp_jupyterlab_shared';
 import ReadOnlyEditor from '../shared/read_only_editor';
 import { JobsObject, Job } from './service/query_history';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';

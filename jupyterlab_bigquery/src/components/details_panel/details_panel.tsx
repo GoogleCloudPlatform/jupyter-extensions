@@ -6,8 +6,8 @@ import { stylesheet } from 'typestyle';
 import ReadOnlyEditor from '../shared/read_only_editor';
 import { SchemaField } from './service/list_table_details';
 import { ModelSchema } from './service/list_model_details';
-import { StripedRows } from '../shared/striped_rows';
 import { SchemaTable, ModelSchemaTable } from '../shared/schema_table';
+import { StripedRows } from 'gcp_jupyterlab_shared';
 
 export const localStyles = stylesheet({
   title: {
