@@ -19,7 +19,7 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeMirror } from 'codemirror';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
+import { NotebookModel } from '@jupyterlab/notebook';
 
 //Extract the file name from the full file path
 export function trimPath(filePath: string) {
@@ -32,49 +32,74 @@ export function trimPath(filePath: string) {
 }
 
 export interface Range {
-    startLine: number,
-    endLine?: number,
-    startColumn?: number,
-    endColumn?: number,
+  startLine: number;
+  endLine?: number;
+  startColumn?: number;
+  endColumn?: number;
 }
 
-export class File {
+export class NotebookFile {
+  notebook: NotebookModel;
 
-    editor: CodeMirror;
+  constructor(widget: any) {
+    this.notebook = widget.content.model as NotebookModel;
+  }
 
-    constructor(widget: IDocumentWidget) {
-        this.editor = ((widget.content as FileEditor).editor as CodeMirrorEditor).editor;
+  getContext(range: Range) {
+    //TODO (mkalil): get context for the given range within the notebook file
+    return null;
+  }
+}
+
+export class RegularFile {
+  editor: CodeMirror;
+
+  constructor(widget: IDocumentWidget) {
+    this.editor = ((widget.content as FileEditor)
+      .editor as CodeMirrorEditor).editor;
+  }
+  /*
+    Return an array of lines from the file that correspond to the given range object
+    Each line is a tuple (line number, text)
+    Return null if the comment was not created with the range attribute, or
+    if the given range no longer exists in the file
+    */
+  getContext(range: Range) {
+    const contextInFile: Array<[number, string]> = new Array<
+      [number, string]
+    >();
+    //a startLine of zero means that this comment is not attached to a particular line number
+    if (range.startLine === 0) {
+      return null;
     }
-
-    getContext(range: Range) {
-        var contextInFile : string;
-        //a startLine of zero means that this comment is not attached to a particular line number
-        if (range.startLine == 0) {
-            return null;
-        }
-        if (!range.endLine) {
-            const untrimmedLine : string = this.editor.getLine(range.startLine);
-            const leftIndex = range.startColumn ? range.startColumn : 0;
-            if (range.endColumn) {
-                contextInFile = untrimmedLine.substring(leftIndex, range.endColumn);
-            } else {
-                contextInFile = untrimmedLine.substring(leftIndex);
-            }
-        }
-        //range has both startLine and endLine attributes
-        else {
-            const endLineLength = this.editor.getLine(range.endLine).length;
-            const startPosition = {
-                line: range.startLine,
-                column: 0,
-            }
-            const endPosition = {
-                line: range.endLine,
-                column: endLineLength - 1,
-            }
-
-            contextInFile = this.editor.getRange(startPosition, endPosition);
+    if (!range.endLine) {
+      //Context is a single line, or part of a single line
+      const untrimmedLine: string = this.editor.getLine(range.startLine);
+      //if untrimmedLine is undefined, the comment was left on a line in the file that no longer exists, so return null
+      if (untrimmedLine) {
+        const leftIndex = range.startColumn ? range.startColumn : 0;
+        if (range.endColumn) {
+          contextInFile.push([
+            range.startLine,
+            untrimmedLine.substring(leftIndex, range.endColumn),
+          ]);
+        } else {
+          contextInFile.push([
+            range.startLine,
+            untrimmedLine.substring(leftIndex),
+          ]);
         }
         return contextInFile;
+      } else {
+        return null;
+      }
+    } else {
+      //when range has both startLine and endLine attributes, take at most 3 lines of the file to display
+      const endLine = Math.max(range.endLine, range.startLine + 3);
+      for (let i = range.startLine; i < endLine; i++) {
+        contextInFile.push([i, this.editor.getLine(i)]);
+      }
+      return contextInFile;
     }
+  }
 }

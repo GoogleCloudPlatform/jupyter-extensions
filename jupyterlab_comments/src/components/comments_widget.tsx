@@ -46,7 +46,7 @@ import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
 import { getServerRoot } from '../service/jupyterConfig';
 import { CodeReview } from '../components/code_review';
-import { File } from '../service/file';
+import { RegularFile, NotebookFile } from '../service/file';
 
 interface Props {
   context: Context;
@@ -135,14 +135,28 @@ export class CommentsComponent extends React.Component<Props, State> {
     this.setState({ activeTab: activeTab });
   };
 
+  isNotebook(widget: any) {
+    /*widget.content is an instance of the Notebook class for Notebook files,
+    or an instance of the FileEditor class for non-Notebook files.
+    A FileEditor contains an 'editor' instance variable,
+    while a Notebook does not
+    */
+    return !widget.content.editor;
+  }
+
   render() {
     const activeTab = this.state.activeTab;
     const currFilePath = this.getCurrentFilePath();
     const currWidget = this.props.context.labShell.currentWidget;
-    const file = new File(currWidget as IDocumentWidget);
+    let file: NotebookFile | RegularFile;
+    if (this.isNotebook(currWidget)) {
+      file = new NotebookFile(currWidget);
+    } else {
+      file = new RegularFile(currWidget as IDocumentWidget);
+    }
     const detachedCommentsList = this.state.detachedComments.map(comment => (
       <>
-        <Comment detachedComment={comment} file={file}/>
+        <Comment detachedComment={comment} file={file} />
         <Divider />
       </>
     ));

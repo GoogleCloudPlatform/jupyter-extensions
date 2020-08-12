@@ -14,24 +14,45 @@
  * limitations under the License.
  **/
 import React from 'react';
-import { File, Range } from '../service/file';
+import { RegularFile, NotebookFile, Range } from '../service/file';
 
 interface Props {
-    range: Range,
-    filePath: string,
-    file?: File;
+  range: Range;
+  filePath: string;
+  file?: RegularFile | NotebookFile;
 }
 
-export class CommentContext extends React.Component<Props> {
+const styles = {
+  lines: {
+    display: 'block',
+    backgroundColor: 'lightgrey',
+    padding: '10px',
+    borderRadius: '3px',
+  },
+  lineNumber: {
+    color: 'white',
+    display: 'inline',
+    paddingRight: '5px',
+    fontSize: '10px',
+  },
+  lineText: {
+    display: 'inline',
+  },
+};
 
+export class CommentContext extends React.Component<Props> {
   render() {
     const context = this.props.file.getContext(this.props.range);
     if (context) {
-        return <code>{context}</code>;
+      const lines = context.map(line => (
+        <div>
+          <p style={styles.lineNumber}> {line[0]} </p>
+          <code style={styles.lineText}> {line[1]} </code>
+        </div>
+      ));
+      return <div style={styles.lines}> {lines} </div>;
     } else {
-        console.log("No context to display");
-        return <> </>;
+      return <div> </div>;
     }
   }
 }
-

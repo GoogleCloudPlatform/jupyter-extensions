@@ -35,7 +35,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 import { NewReplyComment } from './reply_editor';
 import { CommentContext } from './comment_context';
-import { File } from '../service/file';
+import { RegularFile, NotebookFile } from '../service/file';
 
 const style = {
   inline: {
@@ -69,7 +69,7 @@ const style = {
 interface Props {
   detachedComment?: DetachedComment;
   reviewComment?: CodeReviewComment;
-  file?: File;
+  file?: RegularFile | NotebookFile;
 }
 
 interface State {
@@ -97,7 +97,14 @@ export class Comment extends React.Component<Props, State> {
 
     return (
       <>
-        <ListItem key={data.hash} alignItems="flex-start">
+        <ListItem key="context">
+          <CommentContext
+            range={data.range}
+            filePath={data.filePath}
+            file={this.props.file}
+          />
+        </ListItem>
+        <ListItem key="comment" alignItems="flex-start">
           <ListItemAvatar>
             <Avatar alt="avatar" />
           </ListItemAvatar>
@@ -118,9 +125,6 @@ export class Comment extends React.Component<Props, State> {
               </Typography>
             }
           />
-        </ListItem>
-        <ListItem>
-          <CommentContext range={data.range} filePath={data.filePath} file={this.props.file}/>
         </ListItem>
         <div style={style.commentBottom}>
           <Button
@@ -180,7 +184,12 @@ export class Comment extends React.Component<Props, State> {
                     reply,
                     reply.filePath
                   );
-                  return <Comment detachedComment={detached} file={this.props.file}/>;
+                  return (
+                    <Comment
+                      detachedComment={detached}
+                      file={this.props.file}
+                    />
+                  );
                 } else {
                   const review = createReviewCommentFromJSON(
                     reply,
@@ -188,7 +197,9 @@ export class Comment extends React.Component<Props, State> {
                     this.props.reviewComment.request,
                     data.filePath
                   );
-                  return <Comment reviewComment={review} file={this.props.file}/>;
+                  return (
+                    <Comment reviewComment={review} file={this.props.file} />
+                  );
                 }
               })}
             </List>
