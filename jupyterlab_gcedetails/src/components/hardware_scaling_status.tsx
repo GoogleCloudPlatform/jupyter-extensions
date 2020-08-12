@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { stylesheet } from 'typestyle';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { HardwareConfiguration } from '../data';
-import { NotebooksService, Instance } from '../service/notebooks_service';
+import { HardwareConfiguration, STYLES } from '../data';
+import { NotebooksService } from '../service/notebooks_service';
 import { authTokenRetrieval } from './auth_token_retrieval';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
@@ -12,9 +11,9 @@ import { ErrorPage } from './error_page';
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: 400,
       height: 15,
       borderRadius: 5,
+      margin: '20px',
     },
     colorPrimary: {
       backgroundColor:
@@ -26,25 +25,6 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
     },
   })
 )(LinearProgress);
-
-const STYLES = stylesheet({
-  flexContainer: {
-    width: 500,
-    height: 300,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heading: {
-    fontSize: '24px',
-  },
-  paragraph: {
-    height: 60,
-    width: 350,
-    textAlign: 'center',
-  },
-});
 
 enum Status {
   'Authorizing' = 0,
@@ -262,21 +242,14 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   render() {
-    const { status, error, instanceDetails } = this.state;
-    const progressValue = (status / 6) * 100;
-    const { flexContainer, heading, paragraph } = STYLES;
+    const { status } = this.state;
+    const progressValue = (status / 4) * 100;
     const { onDialogClose } = this.props;
-    return status === Status['Error'] ? (
-      <ErrorPage
-        onDialogClose={onDialogClose}
-        error={error}
-        instanceDetails={instanceDetails}
-      />
-    ) : (
-      <div className={flexContainer}>
-        <h3 className={heading}>{Status[status]}</h3>
-        <p className={paragraph}>{statusInfo[status]}</p>
-        {status === Status['Complete'] ? (
+    return (
+      <div className={STYLES.containerPadding}>
+        <p className={STYLES.subheading}>{Status[status]}</p>
+        <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+        {status === 4 || status === 5 ? (
           <Button
             variant="contained"
             color="primary"
