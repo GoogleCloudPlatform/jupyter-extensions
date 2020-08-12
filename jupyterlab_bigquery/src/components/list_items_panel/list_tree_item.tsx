@@ -32,7 +32,11 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
-import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
+import {
+  updateProject,
+  updateDataset,
+  removeProject,
+} from '../../reducers/dataTreeSlice';
 import { openSnackbar } from '../../reducers/snackbarSlice';
 
 import '../../../style/index.css';
@@ -93,13 +97,13 @@ interface ResourceListProps {
   updateProject: any;
   updateDataset: any;
   openSnackbar: any;
+  removeProject: any;
 }
 
 interface ResourceProps {
   context: Context;
   updateProject?: any;
   updateDataset?: any;
-  openSnackbar?: any;
 }
 
 export interface ModelProps extends ResourceProps {
@@ -119,6 +123,8 @@ export interface ProjectProps extends ResourceProps {
   project: Project;
   updateProject: any;
   updateDataset: any;
+  openSnackbar: any;
+  removeProject: any;
 }
 
 interface State {
@@ -138,10 +144,6 @@ export class Resource<T extends ResourceProps> extends React.Component<
     super(props);
   }
 
-  handleOpenSnackbar = error => {
-    this.props.openSnackbar(error);
-  };
-
   copyID = dataTreeItem => {
     Clipboard.copyToSystem(dataTreeItem.id);
   };
@@ -160,7 +162,7 @@ export class Resource<T extends ResourceProps> extends React.Component<
 }
 
 export class ModelResource extends Resource<ModelProps> {
-  constructor(props) {
+  constructor(props: ModelProps) {
     super(props);
   }
 
@@ -207,7 +209,7 @@ export class ModelResource extends Resource<ModelProps> {
 }
 
 export class TableResource extends Resource<TableProps> {
-  constructor(props) {
+  constructor(props: TableProps) {
     super(props);
   }
 
@@ -263,6 +265,14 @@ export class TableResource extends Resource<TableProps> {
     );
   };
 
+  getTableIcon = table => {
+    if (table.partitioned) {
+      return this.getIcon('PartitionedTable');
+    } else {
+      return this.getIcon('Table');
+    }
+  };
+
   tableContextMenuItems = [
     {
       label: 'Query table',
@@ -292,7 +302,7 @@ export class TableResource extends Resource<TableProps> {
         {table.type === 'TABLE' ? (
           <TreeItem
             nodeId={table.id}
-            icon={this.getIcon('Table')}
+            icon={this.getTableIcon(table)}
             label={
               <ContextMenu
                 items={this.tableContextMenuItems.map(item => ({
@@ -330,7 +340,7 @@ export class TableResource extends Resource<TableProps> {
 }
 
 export class DatasetResource extends Resource<DatasetProps> {
-  constructor(props: ProjectProps) {
+  constructor(props: DatasetProps) {
     super(props);
     this.state = {
       expanded: [],
@@ -484,12 +494,12 @@ export class ProjectResource extends Resource<ProjectProps> {
 
   listDatasetsService = new ListDatasetsService();
 
+  handleOpenSnackbar = error => {
+    this.props.openSnackbar(error);
+  };
+
   expandProject = project => {
-    if (project.error) {
-      this.handleOpenSnackbar(project.error);
-    } else {
-      this.getDatasets(project, this.listDatasetsService);
-    }
+    this.getDatasets(project, this.listDatasetsService);
   };
 
   private async getDatasets(project, listDatasetsService) {
@@ -517,13 +527,16 @@ export class ProjectResource extends Resource<ProjectProps> {
         'The project does not exist or does not have BigQuery enabled.';
       newProject['error'] = `Error: ${errorMessage}`;
     } finally {
+      if (newProject['error']) {
+        this.handleOpenSnackbar(newProject['error']);
+      }
       this.props.updateProject(newProject);
       this.setState({ loading: false });
     }
   }
 
   handleExpandProject = project => {
-    if (!Array.isArray(project.datasetIds)) {
+    if (!Array.isArray(project.datasetIds) && !project.error) {
       this.setState({ loading: true });
       this.expandProject(project);
     }
@@ -533,6 +546,10 @@ export class ProjectResource extends Resource<ProjectProps> {
   private async handleRefreshProject(project) {
     await this.expandProject(project);
     this.setState({ expanded: [project.id] });
+  }
+
+  async handleUnpinProject(project) {
+    await this.props.removeProject(project);
   }
 
   handleToggle = (event, nodeIds) => {
@@ -547,6 +564,10 @@ export class ProjectResource extends Resource<ProjectProps> {
     {
       label: 'Refresh project',
       handler: () => this.handleRefreshProject(this.props.project),
+    },
+    {
+      label: 'Unpin project',
+      handler: () => this.handleUnpinProject(this.props.project),
     },
   ];
 
@@ -619,6 +640,8 @@ class ListProjectItem extends React.Component<ResourceListProps, State> {
             context={context}
             updateProject={this.props.updateProject}
             updateDataset={this.props.updateDataset}
+            openSnackbar={this.props.openSnackbar}
+            removeProject={this.props.removeProject}
           />
         </div>
       ));
@@ -636,6 +659,7 @@ const mapDispatchToProps = {
   updateProject,
   updateDataset,
   openSnackbar,
+  removeProject,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListProjectItem);
