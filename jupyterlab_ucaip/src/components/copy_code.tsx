@@ -79,12 +79,12 @@ export class CodeComponentActions extends React.Component<Props, State> {
           </>
         )}
         {this.props.generateEnabled !== false &&
+          this.context.notebookTracker &&
           this.context.notebookTracker.currentWidget !== null && (
             <>
               <Tooltip title="Generate code cell">
                 <IconButton
                   size="small"
-                  color="primary"
                   onClick={_ => {
                     CodeGenService.generateCodeCell(
                       this.context,
