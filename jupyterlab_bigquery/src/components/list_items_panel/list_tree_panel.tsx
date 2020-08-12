@@ -82,6 +82,10 @@ const localStyles = stylesheet({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  headerTitle: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   resources: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     padding: '8px 12px',
@@ -100,6 +104,7 @@ const localStyles = stylesheet({
     display: 'flex',
     flexDirection: 'row',
     marginBottom: '8px',
+    alignItems: 'center',
   },
   search: {
     marginBottom: '8px',
@@ -288,6 +293,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           this.props.addProject(project);
         } else {
           console.log('This project does not exist');
+          this.props.openSnackbar(`Project ${newProjectId} does not exist.`);
         }
       });
     } catch (err) {
@@ -363,7 +369,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           <CustomSnackbar open={snackbar.open} message={snackbar.message} />
         </Portal>
         <header className={localStyles.header}>
-          <div>BigQuery Extension</div>
+          <div className={localStyles.headerTitle}>BigQuery Extension</div>
           <div className={localStyles.buttonContainer}>
             <Tooltip title="Open SQL editor">
               <Button
@@ -401,17 +407,15 @@ class ListItemsPanel extends React.Component<Props, State> {
                   <RefreshIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Pin project">
-                <Button
+              <Tooltip title="Add project">
+                <IconButton
                   size="small"
-                  variant="outlined"
-                  style={{ minWidth: 0 }}
-                  className={localStyles.pinProjectsButton}
+                  aria-label="close"
+                  color="inherit"
                   onClick={this.handleOpenPinProject}
-                  startIcon={<AddIcon />}
                 >
-                  <div className={localStyles.buttonLabel}>Pin project</div>
-                </Button>
+                  <AddIcon fontSize="small" />
+                </IconButton>
               </Tooltip>
             </div>
           </div>

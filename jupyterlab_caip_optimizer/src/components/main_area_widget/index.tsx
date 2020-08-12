@@ -8,6 +8,8 @@ import { Dashboard } from '../dashboard';
 import { SuggestTrials } from '../suggest_trials';
 import { StudyDetails } from '../study_details';
 import { VisualizeTrials } from '../trial_visualization';
+import { ThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../utils/theme';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
@@ -54,7 +56,9 @@ export class MainAreaWidget extends ReactWidget {
   render() {
     return (
       <Provider store={this.reduxStore}>
-        <WrappedViewManager />
+        <ThemeProvider theme={theme}>
+          <WrappedViewManager />
+        </ThemeProvider>
       </Provider>
     );
   }

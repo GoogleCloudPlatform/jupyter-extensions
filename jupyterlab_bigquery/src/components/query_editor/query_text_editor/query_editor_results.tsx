@@ -2,10 +2,12 @@
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
-import { QueryResult } from '../query_text_editor/query_text_editor';
+import { QueryResult } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
+import { Button, Typography } from '@material-ui/core';
+import { Equalizer } from '@material-ui/icons';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -47,6 +49,21 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     this.queryId = props.queryId;
   }
 
+  handleDatastudioExploreButton() {
+    const { query, project } = this.props.queryResult;
+    const config = {
+      sql: query.replace(' ', '+'),
+      billingProjectId: project,
+      projectId: project,
+      connectorType: 'BIG_QUERY',
+      sqlType: 'STANDARD_SQL',
+    };
+    const url =
+      'https://datastudio.google.com/c/u/0/linking/setupAnalysis?config=' +
+      JSON.stringify(config);
+    window.open(url);
+  }
+
   render() {
     const fields = this.props.queryResult.labels;
     const rows = this.props.queryResult.content;
@@ -59,7 +76,21 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
             : localStyles.resultsContainer
         }
       >
-        <Header text="Query results" />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Header text="Query results" />
+          <Button
+            startIcon={<Equalizer fontSize="small" />}
+            onClick={this.handleDatastudioExploreButton.bind(this)}
+          >
+            Explore with Data Studio
+          </Button>
+        </div>
         {fields.length > 0 ? <BQTable fields={fields} rows={rows} /> : <></>}
       </div>
     );

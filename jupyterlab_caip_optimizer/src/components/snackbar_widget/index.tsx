@@ -6,6 +6,8 @@ import { connect, Provider } from 'react-redux';
 import { RootState, AppDispatch } from '../../store/store';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { Store } from 'redux';
+import { ThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../utils/theme';
 
 const mapStateToProps = (state: RootState) => ({
   ...state.snackbar,
@@ -58,8 +60,10 @@ export class SnackbarWidget extends ReactWidget {
   render() {
     return (
       <Provider store={this.reduxStore}>
-        {/* Snackbar lives here since this will always be loaded */}
-        <Snackbar />
+        <ThemeProvider theme={theme}>
+          {/* Snackbar lives here since this will always be loaded */}
+          <Snackbar />
+        </ThemeProvider>
       </Provider>
     );
   }

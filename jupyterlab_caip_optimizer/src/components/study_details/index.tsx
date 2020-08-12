@@ -96,7 +96,6 @@ function formatParams(params: Types.ParameterSpec[]): FormattedParam[] {
 interface Props {
   studyId: string;
   studyToDisplay: FormattedStudy;
-  trials: any[];
   parameterSpecs: Types.ParameterSpec[];
   openTrials: (studyName: string) => void;
   openVisualizations: (studyName: string) => void;
@@ -120,7 +119,6 @@ const mapStateToProps = (state, ownProps) => {
   return {
     studyId: study.name,
     studyToDisplay,
-    trials: study.trials,
     parameterSpecs: study.studyConfig.parameters,
   };
 };
@@ -181,17 +179,18 @@ function createParamRows(study: FormattedStudy): ParamRow[] {
 export const StudyDetailsUnwrapped: React.FC<Props> = ({
   studyId,
   studyToDisplay,
-  trials,
   parameterSpecs,
   openTrials,
   openVisualizations,
   openDashboard,
 }) => {
   const dispatch = useDispatch();
+  React.useEffect(() => {
+    dispatch(fetchTrials(studyId));
+  }, [studyId]);
   const classes = useStyles();
   const configRows = createConfigRows(studyToDisplay);
   const paramRows = createParamRows(studyToDisplay);
-  if (!trials) dispatch(fetchTrials(studyId));
   const [selectedParameterSpec, setSelectedParameterSpec] = React.useState<
     undefined | Types.ParameterSpec
   >(undefined);

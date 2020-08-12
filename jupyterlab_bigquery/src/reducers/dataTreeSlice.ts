@@ -44,6 +44,16 @@ const dataTreeSlice = createSlice({
         state.data.projectIds.push(projectId);
       }
     },
+    removeProject(state, action: PayloadAction<Project>) {
+      const projectResult = action.payload;
+      const projectId = projectResult.id;
+      if (state.data.projects[projectId]) {
+        delete state.data.projects[projectId];
+        state.data.projectIds = state.data.projectIds.filter(
+          item => item !== projectId
+        );
+      }
+    },
     updateDataset(state, action: PayloadAction<Dataset>) {
       const datasetResult = action.payload;
       const datasetId = datasetResult.id;
@@ -61,6 +71,7 @@ export const {
   updateProject,
   updateDataset,
   addProject,
+  removeProject,
 } = dataTreeSlice.actions;
 
 export default dataTreeSlice.reducer;
