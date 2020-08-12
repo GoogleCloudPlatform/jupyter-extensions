@@ -300,6 +300,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 rowData
               );
             }}
+            paging={true}
+            pageSize={20}
+            pageSizeOptions={[20]}
           />
         );
       case ResourceType.Training:
@@ -339,6 +342,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 rowData
               );
             }}
+            paging={true}
+            pageSize={20}
+            pageSizeOptions={[20]}
           />
         );
     }

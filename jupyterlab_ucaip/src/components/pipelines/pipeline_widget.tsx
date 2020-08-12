@@ -7,10 +7,11 @@ import { stylesheet } from 'typestyle';
 const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '14px',
+    fontSize: '18px',
     letterSpacing: '1px',
     margin: 0,
-    padding: '8px 12px 8px 24px',
+    padding: '12px 12px 12px 24px',
+    fontFamily: 'Roboto',
   },
   panel: {
     height: '100%',
