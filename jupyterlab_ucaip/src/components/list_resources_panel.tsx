@@ -24,6 +24,7 @@ import {
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import styled from 'styled-components';
+import { AppContext } from '../context';
 import { CodeGenService } from '../service/code_gen';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
 import {
@@ -39,13 +40,11 @@ import { ImageWidget } from './datasets/image_widget';
 import { ExportModel } from './models/export_model';
 import { ModelWidget } from './models/model_widget';
 import { PipelineWidget } from './pipelines/pipeline_widget';
-import { Context } from './ucaip_widget';
 
 interface Props {
   isVisible: boolean;
   width: number;
   height: number;
-  context: Context;
 }
 
 enum ResourceType {
@@ -111,6 +110,8 @@ const styles = {
 const breakpoints = [250, 380];
 
 export class ListResourcesPanel extends React.Component<Props, State> {
+  static contextType = AppContext;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -158,33 +159,37 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       case ResourceType.Model:
         return (
           <Tooltip title="Export custom model">
-            <Button
-              disabled={this.state.isLoading}
-              color="secondary"
-              size="small"
-              startIcon={<Icon>publish</Icon>}
-              onClick={_ => {
-                this.setState({ exportModelDialogOpen: true });
-              }}
-            >
-              Export
-            </Button>
+            <span>
+              <Button
+                disabled={this.state.isLoading}
+                color="secondary"
+                size="small"
+                startIcon={<Icon>publish</Icon>}
+                onClick={_ => {
+                  this.setState({ exportModelDialogOpen: true });
+                }}
+              >
+                Export
+              </Button>
+            </span>
           </Tooltip>
         );
       case ResourceType.Dataset:
         return (
           <Tooltip title="Create new dataset">
-            <Button
-              disabled={this.state.isLoading}
-              color="secondary"
-              size="small"
-              startIcon={<Icon>add</Icon>}
-              onClick={_ => {
-                this.setState({ createDatasetDialogOpen: true });
-              }}
-            >
-              Create
-            </Button>
+            <span>
+              <Button
+                disabled={this.state.isLoading}
+                color="secondary"
+                size="small"
+                startIcon={<Icon>add</Icon>}
+                onClick={_ => {
+                  this.setState({ createDatasetDialogOpen: true });
+                }}
+              >
+                Create
+              </Button>
+            </span>
           </Tooltip>
         );
     }
@@ -196,177 +201,179 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       height: this.props.height - 80 - (this.state.showSearch ? 25 : 0),
       width: this.props.width,
     };
-    switch (type) {
-      case ResourceType.Dataset:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'datasetType',
-                title: '',
-                render: rowData => this.iconForDatasetType(rowData.datasetType),
-                fixedWidth: 30,
-                sorting: false,
+    return {
+      [ResourceType.Dataset]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'datasetType',
+              title: '',
+              render: rowData => this.iconForDatasetType(rowData.datasetType),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Created at',
+              field: 'createTime',
+              type: ColumnType.DateTime,
+              render: rowData => {
+                return <p>{rowData.createTime.toLocaleString()}</p>;
               },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Created at',
-                field: 'createTime',
-                type: ColumnType.DateTime,
-                render: rowData => {
-                  return <p>{rowData.createTime.toLocaleString()}</p>;
-                },
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Dataset>(this.state.datasets)}
-            onRowClick={rowData => {
-              if (rowData.datasetType === 'TABLE') {
-                this.props.context.manager.launchWidgetForId(
-                  DatasetWidget,
-                  rowData.id,
-                  rowData
-                );
-              } else {
-                this.props.context.manager.launchWidgetForId(
-                  ImageWidget,
-                  rowData.id,
-                  rowData
-                );
-              }
-            }}
-            rowContextMenu={[
-              {
-                label: 'Delete',
-                handler: rowData => {
-                  this.deleteConfirm(rowData);
-                },
-              },
-              {
-                label: 'Copy ID',
-                handler: rowData => {
-                  Clipboard.copyToSystem(rowData.id);
-                },
-              },
-              {
-                label: 'Import to notebook',
-                handler: rowData => {
-                  CodeGenService.generateCodeCell(
-                    this.props.context,
-                    CodeGenService.importDatasetCode(rowData.id),
-                    // Fallback to dataset view
-                    _ => {
-                      this.props.context.manager.launchWidgetForId(
-                        DatasetWidget,
-                        rowData.id,
-                        rowData
-                      );
-                    }
-                  );
-                },
-              },
-            ]}
-            paging={true}
-            pageSize={20}
-            pageSizeOptions={[20]}
-          />
-        );
-      case ResourceType.Model:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'displayName',
-                title: '',
-                render: rowData => this.iconForModelType(rowData.modelType),
-                fixedWidth: 30,
-                sorting: false,
-              },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Last updated',
-                field: 'updateTime',
-                type: ColumnType.DateTime,
-                render: rowData => {
-                  return <p>{rowData.updateTime.toLocaleString()}</p>;
-                },
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Model>(this.state.models)}
-            rowContextMenu={[
-              {
-                label: 'Delete',
-                handler: rowData => {
-                  this.deleteConfirm(rowData);
-                },
-              },
-              {
-                label: 'Copy ID',
-                handler: rowData => {
-                  Clipboard.copyToSystem(rowData.id);
-                },
-              },
-            ]}
-            onRowClick={rowData => {
-              this.props.context.manager.launchWidgetForId(
-                ModelWidget,
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Dataset>(this.state.datasets)}
+          onRowClick={rowData => {
+            if (rowData.datasetType === 'TABLE') {
+              this.context.manager.launchWidgetForId(
+                DatasetWidget,
                 rowData.id,
-                rowData
+                rowData,
+                this.context
               );
-            }}
-          />
-        );
-      case ResourceType.Training:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'status',
-                title: '',
-                render: rowData => this.iconForPipelineState(rowData.state),
-                fixedWidth: 30,
-                sorting: false,
-              },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Time elapsed',
-                field: 'elapsedTime',
-                minShowWidth: breakpoints[1],
-              },
-              {
-                title: 'Created',
-                field: 'createTime',
-                type: ColumnType.DateTime,
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Pipeline>(this.state.pipelines)}
-            onRowClick={rowData => {
-              this.props.context.manager.launchWidgetForId(
-                PipelineWidget,
+            } else {
+              this.context.manager.launchWidgetForId(
+                ImageWidget,
                 rowData.id,
-                rowData
+                rowData,
+                this.context
               );
-            }}
-          />
-        );
-    }
+            }
+          }}
+          rowContextMenu={[
+            {
+              label: 'Delete',
+              handler: rowData => {
+                this.deleteConfirm(rowData);
+              },
+            },
+            {
+              label: 'Copy ID',
+              handler: rowData => {
+                Clipboard.copyToSystem(rowData.id);
+              },
+            },
+            {
+              label: 'Import to notebook',
+              handler: rowData => {
+                CodeGenService.generateCodeCell(
+                  this.context,
+                  CodeGenService.importDatasetCode(rowData.id),
+                  // Fallback to dataset view
+                  _ => {
+                    this.context.manager.launchWidgetForId(
+                      DatasetWidget,
+                      rowData.id,
+                      rowData,
+                      this.context
+                    );
+                  }
+                );
+              },
+            },
+          ]}
+          paging={true}
+          pageSize={20}
+          pageSizeOptions={[20]}
+        />
+      ),
+      [ResourceType.Model]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'displayName',
+              title: '',
+              render: rowData => this.iconForModelType(rowData.modelType),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Last updated',
+              field: 'updateTime',
+              type: ColumnType.DateTime,
+              render: rowData => {
+                return <p>{rowData.updateTime.toLocaleString()}</p>;
+              },
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Model>(this.state.models)}
+          rowContextMenu={[
+            {
+              label: 'Delete',
+              handler: rowData => {
+                this.deleteConfirm(rowData);
+              },
+            },
+            {
+              label: 'Copy ID',
+              handler: rowData => {
+                Clipboard.copyToSystem(rowData.id);
+              },
+            },
+          ]}
+          onRowClick={rowData => {
+            this.context.manager.launchWidgetForId(
+              ModelWidget,
+              rowData.id,
+              rowData,
+              this.context
+            );
+          }}
+        />
+      ),
+      [ResourceType.Training]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'status',
+              title: '',
+              render: rowData => this.iconForPipelineState(rowData.state),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Time elapsed',
+              field: 'elapsedTime',
+              minShowWidth: breakpoints[1],
+            },
+            {
+              title: 'Created',
+              field: 'createTime',
+              type: ColumnType.DateTime,
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Pipeline>(this.state.pipelines)}
+          onRowClick={rowData => {
+            this.context.manager.launchWidgetForId(
+              PipelineWidget,
+              rowData.id,
+              rowData,
+              this.context
+            );
+          }}
+        />
+      ),
+    }[type];
   }
 
   render() {
@@ -450,10 +457,8 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             onSuccess={() => {
               this.refresh();
             }}
-            context={this.props.context}
           />
           <ExportModel
-            context={this.props.context}
             open={this.state.exportModelDialogOpen}
             onClose={() => {
               this.setState({ exportModelDialogOpen: false });

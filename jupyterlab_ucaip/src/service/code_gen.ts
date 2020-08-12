@@ -1,5 +1,5 @@
 import { NotebookActions } from '@jupyterlab/notebook';
-import { Context } from '../components/ucaip_widget';
+import { Context } from '../context';
 
 export abstract class CodeGenService {
   static generateCodeCell(

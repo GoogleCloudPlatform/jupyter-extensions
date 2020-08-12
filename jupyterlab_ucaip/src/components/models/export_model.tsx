@@ -1,13 +1,12 @@
 import { FormControl } from '@material-ui/core';
-import { SelectInput, TextInput, DialogComponent } from 'gcp_jupyterlab_shared';
+import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { CodeComponent } from '../copy_code';
+import { AppContext } from '../../context';
 import { CodeGenService } from '../../service/code_gen';
-import { Context } from '../ucaip_widget';
+import { CodeComponent } from '../copy_code';
 
 interface Props {
-  context: Context;
   open: boolean;
   onClose: () => void;
 }
@@ -31,6 +30,7 @@ const localStyles = stylesheet({
 });
 
 export class ExportModel extends React.Component<Props, State> {
+  static contextType = AppContext;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -60,14 +60,14 @@ export class ExportModel extends React.Component<Props, State> {
           submitLabel="Generate code cell"
           onSubmit={() => {
             CodeGenService.generateCodeCell(
-              this.props.context,
+              this.context,
               this.getExportCode(),
               null
             );
             this.props.onClose();
           }}
           submitDisabled={
-            !this.props.context.notebookTracker.currentWidget ||
+            !this.context.notebookTracker.currentWidget ||
             !this.state.path ||
             !this.state.name
           }
@@ -129,10 +129,14 @@ export class ExportModel extends React.Component<Props, State> {
             />
           </FormControl>
           Export a pretrained model to uCAIP using the Python API
-          <CodeComponent>{this.getExportCode()}</CodeComponent>
+          <CodeComponent generateEnabled={false}>
+            {this.getExportCode()}
+          </CodeComponent>
         </DialogComponent>
       );
     }
     return null;
   }
 }
+
+ExportModel.contextType = AppContext;

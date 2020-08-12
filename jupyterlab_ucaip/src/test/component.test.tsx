@@ -2,7 +2,7 @@ jest.mock('@jupyterlab/apputils');
 import { DatasetService, Dataset } from '../service/dataset';
 import { ModelService, Model, Pipeline } from '../service/model';
 import { ExportData } from '../components/datasets/export_data';
-import { CopyCode, CodeComponent } from '../components/copy_code';
+import { CodeComponentActions, CodeComponent } from '../components/copy_code';
 import {
   ListResourcesPanel,
   ResourceSelect,
@@ -74,7 +74,7 @@ describe('Testing service methods', () => {
 
 describe('Rendering of ExportData Component', () => {
   const exportData = shallow(
-    <ExportData open={true} onClose={null} onSuccess={null} context={null} />
+    <ExportData open={true} onClose={null} onSuccess={null} />
   );
   it('Renders initial state correctly', async () => {
     // TODO: restore snapshot tests
@@ -104,12 +104,7 @@ describe('Rendering of ExportData Component', () => {
 
 describe('Rendering of ListResourcePanel Component', () => {
   const listResourcesPanel = shallow(
-    <ListResourcesPanel
-      isVisible={true}
-      width={50}
-      height={50}
-      context={null}
-    />
+    <ListResourcesPanel isVisible={true} width={50} height={50} />
   );
   it('Renders initial state correctly', async () => {
     // TODO: restore snapshot tests
@@ -147,20 +142,22 @@ describe('Rendering of ListResourcePanel Component', () => {
   });
 });
 
-describe('Rendering of CopyCode Component', () => {
-  const copyCode = shallow(<CopyCode copy={true} code={'sample code'} />);
+describe('Rendering of CodeComponentActions Component', () => {
+  const codeComponentActions = shallow(
+    <CodeComponentActions copyEnabled={true} code={'sample code'} />
+  );
   const codeComponent = shallow(
-    <CodeComponent copy={false}>Sample code</CodeComponent>
+    <CodeComponent copyEnabled={false}>Sample code</CodeComponent>
   );
   it('Renders initial state correctly', async () => {
     codeComponent.debug();
     // TODO: restore snapshot tests
-    //expect(copyCode).toMatchSnapshot();
+    //expect(codeComponentActions).toMatchSnapshot();
     //expect(codeComponent).toMatchSnapshot();
   });
   it('Clicking copy button opens notification toast', async () => {
-    const copyButton = copyCode.find(IconButton).at(0);
+    const copyButton = codeComponentActions.find(IconButton).at(0);
     copyButton.simulate('click');
-    expect(copyCode.state('copyAlertOpen')).toEqual(true);
+    expect(codeComponentActions.state('copyAlertOpen')).toEqual(true);
   });
 });
