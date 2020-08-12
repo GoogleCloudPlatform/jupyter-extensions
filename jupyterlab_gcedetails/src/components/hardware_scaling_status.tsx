@@ -266,7 +266,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     const progressValue = (status / 6) * 100;
     const { flexContainer, heading, paragraph } = STYLES;
     const { onDialogClose } = this.props;
-    return status === 7 ? (
+    return status === Status['Error'] ? (
       <ErrorPage
         onDialogClose={onDialogClose}
         error={error}
@@ -276,7 +276,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
       <div className={flexContainer}>
         <h3 className={heading}>{Status[status]}</h3>
         <p className={paragraph}>{statusInfo[status]}</p>
-        {status === 6 ? (
+        {status === Status['Complete'] ? (
           <Button
             variant="contained"
             color="primary"
