@@ -12,7 +12,7 @@ export interface ViewDetailsObject {
   project: string;
   link: string;
   query: string;
-  legacy_sql: string;
+  legacy_sql: boolean;
 }
 
 export interface ViewDetails {

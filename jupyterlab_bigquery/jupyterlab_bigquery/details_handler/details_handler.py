@@ -205,8 +205,7 @@ def get_view_details(client, view_id):
               view.self_link,
           'schema':
               format_detail_schema(view.schema),
-          'legacy_sql':
-              'true' if view.view_use_legacy_sql else 'false'
+          'legacy_sql': view.view_use_legacy_sql
       }
   }
 

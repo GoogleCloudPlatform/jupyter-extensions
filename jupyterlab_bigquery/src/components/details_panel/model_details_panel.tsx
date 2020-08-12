@@ -1,4 +1,7 @@
 import * as React from 'react';
+import { Button } from '@material-ui/core';
+import { Code } from '@material-ui/icons';
+
 import {
   ModelDetailsService,
   ModelDetails,
@@ -6,6 +9,9 @@ import {
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { Header } from '../shared/header';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { localStyles } from './dataset_details_panel';
 import { formatDate } from '../../utils/formatters';
 
@@ -89,7 +95,30 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.container}>
-          <Header text={this.props.modelName} />
+          <Header
+            text={this.props.modelName}
+            buttons={[
+              <Button
+                onClick={() => {
+                  const queryId = generateQueryId();
+                  WidgetManager.getInstance().launchWidget(
+                    QueryEditorTabWidget,
+                    'main',
+                    queryId,
+                    undefined,
+                    [
+                      queryId,
+                      `SELECT * FROM ML.PREDICT(MODEL \`${this.props.modelId}\`, )`,
+                    ]
+                  );
+                }}
+                startIcon={<Code />}
+                style={{ textTransform: 'none', color: '#1A73E8' }}
+              >
+                Query model
+              </Button>,
+            ]}
+          />
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
