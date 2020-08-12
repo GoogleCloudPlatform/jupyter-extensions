@@ -169,7 +169,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       );
       this.setState({
         result: (
-          <CodeComponent copyEnabled={false}>
+          <CodeComponent copyEnabled={false} generateEnabled={false}>
             {JSON.stringify(result)}
           </CodeComponent>
         ),

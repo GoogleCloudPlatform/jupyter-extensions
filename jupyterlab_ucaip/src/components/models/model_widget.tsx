@@ -12,7 +12,9 @@ import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Model, Pipeline } from '../../service/model';
+import { Context } from '../../context';
+import { Model, ModelService, Pipeline } from '../../service/model';
+import { BaseWidget } from '../base_widget';
 import { EvaluationTable } from './model_evaluation';
 import { ModelPredictions } from './model_predictions';
 import { ModelProperties } from './model_properties';
@@ -86,7 +88,7 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
   const modelId = props.model.id.split('/');
 
   return (
-    <div className={localStyles.panel}>
+    <div style={{ overflow: 'auto', height: '100%' }}>
       <header className={localStyles.header}>{props.model.displayName}</header>
       <Table
         size="small"

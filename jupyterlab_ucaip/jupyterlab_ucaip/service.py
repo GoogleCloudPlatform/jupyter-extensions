@@ -104,14 +104,23 @@ class UCAIPService:
   def _build_model(self, model):
     json_formatted = json_format.MessageToDict(model._pb)
     return {
-        "id": model.name,
-        "displayName": model.display_name,
-        "pipelineId": model.training_pipeline,
-        "createTime": get_milli_time(model.create_time),
-        "updateTime": get_milli_time(model.update_time),
-        "modelType": parse_model_type(model),
-        "inputs": json_formatted.get("explanationSpec", {}).get("metadata", {}).get("inputs"),
-        "deployedModels": json_formatted.get("deployedModels"),
+        "id":
+            model.name,
+        "displayName":
+            model.display_name,
+        "pipelineId":
+            model.training_pipeline,
+        "createTime":
+            get_milli_time(model.create_time),
+        "updateTime":
+            get_milli_time(model.update_time),
+        "modelType":
+            parse_model_type(model),
+        "inputs":
+            json_formatted.get("explanationSpec", {}).get("metadata",
+                                                          {}).get("inputs"),
+        "deployedModels":
+            json_formatted.get("deployedModels"),
     }
 
   def get_models(self):
@@ -216,7 +225,7 @@ class UCAIPService:
         "state": pipeline.state.name.split("_")[-1],
         "error": pipeline.error.message,
         "objective": objective
-    } 
+    }
 
   def _build_training_pipeline(self, pipeline):
     optional_fields = [
@@ -313,11 +322,11 @@ class UCAIPService:
                                    self._gcs_bucket, key))
 
   def _gcs_to_dataframe(self, uris):
-    return pd.concat((pd.read_csv(uri) for uri in uris),
-                     ignore_index=True)
+    return pd.concat((pd.read_csv(uri) for uri in uris), ignore_index=True)
 
   def _import_bigquery_dataset(self, uri):
-    _, project, dataset_id, table_id = re.split("://|[:]|[.]", uri) #Split by ://, : or .
+    _, project, dataset_id, table_id = re.split("://|[:]|[.]",
+                                                uri)  #Split by ://, : or .
     tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
     destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
     dataset_ref = bigquery.DatasetReference(project, dataset_id)
@@ -352,15 +361,16 @@ class UCAIPService:
       return df
     else:
       raise NotImplementedError("Export not implemented for this dataset")
-  
+
   def _get_model(self, model_id):
     return self._model_client.get_model(name=model_id)
-  
+
   def create_endpoint(self, name):
     display_name = "ucaip-extension/" + name
     endpoint = {"display_name": display_name}
-    return self._endpoint_client.create_endpoint(parent=self._parent, endpoint=endpoint).result()
-  
+    return self._endpoint_client.create_endpoint(parent=self._parent,
+                                                 endpoint=endpoint).result()
+
   def delete_endpoint(self, endpoint_id):
     self._endpoint_client.delete_endpoint(name=endpoint_id).result()
 
@@ -378,13 +388,15 @@ class UCAIPService:
     endpoints = []
     if model.deployed_models:
       for deployed_model in model.deployed_models:
-        endpoint = self._endpoint_client.get_endpoint(name=deployed_model.endpoint)
+        endpoint = self._endpoint_client.get_endpoint(
+            name=deployed_model.endpoint)
         built = self._build_endpoint(deployed_model.deployed_model_id, endpoint)
         endpoints.append(built)
     return endpoints
 
   def get_all_endpoints(self):
-    gcp_endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    gcp_endpoints = self._endpoint_client.list_endpoints(
+        parent=self._parent).endpoints
     endpoints = []
     for endpoint in gcp_endpoints:
       built = self._build_endpoint("None", endpoint)
@@ -392,7 +404,8 @@ class UCAIPService:
     return endpoints
 
   def check_deploying(self, model_name, endpoint_id):
-    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    endpoints = self._endpoint_client.list_endpoints(
+        parent=self._parent).endpoints
     if endpoint_id != "":
       filtered = filter(lambda x: endpoint_id == x.name, endpoints)
       filtered = list(filtered)
@@ -404,28 +417,46 @@ class UCAIPService:
       return [self._build_endpoint("None", filtered[0])]
     return []
 
-  def deploy_model(self, model_id, machine_type="n1-standard-2", min_replicas=1, endpoint_id=None):
+  def deploy_model(self,
+                   model_id,
+                   machine_type="n1-standard-2",
+                   min_replicas=1,
+                   endpoint_id=None):
     model = self._get_model(model_id)
     if not endpoint_id:
       endpoint_id = self.create_endpoint(model.display_name).name
     traffic_split = {"0": 100}
     machine_spec = {"machine_type": machine_type}
-    dedicated_resources = {"machine_spec": machine_spec, "min_replica_count": min_replicas}
-    deployed_model = {"model": model_id, "display_name": model.display_name, "dedicated_resources": dedicated_resources}
-    self._endpoint_client.deploy_model(endpoint=endpoint_id, deployed_model=deployed_model, traffic_split=traffic_split)
+    dedicated_resources = {
+        "machine_spec": machine_spec,
+        "min_replica_count": min_replicas
+    }
+    deployed_model = {
+        "model": model_id,
+        "display_name": model.display_name,
+        "dedicated_resources": dedicated_resources
+    }
+    self._endpoint_client.deploy_model(endpoint=endpoint_id,
+                                       deployed_model=deployed_model,
+                                       traffic_split=traffic_split)
 
   def undeploy_model(self, deployed_model_id, endpoint_id):
     try:
-      self._endpoint_client.undeploy_model(endpoint=endpoint_id, deployed_model_id=deployed_model_id).result()
+      self._endpoint_client.undeploy_model(
+          endpoint=endpoint_id, deployed_model_id=deployed_model_id).result()
     except TypeError:
-      print('TypeError when undeploying model. Known error. Fixed in later versions of the API.')
+      print(
+          'TypeError when undeploying model. Known error. Fixed in later versions of the API.'
+      )
 
   def predict_tables(self, endpoint_id, instance):
     parameters_dict = {}
     parameters = json_format.ParseDict(parameters_dict, Value())
     instances_list = [instance]
     instances = [json_format.ParseDict(s, Value()) for s in instances_list]
-    response = self._prediction_client.predict(endpoint=endpoint_id, parameters=parameters, instances=instances)
+    response = self._prediction_client.predict(endpoint=endpoint_id,
+                                               parameters=parameters,
+                                               instances=instances)
     return json_format.MessageToDict(response._pb.predictions[0])
 
   def _copy_local_directory_to_gcs(self, local_path, bucket, gcs_path):
@@ -439,10 +470,7 @@ class UCAIPService:
       blob = bucket.blob(remote_path)
       blob.upload_from_filename(local_file)
 
-  def export_saved_model(self,
-                         display_name,
-                         model_path,
-                         framework):
+  def export_saved_model(self, display_name, model_path, framework):
     # Strip out non alphanumeric chars of model name and prepend uuid
     name = "{}-{}".format(re.sub(r'\W+', '', display_name), str(uuid.uuid4()))
     key = "models/" + name
@@ -463,32 +491,39 @@ class UCAIPService:
                                           bucket.name, key),
                                       container_spec=container_spec)
     return self._model_client.upload_model(parent=self._parent,
-                                           model=model)
+                                           model=model).result()
 
   def get_dataset_details(self, dataset_id):
     df = self.import_dataset(dataset_id)
     columns = list(df.columns)
-    return [{
-      "fieldName": column
-    } for column in columns]
+    return [{"fieldName": column} for column in columns]
 
   def _build_create_training_pipeline_response(self, response):
     return {
-        "training_display_name": response.display_name,
-        "training_task_inputs": json_format.MessageToDict(response._pb.training_task_inputs),
-        "state": response.state,
-        "create_time": response.create_time,
-        "dataset_id": response.input_data_config.dataset_id,
-        "training_fraction": response.input_data_config.fraction_split.training_fraction,
-        "validation_fraction": response.input_data_config.fraction_split.validation_fraction,
-        "test_fraction": response.input_data_config.fraction_split.test_fraction,
-        "model_display_name": response.model_to_upload.display_name
+        "training_display_name":
+            response.display_name,
+        "training_task_inputs":
+            json_format.MessageToDict(response._pb.training_task_inputs),
+        "state":
+            response.state,
+        "create_time":
+            response.create_time,
+        "dataset_id":
+            response.input_data_config.dataset_id,
+        "training_fraction":
+            response.input_data_config.fraction_split.training_fraction,
+        "validation_fraction":
+            response.input_data_config.fraction_split.validation_fraction,
+        "test_fraction":
+            response.input_data_config.fraction_split.test_fraction,
+        "model_display_name":
+            response.model_to_upload.display_name
     }
 
-  def create_training_pipeline(self, training_pipeline_name, dataset_id, 
+  def create_training_pipeline(self, training_pipeline_name, dataset_id,
                                model_name, target_column, prediction_type,
                                objective, budget_hours, transformations):
-    
+
     training_task_inputs = {
         "targetColumn": target_column,
         "predictionType": prediction_type,
@@ -504,9 +539,12 @@ class UCAIPService:
       training_task_inputs["optimizationObjectivePrecisionValue"] = 0.5
 
     training_pipeline = {
-        "display_name": training_pipeline_name,
-        "training_task_definition": "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
-        "training_task_inputs": json_format.ParseDict(training_task_inputs, Value()),
+        "display_name":
+            training_pipeline_name,
+        "training_task_definition":
+            "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
+        "training_task_inputs":
+            json_format.ParseDict(training_task_inputs, Value()),
         "input_data_config": {
             "dataset_id": dataset_id,
             "fraction_split": {
@@ -515,11 +553,12 @@ class UCAIPService:
                 "test_fraction": 0.1,
             },
         },
-        "model_to_upload": {"display_name": model_name},
+        "model_to_upload": {
+            "display_name": model_name
+        },
     }
 
     response = self._pipeline_client.create_training_pipeline(
-        parent=self._parent, training_pipeline=training_pipeline
-    )
+        parent=self._parent, training_pipeline=training_pipeline)
 
     return self._build_create_training_pipeline_response(response)

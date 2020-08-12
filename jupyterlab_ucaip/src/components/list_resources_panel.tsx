@@ -162,7 +162,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             <span>
               <Button
                 disabled={this.state.isLoading}
-                color="secondary"
+                color="primary"
                 size="small"
                 startIcon={<Icon>publish</Icon>}
                 onClick={_ => {
@@ -180,7 +180,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             <span>
               <Button
                 disabled={this.state.isLoading}
-                color="secondary"
+                color="primary"
                 size="small"
                 startIcon={<Icon>add</Icon>}
                 onClick={_ => {
