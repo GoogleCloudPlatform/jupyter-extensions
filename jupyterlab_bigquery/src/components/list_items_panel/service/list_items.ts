@@ -33,6 +33,7 @@ export interface Table {
   type: string;
   datasetId: string;
   parent: string;
+  partitioned: boolean;
 }
 
 export interface Model {

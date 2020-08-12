@@ -95,8 +95,7 @@ export const Trials: React.FC<Props> = ({
               // Don't use material-table onClick. It does not work well with react-testing-library
               // eslint-disable-next-line @typescript-eslint/no-empty-function
               onClick: () => {},
-              disabled:
-                rowData.state === 'INACTIVE' || rowData.state === 'COMPLETED',
+              disabled: rowData.state !== 'ACTIVE',
             };
           }
         },

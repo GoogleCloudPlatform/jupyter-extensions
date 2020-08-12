@@ -17,15 +17,11 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 
-import {
-  BASE_FONT,
-  ActionBar,
-  SubmitButton,
-  Message,
-} from 'gcp_jupyterlab_shared';
+import { BASE_FONT, Message } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
 import { HardwareConfiguration, ACCELERATOR_TYPES } from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
+import { ActionBar } from './action_bar';
 
 interface Props {
   formData: HardwareConfiguration;
@@ -101,13 +97,12 @@ export function ConfirmationPage(props: Props) {
       <div className={STYLES.infoMessage}>
         <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
       </div>
-      <ActionBar closeLabel="Cancel" onClick={onDialogClose}>
-        <SubmitButton
-          actionPending={false}
-          onClick={() => onSubmit()}
-          text="Submit"
-        />
-      </ActionBar>
+      <ActionBar
+        primaryLabel="Submit"
+        onPrimaryClick={() => onSubmit()}
+        secondaryLabel="Cancel"
+        onSecondaryClick={onDialogClose}
+      />
     </div>
   );
 }
