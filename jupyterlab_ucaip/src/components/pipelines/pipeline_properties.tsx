@@ -7,11 +7,13 @@ import {
   IconButton,
   TableHead,
   Box,
+  withStyles,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 import * as React from 'react';
 import { Pipeline } from '../../service/model';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 interface Props {
   pipeline: Pipeline;
@@ -25,6 +27,13 @@ interface RowProps {
 interface RowState {
   open: boolean;
 }
+
+const StyledTableCell = withStyles({
+  root: {
+    fontSize: '13px',
+    BASE_FONT,
+  },
+})(TableCell);
 
 const properties = {
   state: 'Status',
@@ -54,10 +63,10 @@ export class TransformationOptionsRow extends React.Component<
     return (
       <React.Fragment key={'Expandable'}>
         <TableRow key={this.props.row.key}>
-          <TableCell component="th" scope="row">
+          <StyledTableCell component="th" scope="row">
             {this.props.row.key}
-          </TableCell>
-          <TableCell align="right">
+          </StyledTableCell>
+          <StyledTableCell align="right">
             <IconButton
               aria-label="expand row"
               size="small"
@@ -67,10 +76,13 @@ export class TransformationOptionsRow extends React.Component<
             >
               {this.state.open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
             </IconButton>
-          </TableCell>
+          </StyledTableCell>
         </TableRow>
         <TableRow key={'Collapse'}>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <StyledTableCell
+            style={{ paddingBottom: 0, paddingTop: 0 }}
+            colSpan={6}
+          >
             <Collapse in={this.state.open} timeout="auto" unmountOnExit>
               <Box margin={1}>
                 <Table size="small">
@@ -83,17 +95,17 @@ export class TransformationOptionsRow extends React.Component<
                   <TableBody>
                     {this.props.transformationOptions.map(option => (
                       <TableRow key={option.columnName}>
-                        <TableCell component="th" scope="row">
+                        <StyledTableCell component="th" scope="row">
                           {option.columnName}
-                        </TableCell>
-                        <TableCell>{option.dataType}</TableCell>
+                        </StyledTableCell>
+                        <StyledTableCell>{option.dataType}</StyledTableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </Box>
             </Collapse>
-          </TableCell>
+          </StyledTableCell>
         </TableRow>
       </React.Fragment>
     );
@@ -168,10 +180,10 @@ export class PipelineProperties extends React.Component<Props> {
                 />
               ) : (
                 <TableRow key={row.key}>
-                  <TableCell component="th" scope="row">
+                  <StyledTableCell component="th" scope="row">
                     {row.key}
-                  </TableCell>
-                  <TableCell align="right">{row.val}</TableCell>
+                  </StyledTableCell>
+                  <StyledTableCell align="right">{row.val}</StyledTableCell>
                 </TableRow>
               )
             )}

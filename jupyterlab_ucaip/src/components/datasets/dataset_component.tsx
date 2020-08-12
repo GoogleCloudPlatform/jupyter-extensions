@@ -339,7 +339,7 @@ ${columnString} }
                   <FormHelperText>Objective</FormHelperText>
                 </FormControl>
                 <TextField
-                  style={{ paddingLeft: '24px', paddingTop: '3px' }}
+                  style={{ paddingLeft: '24px', paddingTop: '3px', width: 50 }}
                   error={this.state.budgetError}
                   onChange={event => {
                     let val = event.target.value;

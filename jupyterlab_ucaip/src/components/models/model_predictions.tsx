@@ -15,37 +15,15 @@ import {
   CircularProgress,
   Icon,
   Box,
+  Grid,
+  withStyles,
 } from '@material-ui/core';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
-import { ListResourcesTable } from 'gcp_jupyterlab_shared';
+import { ListResourcesTable, BASE_FONT } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Endpoint, Model, ModelService } from '../../service/model';
 import { CodeComponent } from '../copy_code';
-
-const theme = createMuiTheme({
-  overrides: {
-    MuiTable: {
-      root: {
-        borderRadius: 0,
-        borderTop: '1px solid var(--jp-border-color2)',
-      },
-    },
-    MuiTableHead: {
-      root: {
-        fontSize: 'var(--jp-ui-font-size1)',
-        padding: '0px 8px',
-      },
-    },
-    MuiTableCell: {
-      root: {
-        fontSize: 'var(--jp-ui-font-size1)',
-        padding: '2px 24px 2px 8px',
-      },
-    },
-  },
-});
 
 interface Props {
   model: Model;
@@ -65,13 +43,19 @@ interface State {
   endpointId: string;
 }
 
+const StyledTableCell = withStyles({
+  root: {
+    fontSize: '13px',
+    BASE_FONT,
+  },
+})(TableCell);
+
 const localStyles = stylesheet({
-  header: {
-    fontSize: '15px',
-    fontWeight: 600,
+  title: {
+    fontSize: '16px',
     letterSpacing: '1px',
-    margin: 0,
-    padding: '8px',
+    padding: '24px 0px 10px 8px',
+    fontFamily: 'Roboto',
   },
 });
 
@@ -260,7 +244,7 @@ deploy_model(model_id='${this.props.model.id}',
           Your model must be successfully deployed to an endpoint before you can
           test it.
         </Alert>
-        <header className={localStyles.header}>Deploy model to endpoint</header>
+        <div className={localStyles.title}>Deploy model to endpoint</div>
         <p style={{ paddingLeft: '8px' }}>
           <i>Select the machine type and endpoint to deploy to.</i>
         </p>
@@ -318,9 +302,24 @@ deploy_model(model_id='${this.props.model.id}',
     if (endpoints[0].deployedModelId !== 'None') {
       return (
         <div>
-          {this.props.model.modelType === 'TABLE'
-            ? this.testTablesModelComponent()
-            : this.testOtherModelComponent()}
+          <Grid container style={{ margin: '0px', width: '100%' }}>
+            {this.props.model.modelType === 'TABLE'
+              ? this.testTablesModelComponent()
+              : this.testOtherModelComponent()}
+            <Grid
+              item
+              xs={8}
+              style={{ paddingLeft: '16px', paddingRight: '16px' }}
+            >
+              <CodeComponent>
+                {`from jupyterlab_ucaip import predict
+
+instance = ${this.getInstanceString()}
+predict("${this.state.endpoints[0].id}",
+        instance)`}
+              </CodeComponent>
+            </Grid>
+          </Grid>
           <Button
             disabled={!this.isPredictReady() || this.state.isLoading}
             variant="contained"
@@ -341,12 +340,6 @@ deploy_model(model_id='${this.props.model.id}',
             Reset
           </Button>
           <div style={{ marginTop: '16px' }}>{this.state.result}</div>
-          <header className={localStyles.header}>Code sample</header>
-          <CodeComponent>
-            {`from jupyterlab_ucaip import predict
-instance = ${this.getInstanceString()}
-predict("${this.state.endpoints[0].id}", instance)`}
-          </CodeComponent>
         </div>
       );
     } else {
@@ -361,7 +354,7 @@ predict("${this.state.endpoints[0].id}", instance)`}
   private deployed(endpoints: Endpoint[]): JSX.Element {
     return (
       <div>
-        <header className={localStyles.header}>Endpoints</header>
+        <div className={localStyles.title}>Endpoints</div>
         <ListResourcesTable
           columns={[
             {
@@ -398,7 +391,7 @@ predict("${this.state.endpoints[0].id}", instance)`}
             },
           ]}
         />
-        <header className={localStyles.header}>
+        <div className={localStyles.title}>
           Test your model
           <Box
             component="div"
@@ -417,7 +410,7 @@ predict("${this.state.endpoints[0].id}", instance)`}
               <Icon>refresh</Icon>
             </IconButton>
           </Box>
-        </header>
+        </div>
         {this.predictComponent(endpoints)}
       </div>
     );
@@ -425,19 +418,21 @@ predict("${this.state.endpoints[0].id}", instance)`}
 
   private testTablesModelComponent(): JSX.Element {
     return (
-      <ThemeProvider theme={theme}>
-        <Table size="small" style={{ width: 500, marginBottom: '16px' }}>
+      <Grid item xs={4} style={{ padding: 0 }}>
+        <Table size="small" style={{ marginBottom: '16px' }}>
           <TableHead>
             <TableRow>
-              <TableCell align="left">Feature column name</TableCell>
-              <TableCell align="left">Value</TableCell>
+              <StyledTableCell align="left">
+                Feature column name
+              </StyledTableCell>
+              <StyledTableCell align="left">Value</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {Object.keys(this.props.model.inputs).map(option => (
               <TableRow key={option}>
-                <TableCell>{option}</TableCell>
-                <TableCell>
+                <StyledTableCell>{option}</StyledTableCell>
+                <StyledTableCell>
                   <TextField
                     name={option}
                     onChange={this.handleInputChange}
@@ -449,18 +444,18 @@ predict("${this.state.endpoints[0].id}", instance)`}
                       style: { fontSize: 'var(--jp-ui-font-size1)' },
                     }}
                   />
-                </TableCell>
+                </StyledTableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </ThemeProvider>
+      </Grid>
     );
   }
 
   private testOtherModelComponent(): JSX.Element {
     return (
-      <Box mb="16px">
+      <Grid item xs={4} style={{ paddingTop: '8px' }}>
         <TextField
           placeholder='{"some_property": 123}'
           multiline
@@ -478,8 +473,9 @@ predict("${this.state.endpoints[0].id}", instance)`}
               this.setState({ inputParameters: {}, customInputError: true });
             }
           }}
+          style={{ width: '100%' }}
         />
-      </Box>
+      </Grid>
     );
   }
 
@@ -488,7 +484,7 @@ predict("${this.state.endpoints[0].id}", instance)`}
     return (
       <div
         hidden={this.props.value !== this.props.index}
-        style={{ margin: '16px' }}
+        style={{ paddingLeft: '16px' }}
       >
         {endpoints.length !== 0
           ? this.deployed(endpoints)

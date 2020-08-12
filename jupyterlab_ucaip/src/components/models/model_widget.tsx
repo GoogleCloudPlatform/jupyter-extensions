@@ -13,7 +13,6 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Box,
 } from '@material-ui/core';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { stylesheet } from 'typestyle';
@@ -62,6 +61,14 @@ const AntTab = withStyles((theme: Theme) =>
 )((props: StyledTabProps) => <Tab disableRipple {...props} />);
 
 const localStyles = stylesheet({
+  header: {
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    fontSize: '18px',
+    letterSpacing: '1px',
+    margin: 0,
+    padding: '12px 12px 12px 24px',
+    fontFamily: 'Roboto',
+  },
   list: {
     margin: 0,
     overflowY: 'scroll',
@@ -80,34 +87,36 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
   const modelId = props.model.id.split('/');
 
   return (
-    <div style={{ overflow: 'auto', height: '100%' }}>
-      <Box p="16px">
-        <Table size="small" style={{ width: 500 }}>
-          <TableBody>
-            <TableRow key={'ID'}>
-              <TableCell component="th" scope="row">
-                ID
-              </TableCell>
-              <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
-            </TableRow>
-            <TableRow key={'Region'}>
-              <TableCell component="th" scope="row">
-                Region
-              </TableCell>
-              <TableCell align="right">us-central-1</TableCell>
-            </TableRow>
-            <TableRow key={'Created'}>
-              <TableCell component="th" scope="row">
-                Created
-              </TableCell>
-              <TableCell align="right">
-                {props.model.createTime.toLocaleString()}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-        <ModelPredictions model={props.model} value={0} index={0} />
-      </Box>
+    <div className={localStyles.panel}>
+      <header className={localStyles.header}>{props.model.displayName}</header>
+      <Table
+        size="small"
+        style={{ width: 500, marginLeft: '16px', marginTop: '16px' }}
+      >
+        <TableBody>
+          <TableRow key={'ID'}>
+            <TableCell component="th" scope="row">
+              ID
+            </TableCell>
+            <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
+          </TableRow>
+          <TableRow key={'Region'}>
+            <TableCell component="th" scope="row">
+              Region
+            </TableCell>
+            <TableCell align="right">us-central-1</TableCell>
+          </TableRow>
+          <TableRow key={'Created'}>
+            <TableCell component="th" scope="row">
+              Created
+            </TableCell>
+            <TableCell align="right">
+              {props.model.createTime.toLocaleString()}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <ModelPredictions model={props.model} value={0} index={0} />
     </div>
   );
 }
@@ -147,6 +156,9 @@ export class ModelPanel extends React.Component<Props, State> {
     if (!isLoading) {
       return (
         <div className={localStyles.panel}>
+          <header className={localStyles.header}>
+            {this.props.model.displayName}
+          </header>
           <Toolbar variant="dense">
             <AntTabs
               value={tabState}
@@ -155,8 +167,8 @@ export class ModelPanel extends React.Component<Props, State> {
               }
             >
               <AntTab label="Evaluate" />
-              <AntTab label="Model Properties" />
               <AntTab label="Test" />
+              <AntTab label="Model Properties" />
             </AntTabs>
           </Toolbar>
           <ul className={localStyles.list}>
@@ -165,16 +177,16 @@ export class ModelPanel extends React.Component<Props, State> {
               value={tabState}
               index={0}
             />
-            <ModelProperties
-              model={this.props.model}
-              value={tabState}
-              index={1}
-              pipeline={this.state.pipeline}
-            />
             <ModelPredictions
               model={this.props.model}
               value={tabState}
+              index={1}
+            />
+            <ModelProperties
+              model={this.props.model}
+              value={tabState}
               index={2}
+              pipeline={this.state.pipeline}
             />
           </ul>
         </div>
