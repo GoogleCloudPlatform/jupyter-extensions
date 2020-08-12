@@ -1,112 +1,155 @@
+import React from 'react';
 import { style } from 'typestyle';
-import { ToolbarButton } from './toolbar_btn_template';
 
-// TO DO (ashleyswang): Change to non-inheritance implementation of React Component
+import { Props } from './panel';
+import { ToolbarButton } from './toolbar_button';
 
-export class ControlButton extends ToolbarButton {
+interface ControlButtonState {
+  title: string;
+  style: string;
+  isRunning: boolean;
+}
+
+export class ControlButton extends React.Component<Props, ControlButtonState> {
   constructor(props) {
-    super(
-      props,
-      'Stop Auto Sync',
-      style({ backgroundImage: 'var(--jp-icon-stop)' }), 
-      { running: true },
-    );
+    super(props);
+    this.state = {
+      title: 'Stop Auto Sync',
+      style: style({ backgroundImage: 'var(--jp-icon-stop)' }),
+      isRunning: true,
+    };
+  }
 
+  componentDidMount() {
     this.props.service.start();
     this._addListeners();
   }
 
-  protected _onClick = (): void => {
+  render() {
+    const { title, style } = this.state;
+    return (
+      <ToolbarButton
+        title={title}
+        service={this.props.service}
+        style={style}
+        onClick={() => this._onClick()}
+      />
+    );
+  }
+
+  private _onClick(): void {
     if (this.props.service.running) {
       this.props.service.stop();
     } else {
       this.props.service.start();
     }
-  };
+  }
 
   private _setRunState() {
     this.setState({
-      label: 'Stop Auto Sync',
+      title: 'Stop Auto Sync',
       style: style({
         backgroundImage: 'var(--jp-icon-stop)',
       }),
-      options: {running: true},
+      isRunning: true,
     });
   }
 
   private _setStopState() {
     this.setState({
-      label: 'Start Auto Sync',
+      title: 'Start Auto Sync',
       style: style({
         backgroundImage: 'var(--jp-icon-run)',
       }),
-      options: {running: false},
+      isRunning: false,
     });
   }
 
   private _addListeners() {
-    this.props.service.stateChange.connect((service, running) => {
-      if (running && !this.state.options.running)
-        this._setRunState();
-      else if (!running && this.state.options.running)
-        this._setStopState();
+    this.props.service.stateChange.connect((_, running) => {
+      if (running && !this.state.isRunning) this._setRunState();
+      else if (!running && this.state.isRunning) this._setStopState();
     });
   }
 }
 
-export class StatusButton extends ToolbarButton {
-  // TO DO (ashleyswang): add status indicator icon to show state of repo 
-  constructor(props) {
-    super(
-      props,
-      'Save All Open Files',
-      style({ backgroundImage: 'var(--jp-icon-save)' })
+export class StatusButton extends React.Component<Props, {}> {
+  // TO DO (ashleyswang): add status button to show sync state of repo 
+  private readonly title = 'Save All Open Files';
+  private readonly style = style({ backgroundImage: 'var(--jp-icon-stop)' });
+
+  render() {
+    return (
+      <ToolbarButton
+        title={this.title}
+        service={this.props.service}
+        style={this.style}
+        onClick={() => this._onClick()}
+      />
     );
   }
 
-  protected _onClick = (): void => {
+  private _onClick(): void {
     this.props.service.tracker.saveAll();
-  };
+  }
 }
 
-export class SaveButton extends ToolbarButton {
-  constructor(props) {
-    super(
-      props,
-      'Save All Open Files',
-      style({ backgroundImage: 'var(--jp-icon-save)' })
+export class SaveButton extends React.Component<Props, {}> {
+  private readonly title = 'Save All Open Files';
+  private readonly style = style({ backgroundImage: 'var(--jp-icon-save)' });
+
+  render() {
+    return (
+      <ToolbarButton
+        title={this.title}
+        service={this.props.service}
+        style={this.style}
+        onClick={() => this._onClick()}
+      />
     );
   }
 
-  protected _onClick = (): void => {
+  private _onClick(): void {
     this.props.service.tracker.saveAll();
-  };
+  }
 }
 
-export class SyncButton extends ToolbarButton {
-  constructor(props) {
-    super(
-      props,
-      'Sync With Remote Repo',
-      style({ backgroundImage: 'var(--jp-icon-refresh)' })
+export class SyncButton extends React.Component<Props, {}> {
+  private readonly title = 'Sync With Remote Repo';
+  private readonly style = style({ backgroundImage: 'var(--jp-icon-refresh)' });
+
+  render() {
+    return (
+      <ToolbarButton
+        title={this.title}
+        service={this.props.service}
+        style={this.style}
+        onClick={() => this._onClick()}
+      />
     );
   }
 
-  protected _onClick = (): void => {
+  private _onClick(): void {
     this.props.service.git.sync();
-  };
+  }
 }
 
-export class ReloadButton extends ToolbarButton {
-  constructor(props) {
-    super(
-      props,
-      'Reload All Open Files',
-      style({ backgroundImage: 'var(--jp-icon-bug)' })
+export class ReloadButton extends React.Component<Props, {}> {
+  private readonly title = 'Reload All Open Files';
+  private readonly style = style({ backgroundImage: 'var(--jp--icon-bug)' });
+
+  render() {
+    return (
+      <ToolbarButton
+        title={this.title}
+        service={this.props.service}
+        style={this.style}
+        onClick={() => this._onClick()}
+      />
     );
   }
 
-  protected _onClick = (): void => {
+  private _onClick(): void {
     this.props.service.tracker.current.reload();
-  };
+  }
 }
