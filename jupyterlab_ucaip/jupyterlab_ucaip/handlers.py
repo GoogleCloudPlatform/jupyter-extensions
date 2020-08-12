@@ -98,6 +98,19 @@ def _check_deploying(args):
   return UCAIPService.get().check_deploying(model_name=args["modelName"], endpoint_id=args["endpointId"])
 
 
+@_handler("POST", "trainModel")
+def _train_model(args):
+  UCAIPService.get().create_training_pipeline(training_pipeline_name=args["pipelineName"], 
+                                              dataset_id=args["datasetId"], 
+                                              model_name=args["modelName"],
+                                              target_column=args["targetColumn"],
+                                              prediction_type=args["predictionType"],
+                                              objective=args["objective"],
+                                              budget_hours=args["budgetHours"],
+                                              transformations=args["transformations"])
+  return {"success": True}
+
+
 @_handler("POST", "deployModel")
 def _deploy_model(args):
   UCAIPService.get().deploy_model(model_id=args["modelId"], machine_type=args["machineType"], endpoint_id=args["endpointId"])
@@ -107,7 +120,7 @@ def _deploy_model(args):
 @_handler("POST", "undeployModel")
 def _undeploy_model(args):
   UCAIPService.get().undeploy_model(deployed_model_id=args["deployedModelId"],
-                                     endpoint_id=args["endpointId"])
+                                    endpoint_id=args["endpointId"])
   return {"success": True}
 
 

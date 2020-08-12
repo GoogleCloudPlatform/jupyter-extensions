@@ -3,13 +3,25 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Dataset, DatasetService, Column } from '../../service/dataset';
 import { CodeComponent } from '../copy_code';
-import { ListResourcesTable } from 'gcp_jupyterlab_shared';
+import Toast from '../toast';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
+import { StripedRows } from '../striped_rows';
 import {
   LinearProgress,
   FormControl,
   MenuItem,
   Select,
   FormHelperText,
+  Grid,
+  withStyles,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableBody,
+  Table,
+  Button,
+  TextField,
+  Portal,
 } from '@material-ui/core';
 
 interface Props {
@@ -23,22 +35,43 @@ interface State {
   targetColumn: string;
   predictionType: string;
   objective: string;
+  budget: string;
+  budgetError: boolean;
+  trainingResponse: boolean;
 }
+
+const TableHeadCell = withStyles({
+  root: {
+    backgroundColor: '#f8f9fa',
+    whiteSpace: 'nowrap',
+    fontSize: '13px',
+    padding: '4px 16px 4px 16px',
+    borderTop: '1px  solid var(--jp-border-color2)',
+    BASE_FONT,
+  },
+})(TableCell);
+
+const StyledTableCell = withStyles({
+  root: {
+    fontSize: '13px',
+    BASE_FONT,
+  },
+})(TableCell);
 
 const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontSize: '14px',
+    fontSize: '18px',
     letterSpacing: '1px',
     margin: 0,
-    padding: '8px 12px 8px 24px',
+    padding: '12px 12px 12px 24px',
+    fontFamily: 'Roboto',
   },
   title: {
-    fontSize: '15px',
-    fontWeight: 600,
+    fontSize: '16px',
     letterSpacing: '1px',
-    margin: 0,
-    padding: '8px',
+    padding: '24px 0px 10px 8px',
+    fontFamily: 'Roboto',
   },
   panel: {
     backgroundColor: 'white',
@@ -46,7 +79,7 @@ const localStyles = stylesheet({
     ...csstips.vertical,
   },
   paper: {
-    padding: '16px',
+    paddingLeft: '16px',
     textAlign: 'left',
     fontSize: 'var(--jp-ui-font-size1)',
   },
@@ -69,9 +102,12 @@ export class DatasetComponent extends React.Component<Props, State> {
       targetColumn: '',
       predictionType: 'classification',
       objective: 'minimize-log-loss',
+      budget: '1',
+      budgetError: false,
+      trainingResponse: false,
     };
-    this.getColumnString = this.getColumnString.bind(this);
     this.getBasicString = this.getBasicString.bind(this);
+    this.trainModel = this.trainModel.bind(this);
   }
 
   async componentDidMount() {
@@ -96,6 +132,40 @@ export class DatasetComponent extends React.Component<Props, State> {
     }
   }
 
+  private async trainModel() {
+    try {
+      this.setState({ isLoading: true });
+      const displayName = this.props.dataset.displayName;
+      const transformations = [];
+      for (let i = 0; i < this.state.columns.length; i++) {
+        if (this.state.columns[i].fieldName !== this.state.targetColumn) {
+          const column = { columnName: this.state.columns[i].fieldName };
+          transformations.push({ auto: column });
+        }
+      }
+      await DatasetService.trainModel(
+        displayName + '_training',
+        this.getDatasetId(),
+        displayName + '_model',
+        this.state.targetColumn,
+        this.state.predictionType,
+        this.state.objective,
+        parseInt(this.state.budget),
+        transformations
+      );
+      this.setState({ trainingResponse: true });
+    } catch (err) {
+      console.warn('Error creating training pipeline', err);
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  private getDatasetId(): string {
+    const datasetId = this.props.dataset.id.split('/');
+    return datasetId[datasetId.length - 1];
+  }
+
   private getDatasetSource() {
     let source = '';
     const inputConfig = this.props.dataset.metadata['inputConfig'];
@@ -109,7 +179,8 @@ export class DatasetComponent extends React.Component<Props, State> {
     });
   }
 
-  private getColumnString(): string {
+  private getBasicString(): string {
+    const displayName = this.props.dataset.displayName;
     let columnString = '';
     for (let i = 0; i < this.state.columns.length; i++) {
       if (this.state.columns[i].fieldName !== this.state.targetColumn) {
@@ -117,23 +188,17 @@ export class DatasetComponent extends React.Component<Props, State> {
           "    'columnName': '" + this.state.columns[i].fieldName + "',\n";
       }
     }
-    return columnString;
-  }
-
-  private getBasicString(): string {
-    const datasetId = this.props.dataset.id.split('/');
-    const displayName = this.props.dataset.displayName;
 
     return `training_pipeline_name = '${displayName}_training'
-dataset_id = '${datasetId[datasetId.length - 1]}'
+dataset_id = '${this.getDatasetId()}'
 model_name = '${displayName}_model'
 target_column = '${this.state.targetColumn}'
 prediction_type = '${this.state.predictionType}'
 objective = '${this.state.objective}'
-budget_hours = 1
+budget_hours = ${this.state.budget}
 transformations = [{
   'auto': {
-${this.getColumnString()} }
+${columnString} }
 }]`;
   }
 
@@ -163,34 +228,53 @@ ${this.getColumnString()} }
               {this.props.dataset.displayName}
             </header>
             <div className={localStyles.paper}>
-              <header className={localStyles.title}>Dataset Info</header>
-              <p style={{ padding: '8px' }}>
-                Created: {this.props.dataset.createTime.toLocaleString()}
-              </p>
-              <p style={{ padding: '8px' }}>Total columns: {columns.length}</p>
-              <p style={{ padding: '8px' }}>Dataset location: {source}</p>
-              <header className={localStyles.title}>Columns</header>
-              <div style={{ width: '500px' }}>
-                <ListResourcesTable
-                  columns={[
+              <Grid item xs={9}>
+                <div className={localStyles.title}>Dataset Info</div>
+                <StripedRows
+                  rows={[
                     {
-                      field: 'fieldName',
-                      title: 'Field Name',
+                      name: 'Created',
+                      value: this.props.dataset.createTime.toLocaleString(),
+                    },
+                    {
+                      name: 'Total columns',
+                      value: columns.length,
+                    },
+                    {
+                      name: 'Dataset location',
+                      value: source,
                     },
                   ]}
-                  data={columns}
-                  height={columns.length * 40 + 40}
-                  width={200}
                 />
-              </div>
+              </Grid>
+              <header className={localStyles.title}>Columns</header>
+              <Table
+                size="small"
+                style={{ width: 'auto', tableLayout: 'auto' }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableHeadCell>Field name</TableHeadCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {columns.map(column => {
+                    return (
+                      <TableRow key={column.fieldName}>
+                        <StyledTableCell>{column.fieldName}</StyledTableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
               <header className={localStyles.title}>
                 Train Model on Dataset
               </header>
-              <p style={{ padding: '8px' }}>
+              <p style={{ padding: '0px 0px 10px 8px' }}>
                 <i>
-                  Select the target column, type of model, and optimization
-                  objective. Click button or run the generated code in a
-                  notebook cell to create a training pipeline.
+                  Select the target column, type of model, optimization
+                  objective, and budget. Click button or run the generated code
+                  in a notebook cell to create a training pipeline.
                 </i>
               </p>
               <div style={{ paddingLeft: '16px' }}>
@@ -224,13 +308,12 @@ ${this.getColumnString()} }
                       this.setState({ objective: objectives[0] });
                     }}
                     displayEmpty
+                    autoWidth={true}
                   >
-                    <MenuItem key={'classification'} value={'classification'}>
+                    <MenuItem value={'classification'}>
                       {'classification'}
                     </MenuItem>
-                    <MenuItem key={'regression'} value={'regression'}>
-                      {'regression'}
-                    </MenuItem>
+                    <MenuItem value={'regression'}>{'regression'}</MenuItem>
                   </Select>
                   <FormHelperText>Prediction type</FormHelperText>
                 </FormControl>
@@ -243,6 +326,7 @@ ${this.getColumnString()} }
                       });
                     }}
                     displayEmpty
+                    autoWidth={true}
                   >
                     {this.getObjectivesForPredictionType(
                       this.state.predictionType
@@ -254,6 +338,30 @@ ${this.getColumnString()} }
                   </Select>
                   <FormHelperText>Objective</FormHelperText>
                 </FormControl>
+                <TextField
+                  style={{ paddingLeft: '24px', paddingTop: '3px' }}
+                  error={this.state.budgetError}
+                  onChange={event => {
+                    let val = event.target.value;
+                    if (isNaN(parseInt(val))) {
+                      val = '1';
+                      this.setState({
+                        budget: val.toString(),
+                        budgetError: true,
+                      });
+                    } else {
+                      this.setState({
+                        budget: parseInt(val).toString(),
+                        budgetError: false,
+                      });
+                    }
+                  }}
+                  defaultValue={'1'}
+                  inputProps={{
+                    style: { fontSize: 'var(--jp-ui-font-size1)' },
+                  }}
+                  helperText="Budget"
+                />
               </div>
               <CodeComponent>
                 {`from jupyterlab_ucaip import create_training_pipeline
@@ -271,6 +379,28 @@ create_training_pipeline(
   transformations,
 )`}
               </CodeComponent>
+              <Button
+                disabled={this.state.isLoading}
+                variant="contained"
+                color="primary"
+                size="small"
+                style={{ marginBottom: '16px' }}
+                onClick={this.trainModel}
+              >
+                Train Model
+              </Button>
+              <Portal>
+                <Toast
+                  open={this.state.trainingResponse}
+                  message={
+                    'Model is training. View training pipeline under training dropdown.'
+                  }
+                  onClose={() => {
+                    this.setState({ trainingResponse: false });
+                  }}
+                  autoHideDuration={6000}
+                />
+              </Portal>
             </div>
           </ul>
         </div>
