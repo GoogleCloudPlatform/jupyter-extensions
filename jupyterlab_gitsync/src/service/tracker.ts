@@ -1,29 +1,52 @@
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IDocumentWidget, DocumentModel } from '@jupyterlab/docregistry';
 import { ILabShell } from '@jupyterlab/application';
-import { FileEditor } from '@jupyterlab/fileeditor';
+import { ISignal, Signal } from '@lumino/signaling';
+import { IDocumentWidget, DocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { File } from './file';
-import { MergeResolver } from './resolver';
+import { NotebookFile } from './notebook_file';
+
+export interface IResolver {
+  file: IFile;
+  path: string;
+  conflict: boolean;
+  conflictState: ISignal<this, boolean>;
+
+  addVersion(text: string, origin: string): void;
+  mergeVersions(): Promise<any>;
+}
+
+export interface IFile {
+  widget: IDocumentWidget;
+  context: DocumentRegistry.Context;
+  path: string;
+  conflictState: ISignal<this, boolean>;
+  dirtyState: ISignal<this, boolean>;
+  resolver: IResolver
+
+  save(): Promise<void>;
+  reload(): Promise<void>;
+}
 
 export class FileTracker {
   /* Member Fields */
   shell: ILabShell
-  editor: IEditorTracker;
-  current: File;
-  opened: File[] = [];
-  conflicts: File[] = [];
-  resolved: boolean;
+  current: IFile;
+  opened: IFile[] = [];
+  conflicts: IFile[] = [];
+  changed: IFile[] = [];
+  
+  conflict: boolean;
+  dirty: boolean;
 
   private _saveCompleted: Signal<this, void> = new Signal<this, void>(this);
   private _reloadCompleted: Signal<this, void> = new Signal<this, void>(this);
-  private _stateChange: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
-  constructor(editor: IEditorTracker, shell: ILabShell) {
-    this.editor = editor;
+  constructor(shell: ILabShell) {
     this.shell = shell;
-    this._addListeners();
+    this._addListener(this.shell.currentChanged, this._updateCurrent);
   }
 
   get saveCompleted(): ISignal<this, void> {
@@ -34,8 +57,12 @@ export class FileTracker {
     return this._reloadCompleted;
   }
 
-  get stateChange(): ISignal<this, boolean> {
-    return this._stateChange;
+  get conflictState(): ISignal<this, boolean> {
+    return this._conflictState;
+  }
+
+  get dirtyState(): ISignal<this, boolean> {
+    return this._dirtyState;
   }
 
   async saveAll() {
@@ -54,42 +81,43 @@ export class FileTracker {
     return this._reloadCompleted.emit();
   }
 
-  private _addListeners() {
-    this.shell.currentChanged.connect(this._updateCurrent, this);
-  }
-
-  private _updateCurrent() {
-    const current = this.editor.currentWidget;
-    if (current) this._updateFiles(current);
-  }
-
-  private _updateFiles(widget: IDocumentWidget) {
-    let createFile = true;
-
-    this.opened.forEach(file => {
-      if (createFile && file.context.path === widget.context.path) {
-        this.current = file;
-        createFile = false;
-      }
-    });
-
-    if (createFile) {
-      const file = new File(widget);
-      this.current = file;
-      this.opened.push(file);
-      this._addFileListener(file.widget.disposed, this._disposedListener);
-      this._addFileListener(file.resolver.stateChange, this._conflictListener);
-      this._addFileListener(((file.widget.content as FileEditor)
-        .model as DocumentModel).stateChanged, this._dirtyStateListener);
-    } 
-  }
-
-  private _addFileListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any){
     return signal.connect(callback, this);
   }
 
-  private _removeFileListener(signal: ISignal<any, any>, callback: any){
+  private _removeListener(signal: ISignal<any, any>, callback: any){
     return signal.disconnect(callback, this);
+  }
+
+  private _updateState(type: 'conflict' | 'dirty', state: boolean){
+    const curr = (type == 'conflict') ? this.conflict : this.dirty;
+    const signal = (type == 'conflict') ? this._conflictState : this._dirtyState;
+
+    if (state != curr){
+      if (type == 'conflict') { this.conflict = state; }
+      if (type == 'dirty') { this.dirty = state; } 
+      signal.emit(state);
+    }
+  }
+
+  private _updateCurrent() {
+    const current = this.shell.currentWidget;
+    if (current instanceof DocumentWidget){ this._updateFiles(current); }
+  }
+
+  private _updateFiles(widget: DocumentWidget) {
+    var file = this.opened.find(file => file.path === widget.context.path);
+    if(file)
+      this.current = file;
+    else {
+      file = (widget instanceof NotebookPanel) ? new NotebookFile(widget) : new File(widget);
+      this.current = file;
+      this.opened.push(file);
+
+      this._addListener(file.widget.disposed, this._disposedListener);
+      this._addListener(file.conflictState, this._conflictListener);
+      this._addListener(file.dirtyState, this._dirtyStateListener);
+    }
   }
 
   private _disposedListener(sender: IDocumentWidget){
@@ -97,27 +125,33 @@ export class FileTracker {
     const i = this.opened.indexOf(file);
     this.opened.splice(i, 1);
 
-    this._removeFileListener(file.resolver.stateChange, this._conflictListener);
-    this._removeFileListener(((file.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._removeListener(file.conflictState, this._conflictListener);
+    this._removeListener(file.dirtyState, this._dirtyStateListener);
   }
 
-  private _conflictListener(sender: MergeResolver, resolved: boolean){
-    if (resolved){
-      const i = this.conflicts.indexOf(sender.file);
+  private _conflictListener(sender: File, conflict: boolean){
+    if (!conflict){
+      const i = this.conflicts.indexOf(sender);
       this.conflicts.splice(i, 1);
       if (this.conflicts.length == 0){
-        this.resolved = true;
-        this._stateChange.emit(this.resolved);
+        this._updateState('conflict', false);
       }
     } else {
-      this.conflicts.push(sender.file);
-      this.resolved = false;
-      this._stateChange.emit(this.resolved);
+      this.conflicts.push(sender);
+      this._updateState('conflict', true);
     }
   }
-
-  private _dirtyStateListener(sender: DocumentModel, args: any){
-    console.log(sender, args);
+  
+  private _dirtyStateListener(sender: File, dirty: boolean){
+    if (!dirty){
+      const i = this.changed.indexOf(sender);
+      this.changed.splice(i, 1);
+      if (this.changed.length == 0){
+        this._updateState('dirty', false);
+      }
+    } else {
+      this.changed.push(sender);
+      this._updateState('dirty', true);
+    }
   }
 }
