@@ -4,12 +4,8 @@ import * as React from 'react';
 
 import { GitSyncService } from '../service/service';
 import { Toolbar } from './toolbar';
-import { GitSetup } from './setup';
 
-import {
-  // NOTE: keep in alphabetical order
-  panel,
-} from '../style/panel';
+import { panel } from '../style/panel';
 
 export interface Props {
   service: GitSyncService;
@@ -23,18 +19,9 @@ export class Panel extends React.Component<Props> {
   render() {
     return (
       <div className={panel}>
-        {this._renderToolbar()}
-        {this._renderSetup()}
+        <Toolbar service={this.props.service} />
       </div>
     );
-  }
-
-  private _renderToolbar(): React.ReactElement {
-    return <Toolbar service={this.props.service} />;
-  }
-
-  private _renderSetup(): React.ReactElement {
-    return <GitSetup service={this.props.service} />;
   }
 }
 

@@ -18,7 +18,6 @@ const actionBar = style({
   },
   ...csstips.horizontal,
   ...csstips.endJustified,
-  ...csstips.attachToBottom,
 });
 
 /** Funtional Component for defining an action bar with buttons. */
