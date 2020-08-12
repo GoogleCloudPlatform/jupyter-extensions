@@ -19,7 +19,11 @@ import * as React from 'react';
 
 import { BASE_FONT, Message } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
-import { HardwareConfiguration, getGpuTypeText } from '../data';
+import {
+  HardwareConfiguration,
+  getGpuTypeText,
+  NO_ACCELERATOR_TYPE,
+} from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
 
@@ -69,7 +73,7 @@ function displayConfiguration(
     <div>
       <span className={classes(STYLES.title, STYLES.topPadding)}>{title}</span>
       <div className={STYLES.text}>Machine type: {machineType.description}</div>
-      {attachGpu && (
+      {attachGpu && gpuType !== NO_ACCELERATOR_TYPE && (
         <div className={STYLES.text}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
         </div>
