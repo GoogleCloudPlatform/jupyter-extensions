@@ -20,6 +20,9 @@ jest.mock('../study_details', () => ({
 jest.mock('../trial_visualization', () => ({
   VisualizeTrials: () => <div>Trial Visualization Component</div>,
 }));
+jest.mock('../../utils/theme', () => ({
+  theme: {},
+}));
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import { close as reduxClose } from '../../store/view';
@@ -39,10 +42,10 @@ describe('ViewManager', () => {
       <ViewManager data={{ view: 'studyDetails', studyId: 'STUDY-ID' }} />
     );
     expect(viewManager).toMatchInlineSnapshot(`
-    <StudyDetails
-      studyId="STUDY-ID"
-    />
-    `);
+          <StudyDetails
+            studyId="STUDY-ID"
+          />
+        `);
   });
   it('renders the suggest trials page', () => {
     const viewManager = shallow(
@@ -86,9 +89,17 @@ describe('MainAreaWidget', () => {
           }
         }
       >
-        <MockViewManager>
-          Mock View Manager
-        </MockViewManager>
+        <ThemeProvider
+          theme={
+            Object {
+              Symbol(mui.nested): false,
+            }
+          }
+        >
+          <MockViewManager>
+            Mock View Manager
+          </MockViewManager>
+        </ThemeProvider>
       </Provider>
     `);
   });

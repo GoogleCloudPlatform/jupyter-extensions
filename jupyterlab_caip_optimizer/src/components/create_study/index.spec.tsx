@@ -38,7 +38,7 @@ const createConditional = async ({ parentName, parentValues }: Conditional) => {
   // click on parent parameter name
   userEvent.click(await screen.findByTestId(`parent-${parentName}`));
 
-  for (let value of parentValues) {
+  for (const value of parentValues) {
     // select the parent values
     userEvent.click(await screen.findByLabelText(/parent values/i));
     userEvent.click(await screen.findByTestId(`parentValue-${value}`));
