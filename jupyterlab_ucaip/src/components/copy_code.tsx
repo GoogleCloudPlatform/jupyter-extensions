@@ -78,36 +78,37 @@ export class CodeComponentActions extends React.Component<Props, State> {
             </Portal>
           </>
         )}
-        {this.props.generateEnabled !== false && (
-          <>
-            <Tooltip title="Generate code cell">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={_ => {
-                  CodeGenService.generateCodeCell(
-                    this.context,
-                    this.props.code,
-                    null
-                  );
-                  this.setState({ generateAlertOpen: true });
-                }}
-              >
-                <Icon>add_box</Icon>
-              </IconButton>
-            </Tooltip>
-            <Portal>
-              <Toast
-                open={this.state.generateAlertOpen}
-                message={'Generated code cell!'}
-                autoHideDuration={4000}
-                onClose={() => {
-                  this.setState({ generateAlertOpen: false });
-                }}
-              />
-            </Portal>
-          </>
-        )}
+        {this.props.generateEnabled !== false &&
+          this.context.notebookTracker.currentWidget !== null && (
+            <>
+              <Tooltip title="Generate code cell">
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={_ => {
+                    CodeGenService.generateCodeCell(
+                      this.context,
+                      this.props.code,
+                      null
+                    );
+                    this.setState({ generateAlertOpen: true });
+                  }}
+                >
+                  <Icon>add_box</Icon>
+                </IconButton>
+              </Tooltip>
+              <Portal>
+                <Toast
+                  open={this.state.generateAlertOpen}
+                  message={'Generated code cell!'}
+                  autoHideDuration={4000}
+                  onClose={() => {
+                    this.setState({ generateAlertOpen: false });
+                  }}
+                />
+              </Portal>
+            </>
+          )}
       </div>
     );
   }
