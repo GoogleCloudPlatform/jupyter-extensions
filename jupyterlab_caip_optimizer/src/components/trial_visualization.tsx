@@ -14,6 +14,7 @@ import {
   FormControlLabel,
   RadioGroup,
 } from '@material-ui/core/';
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
 import { setView } from '../store/view';
@@ -318,24 +319,26 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [height, setHeight] = React.useState(0);
   const [value, setValue] = React.useState([0, 1]); // Placeholder value for slider changes
   const [selectedMetric, setSelectedMetric] = React.useState('');
-  const [selectedParamOnDropdown, setSelectedParamOnDropdown] = React.useState(
-    ''
-  );
   const [
-    selectedMetricOnDropdown,
-    setSelectedMetricOnDropdown,
+    selectedMetricForScatterplot,
+    setSelectedMetricForScatterplot,
   ] = React.useState('');
   const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState('');
+  const [
+    selectedParamsForScatterplot,
+    setSelectedParamsForScatterplot
+  ] = React.useState([]);
+
+  const handleParamAutocompleteChange = (event, newValue) => {
+    setSelectedParamsForScatterplot(newValue.slice(0,3)); // Limiting number of scatterplots to 3
+  };
 
   const handleLineGraphRadioChange = event => {
     setLineGraphYAxisMetric(event.target.value);
   };
 
-  const handleParamDropdownSelect = event => {
-    setSelectedParamOnDropdown(event.target.value);
-  };
   const handleMetricDropdownSelect = event => {
-    setSelectedMetricOnDropdown(event.target.value);
+    setSelectedMetricForScatterplot(event.target.value);
   };
 
   if (!trials) {
@@ -348,7 +351,20 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
       'finalMeasurement' in trial &&
       'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
+
   const { paramLabelList, metricLabelList } = fetchAxisLabels(completedTrials);
+
+  /**
+   * Set default parameters & metrics for scatterplot so that graphs will show up before selecting/specifying values
+   */
+  const setScatterplotDefaults = (paramLabelList, metricLabelList) => {
+    if (metricLabelList) setSelectedMetricForScatterplot(metricLabelList[0]);
+    if (paramLabelList) setSelectedParamsForScatterplot(paramLabelList.slice(0, 3));
+  };
+
+  // Make sure to only update the scatterplot param/metric once
+  if (!selectedMetricForScatterplot || !selectedParamsForScatterplot) setScatterplotDefaults(paramLabelList, metricLabelList);
+
   const trialDataList: TrialData[] = createTrialData(completedTrials);
 
   const handleMetricSelectionChange = event => {
@@ -569,55 +585,63 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                   <Grid container item xs={12}>
                     <Typography variant="h6">Scatterplot Analysis</Typography>
                   </Grid>
-                  <Grid container item xs={6} spacing={1}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        id="scatterplotParam"
-                        variant="outlined"
-                        select
-                        label="Select Parameter"
-                        value={selectedParamOnDropdown}
-                        onChange={handleParamDropdownSelect}
-                        size="small"
-                        fullWidth
-                        required
-                      >
-                        {paramLabelList.map(item => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                  <Box m={1} width="100%">
+                    <Grid container item xs={12} spacing={1}>
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          multiple
+                          id="scatterplotParam"
+                          options={paramLabelList}
+                          getOptionLabel={(option) => option}
+                          defaultValue={paramLabelList.slice(0,3)}
+                          filterSelectedOptions
+                          fullWidth
+                          size="small"
+                          onChange={handleParamAutocompleteChange}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="outlined"
+                              label="Select Parameter"
+                              placeholder="Select up to 3 parameters"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          id="scatterplotMetric"
+                          variant="outlined"
+                          select
+                          label="Select Metric"
+                          value={selectedMetricForScatterplot}
+                          onChange={handleMetricDropdownSelect}
+                          size="small"
+                          fullWidth
+                          required
+                        >
+                          {metricLabelList.map(item => (
+                            <MenuItem key={item} value={item}>
+                              {item}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        id="scatterplotMetric"
-                        variant="outlined"
-                        select
-                        label="Select Metric"
-                        value={selectedMetricOnDropdown}
-                        onChange={handleMetricDropdownSelect}
-                        size="small"
-                        fullWidth
-                        required
-                      >
-                        {metricLabelList.map(item => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
-                  </Grid>
-                  <Grid container item xs={6}>
-                    <Scatterplot
-                      width={width * 0.5}
-                      height={height * 0.8}
-                      axisProps={axisPropsList}
-                      trialData={trialDataList}
-                      selectedParam={selectedParamOnDropdown}
-                      selectedMetric={selectedMetricOnDropdown}
-                    />
+                  </Box>
+                  <Grid container item xs={12} justify="center">
+                    {selectedParamsForScatterplot.map((param) => {
+                      return (
+                        <Scatterplot
+                          width={width * 0.3}
+                          height={height * 0.5}
+                          axisProps={axisPropsList}
+                          trialData={trialDataList}
+                          selectedParam={param}
+                          selectedMetric={selectedMetricForScatterplot}
+                        />
+                      );
+                    })}
                   </Grid>
                 </Grid>
               </Paper>
