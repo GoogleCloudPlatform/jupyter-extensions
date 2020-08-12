@@ -387,6 +387,31 @@ export const STYLES = stylesheet({
     alignItems: 'center',
     ...csstips.horizontal,
   },
+  containerPadding: {
+    padding: '20px 30px',
+    maxWidth: '400px',
+  },
+  heading: {
+    fontSize: '22px',
+    padding: '20px 0px',
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+  },
+  subheading: {
+    fontSize: '18px',
+    fontWeight: 700,
+    padding: '10px 0px',
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+  },
+  paragraph: {
+    fontSize: '14px',
+    fontWeight: 400,
+    padding: '5px 0px',
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+  },
   attribute: {
     marginRight: '4px',
   },

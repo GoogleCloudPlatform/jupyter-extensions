@@ -15,19 +15,8 @@
  */
 
 import * as React from 'react';
-import { ActionBar, SubmitButton } from 'gcp_jupyterlab_shared';
-import { stylesheet } from 'typestyle';
 import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
-
-const DETAILS_STYLES = stylesheet({
-  container: {
-    padding: '0px 30px',
-  },
-  heading: {
-    fontSize: '20px',
-    padding: '20px 0px',
-  },
-});
+import { ActionBar } from './action_bar';
 
 interface Props {
   details: Details;
@@ -40,23 +29,26 @@ interface Props {
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
   return (
-    <dl className={DETAILS_STYLES.container}>
-      <p className={DETAILS_STYLES.heading}>Notebook VM Details</p>
-      {receivedError
-        ? 'Unable to retrieve GCE VM details, please check your server logs'
-        : MAPPED_ATTRIBUTES.map(am => (
-            <div className={STYLES.listRow} key={am.label}>
-              <dt className={STYLES.dt}>{am.label}</dt>
-              <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-            </div>
-          ))}
-      <ActionBar closeLabel="Close" onClick={onDialogClose}>
-        <SubmitButton
-          actionPending={false}
-          onClick={reshapeForm}
-          text="Reshape"
-        />
-      </ActionBar>
+    <dl className={STYLES.containerPadding}>
+      <p className={STYLES.heading}>Notebook VM Details</p>
+      {receivedError ? (
+        <p className={STYLES.paragraph}>
+          Unable to retrieve GCE VM details, please check your server logs
+        </p>
+      ) : (
+        MAPPED_ATTRIBUTES.map(am => (
+          <div className={STYLES.listRow} key={am.label}>
+            <dt className={STYLES.dt}>{am.label}</dt>
+            <dd className={STYLES.dd}>{am.mapper(details)}</dd>
+          </div>
+        ))
+      )}
+      <ActionBar
+        primaryLabel="Update"
+        secondaryLabel="Close"
+        onPrimaryClick={reshapeForm}
+        onSecondaryClick={onDialogClose}
+      />
     </dl>
   );
 }
