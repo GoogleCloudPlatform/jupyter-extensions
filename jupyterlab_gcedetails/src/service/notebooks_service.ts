@@ -23,7 +23,6 @@ import {
   PATCH,
   POST,
   ApiRequest,
-  // handleApiError,
 } from 'gcp_jupyterlab_shared';
 
 const POLL_INTERVAL = 5000;

@@ -17,14 +17,15 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 
-import { BASE_FONT, Message } from 'gcp_jupyterlab_shared';
+import { BASE_FONT, Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
-import { ConfigurationError, ErrorType } from './hardware_configuration_dialog';
+import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
 import { getGpuTypeText, getMachineTypeText } from '../data';
 
 interface Props {
+  instanceDetails?: Instance;
   error: ConfigurationError;
   onDialogClose: () => void;
 }
@@ -83,8 +84,8 @@ function displayInstance(instance: Instance) {
 }
 
 export function ErrorPage(props: Props) {
-  const { onDialogClose, error } = props;
-  const { errorType, errorValue, instanceDetails } = error;
+  const { onDialogClose, error, instanceDetails } = props;
+  const { errorType, errorValue } = error;
 
   return (
     <div className={STYLES.container}>
@@ -97,13 +98,10 @@ export function ErrorPage(props: Props) {
       </div>
       {errorType === ErrorType.START && (
         <div className={STYLES.infoMessage}>
-          <Message
-            asError={true}
-            asActivity={false}
-            text={ERROR_MESSAGE}
-            link={LINK}
-            linkText={LINK_TEXT}
-          />
+          <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>
+            {ERROR_MESSAGE}
+            <LearnMoreLink href={LINK} text={LINK_TEXT} />
+          </Message>
         </div>
       )}
       {errorType !== ErrorType.START && (

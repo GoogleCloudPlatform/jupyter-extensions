@@ -4,10 +4,10 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { HardwareConfiguration } from '../data';
-import { ErrorType } from './hardware_configuration_dialog';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { authTokenRetrieval } from './auth_token_retrieval';
 import { ServerWrapper } from './server_wrapper';
+import { ErrorPage } from './error_page';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -49,20 +49,36 @@ const STYLES = stylesheet({
 enum Status {
   'Authorizing' = 0,
   'Stopping Instance' = 1,
-  'Reshaping Instance' = 2,
-  'Starting Instance' = 3,
-  'Complete' = 5,
-  'Error' = 6,
+  'Updating Machine Configuration' = 2,
+  'Updating GPU Configuration' = 3,
+  'Starting Instance' = 4,
+  'Refreshing Session' = 5,
+  'Complete' = 6,
+  'Error' = 7,
 }
 
 const statusInfo = [
   'Getting authorization token to reshape machine. Please complete the OAuth 2.0 authorization steps in the popup',
   'Shutting down instance for reshaping.',
-  'Reshaping instance to your configuration.',
+  'Reshaping machine configuration to match your selection.',
+  'Reshaping GPU configuration to match your selection.',
   'Restarting your instance. Your newly configured machine will be ready very shortly!',
+  'Refreshing your JupyterLab session to reflect your new configuration.',
   'Operation complete. Enjoy your newly configured instance! You may now close this dialog.',
   'An error has occured, please try again later. You may need to restart the instance manually.',
 ];
+
+export enum ErrorType {
+  STOP = 'Stop',
+  RESHAPING = 'Reshape',
+  START = 'Start',
+  REFRESH = 'Refresh',
+}
+
+export interface ConfigurationError {
+  errorType: ErrorType;
+  errorValue: any;
+}
 
 interface Props {
   hardwareConfiguration: HardwareConfiguration;
@@ -70,14 +86,12 @@ interface Props {
   onDialogClose: () => void;
   onCompletion: () => void;
   detailsServer: ServerWrapper;
-  onError: (err, errorType: ErrorType, instanceDetails?: Instance) => void;
-  showErrorPage: () => void;
 }
 
 interface State {
   status: Status;
   instanceDetails: Instance;
-  reshapingError: boolean;
+  error: ConfigurationError;
 }
 
 export class HardwareScalingStatus extends React.Component<Props, State> {
@@ -88,7 +102,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     this.state = {
       status: Status.Authorizing,
       instanceDetails: null,
-      reshapingError: false,
+      error: null,
     };
   }
 
@@ -97,6 +111,59 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     event.returnValue = '';
   }
 
+  private updateStatus(status: Status, instanceDetails: Instance) {
+    this.setState({
+      status,
+      instanceDetails,
+    });
+  }
+
+  private showError(
+    errorType: ErrorType,
+    errorValue: any,
+    newInstanceDetails?: Instance
+  ) {
+    this.setState({
+      status: Status.Error,
+      instanceDetails: newInstanceDetails
+        ? newInstanceDetails
+        : this.state.instanceDetails,
+      error: {
+        errorType,
+        errorValue,
+      },
+    });
+  }
+
+  private updateError(
+    errorType: ErrorType,
+    errorValue: any,
+    newInstanceDetails?: Instance
+  ) {
+    this.setState({
+      instanceDetails: newInstanceDetails
+        ? newInstanceDetails
+        : this.state.instanceDetails,
+      error: {
+        errorType,
+        errorValue,
+      },
+    });
+  }
+
+  private async waitForServer() {
+    for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
+      try {
+        await this.props.detailsServer.getUtilizationData();
+        break;
+      } catch (err) {
+        if (tries === this.NUM_RETRIES - 1) {
+          this.showError(ErrorType.REFRESH, err);
+        }
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+  }
   async componentDidMount() {
     const { notebookService } = this.props;
     try {
@@ -113,94 +180,74 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    const { status, instanceDetails, reshapingError } = this.state;
-    const {
-      hardwareConfiguration,
-      notebookService,
-      onError,
-      showErrorPage,
-      onCompletion,
-    } = this.props;
+    const { status, error, instanceDetails } = this.state;
+    const { hardwareConfiguration, notebookService, onCompletion } = this.props;
     const { machineType, attachGpu, gpuType, gpuCount } = hardwareConfiguration;
 
     if (prevState.status !== status) {
       switch (status) {
         case Status['Stopping Instance']: {
           try {
-            const stopResult = (await notebookService.stop()) as Instance;
-            this.setState({
-              status: Status['Reshaping Instance'],
-              instanceDetails: stopResult,
-            });
+            const stopResult = await notebookService.stop();
+            this.updateStatus(
+              Status['Updating Machine Configuration'],
+              stopResult
+            );
           } catch (err) {
-            onError(err, ErrorType.STOP, instanceDetails);
-            this.setState({ status: Status.Error });
+            this.showError(ErrorType.STOP, err);
           }
           break;
         }
 
-        case Status['Reshaping Instance']: {
-          let reshapeResult: Instance = instanceDetails;
-          // Change machineType
+        case Status['Updating Machine Configuration']: {
+          let setMachineTypeResult = instanceDetails;
           try {
-            reshapeResult = (await notebookService.setMachineType(
+            setMachineTypeResult = await notebookService.setMachineType(
               machineType.name
-            )) as Instance;
+            );
           } catch (err) {
-            this.setState({ reshapingError: true });
-            onError(err, ErrorType.RESHAPING, reshapeResult);
+            this.updateError(ErrorType.RESHAPING, err);
           }
-          // Attach GPU
-          if (attachGpu) {
-            try {
-              reshapeResult = (await notebookService.setAccelerator(
-                gpuType,
-                gpuCount
-              )) as Instance;
-            } catch (err) {
-              this.setState({ reshapingError: true });
-              onError(err, ErrorType.RESHAPING, reshapeResult);
-            }
+          const nextStatus = attachGpu
+            ? 'Updating GPU Configuration'
+            : 'Starting Instance';
+          this.updateStatus(Status[nextStatus], setMachineTypeResult);
+          break;
+        }
+
+        case Status['Updating GPU Configuration']: {
+          let setGpuTypeResult = instanceDetails;
+          try {
+            setGpuTypeResult = await notebookService.setAccelerator(
+              gpuType,
+              gpuCount
+            );
+          } catch (err) {
+            this.updateError(ErrorType.RESHAPING, err);
           }
-          // If reshaping fails, start the machine and display reshaping error message after machine has started
-          this.setState({
-            status: Status['Starting Instance'],
-            instanceDetails: reshapeResult,
-          });
+          this.updateStatus(Status['Starting Instance'], setGpuTypeResult);
           break;
         }
 
         case Status['Starting Instance']: {
-          let startResult: Instance = null;
           try {
-            startResult = (await notebookService.start()) as Instance;
+            const startResult = await notebookService.start();
+            this.updateStatus(Status['Refreshing Session'], startResult);
           } catch (err) {
-            onError(err, ErrorType.START, instanceDetails);
-            this.setState({ status: Status.Error });
+            this.showError(ErrorType.START, err);
           }
-
-          // Wait for server to come back up
-          for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
-            try {
-              await this.props.detailsServer.getUtilizationData();
-              break;
-            } catch (err) {
-              if (tries === this.NUM_RETRIES - 1) {
-                onError(err, ErrorType.REFRESH, startResult);
-                this.setState({ status: Status.Error });
-              }
-              await new Promise(resolve => setTimeout(resolve, 5000));
-            }
-          }
-          onCompletion();
-          this.setState({
-            status: reshapingError ? Status.Error : Status.Complete,
-          });
           break;
         }
 
-        case Status['Error']: {
-          showErrorPage();
+        case Status['Refreshing Session']: {
+          await this.waitForServer();
+          onCompletion();
+          this.setState({
+            status:
+              error && error.errorType === ErrorType.RESHAPING
+                ? Status.Error
+                : Status.Complete,
+          });
           break;
         }
 
@@ -215,15 +262,21 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   render() {
-    const { status } = this.state;
-    const progressValue = (status / 4) * 100;
+    const { status, error, instanceDetails } = this.state;
+    const progressValue = (status / 6) * 100;
     const { flexContainer, heading, paragraph } = STYLES;
     const { onDialogClose } = this.props;
-    return (
+    return status === 7 ? (
+      <ErrorPage
+        onDialogClose={onDialogClose}
+        error={error}
+        instanceDetails={instanceDetails}
+      />
+    ) : (
       <div className={flexContainer}>
         <h3 className={heading}>{Status[status]}</h3>
         <p className={paragraph}>{statusInfo[status]}</p>
-        {status === 4 || status === 5 ? (
+        {status === 6 ? (
           <Button
             variant="contained"
             color="primary"
