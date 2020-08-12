@@ -1,6 +1,6 @@
 import React from 'react';
 import QueryTextEditor from '../query_text_editor/query_text_editor';
-import QueryResults from './query_editor_results';
+import QueryResults from '../query_text_editor/query_editor_results';
 import {
   QueryId,
   generateQueryId,

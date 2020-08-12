@@ -86,7 +86,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                     'main',
                     queryId,
                     undefined,
-                    [queryId, `SELECT * FROM \`${this.props.table_id}\``]
+                    [
+                      queryId,
+                      `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
+                    ]
                   );
                 }}
                 startIcon={<Code />}
