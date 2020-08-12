@@ -155,13 +155,17 @@ type ParentBaseInput<T> = {
 
 export const ParameterNumberInput: React.FC<ParentBaseInput<
   TemporaryParameterIntegerMetadata | TemporaryParameterDoubleMetadata
->> = ({
+> & { type: 'INTEGER' | 'DOUBLE' }> = ({
+  type,
   metadata,
   onChange,
   parentParameters,
   parentMetadata,
   onChangeParentMetadata,
 }) => {
+  const inputProps = {
+    step: type === 'INTEGER' ? 1 : 'any',
+  };
   return (
     <>
       {/* NOTE: this continues to use the grid layout from parameter list */}
@@ -169,6 +173,8 @@ export const ParameterNumberInput: React.FC<ParentBaseInput<
         <TextField
           id="parameterMinValue"
           required
+          type="number"
+          inputProps={inputProps}
           variant="outlined"
           label="Min Value"
           fullWidth
@@ -182,6 +188,8 @@ export const ParameterNumberInput: React.FC<ParentBaseInput<
         <TextField
           id="parameterMaxValue"
           required
+          type="number"
+          inputProps={inputProps}
           variant="outlined"
           label="Max Value"
           fullWidth
