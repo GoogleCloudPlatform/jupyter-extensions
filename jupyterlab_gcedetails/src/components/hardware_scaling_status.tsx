@@ -51,7 +51,6 @@ enum Status {
   'Stopping Instance' = 1,
   'Reshaping Instance' = 2,
   'Starting Instance' = 3,
-  'Refreshing Session' = 4,
   'Complete' = 5,
   'Error' = 6,
 }
@@ -61,7 +60,6 @@ const statusInfo = [
   'Shutting down instance for reshaping.',
   'Reshaping instance to your configuration.',
   'Restarting your instance. Your newly configured machine will be ready very shortly!',
-  'Refreshing your JupyterLab session.',
   'Operation complete. Enjoy your newly configured instance! You may now close this dialog.',
   'An error has occured, please try again later. You may need to restart the instance manually.',
 ];
@@ -225,7 +223,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
       <div className={flexContainer}>
         <h3 className={heading}>{Status[status]}</h3>
         <p className={paragraph}>{statusInfo[status]}</p>
-        {status === 5 || status === 6 ? (
+        {status === 4 || status === 5 ? (
           <Button
             variant="contained"
             color="primary"

@@ -51,7 +51,7 @@ export const STYLES = stylesheet({
     paddingTop: '15px',
   },
   infoMessage: {
-    margin: '20px 16px 0px 16px',
+    margin: '20px 16px 16px 16px',
   },
 });
 
@@ -60,7 +60,6 @@ const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;
 
 function displayInstance(instance: Instance) {
-  console.log('display instance');
   const { machineType, acceleratorConfig } = instance;
   const machineTypeText = getMachineTypeText(machineType.split('/').pop());
 
