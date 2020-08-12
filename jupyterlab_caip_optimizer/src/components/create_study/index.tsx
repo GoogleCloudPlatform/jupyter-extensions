@@ -2,77 +2,28 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  Paper,
-  Chip,
   Typography,
   TextField,
   MenuItem,
   Grid,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { connect } from 'react-redux';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createStudy } from '../../store/studies';
 import { setView } from '../../store/view';
 import { styles } from '../../utils/styles';
 import * as Types from '../../types';
-
-const useStyles = makeStyles(theme => ({
-  chipBox: {
-    display: 'flex',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    listStyle: 'none',
-    padding: theme.spacing(1),
-    backgroundColor: '#888888',
-    margin: 0,
-  },
-  chip: {
-    margin: theme.spacing(0.5),
-  },
-}));
-
-interface Props {
-  createStudyAndLoad: (study: Types.Study) => void;
-}
-
-const mapDispatchToProps = dispatch => ({
-  createStudyAndLoad: (study: Types.Study) =>
-    // Redux's createAsyncThunk returns a Promise<PayloadAction<type>> since the
-    // action has more information. Read more here:
-    // https://redux-toolkit.js.org/api/createAsyncThunk#return-value
-    dispatch(createStudy(study)).then((action: PayloadAction<Types.Study>) => {
-      dispatch(
-        setView({
-          view: 'studyDetails',
-          studyId: action.payload.name,
-        })
-      );
-    }),
-});
-
-export interface DropdownItem {
-  value: string;
-  label: string;
-}
-
-type ParameterChip = {
-  key: number;
-  label: string;
-  paramName: string;
-  paramType: Types.ParameterType;
-  paramValList?: string[];
-  paramValListString?: string;
-  paramMinVal?: string;
-  paramMaxVal?: string;
-};
-
-type MetricChip = {
-  key: number;
-  label: string;
-  metricName: string;
-  metricGoalType: Types.GoalType;
-};
+import { ParameterList } from './parameter_list';
+import { MetricList } from './metric_list';
+import { useAppDispatch } from '../../store/store';
+import {
+  DropdownItem,
+  TemporaryParameter,
+  TemporaryParameterDoubleMetadata,
+  TemporaryParameterIntegerMetadata,
+  TemporaryParameterCategoricalMetadata,
+  TemporaryParameterDiscreteMetadata,
+  TemporaryParameterChildMetadata,
+} from './types';
 
 export const createDropdown = (
   items: ReadonlyArray<string>
@@ -85,244 +36,139 @@ export const createDropdown = (
   return dropdownList;
 };
 
-export const CreateStudyUnwrapped: React.FC<Props> = ({
-  createStudyAndLoad,
-}) => {
-  const classes = useStyles();
+const createPartialSpec = (parameter: TemporaryParameter) => {
+  const parameterSpec: Partial<Types.ParameterSpec> = {};
+  parameterSpec['parameter'] = parameter.name;
+  parameterSpec['type'] = parameter.type;
+  switch (parameterSpec.type) {
+    case 'DOUBLE': {
+      const {
+        minValue,
+        maxValue,
+      } = parameter.metadata as TemporaryParameterDoubleMetadata;
+      parameterSpec['doubleValueSpec'] = {
+        minValue: Number(minValue),
+        maxValue: Number(maxValue),
+      } as Types.DoubleValueSpec;
+      break;
+    }
+    case 'INTEGER': {
+      const {
+        minValue,
+        maxValue,
+      } = parameter.metadata as TemporaryParameterIntegerMetadata;
+      parameterSpec['integerValueSpec'] = {
+        minValue: minValue,
+        maxValue: maxValue,
+      } as Types.IntegerValueSpec;
+      break;
+    }
+    case 'CATEGORICAL': {
+      const {
+        valueList,
+      } = parameter.metadata as TemporaryParameterCategoricalMetadata;
+      parameterSpec['categoricalValueSpec'] = {
+        values: valueList,
+      } as Types.CategoricalValueSpec;
+      break;
+    }
+    case 'DISCRETE': {
+      const {
+        valueList,
+      } = parameter.metadata as TemporaryParameterDiscreteMetadata;
+      parameterSpec['discreteValueSpec'] = {
+        values: valueList.map((valueString: string): number =>
+          Number(valueString)
+        ),
+      } as Types.DiscreteValueSpec;
+      break;
+    }
+  }
+  return parameterSpec as Types.ParameterSpec;
+};
+
+const temporaryParametersToSpecs = (
+  parameters: TemporaryParameter[]
+): Types.ParameterSpec[] => {
+  const specs = new Map<
+    string,
+    { spec: Types.ParameterSpec; parent?: TemporaryParameterChildMetadata }
+  >();
+
+  parameters.forEach(parameter => {
+    const spec = createPartialSpec(parameter);
+    specs.set(parameter.name, { spec, parent: parameter.parent });
+  });
+
+  specs.forEach(({ spec, parent }) => {
+    if (parent) {
+      if (!specs.has(parent.name)) {
+        throw new TypeError(
+          `Parent with name "${parent.name}" does not exist!`
+        );
+      }
+      const { spec: parentSpec } = specs.get(parent.name);
+
+      // add to parent children
+      switch (parentSpec.type) {
+        case 'CATEGORICAL':
+        case 'DISCRETE':
+        case 'INTEGER':
+          if (!parentSpec.childParameterSpecs) {
+            parentSpec.childParameterSpecs = [];
+          }
+          parentSpec.childParameterSpecs.push(spec);
+          break;
+        default:
+          throw new TypeError(
+            `Parent of type "${parentSpec.type}" can not have children`
+          );
+      }
+
+      // add valid values for spec
+      switch (parentSpec.type) {
+        case 'CATEGORICAL':
+          // TODO: fixing typings
+          (spec as any).parentCategoricalValues = { values: parent.validFor };
+          break;
+        case 'DISCRETE':
+          (spec as any).parentDiscreteValues = {
+            values: parent.validFor.map(stringValue =>
+              parseInt(stringValue, 10)
+            ),
+          };
+          break;
+        case 'INTEGER':
+          (spec as any).parentIntValues = {
+            values: parent.validFor.map(stringValue =>
+              parseInt(stringValue, 10)
+            ),
+          };
+          break;
+      }
+    }
+  });
+
+  const specsArray = Array.from(specs.values());
+
+  // return root spec nodes
+  return specsArray.filter(item => !item.parent).map(item => item.spec);
+};
+
+export const CreateStudy: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [studyName, setStudyName] = React.useState('');
-  const [paramName, setParamName] = React.useState('');
-  const [paramType, setParamType] = React.useState<Types.ParameterType>(
-    'PARAMETER_TYPE_UNSPECIFIED'
-  );
-  const paramTypes: DropdownItem[] = createDropdown(Types.ParameterTypeList);
-  const [paramMinVal, setParamMinVal] = React.useState('');
-  const [paramMaxVal, setParamMaxVal] = React.useState('');
-  const [paramValList, setParamValList] = React.useState([]);
-  const [paramValListString, setParamValListString] = React.useState('');
-  const [paramIsNew, setParamIsNew] = React.useState(true);
-  const [paramChipData, setParamChipData] = React.useState<ParameterChip[]>([]);
-  const [metricName, setMetricName] = React.useState('');
-  const [metricGoalType, setMetricGoalType] = React.useState<Types.GoalType>(
-    'GOAL_TYPE_UNSPECIFIED'
-  );
-  const metricGoalTypes: DropdownItem[] = createDropdown(Types.GoalTypeList);
-  const [metricIsNew, setMetricIsNew] = React.useState(true);
-  const [metricChipData, setMetricChipData] = React.useState<MetricChip[]>([]);
+  const algorithmTypes: DropdownItem[] = createDropdown(Types.AlgorithmList);
   const [algorithmType, setAlgorithmType] = React.useState<Types.Algorithm>(
     'ALGORITHM_UNSPECIFIED'
   );
-  const algorithmTypes: DropdownItem[] = createDropdown(Types.AlgorithmList);
-  const [paramKeyCounter, setParamKeyCounter] = React.useState(0);
-  const [metricKeyCounter, setMetricKeyCounter] = React.useState(0);
-
-  const resetParamState = () => {
-    setParamType('PARAMETER_TYPE_UNSPECIFIED');
-    setParamName('');
-    setParamMinVal('');
-    setParamMaxVal('');
-    setParamValList([]);
-    setParamValListString('');
-    setParamIsNew(true);
-  };
-
-  const resetMetricState = () => {
-    setMetricGoalType('GOAL_TYPE_UNSPECIFIED');
-    setMetricName('');
-    setMetricIsNew(true);
-  };
-
-  const handleParamValListChange = event => {
-    setParamValListString(event.target.value);
-    const valueList = event.target.value.split(',').filter(i => i); // to remove empty string
-    setParamValList(valueList);
-  };
-
-  const handleParamTypeChange = event => {
-    const type = event.target.value;
-    setParamType(type);
-    if (type === 'DOUBLE' || type === 'INTEGER') {
-      setParamValListString('');
-      setParamValList([]);
-      return;
-    }
-    setParamMaxVal('');
-    setParamMinVal('');
-    return;
-  };
-
-  const loadParamData = thisChip => {
-    setParamName(thisChip.paramName);
-    setParamType(thisChip.paramType);
-    thisChip.paramMinVal
-      ? setParamMinVal(thisChip.paramMinVal)
-      : setParamMinVal('');
-    thisChip.paramMaxVal
-      ? setParamMaxVal(thisChip.paramMaxVal)
-      : setParamMaxVal('');
-    if (thisChip.paramValList) {
-      setParamValList(thisChip.paramValList);
-      setParamValListString(thisChip.paramValList.join(','));
-    }
-    setParamIsNew(false);
-  };
-
-  const loadMetricData = thisChip => {
-    setMetricName(thisChip.metricName);
-    setMetricGoalType(thisChip.metricGoalType);
-    setMetricIsNew(false);
-  };
-
-  const getCurrentParamChip = (): ParameterChip => {
-    setParamKeyCounter(paramKeyCounter + 1);
-    return {
-      key: paramKeyCounter,
-      label: paramName,
-      paramName,
-      paramType,
-      paramMinVal: paramMinVal ? paramMinVal : '',
-      paramMaxVal: paramMaxVal ? paramMaxVal : '',
-      paramValList: paramValList ? paramValList : [],
-      paramValListString: paramValListString ? paramValListString : '',
-    };
-  };
-
-  const getCurrentMetricChip = (): MetricChip => {
-    setMetricKeyCounter(metricKeyCounter + 1);
-    return {
-      key: metricKeyCounter,
-      label: metricName,
-      metricName,
-      metricGoalType,
-    };
-  };
-
-  const handleParamChipClick = event => {
-    const clickedChipLabel = event.target.textContent;
-    const thisChip = paramChipData.find(
-      chip => chip.paramName === clickedChipLabel
-    );
-    loadParamData(thisChip);
-  };
-
-  const handleMetricChipClick = event => {
-    const clickedChipLabel = event.target.textContent;
-    const thisChip = metricChipData.find(
-      chip => chip.metricName === clickedChipLabel
-    );
-    loadMetricData(thisChip);
-  };
-
-  const handleAddParam = () => {
-    setParamChipData([...paramChipData, getCurrentParamChip()]);
-    resetParamState();
-  };
-
-  const handleSaveParam = () => {
-    const newParamChipData = paramChipData.map(function(chip) {
-      return chip.paramName === paramName ? getCurrentParamChip() : chip;
-    });
-    setParamChipData(newParamChipData);
-    resetParamState();
-  };
-
-  const handleDeleteParam = () => {
-    const newParamChipData = paramChipData.filter(
-      chip => chip.paramName !== paramName
-    );
-    setParamChipData(newParamChipData);
-    resetParamState();
-  };
-
-  const handleMetricGoalTypeChange = event => {
-    const type = event.target.value;
-    setMetricGoalType(type);
-  };
-
-  const handleAlgorithmTypeChange = event => {
-    const type = event.target.value;
-    setAlgorithmType(type);
-  };
-
-  const handleAddMetric = () => {
-    setMetricChipData([...metricChipData, getCurrentMetricChip()]);
-    resetMetricState();
-  };
-
-  const handleSaveMetric = () => {
-    const newMetricChipData = metricChipData.map(function(chip) {
-      return chip.metricName === metricName ? getCurrentMetricChip() : chip;
-    });
-    setMetricChipData(newMetricChipData);
-    resetMetricState();
-  };
-
-  const handleDeleteMetric = () => {
-    const newMetricChipData = metricChipData.filter(
-      chip => chip.metricName !== metricName
-    );
-    setMetricChipData(newMetricChipData);
-    resetMetricState();
-  };
-
-  const getMetricSpecList = (): Types.MetricSpec[] => {
-    return metricChipData.map(
-      (metric: MetricChip): Types.MetricSpec => {
-        return {
-          goal: metric.metricGoalType,
-          metric: metric.metricName,
-        };
-      }
-    );
-  };
-
-  const getParameterSpecList = (): Types.ParameterSpec[] => {
-    return paramChipData.map(
-      (parameter: ParameterChip): Types.ParameterSpec => {
-        const parameterSpec: Partial<Types.ParameterSpec> = {};
-        parameterSpec['parameter'] = parameter.paramName;
-        parameterSpec['type'] = parameter.paramType;
-        switch (parameterSpec.type) {
-          case 'DOUBLE': {
-            parameterSpec['doubleValueSpec'] = {
-              minValue: Number(parameter.paramMinVal),
-              maxValue: Number(parameter.paramMaxVal),
-            } as Types.DoubleValueSpec;
-            break;
-          }
-          case 'INTEGER': {
-            parameterSpec['integerValueSpec'] = {
-              minValue: parameter.paramMinVal,
-              maxValue: parameter.paramMaxVal,
-            } as Types.IntegerValueSpec;
-            break;
-          }
-          case 'CATEGORICAL': {
-            parameterSpec['categoricalValueSpec'] = {
-              values: parameter.paramValList,
-            } as Types.CategoricalValueSpec;
-            break;
-          }
-          case 'DISCRETE': {
-            parameterSpec['discreteValueSpec'] = {
-              values: parameter.paramValList.map(
-                (valueString: string): number => Number(valueString)
-              ),
-            } as Types.DiscreteValueSpec;
-            break;
-          }
-        }
-        const finalParameterSpec = parameterSpec as Types.ParameterSpec;
-        return finalParameterSpec;
-      }
-    );
-  };
+  const [parameters, setParameters] = React.useState<TemporaryParameter[]>([]);
+  const [metrics, setMetrics] = React.useState<Types.MetricSpec[]>([]);
 
   const getStudyObject = (): Types.Study => {
-    const metrics = getMetricSpecList();
-    const parameters = getParameterSpecList();
     const studyConfig: Types.StudyConfig = {
       metrics,
-      parameters,
+      parameters: temporaryParametersToSpecs(parameters),
       algorithm: algorithmType,
     };
     const study: Types.Study = {
@@ -332,296 +178,146 @@ export const CreateStudyUnwrapped: React.FC<Props> = ({
     return study;
   };
 
+  const createStudyAndLoad = (study: Types.Study) =>
+    // Redux's createAsyncThunk returns a Promise<PayloadAction<type>> since the
+    // action has more information. Read more here:
+    // https://redux-toolkit.js.org/api/createAsyncThunk#return-value
+    (dispatch(createStudy(study)) as Promise<PayloadAction<Types.Study>>).then(
+      (action: PayloadAction<Types.Study>) => {
+        dispatch(
+          setView({
+            view: 'studyDetails',
+            studyId: action.payload.name,
+          })
+        );
+      }
+    );
+
   return (
-    <Box className={styles.root} m={5}>
-      <React.Fragment>
-        <Grid container spacing={3}>
-          <Grid container item xs={12}>
-            <Typography variant="h5" gutterBottom>
-              Create New Study
-            </Typography>
-          </Grid>
-          <Grid container item xs={12}>
-            <TextField
-              required
-              variant="outlined"
-              id="studyName"
-              name="studyName"
-              label="Study Name"
-              value={studyName}
-              onChange={e => setStudyName(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid container item spacing={1} xs={12} md={6}>
-            <Typography align="center" variant="h6" gutterBottom>
-              Parameter Configuration
-            </Typography>
-            <Grid item xs={12}>
-              <TextField
-                required
-                variant="outlined"
-                id="paramName"
-                name="paramName"
-                label="Parameter Name"
-                fullWidth
-                value={paramName}
-                onChange={e => setParamName(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="paramType"
-                variant="outlined"
-                select
-                label="Parameter Type"
-                value={paramType}
-                onChange={handleParamTypeChange}
-                fullWidth
-                required
-              >
-                {paramTypes.map(option => (
-                  <MenuItem
-                    key={option.value}
-                    value={option.value}
-                    data-testid="paramType"
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                required
-                id="paramMinVal"
-                variant="outlined"
-                name="paramMinVal"
-                label="Min Value"
-                helperText="For Double and Integer types."
-                fullWidth
-                disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
-                value={paramMinVal}
-                onChange={e => setParamMinVal(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                required
-                id="paramMaxVal"
-                variant="outlined"
-                name="paramMaxVal"
-                label="Max Value"
-                fullWidth
-                disabled={paramType !== 'INTEGER' && paramType !== 'DOUBLE'}
-                value={paramMaxVal}
-                onChange={e => setParamMaxVal(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                id="paramVals"
-                variant="outlined"
-                name="paramVals"
-                label="List of possible values"
-                helperText="For Categorical and Discrete types. Separate values by comma (e.g. 1,2,3,4,5)"
-                fullWidth
-                disabled={
-                  paramType !== 'CATEGORICAL' && paramType !== 'DISCRETE'
-                }
-                value={paramValListString}
-                onChange={handleParamValListChange}
-              />
-            </Grid>
-            <Grid container item justify="space-evenly" xs={12}>
-              <Button
-                color="primary"
-                disabled={paramIsNew}
-                onClick={handleSaveParam}
-              >
-                SAVE PARAM
-              </Button>
-              <Button
-                color="primary"
-                disabled={paramIsNew}
-                onClick={handleDeleteParam}
-              >
-                DELETE PARAM
-              </Button>
-              <Button
-                color="primary"
-                disabled={
-                  !paramType ||
-                  !paramName ||
-                  (!paramMinVal && !paramMaxVal && paramValList.length === 0) ||
-                  !paramIsNew
-                }
-                onClick={handleAddParam}
-              >
-                ADD PARAM
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Paper component="ul" className={classes.chipBox}>
-                {paramChipData.map(data => {
-                  return (
-                    <li key={data.key} data-testid="paramChip">
-                      <Chip
-                        label={data.label}
-                        className={classes.chip}
-                        clickable
-                        onClick={handleParamChipClick}
-                        color={
-                          data.label === paramName ? 'secondary' : 'default'
-                        }
-                      />
-                    </li>
-                  );
-                })}
-              </Paper>
-            </Grid>
-          </Grid>
-          <Grid
-            container
-            item
-            spacing={3}
-            xs={12}
-            md={6}
-            alignContent="flex-start"
-          >
-            <Grid container item spacing={1} alignContent="flex-start">
-              <Typography align="center" variant="h6" gutterBottom>
-                Metric Configuration
+    <Box className={styles.root}>
+      <Box m={5}>
+        <React.Fragment>
+          <Grid container spacing={3}>
+            <Grid container item xs={12}>
+              <Typography variant="h4" gutterBottom>
+                Create New Study
               </Typography>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  variant="outlined"
-                  id="metricName"
-                  name="metricName"
-                  label="Metric Name"
-                  fullWidth
-                  value={metricName}
-                  onChange={e => setMetricName(e.target.value)}
+            </Grid>
+
+            {/* Basics */}
+            <Grid container item xs={12}>
+              {/* Take up half of the page */}
+              <Grid container item xs={12} md={6} spacing={3}>
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom>
+                    Basics
+                  </Typography>
+
+                  <TextField
+                    required
+                    variant="outlined"
+                    id="studyName"
+                    name="studyName"
+                    label="Study Name"
+                    value={studyName}
+                    onChange={e => setStudyName(e.target.value)}
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    id="algorithmType"
+                    variant="outlined"
+                    select
+                    label="Algorithm Type"
+                    value={algorithmType}
+                    onChange={event =>
+                      setAlgorithmType(event.target.value as Types.Algorithm)
+                    }
+                    fullWidth
+                    required
+                  >
+                    {algorithmTypes.map(option => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Parameters */}
+            <Grid
+              container
+              item
+              spacing={1}
+              xs={12}
+              md={6}
+              alignContent="flex-start"
+            >
+              <Grid container item spacing={1} alignContent="flex-start">
+                <Typography variant="h6" gutterBottom>
+                  Parameter Configuration
+                </Typography>
+
+                <ParameterList
+                  parameters={parameters}
+                  onChange={setParameters}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  id="metricGoalType"
-                  SelectProps={{
-                    SelectDisplayProps: {
-                      // Needed for testing
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                      // @ts-ignore
-                      'data-testid': 'metricGoalType',
-                    },
-                  }}
-                  variant="outlined"
-                  select
-                  label="Goal Type"
-                  value={metricGoalType}
-                  onChange={handleMetricGoalTypeChange}
-                  fullWidth
-                  required
-                >
-                  {metricGoalTypes.map(option => (
-                    <MenuItem
-                      key={option.value}
-                      value={option.value}
-                      data-testid="metricItem"
-                    >
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid container item justify="space-evenly" xs={12}>
-                <Button
-                  color="primary"
-                  disabled={metricIsNew}
-                  onClick={handleSaveMetric}
-                >
-                  SAVE METRIC
-                </Button>
-                <Button
-                  color="primary"
-                  disabled={metricIsNew}
-                  onClick={handleDeleteMetric}
-                >
-                  DELETE METRIC
-                </Button>
-                <Button
-                  color="primary"
-                  disabled={!metricName || !metricGoalType || !metricIsNew}
-                  onClick={handleAddMetric}
-                >
-                  ADD METRIC
-                </Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Paper component="ul" className={classes.chipBox}>
-                  {metricChipData.map(data => {
-                    return (
-                      <li key={data.key} data-testid="metricChip">
-                        <Chip
-                          label={data.label}
-                          className={classes.chip}
-                          clickable
-                          onClick={handleMetricChipClick}
-                          color={
-                            data.label === metricName ? 'secondary' : 'default'
-                          }
-                        />
-                      </li>
-                    );
-                  })}
-                </Paper>
-              </Grid>
             </Grid>
-            <Grid container item spacing={1} alignContent="flex-start">
-              <Typography align="center" variant="h6" gutterBottom>
-                Algorithm
-              </Typography>
-              <Grid item xs={12}>
-                <TextField
-                  id="algorithmType"
-                  variant="outlined"
-                  select
-                  label="Algorithm Type"
-                  value={algorithmType}
-                  onChange={handleAlgorithmTypeChange}
-                  fullWidth
-                  required
-                >
-                  {algorithmTypes.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid container item spacing={3} justify="flex-end">
-            <Button
-              size="large"
-              variant="contained"
-              color="primary"
-              id="createStudyButton"
-              disabled={!studyName}
-              onClick={() => createStudyAndLoad(getStudyObject())}
+
+            {/* Metrics */}
+            <Grid
+              container
+              item
+              spacing={3}
+              xs={12}
+              md={6}
+              alignContent="flex-start"
             >
-              Create Study
-            </Button>
+              <Grid container item spacing={1} alignContent="flex-start">
+                <Typography align="center" variant="h6" gutterBottom>
+                  Metric Configuration
+                </Typography>
+                <MetricList metrics={metrics} onChange={setMetrics} />
+              </Grid>
+            </Grid>
+
+            <Grid container item xs={12} spacing={1}>
+              {/* Take up half of the page */}
+              <Grid container item xs={12} md={6}>
+                <Box clone mr={2}>
+                  <Button
+                    size="large"
+                    data-testid="createStudy"
+                    variant="contained"
+                    color="primary"
+                    id="createStudyButton"
+                    disabled={!studyName}
+                    onClick={() => createStudyAndLoad(getStudyObject())}
+                  >
+                    Create
+                  </Button>
+                </Box>
+
+                <Box>
+                  <Button
+                    size="large"
+                    color="primary"
+                    id="cancel"
+                    onClick={() => dispatch(setView({ view: 'dashboard' }))}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
           </Grid>
-        </Grid>
-      </React.Fragment>
+        </React.Fragment>
+      </Box>
     </Box>
   );
 };
-
-export const CreateStudy = connect(
-  null,
-  mapDispatchToProps
-)(CreateStudyUnwrapped);

@@ -7,6 +7,7 @@ import { CreateStudy } from '../create_study';
 import { Dashboard } from '../dashboard';
 import { SuggestTrials } from '../suggest_trials';
 import { StudyDetails } from '../study_details';
+import { VisualizeTrials } from '../trial_visualization';
 
 const mapStateToProps = (state: RootState) => ({
   data: state.view.data,
@@ -26,7 +27,7 @@ export const ViewManager = ({ data }: { data: ViewType }) => {
     case 'suggestTrials':
       return <SuggestTrials studyName={data.studyId} />;
     case 'visualizeTrials':
-      return <>Visualize Trials: studyId={data.studyId} </>;
+      return <VisualizeTrials studyName={data.studyId} />;
   }
 };
 
@@ -41,6 +42,7 @@ export class MainAreaWidget extends ReactWidget {
     super();
     this.id = 'optimizer:main-area';
     this.title.label = 'GCP Optimizer';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-optimizer-icon';
     this.title.closable = true;
   }
 

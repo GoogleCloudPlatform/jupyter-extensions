@@ -397,9 +397,7 @@ export class EvaluationTable extends React.Component<Props, State> {
                 <TableBody>
                   {evaluationTable.map(row => (
                     <TableRow key={row.key}>
-                      <StyledTableCell component="th" scope="row">
-                        {row.key}
-                      </StyledTableCell>
+                      <StyledTableCell scope="row">{row.key}</StyledTableCell>
                       <StyledTableCell align="right">{row.val}</StyledTableCell>
                     </TableRow>
                   ))}

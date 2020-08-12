@@ -1,28 +1,28 @@
-import * as csstips from 'csstips';
-import * as React from 'react';
-import { stylesheet } from 'typestyle';
-import { Dataset, DatasetService, Column } from '../../service/dataset';
-import { CodeComponent } from '../copy_code';
-import Toast from '../toast';
-import { BASE_FONT } from 'gcp_jupyterlab_shared';
-import { StripedRows } from '../striped_rows';
 import {
-  LinearProgress,
+  Button,
   FormControl,
-  MenuItem,
-  Select,
   FormHelperText,
   Grid,
-  withStyles,
-  TableCell,
-  TableRow,
-  TableHead,
-  TableBody,
-  Table,
-  Button,
-  TextField,
+  LinearProgress,
+  MenuItem,
   Portal,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  withStyles,
 } from '@material-ui/core';
+import * as csstips from 'csstips';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
+import * as React from 'react';
+import { stylesheet } from 'typestyle';
+import { Column, Dataset, DatasetService } from '../../service/dataset';
+import { CodeComponent } from '../copy_code';
+import { StripedRows } from '../striped_rows';
+import Toast from '../toast';
 
 interface Props {
   dataset: Dataset;

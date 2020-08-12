@@ -1,25 +1,12 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { DialogComponent } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-import { WidgetManager, DialogComponent, COLORS } from 'gcp_jupyterlab_shared';
-import { ListResourcesPanel } from './list_resources_panel';
+import { Context } from '../context';
 import { ManagementService } from '../service/management';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: COLORS.blue,
-    },
-  },
-});
-
-export interface Context {
-  app: JupyterFrontEnd;
-  manager: WidgetManager;
-}
+import { BaseWidget } from './base_widget';
+import { ListResourcesPanel } from './list_resources_panel';
 
 interface ResizeOrVisible {
   resize?: Widget.ResizeMessage;
@@ -44,7 +31,7 @@ const REQUIRED_SERVICES: ReadonlyArray<Service> = [
 ];
 
 /** Widget to be registered in the left-side panel. */
-export class UCAIPWidget extends ReactWidget {
+export class UCAIPWidget extends BaseWidget {
   id = 'ucaip_widget';
   private resizeVisibleSignal = new Signal<UCAIPWidget, ResizeOrVisible>(this);
   private resizeSignal = new Signal<UCAIPWidget, Widget.ResizeMessage>(this);
@@ -56,8 +43,8 @@ export class UCAIPWidget extends ReactWidget {
   private _project =
     'https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=';
 
-  constructor(private context: Context) {
-    super();
+  constructor(context: Context) {
+    super(context);
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-UcaipIcon';
     this.title.caption = 'My Datasets';
     this.resizeSignal.connect(this.updateSizeVisible);
@@ -115,9 +102,9 @@ export class UCAIPWidget extends ReactWidget {
     return requiredServicesEnabled;
   }
 
-  render() {
+  body() {
     return (
-      <ThemeProvider theme={theme}>
+      <>
         <UseSignal signal={this.resizeVisibleSignal}>
           {(_, event: ResizeOrVisible) => {
             const w = event ? event.resize.width : 0;
@@ -127,7 +114,6 @@ export class UCAIPWidget extends ReactWidget {
                 isVisible={this.isVisible}
                 width={w}
                 height={h}
-                context={this.context}
               />
             );
           }}
@@ -152,7 +138,7 @@ export class UCAIPWidget extends ReactWidget {
             );
           }}
         </UseSignal>
-      </ThemeProvider>
+      </>
     );
   }
 }

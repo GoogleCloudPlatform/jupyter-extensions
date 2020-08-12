@@ -73,7 +73,7 @@ class ReviewCommentsHandler(APIHandler):
             if git.inside_git_repo(full_file_path_dir):
                 git_root_dir = git.get_repo_root(full_file_path_dir)
                 file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
-                comments = git.get_code_review_comments(file_path_from_repo_root, git_root_dir)
+                comments = git.get_all_code_review_comments(file_path_from_repo_root, git_root_dir)
                 if comments is None:
                     self.finish(json.dumps({}))
                 else:
@@ -113,6 +113,31 @@ class AddDetachedCommentHandler(APIHandler):
             print("Error adding a new detached comment")
             print(traceback.format_exc())
 
+
+class AddReviewCommentHandler(APIHandler):
+
+    def post(self):
+        try:
+            file_path = self.get_argument('file_path')
+            server_root = os.path.expanduser(self.get_argument('server_root'))
+            data = json.loads(self.request.body)
+            comment = data.get('comment')
+            review_hash = data.get('reviewHash')
+            parent = data.get('parent', "")
+
+            full_file_path = os.path.join(server_root, file_path)
+            full_file_path_dir = os.path.dirname(full_file_path)
+            git_root_dir = git.get_repo_root(full_file_path_dir)
+            file_path_from_repo_root = os.path.relpath(full_file_path, start=git_root_dir)
+
+            if parent:
+                git.add_review_reply_comment(file_path_from_repo_root, git_root_dir, comment, parent, review_hash)
+            else:
+                git.add_review_comment(file_path_from_repo_root, git_root_dir, comment, review_hash)
+
+        except Exception as e:
+            print("Error adding a new detached comment")
+            print(traceback.format_exc())
 
 class RefreshIntervalHandler(APIHandler):
 

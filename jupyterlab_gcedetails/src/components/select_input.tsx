@@ -32,7 +32,7 @@ interface Props {
 export const STYLES = stylesheet({
   select: {
     display: 'block',
-    marginTop: '4px',
+    marginTop: '2px',
   },
   icon: {
     right: '14px',

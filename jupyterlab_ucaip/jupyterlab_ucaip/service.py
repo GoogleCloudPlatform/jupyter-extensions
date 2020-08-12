@@ -15,6 +15,8 @@ from google.protobuf import json_format
 from googleapiclient.discovery import build
 from gcp_jupyterlab_shared.handlers import AuthProvider
 
+from jupyterlab_ucaip.types import ModelFramework, ModelType, DatasetType
+
 # TODO: Add ability to programatically set region
 API_ENDPOINT = "us-central1-aiplatform.googleapis.com"
 PREDICTION_ENDPOINT = "us-central1-prediction-aiplatform.googleapis.com"
@@ -38,29 +40,6 @@ def parse_model_type(model):
     if mt.value.lower() in model.metadata_schema_uri:
       return mt.value
   return ModelType.OTHER.value
-
-
-class ModelFramework(Enum):
-  SKLEARN_CPU_0_20 = "sklearn-cpu.0-20"
-  SKLEARN_CPU_0_22 = "sklearn-cpu.0-22"
-  TF_CPU_1_15 = "tf-cpu.1-15"
-  TF_GPU_1_15 = "tf-gpu.1-15"
-  TF_CPU_2_1 = "tf2-cpu.2-1"
-  TF_GPU_2_1 = "tf2-gpu.2-1"
-  XGBOOST_CPU_0_82 = "xgboost-cpu.0-82"
-  XGBOOST_CPU_0_90 = "xgboost-cpu.0-90"
-
-
-class ModelType(Enum):
-  OTHER = "OTHER"
-  TABLE = "TABLE"
-  IMAGE = "IMAGE"
-
-
-class DatasetType(Enum):
-  OTHER = "OTHER"
-  TABLE = "TABLE"
-  IMAGE = "IMAGE"
 
 
 class ManagementService:
@@ -338,7 +317,7 @@ class UCAIPService:
                      ignore_index=True)
 
   def _import_bigquery_dataset(self, uri):
-    _, project, dataset_id, table_id = re.split("://|:|\.", uri) #Split by ://, : or .
+    _, project, dataset_id, table_id = re.split("://|[:]|[.]", uri) #Split by ://, : or .
     tmp_name = "tmp/{}-{}-{}".format(str(uuid.uuid4()), dataset_id, table_id)
     destination_uri = "gs://{}/{}".format(self._get_gcs_bucket().name, tmp_name)
     dataset_ref = bigquery.DatasetReference(project, dataset_id)

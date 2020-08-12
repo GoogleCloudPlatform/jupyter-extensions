@@ -63,9 +63,7 @@ export class TransformationOptionsRow extends React.Component<
     return (
       <React.Fragment key={'Expandable'}>
         <TableRow key={this.props.row.key}>
-          <StyledTableCell component="th" scope="row">
-            {this.props.row.key}
-          </StyledTableCell>
+          <StyledTableCell scope="row">{this.props.row.key}</StyledTableCell>
           <StyledTableCell align="right">
             <IconButton
               aria-label="expand row"
@@ -95,7 +93,7 @@ export class TransformationOptionsRow extends React.Component<
                   <TableBody>
                     {this.props.transformationOptions.map(option => (
                       <TableRow key={option.columnName}>
-                        <StyledTableCell component="th" scope="row">
+                        <StyledTableCell scope="row">
                           {option.columnName}
                         </StyledTableCell>
                         <StyledTableCell>{option.dataType}</StyledTableCell>
@@ -180,9 +178,7 @@ export class PipelineProperties extends React.Component<Props> {
                 />
               ) : (
                 <TableRow key={row.key}>
-                  <StyledTableCell component="th" scope="row">
-                    {row.key}
-                  </StyledTableCell>
+                  <StyledTableCell scope="row">{row.key}</StyledTableCell>
                   <StyledTableCell align="right">{row.val}</StyledTableCell>
                 </TableRow>
               )

@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import React, { useState } from 'react';
-import { TextField, Button, Grid, Icon } from '@material-ui/core';
-import { newDetachedCommentThread } from '../service/add_comment';
+import { TextField, Grid } from '@material-ui/core';
+import {
+  newDetachedCommentThread,
+  newReviewCommentThread,
+} from '../service/add_comment';
+import { SendButton } from './send_button';
 
 interface Props {
   serverRoot: string;
   currFilePath: string;
+  commentType: 'detached' | 'review';
+  reviewHash?: string;
 }
 
 const style = {
@@ -28,22 +33,33 @@ const style = {
     padding: 20,
   },
   submit: {
-    paddingLeft: 225,
+    paddingLeft: 320,
     display: 'inlineBlock',
   },
   textField: {
-    width: 300,
+    width: 400,
   },
 };
 
 export function CommentEditor(props) {
-  const [comment, setComment] = useState('Start a new comment thread');
+  const [comment, setComment] = useState('');
 
   const handleSubmit = event => {
     event.preventDefault();
-    console.log(comment);
-    newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
-    setComment(''); //clear comment text field
+    switch (props.commentType) {
+      case 'review':
+        newReviewCommentThread(
+          props.currFilePath,
+          props.serverRoot,
+          comment,
+          props.reviewHash
+        );
+        break;
+      case 'detached':
+        newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
+        break;
+    }
+    setComment(''); //clear comment editor field
   };
   return (
     <form
@@ -60,8 +76,7 @@ export function CommentEditor(props) {
           <TextField
             multiline
             rows={3}
-            id="outlined-helperText"
-            label="Add a new comment"
+            label="Start a new comment thread"
             value={comment}
             onChange={e => setComment(e.target.value)}
             variant="outlined"
@@ -71,15 +86,7 @@ export function CommentEditor(props) {
           />
         </Grid>
         <Grid item style={style.submit}>
-          <Button
-            type="submit"
-            color="primary"
-            size="medium"
-            endIcon={<Icon>send</Icon>}
-            className="sendThread"
-          >
-            Send
-          </Button>
+          <SendButton type="sendThread" />
         </Grid>
       </Grid>
     </form>
