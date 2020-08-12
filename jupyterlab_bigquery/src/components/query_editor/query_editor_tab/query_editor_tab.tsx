@@ -1,5 +1,7 @@
 import React from 'react';
-import QueryTextEditor from '../query_text_editor/query_text_editor';
+import QueryTextEditor, {
+  QueryResult,
+} from '../query_text_editor/query_text_editor';
 import QueryResults from '../query_text_editor/query_editor_results';
 import {
   QueryId,
@@ -17,12 +19,13 @@ const localStyles = stylesheet({
     ...BASE_FONT,
   },
 });
+import { connect } from 'react-redux';
 
 interface QueryEditorTabProps {
   isVisible: boolean;
   queryId?: string;
   iniQuery?: string;
-  width?: number;
+  queries: { [key: string]: QueryResult };
 }
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
@@ -38,17 +41,26 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
   }
 
   render() {
+    const { queries } = this.props;
+
+    const queryResult = queries[this.queryId];
+    // eslint-disable-next-line no-extra-boolean-cast
+    const showResult = !!queryResult && queryResult.content.length > 0;
+
     return (
       <div className={localStyles.queryTextEditorRoot}>
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.props.iniQuery}
-          width={this.props.width}
         />
-        <QueryResults queryId={this.queryId} />
+        {showResult && <QueryResults queryId={this.queryId} />}
       </div>
     );
   }
 }
 
-export default QueryEditorTab;
+const mapStateToProps = state => {
+  return { queries: state.queryEditorTab.queries };
+};
+
+export default connect(mapStateToProps)(QueryEditorTab);
