@@ -1,67 +1,61 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
-import { stylesheet, classes } from 'typestyle';
-import { css, COLORS } from 'gcp_jupyterlab_shared';
+import { stylesheet } from 'typestyle';
+import Button from '@material-ui/core/Button';
+import { withStyles, createStyles } from '@material-ui/core/styles';
 
 interface Props {
   primaryLabel: string;
   secondaryLabel?: string;
   onPrimaryClick: () => void;
   onSecondaryClick?: () => void;
-  primaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  secondaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 const STYLES = stylesheet({
   actionBar: {
-    padding: '16px',
-    marginTop: '5px',
+    margin: '25px 0px',
     display: 'block',
-    $nest: {
-      '&>*': {
-        marginLeft: '16px',
-      },
-    },
     ...csstips.horizontal,
     ...csstips.endJustified,
   },
-  primaryButton: {
-    backgroundColor: COLORS.blue,
-    color: COLORS.white,
-    $nest: {
-      '&:disabled': {
-        backgroundColor: '#bfbfbf',
-      },
-      '&:hover': {
-        cursor: 'pointer',
-      },
-      '&:disabled:hover': { cursor: 'default' },
-    },
+  secondaryButton: {
+    margin: '0px 10px',
   },
 });
+
+const SecondaryButton = withStyles(() =>
+  createStyles({
+    root: {
+      marginRight: '10px',
+    },
+  })
+)(Button);
 
 /** Funtional Component for defining an action bar with buttons. */
 export function ActionBar(props: Props) {
   return (
     <div className={STYLES.actionBar}>
       {props.secondaryLabel && (
-        <button
-          type="button"
-          className={css.button}
+        <SecondaryButton
+          variant="contained"
+          size="small"
+          disableRipple={true}
+          disableElevation={true}
           onClick={props.onSecondaryClick}
-          {...props.secondaryButtonProps}
         >
           {props.secondaryLabel}
-        </button>
+        </SecondaryButton>
       )}
-      <button
-        type="button"
-        className={classes(css.button, STYLES.primaryButton)}
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        disableRipple={true}
+        disableElevation={true}
         onClick={props.onPrimaryClick}
-        {...props.primaryButtonProps}
       >
         {props.primaryLabel}
-      </button>
+      </Button>
     </div>
   );
 }
