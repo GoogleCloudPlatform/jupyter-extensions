@@ -77,8 +77,7 @@ describe('Rendering of ExportData Component', () => {
     <ExportData open={true} onClose={null} onSuccess={null} />
   );
   it('Renders initial state correctly', async () => {
-    // TODO: restore snapshot tests
-    //expect(exportData).toMatchSnapshot();
+    expect(exportData).toMatchSnapshot();
     expect(exportData.state('from')).toEqual('computer');
     expect(exportData.state('name')).toEqual('');
   });
@@ -107,8 +106,7 @@ describe('Rendering of ListResourcePanel Component', () => {
     <ListResourcesPanel isVisible={true} width={50} height={50} />
   );
   it('Renders initial state correctly', async () => {
-    // TODO: restore snapshot tests
-    //expect(listResourcesPanel).toMatchSnapshot();
+    expect(listResourcesPanel).toMatchSnapshot();
     expect(listResourcesPanel.state('resourceType')).toEqual('dataset');
     expect(listResourcesPanel.state('searchString')).toEqual('');
     expect(listResourcesPanel.state('showSearch')).toEqual(false);
@@ -151,9 +149,8 @@ describe('Rendering of CodeComponentActions Component', () => {
   );
   it('Renders initial state correctly', async () => {
     codeComponent.debug();
-    // TODO: restore snapshot tests
-    //expect(codeComponentActions).toMatchSnapshot();
-    //expect(codeComponent).toMatchSnapshot();
+    expect(codeComponentActions).toMatchSnapshot();
+    expect(codeComponent).toMatchSnapshot();
   });
   it('Clicking copy button opens notification toast', async () => {
     const copyButton = codeComponentActions.find(IconButton).at(0);
