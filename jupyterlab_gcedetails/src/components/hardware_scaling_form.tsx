@@ -35,10 +35,11 @@ import {
   optionToMachineType,
   machineTypeToOption,
   getGpuTypeOptionsList,
-  NO_ACCELERATOR,
   getGpuCountOptionsList,
   Details,
   detailsToHardwareConfiguration,
+  NO_ACCELERATOR_TYPE,
+  NO_ACCELERATOR_COUNT,
 } from '../data';
 import { ActionBar } from './action_bar';
 
@@ -104,18 +105,23 @@ const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
 
 export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
+  private oldConfiguration: HardwareConfiguration;
 
   constructor(props: Props) {
     super(props);
 
+    this.oldConfiguration = props.details
+      ? detailsToHardwareConfiguration(props.details)
+      : null;
+
     this.state = {
-      configuration: props.details
-        ? detailsToHardwareConfiguration(props.details)
+      configuration: this.oldConfiguration
+        ? this.oldConfiguration
         : {
             machineType: DEFAULT_MACHINE_TYPE,
             attachGpu: false,
-            gpuType: NO_ACCELERATOR,
-            gpuCount: NO_ACCELERATOR,
+            gpuType: NO_ACCELERATOR_TYPE,
+            gpuCount: NO_ACCELERATOR_COUNT,
           },
       // update the gpu count options based on the selected gpu type
       gpuCountOptions: props.details
@@ -159,11 +165,11 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         ...this.state.configuration,
         attachGpu: event.target.checked,
         gpuType:
-          gpuType === NO_ACCELERATOR
+          gpuType === NO_ACCELERATOR_TYPE
             ? (ACCELERATOR_TYPES[0].value as string)
             : gpuType,
         gpuCount:
-          gpuCount === NO_ACCELERATOR
+          gpuCount === NO_ACCELERATOR_COUNT
             ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
             : gpuCount,
       },
@@ -199,8 +205,16 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   private submitForm() {
     const configuration = { ...this.state.configuration };
     if (!configuration.attachGpu) {
-      configuration.gpuType = NO_ACCELERATOR;
-      configuration.gpuCount = NO_ACCELERATOR;
+      configuration.gpuType = NO_ACCELERATOR_TYPE;
+      configuration.gpuCount = NO_ACCELERATOR_COUNT;
+
+      /*
+       * If machine originally had a GPU we want to explicilty attach an
+       * accelerator of type NO_ACCELERATOR_TYPE through the Notebooks API to remove it
+       */
+      configuration.attachGpu = this.oldConfiguration
+        ? this.oldConfiguration.attachGpu
+        : configuration.attachGpu;
     }
     this.props.onSubmit(configuration);
   }
