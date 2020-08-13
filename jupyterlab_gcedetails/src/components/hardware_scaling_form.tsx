@@ -23,6 +23,7 @@ import {
   LearnMoreLink,
   BASE_FONT,
   Option,
+  Message,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
 import { NestedSelect } from './machine_type_select';
@@ -39,6 +40,7 @@ import {
   getGpuCountOptionsList,
   Details,
   detailsToHardwareConfiguration,
+  STYLES,
 } from '../data';
 import { ActionBar } from './action_bar';
 
@@ -53,12 +55,12 @@ interface State {
   gpuCountOptions: Option[];
 }
 
-export const STYLES = stylesheet({
+export const FORM_STYLES = stylesheet({
   checkbox: {
     marginRight: '10px',
   },
   checkboxContainer: {
-    padding: '8px 0px 8px 0px',
+    padding: '18px 0px 8px 0px',
   },
   title: {
     ...BASE_FONT,
@@ -78,10 +80,7 @@ export const STYLES = stylesheet({
     ...csstips.flex,
   },
   formContainer: {
-    padding: '26px 16px 0px 16px',
-  },
-  container: {
-    width: '500px',
+    width: '468px',
   },
   description: {
     paddingBottom: '10px',
@@ -101,6 +100,8 @@ const DEFAULT_MACHINE_TYPE = optionToMachineType(
 const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance, 
 the available GPU types and the minimum number of GPUs that can be selected may vary. `;
 const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
+const INFO_MESSAGE = `If you have chosen to attach GPUs to your instance, 
+the NVIDIA GPU driver will be installed automatically on the next startup.`;
 
 export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
@@ -145,7 +146,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
 
   private gpuRestrictionMessage() {
     return (
-      <p className={classes(css.noTopMargin, STYLES.description)}>
+      <p className={STYLES.paragraph}>
         {GPU_RESTRICTION_MESSAGE}
         <LearnMoreLink href={GPU_RESTRICTION_LINK} />
       </p>
@@ -211,65 +212,71 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     const { gpuType, gpuCount, attachGpu, machineType } = configuration;
 
     return (
-      <div className={STYLES.container}>
-        <div className={STYLES.formContainer}>
-          <span className={STYLES.title}>Hardware Scaling Limits</span>
-          <form>
-            <HardwareConfigurationDescription />
-            <span className={STYLES.subtitle}>Machine Configuration</span>
-            <NestedSelect
-              label="Machine type"
-              nestedOptionsList={MACHINE_TYPES.map(machineType => ({
-                header: machineType.base,
-                options: machineType.configurations,
-              }))}
-              onChange={machineType => this.onMachineTypeChange(machineType)}
-              value={machineTypeToOption(machineType)}
+      <div className={STYLES.containerPadding}>
+        <div className={FORM_STYLES.formContainer}>
+          <span className={STYLES.heading}>Hardware Scaling Limits</span>
+          <HardwareConfigurationDescription />
+          <span className={STYLES.subheading}>Machine Configuration</span>
+          <NestedSelect
+            label="Machine type"
+            nestedOptionsList={MACHINE_TYPES.map(machineType => ({
+              header: machineType.base,
+              options: machineType.configurations,
+            }))}
+            onChange={machineType => this.onMachineTypeChange(machineType)}
+            value={machineTypeToOption(machineType)}
+          />
+          <span className={STYLES.subheading}>GPU Configuration</span>
+          {this.gpuRestrictionMessage()}
+          <div className={FORM_STYLES.checkboxContainer}>
+            <CheckboxInput
+              label="Attach GPUs"
+              className={FORM_STYLES.checkbox}
+              name="attachGpu"
+              checked={attachGpu && this.canAttachGpu(machineType.name)}
+              onChange={e => this.onAttachGpuChange(e)}
+              disabled={!this.canAttachGpu(machineType.name)}
             />
-            <span className={STYLES.subtitle}>GPUs</span>
-            {this.gpuRestrictionMessage()}
-            <div className={STYLES.checkboxContainer}>
-              <CheckboxInput
-                label="Attach GPUs"
-                className={STYLES.checkbox}
-                name="attachGpu"
-                checked={attachGpu && this.canAttachGpu(machineType.name)}
-                onChange={e => this.onAttachGpuChange(e)}
-                disabled={!this.canAttachGpu(machineType.name)}
-              />
-            </div>
-            {attachGpu && this.canAttachGpu(machineType.name) && (
-              <div
-                className={classes(css.scheduleBuilderRow, STYLES.topPadding)}
-              >
-                <div className={css.flex1}>
-                  <SelectInput
-                    label="GPU type"
-                    name="gpuType"
-                    value={gpuType}
-                    options={this.gpuTypeOptions}
-                    onChange={e => this.onGpuTypeChange(e)}
-                  />
-                </div>
-                <div className={css.flex1}>
-                  <SelectInput
-                    label="Number of GPUs"
-                    name="gpuCount"
-                    value={gpuCount}
-                    options={gpuCountOptions}
-                    onChange={e =>
-                      this.setState({
-                        configuration: {
-                          ...this.state.configuration,
-                          gpuCount: e.target.value,
-                        },
-                      })
-                    }
-                  />
-                </div>
+          </div>
+          {attachGpu && this.canAttachGpu(machineType.name) && (
+            <div
+              className={classes(
+                css.scheduleBuilderRow,
+                FORM_STYLES.topPadding
+              )}
+            >
+              <div className={css.flex1}>
+                <SelectInput
+                  label="GPU type"
+                  name="gpuType"
+                  value={gpuType}
+                  options={this.gpuTypeOptions}
+                  onChange={e => this.onGpuTypeChange(e)}
+                />
               </div>
-            )}
-          </form>
+              <div className={css.flex1}>
+                <SelectInput
+                  label="Number of GPUs"
+                  name="gpuCount"
+                  value={gpuCount}
+                  options={gpuCountOptions}
+                  onChange={e =>
+                    this.setState({
+                      configuration: {
+                        ...this.state.configuration,
+                        gpuCount: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+          {attachGpu && (
+            <div className={STYLES.infoMessage}>
+              <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
+            </div>
+          )}
         </div>
         <ActionBar
           primaryLabel="Next"
@@ -290,7 +297,7 @@ const LINK = 'https://cloud.google.com/compute/all-pricing';
 // tslint:disable-next-line:enforce-name-casing
 export function HardwareConfigurationDescription() {
   return (
-    <p className={classes(css.noTopMargin, STYLES.description)}>
+    <p className={STYLES.paragraph}>
       {DESCRIPTION}
       <LearnMoreLink href={LINK} />
     </p>

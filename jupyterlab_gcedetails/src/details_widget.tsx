@@ -111,9 +111,14 @@ export class VmDetails extends React.Component<Props, State> {
     try {
       const details = (await detailsServer.getUtilizationData()) as Details;
       this.setState({ details: details });
+      notebookService.projectId = 'jupyterlab-interns-sandbox';
+      notebookService.locationId = 'us-west1-b';
+      notebookService.instanceName = 'tf-21-hw-config';
+      /*
       notebookService.projectId = details.project.projectId;
       notebookService.locationId = details.instance.zone.split('/').pop();
       notebookService.instanceName = details.instance.name.split('/').pop();
+      */
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });

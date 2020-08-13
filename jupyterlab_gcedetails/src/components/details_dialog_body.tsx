@@ -15,6 +15,7 @@
  */
 
 import * as React from 'react';
+import { stylesheet, classes } from 'typestyle';
 import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
 import { ActionBar } from './action_bar';
 
@@ -25,12 +26,20 @@ interface Props {
   reshapeForm: () => void;
 }
 
+const DIALOG_STYLES = stylesheet({
+  headingPadding: {
+    paddingBottom: '15px',
+  },
+});
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
   return (
     <dl className={STYLES.containerPadding}>
-      <p className={STYLES.heading}>Notebook VM Details</p>
+      <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
+        Notebook VM Details
+      </p>
       {receivedError ? (
         <p className={STYLES.paragraph}>
           Unable to retrieve GCE VM details, please check your server logs

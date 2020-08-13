@@ -41,8 +41,7 @@ const STYLES = stylesheet({
     width: '468px',
   },
   nestedSelect: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    display: 'block',
   },
   input: {
     marginTop: '2px',
