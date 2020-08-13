@@ -164,6 +164,7 @@ export const ParameterList: React.FC<Props> = ({
       case 'INTEGER':
         return (
           <ParameterNumberInput
+            type={type}
             metadata={
               metadata as
                 | TemporaryParameterDoubleMetadata

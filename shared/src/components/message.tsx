@@ -22,9 +22,10 @@ import { Progress } from './progress';
 import { RedError, BlueInfo } from './status_icons';
 
 interface Props {
+  children?: React.ReactNode;
   asError?: boolean;
   asActivity?: boolean;
-  text: string;
+  text?: string;
 }
 
 const localStyles = stylesheet({
@@ -63,7 +64,9 @@ export function Message(props: Props): JSX.Element {
       ) : (
         <BlueInfo />
       )}
-      <span className={localStyles.text}>{props.text}</span>
+      <span className={localStyles.text}>
+        {props.children ? props.children : props.text}
+      </span>
     </div>
   );
 }

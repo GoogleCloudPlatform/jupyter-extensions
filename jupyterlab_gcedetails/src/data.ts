@@ -87,7 +87,11 @@ export interface HardwareConfiguration {
 /**
  * AI Platform Accelerator types.
  * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
  */
+export const NO_ACCELERATOR_TYPE = 'ACCELERATOR_TYPE_UNSPECIFIED';
+export const NO_ACCELERATOR_COUNT = '0';
+
 export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
   { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
@@ -95,6 +99,10 @@ export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
   { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
 ];
+
+export function getGpuTypeText(value: string) {
+  return ACCELERATOR_TYPES.find(option => option.value === value).text;
+}
 
 /**
  * AI Platform Accelerator counts.
@@ -107,8 +115,6 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
   { value: '8', text: '8' },
 ];
 
-export const NO_ACCELERATOR = '';
-
 /**
  * Convert nvidia-smi product_name type to match the AcceleratorType
  * enums that are used in the Notebooks API:
@@ -119,7 +125,7 @@ function nvidiaNameToEnum(name: string): string {
     accelerator.text.endsWith(name)
   );
 
-  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR;
+  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR_TYPE;
 }
 
 /**
@@ -157,7 +163,8 @@ export function getGpuCountOptionsList(
   accelerators: Accelerator[],
   acceleratorName: string
 ): Option[] {
-  if (acceleratorName === NO_ACCELERATOR) return ACCELERATOR_COUNTS_1_2_4_8;
+  if (acceleratorName === NO_ACCELERATOR_TYPE)
+    return ACCELERATOR_COUNTS_1_2_4_8;
 
   const accelerator = accelerators.find(
     accelerator => acceleratorNameToEnum(accelerator.name) === acceleratorName
@@ -194,7 +201,7 @@ export function detailsToHardwareConfiguration(
     machineType: instance.machineType,
     attachGpu: Boolean(gpu.name),
     gpuType: nvidiaNameToEnum(gpu.name),
-    gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR,
+    gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR_COUNT,
   };
 }
 
@@ -376,6 +383,18 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
     ],
   },
 ];
+
+export function getMachineTypeText(value: string) {
+  const machineType = MACHINE_TYPES.find(machineType =>
+    value.startsWith(machineType.base.value as string)
+  );
+
+  return machineType
+    ? machineType.configurations.find(
+        configuration => configuration.value === value
+      ).text
+    : null;
+}
 
 /* Class names applied to the component. */
 export const STYLES = stylesheet({
