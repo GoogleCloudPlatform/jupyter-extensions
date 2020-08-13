@@ -133,19 +133,19 @@ class Git(Configurable):
 		return reviews_list
 
 
-	def add_detached_comment(self, file_path_from_repo_root, git_root_dir, comment_string):
-		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root)
+	def add_detached_comment(self, file_path_from_repo_root, git_root_dir, comment_string, line_num):
+		self.run(git_root_dir, 'appraise', 'comment', '-d', '-m', comment_string, '-f', file_path_from_repo_root, '-l', str(line_num))
 		self.push_local_comments(git_root_dir)
 
 	def add_detached_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent):
 		self.run(git_root_dir, 'appraise', 'comment', '-d', '-p', parent,'-m', comment_string, '-f', file_path_from_repo_root)
 		self.push_local_comments(git_root_dir)
 
-	def add_review_comment(self, file_path_from_repo_root, git_root_dir, comment_string, review_hash):
-		self.run(git_root_dir, 'appraise', 'comment', '-f', file_path_from_repo_root, '-m', comment_string, review_hash)
+	def add_review_comment(self, file_path_from_repo_root, git_root_dir, comment_string, review_hash, line_num):
+		self.run(git_root_dir, 'appraise', 'comment', '-f', file_path_from_repo_root, '-l', str(line_num), '-m', comment_string, review_hash)
 		self.push_local_comments(git_root_dir)
 
-	def add_review_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent, review_hash):
+	def add_review_reply_comment(self, file_path_from_repo_root, git_root_dir, comment_string, parent, review_hash, line_num):
 		self.run(git_root_dir, 'appraise', 'comment', '-p', parent, '-f', file_path_from_repo_root, '-m', comment_string, review_hash)
 		self.push_local_comments(git_root_dir)
 

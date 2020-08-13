@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import { TextField, Grid } from '@material-ui/core';
+import { TextField, Grid, Input } from '@material-ui/core';
 import {
   newDetachedCommentThread,
   newReviewCommentThread,
@@ -33,16 +33,20 @@ const style = {
     padding: 20,
   },
   submit: {
-    paddingLeft: 320,
+    paddingLeft: 10,
     display: 'inlineBlock',
   },
   textField: {
     width: 400,
   },
+  submitOptions: {
+    paddingLeft: 300,
+  },
 };
 
 export function CommentEditor(props) {
   const [comment, setComment] = useState('');
+  const [lineNumber, setLineNumber] = useState(0);
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -52,14 +56,21 @@ export function CommentEditor(props) {
           props.currFilePath,
           props.serverRoot,
           comment,
-          props.reviewHash
+          props.reviewHash,
+          lineNumber
         );
         break;
       case 'detached':
-        newDetachedCommentThread(props.currFilePath, props.serverRoot, comment);
+        newDetachedCommentThread(
+          props.currFilePath,
+          props.serverRoot,
+          comment,
+          lineNumber
+        );
         break;
     }
     setComment(''); //clear comment editor field
+    setLineNumber(0);
   };
   return (
     <form
@@ -85,8 +96,24 @@ export function CommentEditor(props) {
             className="newThreadTextField"
           />
         </Grid>
-        <Grid item style={style.submit}>
-          <SendButton type="sendThread" />
+        <Grid container direction="row" style={style.submitOptions}>
+          <Input
+            type="number"
+            value={lineNumber}
+            onChange={e => setLineNumber(parseInt(e.target.value))}
+            name="line number"
+            placeholder="line #"
+            margin="none"
+            inputProps={{
+              style: {
+                width: '40px',
+              },
+              min: 0,
+            }}
+          />
+          <Grid item style={style.submit}>
+            <SendButton type="sendThread" />
+          </Grid>
         </Grid>
       </Grid>
     </form>

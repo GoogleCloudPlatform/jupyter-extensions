@@ -50,12 +50,12 @@ function activate(
         content = new CommentsWidget(context);
         widget = new MainAreaWidget<CommentsWidget>({ content });
         widget.id = 'jupyterlab_comments';
-        widget.title.label = 'Notebook comments in Git';
+        widget.title.label = 'Comments';
         widget.title.closable = true;
       }
 
       if (!widget.isAttached) {
-        app.shell.add(widget, 'right');
+        app.shell.add(widget, 'right', { rank: 200 });
       }
       app.shell.activateById(widget.id);
     },
