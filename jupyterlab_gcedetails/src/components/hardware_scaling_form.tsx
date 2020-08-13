@@ -40,6 +40,7 @@ import {
   detailsToHardwareConfiguration,
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
+  isEqualHardwareConfiguration,
 } from '../data';
 import { ActionBar } from './action_bar';
 
@@ -159,19 +160,16 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { gpuType, gpuCount } = this.state.configuration;
     this.setState({
       configuration: {
         ...this.state.configuration,
         attachGpu: event.target.checked,
-        gpuType:
-          gpuType === NO_ACCELERATOR_TYPE
-            ? (ACCELERATOR_TYPES[0].value as string)
-            : gpuType,
-        gpuCount:
-          gpuCount === NO_ACCELERATOR_COUNT
-            ? (ACCELERATOR_COUNTS_1_2_4_8[0].value as string)
-            : gpuCount,
+        gpuType: event.target.checked
+          ? (this.gpuTypeOptions[0].value as string)
+          : NO_ACCELERATOR_TYPE,
+        gpuCount: event.target.checked
+          ? (this.state.gpuCountOptions[0].value as string)
+          : NO_ACCELERATOR_COUNT,
       },
     });
   }
@@ -205,9 +203,6 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   private submitForm() {
     const configuration = { ...this.state.configuration };
     if (!configuration.attachGpu) {
-      configuration.gpuType = NO_ACCELERATOR_TYPE;
-      configuration.gpuCount = NO_ACCELERATOR_COUNT;
-
       /*
        * If machine originally had a GPU we want to explicilty attach an
        * accelerator of type NO_ACCELERATOR_TYPE through the Notebooks API to remove it
@@ -288,6 +283,12 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar
           primaryLabel="Next"
           onPrimaryClick={() => this.submitForm()}
+          primaryButtonProps={{
+            disabled: isEqualHardwareConfiguration(
+              this.oldConfiguration,
+              configuration
+            ),
+          }}
           secondaryLabel="Cancel"
           onSecondaryClick={onDialogClose}
         />

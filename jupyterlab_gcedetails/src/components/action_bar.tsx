@@ -8,6 +8,8 @@ interface Props {
   secondaryLabel?: string;
   onPrimaryClick: () => void;
   onSecondaryClick?: () => void;
+  primaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  secondaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 const STYLES = stylesheet({
@@ -26,6 +28,15 @@ const STYLES = stylesheet({
   primaryButton: {
     backgroundColor: COLORS.blue,
     color: COLORS.white,
+    $nest: {
+      '&:disabled': {
+        backgroundColor: '#bfbfbf',
+      },
+      '&:hover': {
+        cursor: 'pointer',
+      },
+      '&:disabled:hover': { cursor: 'default' },
+    },
   },
 });
 
@@ -38,6 +49,7 @@ export function ActionBar(props: Props) {
           type="button"
           className={css.button}
           onClick={props.onSecondaryClick}
+          {...props.secondaryButtonProps}
         >
           {props.secondaryLabel}
         </button>
@@ -46,6 +58,7 @@ export function ActionBar(props: Props) {
         type="button"
         className={classes(css.button, STYLES.primaryButton)}
         onClick={props.onPrimaryClick}
+        {...props.primaryButtonProps}
       >
         {props.primaryLabel}
       </button>

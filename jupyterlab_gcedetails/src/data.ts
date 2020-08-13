@@ -121,10 +121,11 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
  */
 function nvidiaNameToEnum(name: string): string {
+  if (name === '') return NO_ACCELERATOR_TYPE;
+
   const accelerator = ACCELERATOR_TYPES.find(accelerator =>
     accelerator.text.endsWith(name)
   );
-
   return accelerator ? (accelerator.value as string) : NO_ACCELERATOR_TYPE;
 }
 
@@ -203,6 +204,19 @@ export function detailsToHardwareConfiguration(
     gpuType: nvidiaNameToEnum(gpu.name),
     gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR_COUNT,
   };
+}
+
+export function isEqualHardwareConfiguration(
+  a: HardwareConfiguration,
+  b: HardwareConfiguration
+) {
+  return (
+    a.machineType.name === b.machineType.name &&
+    a.machineType.description === b.machineType.description &&
+    a.attachGpu === b.attachGpu &&
+    a.gpuType === b.gpuType &&
+    a.gpuCount === b.gpuCount
+  );
 }
 
 interface AttributeMapper {
