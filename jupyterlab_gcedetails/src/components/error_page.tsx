@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import * as csstips from 'csstips';
 import * as React from 'react';
 
-import { BASE_FONT, Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
-import { stylesheet, classes } from 'typestyle';
+import { Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
-import { getGpuTypeText, getMachineTypeText } from '../data';
+import { getGpuTypeText, getMachineTypeText, STYLES } from '../data';
 
 interface Props {
   instanceDetails?: Instance;
@@ -30,33 +28,34 @@ interface Props {
   onDialogClose: () => void;
 }
 
-export const STYLES = stylesheet({
-  title: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
-  text: {
-    display: 'block',
-  },
-  textContainer: {
-    padding: '26px 16px 0px 16px',
-  },
-  container: {
-    width: '500px',
-  },
-  topPadding: {
-    paddingTop: '15px',
-  },
-  infoMessage: {
-    margin: '20px 16px 16px 16px',
-  },
-});
+// export const STYLES = stylesheet({
+//   title: {
+//     ...BASE_FONT,
+//     fontWeight: 500,
+//     fontSize: '15px',
+//     marginBottom: '5px',
+//     ...csstips.horizontal,
+//     ...csstips.flex,
+//   },
+//   text: {
+//     display: 'block',
+//   },
+//   textContainer: {
+//     padding: '26px 16px 0px 16px',
+//   },
+//   container: {
+//     width: '500px',
+//   },
+//   topPadding: {
+//     paddingTop: '15px',
+//   },
+//   infoMessage: {
+//     margin: '20px 16px 16px 16px',
+//   },
+// });
 
-const ERROR_MESSAGE = `You must manually start your instance from the Google Cloud Console to continue using this Notebook. `;
+const ERROR_MESSAGE = `You must manually start your instance from the Google 
+Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;
 
@@ -66,14 +65,16 @@ function displayInstance(instance: Instance) {
 
   return (
     <div>
-      <span className={classes(STYLES.title, STYLES.topPadding)}>
+      <span className={STYLES.subheading}>
         Your current configuration:
       </span>
       {machineTypeText && (
-        <div className={STYLES.text}>Machine type: {machineTypeText}</div>
+        <div className={STYLES.paragraph}>
+          Machine type: {machineTypeText}
+        </div>
       )}
       {acceleratorConfig && (
-        <div className={STYLES.text}>
+        <div className={STYLES.paragraph}>
           {`GPUs: ${acceleratorConfig.coreCount} ${getGpuTypeText(
             acceleratorConfig.type
           )}`}
@@ -88,22 +89,22 @@ export function ErrorPage(props: Props) {
   const { errorType, errorValue } = error;
 
   return (
-    <div className={STYLES.container}>
-      <div className={STYLES.textContainer}>
-        <span
-          className={STYLES.title}
-        >{`Failed to ${errorType} Your Machine`}</span>
-        {errorValue}
-        {instanceDetails && displayInstance(instanceDetails)}
+    <div className={STYLES.containerPadding}>
+      <div className={STYLES.containerSize}>
+          <span
+            className={STYLES.heading}
+          >{`Failed to ${errorType} Your Machine`}</span>
+          <div className={STYLES.paragraph}>{errorValue}</div>
+          {instanceDetails && displayInstance(instanceDetails)}
+        {errorType === ErrorType.START && (
+          <div className={STYLES.infoMessage}>
+            <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>
+              {ERROR_MESSAGE}
+              <LearnMoreLink href={LINK} text={LINK_TEXT} />
+            </Message>
+          </div>
+        )}
       </div>
-      {errorType === ErrorType.START && (
-        <div className={STYLES.infoMessage}>
-          <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>
-            {ERROR_MESSAGE}
-            <LearnMoreLink href={LINK} text={LINK_TEXT} />
-          </Message>
-        </div>
-      )}
       {errorType !== ErrorType.START && (
         <ActionBar primaryLabel="Close" onPrimaryClick={onDialogClose} />
       )}
