@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   RadioGroup,
 } from '@material-ui/core/';
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
 import { setView } from '../store/view';
@@ -80,18 +80,18 @@ export interface PCPAxisData {
  * @param metricLabelList List of metric names
  * @param axisPropsList List of axisProps
  */
-function createPCPAxisDataList(
+function createPcpAxisDataList(
   paramLabelList: string[],
   metricLabelList: string[],
   axisPropsList: AxisPropsList
 ): PCPAxisData[] {
-  const PCPAxisDataList = [];
+  const pcpAxisDataList = [];
   paramLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
     switch (thisAxisProps.type) {
       case 'DOUBLE':
       case 'INTEGER':
-        PCPAxisDataList.push({
+        pcpAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
@@ -100,7 +100,7 @@ function createPCPAxisDataList(
         break;
       case 'CATEGORICAL':
       case 'DISCRETE':
-        PCPAxisDataList.push({
+        pcpAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           values: 'values' in thisAxisProps ? thisAxisProps.values : null,
@@ -110,14 +110,14 @@ function createPCPAxisDataList(
   });
   metricLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
-    PCPAxisDataList.push({
+    pcpAxisDataList.push({
       label,
       type: axisPropsList[label].type,
       minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
       maxVal: 'maxVal' in thisAxisProps ? thisAxisProps.maxVal : null,
     });
   });
-  return PCPAxisDataList;
+  return pcpAxisDataList;
 }
 
 function getParameterValue(parameter: Types.Parameter) {
@@ -326,11 +326,11 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState('');
   const [
     selectedParamsForScatterplot,
-    setSelectedParamsForScatterplot
+    setSelectedParamsForScatterplot,
   ] = React.useState([]);
 
   const handleParamAutocompleteChange = (event, newValue) => {
-    setSelectedParamsForScatterplot(newValue.slice(0,3)); // Limiting number of scatterplots to 3
+    setSelectedParamsForScatterplot(newValue.slice(0, 3)); // Limiting number of scatterplots to 3
   };
 
   const handleLineGraphRadioChange = event => {
@@ -359,11 +359,13 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
    */
   const setScatterplotDefaults = (paramLabelList, metricLabelList) => {
     if (metricLabelList) setSelectedMetricForScatterplot(metricLabelList[0]);
-    if (paramLabelList) setSelectedParamsForScatterplot(paramLabelList.slice(0, 3));
+    if (paramLabelList)
+      setSelectedParamsForScatterplot(paramLabelList.slice(0, 3));
   };
 
   // Make sure to only update the scatterplot param/metric once
-  if (!selectedMetricForScatterplot || !selectedParamsForScatterplot) setScatterplotDefaults(paramLabelList, metricLabelList);
+  if (!selectedMetricForScatterplot || !selectedParamsForScatterplot)
+    setScatterplotDefaults(paramLabelList, metricLabelList);
 
   const trialDataList: TrialData[] = createTrialData(completedTrials);
 
@@ -373,7 +375,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [axisPropsList, setAxisPropsList] = React.useState<AxisPropsList>(
     createAxisPropsList(completedTrials, studyConfig, metricLabelList)
   );
-  const PCPAxisDataList = createPCPAxisDataList(
+  const pcpAxisDataList = createPcpAxisDataList(
     paramLabelList,
     metricLabelList,
     axisPropsList
@@ -592,13 +594,13 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                           multiple
                           id="scatterplotParam"
                           options={paramLabelList}
-                          getOptionLabel={(option) => option}
-                          defaultValue={paramLabelList.slice(0,3)}
+                          getOptionLabel={option => option}
+                          defaultValue={paramLabelList.slice(0, 3)}
                           filterSelectedOptions
                           fullWidth
                           size="small"
                           onChange={handleParamAutocompleteChange}
-                          renderInput={(params) => (
+                          renderInput={params => (
                             <TextField
                               {...params}
                               variant="outlined"
@@ -630,7 +632,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                     </Grid>
                   </Box>
                   <Grid container item xs={12} justify="center">
-                    {selectedParamsForScatterplot.map((param) => {
+                    {selectedParamsForScatterplot.map(param => {
                       return (
                         <Scatterplot
                           width={width * 0.3}
@@ -657,7 +659,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                     height={height}
                     axisPropsList={axisPropsList}
                     trialDataList={trialDataList}
-                    axisDataList={PCPAxisDataList}
+                    axisDataList={pcpAxisDataList}
                     selectedMetricForColor={selectedMetric}
                   />
                   <Grid container item xs={12} justify="center">
