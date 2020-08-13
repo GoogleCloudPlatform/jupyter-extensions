@@ -1,7 +1,20 @@
 import React from 'react';
 import { Grid, Paper, Radio } from '@material-ui/core';
+import { LineGraph } from './graphs/line_graph';
+import { Scatterplot } from './graphs/scatterplot';
 import { ParallelCoordinates } from './graphs/parallel_coordinates';
-import { Typography, Slider, Box, Button } from '@material-ui/core/';
+import {
+  Typography,
+  Slider,
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+} from '@material-ui/core/';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import { useDispatch, connect } from 'react-redux';
 import { fetchTrials } from '../store/studies';
 import { setView } from '../store/view';
@@ -21,6 +34,7 @@ type ContinuousAxisProps = {
   minVal: number;
   maxVal: number;
   flip?: boolean;
+  goal?: string;
 };
 
 type DiscontinousAxisProps = {
@@ -32,6 +46,11 @@ type DiscontinousAxisProps = {
   maxIndex: number;
 };
 
+/**
+ * List of all the axisProps.
+ * AxisProps is an object that has all the properties of a parameter/metric
+ * and is used across all the visualizations.
+ */
 export interface AxisPropsList {
   trialId: ContinuousAxisProps;
   [key: string]: ContinuousAxisProps | DiscontinousAxisProps;
@@ -43,8 +62,11 @@ export interface TrialData {
   [key: string]: number | string;
 }
 
-// Needed for populating D3 axis
-export interface AxisData {
+/**
+ * AxisData needed for parallel coordinates.
+ * (PCP is short term for parallel coordinates)
+ */
+export interface PCPAxisData {
   label: string;
   type: string;
   minVal?: number;
@@ -52,18 +74,24 @@ export interface AxisData {
   values?: string[] | number[];
 }
 
-function createAxesData(
-  axisLabelsLeft,
-  axisLabelsRight,
+/**
+ * Populates list of axis data for parallel coordinates.
+ * @param paramLabelList List of parameter names
+ * @param metricLabelList List of metric names
+ * @param axisPropsList List of axisProps
+ */
+function createPcpAxisDataList(
+  paramLabelList: string[],
+  metricLabelList: string[],
   axisPropsList: AxisPropsList
-): AxisData[] {
-  const axesData = [];
-  axisLabelsLeft.forEach(label => {
+): PCPAxisData[] {
+  const pcpAxisDataList = [];
+  paramLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
     switch (thisAxisProps.type) {
       case 'DOUBLE':
       case 'INTEGER':
-        axesData.push({
+        pcpAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
@@ -72,7 +100,7 @@ function createAxesData(
         break;
       case 'CATEGORICAL':
       case 'DISCRETE':
-        axesData.push({
+        pcpAxisDataList.push({
           label,
           type: axisPropsList[label].type,
           values: 'values' in thisAxisProps ? thisAxisProps.values : null,
@@ -80,16 +108,16 @@ function createAxesData(
         break;
     }
   });
-  axisLabelsRight.forEach(label => {
+  metricLabelList.forEach(label => {
     const thisAxisProps = axisPropsList[label];
-    axesData.push({
+    pcpAxisDataList.push({
       label,
       type: axisPropsList[label].type,
       minVal: 'minVal' in thisAxisProps ? thisAxisProps.minVal : null,
       maxVal: 'maxVal' in thisAxisProps ? thisAxisProps.maxVal : null,
     });
   });
-  return axesData;
+  return pcpAxisDataList;
 }
 
 function getParameterValue(parameter: Types.Parameter) {
@@ -118,6 +146,12 @@ function createTrialData(completedTrials: Types.Trial[]): TrialData[] {
   });
 }
 
+/**
+ * Retrieves min and max value of all the metrics.
+ * This function is needed because we do not have a pre-set min/max values for metrics
+ * and thus depend on the actual final measurements of completed trials.
+ * @param completedTrials List of completed trials (guranteed to have finalMeasurement)
+ */
 function findMetricMinMax(completedTrials: Types.Trial[]) {
   const minMaxRecord = {};
   completedTrials.forEach((trial, index) => {
@@ -143,7 +177,7 @@ function findMetricMinMax(completedTrials: Types.Trial[]) {
   return minMaxRecord;
 }
 
-function createAxisProps(
+function createAxisPropsList(
   completedTrials: Types.Trial[],
   studyConfig: Types.StudyConfig,
   metricNameList: string[]
@@ -235,20 +269,29 @@ function createAxisProps(
       maxVal: metricMinMax[metric].max,
     };
   });
+  // Store metric goals in axisPropsList
+  studyConfig.metrics.forEach(metricSpec => {
+    axisPropsList[metricSpec.metric]['goal'] = metricSpec.goal;
+  });
   return axisPropsList;
 }
 
+/**
+ * Finds all the labels for parameters & metrics and make it into a list of strings
+ * Note that trialId is included as one of the paramLabels, though it isn't essentially a parameter
+ * @param trials List of all the trials
+ */
 function fetchAxisLabels(trials: Types.Trial[]) {
   const completedTrials = trials.filter(
     trial => trial.state === 'COMPLETED' && 'finalMeasurement' in trial
   );
   return {
-    axisLabelsLeft: completedTrials
+    paramLabelList: completedTrials
       ? ['trialId'].concat(
           completedTrials[0].parameters.map(param => param.parameter)
         )
       : [],
-    axisLabelsRight: completedTrials
+    metricLabelList: completedTrials
       ? completedTrials[0].finalMeasurement.metrics.map(metric => metric.metric)
       : [],
   };
@@ -276,6 +319,27 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
   const [height, setHeight] = React.useState(0);
   const [value, setValue] = React.useState([0, 1]); // Placeholder value for slider changes
   const [selectedMetric, setSelectedMetric] = React.useState('');
+  const [
+    selectedMetricForScatterplot,
+    setSelectedMetricForScatterplot,
+  ] = React.useState('');
+  const [lineGraphYAxisMetric, setLineGraphYAxisMetric] = React.useState('');
+  const [
+    selectedParamsForScatterplot,
+    setSelectedParamsForScatterplot,
+  ] = React.useState([]);
+
+  const handleParamAutocompleteChange = (event, newValue) => {
+    setSelectedParamsForScatterplot(newValue.slice(0, 3)); // Limiting number of scatterplots to 3
+  };
+
+  const handleLineGraphRadioChange = event => {
+    setLineGraphYAxisMetric(event.target.value);
+  };
+
+  const handleMetricDropdownSelect = event => {
+    setSelectedMetricForScatterplot(event.target.value);
+  };
 
   if (!trials) {
     dispatch(fetchTrials(studyName));
@@ -287,18 +351,33 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
       'finalMeasurement' in trial &&
       'value' in trial.finalMeasurement.metrics[0]
   ); // should be checking if 'value' exists in all the metrics inside finalMeasurement but just checking one for better performance
-  const { axisLabelsLeft, axisLabelsRight } = fetchAxisLabels(completedTrials);
+
+  const { paramLabelList, metricLabelList } = fetchAxisLabels(completedTrials);
+
+  /**
+   * Set default parameters & metrics for scatterplot so that graphs will show up before selecting/specifying values
+   */
+  const setScatterplotDefaults = (paramLabelList, metricLabelList) => {
+    if (metricLabelList) setSelectedMetricForScatterplot(metricLabelList[0]);
+    if (paramLabelList)
+      setSelectedParamsForScatterplot(paramLabelList.slice(0, 3));
+  };
+
+  // Make sure to only update the scatterplot param/metric once
+  if (!selectedMetricForScatterplot || !selectedParamsForScatterplot)
+    setScatterplotDefaults(paramLabelList, metricLabelList);
+
   const trialDataList: TrialData[] = createTrialData(completedTrials);
 
   const handleMetricSelectionChange = event => {
     setSelectedMetric(event.target.value);
   };
   const [axisPropsList, setAxisPropsList] = React.useState<AxisPropsList>(
-    createAxisProps(completedTrials, studyConfig, axisLabelsRight)
+    createAxisPropsList(completedTrials, studyConfig, metricLabelList)
   );
-  const axesData = createAxesData(
-    axisLabelsLeft,
-    axisLabelsRight,
+  const pcpAxisDataList = createPcpAxisDataList(
+    paramLabelList,
+    metricLabelList,
     axisPropsList
   );
   const handleTrialIdAxisChange = (event, newValue, item) => {
@@ -461,14 +540,126 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
         <Box display="flex" my={3}>
           <Grid container spacing={3}>
             <Grid container item xs={12} ref={ref}>
-              <Paper>
-                <Box m={5} overflow="scroll">
+              <Paper className={styles.paper}>
+                <Grid container item xs={12} alignItems="center">
+                  <Grid container item xs={12}>
+                    <Typography variant="h6">Study Overview</Typography>
+                  </Grid>
+                  <Grid container item xs={10}>
+                    <LineGraph
+                      width={width * ((10 / 12) * 1.0)}
+                      height={height * ((10 / 12) * 0.5)}
+                      axisProps={axisPropsList}
+                      trialData={trialDataList}
+                      selectedMetric={
+                        lineGraphYAxisMetric
+                          ? lineGraphYAxisMetric
+                          : metricLabelList[0]
+                      }
+                      metricList={metricLabelList}
+                    />
+                  </Grid>
+                  <Grid container item xs={2}>
+                    <FormControl component="fieldset">
+                      <RadioGroup
+                        aria-label="yAxis"
+                        name="yAxis"
+                        value={lineGraphYAxisMetric}
+                        onChange={handleLineGraphRadioChange}
+                        defaultValue={metricLabelList[0]}
+                      >
+                        {metricLabelList.map(metric => {
+                          return (
+                            <FormControlLabel
+                              value={metric}
+                              control={<Radio size="small" />}
+                              label={metric}
+                            />
+                          );
+                        })}
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </Paper>
+              <Paper className={styles.paper}>
+                <Grid container item xs={12} alignItems="center">
+                  <Grid container item xs={12}>
+                    <Typography variant="h6">Scatterplot Analysis</Typography>
+                  </Grid>
+                  <Box m={1} width="100%">
+                    <Grid container item xs={12} spacing={1}>
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          multiple
+                          id="scatterplotParam"
+                          options={paramLabelList}
+                          getOptionLabel={option => option}
+                          defaultValue={paramLabelList.slice(0, 3)}
+                          filterSelectedOptions
+                          fullWidth
+                          size="small"
+                          onChange={handleParamAutocompleteChange}
+                          renderInput={params => (
+                            <TextField
+                              {...params}
+                              variant="outlined"
+                              label="Select Parameter"
+                              placeholder="Select up to 3 parameters"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          id="scatterplotMetric"
+                          variant="outlined"
+                          select
+                          label="Select Metric"
+                          value={selectedMetricForScatterplot}
+                          onChange={handleMetricDropdownSelect}
+                          size="small"
+                          fullWidth
+                          required
+                        >
+                          {metricLabelList.map(item => (
+                            <MenuItem key={item} value={item}>
+                              {item}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <Grid container item xs={12} justify="center">
+                    {selectedParamsForScatterplot.map(param => {
+                      return (
+                        <Scatterplot
+                          width={width * 0.3}
+                          height={height * 0.5}
+                          axisProps={axisPropsList}
+                          trialData={trialDataList}
+                          selectedParam={param}
+                          selectedMetric={selectedMetricForScatterplot}
+                        />
+                      );
+                    })}
+                  </Grid>
+                </Grid>
+              </Paper>
+              <Paper className={styles.paper}>
+                <Grid container item xs={12}>
+                  <Typography variant="h6">
+                    Parallel Coordinates Analysis
+                  </Typography>
+                </Grid>
+                <Box m={5}>
                   <ParallelCoordinates
                     width={width}
                     height={height}
                     axisPropsList={axisPropsList}
                     trialDataList={trialDataList}
-                    axesData={axesData}
+                    axisDataList={pcpAxisDataList}
                     selectedMetricForColor={selectedMetric}
                   />
                   <Grid container item xs={12} justify="center">
@@ -479,7 +670,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       spacing={2}
                       alignContent="flex-start"
                     >
-                      {populateSliders(axisLabelsLeft, axisPropsList)}
+                      {populateSliders(paramLabelList, axisPropsList)}
                     </Grid>
                     <Grid
                       container
@@ -488,7 +679,7 @@ export const VisualizeTrialsUnWrapped: React.FC<Props> = ({
                       spacing={1}
                       alignContent="flex-start"
                     >
-                      {populateSliders(axisLabelsRight, axisPropsList, true)}
+                      {populateSliders(metricLabelList, axisPropsList, true)}
                     </Grid>
                   </Grid>
                 </Box>
