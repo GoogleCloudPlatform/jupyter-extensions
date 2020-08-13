@@ -65,6 +65,7 @@
     "@phosphor/virtualdom": "^1.2.0",
     "@phosphor/widgets": "^1.9.3",
     "@reduxjs/toolkit": "^1.4.0",
+    "closure-library.ts": "^1.0.0",
     "copy-to-clipboard": "^3.3.1",
     "csstips": "1.2.0",
     "gcp_jupyterlab_shared": "^1.0.0",
