@@ -37,14 +37,14 @@ enum Status {
 }
 
 const statusInfo = [
-  'Getting authorization token to reshape machine. Please complete the OAuth 2.0 authorization steps in the popup',
+  'Please complete the OAuth 2.0 authorization steps in the popup',
   'Shutting down instance for reshaping.',
   'Reshaping machine configuration to match your selection.',
   'Reshaping GPU configuration to match your selection.',
-  'Restarting your instance. Your newly configured machine will be ready very shortly!',
+  'Restarting your instance.',
   'Refreshing your JupyterLab session to reflect your new configuration.',
-  'Operation complete. Enjoy your newly configured instance! You may now close this dialog.',
-  'An error has occured, please try again later. You may need to restart the instance manually.',
+  'Operation complete. Enjoy your newly configured instance!',
+  'An error has occured, please try again later.',
 ];
 
 export enum ErrorType {

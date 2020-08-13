@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as React from 'react';
 
+import * as React from 'react';
 import { Message } from 'gcp_jupyterlab_shared';
 import { HardwareConfiguration, ACCELERATOR_TYPES, STYLES } from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
@@ -27,7 +27,8 @@ interface Props {
   onSubmit: () => void;
 }
 
-const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.`;
+const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this 
+time you will not be able to access your notebook instance.`;
 
 function displayConfiguration(
   configuration: HardwareConfiguration,
