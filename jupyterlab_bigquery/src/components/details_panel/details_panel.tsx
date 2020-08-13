@@ -11,9 +11,8 @@ import {
   withStyles,
 } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
-import Editor from '@monaco-editor/react';
-import { monaco } from '@monaco-editor/react';
 
+import ReadOnlyEditor from '../shared/read_only_editor';
 import { SchemaField } from './service/list_table_details';
 import { ModelSchema } from './service/list_model_details';
 import { StripedRows } from '../shared/striped_rows';
@@ -112,39 +111,6 @@ const getTitle = type => {
 export const DetailsPanel: React.SFC<Props> = props => {
   const { details, rows, detailsType } = props;
 
-  function handleEditorDidMount(_, editor) {
-    const editorElement = editor.getDomNode();
-    if (!editorElement) {
-      return;
-    }
-
-    monaco
-      .init()
-      .then(monaco => {
-        const lineHeight = editor.getOption(
-          monaco.editor.EditorOption.lineHeight
-        );
-        const lineCount = editor._modelData.viewModel.getLineCount();
-        const height = lineCount * lineHeight;
-        editorElement.style.height = `${height}px`;
-        editor.layout();
-
-        monaco.editor.defineTheme('viewQueryTheme', {
-          base: 'vs',
-          inherit: true,
-          rules: [],
-          colors: { 'editorCursor.foreground': '#FFFFFF' },
-        });
-        monaco.editor.setTheme('viewQueryTheme');
-      })
-      .catch(error =>
-        console.error(
-          'An error occurred during initialization of Monaco: ',
-          error
-        )
-      );
-  }
-
   return (
     <div className={localStyles.panel}>
       <div className={localStyles.detailsBody}>
@@ -219,28 +185,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
             <div className={localStyles.title} style={{ marginTop: '32px' }}>
               Query
             </div>
-            <Editor
-              width="100%"
-              theme={'light'}
-              language={'sql'}
-              value={details.query}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                cursorStyle: 'line-thin',
-                cursorWidth: 0,
-                renderLineHighlight: 'none',
-                overviewRulerLanes: 0,
-                overviewRulerBorder: false,
-                hideCursorInOverviewRuler: true,
-                glyphMargin: true,
-                matchBrackets: 'never',
-                occurrencesHighlight: false,
-                folding: false,
-                scrollBeyondLastLine: false,
-              }}
-              editorDidMount={handleEditorDidMount}
-            />
+            <ReadOnlyEditor query={details.query} />
           </div>
         )}
 

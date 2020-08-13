@@ -13,6 +13,8 @@ const DEFAULT_INIT_QUERY_STATE = {
   labels: [],
   bytesProcessed: null,
   queryId: null,
+  project: null,
+  query: null,
 };
 
 const initialState: QueryEditorState = {
@@ -30,19 +32,14 @@ const queryEditorTabSlice = createSlice({
     updateQueryResult(state, action: PayloadAction<QueryResult>) {
       const queryResult = action.payload;
       const queryId = queryResult.queryId;
-      let newQueryState = state.queries[queryId];
-
-      if (!newQueryState) {
-        newQueryState = Object.assign(
-          {},
-          DEFAULT_INIT_QUERY_STATE
-        ) as QueryResult;
-      }
+      const newQueryState = state.queries[queryId];
 
       newQueryState.content = newQueryState.content.concat(queryResult.content);
       newQueryState.labels = queryResult.labels;
       newQueryState.bytesProcessed = queryResult.bytesProcessed;
       newQueryState.queryId = queryId;
+      newQueryState.query = queryResult.query;
+      newQueryState.project = queryResult.project;
 
       state.queries = { ...state.queries, [queryId]: newQueryState };
     },

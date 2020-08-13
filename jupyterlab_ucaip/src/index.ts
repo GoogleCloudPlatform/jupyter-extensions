@@ -6,12 +6,21 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
+import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { UCAIPWidget } from './components/ucaip_widget';
 import { WidgetManager } from 'gcp_jupyterlab_shared';
 
-async function activate(app: JupyterFrontEnd) {
+async function activate(
+  app: JupyterFrontEnd,
+  notebookTracker: INotebookTracker
+) {
   const manager = new WidgetManager(app);
-  const context = { app: app, manager: manager };
+  const context = {
+    app: app,
+    manager: manager,
+    notebookTracker: notebookTracker,
+  };
   const listWidget = new UCAIPWidget(context);
   listWidget.addClass('jp-UcaipIcon');
   app.shell.add(listWidget, 'left', { rank: 100 });
@@ -22,7 +31,7 @@ async function activate(app: JupyterFrontEnd) {
  */
 const uCAIP: JupyterFrontEndPlugin<void> = {
   id: 'ucaip:ucaip',
-  requires: [],
+  requires: [INotebookTracker],
   activate: activate,
   autoStart: true,
 };

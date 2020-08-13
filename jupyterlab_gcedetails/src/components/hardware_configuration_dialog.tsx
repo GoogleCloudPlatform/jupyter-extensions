@@ -50,7 +50,6 @@ interface State {
   hardwareConfiguration: HardwareConfiguration;
 }
 
-/** Funtional Component for a common dialog interface with cancel and submit buttons. */
 export class HardwareConfigurationDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -104,6 +103,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             details={details}
           />
         );
+
       case View.CONFIRMATION:
         return (
           <ConfirmationPage
@@ -119,6 +119,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             }}
           />
         );
+
       case View.STATUS:
         return (
           <HardwareScalingStatus

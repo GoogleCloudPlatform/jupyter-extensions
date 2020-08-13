@@ -9,6 +9,7 @@ interface Props {
   secondaryLabel?: string;
   onPrimaryClick: () => void;
   onSecondaryClick?: () => void;
+  primaryDisabled?: boolean;
 }
 
 const STYLES = stylesheet({
@@ -61,6 +62,7 @@ export function ActionBar(props: Props) {
         disableRipple={true}
         disableElevation={true}
         onClick={props.onPrimaryClick}
+        disabled={props.primaryDisabled}
       >
         {props.primaryLabel}
       </PrimaryButton>

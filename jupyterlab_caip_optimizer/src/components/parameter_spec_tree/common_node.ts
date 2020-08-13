@@ -12,6 +12,8 @@ function isStringArray(array: unknown[]): array is string[] {
 
 interface ReactTreeCommonNodeOptions {
   onClick?: (spec: ParameterSpec) => void;
+  parameterNode?: React.SVGProps<SVGGElement>;
+  parameterValueNode?: React.SVGProps<SVGGElement>;
 }
 
 export class CommonNode {
@@ -163,10 +165,19 @@ export class CommonNode {
       newPath
     );
     const pathString = newPath.join('/');
+    const gProps = options.parameterValueNode
+      ? {
+          ...options.parameterValueNode,
+          'data-testid': pathString,
+        }
+      : {
+          className: styles.noClick,
+          'data-testid': pathString,
+        };
     return {
       id: pathString,
       name,
-      gProps: { className: styles.noClick, 'data-testid': pathString },
+      gProps,
       children: categoryChildren,
     };
   }
@@ -203,7 +214,12 @@ export class CommonNode {
       );
     }
 
-    const gProps = { className: styles.node, 'data-testid': pathString };
+    const gProps = options.parameterNode
+      ? { ...options.parameterNode, 'data-testid': pathString }
+      : {
+          className: styles.node,
+          'data-testid': pathString,
+        };
 
     if ('onClick' in options) {
       gProps['onClick'] = () => options.onClick(this.spec);
@@ -228,10 +244,19 @@ export class CommonNode {
     options: ReactTreeCommonNodeOptions = {},
     valueSubNodes = false
   ): TreeNode {
+    const gProps = options.parameterValueNode
+      ? {
+          ...options.parameterValueNode,
+          'data-testid': 'root',
+        }
+      : {
+          className: styles.noClick,
+          'data-testid': 'root',
+        };
     return {
       id: 'root',
       name: 'root',
-      gProps: { className: styles.noClick, 'data-testid': 'root' },
+      gProps,
       children: parameterSpecs.map(spec =>
         new CommonNode(spec).toReactTreeGraph(options, ['root'], valueSubNodes)
       ),

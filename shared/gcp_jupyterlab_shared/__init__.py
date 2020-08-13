@@ -15,7 +15,7 @@
 from notebook.utils import url_path_join
 
 # Needs to be set before handlers since they import VERSION
-VERSION = '1.0.5'
+VERSION = '1.0.6'
 
 from .handlers import MetadataHandler, ProxyHandler, ProjectHandler, RuntimeEnvHandler
 

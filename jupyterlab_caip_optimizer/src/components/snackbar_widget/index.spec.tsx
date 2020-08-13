@@ -5,6 +5,9 @@ jest.mock('@material-ui/core', () => ({
 jest.mock('@material-ui/lab', () => ({
   Alert: ({ children }) => children,
 }));
+jest.mock('../../utils/theme', () => ({
+  theme: {},
+}));
 import * as React from 'react';
 import { SnackbarUnwrapped } from '.';
 import { mount } from 'enzyme';

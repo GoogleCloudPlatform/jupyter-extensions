@@ -16,7 +16,12 @@
 import * as React from 'react';
 
 import { Message } from 'gcp_jupyterlab_shared';
-import { HardwareConfiguration, ACCELERATOR_TYPES, STYLES } from '../data';
+import {
+  HardwareConfiguration,
+  getGpuTypeText,
+  NO_ACCELERATOR_TYPE,
+  STYLES,
+} from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
 
@@ -28,10 +33,6 @@ interface Props {
 }
 
 const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.`;
-
-function getGpuTypeText(value: string) {
-  return ACCELERATOR_TYPES.find(option => option.value === value).text;
-}
 
 function displayConfiguration(
   configuration: HardwareConfiguration,
@@ -45,7 +46,7 @@ function displayConfiguration(
       <div className={STYLES.paragraph}>
         Machine type: {machineType.description}
       </div>
-      {attachGpu && (
+      {attachGpu && gpuType !== NO_ACCELERATOR_TYPE && (
         <div className={STYLES.paragraph}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
         </div>

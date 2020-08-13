@@ -1,7 +1,9 @@
 import { FormControl } from '@material-ui/core';
-import { SelectInput, TextInput, DialogComponent } from 'gcp_jupyterlab_shared';
+import { DialogComponent, SelectInput, TextInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { AppContext } from '../../context';
+import { CodeGenService } from '../../service/code_gen';
 import { CodeComponent } from '../copy_code';
 
 interface Props {
@@ -10,6 +12,7 @@ interface Props {
 }
 
 interface State {
+  path: string;
   name: string;
   framework: string;
 }
@@ -27,12 +30,22 @@ const localStyles = stylesheet({
 });
 
 export class ExportModel extends React.Component<Props, State> {
+  static contextType = AppContext;
   constructor(props: Props) {
     super(props);
     this.state = {
+      path: '',
       name: '',
       framework: 'TF_CPU_2_1',
     };
+  }
+
+  private getExportCode() {
+    return CodeGenService.exportModelCode(
+      this.state.path,
+      this.state.name,
+      this.state.framework
+    );
   }
 
   render() {
@@ -44,9 +57,29 @@ export class ExportModel extends React.Component<Props, State> {
           cancelLabel="OK"
           onClose={this.props.onClose}
           onCancel={this.props.onClose}
-          hideSubmit
+          submitLabel="Generate code cell"
+          onSubmit={() => {
+            CodeGenService.generateCodeCell(
+              this.context,
+              this.getExportCode(),
+              null
+            );
+            this.props.onClose();
+          }}
+          submitDisabled={
+            !this.context.notebookTracker.currentWidget ||
+            !this.state.path ||
+            !this.state.name
+          }
         >
           <FormControl className={localStyles.form}>
+            <TextInput
+              placeholder="path/to/model"
+              label="Path to saved model"
+              onChange={event => {
+                this.setState({ path: event.target.value });
+              }}
+            />
             <TextInput
               placeholder="my_model"
               label="Name"
@@ -96,23 +129,8 @@ export class ExportModel extends React.Component<Props, State> {
             />
           </FormControl>
           Export a pretrained model to uCAIP using the Python API
-          <CodeComponent>
-            {`from jupyterlab_ucaip import export_saved_model, ModelFramework
-
-display_name= "${this.state.name}"
-model_path = "my_model"
-framework = ModelFramework.${this.state.framework}
-
-# Save your model in preferred format to the local path
-# model.save(model_path)
-
-# Export local model to uCAIP
-op = export_saved_model(display_name="${this.state.name}",
-                        model_path=model_path,
-                        framework=framework)
-
-# Get result of export model operation
-op.result()`}
+          <CodeComponent generateEnabled={false}>
+            {this.getExportCode()}
           </CodeComponent>
         </DialogComponent>
       );
@@ -120,3 +138,5 @@ op.result()`}
     return null;
   }
 }
+
+ExportModel.contextType = AppContext;
