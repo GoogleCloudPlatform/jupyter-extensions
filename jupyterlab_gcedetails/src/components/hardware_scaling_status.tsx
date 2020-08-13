@@ -254,7 +254,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     ) : (
       <div className={STYLES.containerPadding}>
         <div className={STYLES.containerSize}>
-          <h3 className={STYLES.heading}>{Status[status]}</h3>
+          <p className={STYLES.heading}>{Status[status]}</p>
           <p className={STYLES.paragraph}>{statusInfo[status]}</p>
         </div>
         {status === Status['Complete'] ? (
