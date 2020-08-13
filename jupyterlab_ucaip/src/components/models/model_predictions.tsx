@@ -243,7 +243,7 @@ deploy_model(model_id='${this.props.model.id}',
 
   private needToDeploy(): JSX.Element {
     return (
-      <div>
+      <div style={{ paddingTop: '16px', paddingRight: '16px' }}>
         <Alert severity="info">
           Your model must be successfully deployed to an endpoint before you can
           test it.
