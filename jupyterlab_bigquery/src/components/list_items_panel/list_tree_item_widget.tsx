@@ -2,12 +2,7 @@ import { UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import * as React from 'react';
 import { ReduxReactWidget } from '../../utils/widgetManager/redux_react_widget';
-import {
-  ListProjectsService,
-  ListDatasetsService,
-  ListTablesService,
-  ListModelsService,
-} from './service/list_items';
+import { ListProjectsService } from './service/list_items';
 import ListItemsPanel from './list_tree_panel';
 import { Context } from './list_tree_panel';
 
@@ -18,9 +13,6 @@ export default class ListItemsWidget extends ReduxReactWidget {
 
   constructor(
     private readonly listProjectsService: ListProjectsService,
-    private readonly listDatasetsService: ListDatasetsService,
-    private readonly listTablesService: ListTablesService,
-    private readonly listModelsService: ListModelsService,
     private context: Context
   ) {
     super();
@@ -43,9 +35,6 @@ export default class ListItemsWidget extends ReduxReactWidget {
           <ListItemsPanel
             isVisible={isVisible}
             listProjectsService={this.listProjectsService}
-            listDatasetsService={this.listDatasetsService}
-            listTablesService={this.listTablesService}
-            listModelsService={this.listModelsService}
             context={this.context}
           />
         )}

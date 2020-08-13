@@ -23,6 +23,7 @@ import {
   createDetachedCommentFromJSON,
   CodeReviewComment,
   createReviewCommentFromJSON,
+  ReviewRequest,
 } from '../service/comment';
 import { httpGitRequest, refreshIntervalRequest } from '../service/request';
 import { stylesheet } from 'typestyle';
@@ -34,12 +35,16 @@ import {
   Tabs,
   Tab,
   AppBar,
+  Grid,
 } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import CommentIcon from '@material-ui/icons/Comment';
 import { ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
 import { getServerRoot } from '../service/jupyterConfig';
+import { CodeReview } from '../components/code_review';
 
 interface Props {
   context: Context;
@@ -47,7 +52,7 @@ interface Props {
 
 interface State {
   detachedComments: DetachedComment[];
-  reviewComments: CodeReviewComment[];
+  reviewComments: Array<[ReviewRequest, Array<CodeReviewComment>]>;
   fileName: string;
   serverRoot: string;
   activeTab: number;
@@ -75,6 +80,17 @@ const localStyles = stylesheet({
   commentsList: {
     flexDirection: 'column',
     minHeight: '100vh',
+  },
+});
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#3f51b5',
+    },
+    secondary: {
+      main: '#002984',
+    },
   },
 });
 
@@ -126,65 +142,91 @@ export class CommentsComponent extends React.Component<Props, State> {
         <Divider />
       </>
     ));
-    const reviewCommentsList = this.state.reviewComments.map(comment => (
-      <>
-        <Comment reviewComment={comment} />
-        <Divider />
-      </>
-    ));
+    const numDetachedComments = this.state.detachedComments.length;
+    const detachedLabel: string =
+      'Detached (' + numDetachedComments.toString() + ')';
+    const reviewCommentsList = this.state.reviewComments.map(
+      reviewCommentsArr => (
+        <>
+          <CodeReview
+            reviewRequest={reviewCommentsArr[0]}
+            commentsList={reviewCommentsArr[1]}
+          />
+          <NewCommentThread
+            serverRoot={this.state.serverRoot}
+            currFilePath={currFilePath}
+            commentType="review"
+            reviewHash={reviewCommentsArr[0].reviewHash}
+          />
+        </>
+      )
+    );
     return (
-      <div className={localStyles.root}>
-        <CssBaseline />
-        {!this.state.errorMessage && (
-          <Typography
-            color="primary"
-            variant="h5"
-            className={localStyles.header}
-            gutterBottom
-          >
-            Comments for {this.state.fileName}
-          </Typography>
-        )}
+      <ThemeProvider theme={theme}>
+        <div className={localStyles.root}>
+          <CssBaseline />
+          {!this.state.errorMessage && (
+            <Grid
+              container
+              direction="row"
+              spacing={1}
+              className={localStyles.header}
+            >
+              <Grid item>
+                <CommentIcon color="primary" />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5">
+                  Comments for {this.state.fileName}
+                </Typography>
+              </Grid>
+            </Grid>
+          )}
 
-        <AppBar position="static">
-          <Tabs
-            value={activeTab}
-            onChange={this.tabChange}
-            className={localStyles.tabs}
-          >
-            <Tab label="Review" value={0} />
-            <Tab label="Detached" value={1} />
-          </Tabs>
-        </AppBar>
+          <AppBar position="static">
+            <Tabs
+              value={activeTab}
+              onChange={this.tabChange}
+              indicatorColor="secondary"
+              className={localStyles.tabs}
+            >
+              <Tab label="Code Reviews" value={0} />
+              <Tab label={detachedLabel} value={1} />
+            </Tabs>
+          </AppBar>
 
-        {this.state.errorMessage && (
-          <Typography
-            variant="subtitle1"
-            className={localStyles.header}
-            gutterBottom
-          >
-            {' '}
-            {this.state.errorMessage}
-          </Typography>
-        )}
-        {!this.state.errorMessage &&
-          (this.state.activeTab === 0 ? (
-            <List className={localStyles.commentsList}>
-              {reviewCommentsList}{' '}
-            </List>
-          ) : (
-            <>
-              <NewCommentThread
-                serverRoot={this.state.serverRoot}
-                currFilePath={currFilePath}
-              />
-              <List className={localStyles.commentsList}>
-                {' '}
-                {detachedCommentsList}{' '}
-              </List>
-            </>
-          ))}
-      </div>
+          {this.state.errorMessage && (
+            <Typography
+              variant="subtitle1"
+              className={localStyles.header}
+              gutterBottom
+            >
+              {' '}
+              {this.state.errorMessage}
+            </Typography>
+          )}
+          {!this.state.errorMessage &&
+            (this.state.activeTab === 0 ? (
+              <>
+                <List className={localStyles.commentsList}>
+                  {reviewCommentsList}{' '}
+                </List>
+              </>
+            ) : (
+              <>
+                <NewCommentThread
+                  serverRoot={this.state.serverRoot}
+                  currFilePath={currFilePath}
+                  commentType="detached"
+                />
+                <List className={localStyles.commentsList}>
+                  {' '}
+                  {detachedCommentsList}{' '}
+                </List>
+              </>
+            ))}
+        </div>
+      </ThemeProvider>
     );
   }
 
@@ -217,13 +259,15 @@ export class CommentsComponent extends React.Component<Props, State> {
     );
   }
 
-  private async getCodeReviewComments(serverRoot: string, filePath: string) {
+  private async getAllCodeReviewComments(serverRoot: string, filePath: string) {
     httpGitRequest('reviewComments', 'GET', filePath, serverRoot).then(
       response =>
         response.json().then(data => {
-          const comments: Array<CodeReviewComment> = new Array<
-            CodeReviewComment
-          >();
+          //Each Array<CodeReviewComment> stores all the comments on this file for a different code review
+          const reviews: Array<[
+            ReviewRequest,
+            Array<CodeReviewComment>
+          ]> = new Array<[ReviewRequest, Array<CodeReviewComment>]>();
           const shortenedFilePath = trimPath(filePath);
           if (data) {
             if (data.error_message) {
@@ -234,21 +278,28 @@ export class CommentsComponent extends React.Component<Props, State> {
               });
             } else {
               this.setState({ errorMessage: '' }); //remove error message
-              if (data.comments) {
-                data.comments.forEach(function(obj) {
-                  const comment = createReviewCommentFromJSON(
-                    obj,
-                    data.revision,
-                    data.request,
-                    filePath
-                  );
-                  comments.push(comment);
-                });
-              }
+              data.forEach(function(review) {
+                const request = review.request;
+                const comments: Array<CodeReviewComment> = new Array<
+                  CodeReviewComment
+                >();
+                if (review.comments) {
+                  review.comments.forEach(function(commentObj) {
+                    const comment = createReviewCommentFromJSON(
+                      commentObj,
+                      review.revision,
+                      review.request,
+                      filePath
+                    );
+                    comments.push(comment);
+                  });
+                  reviews.push([request, comments]);
+                }
+              });
             }
           }
           this.setState({
-            reviewComments: comments,
+            reviewComments: reviews,
             fileName: shortenedFilePath,
           });
         })
@@ -297,7 +348,8 @@ export class CommentsComponent extends React.Component<Props, State> {
     filePath: any
   ) {
     this.getDetachedComments(serverRoot, filePath);
-    this.getCodeReviewComments(serverRoot, filePath);
+    this.getAllCodeReviewComments(serverRoot, filePath);
+    // this.getCurrentCodeReviewComments(serverRoot, filePath);
   }
 
   private clearComments() {

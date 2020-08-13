@@ -1,8 +1,9 @@
-import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { Pipeline } from '../../service/model';
-import { PipelineProperties } from './pipeline_properties';
 import { stylesheet } from 'typestyle';
+import { Context } from '../../context';
+import { Pipeline } from '../../service/model';
+import { BaseWidget } from '../base_widget';
+import { PipelineProperties } from './pipeline_properties';
 
 const localStyles = stylesheet({
   header: {
@@ -21,18 +22,18 @@ const localStyles = stylesheet({
 });
 
 /** Widget to be registered in the left-side panel. */
-export class PipelineWidget extends ReactWidget {
+export class PipelineWidget extends BaseWidget {
   id = 'pipeline-widget';
 
-  constructor(private readonly pipeline: Pipeline) {
-    super();
+  constructor(private readonly pipeline: Pipeline, context: Context) {
+    super(context);
     this.title.label = pipeline.displayName;
     this.title.caption = 'Pipeline ' + pipeline.displayName;
     this.title.closable = true;
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-UcaipIcon-training';
   }
 
-  render() {
+  body() {
     return (
       <div className={localStyles.panel}>
         <header className={localStyles.header}>

@@ -45,7 +45,7 @@ const STYLES = stylesheet({
     paddingBottom: '8px',
   },
   input: {
-    marginTop: '4px',
+    marginTop: '2px',
   },
 });
 
@@ -217,6 +217,7 @@ interface NestedSelectProps {
   nestedOptionsList: NestedOptions[];
   onChange?: (value: Option) => void;
   label?: string;
+  value?: Option;
 }
 
 interface NestedSelectState {
@@ -232,7 +233,7 @@ export class NestedSelect extends React.Component<
     super(props);
 
     this.state = {
-      value: props.nestedOptionsList[0].options[0],
+      value: props.value ? props.value : props.nestedOptionsList[0].options[0],
       anchorEl: null,
     };
   }

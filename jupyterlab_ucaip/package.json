@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_ucaip",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "uCAIP extension for JupyterLab",
   "keywords": [
     "jupyter",
@@ -33,7 +33,8 @@
     "prepack": "npm run clean && npm run build",
     "test": "jest --coverage --passWithNoTests",
     "test-watch": "jest --watch",
-    "watch": "tsc -b -w"
+    "watch": "tsc -b -w",
+    "docs": "cd jupyterlab_ucaip && pydoc-markdown -m jupyterlab_ucaip.public -m jupyterlab_ucaip.types > README.md"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.0.2",
@@ -53,8 +54,9 @@
     "@types/react": "^16.9.35",
     "csstips": "^1.2.0",
     "eslint": "^7.5.0",
-    "humanize-duration": "^3.23.1",
     "gcp_jupyterlab_shared": "^1.0.5",
+    "humanize-duration": "^3.23.1",
+    "jest-canvas-mock": "^2.2.0",
     "material-table": "^1.61.0",
     "react-portal": "^4.2.1",
     "react-syntax-highlighter": "^13.0.0",

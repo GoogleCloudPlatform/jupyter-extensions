@@ -1,13 +1,14 @@
 import { Clipboard } from '@jupyterlab/apputils';
 import {
   Box,
+  Button,
   Icon,
   IconButton,
   ListItem,
-  Toolbar,
-  Button,
-  Select,
   MenuItem,
+  Select,
+  Toolbar,
+  Tooltip,
 } from '@material-ui/core';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
@@ -23,6 +24,8 @@ import {
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import styled from 'styled-components';
+import { AppContext } from '../context';
+import { CodeGenService } from '../service/code_gen';
 import { Dataset, DatasetService, DatasetType } from '../service/dataset';
 import {
   Model,
@@ -31,10 +34,9 @@ import {
   Pipeline,
   PipelineState,
 } from '../service/model';
-import { Context } from './ucaip_widget';
 import { DatasetWidget } from './datasets/dataset_widget';
-import { ImageWidget } from './datasets/image_widget';
 import { ExportData } from './datasets/export_data';
+import { ImageWidget } from './datasets/image_widget';
 import { ExportModel } from './models/export_model';
 import { ModelWidget } from './models/model_widget';
 import { PipelineWidget } from './pipelines/pipeline_widget';
@@ -43,7 +45,6 @@ interface Props {
   isVisible: boolean;
   width: number;
   height: number;
-  context: Context;
 }
 
 enum ResourceType {
@@ -61,7 +62,7 @@ interface State {
   resourceType: ResourceType;
   searchString: string;
   showSearch: boolean;
-  exportDatasetDialogOpen: boolean;
+  createDatasetDialogOpen: boolean;
   exportModelDialogOpen: boolean;
   deleteDialogOpen: boolean;
   deleteSubmitHandler: () => void;
@@ -109,6 +110,8 @@ const styles = {
 const breakpoints = [250, 380];
 
 export class ListResourcesPanel extends React.Component<Props, State> {
+  static contextType = AppContext;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -123,7 +126,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       deleteDialogOpen: false,
       deleteSubmitHandler: null,
       deleteTargetName: '',
-      exportDatasetDialogOpen: false,
+      createDatasetDialogOpen: false,
       exportModelDialogOpen: false,
     };
   }
@@ -155,29 +158,39 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     switch (type) {
       case ResourceType.Model:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>publish</Icon>}
-            onClick={_ => {
-              this.setState({ exportModelDialogOpen: true });
-            }}
-          >
-            Export
-          </Button>
+          <Tooltip title="Export custom model">
+            <span>
+              <Button
+                disabled={this.state.isLoading}
+                color="primary"
+                size="small"
+                startIcon={<Icon>publish</Icon>}
+                onClick={_ => {
+                  this.setState({ exportModelDialogOpen: true });
+                }}
+              >
+                Export
+              </Button>
+            </span>
+          </Tooltip>
         );
       case ResourceType.Dataset:
         return (
-          <Button
-            color="primary"
-            size="small"
-            startIcon={<Icon>add</Icon>}
-            onClick={_ => {
-              this.setState({ exportDatasetDialogOpen: true });
-            }}
-          >
-            Create
-          </Button>
+          <Tooltip title="Create new dataset">
+            <span>
+              <Button
+                disabled={this.state.isLoading}
+                color="primary"
+                size="small"
+                startIcon={<Icon>add</Icon>}
+                onClick={_ => {
+                  this.setState({ createDatasetDialogOpen: true });
+                }}
+              >
+                Create
+              </Button>
+            </span>
+          </Tooltip>
         );
     }
   }
@@ -187,167 +200,180 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       isLoading: this.state.isLoading,
       height: this.props.height - 80 - (this.state.showSearch ? 25 : 0),
       width: this.props.width,
+      paging: true,
+      pageSize: 20,
+      pageSizeOptions: [20],
     };
-    switch (type) {
-      case ResourceType.Dataset:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'datasetType',
-                title: '',
-                render: rowData => this.iconForDatasetType(rowData.datasetType),
-                fixedWidth: 30,
-                sorting: false,
+    return {
+      [ResourceType.Dataset]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'datasetType',
+              title: '',
+              render: rowData => this.iconForDatasetType(rowData.datasetType),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Created at',
+              field: 'createTime',
+              type: ColumnType.DateTime,
+              render: rowData => {
+                return <p>{rowData.createTime.toLocaleString()}</p>;
               },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Created at',
-                field: 'createTime',
-                type: ColumnType.DateTime,
-                render: rowData => {
-                  return <p>{rowData.createTime.toLocaleString()}</p>;
-                },
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Dataset>(this.state.datasets)}
-            onRowClick={rowData => {
-              if (rowData.datasetType === 'TABLE') {
-                this.props.context.manager.launchWidgetForId(
-                  DatasetWidget,
-                  rowData.id,
-                  rowData
-                );
-              } else {
-                this.props.context.manager.launchWidgetForId(
-                  ImageWidget,
-                  rowData.id,
-                  rowData
-                );
-              }
-            }}
-            rowContextMenu={[
-              {
-                label: 'Delete',
-                handler: rowData => {
-                  this.deleteConfirm(rowData);
-                },
-              },
-              {
-                label: 'Copy ID',
-                handler: rowData => {
-                  Clipboard.copyToSystem(rowData.id);
-                },
-              },
-            ]}
-            paging={true}
-            pageSize={20}
-            pageSizeOptions={[20]}
-          />
-        );
-      case ResourceType.Model:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'displayName',
-                title: '',
-                render: rowData => this.iconForModelType(rowData.modelType),
-                fixedWidth: 30,
-                sorting: false,
-              },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Last updated',
-                field: 'updateTime',
-                type: ColumnType.DateTime,
-                render: rowData => {
-                  return <p>{rowData.updateTime.toLocaleString()}</p>;
-                },
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Model>(this.state.models)}
-            rowContextMenu={[
-              {
-                label: 'Delete',
-                handler: rowData => {
-                  this.deleteConfirm(rowData);
-                },
-              },
-              {
-                label: 'Copy ID',
-                handler: rowData => {
-                  Clipboard.copyToSystem(rowData.id);
-                },
-              },
-            ]}
-            onRowClick={rowData => {
-              this.props.context.manager.launchWidgetForId(
-                ModelWidget,
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Dataset>(this.state.datasets)}
+          onRowClick={rowData => {
+            if (rowData.datasetType === 'TABLE') {
+              this.context.manager.launchWidgetForId(
+                DatasetWidget,
                 rowData.id,
-                rowData
+                rowData,
+                this.context
               );
-            }}
-            paging={true}
-            pageSize={20}
-            pageSizeOptions={[20]}
-          />
-        );
-      case ResourceType.Training:
-        return (
-          <ListResourcesTable
-            {...sharedProps}
-            columns={[
-              {
-                field: 'status',
-                title: '',
-                render: rowData => this.iconForPipelineState(rowData.state),
-                fixedWidth: 30,
-                sorting: false,
-              },
-              {
-                field: 'displayName',
-                title: 'Name',
-              },
-              {
-                title: 'Time elapsed',
-                field: 'elapsedTime',
-                minShowWidth: breakpoints[1],
-              },
-              {
-                title: 'Created',
-                field: 'createTime',
-                type: ColumnType.DateTime,
-                rightAlign: true,
-                minShowWidth: breakpoints[0],
-              },
-            ]}
-            data={this.filterResources<Pipeline>(this.state.pipelines)}
-            onRowClick={rowData => {
-              this.props.context.manager.launchWidgetForId(
-                PipelineWidget,
+            } else {
+              this.context.manager.launchWidgetForId(
+                ImageWidget,
                 rowData.id,
-                rowData
+                rowData,
+                this.context
               );
-            }}
-            paging={true}
-            pageSize={20}
-            pageSizeOptions={[20]}
-          />
-        );
-    }
+            }
+          }}
+          rowContextMenu={[
+            {
+              label: 'Delete',
+              handler: rowData => {
+                this.deleteConfirm(rowData);
+              },
+            },
+            {
+              label: 'Copy ID',
+              handler: rowData => {
+                Clipboard.copyToSystem(rowData.id);
+              },
+            },
+            {
+              label: 'Import to notebook',
+              handler: rowData => {
+                CodeGenService.generateCodeCell(
+                  this.context,
+                  CodeGenService.importDatasetCode(rowData.id),
+                  // Fallback to dataset view
+                  _ => {
+                    this.context.manager.launchWidgetForId(
+                      DatasetWidget,
+                      rowData.id,
+                      rowData,
+                      this.context
+                    );
+                  }
+                );
+              },
+            },
+          ]}
+        />
+      ),
+      [ResourceType.Model]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'displayName',
+              title: '',
+              render: rowData => this.iconForModelType(rowData.modelType),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Last updated',
+              field: 'updateTime',
+              type: ColumnType.DateTime,
+              render: rowData => {
+                return <p>{rowData.updateTime.toLocaleString()}</p>;
+              },
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Model>(this.state.models)}
+          rowContextMenu={[
+            {
+              label: 'Delete',
+              handler: rowData => {
+                this.deleteConfirm(rowData);
+              },
+            },
+            {
+              label: 'Copy ID',
+              handler: rowData => {
+                Clipboard.copyToSystem(rowData.id);
+              },
+            },
+          ]}
+          onRowClick={rowData => {
+            this.context.manager.launchWidgetForId(
+              ModelWidget,
+              rowData.id,
+              rowData,
+              this.context
+            );
+          }}
+        />
+      ),
+      [ResourceType.Training]: (
+        <ListResourcesTable
+          {...sharedProps}
+          columns={[
+            {
+              field: 'status',
+              title: '',
+              render: rowData => this.iconForPipelineState(rowData.state),
+              fixedWidth: 30,
+              sorting: false,
+            },
+            {
+              field: 'displayName',
+              title: 'Name',
+            },
+            {
+              title: 'Time elapsed',
+              field: 'elapsedTime',
+              minShowWidth: breakpoints[1],
+            },
+            {
+              title: 'Created',
+              field: 'createTime',
+              type: ColumnType.DateTime,
+              rightAlign: true,
+              minShowWidth: breakpoints[0],
+            },
+          ]}
+          data={this.filterResources<Pipeline>(this.state.pipelines)}
+          onRowClick={rowData => {
+            this.context.manager.launchWidgetForId(
+              PipelineWidget,
+              rowData.id,
+              rowData,
+              this.context
+            );
+          }}
+        />
+      ),
+    }[type];
   }
 
   render() {
@@ -383,7 +409,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.setState({ showSearch: !this.state.showSearch });
               }}
             >
-              <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              <Tooltip
+                title={this.state.showSearch ? 'Close Search' : 'Search'}
+              >
+                <Icon>{this.state.showSearch ? 'search_off' : 'search'}</Icon>
+              </Tooltip>
             </IconButton>
             <IconButton
               disabled={this.state.isLoading}
@@ -392,7 +422,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
                 this.refresh();
               }}
             >
-              <Icon>refresh</Icon>
+              <Tooltip title="Refresh">
+                <Icon>refresh</Icon>
+              </Tooltip>
             </IconButton>
           </Toolbar>
 
@@ -418,14 +450,13 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             submitLabel={'Ok'}
           />
           <ExportData
-            open={this.state.exportDatasetDialogOpen}
+            open={this.state.createDatasetDialogOpen}
             onClose={() => {
-              this.setState({ exportDatasetDialogOpen: false });
+              this.setState({ createDatasetDialogOpen: false });
             }}
             onSuccess={() => {
               this.refresh();
             }}
-            context={this.props.context}
           />
           <ExportModel
             open={this.state.exportModelDialogOpen}
@@ -487,9 +518,11 @@ export class ListResourcesPanel extends React.Component<Props, State> {
     };
     return (
       <ListItem dense style={{ padding: 0 }}>
-        <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
-          {icons[datasetType].icon}
-        </Icon>
+        <Tooltip title={datasetType.toLowerCase() + ' dataset'}>
+          <Icon style={{ ...styles.icon, color: icons[datasetType].color }}>
+            {icons[datasetType].icon}
+          </Icon>
+        </Tooltip>
       </ListItem>
     );
   }

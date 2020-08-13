@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { Provider, connect } from 'react-redux';
+import { Provider, connect, useDispatch } from 'react-redux';
 import {
   Box,
   Button,
@@ -27,7 +27,9 @@ import {
   TableContainer,
   TableRow,
   Typography,
+  Link,
 } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { RootState, AppDispatch } from '../../store/store';
 import { Study } from '../../types';
 import { setView } from '../../store/view';
@@ -36,6 +38,8 @@ import { prettifyStudyName } from '../../service/optimizer';
 import { style } from 'typestyle';
 import { styles } from '../../utils/styles';
 import { Loading } from '../misc/loading';
+import AddIcon from '@material-ui/icons/Add';
+import { theme } from '../../utils/theme';
 
 const rowStyle = style({
   $nest: {
@@ -72,6 +76,7 @@ export const Sidebar = ({
   openDashboard,
   openStudy,
 }: SidebarProps) => {
+  const dispatch = useDispatch();
   return (
     <Box
       className={styles.root}
@@ -82,16 +87,65 @@ export const Sidebar = ({
       display="flex"
       flexDirection="column"
     >
-      <Box display="flex" pt={2}>
-        <Box mx="auto">
-          <Typography variant="h4" gutterBottom>
-            Optimizer
-          </Typography>
+      <Box
+        display="flex"
+        alignItems="center"
+        flexWrap="wrap"
+        pt={2}
+        px={1}
+        style={{ justifyContent: 'center' }}
+      >
+        <Typography variant="h6" gutterBottom>
+          Optimizer
+        </Typography>
 
-          <Button color="primary" onClick={() => openDashboard()}>
-            Main Dashboard
-          </Button>
+        {/* Spacing Element */}
+        <Box style={{ flexGrow: 1 }} />
+
+        <Box display="flex">
+          <Box mr={0.5}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => openDashboard()}
+            >
+              Main Dashboard
+            </Button>
+          </Box>
+          <Box ml={0.5}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() =>
+                dispatch(
+                  setView({
+                    view: 'createStudy',
+                  })
+                )
+              }
+              startIcon={<AddIcon />}
+            >
+              Create Study
+            </Button>
+          </Box>
         </Box>
+      </Box>
+
+      <Box my={2} px={1}>
+        <Typography variant="body2">
+          AI Platform Optimizer is a black-box optimization service that helps
+          you tune hyperparameters in complex machine learning (ML) models
+          through studies.{' '}
+          <Link
+            href="https://cloud.google.com/ai-platform/optimizer/docs"
+            color="primary"
+            variant="body2"
+            rel="noopener"
+            target="_blank"
+          >
+            Learn more
+          </Link>
+        </Typography>
       </Box>
 
       {!!error && (
@@ -145,14 +199,17 @@ export class SidebarWidget extends ReactWidget {
   constructor(private readonly reduxStore: Store) {
     super();
     this.id = 'optimizer-sidebar';
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-optimizer-icon';
+    this.title.iconClass =
+      'jp-Icon jp-Icon-20 jp-optimizer-icon jp-optimizer-icon-rotate';
     this.title.caption = 'GCP Optimizer';
   }
 
   render() {
     return (
       <Provider store={this.reduxStore}>
-        <WrappedSidebar />
+        <ThemeProvider theme={theme}>
+          <WrappedSidebar />
+        </ThemeProvider>
       </Provider>
     );
   }

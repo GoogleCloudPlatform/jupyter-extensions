@@ -10,6 +10,10 @@
   background-image: url('./images/table_20px.svg');
   background-size: contain;
 }
+.jp-PartitionedTableIcon {
+  background-image: url('./images/table_partitioned_18px.svg');
+  background-size: contain;
+}
 .jp-ViewIcon {
   background-image: url('./images/table_view_24px.svg');
   background-size: contain;
@@ -17,4 +21,7 @@
 .jp-ModelIcon {
   background-image: url('./images/model_20px.svg');
   background-size: contain;
+}
+.jp-OutputArea-child .jp-OutputArea-output {
+  overflow: auto;
 }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { withStyles, Tabs, Tab, Button } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { Code } from '@material-ui/icons';
 
 import {
@@ -7,6 +7,7 @@ import {
   TableDetails,
 } from './service/list_table_details';
 import { Header } from '../shared/header';
+import { StyledTabs, StyledTab, TabPanel } from '../shared/tabs';
 import LoadingPanel from '../loading_panel';
 import TableDetailsPanel from './table_details_panel';
 import TablePreviewPanel from './table_preview';
@@ -15,7 +16,7 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { stylesheet } from 'typestyle';
 
-const localStyles = stylesheet({
+export const localStyles = stylesheet({
   body: {
     margin: '24px',
     marginBottom: 0,
@@ -26,42 +27,6 @@ const localStyles = stylesheet({
     flexDirection: 'column',
   },
 });
-
-const StyledTabs = withStyles({
-  root: {
-    borderBottom: '1px solid #e8e8e8',
-    minHeight: 'auto',
-    padding: 0,
-  },
-  indicator: {
-    backgroundColor: '#0d68ff',
-    height: '2.5px',
-  },
-})(Tabs);
-
-const StyledTab = withStyles({
-  root: {
-    textTransform: 'none',
-    minWidth: 'auto',
-    minHeight: 'auto',
-    fontSize: '13px',
-    '&:hover': {
-      color: '#0d68ff',
-      opacity: 1,
-    },
-    '&$selected': {
-      color: '#0d68ff',
-    },
-    '&:focus': {
-      color: '#0d68ff',
-    },
-  },
-  selected: {},
-})((props: StyledTabProps) => <Tab disableRipple {...props} />);
-
-interface StyledTabProps {
-  label: string;
-}
 
 interface Props {
   tableDetailsService: TableDetailsService;
@@ -86,32 +51,6 @@ interface DetailRow {
 enum TabInds {
   details = 0,
   preview,
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index } = props;
-
-  return (
-    <div
-      id={`tabpanel-${index}`}
-      style={{
-        flex: 1,
-        minHeight: 0,
-        flexDirection: 'column',
-        display: value !== index ? 'none' : 'flex',
-        overflowX: value === TabInds.preview ? 'auto' : 'hidden',
-        overflowY: 'auto',
-      }}
-    >
-      {children}
-    </div>
-  );
 }
 
 export default class TableDetailsTabs extends React.Component<Props, State> {
@@ -147,7 +86,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                     'main',
                     queryId,
                     undefined,
-                    [queryId, `SELECT * FROM \`${this.props.table_id}\``]
+                    [
+                      queryId,
+                      `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
+                    ]
                   );
                 }}
                 startIcon={<Code />}
@@ -165,14 +107,22 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
               <StyledTab label="Details" />
               <StyledTab label="Preview" />
             </StyledTabs>
-            <TabPanel value={this.state.currentTab} index={TabInds.details}>
+            <TabPanel
+              value={this.state.currentTab}
+              index={TabInds.details}
+              TabInds={TabInds}
+            >
               <TableDetailsPanel
                 tableId={this.props.table_id}
                 isVisible={this.props.isVisible}
                 tableDetailsService={this.props.tableDetailsService}
               />
             </TabPanel>
-            <TabPanel value={this.state.currentTab} index={TabInds.preview}>
+            <TabPanel
+              value={this.state.currentTab}
+              index={TabInds.preview}
+              TabInds={TabInds}
+            >
               <TablePreviewPanel
                 tableId={this.props.table_id}
                 isVisible={this.props.isVisible}

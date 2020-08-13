@@ -4,7 +4,7 @@ from notebook.utils import url_path_join
 from jupyterlab_ucaip.handlers import handlers
 from jupyterlab_ucaip.version import VERSION
 from jupyterlab_ucaip.public import *
-from jupyterlab_ucaip.service import ModelFramework
+from jupyterlab_ucaip.types import *
 
 __version__ = VERSION
 

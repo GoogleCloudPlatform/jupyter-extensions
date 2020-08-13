@@ -1,22 +1,23 @@
-import { ReactWidget } from '@jupyterlab/apputils';
-import * as React from 'react';
-import { Model, ModelService, Pipeline } from '../../service/model';
-import { EvaluationTable } from './model_evaluation';
-import { ModelProperties } from './model_properties';
-import { ModelPredictions } from './model_predictions';
 import {
   LinearProgress,
-  Toolbar,
-  Tabs,
   Tab,
   Table,
   TableBody,
   TableCell,
   TableRow,
+  Tabs,
+  Toolbar,
 } from '@material-ui/core';
-import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { stylesheet } from 'typestyle';
+import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import * as csstips from 'csstips';
+import * as React from 'react';
+import { stylesheet } from 'typestyle';
+import { Context } from '../../context';
+import { Model, ModelService, Pipeline } from '../../service/model';
+import { BaseWidget } from '../base_widget';
+import { EvaluationTable } from './model_evaluation';
+import { ModelPredictions } from './model_predictions';
+import { ModelProperties } from './model_properties';
 
 interface Props {
   model: Model;
@@ -87,7 +88,7 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
   const modelId = props.model.id.split('/');
 
   return (
-    <div className={localStyles.panel}>
+    <div style={{ overflow: 'auto', height: '100%' }}>
       <header className={localStyles.header}>{props.model.displayName}</header>
       <Table
         size="small"
@@ -95,21 +96,15 @@ export default function OtherModelPanel(props: React.PropsWithChildren<Props>) {
       >
         <TableBody>
           <TableRow key={'ID'}>
-            <TableCell component="th" scope="row">
-              ID
-            </TableCell>
+            <TableCell scope="row">ID</TableCell>
             <TableCell align="right">{modelId[modelId.length - 1]}</TableCell>
           </TableRow>
           <TableRow key={'Region'}>
-            <TableCell component="th" scope="row">
-              Region
-            </TableCell>
+            <TableCell scope="row">Region</TableCell>
             <TableCell align="right">us-central-1</TableCell>
           </TableRow>
           <TableRow key={'Created'}>
-            <TableCell component="th" scope="row">
-              Created
-            </TableCell>
+            <TableCell scope="row">Created</TableCell>
             <TableCell align="right">
               {props.model.createTime.toLocaleString()}
             </TableCell>
@@ -198,18 +193,18 @@ export class ModelPanel extends React.Component<Props, State> {
 }
 
 /** Widget to be registered in the left-side panel. */
-export class ModelWidget extends ReactWidget {
+export class ModelWidget extends BaseWidget {
   id = 'model-widget';
 
-  constructor(private readonly modelMeta: Model) {
-    super();
+  constructor(private readonly modelMeta: Model, context: Context) {
+    super(context);
     this.title.label = modelMeta.displayName;
     this.title.caption = 'Model ' + modelMeta.displayName;
     this.title.closable = true;
     this.title.iconClass = 'jp-Icon jp-Icon-20 jp-UcaipIcon-model';
   }
 
-  render() {
+  body() {
     if (this.modelMeta.modelType !== 'OTHER') {
       return <ModelPanel model={this.modelMeta} />;
     } else {

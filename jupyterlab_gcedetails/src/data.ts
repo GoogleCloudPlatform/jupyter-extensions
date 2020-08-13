@@ -23,6 +23,12 @@ interface MachineType {
   description: string;
 }
 
+export interface Accelerator {
+  name: string;
+  description: string;
+  maximumCardsPerInstance: number;
+}
+
 interface Instance {
   attributes: {
     framework: string;
@@ -51,6 +57,7 @@ interface Gpu {
   name: string;
   driver_version: string;
   cuda_version: string;
+  count: string;
   gpu: number;
   memory: number;
   temperature: number;
@@ -61,6 +68,7 @@ export interface Details {
   project: Project;
   utilization: Utilization;
   gpu: Gpu;
+  acceleratorTypes: Accelerator[];
 }
 
 export interface Option {
@@ -70,10 +78,124 @@ export interface Option {
 }
 
 export interface HardwareConfiguration {
-  machineType: Option;
+  machineType: MachineType;
   attachGpu: boolean;
-  gpuType: string;
+  gpuType: string; // as Notebooks API AcceleratorType enum values
   gpuCount: string;
+}
+
+/**
+ * AI Platform Accelerator types.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ */
+export const ACCELERATOR_TYPES: Option[] = [
+  { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
+  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
+  { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
+  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
+  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+];
+
+/**
+ * AI Platform Accelerator counts.
+ * https://cloud.google.com/ai-platform/training/docs/using-gpus
+ */
+export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
+  { value: '1', text: '1' },
+  { value: '2', text: '2' },
+  { value: '4', text: '4' },
+  { value: '8', text: '8' },
+];
+
+export const NO_ACCELERATOR = '';
+
+/**
+ * Convert nvidia-smi product_name type to match the AcceleratorType
+ * enums that are used in the Notebooks API:
+ * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
+ */
+function nvidiaNameToEnum(name: string): string {
+  const accelerator = ACCELERATOR_TYPES.find(accelerator =>
+    accelerator.text.endsWith(name)
+  );
+
+  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR;
+}
+
+/**
+ * Format gcloud compute acceleratorType to match the AcceleratorType
+ * enums that are used in the Notebooks API:
+ * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
+ */
+function acceleratorNameToEnum(name: string): string {
+  return name.toUpperCase().replace(/-/g, '_');
+}
+
+export function getGpuTypeOptionsList(
+  accelerators: Accelerator[],
+  cpuPlatform: string
+): Option[] {
+  // For more information on gpu restrictions see: https://cloud.google.com/compute/docs/gpus#restrictions
+  accelerators = accelerators.filter(
+    accelerator =>
+      // filter out virtual workstation accelerator types
+      !accelerator.name.endsWith('-vws') &&
+      // a minimum cpu platform of Intel Skylake or later does not currently support the k80 gpu
+      !(
+        accelerator.name === 'nvidia-tesla-k80' &&
+        cpuPlatform === 'Intel Skylake'
+      )
+  );
+
+  return accelerators.map(accelerator => ({
+    value: acceleratorNameToEnum(accelerator.name),
+    text: accelerator.description,
+  }));
+}
+
+export function getGpuCountOptionsList(
+  accelerators: Accelerator[],
+  acceleratorName: string
+): Option[] {
+  if (acceleratorName === NO_ACCELERATOR) return ACCELERATOR_COUNTS_1_2_4_8;
+
+  const accelerator = accelerators.find(
+    accelerator => acceleratorNameToEnum(accelerator.name) === acceleratorName
+  );
+  return accelerator
+    ? ACCELERATOR_COUNTS_1_2_4_8.slice(
+        0,
+        Math.log(accelerator.maximumCardsPerInstance) / Math.log(2) + 1
+      )
+    : ACCELERATOR_COUNTS_1_2_4_8;
+}
+
+export function optionToMachineType(option: Option): MachineType {
+  return {
+    name: option.value as string,
+    description: option.text,
+  };
+}
+
+export function machineTypeToOption(machineType: MachineType): Option {
+  return {
+    value: machineType.name,
+    text: machineType.description,
+    disabled: false,
+  };
+}
+
+export function detailsToHardwareConfiguration(
+  details: Details
+): HardwareConfiguration {
+  const { instance, gpu } = details;
+
+  return {
+    machineType: instance.machineType,
+    attachGpu: Boolean(gpu.name),
+    gpuType: nvidiaNameToEnum(gpu.name),
+    gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR,
+  };
 }
 
 interface AttributeMapper {
@@ -120,56 +242,9 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
 MAPPED_ATTRIBUTES.push(...REFRESHABLE_MAPPED_ATTRIBUTES);
 
 /**
- * AI Platform Accelerator types.
- * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
- */
-export const ACCELERATOR_TYPES: Option[] = [
-  { value: '', text: 'None' },
-  { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
-  { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
-  { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
-  { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
-  { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
-];
-
-/**
- * AI Platform Accelerator counts.
- * https://cloud.google.com/ai-platform/training/docs/using-gpus
- */
-export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
-  { value: '1', text: '1' },
-  { value: '2', text: '2' },
-  { value: '4', text: '4' },
-  { value: '8', text: '8' },
-];
-
-/**
  * AI Platform Machine types.
  * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
  */
-export const MASTER_TYPES: Option[] = [
-  { value: 'n1-standard-4', text: '4 CPUs, 15 GB RAM' },
-  { value: 'n1-standard-8', text: '8 CPUs, 30 GB RAM' },
-  { value: 'n1-standard-16', text: '16 CPUs, 60 GB RAM' },
-  { value: 'n1-standard-32', text: '32 CPUs, 120 GB RAM' },
-  { value: 'n1-standard-64', text: '64 CPUs, 240 GB RAM' },
-  { value: 'n1-standard-96', text: '96 CPUs, 360 GB RAM' },
-
-  { value: 'n1-highmem-2', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-4', text: '4 CPUs, 26 GB RAM' },
-  { value: 'n1-highmem-8', text: '8 CPUs, 52 GB RAM' },
-  { value: 'n1-highmem-16', text: '16 CPUs, 104 GB RAM' },
-  { value: 'n1-highmem-32', text: '32 CPUs, 208 GB RAM' },
-  { value: 'n1-highmem-64', text: '64 CPUs, 416 GB RAM' },
-  { value: 'n1-highmem-96', text: '96 CPUs, 624 GB RAM' },
-
-  { value: 'n1-highcpu-16', text: '16 CPUs, 14.4 GB RAM' },
-  { value: 'n1-highcpu-32', text: '32 CPUs, 28.8 GB RAM' },
-  { value: 'n1-highcpu-64', text: '64 CPUs, 57.6 GB RAM' },
-  { value: 'n1-highcpu-96', text: '96 CPUs, 86.4 GB RAM' },
-];
-
-/* CPU to Memory mappings for the Compute Engine machine types */
 export interface MachineTypeConfiguration {
   base: Option;
   configurations: Option[];

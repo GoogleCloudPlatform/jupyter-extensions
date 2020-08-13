@@ -5,6 +5,7 @@ import {
 } from './service/list_table_details';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
+import { formatDate } from '../../utils/formatters';
 
 interface Props {
   tableDetailsService: TableDetailsService;
@@ -24,7 +25,7 @@ interface DetailRow {
   value: string | number;
 }
 
-function formatBytes(numBytes, numDecimals = 2) {
+export function formatBytes(numBytes, numDecimals = 2) {
   if (numBytes === 0) return '0 Bytes';
   const d = Math.floor(Math.log(numBytes) / Math.log(1024));
   return (
@@ -83,14 +84,14 @@ export default class TableDetailsPanel extends React.Component<Props, State> {
           name: 'Number of rows',
           value: detailsObj.num_rows.toLocaleString(),
         },
-        { name: 'Created', value: detailsObj.date_created },
+        { name: 'Created', value: formatDate(detailsObj.date_created) },
         {
           name: 'Table expiration',
-          value: detailsObj.expires ? detailsObj.expires : 'Never',
+          value: detailsObj.expires ? formatDate(detailsObj.expires) : 'Never',
         },
         {
           name: 'Last modified',
-          value: detailsObj.last_modified,
+          value: formatDate(detailsObj.last_modified),
         },
         {
           name: 'Data location',

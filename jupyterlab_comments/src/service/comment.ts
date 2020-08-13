@@ -41,6 +41,7 @@ export interface ReviewRequest {
   requester: string;
   description: any;
   baseCommit: any;
+  reviewHash: any;
 }
 
 export function createDetachedCommentFromJSON(
@@ -82,6 +83,7 @@ export function createReviewCommentFromJSON(
   const now = new Date();
   const current = now.getTime();
   const timestampString = timeAgo(current, parseInt(content.timestamp) * 1000);
+  request.reviewHash = revision;
   const comment: CodeReviewComment = {
     author: content.author,
     text: content.description,

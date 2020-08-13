@@ -3,11 +3,33 @@ import { screen, render, waitFor } from '../../utils/redux_render';
 import {
   cleanFakeStudyName,
   fakeStudyName,
+  fakeTrialWithFinalMeasurement,
 } from '../../service/test-constants';
 import { StudyDetails } from '.';
 import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
+import { proxyUrl, getTrialsUrl } from '../../utils/urls';
+
+const server = setupServer();
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe('Study Details Page', () => {
+  beforeEach(() => {
+    server.use(
+      rest.get(proxyUrl(getTrialsUrl()), (req, res, ctx) => {
+        return res(
+          ctx.json({
+            trials: [fakeTrialWithFinalMeasurement],
+          })
+        );
+      })
+    );
+  });
+
   it('shows name, objective, algorithm, state and parameters', () => {
     render(<StudyDetails studyId={fakeStudyName} />);
 
@@ -46,7 +68,7 @@ describe('Study Details Page', () => {
   it('goes back to dashboard', async () => {
     const { getState } = render(<StudyDetails studyId={fakeStudyName} />);
 
-    userEvent.click(screen.getByText(/go to dashboard/i));
+    userEvent.click(screen.getByText(/back to dashboard/i));
 
     await waitFor(() =>
       expect(getState().view).toEqual({
