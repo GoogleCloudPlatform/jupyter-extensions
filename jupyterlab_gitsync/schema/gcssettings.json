@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "jupyter.lab.setting-icon-class": "jp-CookiesIcon",
+  "jupyter.lab.setting-icon-label": "Cookies",
+  "title": "JupyterLab Git Sync",
+  "description": "JupyterLab Git Sync",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "title": "JupyterLab Git Sync",
+      "description": "JupyterLab Git Sync"
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Dataset, DatasetService, Column } from '../../service/dataset';
+import { CodeGenService } from '../../service/code_gen';
+import { Column, Dataset, DatasetService } from '../../service/dataset';
 import { CodeComponent } from '../copy_code';
 import { ListResourcesTable } from 'gcp_jupyterlab_shared';
 import {

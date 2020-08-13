@@ -12,6 +12,7 @@ export interface Project {
   name: string;
   datasets: {};
   datasetIds: [];
+  error?: string;
 }
 
 export interface Dataset {
@@ -22,16 +23,25 @@ export interface Dataset {
   models: {};
   modelIds: [];
   projectId: string;
+  parent: string;
+  type: string;
 }
 
 export interface Table {
   id: string;
   name: string;
+  type: string;
   datasetId: string;
+  parent: string;
+  partitioned: boolean;
 }
 
 export interface Model {
   id: string;
+  name: string;
+  datasetId: string;
+  parent: string;
+  type: string;
 }
 
 export class ListProjectsService {

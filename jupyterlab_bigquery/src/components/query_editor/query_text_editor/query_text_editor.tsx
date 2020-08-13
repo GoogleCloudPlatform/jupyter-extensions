@@ -7,6 +7,7 @@ import {
   resetQueryResult,
   deleteQueryEntry,
   QueryId,
+  generateQueryId,
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
@@ -17,6 +18,7 @@ import {
   CheckCircleOutline,
   ErrorOutlineOutlined,
   FileCopyOutlined,
+  FullscreenOutlined,
 } from '@material-ui/icons';
 import {
   Button,
@@ -27,13 +29,17 @@ import {
 import { stylesheet } from 'typestyle';
 import PagedService, { JobState } from '../../../utils/pagedAPI/paged_service';
 import PagedJob from '../../../utils/pagedAPI/pagedJob';
-import { QueryEditorType } from '../query_editor_tab/query_editor_results';
+import { QueryEditorType } from './query_editor_results';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
+import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
   bytesProcessed: number | null;
   message: string | null;
   ifMsgErr: boolean;
+  height: number;
+  renderMonacoEditor: boolean;
 }
 
 interface QueryTextEditorProps {
@@ -44,6 +50,8 @@ interface QueryTextEditorProps {
   iniQuery?: string;
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
+  width?: number;
+  onQueryChange?: (string) => void;
 }
 
 interface QueryResponseType {
@@ -57,6 +65,8 @@ export interface QueryResult {
   labels: Array<string>;
   bytesProcessed: number;
   queryId: QueryId;
+  project: string;
+  query: string;
 }
 
 interface QueryRequestBodyType {
@@ -67,13 +77,13 @@ interface QueryRequestBodyType {
 
 const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   lineNumbers: 'on',
-  automaticLayout: true,
   formatOnType: true,
   formatOnPaste: true,
   wordWrap: 'on',
   wrappingIndent: 'same',
   wrappingStrategy: 'advanced',
   minimap: { enabled: false },
+  cursorStyle: 'line-thin',
 };
 
 const styleSheet = stylesheet({
@@ -159,6 +169,8 @@ class QueryTextEditor extends React.Component<
       bytesProcessed: null,
       message: null,
       ifMsgErr: false,
+      height: 0,
+      renderMonacoEditor: false,
     };
     this.pagedQueryService = new PagedService('query');
     this.timeoutAlarm = null;
@@ -178,8 +190,38 @@ class QueryTextEditor extends React.Component<
     });
   }
 
+  updateDimensions() {
+    this.editor.layout();
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.updateDimensions.bind(this));
+
+    // Delay rendering of monaco editor to avoid mal-size
+    setTimeout(() => {
+      this.setState({ renderMonacoEditor: true });
+    }, 100);
+  }
+
   componentWillUnmount() {
     this.props.deleteQueryEntry(this.queryId);
+    window.removeEventListener('resize', this.updateDimensions.bind(this));
+  }
+
+  componentDidUpdate(
+    prevProps: QueryTextEditorProps,
+    prevState: QueryTextEditorState
+  ) {
+    if (
+      (prevProps.width !== this.props.width ||
+        prevState.height !== this.state.height) &&
+      this.editor
+    ) {
+      this.editor.layout({
+        width: this.props.width,
+        height: this.state.height,
+      });
+    }
   }
 
   handleButtonClick() {
@@ -222,6 +264,7 @@ class QueryTextEditor extends React.Component<
           this.setState({ bytesProcessed: response.bytesProcessed });
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
+          processed.query = query;
 
           this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
@@ -245,9 +288,17 @@ class QueryTextEditor extends React.Component<
   }
 
   handleEditorDidMount(_, editor) {
+    if (this.editorRef.current) {
+      this.setState({ height: this.editorRef.current.clientHeight });
+    }
     this.editor = editor;
 
     this.editor.onKeyUp(() => {
+      if (this.props.onQueryChange) {
+        const query = this.editor.getValue();
+        this.props.onQueryChange(query);
+      }
+
       this.setState({ bytesProcessed: null, message: null, ifMsgErr: false });
       // eslint-disable-next-line no-extra-boolean-cast
       if (!!this.timeoutAlarm) {
@@ -462,6 +513,8 @@ class QueryTextEditor extends React.Component<
     return undefined;
   }
 
+  private editorRef = React.createRef<HTMLDivElement>();
+
   renderMessage() {
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
@@ -501,7 +554,7 @@ class QueryTextEditor extends React.Component<
     }
   }
 
-  renderButtonCopyButton() {
+  renderCopyButton() {
     return (
       <IconButton
         size="small"
@@ -510,24 +563,52 @@ class QueryTextEditor extends React.Component<
           copy(query.trim());
         }}
       >
-        <FileCopyOutlined />
+        <FileCopyOutlined fontSize="small" />
       </IconButton>
     );
+  }
+
+  renderOpenTabQueryEditorButton() {
+    return (
+      <IconButton
+        size="small"
+        onClick={_ => {
+          const query = this.editor.getValue();
+          const queryId = generateQueryId();
+          WidgetManager.getInstance().launchWidget(
+            QueryEditorTabWidget,
+            'main',
+            queryId,
+            undefined,
+            [queryId, query]
+          );
+        }}
+      >
+        <FullscreenOutlined />
+      </IconButton>
+    );
+  }
+
+  handleKeyPress(evt) {
+    if ((evt.ctrlKey || evt.metaKey) && evt.key === 'Enter') {
+      this.handleButtonClick();
+    }
   }
 
   render() {
     const { iniQuery } = this.props;
 
     // eslint-disable-next-line no-extra-boolean-cast
-    const queryValue = !!iniQuery ? iniQuery : 'SELECT * FROM *';
+    const queryValue = !!iniQuery ? iniQuery : '';
+
+    const ifIncell = this.props.editorType === 'IN_CELL';
 
     return (
       <div
         className={
-          this.props.editorType === 'IN_CELL'
-            ? styleSheet.wholeEditorInCell
-            : styleSheet.wholeEditor
+          ifIncell ? styleSheet.wholeEditorInCell : styleSheet.wholeEditor
         }
+        onKeyPress={this.handleKeyPress.bind(this)}
       >
         <div className={styleSheet.buttonInfoBar}>
           <div>
@@ -542,26 +623,30 @@ class QueryTextEditor extends React.Component<
             }}
           >
             {this.renderMessage()}
-            {this.renderButtonCopyButton()}
+            {this.renderCopyButton()}
+            {ifIncell && this.renderOpenTabQueryEditorButton()}
           </div>
         </div>
 
         <div
           className={
-            this.props.editorType === 'IN_CELL'
+            ifIncell
               ? styleSheet.queryTextEditorInCell
               : styleSheet.queryTextEditor
           }
+          ref={this.editorRef}
         >
-          <Editor
-            width="100%"
-            height="100%"
-            theme={'sqlTheme'}
-            language={'sql'}
-            value={queryValue}
-            editorDidMount={this.handleEditorDidMount.bind(this)}
-            options={SQL_EDITOR_OPTIONS}
-          />
+          {this.state.renderMonacoEditor && (
+            <Editor
+              width="100%"
+              height="100%"
+              theme={'sqlTheme'}
+              language={'sql'}
+              value={queryValue}
+              editorDidMount={this.handleEditorDidMount.bind(this)}
+              options={SQL_EDITOR_OPTIONS}
+            />
+          )}
         </div>
       </div>
     );

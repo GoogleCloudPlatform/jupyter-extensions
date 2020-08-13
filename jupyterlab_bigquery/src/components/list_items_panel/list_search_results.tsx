@@ -1,18 +1,15 @@
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeView from '@material-ui/lab/TreeView';
-import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
 import { stylesheet } from 'typestyle';
-import { Clipboard } from '@jupyterlab/apputils';
 
 import { SearchResult } from './service/search_items';
 import { Context } from './list_tree_panel';
-import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
-import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
-import { TableDetailsWidget } from '../details_panel/table_details_widget';
-import { TableDetailsService } from '../details_panel/service/list_table_details';
+
+import {
+  DatasetResource,
+  ModelResource,
+  TableResource,
+} from './list_tree_item';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -35,14 +32,22 @@ const localStyles = stylesheet({
   },
   root: {
     flexGrow: 1,
-    maxWidth: 400,
   },
   searchResultItem: {
     flexGrow: 1,
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    '&:hover': {
+      cursor: 'pointer',
+      backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+  },
+  searchResultTitle: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size1)',
   },
   searchResultSubtitle: {
-    fontSize: 12,
+    fontFamily: 'var(--jp-ui-font-family)',
+    fontSize: 'var(--jp-ui-font-size0)',
     color: 'gray',
   },
 });
@@ -57,182 +62,139 @@ interface State {
 }
 
 export function BuildSearchResult(result, context) {
-  const copyID = dataTreeItem => {
-    Clipboard.copyToSystem(dataTreeItem.id);
-  };
+  return (
+    <div>
+      {result.type === 'dataset' ? (
+        <DatasetSearchResult context={context} dataset={result} />
+      ) : result.type === 'model' ? (
+        <ModelSearchResult context={context} model={result} />
+      ) : result.type === 'table' ? (
+        <TableSearchResult context={context} table={result} />
+      ) : (
+        <ViewSearchResult context={context} table={result} />
+      )}
+    </div>
+  );
+}
 
-  const openDatasetDetails = dataset => {
-    const service = new DatasetDetailsService();
-    const widgetType = DatasetDetailsWidget;
-    context.manager.launchWidgetForId(
-      dataset.id,
-      widgetType,
-      service,
-      dataset.id,
-      dataset.name
-    );
-  };
+export class DatasetSearchResult extends DatasetResource {
+  contextMenuItems = [
+    {
+      label: 'Copy dataset ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+  ];
 
-  const openTableDetails = table => {
-    const service = new TableDetailsService();
-    const widgetType = TableDetailsWidget;
-    context.manager.launchWidgetForId(
-      table.id,
-      widgetType,
-      service,
-      table.id,
-      table.name
-    );
-  };
-
-  const openViewDetails = view => {
-    event.stopPropagation();
-    // TODO: Create view widget
-  };
-
-  const renderTable = table => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Table ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
+  render() {
+    const { dataset } = this.props;
     return (
       <ContextMenu
-        items={contextMenuItems.map(item => ({
-          label: item.label,
-          onClick: () => item.handler(table),
-        }))}
-      >
-        <TreeItem
-          nodeId={table.id}
-          label={
-            <div>
-              <div>{table.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {table.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {table.type}
-              </div>
-            </div>
-          }
-          onDoubleClick={() => openTableDetails(table)}
-          className={localStyles.searchResultItem}
-        />
-      </ContextMenu>
-    );
-  };
-
-  const renderView = view => {
-    const contextMenuItems = [
-      {
-        label: 'Copy View ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <ContextMenu
-        items={contextMenuItems.map(item => ({
-          label: item.label,
-          onClick: () => item.handler(view),
-        }))}
-      >
-        <TreeItem
-          nodeId={view.id}
-          label={
-            <div>
-              <div>{view.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {view.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {view.type}
-              </div>
-            </div>
-          }
-          onDoubleClick={() => openViewDetails(view)}
-          className={localStyles.searchResultItem}
-        />
-      </ContextMenu>
-    );
-  };
-
-  const renderModel = model => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Model ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <ContextMenu
-        items={contextMenuItems.map(item => ({
-          label: item.label,
-          onClick: () => item.handler(model),
-        }))}
-      >
-        <TreeItem
-          nodeId={model.id}
-          label={
-            <div>
-              <div>{model.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Dataset: {model.parent}
-              </div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {model.type}
-              </div>
-            </div>
-          }
-          className={localStyles.searchResultItem}
-        />
-      </ContextMenu>
-    );
-  };
-
-  const renderDataset = dataset => {
-    const contextMenuItems = [
-      {
-        label: 'Copy Dataset ID',
-        handler: dataTreeItem => copyID(dataTreeItem),
-      },
-    ];
-    return (
-      <ContextMenu
-        items={contextMenuItems.map(item => ({
+        items={this.contextMenuItems.map(item => ({
           label: item.label,
           onClick: () => item.handler(dataset),
         }))}
       >
-        <TreeItem
-          nodeId={dataset.id}
-          label={
-            <div>
-              <div>{dataset.name}</div>
-              <div className={localStyles.searchResultSubtitle}>
-                Type: {dataset.type}
-              </div>
-            </div>
-          }
-          onDoubleClick={() => openDatasetDetails(dataset)}
+        <div
+          onDoubleClick={event => this.openDatasetDetails(event, dataset)}
           className={localStyles.searchResultItem}
-        />
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{dataset.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {dataset.type}
+            </div>
+          </div>
+        </div>
       </ContextMenu>
     );
-  };
+  }
+}
 
-  return (
-    <div>
-      {result.type === 'dataset'
-        ? renderDataset(result)
-        : result.type === 'model'
-        ? renderModel(result)
-        : result.type === 'table'
-        ? renderTable(result)
-        : renderView(result)}
-    </div>
-  );
+export class ModelSearchResult extends ModelResource {
+  render() {
+    const { model } = this.props;
+    return (
+      <ContextMenu
+        items={this.contextMenuItems.map(item => ({
+          label: item.label,
+          onClick: () => item.handler(model),
+        }))}
+      >
+        <div
+          onDoubleClick={event => this.openModelDetails(event, model)}
+          className={localStyles.searchResultItem}
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{model.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {model.parent}
+            </div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {model.type}
+            </div>
+          </div>
+        </div>
+      </ContextMenu>
+    );
+  }
+}
+
+export class TableSearchResult extends TableResource {
+  render() {
+    const { table } = this.props;
+    return (
+      <ContextMenu
+        items={this.tableContextMenuItems.map(item => ({
+          label: item.label,
+          onClick: () => item.handler(table),
+        }))}
+      >
+        <div
+          onDoubleClick={event => this.openTableDetails(event, table)}
+          className={localStyles.searchResultItem}
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{table.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {table.parent}
+            </div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {table.type}
+            </div>
+          </div>
+        </div>
+      </ContextMenu>
+    );
+  }
+}
+
+export class ViewSearchResult extends TableResource {
+  render() {
+    const { table } = this.props;
+    return (
+      <ContextMenu
+        items={this.viewContextMenuItems.map(item => ({
+          label: item.label,
+          onClick: () => item.handler(table),
+        }))}
+      >
+        <div
+          onDoubleClick={event => this.openViewDetails(event, table)}
+          className={localStyles.searchResultItem}
+        >
+          <div>
+            <div className={localStyles.searchResultTitle}>{table.name}</div>
+            <div className={localStyles.searchResultSubtitle}>
+              Dataset: {table.parent}
+            </div>
+            <div className={localStyles.searchResultSubtitle}>
+              Type: {table.type}
+            </div>
+          </div>
+        </div>
+      </ContextMenu>
+    );
+  }
 }
 
 export default class ListSearchResults extends React.Component<
@@ -246,15 +208,9 @@ export default class ListSearchResults extends React.Component<
   render() {
     const { context, searchResults } = this.props;
     return searchResults.map(result => (
-      <TreeView
-        className={localStyles.root}
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpanded={['root']}
-        defaultExpandIcon={<ChevronRightIcon />}
-        key={result.id}
-      >
+      <div key={result.id} className={localStyles.root}>
         {BuildSearchResult(result, context)}
-      </TreeView>
+      </div>
     ));
   }
 }

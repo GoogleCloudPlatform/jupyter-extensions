@@ -1,20 +1,16 @@
 import * as React from 'react';
+import { Button } from '@material-ui/core';
+import { Code } from '@material-ui/icons';
 
 import { ViewDetailsService, ViewDetails } from './service/list_view_details';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
-import { stylesheet } from 'typestyle';
-
-const localStyles = stylesheet({
-  body: {
-    marginBottom: '24px',
-    marginRight: '24px',
-    marginLeft: '24px',
-    height: '100%',
-    overflowY: 'auto',
-  },
-});
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { localStyles } from './dataset_details_panel';
+import { formatDate } from '../../utils/formatters';
 
 interface Props {
   viewDetailsService: ViewDetailsService;
@@ -69,9 +65,12 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
       const detailsObj = details.details;
       const rows = [
         { name: 'View ID', value: detailsObj.id },
-        { name: 'Created', value: detailsObj.date_created },
-        { name: 'Last modified', value: detailsObj.last_modified },
-        { name: 'View expiration', value: detailsObj.expires ?? 'Never' },
+        { name: 'Created', value: formatDate(detailsObj.date_created) },
+        { name: 'Last modified', value: formatDate(detailsObj.last_modified) },
+        {
+          name: 'View expiration',
+          value: detailsObj.expires ? formatDate(detailsObj.expires) : 'Never',
+        },
         { name: 'Use Legacy SQL', value: detailsObj.legacy_sql },
       ];
 
@@ -88,8 +87,31 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ height: '100%' }}>
-          <Header text={this.props.view_name} />
+        <div className={localStyles.container}>
+          <Header
+            text={this.props.view_name}
+            buttons={[
+              <Button
+                onClick={() => {
+                  const queryId = generateQueryId();
+                  WidgetManager.getInstance().launchWidget(
+                    QueryEditorTabWidget,
+                    'main',
+                    queryId,
+                    undefined,
+                    [
+                      queryId,
+                      `SELECT * FROM \`${this.props.view_id}\` LIMIT 1000`,
+                    ]
+                  );
+                }}
+                startIcon={<Code />}
+                style={{ textTransform: 'none', color: '#1A73E8' }}
+              >
+                Query view
+              </Button>,
+            ]}
+          />
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}

@@ -101,6 +101,7 @@ class TestListTree(unittest.TestCase):
           'name': 'dummy_table1',
           'datasetId': 'dummy_dataset1',
           'type': None,
+          'partitioned': False,
         }
       },
       'tableIds': ['dummy_project1.dummy_dataset1.dummy_table1']
@@ -174,19 +175,19 @@ class TestListTree(unittest.TestCase):
         'type': 'table',
         'parent': 'dummy_dataset',
         'name': 'dummy_table',
-        'id': 'dummy_dataset.dummy_table',
+        'id': 'dummy_project.dummy_dataset.dummy_table',
       },
       {
         'type': 'view',
         'parent': 'dummy_dataset',
         'name': 'dummy_view',
-        'id': 'dummy_dataset.dummy_view',
+        'id': 'dummy_project.dummy_dataset.dummy_view',
       },
       {
         'type': 'model',
         'parent': 'dummy_dataset',
         'name': 'dummy_model',
-        'id': 'dummy_dataset.dummy_model',
+        'id': 'dummy_project.dummy_dataset.dummy_model',
       },
     ]}
 

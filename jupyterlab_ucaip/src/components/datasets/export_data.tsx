@@ -1,25 +1,25 @@
+import { ClientSession } from '@jupyterlab/apputils';
 import {
+  Button,
+  CircularProgress,
   FormControl,
   FormHelperText,
-  Button,
   Portal,
-  CircularProgress,
 } from '@material-ui/core';
-import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import {
   BASE_FONT,
   COLORS,
   DialogComponent,
   Option,
   RadioInput,
-  TextInput,
   SelectInput,
+  TextInput,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { AppContext } from '../../context';
 import { DatasetService } from '../../service/dataset';
-import { Context } from '../ucaip_widget';
-import { ClientSession } from '@jupyterlab/apputils';
 import { KernelModel } from '../../service/kernel_model';
 import Toast from '../toast';
 
@@ -29,7 +29,6 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  context: Context;
 }
 
 interface State {
@@ -104,6 +103,7 @@ const SOURCES: Option[] = [
 ];
 
 export class ExportData extends React.Component<Props, State> {
+  static contextType = AppContext;
   constructor(props: Props) {
     super(props);
     this.submit = this.submit.bind(this);
@@ -162,7 +162,7 @@ export class ExportData extends React.Component<Props, State> {
   }
 
   private getSessions() {
-    const manager = this.props.context.app.serviceManager;
+    const manager = this.context.app.serviceManager;
     const running = manager.sessions.running();
     const sessions: Option[] = [];
     let current = running.next();
@@ -180,7 +180,7 @@ export class ExportData extends React.Component<Props, State> {
   }
 
   private initializeSession(kernelId: string) {
-    const manager = this.props.context.app.serviceManager;
+    const manager = this.context.app.serviceManager;
     const kernelPreference = {
       id: kernelId,
     };
@@ -262,11 +262,11 @@ export class ExportData extends React.Component<Props, State> {
     if (this.props.open) {
       return (
         <DialogComponent
-          header={'Export Data to uCAIP Tables Dataset'}
+          header={'Create new uCAIP Tables Dataset'}
           open={true}
           onClose={this.props.onClose}
           onCancel={this.props.onClose}
-          submitLabel={'Export Data'}
+          submitLabel={'Create dataset'}
           onSubmit={this.submit}
           submitDisabled={
             this.state.loading ||
@@ -274,6 +274,7 @@ export class ExportData extends React.Component<Props, State> {
             !this.state.name ||
             !this.state.source
           }
+          height={'460px'}
         >
           <RadioInput
             value={this.state.from}

@@ -1,0 +1,12 @@
+.jp-git-icon {
+  background-image: url('./images/git-icon.svg');
+  background-size: contain;
+}
+
+[data-jp-theme-light='true'] .jp-git-icon {
+  filter: brightness(1);
+}
+
+[data-jp-theme-light='false'] .jp-git-icon {
+  filter: brightness(2);
+}
