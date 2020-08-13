@@ -221,7 +221,7 @@ describe('NotebookInstanceServiceLayer', () => {
       try {
         await notebooksService.stop();
       } catch (err) {
-        expect(err).toEqual('400: Could not stop Notebook Instance');
+        expect(err).toEqual('Could not stop Notebook Instance');
       }
       stopTimers();
 
@@ -325,7 +325,7 @@ describe('NotebookInstanceServiceLayer', () => {
       try {
         await notebooksService.start();
       } catch (err) {
-        expect(err).toEqual('400: Could not start Notebook Instance');
+        expect(err).toEqual('Could not start Notebook Instance');
       }
       stopTimers();
 
@@ -437,9 +437,7 @@ describe('NotebookInstanceServiceLayer', () => {
       try {
         await notebooksService.setMachineType(machineType);
       } catch (err) {
-        expect(err).toEqual(
-          '400: Could not set Machine Type of Notebook Instance'
-        );
+        expect(err).toEqual('Could not set Machine Type of Notebook Instance');
       }
       stopTimers();
 
@@ -558,7 +556,7 @@ describe('NotebookInstanceServiceLayer', () => {
         await notebooksService.setAccelerator(type, coreCount);
       } catch (err) {
         expect(err).toEqual(
-          '400: Could not attach Accelerator to Notebook Instance'
+          'Could not attach Accelerator to Notebook Instance'
         );
       }
       stopTimers();

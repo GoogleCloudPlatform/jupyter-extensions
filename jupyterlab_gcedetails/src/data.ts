@@ -96,6 +96,10 @@ export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
 ];
 
+export function getGpuTypeText(value: string) {
+  return ACCELERATOR_TYPES.find(option => option.value === value).text;
+}
+
 /**
  * AI Platform Accelerator counts.
  * https://cloud.google.com/ai-platform/training/docs/using-gpus
@@ -376,6 +380,18 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
     ],
   },
 ];
+
+export function getMachineTypeText(value: string) {
+  const machineType = MACHINE_TYPES.find(machineType =>
+    value.startsWith(machineType.base.value as string)
+  );
+
+  return machineType
+    ? machineType.configurations.find(
+        configuration => configuration.value === value
+      ).text
+    : null;
+}
 
 /* Class names applied to the component. */
 export const STYLES = stylesheet({

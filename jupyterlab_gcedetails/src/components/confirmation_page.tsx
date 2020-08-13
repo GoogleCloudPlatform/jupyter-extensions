@@ -19,7 +19,7 @@ import * as React from 'react';
 
 import { BASE_FONT, Message } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
-import { HardwareConfiguration, ACCELERATOR_TYPES } from '../data';
+import { HardwareConfiguration, getGpuTypeText } from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
 
@@ -58,10 +58,6 @@ export const STYLES = stylesheet({
 
 const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.
   If you have chosen to attach GPUs to your instance, the NVIDIA GPU driver will be installed automatically on the next startup.`;
-
-function getGpuTypeText(value: string) {
-  return ACCELERATOR_TYPES.find(option => option.value === value).text;
-}
 
 function displayConfiguration(
   configuration: HardwareConfiguration,
