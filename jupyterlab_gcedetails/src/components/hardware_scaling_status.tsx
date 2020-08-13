@@ -1,8 +1,8 @@
 import * as React from 'react';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import { HardwareConfiguration, STYLES } from '../data';
+import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { authTokenRetrieval } from './auth_token_retrieval';
 import { ServerWrapper } from './server_wrapper';
@@ -13,7 +13,7 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
     root: {
       height: 15,
       borderRadius: 5,
-      margin: '20px',
+      margin: '20px 0px',
     },
     colorPrimary: {
       backgroundColor:
@@ -253,21 +253,15 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
       />
     ) : (
       <div className={STYLES.containerPadding}>
-        <h3 className={STYLES.subheading}>{Status[status]}</h3>
-        <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+        <div className={STYLES.containerSize}>
+          <p className={STYLES.heading}>{Status[status]}</p>
+          <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+        </div>
         {status === Status['Complete'] ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              onDialogClose();
-            }}
-          >
-            Close
-          </Button>
+          <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
         ) : (
-          <BorderLinearProgress variant="determinate" value={progressValue} />
-        )}
+            <BorderLinearProgress variant="determinate" value={progressValue} />
+          )}
       </div>
     );
   }

@@ -9,17 +9,15 @@ interface Props {
   secondaryLabel?: string;
   onPrimaryClick: () => void;
   onSecondaryClick?: () => void;
+  primaryDisabled?: boolean;
 }
 
 const STYLES = stylesheet({
   actionBar: {
-    margin: '25px 0px',
+    marginTop: '25px',
     display: 'block',
     ...csstips.horizontal,
     ...csstips.endJustified,
-  },
-  secondaryButton: {
-    margin: '0px 10px',
   },
 });
 
@@ -27,6 +25,17 @@ const SecondaryButton = withStyles(() =>
   createStyles({
     root: {
       marginRight: '10px',
+      textTransform: 'capitalize',
+      fontFamily: 'var(--jp-ui-font-family)',
+    },
+  })
+)(Button);
+
+const PrimaryButton = withStyles(() =>
+  createStyles({
+    root: {
+      textTransform: 'capitalize',
+      fontFamily: 'var(--jp-ui-font-family)',
     },
   })
 )(Button);
@@ -46,16 +55,17 @@ export function ActionBar(props: Props) {
           {props.secondaryLabel}
         </SecondaryButton>
       )}
-      <Button
+      <PrimaryButton
         variant="contained"
         color="primary"
         size="small"
         disableRipple={true}
         disableElevation={true}
         onClick={props.onPrimaryClick}
+        disabled={props.primaryDisabled}
       >
         {props.primaryLabel}
-      </Button>
+      </PrimaryButton>
     </div>
   );
 }

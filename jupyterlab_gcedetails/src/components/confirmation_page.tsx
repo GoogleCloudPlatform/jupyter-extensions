@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import * as csstips from 'csstips';
 import * as React from 'react';
-
-import { BASE_FONT, Message } from 'gcp_jupyterlab_shared';
-import { stylesheet, classes } from 'typestyle';
+import { Message } from 'gcp_jupyterlab_shared';
 import {
   HardwareConfiguration,
   getGpuTypeText,
   NO_ACCELERATOR_TYPE,
+  STYLES,
 } from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
@@ -34,34 +31,7 @@ interface Props {
   onSubmit: () => void;
 }
 
-export const STYLES = stylesheet({
-  title: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
-  text: {
-    display: 'block',
-  },
-  textContainer: {
-    padding: '26px 16px 0px 16px',
-  },
-  container: {
-    width: '500px',
-  },
-  topPadding: {
-    paddingTop: '15px',
-  },
-  infoMessage: {
-    margin: '20px 16px 0px 16px',
-  },
-});
-
-const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.
-  If you have chosen to attach GPUs to your instance, the NVIDIA GPU driver will be installed automatically on the next startup.`;
+const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this time you will not be able to access your notebook instance.`;
 
 function displayConfiguration(
   configuration: HardwareConfiguration,
@@ -71,10 +41,12 @@ function displayConfiguration(
 
   return (
     <div>
-      <span className={classes(STYLES.title, STYLES.topPadding)}>{title}</span>
-      <div className={STYLES.text}>Machine type: {machineType.description}</div>
+      <span className={STYLES.subheading}>{title}</span>
+      <div className={STYLES.paragraph}>
+        Machine type: {machineType.description}
+      </div>
       {attachGpu && gpuType !== NO_ACCELERATOR_TYPE && (
-        <div className={STYLES.text}>
+        <div className={STYLES.paragraph}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
         </div>
       )}
@@ -86,16 +58,16 @@ export function ConfirmationPage(props: Props) {
   const { onDialogClose, formData, currentConfiguration, onSubmit } = props;
 
   return (
-    <div className={STYLES.container}>
-      <div className={STYLES.textContainer}>
-        <span className={STYLES.title}>Hardware Scaling Limits</span>
+    <div className={STYLES.containerPadding}>
+      <div className={STYLES.containerSize}>
+        <span className={STYLES.heading}>Hardware Scaling Limits</span>
         <HardwareConfigurationDescription />
         {currentConfiguration &&
           displayConfiguration(currentConfiguration, 'Old Configuration')}
         {displayConfiguration(formData, 'New Configuration')}
-      </div>
-      <div className={STYLES.infoMessage}>
-        <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
+        <div className={STYLES.infoMessage}>
+          <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
+        </div>
       </div>
       <ActionBar
         primaryLabel="Submit"
