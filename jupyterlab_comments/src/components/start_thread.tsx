@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import { TextField, Grid, Input } from '@material-ui/core';
+import { TextField, Grid, Input, Button } from '@material-ui/core';
 import {
   newDetachedCommentThread,
   newReviewCommentThread,
@@ -40,13 +40,14 @@ const style = {
     width: 400,
   },
   submitOptions: {
-    paddingLeft: 300,
+    paddingLeft: 250,
   },
 };
 
 export function CommentEditor(props) {
   const [comment, setComment] = useState('');
   const [lineNumber, setLineNumber] = useState(0);
+  const [showLineInput, setShowLineInput] = useState(false);
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -71,6 +72,7 @@ export function CommentEditor(props) {
     }
     setComment(''); //clear comment editor field
     setLineNumber(0);
+    setShowLineInput(false)
   };
   return (
     <form
@@ -97,20 +99,27 @@ export function CommentEditor(props) {
           />
         </Grid>
         <Grid container direction="row" style={style.submitOptions}>
-          <Input
-            type="number"
-            value={lineNumber}
-            onChange={e => setLineNumber(parseInt(e.target.value))}
-            name="line number"
-            placeholder="line #"
-            margin="none"
-            inputProps={{
-              style: {
-                width: '40px',
-              },
-              min: 0,
-            }}
-          />
+          {showLineInput ?
+            <Input
+              type="number"
+              value={lineNumber}
+              onChange={e => setLineNumber(parseInt(e.target.value))}
+              name="line number"
+              margin="none"
+              inputProps={{
+                style: {
+                  width: '40px',
+                },
+                min: 0,
+              }}
+            />
+           :
+            <Button
+              size="small"
+              onClick={() => setShowLineInput(true)}>
+              {'Set line #'}
+            </Button>
+          }
           <Grid item style={style.submit}>
             <SendButton type="sendThread" />
           </Grid>
