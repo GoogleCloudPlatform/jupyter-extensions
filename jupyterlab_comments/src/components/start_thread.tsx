@@ -72,7 +72,7 @@ export function CommentEditor(props) {
     }
     setComment(''); //clear comment editor field
     setLineNumber(0);
-    setShowLineInput(false)
+    setShowLineInput(false);
   };
   return (
     <form
@@ -99,7 +99,7 @@ export function CommentEditor(props) {
           />
         </Grid>
         <Grid container direction="row" style={style.submitOptions}>
-          {showLineInput ?
+          {showLineInput ? (
             <Input
               type="number"
               value={lineNumber}
@@ -113,13 +113,11 @@ export function CommentEditor(props) {
                 min: 0,
               }}
             />
-           :
-            <Button
-              size="small"
-              onClick={() => setShowLineInput(true)}>
+          ) : (
+            <Button size="small" onClick={() => setShowLineInput(true)}>
               {'Set line #'}
             </Button>
-          }
+          )}
           <Grid item style={style.submit}>
             <SendButton type="sendThread" />
           </Grid>
