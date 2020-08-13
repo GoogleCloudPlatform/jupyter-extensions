@@ -3,7 +3,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 interface QueryHistory {
   jobs: JobsObject;
-  jobIds: JobIdsObject;
+  jobIds: string[];
 }
 
 export interface JobIdsObject {
@@ -14,7 +14,7 @@ export interface JobsObject {
   [key: string]: Job;
 }
 
-interface JobDetailsObject {
+export interface JobDetailsObject {
   query: string;
   id: string;
   user: string;
@@ -28,17 +28,22 @@ interface JobDetailsObject {
   destination: string;
   useLegacySql: boolean;
   state: string;
-  errors: string[];
-  errorResult: string;
+  errors: ErrorResult[];
+  errorResult: ErrorResult;
   from_cache: boolean;
   project: string;
 }
 
-interface Job {
+interface ErrorResult {
+  location: string;
+  message: string;
+  reason: string;
+}
+
+export interface Job {
   query: string;
   id: string;
   created: string;
-  time: string;
   errored: boolean;
   details?: JobDetailsObject;
 }

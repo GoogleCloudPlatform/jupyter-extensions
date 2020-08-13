@@ -1,13 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { AxisPropsList, TrialData, AxisData } from '../trial_visualization';
+import { AxisPropsList, TrialData, PCPAxisData } from '../trial_visualization';
 
 interface Props {
   width: number;
   height: number;
   axisPropsList: AxisPropsList;
   trialDataList: TrialData[];
-  axesData: AxisData[];
+  axisDataList: PCPAxisData[];
   selectedMetricForColor: string;
 }
 
@@ -47,9 +47,9 @@ export const ParallelCoordinates = (props: Props) => {
   const height = props.height;
   const padding = 50;
   const trialDataList = props.trialDataList;
-  const axesData = props.axesData;
+  const axisDataList = props.axisDataList;
   const selectedMetricForColor = props.selectedMetricForColor;
-  const verticalAxes = axesData.map(axis => axis.label);
+  const verticalAxes = axisDataList.map(axis => axis.label);
   const [axisClicked, setAxisClicked] = React.useState(false);
   const [clickedAxisName, setClickedAxisName] = React.useState('none');
   const [selectBoxDetails, setSelectBoxDetails] = React.useState({
@@ -60,7 +60,7 @@ export const ParallelCoordinates = (props: Props) => {
   useEffect(() => {
     if (
       props.trialDataList &&
-      axesData &&
+      axisDataList &&
       d3Container.current &&
       width > 0 &&
       height > 0
@@ -103,8 +103,8 @@ export const ParallelCoordinates = (props: Props) => {
        */
       const yScaleInverted: ScaleObject = {};
 
-      // Populate axis using axesData
-      axesData.forEach((axis: Data) => {
+      // Populate axis using axisDataList
+      axisDataList.forEach((axis: Data) => {
         let scale; // Vertical scale mapping the data value of the trial to the vertical positions
         switch (axis.type) {
           case 'INTEGER':
@@ -446,7 +446,7 @@ export const ParallelCoordinates = (props: Props) => {
     axisPropsList,
     height,
     width,
-    axesData,
+    axisDataList,
     trialDataList,
     verticalAxes,
     axisClicked,

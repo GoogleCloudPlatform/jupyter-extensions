@@ -1,17 +1,15 @@
-import { LinearProgress, CircularProgress, Icon } from '@material-ui/core';
+import { CircularProgress, Icon } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
-import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
 import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
 
 import {
-  DataTree,
   Project,
   Dataset,
   Table,
@@ -32,8 +30,6 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
-import { updateProject, updateDataset } from '../../reducers/dataTreeSlice';
-import { openSnackbar } from '../../reducers/snackbarSlice';
 
 import '../../../style/index.css';
 
@@ -87,19 +83,10 @@ const localStyles = stylesheet({
   },
 });
 
-interface ResourceListProps {
-  context: Context;
-  dataTree: DataTree;
-  updateProject: any;
-  updateDataset: any;
-  openSnackbar: any;
-}
-
 interface ResourceProps {
   context: Context;
   updateProject?: any;
   updateDataset?: any;
-  openSnackbar?: any;
 }
 
 export interface ModelProps extends ResourceProps {
@@ -119,10 +106,10 @@ export interface ProjectProps extends ResourceProps {
   project: Project;
   updateProject: any;
   updateDataset: any;
-}
-
-interface State {
-  expanded: [];
+  openSnackbar: any;
+  removeProject: any;
+  collapseAll?: boolean;
+  updateCollapseAll? : any;
 }
 
 interface ResourceState {
@@ -137,10 +124,6 @@ export class Resource<T extends ResourceProps> extends React.Component<
   constructor(props) {
     super(props);
   }
-
-  handleOpenSnackbar = error => {
-    this.props.openSnackbar(error);
-  };
 
   copyID = dataTreeItem => {
     Clipboard.copyToSystem(dataTreeItem.id);
@@ -160,7 +143,7 @@ export class Resource<T extends ResourceProps> extends React.Component<
 }
 
 export class ModelResource extends Resource<ModelProps> {
-  constructor(props) {
+  constructor(props: ModelProps) {
     super(props);
   }
 
@@ -207,7 +190,7 @@ export class ModelResource extends Resource<ModelProps> {
 }
 
 export class TableResource extends Resource<TableProps> {
-  constructor(props) {
+  constructor(props: TableProps) {
     super(props);
   }
 
@@ -263,6 +246,14 @@ export class TableResource extends Resource<TableProps> {
     );
   };
 
+  getTableIcon = table => {
+    if (table.partitioned) {
+      return this.getIcon('PartitionedTable');
+    } else {
+      return this.getIcon('Table');
+    }
+  };
+
   tableContextMenuItems = [
     {
       label: 'Query table',
@@ -292,7 +283,7 @@ export class TableResource extends Resource<TableProps> {
         {table.type === 'TABLE' ? (
           <TreeItem
             nodeId={table.id}
-            icon={this.getIcon('Table')}
+            icon={this.getTableIcon(table)}
             label={
               <ContextMenu
                 items={this.tableContextMenuItems.map(item => ({
@@ -330,7 +321,7 @@ export class TableResource extends Resource<TableProps> {
 }
 
 export class DatasetResource extends Resource<DatasetProps> {
-  constructor(props: ProjectProps) {
+  constructor(props: DatasetProps) {
     super(props);
     this.state = {
       expanded: [],
@@ -484,15 +475,15 @@ export class ProjectResource extends Resource<ProjectProps> {
 
   listDatasetsService = new ListDatasetsService();
 
-  expandProject = project => {
-    if (project.error) {
-      this.handleOpenSnackbar(project.error);
-    } else {
-      this.getDatasets(project, this.listDatasetsService);
-    }
+  handleOpenSnackbar = error => {
+    this.props.openSnackbar(error);
   };
 
-  private async getDatasets(project, listDatasetsService) {
+  expandProject = project => {
+    this.getDatasets(project, this.listDatasetsService);
+  };
+
+  async getDatasets(project, listDatasetsService) {
     const newProject = {
       id: project.id,
       name: project.name,
@@ -517,13 +508,17 @@ export class ProjectResource extends Resource<ProjectProps> {
         'The project does not exist or does not have BigQuery enabled.';
       newProject['error'] = `Error: ${errorMessage}`;
     } finally {
+      if (newProject['error']) {
+        this.handleOpenSnackbar(newProject['error']);
+      }
       this.props.updateProject(newProject);
       this.setState({ loading: false });
     }
   }
 
   handleExpandProject = project => {
-    if (!Array.isArray(project.datasetIds)) {
+    this.props.updateCollapseAll(false);
+    if (!Array.isArray(project.datasetIds) && !project.error) {
       this.setState({ loading: true });
       this.expandProject(project);
     }
@@ -533,6 +528,10 @@ export class ProjectResource extends Resource<ProjectProps> {
   private async handleRefreshProject(project) {
     await this.expandProject(project);
     this.setState({ expanded: [project.id] });
+  }
+
+  async handleUnpinProject(project) {
+    await this.props.removeProject(project);
   }
 
   handleToggle = (event, nodeIds) => {
@@ -548,18 +547,28 @@ export class ProjectResource extends Resource<ProjectProps> {
       label: 'Refresh project',
       handler: () => this.handleRefreshProject(this.props.project),
     },
+    {
+      label: 'Unpin project',
+      handler: () => this.handleUnpinProject(this.props.project),
+    },
   ];
+
+  componentDidUpdate() {
+    if (this.props.collapseAll && this.state.expanded.length > 0) {
+      this.setState({ expanded: [] });
+    }
+  }
 
   render() {
     const { project } = this.props;
-    const { loading } = this.state;
+    const { loading, expanded } = this.state;
     return (
       <TreeView
         className={localStyles.root}
         defaultCollapseIcon={<ArrowDropDownIcon fontSize="small" />}
         defaultExpanded={['root']}
         defaultExpandIcon={<ArrowRightIcon fontSize="small" />}
-        expanded={this.state.expanded}
+        expanded={expanded}
         onNodeToggle={this.handleToggle}
       >
         <TreeItem
@@ -600,42 +609,3 @@ export class ProjectResource extends Resource<ProjectProps> {
     );
   }
 }
-
-class ListProjectItem extends React.Component<ResourceListProps, State> {
-  constructor(props: ResourceListProps) {
-    super(props);
-    this.state = {
-      expanded: [],
-    };
-  }
-
-  render() {
-    const { dataTree, context } = this.props;
-    if (Array.isArray(dataTree.projectIds)) {
-      return dataTree.projectIds.map(projectId => (
-        <div key={projectId}>
-          <ProjectResource
-            project={dataTree.projects[projectId]}
-            context={context}
-            updateProject={this.props.updateProject}
-            updateDataset={this.props.updateDataset}
-          />
-        </div>
-      ));
-    } else {
-      return <LinearProgress />;
-    }
-  }
-}
-
-const mapStateToProps = state => {
-  const dataTree = state.dataTree.data;
-  return { dataTree };
-};
-const mapDispatchToProps = {
-  updateProject,
-  updateDataset,
-  openSnackbar,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ListProjectItem);

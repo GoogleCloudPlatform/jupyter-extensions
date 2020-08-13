@@ -145,12 +145,16 @@ export class ModelPredictions extends React.Component<Props, State> {
       );
       this.setState({
         result: (
-          <CodeComponent copy={false}>{JSON.stringify(result)}</CodeComponent>
+          <CodeComponent copyEnabled={false}>
+            {JSON.stringify(result)}
+          </CodeComponent>
         ),
       });
     } catch (err) {
       this.setState({
-        result: <CodeComponent copy={false}>{err.message}</CodeComponent>,
+        result: (
+          <CodeComponent copyEnabled={false}>{err.message}</CodeComponent>
+        ),
       });
       console.warn('Error predicting result', err);
     } finally {

@@ -29,6 +29,7 @@ import {
   Typography,
   Link,
 } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { RootState, AppDispatch } from '../../store/store';
 import { Study } from '../../types';
 import { setView } from '../../store/view';
@@ -38,6 +39,7 @@ import { style } from 'typestyle';
 import { styles } from '../../utils/styles';
 import { Loading } from '../misc/loading';
 import AddIcon from '@material-ui/icons/Add';
+import { theme } from '../../utils/theme';
 
 const rowStyle = style({
   $nest: {
@@ -205,7 +207,9 @@ export class SidebarWidget extends ReactWidget {
   render() {
     return (
       <Provider store={this.reduxStore}>
-        <WrappedSidebar />
+        <ThemeProvider theme={theme}>
+          <WrappedSidebar />
+        </ThemeProvider>
       </Provider>
     );
   }
