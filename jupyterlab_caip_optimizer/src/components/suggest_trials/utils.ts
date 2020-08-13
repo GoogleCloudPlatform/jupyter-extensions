@@ -251,29 +251,27 @@ export function inputValuesToParameterList(
 
         switch (spec.type) {
           case 'CATEGORICAL': {
-            const stringValue = inputValue;
             parameters.push({
               parameter: spec.parameter,
-              stringValue,
+              stringValue: inputValue,
             });
             if (spec.childParameterSpecs)
               nodes.extend(
                 spec.childParameterSpecs.filter(child =>
-                  child.parentCategoricalValues!.values.includes(stringValue)
+                  child.parentCategoricalValues!.values.includes(inputValue)
                 )
               );
             break;
           }
           case 'INTEGER': {
-            const intValue = inputValue;
             parameters.push({
               parameter: spec.parameter,
-              intValue,
+              intValue: inputValue,
             });
             if (spec.childParameterSpecs)
               nodes.extend(
                 spec.childParameterSpecs.filter(child =>
-                  child.parentIntValues!.values.includes(intValue)
+                  child.parentIntValues!.values.includes(inputValue)
                 )
               );
             break;

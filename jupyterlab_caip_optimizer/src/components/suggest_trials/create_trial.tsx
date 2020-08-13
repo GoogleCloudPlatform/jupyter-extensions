@@ -108,7 +108,14 @@ function parameterSpecToInputs(
 ) {
   return parameterSpecs.map(spec => {
     const name = spec.parameter;
-    const label = `"${name}" Parameter`;
+    let label = `"${name}" Parameter`;
+    if (
+      !!spec.parentCategoricalValues ||
+      !!spec.parentDiscreteValues ||
+      !!spec.parentIntValues
+    ) {
+      label += ' (Child)';
+    }
     const input = values[name];
     let inputElement: JSX.Element;
     let children: JSX.Element[] = [];
