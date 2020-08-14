@@ -41,10 +41,12 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CommentIcon from '@material-ui/icons/Comment';
 import { ILabShell } from '@jupyterlab/application';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
 import { getServerRoot } from '../service/jupyterConfig';
 import { CodeReview } from '../components/code_review';
+import { RegularFile, NotebookFile } from '../service/file';
 
 interface Props {
   context: Context;
@@ -133,12 +135,28 @@ export class CommentsComponent extends React.Component<Props, State> {
     this.setState({ activeTab: activeTab });
   };
 
+  isNotebook(widget: any) {
+    /*widget.content is an instance of the Notebook class for Notebook files,
+    or an instance of the FileEditor class for non-Notebook files.
+    A FileEditor contains an 'editor' instance variable,
+    while a Notebook does not
+    */
+    return !widget.content.editor;
+  }
+
   render() {
     const activeTab = this.state.activeTab;
     const currFilePath = this.getCurrentFilePath();
+    const currWidget = this.props.context.labShell.currentWidget;
+    let file: NotebookFile | RegularFile;
+    if (this.isNotebook(currWidget)) {
+      file = new NotebookFile(currWidget);
+    } else {
+      file = new RegularFile(currWidget as IDocumentWidget);
+    }
     const detachedCommentsList = this.state.detachedComments.map(comment => (
       <>
-        <Comment detachedComment={comment} />
+        <Comment detachedComment={comment} file={file} />
         <Divider />
       </>
     ));
@@ -151,6 +169,7 @@ export class CommentsComponent extends React.Component<Props, State> {
           <CodeReview
             reviewRequest={reviewCommentsArr[0]}
             commentsList={reviewCommentsArr[1]}
+            file={file}
           />
           <NewCommentThread
             serverRoot={this.state.serverRoot}

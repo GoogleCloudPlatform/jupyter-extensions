@@ -91,21 +91,17 @@ export interface ParameterSpecChildren {
   childParameterSpecs?: ParameterSpec[];
 }
 
-export type ParameterSpecParent =
-  | {
-      parentDiscreteValues: MatchingParentDiscreteValueSpec;
-    }
-  | {
-      parentIntValues: MatchingParentIntValueSpec;
-    }
-  | {
-      parentCategoricalValues: MatchingParentCategoricalValueSpec;
-    }
-  | {};
-
-export type UnspecifiedParameter = ParameterBase & {
-  type: 'PARAMETER_TYPE_UNSPECIFIED';
+// NOTE: this types are a union
+export type ParameterSpecParent = {
+  parentDiscreteValues?: MatchingParentDiscreteValueSpec;
+  parentIntValues?: MatchingParentIntValueSpec;
+  parentCategoricalValues?: MatchingParentCategoricalValueSpec;
 };
+
+export type UnspecifiedParameter = ParameterBase &
+  ParameterSpecParent & {
+    type: 'PARAMETER_TYPE_UNSPECIFIED';
+  };
 
 export type DoubleParameterSpec = ParameterSpecBase &
   ParameterSpecParent & {

@@ -24,3 +24,7 @@ If you change these attributes, you will need to run ``npm run install-extension
 
 After installation, the extension can be activated by navigating to the JupyterLab command palette and selecting 'Notebook comments in git'
 
+# Mirroring comments from pull requests in GitHub (optional)
+
+This GitHub [workflow](https://github.com/google/git-appraise/blob/master/.github/workflows/mirror-pull-requests.yaml) can be used to automatically mirror pull request data into git-notes so that PR comments can also be viewed in the extension.
+

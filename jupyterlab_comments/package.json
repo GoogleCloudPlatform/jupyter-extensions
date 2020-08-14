@@ -52,7 +52,8 @@
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/docmanager": "^1.2.1",
     "@jupyterlab/docregistry": "^1.2.1",
-    "@jupyterlab/filebrowser": "^1.2.1"
+    "@jupyterlab/filebrowser": "^1.2.1",
+    "@jupyterlab/fileeditor": "^1.2.8"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",

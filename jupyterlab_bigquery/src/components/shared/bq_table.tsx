@@ -17,11 +17,9 @@ import {
   LastPage,
 } from '@material-ui/icons';
 
+import { TableHeadCell } from './schema_table';
+
 const localStyles = stylesheet({
-  tableHeader: {
-    backgroundColor: '#f0f0f0',
-    color: 'black',
-  },
   tableCell: {
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
@@ -147,10 +145,10 @@ export class BQTable extends React.Component<Props, State> {
       <>
         <div className={localStyles.scrollable}>
           <Table size="small" style={{ width: 'auto', tableLayout: 'auto' }}>
-            <TableHead className={localStyles.tableHeader}>
+            <TableHead>
               <TableRow>
                 {fields.map((field, index) => (
-                  <TableCell key={'field_' + index}>{field}</TableCell>
+                  <TableHeadCell key={'field_' + index}>{field}</TableHeadCell>
                 ))}
               </TableRow>
             </TableHead>

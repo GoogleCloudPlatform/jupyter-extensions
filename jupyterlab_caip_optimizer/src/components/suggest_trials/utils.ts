@@ -28,6 +28,7 @@ import {
 import { Column } from 'material-table';
 import { MetricsInputs, ParameterInputs } from '.';
 import { ErrorCheckFunction } from '../../utils/use_error_state_map';
+import { Deque } from '@blakeembrey/deque';
 
 export type TrialColumn = Column<Trial>;
 
@@ -39,16 +40,37 @@ export interface ValidateParameterInputs {
   [parameterName: string]: ErrorCheckFunction<string>;
 }
 
+function parametersToColumnsTree(
+  parameters: ParameterSpec[],
+  list: TrialColumn[] = []
+): TrialColumn[] {
+  parameters.forEach(parameter => {
+    list.push({
+      // Attach parameter to name to avoid name collision with other columns properties like state and name
+      field: `${parameter.parameter}Parameter`,
+      title: parameter.parameter,
+    });
+    switch (parameter.type) {
+      case 'CATEGORICAL':
+      case 'DISCRETE':
+      case 'INTEGER':
+        if (parameter.childParameterSpecs) {
+          parametersToColumnsTree(parameter.childParameterSpecs, list);
+        }
+    }
+  });
+  return list;
+}
+
 /**
- * Converts a paramter to a valid column for `material-table`
- * @param parameter The parameter to make into a column.
+ * Converts a list of parameters to valid columns for `material-table`.
+ * It handles parameter trees as well.
+ * @param parameters The parameter list to convert into a columns.
  */
-export function parameterToColumn(parameter: ParameterSpec): TrialColumn {
-  return {
-    // Attach parameter to name to avoid name collision with other properties like state and name
-    field: `${parameter.parameter}Parameter`,
-    title: parameter.parameter,
-  };
+export function parametersToColumns(
+  parameters: ParameterSpec[]
+): TrialColumn[] {
+  return parametersToColumnsTree(parameters);
 }
 
 /**
@@ -187,6 +209,26 @@ export function parameterSpecToInputsValues(
   );
 }
 
+export function flattenParameterSpecTree(
+  specs: ParameterSpec[]
+): ParameterSpec[] {
+  const list: ParameterSpec[] = [];
+  const items = [...specs];
+  while (items.length > 0) {
+    const item = items.pop();
+    list.push(item);
+    switch (item.type) {
+      case 'DISCRETE':
+      case 'CATEGORICAL':
+      case 'INTEGER':
+        if (item.childParameterSpecs)
+          for (const child of item.childParameterSpecs) items.push(child);
+        break;
+    }
+  }
+  return list;
+}
+
 /**
  * Converts parameter input values to parameter list for a trial.
  * @param inputs The parameter input values (which are strings).
@@ -194,23 +236,73 @@ export function parameterSpecToInputsValues(
  */
 export function inputValuesToParameterList(
   inputs: ParameterInputs,
-  parameterSpecs: ParameterSpec[]
+  roots: ParameterSpec[]
 ): Parameter[] {
-  return parameterSpecs.map(spec => {
-    const inputValue = inputs[spec.parameter];
-    switch (spec.type) {
-      case 'CATEGORICAL':
-        return { parameter: spec.parameter, stringValue: inputValue };
-      case 'INTEGER':
-        return { parameter: spec.parameter, intValue: inputValue };
-      case 'DISCRETE':
-      case 'DOUBLE':
-        return {
-          parameter: spec.parameter,
-          floatValue: parseFloat(inputValue),
-        };
+  const parameters: Parameter[] = [];
+
+  for (const root of roots) {
+    const nodes = new Deque<ParameterSpec>();
+    nodes.push(root);
+    while (nodes.size > 0) {
+      // go through every item in current level and add to list
+      for (let i = 0; i < nodes.size; ++i) {
+        const spec = nodes.popLeft();
+        const inputValue = inputs[spec.parameter];
+
+        switch (spec.type) {
+          case 'CATEGORICAL': {
+            parameters.push({
+              parameter: spec.parameter,
+              stringValue: inputValue,
+            });
+            if (spec.childParameterSpecs)
+              nodes.extend(
+                spec.childParameterSpecs.filter(child =>
+                  child.parentCategoricalValues!.values.includes(inputValue)
+                )
+              );
+            break;
+          }
+          case 'INTEGER': {
+            parameters.push({
+              parameter: spec.parameter,
+              intValue: inputValue,
+            });
+            if (spec.childParameterSpecs)
+              nodes.extend(
+                spec.childParameterSpecs.filter(child =>
+                  child.parentIntValues!.values.includes(inputValue)
+                )
+              );
+            break;
+          }
+          case 'DISCRETE':
+            {
+              const floatValue = parseFloat(inputValue);
+              parameters.push({
+                parameter: spec.parameter,
+                floatValue,
+              });
+              if (spec.childParameterSpecs)
+                nodes.extend(
+                  spec.childParameterSpecs.filter(child =>
+                    child.parentDiscreteValues!.values.includes(floatValue)
+                  )
+                );
+            }
+            break;
+          case 'DOUBLE':
+            parameters.push({
+              parameter: spec.parameter,
+              floatValue: parseFloat(inputValue),
+            });
+            break;
+        }
+      }
     }
-  });
+  }
+
+  return parameters;
 }
 
 /**
