@@ -28,32 +28,6 @@ interface Props {
   onDialogClose: () => void;
 }
 
-// export const STYLES = stylesheet({
-//   title: {
-//     ...BASE_FONT,
-//     fontWeight: 500,
-//     fontSize: '15px',
-//     marginBottom: '5px',
-//     ...csstips.horizontal,
-//     ...csstips.flex,
-//   },
-//   text: {
-//     display: 'block',
-//   },
-//   textContainer: {
-//     padding: '26px 16px 0px 16px',
-//   },
-//   container: {
-//     width: '500px',
-//   },
-//   topPadding: {
-//     paddingTop: '15px',
-//   },
-//   infoMessage: {
-//     margin: '20px 16px 16px 16px',
-//   },
-// });
-
 const ERROR_MESSAGE = `You must manually start your instance from the Google 
 Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
@@ -65,13 +39,9 @@ function displayInstance(instance: Instance) {
 
   return (
     <div>
-      <span className={STYLES.subheading}>
-        Your current configuration:
-      </span>
+      <span className={STYLES.subheading}>Your current configuration:</span>
       {machineTypeText && (
-        <div className={STYLES.paragraph}>
-          Machine type: {machineTypeText}
-        </div>
+        <div className={STYLES.paragraph}>Machine type: {machineTypeText}</div>
       )}
       {acceleratorConfig && (
         <div className={STYLES.paragraph}>
@@ -91,11 +61,11 @@ export function ErrorPage(props: Props) {
   return (
     <div className={STYLES.containerPadding}>
       <div className={STYLES.containerSize}>
-          <span
-            className={STYLES.heading}
-          >{`Failed to ${errorType} Your Machine`}</span>
-          <div className={STYLES.paragraph}>{errorValue}</div>
-          {instanceDetails && displayInstance(instanceDetails)}
+        <span
+          className={STYLES.heading}
+        >{`Failed to ${errorType} Your Machine`}</span>
+        <div className={STYLES.paragraph}>{errorValue}</div>
+        {instanceDetails && displayInstance(instanceDetails)}
         {errorType === ErrorType.START && (
           <div className={STYLES.infoMessage}>
             <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>

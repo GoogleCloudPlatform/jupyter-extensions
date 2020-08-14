@@ -260,8 +260,8 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         {status === Status['Complete'] ? (
           <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
         ) : (
-            <BorderLinearProgress variant="determinate" value={progressValue} />
-          )}
+          <BorderLinearProgress variant="determinate" value={progressValue} />
+        )}
       </div>
     );
   }
