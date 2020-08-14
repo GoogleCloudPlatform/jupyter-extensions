@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import * as React from 'react';
-import { Button } from '@material-ui/core';
+import { Button, Select, MenuItem, withStyles } from '@material-ui/core';
 import { Code } from '@material-ui/icons';
 
 import {
@@ -25,8 +26,12 @@ interface Props {
 interface State {
   hasLoaded: boolean;
   isLoading: boolean;
+  panelIsLoading: boolean;
   details: ModelDetails;
   rows: DetailRow[];
+  trainingRows: any[];
+  currentRun: number;
+  loadedRuns: any;
 }
 
 interface DetailRow {
@@ -34,22 +39,60 @@ interface DetailRow {
   value: string | number;
 }
 
+const displayOptionNames = {
+  actual_iterations: 'Actual iterations',
+  data_split_column: 'Data split column',
+  data_split_eval_fraction: 'Data split eval fraction',
+  data_split_method: 'Data split method',
+  distance_type: 'Distance type',
+  early_stop: 'Early stop',
+  initial_learn_rate: 'Initial learn rate',
+  input_label_columns: 'Input label columns',
+  kmeans_initialization_column: 'Kmeans initialization column',
+  kmeans_initialization_method: 'Centroids initialization method',
+  l1_regularization: 'L1 regularization',
+  l2_regularization: 'L2 regularization',
+  label_class_weights: 'Label class weights',
+  learn_rate: 'Learn rate',
+  learn_rate_strategy: 'Learn rate strategy',
+  loss_type: 'Loss type',
+  max_iterations: 'Max allowed iterations',
+  min_relative_progress: 'Min relative progress',
+  model_uri: 'Model uri',
+  num_clusters: 'Number of clusters',
+  optimization_strategy: 'Optimization strategy',
+  warm_start: 'Warm start',
+};
+
+const StyledMenuItem = withStyles({
+  selected: {
+    color: '#1A73E8',
+  },
+})(MenuItem);
+
 export default class ModelDetailsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       hasLoaded: false,
       isLoading: false,
+      panelIsLoading: false,
       details: { details: {} } as ModelDetails,
       rows: [],
+      currentRun: null,
+      trainingRows: [],
+      loadedRuns: {},
     };
   }
 
-  componentDidUpdate(prevProps: Props) {
+  async componentDidUpdate(prevProps: Props) {
     const isFirstLoad =
       !(this.state.hasLoaded || prevProps.isVisible) && this.props.isVisible;
     if (isFirstLoad) {
-      this.getDetails();
+      await this.getDetails();
+      this.getTrainingRunDetails(
+        this.state.details.details.training_runs.length - 1
+      );
     }
   }
 
@@ -81,11 +124,42 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
           value: detailsObj.model_type,
         },
       ];
-      this.setState({ hasLoaded: true, details, rows });
+      this.setState({
+        hasLoaded: true,
+        details,
+        rows,
+        currentRun: detailsObj.training_runs.length - 1,
+      });
     } catch (err) {
       console.warn('Error retrieving model details', err);
     } finally {
       this.setState({ isLoading: false });
+    }
+  }
+
+  private async getTrainingRunDetails(runIndex: number) {
+    try {
+      this.setState({ panelIsLoading: true });
+
+      if (!this.state.loadedRuns[runIndex]) {
+        const details = await this.props.modelDetailsService.getTrainingRunDetails(
+          this.props.modelId,
+          runIndex
+        );
+
+        const trainingRows = Object.entries(details.details).map(pair => {
+          return { name: displayOptionNames[pair[0]], value: pair[1] };
+        });
+
+        const updatedRuns = { ...this.state.loadedRuns };
+        updatedRuns[runIndex] = trainingRows;
+        this.setState({ loadedRuns: updatedRuns });
+        console.log(this.state.loadedRuns);
+      }
+    } catch (err) {
+      console.warn('Error retrieving model training run details', err);
+    } finally {
+      this.setState({ panelIsLoading: false });
     }
   }
 
@@ -95,36 +169,70 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.container}>
-          <Header
-            text={this.props.modelName}
-            buttons={[
-              <Button
-                onClick={() => {
-                  const queryId = generateQueryId();
-                  WidgetManager.getInstance().launchWidget(
-                    QueryEditorTabWidget,
-                    'main',
+          <Header>
+            <div>
+              {this.props.modelName}
+              {this.state.details.details.training_runs &&
+              this.state.details.details.training_runs.length > 1 ? (
+                <Select
+                  value={this.state.currentRun}
+                  onChange={event => {
+                    this.setState({ currentRun: event.target.value as number });
+                    this.getTrainingRunDetails(event.target.value as number);
+                  }}
+                  disableUnderline
+                  style={{ marginLeft: '36px' }}
+                >
+                  {this.state.details.details.training_runs &&
+                    this.state.details.details.training_runs.map(
+                      (date, index) => {
+                        return (
+                          <StyledMenuItem
+                            value={index}
+                            key={`training_run_${index}`}
+                          >
+                            {index + 1} ({formatDate(date)})
+                          </StyledMenuItem>
+                        );
+                      }
+                    )}
+                </Select>
+              ) : (
+                undefined
+              )}
+            </div>
+            <Button
+              onClick={() => {
+                const queryId = generateQueryId();
+                WidgetManager.getInstance().launchWidget(
+                  QueryEditorTabWidget,
+                  'main',
+                  queryId,
+                  undefined,
+                  [
                     queryId,
-                    undefined,
-                    [
-                      queryId,
-                      `SELECT * FROM ML.PREDICT(MODEL \`${this.props.modelId}\`, )`,
-                    ]
-                  );
-                }}
-                startIcon={<Code />}
-                style={{ textTransform: 'none', color: '#1A73E8' }}
-              >
-                Query model
-              </Button>,
-            ]}
-          />
+                    `SELECT * FROM ML.PREDICT(MODEL \`${this.props.modelId}\`, )`,
+                  ]
+                );
+              }}
+              startIcon={<Code />}
+              style={{ textTransform: 'none', color: '#1A73E8' }}
+            >
+              Query model
+            </Button>
+          </Header>
+
           <div className={localStyles.body}>
-            <DetailsPanel
-              details={this.state.details.details}
-              rows={this.state.rows}
-              detailsType="MODEL"
-            />
+            {this.state.panelIsLoading ? (
+              <LoadingPanel />
+            ) : (
+              <DetailsPanel
+                details={this.state.details.details}
+                rows={this.state.rows}
+                trainingRows={this.state.loadedRuns[this.state.currentRun]}
+                detailsType="MODEL"
+              />
+            )}
           </div>
         </div>
       );

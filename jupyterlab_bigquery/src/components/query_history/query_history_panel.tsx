@@ -368,7 +368,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     if (this.state.isLoading) {
       return (
         <>
-          <Header text="Query history" /> <LoadingPanel />
+          <Header>Query history</Header> <LoadingPanel />
         </>
       );
     } else {
@@ -377,7 +377,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
 
       return (
         <div className={localStyles.queryHistoryRoot}>
-          <Header text="Query history" />
+          <Header>Query history</Header>
           <div className={localStyles.body}>
             {Object.keys(queriesByDate).map(date => {
               return (

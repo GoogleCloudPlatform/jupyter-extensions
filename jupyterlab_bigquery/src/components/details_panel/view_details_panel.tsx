@@ -66,7 +66,10 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
           name: 'View expiration',
           value: detailsObj.expires ? formatDate(detailsObj.expires) : 'Never',
         },
-        { name: 'Use Legacy SQL', value: detailsObj.legacy_sql },
+        {
+          name: 'Use Legacy SQL',
+          value: detailsObj.legacy_sql ? 'true' : 'false',
+        },
       ];
 
       this.setState({ hasLoaded: true, details, rows });
@@ -83,30 +86,28 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.container}>
-          <Header
-            text={this.props.view_name}
-            buttons={[
-              <Button
-                onClick={() => {
-                  const queryId = generateQueryId();
-                  WidgetManager.getInstance().launchWidget(
-                    QueryEditorTabWidget,
-                    'main',
+          <Header>
+            {this.props.view_name}
+            <Button
+              onClick={() => {
+                const queryId = generateQueryId();
+                WidgetManager.getInstance().launchWidget(
+                  QueryEditorTabWidget,
+                  'main',
+                  queryId,
+                  undefined,
+                  [
                     queryId,
-                    undefined,
-                    [
-                      queryId,
-                      `SELECT * FROM \`${this.props.view_id}\` LIMIT 1000`,
-                    ]
-                  );
-                }}
-                startIcon={<Code />}
-                style={{ textTransform: 'none', color: '#1A73E8' }}
-              >
-                Query view
-              </Button>,
-            ]}
-          />
+                    `SELECT * FROM \`${this.props.view_id}\` LIMIT 1000`,
+                  ]
+                );
+              }}
+              startIcon={<Code />}
+              style={{ textTransform: 'none', color: '#1A73E8' }}
+            >
+              Query view
+            </Button>
+          </Header>
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
