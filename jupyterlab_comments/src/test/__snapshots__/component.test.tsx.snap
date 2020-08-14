@@ -3,8 +3,16 @@
 exports[`Basic Comment Component Rendering detached comment should render correctly 1`] = `
 <Fragment>
   <WithStyles(ForwardRef(ListItem))
+    key="context"
+  >
+    <CommentContext
+      filePath="fake/path"
+      range="none"
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <WithStyles(ForwardRef(ListItem))
     alignItems="flex-start"
-    key="none"
+    key="comment"
   >
     <WithStyles(ForwardRef(ListItemAvatar))>
       <WithStyles(ForwardRef(Avatar))
@@ -93,8 +101,16 @@ exports[`Basic Comment Component Rendering detached comment should render correc
 exports[`Basic Comment Component Rendering review comment should render correctly 1`] = `
 <Fragment>
   <WithStyles(ForwardRef(ListItem))
+    key="context"
+  >
+    <CommentContext
+      filePath="fake/path"
+      range="none"
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <WithStyles(ForwardRef(ListItem))
     alignItems="flex-start"
-    key="none"
+    key="comment"
   >
     <WithStyles(ForwardRef(ListItemAvatar))>
       <WithStyles(ForwardRef(Avatar))

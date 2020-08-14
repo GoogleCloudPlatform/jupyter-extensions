@@ -78,6 +78,13 @@ export function BuildSearchResult(result, context) {
 }
 
 export class DatasetSearchResult extends DatasetResource {
+  contextMenuItems = [
+    {
+      label: 'Copy dataset ID',
+      handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+  ];
+
   render() {
     const { dataset } = this.props;
     return (

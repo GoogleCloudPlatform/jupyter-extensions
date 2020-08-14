@@ -19,11 +19,15 @@ import { httpGitRequest } from '../service/request';
 export async function newDetachedCommentThread(
   currFilePath,
   serverRoot,
-  commentString
+  commentString,
+  lineNumber?
 ) {
   const body: Record<string, string> = {
     comment: commentString,
   };
+  if (lineNumber) {
+    body.line = lineNumber;
+  }
   httpGitRequest(
     'addDetachedComment',
     'POST',
@@ -60,12 +64,16 @@ export async function newReviewCommentThread(
   currFilePath,
   serverRoot,
   commentString,
-  reviewHash
+  reviewHash,
+  lineNumber?
 ) {
   const body: Record<string, string> = {
     comment: commentString,
     reviewHash: reviewHash,
   };
+  if (lineNumber) {
+    body.line = lineNumber;
+  }
   httpGitRequest(
     'addReviewComment',
     'POST',

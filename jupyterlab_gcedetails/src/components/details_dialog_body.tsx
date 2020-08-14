@@ -15,9 +15,9 @@
  */
 
 import * as React from 'react';
-import { ActionBar, SubmitButton } from 'gcp_jupyterlab_shared';
 import { stylesheet } from 'typestyle';
 import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
+import { ActionBar } from './action_bar';
 
 const DETAILS_STYLES = stylesheet({
   container: {
@@ -50,13 +50,12 @@ export function DetailsDialogBody(props: Props) {
               <dd className={STYLES.dd}>{am.mapper(details)}</dd>
             </div>
           ))}
-      <ActionBar closeLabel="Close" onClick={onDialogClose}>
-        <SubmitButton
-          actionPending={false}
-          onClick={reshapeForm}
-          text="Reshape"
-        />
-      </ActionBar>
+      <ActionBar
+        primaryLabel="Reshape"
+        onPrimaryClick={reshapeForm}
+        secondaryLabel="Close"
+        onSecondaryClick={onDialogClose}
+      />
     </dl>
   );
 }

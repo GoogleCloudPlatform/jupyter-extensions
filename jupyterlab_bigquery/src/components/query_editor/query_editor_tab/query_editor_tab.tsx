@@ -5,6 +5,18 @@ import {
   QueryId,
   generateQueryId,
 } from '../../../reducers/queryEditorTabSlice';
+import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
+
+const localStyles = stylesheet({
+  queryTextEditorRoot: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    height: '100%',
+    ...BASE_FONT,
+  },
+});
 
 interface QueryEditorTabProps {
   isVisible: boolean;
@@ -27,14 +39,7 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
 
   render() {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          height: '100%',
-        }}
-      >
+      <div className={localStyles.queryTextEditorRoot}>
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.props.iniQuery}

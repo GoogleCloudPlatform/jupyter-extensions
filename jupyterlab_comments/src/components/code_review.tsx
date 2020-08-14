@@ -18,12 +18,14 @@ import * as React from 'react';
 import { Divider, Grid, List, Typography } from '@material-ui/core';
 import RateReviewIcon from '@material-ui/icons/RateReview';
 import { CodeReviewComment, ReviewRequest } from '../service/comment';
-import { Comment } from '../components/comment';
+import { Comment } from './comment';
 import { timeAgo } from '../service/timestamp';
+import { RegularFile, NotebookFile } from '../service/file';
 
 interface Props {
   commentsList: Array<CodeReviewComment>;
   reviewRequest: ReviewRequest;
+  file: RegularFile | NotebookFile;
 }
 
 const style = {
@@ -48,7 +50,11 @@ export class CodeReview extends React.Component<Props> {
   render() {
     const comments = this.props.commentsList.map(comment => (
       <>
-        <Comment reviewComment={comment} />
+        <Comment
+          reviewComment={comment}
+          file={this.props.file}
+          key={comment.timestamp}
+        />
         <Divider />
       </>
     ));

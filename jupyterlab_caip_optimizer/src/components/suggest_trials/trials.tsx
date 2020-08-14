@@ -24,7 +24,7 @@ import { Trial, StudyConfig } from '../../types';
 import { prettifyTrial } from '../../service/optimizer';
 import {
   trialToData,
-  parameterToColumn,
+  parametersToColumns,
   metricToColumn,
   trialStateValue,
 } from './utils';
@@ -46,7 +46,7 @@ export const Trials: React.FC<Props> = ({
   const dispatch = useDispatch();
   const trialData = trials.map(trialToData);
   const parameterSpecColumns = React.useMemo(
-    () => studyConfig.parameters.map(parameterToColumn),
+    () => parametersToColumns(studyConfig.parameters),
     [studyConfig.parameters]
   );
   const metricSpecColumns = React.useMemo(
