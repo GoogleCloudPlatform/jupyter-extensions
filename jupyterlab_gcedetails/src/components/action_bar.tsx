@@ -17,6 +17,7 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { COLORS } from 'gcp_jupyterlab_shared';
 import Button from '@material-ui/core/Button';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 
@@ -52,6 +53,10 @@ const PrimaryButton = withStyles(() =>
     root: {
       textTransform: 'capitalize',
       fontFamily: 'var(--jp-ui-font-family)',
+      backgroundColor: COLORS.blue,
+      '&:hover': {
+        backgroundColor: '#1a62e8',
+      },
     },
   })
 )(Button);

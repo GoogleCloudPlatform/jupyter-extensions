@@ -37,6 +37,8 @@ export const STYLES = stylesheet({
   icon: {
     right: '14px',
     position: 'absolute',
+    cursor: 'pointer',
+    pointerEvents: 'none',
   },
 });
 
