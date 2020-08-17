@@ -1,14 +1,9 @@
-import base64
 import json
-import re
 import tornado.gen as gen
 import os
 import subprocess
 
-from collections import namedtuple
-from notebook.base.handlers import APIHandler, app_log
-
-from jupyterlab_gitsync.version import VERSION 
+from notebook.base.handlers import APIHandler
 
 class NotebookInitHandler(APIHandler):
 

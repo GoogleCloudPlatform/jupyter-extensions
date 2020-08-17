@@ -100,18 +100,17 @@ local_contents = '{"metadata":{"kernelspec":{"display_name":"","name":""},\
   is a cell from the base version of the file.\\")","metadata":{"trusted":true},\
   "execution_count":null,"outputs":[]}]}'
 
-def make_setup():
-  subprocess.call(['mkdir', 'test_files'], cwd='.')
-  subprocess.call(['mkdir', 'test_files/.sync_cache'], cwd='.')
-  subprocess.call(['mkdir', 'test_files/.sync_cache/init_cache_test'], cwd='.')
-
-def remove_setup():
-  subprocess.call(['rm', '-r', 'test_files'], cwd='.')
-
 class TestNotebookInit(unittest.TestCase):
 
+  def setUp(self):
+    subprocess.call(['mkdir', 'test_files'], cwd='.')
+    subprocess.call(['mkdir', 'test_files/.sync_cache'], cwd='.')
+    subprocess.call(['mkdir', 'test_files/.sync_cache/init_cache_test'], cwd='.')
+
+  def tearDown(self):
+    subprocess.call(['rm', '-r', 'test_files'], cwd='.')
+
   def test_update_base(self):
-    make_setup()
     base_og_path = 'test_files/.sync_cache/init_cache_test/merged.ipynb'
     with open(base_og_path, 'w') as b:
       b.write(base_contents)
@@ -127,10 +126,8 @@ class TestNotebookInit(unittest.TestCase):
       base_ud_contents = b.read()
 
     self.assertEqual(base_ud_contents, base_contents, msg='merged.ipynb did not successfully copy into base.ipynb')
-    remove_setup()
 
   def test_update_local(self):
-    make_setup()
 
     path = 'test_files'
     dpath = '.sync_cache/init_cache_test'
@@ -141,10 +138,8 @@ class TestNotebookInit(unittest.TestCase):
       local_ud_contents = l.read()
 
     self.assertEqual(local_ud_contents, local_contents, msg='input text did not successfully copy into local.ipynb')
-    remove_setup()
 
   def test_update_remote(self):
-    make_setup()
     remote_og_path = 'test_files/init_cache_test.ipynb'
     with open(remote_og_path, 'w') as r:
       r.write(remote_contents)
@@ -161,10 +156,8 @@ class TestNotebookInit(unittest.TestCase):
       remote_ud_contents = r.read()
 
     self.assertEqual(remote_ud_contents, remote_contents, msg='remote file did not successfully copy into remote.ipynb')
-    remove_setup()
 
   def test_merge_notebooks(self):
-    make_setup()
     with open('test_files/.sync_cache/init_cache_test/base.ipynb', 'w') as b:
       b.write(base_contents)
     with open('test_files/.sync_cache/init_cache_test/local.ipynb', 'w') as l:
@@ -188,10 +181,8 @@ class TestNotebookInit(unittest.TestCase):
 
     self.assertTrue(local_changes in merged_ud_contents, msg='local changes are not in merged.ipynb')
     self.assertTrue(remote_changes in merged_ud_contents, msg='remote changes are not in merged.ipynb')
-    remove_setup()
 
   def test_update_disk_file(self):
-    make_setup()
     with open('test_files/.sync_cache/init_cache_test/merged.ipynb', 'w') as m:
       m.write(base_contents)
 
@@ -207,7 +198,6 @@ class TestNotebookInit(unittest.TestCase):
       original = og.read()
 
     self.assertEqual(original, base_contents, msg='remote file did not successfully copy into remote.ipynb')
-    remove_setup()
 
 if __name__ == '__main__':
   unittest.main()

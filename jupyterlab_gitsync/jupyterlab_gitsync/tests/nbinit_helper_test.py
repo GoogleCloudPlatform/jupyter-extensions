@@ -2,44 +2,43 @@ import unittest
 import subprocess
 from jupyterlab_gitsync.nb_handlers import NotebookInitHandler
 
-def make_setup():
-  subprocess.call(['mkdir', 'test_files'], cwd='.')
-  subprocess.call(['mkdir', 'test_files/.sync_cache'], cwd='.')
-  file_path = 'test_files/init_cache_test.ipynb'
-
-  file_contents = '{                            \n\
-                     "cells": [                 \n\
-                      {                         \n\
-                       "cell_type": "code",     \n\
-                       "execution_count": null, \n\
-                       "metadata": {},          \n\
-                       "outputs": [],           \n\
-                       "source": []             \n\
-                      }                         \n\
-                     ],                         \n\
-                     "metadata": {              \n\
-                      "kernelspec": {           \n\
-                       "display_name": "",      \n\
-                       "name": ""               \n\
-                      },                        \n\
-                      "language_info": {        \n\
-                       "name": ""               \n\
-                      }                         \n\
-                     },                         \n\
-                     "nbformat": 4,             \n\
-                     "nbformat_minor": 4        \n\
-                    }'
-
-  with open(file_path, 'w+') as file:
-    file.write(file_contents)
-
-def remove_setup(): 
-  subprocess.call(['rm', '-r', 'test_files'], cwd='.')
-
 class TestNotebookInit(unittest.TestCase):
+  
+  def setUp(self):
+    subprocess.call(['mkdir', 'test_files'], cwd='.')
+    subprocess.call(['mkdir', 'test_files/.sync_cache'], cwd='.')
+    file_path = 'test_files/init_cache_test.ipynb'
+
+    file_contents = '{                            \n\
+                       "cells": [                 \n\
+                        {                         \n\
+                         "cell_type": "code",     \n\
+                         "execution_count": null, \n\
+                         "metadata": {},          \n\
+                         "outputs": [],           \n\
+                         "source": []             \n\
+                        }                         \n\
+                       ],                         \n\
+                       "metadata": {              \n\
+                        "kernelspec": {           \n\
+                         "display_name": "",      \n\
+                         "name": ""               \n\
+                        },                        \n\
+                        "language_info": {        \n\
+                         "name": ""               \n\
+                        }                         \n\
+                       },                         \n\
+                       "nbformat": 4,             \n\
+                       "nbformat_minor": 4        \n\
+                      }'
+
+    with open(file_path, 'w+') as file:
+      file.write(file_contents)
+
+  def tearDown(self): 
+    subprocess.call(['rm', '-r', 'test_files'], cwd='.')
 
   def test_add_file_cache(self):
-    make_setup()
     path = 'test_files'
     file_path = 'test_files/init_cache_test.ipynb'
 
@@ -50,11 +49,8 @@ class TestNotebookInit(unittest.TestCase):
 
     file_exists = not subprocess.call(['ls', dpath], cwd=path)
     self.assertTrue(file_exists, msg="directory in '.sync_cache' containing cached files does not exist" )
-    remove_setup()
-    
 
   def test_init_cache_files(self):
-    make_setup()
     subprocess.call(['mkdir', 'test_files/.sync_cache/init_cache_test'], cwd='.')
 
     path = 'test_files'
@@ -83,7 +79,6 @@ class TestNotebookInit(unittest.TestCase):
     self.assertEqual(base, local, msg="BASE and LOCAL are different")
     self.assertEqual(base, remote, msg="BASE and REMOTE are different")
     self.assertEqual(base, merged, msg="BASE and MERGED are different")
-    remove_setup()
 
 if __name__ == '__main__':
   unittest.main()
