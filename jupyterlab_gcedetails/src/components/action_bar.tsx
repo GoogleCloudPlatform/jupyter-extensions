@@ -26,8 +26,7 @@ interface Props {
   secondaryLabel?: string;
   onPrimaryClick: () => void;
   onSecondaryClick?: () => void;
-  primaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  secondaryButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  primaryDisabled?: boolean;
 }
 
 const STYLES = stylesheet({
@@ -73,7 +72,6 @@ export function ActionBar(props: Props) {
           disableRipple={true}
           disableElevation={true}
           onClick={props.onSecondaryClick}
-          {...props.secondaryButtonProps}
         >
           {props.secondaryLabel}
         </SecondaryButton>
@@ -85,7 +83,7 @@ export function ActionBar(props: Props) {
         disableRipple={true}
         disableElevation={true}
         onClick={props.onPrimaryClick}
-        {...props.primaryButtonProps}
+        disabled={props.primaryDisabled}
       >
         {props.primaryLabel}
       </PrimaryButton>

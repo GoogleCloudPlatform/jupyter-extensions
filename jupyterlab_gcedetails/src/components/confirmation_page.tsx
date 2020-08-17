@@ -16,7 +16,12 @@
 
 import * as React from 'react';
 import { Message } from 'gcp_jupyterlab_shared';
-import { HardwareConfiguration, ACCELERATOR_TYPES, STYLES } from '../data';
+import {
+  HardwareConfiguration,
+  getGpuTypeText,
+  NO_ACCELERATOR_TYPE,
+  STYLES,
+} from '../data';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
 
@@ -42,7 +47,7 @@ function displayConfiguration(
       <div className={STYLES.paragraph}>
         Machine type: {machineType.description}
       </div>
-      {attachGpu && (
+      {attachGpu && gpuType !== NO_ACCELERATOR_TYPE && (
         <div className={STYLES.paragraph}>
           {`GPUs: ${gpuCount} ${getGpuTypeText(gpuType)}`}
         </div>

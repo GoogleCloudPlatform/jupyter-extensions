@@ -40,6 +40,9 @@ import {
   Details,
   detailsToHardwareConfiguration,
   STYLES,
+  NO_ACCELERATOR_TYPE,
+  NO_ACCELERATOR_COUNT,
+  isEqualHardwareConfiguration,
 } from '../data';
 import { ActionBar } from './action_bar';
 
@@ -287,12 +290,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar
           primaryLabel="Next"
           onPrimaryClick={() => this.submitForm()}
-          primaryButtonProps={{
-            disabled: isEqualHardwareConfiguration(
-              this.oldConfiguration,
-              configuration
-            ),
-          }}
+          primaryDisabled={isEqualHardwareConfiguration(
+            this.oldConfiguration,
+            configuration
+          )}
           secondaryLabel="Cancel"
           onSecondaryClick={onDialogClose}
         />
