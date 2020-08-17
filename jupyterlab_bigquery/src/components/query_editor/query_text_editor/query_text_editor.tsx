@@ -32,6 +32,7 @@ import PagedJob from '../../../utils/pagedAPI/pagedJob';
 import { QueryEditorType } from './query_editor_results';
 import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
+import { formatBytes } from '../../../utils/formatters';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -427,13 +428,6 @@ class QueryTextEditor extends React.Component<
     this.monacoInstance.editor.setModelMarkers(model, 'owner', []);
   }
 
-  readableBytes(bytes: number) {
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
-  }
-
   renderButton() {
     const buttonState = this.state.queryState;
     let content = undefined;
@@ -518,7 +512,7 @@ class QueryTextEditor extends React.Component<
   renderMessage() {
     // eslint-disable-next-line no-extra-boolean-cast
     const readableSize = !!this.state.bytesProcessed
-      ? this.readableBytes(this.state.bytesProcessed)
+      ? formatBytes(this.state.bytesProcessed, 1)
       : null;
 
     const message = this.state.message;

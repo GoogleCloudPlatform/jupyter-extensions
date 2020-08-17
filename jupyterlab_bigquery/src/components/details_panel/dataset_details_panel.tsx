@@ -8,7 +8,7 @@ import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
 import { stylesheet } from 'typestyle';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, formatMs } from '../../utils/formatters';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 export const localStyles = stylesheet({
@@ -65,11 +65,6 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     }
   }
 
-  formatMs(ms) {
-    const days = ms / 86400000;
-    return `${days} day${days > 1 ? 's' : ''} 0 hr`;
-  }
-
   private async getDetails() {
     try {
       this.setState({ isLoading: true });
@@ -84,7 +79,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
         {
           name: 'Default table expiration',
           value: detailsObj.default_expiration
-            ? this.formatMs(detailsObj.default_expiration)
+            ? formatMs(detailsObj.default_expiration)
             : 'Never',
         },
         {
