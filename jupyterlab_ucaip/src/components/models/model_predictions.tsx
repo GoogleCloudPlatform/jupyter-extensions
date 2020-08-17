@@ -6,15 +6,19 @@ import {
   TableHead,
   TableRow,
   TextField,
+  IconButton,
+  Button,
+  FormControl,
+  FormHelperText,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Icon,
   Box,
 } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
-import {
-  ListResourcesTable,
-  SubmitButton,
-  TextInput,
-} from 'gcp_jupyterlab_shared';
+import { ListResourcesTable } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { Endpoint, Model, ModelService } from '../../service/model';
@@ -52,10 +56,13 @@ interface Props {
 interface State {
   isLoading: boolean;
   endpoints: Endpoint[];
+  allEndpoints: Endpoint[];
   inputParameters: object;
   customInput: string;
   customInputError: boolean;
   result: JSX.Element;
+  machineType: string;
+  endpointId: string;
 }
 
 const localStyles = stylesheet({
@@ -68,16 +75,34 @@ const localStyles = stylesheet({
   },
 });
 
+const machineTypes = [
+  'n1-standard-2',
+  'n1-standard-4',
+  'n1-standard-8',
+  'n1-standard-16',
+  'n1-highmem-2',
+  'n1-highmem-4',
+  'n1-highmem-8',
+  'n1-highmem-16',
+  'n1-highcpu-2',
+  'n1-highcpu-4',
+  'n1-highcpu-8',
+  'n1-highcpu-16',
+];
+
 export class ModelPredictions extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       isLoading: false,
       endpoints: [],
+      allEndpoints: [],
       inputParameters: {},
       customInput: '',
       customInputError: false,
       result: null,
+      machineType: machineTypes[0],
+      endpointId: '',
     };
     this.deployModel = this.deployModel.bind(this);
     this.undeployModel = this.undeployModel.bind(this);
@@ -86,6 +111,8 @@ export class ModelPredictions extends React.Component<Props, State> {
     this.isPredictReady = this.isPredictReady.bind(this);
     this.handlePredict = this.handlePredict.bind(this);
     this.getEndpoints = this.getEndpoints.bind(this);
+    this.getCodeString = this.getCodeString.bind(this);
+    this.getInstanceString = this.getInstanceString.bind(this);
   }
 
   async componentDidMount() {
@@ -96,11 +123,19 @@ export class ModelPredictions extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true });
       let endpoints = await ModelService.getEndpoints(this.props.model.id);
+      let allEndpoints = [];
       if (endpoints.length === 0) {
-        endpoints = await ModelService.checkDeploying(this.props.model);
+        endpoints = await ModelService.getDeployingEndpoints(
+          this.props.model,
+          this.state.endpointId
+        );
+      }
+      if (endpoints.length === 0) {
+        allEndpoints = await ModelService.getAllEndpoints();
       }
       this.setState({
         endpoints: endpoints,
+        allEndpoints: allEndpoints,
       });
     } catch (err) {
       console.warn('Error getting endpoints', err);
@@ -112,7 +147,11 @@ export class ModelPredictions extends React.Component<Props, State> {
   private async deployModel() {
     try {
       this.setState({ isLoading: true });
-      await ModelService.deployModel(this.props.model.id);
+      await ModelService.deployModel(
+        this.props.model.id,
+        this.state.machineType,
+        this.state.endpointId
+      );
       this.getEndpoints();
     } catch (err) {
       console.warn('Error deploying model', err);
@@ -128,6 +167,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       if (endpoint.displayName.includes('ucaip-extension')) {
         await ModelService.deleteEndpoint(endpoint.id);
       }
+      this.setState({ endpointId: '' });
       this.getEndpoints();
     } catch (err) {
       console.warn('Error undeploying model', err);
@@ -180,6 +220,28 @@ export class ModelPredictions extends React.Component<Props, State> {
     }
   }
 
+  private getInstanceString(): string {
+    let instanceString = `{\n`;
+    for (const [key, value] of Object.entries(this.state.inputParameters)) {
+      instanceString += `  '${key}': '${value}',\n`;
+    }
+    instanceString += `}`;
+    return instanceString;
+  }
+
+  private getCodeString(): string {
+    let codeString = `from jupyterlab_ucaip import deploy_model
+
+deploy_model(model_id='${this.props.model.id}',
+             machine_type='${this.state.machineType}'`;
+    if (this.state.endpointId !== '') {
+      codeString += `,
+             endpoint_id='${this.state.endpointId}'`;
+    }
+    codeString += `)`;
+    return codeString;
+  }
+
   private handleInputChange(event) {
     const target = event.target;
     const current = this.state.inputParameters;
@@ -198,41 +260,60 @@ export class ModelPredictions extends React.Component<Props, State> {
   private needToDeploy(): JSX.Element {
     return (
       <div>
-        <SubmitButton
-          actionPending={this.state.isLoading}
-          onClick={this.deployModel}
-          text={'Deploy Model'}
-          style={{ marginBottom: '16px' }}
-        />
         <Alert severity="info">
           Your model must be successfully deployed to an endpoint before you can
           test it.
         </Alert>
-        <header className={localStyles.header}>
-          Deploy model to basic endpoint
-        </header>
+        <header className={localStyles.header}>Deploy model to endpoint</header>
         <p style={{ paddingLeft: '8px' }}>
-          <i>Deploys model to an endpoint with a low level machine type.</i>
+          <i>Select the machine type and endpoint to deploy to.</i>
         </p>
-        <CodeComponent>
-          {`import * from jupyterlab_ucaip
-
-deploy_model('${this.props.model.id}')`}
-        </CodeComponent>
-        <header className={localStyles.header}>
-          Deploy model to customized endpoint
-        </header>
-        <p style={{ paddingLeft: '8px' }}>
-          <i>Fill in the machine type and endpoint to deploy to.</i>
-        </p>
-        <CodeComponent>
-          {`import * from jupyterlab_ucaip
-
-machine_type = ''
-endpoint_id = ''
-
-deploy_model('${this.props.model.id}', machine_type, endpoint_id)`}
-        </CodeComponent>
+        <FormControl style={{ marginLeft: '16px' }}>
+          <Select
+            value={this.state.machineType}
+            onChange={event => {
+              this.setState({ machineType: event.target.value as string });
+            }}
+            displayEmpty
+          >
+            {machineTypes.map(option => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Machine type</FormHelperText>
+        </FormControl>
+        <FormControl style={{ marginLeft: '16px' }}>
+          <Select
+            value={this.state.endpointId}
+            onChange={event => {
+              this.setState({ endpointId: event.target.value as string });
+            }}
+            displayEmpty
+          >
+            <MenuItem key={''} value={''}>
+              new endpoint
+            </MenuItem>
+            {this.state.allEndpoints.map(option => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.displayName}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Endpoint</FormHelperText>
+        </FormControl>
+        <CodeComponent>{this.getCodeString()}</CodeComponent>
+        <Button
+          disabled={this.state.isLoading}
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={this.deployModel}
+          style={{ marginBottom: '16px' }}
+        >
+          Deploy Model
+        </Button>
       </div>
     );
   }
@@ -244,24 +325,37 @@ deploy_model('${this.props.model.id}', machine_type, endpoint_id)`}
           {this.props.model.modelType === 'TABLE'
             ? this.testTablesModelComponent()
             : this.testOtherModelComponent()}
-          <SubmitButton
-            actionPending={!this.isPredictReady() || this.state.isLoading}
+          <Button
+            disabled={!this.isPredictReady() || this.state.isLoading}
+            variant="contained"
+            color="primary"
+            size="small"
             onClick={this.handlePredict}
-            text={'Predict'}
             style={{ marginRight: '16px' }}
-          />
-          <SubmitButton
-            actionPending={false}
+          >
+            Predict
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
             onClick={this.handleReset}
-            text={'Reset'}
             style={{ marginRight: '16px' }}
-          />
+          >
+            Reset
+          </Button>
           <div style={{ marginTop: '16px' }}>{this.state.result}</div>
+          <header className={localStyles.header}>Code sample</header>
+          <CodeComponent>
+            {`from jupyterlab_ucaip import predict
+instance = ${this.getInstanceString()}
+predict("${this.state.endpoints[0].id}", instance)`}
+          </CodeComponent>
         </div>
       );
     } else {
       return (
-        <Alert severity="info">
+        <Alert icon={<CircularProgress size={18} />} severity="info">
           Waiting for model to finish deploying. Check back in a few minutes.
         </Alert>
       );
@@ -308,14 +402,27 @@ deploy_model('${this.props.model.id}', machine_type, endpoint_id)`}
             },
           ]}
         />
-        <header className={localStyles.header}>Test your model</header>
+        <header className={localStyles.header}>
+          Test your model
+          <Box
+            component="div"
+            display="inline"
+            visibility={
+              endpoints[0].deployedModelId !== 'None' ? 'hidden' : 'visible'
+            }
+          >
+            <IconButton
+              disabled={this.state.isLoading}
+              size="small"
+              onClick={_ => {
+                this.getEndpoints();
+              }}
+            >
+              <Icon>refresh</Icon>
+            </IconButton>
+          </Box>
+        </header>
         {this.predictComponent(endpoints)}
-        <header className={localStyles.header}>Code sample</header>
-        <CodeComponent>
-          {`from jupyterlab_ucaip import predict
-instance = ${JSON.stringify(this.state.inputParameters)}
-predict("${this.state.endpoints[0].id}", instance)`}
-        </CodeComponent>
       </div>
     );
   }
@@ -335,13 +442,16 @@ predict("${this.state.endpoints[0].id}", instance)`}
               <TableRow key={option}>
                 <TableCell>{option}</TableCell>
                 <TableCell>
-                  <TextInput
+                  <TextField
                     name={option}
                     onChange={this.handleInputChange}
                     value={this.state.inputParameters[option] || ''}
                     placeholder={
                       this.props.model.inputs[option]['inputBaselines'][0]
                     }
+                    inputProps={{
+                      style: { fontSize: 'var(--jp-ui-font-size1)' },
+                    }}
                   />
                 </TableCell>
               </TableRow>
