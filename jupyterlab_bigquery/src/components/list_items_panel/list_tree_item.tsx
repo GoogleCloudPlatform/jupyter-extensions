@@ -109,7 +109,7 @@ export interface ProjectProps extends ResourceProps {
   openSnackbar: any;
   removeProject: any;
   collapseAll?: boolean;
-  updateCollapseAll? : any;
+  updateCollapseAll?: any;
 }
 
 interface ResourceState {
