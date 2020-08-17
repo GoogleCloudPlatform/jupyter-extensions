@@ -19,8 +19,13 @@ import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_edi
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { formatTime, formatDate } from '../../utils/formatters';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
+  queryHistoryRoot: {
+    height: '100%',
+    ...BASE_FONT,
+  },
   body: {
     height: '100%',
     overflowY: 'auto',
@@ -372,7 +377,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       const queriesByDate = this.processHistory(jobIds, jobs);
 
       return (
-        <div style={{ height: '100%' }}>
+        <div className={localStyles.queryHistoryRoot}>
           <Header text="Query history" />
           <div className={localStyles.body}>
             {Object.keys(queriesByDate).map(date => {

@@ -41,8 +41,7 @@ const STYLES = stylesheet({
     width: '468px',
   },
   nestedSelect: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    display: 'block',
   },
   input: {
     marginTop: '2px',
@@ -103,7 +102,7 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
 
     return (
       <div onMouseEnter={() => onHover()}>
-        <ListItem button>
+        <ListItem button style={{ cursor: 'default' }}>
           <ListItemText
             primary={label}
             primaryTypographyProps={{ style: TEXT_STYLE }}
@@ -279,9 +278,10 @@ export class NestedSelect extends React.Component<
           variant="outlined"
           fullWidth={true}
           onClick={e => this.handleClick(e)}
+          inputProps={{ style: { cursor: 'pointer' } }}
           InputProps={{
             readOnly: true,
-            style: TEXT_STYLE,
+            style: { ...TEXT_STYLE, cursor: 'pointer' },
             endAdornment: (
               <InputAdornment position="end">
                 <ArrowDropDownIcon />

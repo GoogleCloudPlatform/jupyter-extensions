@@ -15,6 +15,7 @@ import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_edi
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 export const localStyles = stylesheet({
   body: {
@@ -25,6 +26,12 @@ export const localStyles = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
+  },
+  tableDetailsRoot: {
+    display: 'flex',
+    flexFlow: 'column',
+    height: '100%',
+    ...BASE_FONT,
   },
 });
 
@@ -74,7 +81,7 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
       return <LoadingPanel />;
     } else {
       return (
-        <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+        <div className={localStyles.tableDetailsRoot}>
           <Header
             text={this.props.table_name}
             buttons={[
