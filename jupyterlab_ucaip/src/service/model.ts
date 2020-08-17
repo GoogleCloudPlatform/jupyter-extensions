@@ -167,12 +167,16 @@ export abstract class ModelService {
     return data;
   }
 
-  static async checkDeploying(model: Model): Promise<Endpoint[]> {
+  static async getDeployingEndpoints(
+    model: Model,
+    endpointId: string
+  ): Promise<Endpoint[]> {
     const body = {
       modelName: model.displayName,
+      endpointId: endpointId,
     };
     const data = await requestAPI<Endpoint[]>(
-      'v1/checkDeploying',
+      'v1/getDeployingEndpoints',
       createRequest(body)
     );
     for (let i = 0; i < data.length; ++i) {
@@ -181,9 +185,23 @@ export abstract class ModelService {
     return data;
   }
 
-  static async deployModel(modelId: string): Promise<void> {
+  static async getAllEndpoints(): Promise<Endpoint[]> {
+    const data = await requestAPI<Endpoint[]>('v1/getAllEndpoints');
+    for (let i = 0; i < data.length; ++i) {
+      data[i].updateTime = new Date(data[i].updateTime);
+    }
+    return data;
+  }
+
+  static async deployModel(
+    modelId: string,
+    machineType: string,
+    endpointId: string
+  ): Promise<void> {
     const body = {
       modelId: modelId,
+      machineType: machineType,
+      endpointId: endpointId !== '' ? endpointId : null,
     };
     await requestAPI('v1/deployModel', createRequest(body));
   }

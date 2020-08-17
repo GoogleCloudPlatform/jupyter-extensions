@@ -420,6 +420,37 @@ export const STYLES = stylesheet({
     alignItems: 'center',
     ...csstips.horizontal,
   },
+  containerPadding: {
+    margin: '0px',
+    padding: '35px 30px',
+  },
+  containerSize: {
+    width: 468,
+  },
+  heading: {
+    fontSize: '22px',
+    paddingBottom: '10px',
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+    display: 'block',
+  },
+  subheading: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+    fontWeight: 700,
+    fontSize: '15px',
+    paddingTop: '20px',
+    paddingBottom: '5px',
+    display: 'block',
+  },
+  paragraph: {
+    fontSize: '14px',
+    display: 'block',
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+  },
   attribute: {
     marginRight: '4px',
   },
@@ -450,6 +481,9 @@ export const STYLES = stylesheet({
   listRow: {
     display: 'table-row',
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
+  },
+  infoMessage: {
+    marginTop: '20px',
   },
 });
 
