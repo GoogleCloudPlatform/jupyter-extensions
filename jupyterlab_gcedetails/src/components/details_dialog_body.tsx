@@ -15,19 +15,10 @@
  */
 
 import * as React from 'react';
-import { stylesheet } from 'typestyle';
-import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
+import { stylesheet, classes } from 'typestyle';
+import { STYLES } from '../data/styles';
+import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { ActionBar } from './action_bar';
-
-const DETAILS_STYLES = stylesheet({
-  container: {
-    padding: '0px 30px',
-  },
-  heading: {
-    fontSize: '20px',
-    padding: '20px 0px',
-  },
-});
 
 interface Props {
   details: Details;
@@ -36,24 +27,36 @@ interface Props {
   reshapeForm: () => void;
 }
 
+const DIALOG_STYLES = stylesheet({
+  headingPadding: {
+    paddingBottom: '15px',
+  },
+});
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
   return (
-    <dl className={DETAILS_STYLES.container}>
-      <p className={DETAILS_STYLES.heading}>Notebook VM Details</p>
-      {receivedError
-        ? 'Unable to retrieve GCE VM details, please check your server logs'
-        : MAPPED_ATTRIBUTES.map(am => (
-            <div className={STYLES.listRow} key={am.label}>
-              <dt className={STYLES.dt}>{am.label}</dt>
-              <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-            </div>
-          ))}
+    <dl className={STYLES.containerPadding}>
+      <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
+        Notebook VM Details
+      </p>
+      {receivedError ? (
+        <p className={STYLES.paragraph}>
+          Unable to retrieve GCE VM details, please check your server logs
+        </p>
+      ) : (
+        MAPPED_ATTRIBUTES.map(am => (
+          <div className={STYLES.listRow} key={am.label}>
+            <dt className={STYLES.dt}>{am.label}</dt>
+            <dd className={STYLES.dd}>{am.mapper(details)}</dd>
+          </div>
+        ))
+      )}
       <ActionBar
-        primaryLabel="Reshape"
-        onPrimaryClick={reshapeForm}
+        primaryLabel="Update"
         secondaryLabel="Close"
+        onPrimaryClick={reshapeForm}
         onSecondaryClick={onDialogClose}
       />
     </dl>

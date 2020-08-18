@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { stylesheet } from 'typestyle';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import { HardwareConfiguration } from '../data';
+import { STYLES } from '../data/styles';
+import { HardwareConfiguration } from '../data/data';
+import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { authTokenRetrieval } from './auth_token_retrieval';
 import { ServerWrapper } from './server_wrapper';
@@ -12,9 +12,9 @@ import { ErrorPage } from './error_page';
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: 400,
       height: 15,
       borderRadius: 5,
+      margin: '20px 0px',
     },
     colorPrimary: {
       backgroundColor:
@@ -26,25 +26,6 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
     },
   })
 )(LinearProgress);
-
-const STYLES = stylesheet({
-  flexContainer: {
-    width: 500,
-    height: 300,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heading: {
-    fontSize: '24px',
-  },
-  paragraph: {
-    height: 60,
-    width: 350,
-    textAlign: 'center',
-  },
-});
 
 enum Status {
   'Authorizing' = 0,
@@ -58,14 +39,14 @@ enum Status {
 }
 
 const statusInfo = [
-  'Getting authorization token to reshape machine. Please complete the OAuth 2.0 authorization steps in the popup',
+  'Please complete the OAuth 2.0 authorization steps in the popup',
   'Shutting down instance for reshaping.',
   'Reshaping machine configuration to match your selection.',
   'Reshaping GPU configuration to match your selection.',
-  'Restarting your instance. Your newly configured machine will be ready very shortly!',
+  'Restarting your instance.',
   'Refreshing your JupyterLab session to reflect your new configuration.',
-  'Operation complete. Enjoy your newly configured instance! You may now close this dialog.',
-  'An error has occured, please try again later. You may need to restart the instance manually.',
+  'Operation complete. Enjoy your newly configured instance!',
+  'An error has occured, please try again later.',
 ];
 
 export enum ErrorType {
@@ -264,7 +245,6 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   render() {
     const { status, error, instanceDetails } = this.state;
     const progressValue = (status / 6) * 100;
-    const { flexContainer, heading, paragraph } = STYLES;
     const { onDialogClose } = this.props;
     return status === Status['Error'] ? (
       <ErrorPage
@@ -273,19 +253,13 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         instanceDetails={instanceDetails}
       />
     ) : (
-      <div className={flexContainer}>
-        <h3 className={heading}>{Status[status]}</h3>
-        <p className={paragraph}>{statusInfo[status]}</p>
+      <div className={STYLES.containerPadding}>
+        <div className={STYLES.containerSize}>
+          <p className={STYLES.heading}>{Status[status]}</p>
+          <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+        </div>
         {status === Status['Complete'] ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              onDialogClose();
-            }}
-          >
-            Close
-          </Button>
+          <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
         ) : (
           <BorderLinearProgress variant="determinate" value={progressValue} />
         )}

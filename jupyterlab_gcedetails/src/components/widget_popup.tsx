@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { Popper, Fade, Paper } from '@material-ui/core';
 import { classes } from 'typestyle';
-import { STYLES } from '../data';
+import { STYLES } from '../data/styles';
 
 interface Props {
   children: React.ReactNode;

@@ -27,7 +27,8 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option, TEXT_STYLE } from '../data';
+import { TEXT_STYLE } from '../data/styles';
+import { Option } from '../data/data';
 
 const STYLES = stylesheet({
   itemGroup: {
@@ -41,8 +42,7 @@ const STYLES = stylesheet({
     width: '468px',
   },
   nestedSelect: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    display: 'block',
   },
   input: {
     marginTop: '2px',
@@ -103,7 +103,7 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
 
     return (
       <div onMouseEnter={() => onHover()}>
-        <ListItem button>
+        <ListItem button style={{ cursor: 'default' }}>
           <ListItemText
             primary={label}
             primaryTypographyProps={{ style: TEXT_STYLE }}
@@ -279,9 +279,10 @@ export class NestedSelect extends React.Component<
           variant="outlined"
           fullWidth={true}
           onClick={e => this.handleClick(e)}
+          inputProps={{ style: { cursor: 'pointer' } }}
           InputProps={{
             readOnly: true,
-            style: TEXT_STYLE,
+            style: { ...TEXT_STYLE, cursor: 'pointer' },
             endAdornment: (
               <InputAdornment position="end">
                 <ArrowDropDownIcon />

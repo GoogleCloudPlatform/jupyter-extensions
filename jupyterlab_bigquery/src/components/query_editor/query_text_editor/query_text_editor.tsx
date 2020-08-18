@@ -32,6 +32,7 @@ import PagedJob from '../../../utils/pagedAPI/pagedJob';
 import { QueryEditorType } from './query_editor_results';
 import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
+import ReactResizeDetector from 'react-resize-detector';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -50,8 +51,8 @@ interface QueryTextEditorProps {
   iniQuery?: string;
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
-  width?: number;
   onQueryChange?: (string) => void;
+  showResult?: boolean;
 }
 
 interface QueryResponseType {
@@ -190,13 +191,7 @@ class QueryTextEditor extends React.Component<
     });
   }
 
-  updateDimensions() {
-    this.editor.layout();
-  }
-
   componentDidMount() {
-    window.addEventListener('resize', this.updateDimensions.bind(this));
-
     // Delay rendering of monaco editor to avoid mal-size
     setTimeout(() => {
       this.setState({ renderMonacoEditor: true });
@@ -205,23 +200,6 @@ class QueryTextEditor extends React.Component<
 
   componentWillUnmount() {
     this.props.deleteQueryEntry(this.queryId);
-    window.removeEventListener('resize', this.updateDimensions.bind(this));
-  }
-
-  componentDidUpdate(
-    prevProps: QueryTextEditorProps,
-    prevState: QueryTextEditorState
-  ) {
-    if (
-      (prevProps.width !== this.props.width ||
-        prevState.height !== this.state.height) &&
-      this.editor
-    ) {
-      this.editor.layout({
-        width: this.props.width,
-        height: this.state.height,
-      });
-    }
   }
 
   handleButtonClick() {
@@ -307,6 +285,8 @@ class QueryTextEditor extends React.Component<
       this.timeoutAlarm = setTimeout(this.checkSQL.bind(this), 1500);
       this.resetMarkers();
     });
+
+    this.editor.layout();
 
     // initial check
     this.checkSQL();
@@ -628,26 +608,33 @@ class QueryTextEditor extends React.Component<
           </div>
         </div>
 
-        <div
-          className={
-            ifIncell
-              ? styleSheet.queryTextEditorInCell
-              : styleSheet.queryTextEditor
-          }
-          ref={this.editorRef}
-        >
-          {this.state.renderMonacoEditor && (
-            <Editor
-              width="100%"
-              height="100%"
-              theme={'sqlTheme'}
-              language={'sql'}
-              value={queryValue}
-              editorDidMount={this.handleEditorDidMount.bind(this)}
-              options={SQL_EDITOR_OPTIONS}
-            />
-          )}
-        </div>
+        <ReactResizeDetector>
+          {({ width, height }) => {
+            this.editor && this.editor.layout({ width: width, height: height });
+            return (
+              <div
+                className={
+                  ifIncell
+                    ? styleSheet.queryTextEditorInCell
+                    : styleSheet.queryTextEditor
+                }
+                ref={this.editorRef}
+              >
+                {this.state.renderMonacoEditor && (
+                  <Editor
+                    width={width}
+                    height={height}
+                    theme={'sqlTheme'}
+                    language={'sql'}
+                    value={queryValue}
+                    editorDidMount={this.handleEditorDidMount.bind(this)}
+                    options={SQL_EDITOR_OPTIONS}
+                  />
+                )}
+              </div>
+            );
+          }}
+        </ReactResizeDetector>
       </div>
     );
   }
