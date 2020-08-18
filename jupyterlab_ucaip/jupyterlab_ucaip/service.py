@@ -394,7 +394,6 @@ class UCAIPService:
         endpoints.append(built)
     return endpoints
 
-<<<<<<< HEAD
   def get_all_endpoints(self):
     gcp_endpoints = self._endpoint_client.list_endpoints(
         parent=self._parent).endpoints
@@ -404,15 +403,10 @@ class UCAIPService:
       endpoints.append(built)
     return endpoints
 
-  def check_deploying(self, model_name, endpoint_id):
+  def get_deploying_endpoints(self, model_name, endpoint_id):
     endpoints = self._endpoint_client.list_endpoints(
         parent=self._parent).endpoints
-    if endpoint_id != "":
-=======
-  def get_deploying_endpoints(self, model_name, endpoint_id):
-    endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
     if endpoint_id:
->>>>>>> upstream/master
       filtered = filter(lambda x: endpoint_id == x.name, endpoints)
       filtered = list(filtered)
     else:
@@ -424,14 +418,19 @@ class UCAIPService:
     return []
 
   def get_all_endpoints(self):
-    gcp_endpoints = self._endpoint_client.list_endpoints(parent=self._parent).endpoints
+    gcp_endpoints = self._endpoint_client.list_endpoints(
+        parent=self._parent).endpoints
     endpoints = []
     for endpoint in gcp_endpoints:
       built = self._build_endpoint("None", endpoint)
       endpoints.append(built)
     return endpoints
 
-  def deploy_model(self, model_id, machine_type="n1-standard-2", min_replicas=1, endpoint_id=None):
+  def deploy_model(self,
+                   model_id,
+                   machine_type="n1-standard-2",
+                   min_replicas=1,
+                   endpoint_id=None):
     model = self._get_model(model_id)
     if not endpoint_id:
       endpoint_id = self.create_endpoint(model.display_name).name
