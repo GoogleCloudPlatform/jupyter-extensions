@@ -44,7 +44,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
-import { getServerRoot } from '../service/jupyterConfig';
+import { getServerRoot, Context } from '../service/jupyterConfig';
 import { CodeReview } from '../components/code_review';
 import { RegularFile, NotebookFile } from '../service/file';
 
@@ -61,10 +61,10 @@ interface State {
   errorMessage: string;
 }
 
-export interface Context {
-  labShell: ILabShell;
-  docManager: IDocumentManager;
-}
+// export interface Context {
+//   labShell: ILabShell;
+//   docManager: IDocumentManager;
+// }
 
 const localStyles = stylesheet({
   root: {
@@ -268,6 +268,7 @@ export class CommentsComponent extends React.Component<Props, State> {
                 const comment = createDetachedCommentFromJSON(obj, filePath);
                 comments.push(comment);
               });
+              comments.reverse();
             }
           }
           this.setState({
@@ -312,6 +313,7 @@ export class CommentsComponent extends React.Component<Props, State> {
                     );
                     comments.push(comment);
                   });
+                  comments.reverse();
                   reviews.push([request, comments]);
                 }
               });

@@ -14,7 +14,14 @@
  * limitations under the License.
  **/
 import { PageConfig } from '@jupyterlab/coreutils';
+import { ILabShell } from '@jupyterlab/application';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 export function getServerRoot() {
   return PageConfig.getOption('serverRoot');
+}
+
+export interface Context {
+    labShell: ILabShell;
+    docManager: IDocumentManager;
 }
