@@ -64,14 +64,6 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     window.open(url);
   }
 
-  addElementToForm(form, name, value, elementType) {
-    const el = document.createElement(elementType);
-    el.name = name;
-    el.value = value;
-
-    form.appendChild(el);
-  }
-
   render() {
     const fields = this.props.queryResult.labels;
     const rows = this.props.queryResult.content;
