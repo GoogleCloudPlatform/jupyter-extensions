@@ -32,7 +32,6 @@ import { CommentsWidget } from './components/comments_widget';
 
 import { NewCommentDialogWidget } from './components/new_comment_dialog';
 
-
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
@@ -75,7 +74,8 @@ function activate(
   const addNewComment = 'comments:add';
   app.commands.addCommand(addNewComment, {
     execute: () => {
-      const file = ((labShell.currentWidget as IDocumentWidget).content as FileEditor);
+      const file = (labShell.currentWidget as IDocumentWidget)
+        .content as FileEditor;
       if (!widget) {
         return;
       }
@@ -86,17 +86,16 @@ function activate(
       const dialogWidget = new NewCommentDialogWidget(selectionObj, context);
       dialogWidget.id = 'new_comment';
 
-      // app.shell.add(dialogWidget, 'left');
+      app.shell.add(dialogWidget, 'bottom');
       app.shell.activateById(dialogWidget.id);
-
-      },
+    },
     label: 'New comment',
   });
   //Add command to file editor's right click context menu
   app.contextMenu.addItem({
-      command: addNewComment,
-      selector: '.jp-FileEditor',
-      rank: 1
+    command: addNewComment,
+    selector: '.jp-FileEditor',
+    rank: 1,
   });
 }
 

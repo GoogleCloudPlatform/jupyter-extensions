@@ -39,8 +39,6 @@ import {
 } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CommentIcon from '@material-ui/icons/Comment';
-import { ILabShell } from '@jupyterlab/application';
-import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
@@ -60,11 +58,6 @@ interface State {
   activeTab: number;
   errorMessage: string;
 }
-
-// export interface Context {
-//   labShell: ILabShell;
-//   docManager: IDocumentManager;
-// }
 
 const localStyles = stylesheet({
   root: {

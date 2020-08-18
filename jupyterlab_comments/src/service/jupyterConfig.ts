@@ -22,6 +22,6 @@ export function getServerRoot() {
 }
 
 export interface Context {
-    labShell: ILabShell;
-    docManager: IDocumentManager;
+  labShell: ILabShell;
+  docManager: IDocumentManager;
 }

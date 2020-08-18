@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Button, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@material-ui/core';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { NewCommentThread } from './start_thread';
-import { getServerRoot } from '../service/jupyterConfig';
+import { getServerRoot, Context } from '../service/jupyterConfig';
 
 function NewCommentDialog(props) {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = useState(true);
   const [comment, setComment] = useState('');
 
   const handleCloseCancel = () => {
@@ -14,16 +21,19 @@ function NewCommentDialog(props) {
 
   const handleCloseSend = () => {
     setOpen(false);
-  }
+    console.log(comment);
+  };
 
   return (
     <div>
-      <Dialog open={open} onClose={handleCloseCancel} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={open}
+        onClose={handleCloseCancel}
+        aria-labelledby="form-dialog-title"
+      >
         <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Start a new comment thread
-          </DialogContentText>
+          <DialogContentText>Start a new comment thread</DialogContentText>
           <TextField
             autoFocus
             margin="dense"
@@ -33,7 +43,6 @@ function NewCommentDialog(props) {
             onChange={e => setComment(e.target.value)}
             fullWidth
           />
-          <NewCommentThread {...this.props}/>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCancel} color="primary">
@@ -57,16 +66,15 @@ interface Props {
 
 class DialogComponent extends React.Component<Props> {
   render() {
-    return <NewCommentDialog {...this.props}/>;
+    return <NewCommentDialog {...this.props} />;
   }
 }
 
 export class NewCommentDialogWidget extends ReactWidget {
+  context: Context;
+  selection: object;
 
-  context : object;
-  selection : object;
-
-  constructor(selection : object, context: object) {
+  constructor(selection: object, context: Context) {
     super();
     this.selection = selection;
     this.context = context;
@@ -75,6 +83,13 @@ export class NewCommentDialogWidget extends ReactWidget {
     const serverRoot = getServerRoot();
     const currWidget = this.context.labShell.currentWidget;
     const filePath = this.context.docManager.contextForWidget(currWidget).path;
-    return (<DialogComponent selection={this.selection} serverRoot={serverRoot} commentType="detached" currFilePath={filePath}/>);
+    return (
+      <DialogComponent
+        selection={this.selection}
+        serverRoot={serverRoot}
+        commentType="detached"
+        currFilePath={filePath}
+      />
+    );
   }
 }

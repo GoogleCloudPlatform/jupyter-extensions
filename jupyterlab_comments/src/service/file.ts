@@ -55,12 +55,11 @@ export class RegularFile {
   codeMirror: CodeMirror;
   codeMirrorEditor: CodeMirrorEditor;
 
-
   constructor(widget: IDocumentWidget) {
     this.codeMirror = ((widget.content as FileEditor)
       .editor as CodeMirrorEditor).editor;
-    this.codeMirrorEditor = ((widget.content as FileEditor)
-      .editor as CodeMirrorEditor);
+    this.codeMirrorEditor = (widget.content as FileEditor)
+      .editor as CodeMirrorEditor;
     // let selection = this.codeMirrorEditor.getSelection();
     // let context = this.codeMirrorEditor.doc.getSelection(); //text of the selection
     // let startLine = selection.start.line;
