@@ -9,7 +9,14 @@ import {
   generateQueryId,
 } from '../../../reducers/queryEditorTabSlice';
 import { DOMWidgetView } from '@jupyter-widgets/base';
-import ReactResizeDetector from 'react-resize-detector';
+import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
+
+const localStyles = stylesheet({
+  inCellEditorRoot: {
+    ...BASE_FONT,
+  },
+});
 
 interface QueryEditorInCellProps {
   queries: { [key: string]: QueryResult };
@@ -41,30 +48,23 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     this.props.ipyView.touch();
 
     return (
-      <ReactResizeDetector>
-        {({ width }) => {
-          return (
-            <div>
-              <QueryTextEditor
-                queryId={this.queryId}
-                iniQuery={this.iniQuery}
-                editorType="IN_CELL"
-                queryFlags={this.queryFlags}
-                width={width}
-                onQueryChange={query => {
-                  this.props.ipyView.model.set('query', query);
-                  this.props.ipyView.touch();
-                }}
-              />
-              {showResult ? (
-                <QueryResults queryId={this.queryId} editorType="IN_CELL" />
-              ) : (
-                undefined
-              )}
-            </div>
-          );
-        }}
-      </ReactResizeDetector>
+      <div className={localStyles.inCellEditorRoot}>
+        <QueryTextEditor
+          queryId={this.queryId}
+          iniQuery={this.iniQuery}
+          editorType="IN_CELL"
+          queryFlags={this.queryFlags}
+          onQueryChange={query => {
+            this.props.ipyView.model.set('query', query);
+            this.props.ipyView.touch();
+          }}
+        />
+        {showResult ? (
+          <QueryResults queryId={this.queryId} editorType="IN_CELL" />
+        ) : (
+          undefined
+        )}
+      </div>
     );
   }
 }

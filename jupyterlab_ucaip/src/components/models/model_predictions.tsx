@@ -109,7 +109,7 @@ export class ModelPredictions extends React.Component<Props, State> {
       let endpoints = await ModelService.getEndpoints(this.props.model.id);
       let allEndpoints = [];
       if (endpoints.length === 0) {
-        endpoints = await ModelService.checkDeploying(
+        endpoints = await ModelService.getDeployingEndpoints(
           this.props.model,
           this.state.endpointId
         );

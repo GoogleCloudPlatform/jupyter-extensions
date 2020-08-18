@@ -98,7 +98,7 @@ class AddDetachedCommentHandler(APIHandler):
             data = json.loads(self.request.body)
             comment = data.get('comment')
             parent = data.get('parent', "")
-
+            line_num = data.get('line', 0) #startLine = 0 means comment not attached to any line in the file
             full_file_path = os.path.join(server_root, file_path)
             full_file_path_dir = os.path.dirname(full_file_path)
             git_root_dir = git.get_repo_root(full_file_path_dir)
@@ -107,7 +107,7 @@ class AddDetachedCommentHandler(APIHandler):
             if parent:
                 git.add_detached_reply_comment(file_path_from_repo_root, git_root_dir, comment, parent)
             else:
-                git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment)
+                git.add_detached_comment(file_path_from_repo_root, git_root_dir, comment, line_num)
 
         except Exception as e:
             print("Error adding a new detached comment")
@@ -124,6 +124,7 @@ class AddReviewCommentHandler(APIHandler):
             comment = data.get('comment')
             review_hash = data.get('reviewHash')
             parent = data.get('parent', "")
+            line_num = data.get('line', 0)
 
             full_file_path = os.path.join(server_root, file_path)
             full_file_path_dir = os.path.dirname(full_file_path)
@@ -133,7 +134,7 @@ class AddReviewCommentHandler(APIHandler):
             if parent:
                 git.add_review_reply_comment(file_path_from_repo_root, git_root_dir, comment, parent, review_hash)
             else:
-                git.add_review_comment(file_path_from_repo_root, git_root_dir, comment, review_hash)
+                git.add_review_comment(file_path_from_repo_root, git_root_dir, comment, review_hash, line_num)
 
         except Exception as e:
             print("Error adding a new detached comment")

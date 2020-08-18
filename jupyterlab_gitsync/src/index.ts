@@ -22,6 +22,7 @@ async function activate(
   editor: IEditorTracker
 ) {
   // TO DO (ashleyswang): add config method to determine path and options for git sync 
+  // path requires no slash at end for handler
   const path = './jupyterlab_gitsync/TEST';
   const options = {remote: 'origin', worktree: 'ashleyswang/master'};
   

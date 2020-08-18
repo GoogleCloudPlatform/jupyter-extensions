@@ -88,6 +88,12 @@ def _get_endpoints(args):
   return UCAIPService.get().get_endpoints(model_id=args["modelId"])
 
 
+@_handler("POST", "getDeployingEndpoints")
+def _check_deploying(args):
+  return UCAIPService.get().get_deploying_endpoints(
+      model_name=args["modelName"], endpoint_id=args["endpointId"])
+
+
 @_handler("GET", "getAllEndpoints")
 def _get_all_endpoints(args):
   return UCAIPService.get().get_all_endpoints()
@@ -95,25 +101,29 @@ def _get_all_endpoints(args):
 
 @_handler("POST", "checkDeploying")
 def _check_deploying(args):
-  return UCAIPService.get().check_deploying(model_name=args["modelName"], endpoint_id=args["endpointId"])
+  return UCAIPService.get().check_deploying(model_name=args["modelName"],
+                                            endpoint_id=args["endpointId"])
 
 
 @_handler("POST", "trainModel")
 def _train_model(args):
-  UCAIPService.get().create_training_pipeline(training_pipeline_name=args["pipelineName"], 
-                                              dataset_id=args["datasetId"], 
-                                              model_name=args["modelName"],
-                                              target_column=args["targetColumn"],
-                                              prediction_type=args["predictionType"],
-                                              objective=args["objective"],
-                                              budget_hours=args["budgetHours"],
-                                              transformations=args["transformations"])
+  UCAIPService.get().create_training_pipeline(
+      training_pipeline_name=args["pipelineName"],
+      dataset_id=args["datasetId"],
+      model_name=args["modelName"],
+      target_column=args["targetColumn"],
+      prediction_type=args["predictionType"],
+      objective=args["objective"],
+      budget_hours=args["budgetHours"],
+      transformations=args["transformations"])
   return {"success": True}
 
 
 @_handler("POST", "deployModel")
 def _deploy_model(args):
-  UCAIPService.get().deploy_model(model_id=args["modelId"], machine_type=args["machineType"], endpoint_id=args["endpointId"])
+  UCAIPService.get().deploy_model(model_id=args["modelId"],
+                                  machine_type=args["machineType"],
+                                  endpoint_id=args["endpointId"])
   return {"success": True}
 
 
@@ -133,12 +143,7 @@ def _delete_endpoint(args):
 @_handler("POST", "predict")
 def _predict_tables(args):
   return UCAIPService.get().predict_tables(endpoint_id=args["endpointId"],
-                                            instance=args["inputs"])
-
-
-@_handler("GET", "tableInfo")
-def _table_info(args):
-  return UCAIPService.get().get_table_specs(args["datasetId"])
+                                           instance=args["inputs"])
 
 
 @_handler("POST", "deleteDataset")
@@ -150,6 +155,12 @@ def _delete_dataset(args):
 @_handler("POST", "deleteModel")
 def _delete_model(args):
   UCAIPService.get().model_client.delete_model(name=args["modelId"])
+  return {"success": True}
+
+
+@_handler("POST", "deleteEndpoint")
+def _delete_endpoint(args):
+  UCAIPService.get().delete_endpoint(endpoint_id=args["endpointId"])
   return {"success": True}
 
 
@@ -174,6 +185,6 @@ def _create_tables_dataset(args):
         file_data=decoded)
   else:
     UCAIPService.get().create_dataset(display_name=args["displayName"],
-                                       gcs_uri=args.get("gcsSource"),
-                                       bigquery_uri=args.get("bigquerySource"))
+                                      gcs_uri=args.get("gcsSource"),
+                                      bigquery_uri=args.get("bigquerySource"))
   return {"success": True}

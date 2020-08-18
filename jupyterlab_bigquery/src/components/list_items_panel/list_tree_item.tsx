@@ -1,17 +1,15 @@
-import { LinearProgress, CircularProgress, Icon } from '@material-ui/core';
+import { CircularProgress, Icon } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
 import * as csstips from 'csstips';
 import React from 'react';
-import { connect } from 'react-redux';
 import { stylesheet } from 'typestyle';
 import { Clipboard } from '@jupyterlab/apputils';
 import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
 
 import {
-  DataTree,
   Project,
   Dataset,
   Table,
@@ -32,12 +30,6 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
-import {
-  updateProject,
-  updateDataset,
-  removeProject,
-} from '../../reducers/dataTreeSlice';
-import { openSnackbar } from '../../reducers/snackbarSlice';
 
 import '../../../style/index.css';
 
@@ -91,15 +83,6 @@ const localStyles = stylesheet({
   },
 });
 
-interface ResourceListProps {
-  context: Context;
-  dataTree: DataTree;
-  updateProject: any;
-  updateDataset: any;
-  openSnackbar: any;
-  removeProject: any;
-}
-
 interface ResourceProps {
   context: Context;
   updateProject?: any;
@@ -125,10 +108,8 @@ export interface ProjectProps extends ResourceProps {
   updateDataset: any;
   openSnackbar: any;
   removeProject: any;
-}
-
-interface State {
-  expanded: [];
+  collapseAll?: boolean;
+  updateCollapseAll?: any;
 }
 
 interface ResourceState {
@@ -502,7 +483,7 @@ export class ProjectResource extends Resource<ProjectProps> {
     this.getDatasets(project, this.listDatasetsService);
   };
 
-  private async getDatasets(project, listDatasetsService) {
+  async getDatasets(project, listDatasetsService) {
     const newProject = {
       id: project.id,
       name: project.name,
@@ -536,6 +517,7 @@ export class ProjectResource extends Resource<ProjectProps> {
   }
 
   handleExpandProject = project => {
+    this.props.updateCollapseAll(false);
     if (!Array.isArray(project.datasetIds) && !project.error) {
       this.setState({ loading: true });
       this.expandProject(project);
@@ -571,16 +553,22 @@ export class ProjectResource extends Resource<ProjectProps> {
     },
   ];
 
+  componentDidUpdate() {
+    if (this.props.collapseAll && this.state.expanded.length > 0) {
+      this.setState({ expanded: [] });
+    }
+  }
+
   render() {
     const { project } = this.props;
-    const { loading } = this.state;
+    const { loading, expanded } = this.state;
     return (
       <TreeView
         className={localStyles.root}
         defaultCollapseIcon={<ArrowDropDownIcon fontSize="small" />}
         defaultExpanded={['root']}
         defaultExpandIcon={<ArrowRightIcon fontSize="small" />}
-        expanded={this.state.expanded}
+        expanded={expanded}
         onNodeToggle={this.handleToggle}
       >
         <TreeItem
@@ -621,45 +609,3 @@ export class ProjectResource extends Resource<ProjectProps> {
     );
   }
 }
-
-class ListProjectItem extends React.Component<ResourceListProps, State> {
-  constructor(props: ResourceListProps) {
-    super(props);
-    this.state = {
-      expanded: [],
-    };
-  }
-
-  render() {
-    const { dataTree, context } = this.props;
-    if (Array.isArray(dataTree.projectIds)) {
-      return dataTree.projectIds.map(projectId => (
-        <div key={projectId}>
-          <ProjectResource
-            project={dataTree.projects[projectId]}
-            context={context}
-            updateProject={this.props.updateProject}
-            updateDataset={this.props.updateDataset}
-            openSnackbar={this.props.openSnackbar}
-            removeProject={this.props.removeProject}
-          />
-        </div>
-      ));
-    } else {
-      return <LinearProgress />;
-    }
-  }
-}
-
-const mapStateToProps = state => {
-  const dataTree = state.dataTree.data;
-  return { dataTree };
-};
-const mapDispatchToProps = {
-  updateProject,
-  updateDataset,
-  openSnackbar,
-  removeProject,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ListProjectItem);

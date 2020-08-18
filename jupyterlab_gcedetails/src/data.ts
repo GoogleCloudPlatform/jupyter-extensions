@@ -87,7 +87,11 @@ export interface HardwareConfiguration {
 /**
  * AI Platform Accelerator types.
  * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
+ * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
  */
+export const NO_ACCELERATOR_TYPE = 'ACCELERATOR_TYPE_UNSPECIFIED';
+export const NO_ACCELERATOR_COUNT = '0';
+
 export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
   { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
@@ -95,6 +99,10 @@ export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
   { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
 ];
+
+export function getGpuTypeText(value: string) {
+  return ACCELERATOR_TYPES.find(option => option.value === value).text;
+}
 
 /**
  * AI Platform Accelerator counts.
@@ -107,19 +115,18 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
   { value: '8', text: '8' },
 ];
 
-export const NO_ACCELERATOR = '';
-
 /**
  * Convert nvidia-smi product_name type to match the AcceleratorType
  * enums that are used in the Notebooks API:
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
  */
 function nvidiaNameToEnum(name: string): string {
+  if (name === '') return NO_ACCELERATOR_TYPE;
+
   const accelerator = ACCELERATOR_TYPES.find(accelerator =>
     accelerator.text.endsWith(name)
   );
-
-  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR;
+  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR_TYPE;
 }
 
 /**
@@ -157,7 +164,8 @@ export function getGpuCountOptionsList(
   accelerators: Accelerator[],
   acceleratorName: string
 ): Option[] {
-  if (acceleratorName === NO_ACCELERATOR) return ACCELERATOR_COUNTS_1_2_4_8;
+  if (acceleratorName === NO_ACCELERATOR_TYPE)
+    return ACCELERATOR_COUNTS_1_2_4_8;
 
   const accelerator = accelerators.find(
     accelerator => acceleratorNameToEnum(accelerator.name) === acceleratorName
@@ -194,8 +202,21 @@ export function detailsToHardwareConfiguration(
     machineType: instance.machineType,
     attachGpu: Boolean(gpu.name),
     gpuType: nvidiaNameToEnum(gpu.name),
-    gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR,
+    gpuCount: gpu.name ? gpu.count : NO_ACCELERATOR_COUNT,
   };
+}
+
+export function isEqualHardwareConfiguration(
+  a: HardwareConfiguration,
+  b: HardwareConfiguration
+) {
+  return (
+    a.machineType.name === b.machineType.name &&
+    a.machineType.description === b.machineType.description &&
+    a.attachGpu === b.attachGpu &&
+    a.gpuType === b.gpuType &&
+    a.gpuCount === b.gpuCount
+  );
 }
 
 interface AttributeMapper {
@@ -377,6 +398,18 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
   },
 ];
 
+export function getMachineTypeText(value: string) {
+  const machineType = MACHINE_TYPES.find(machineType =>
+    value.startsWith(machineType.base.value as string)
+  );
+
+  return machineType
+    ? machineType.configurations.find(
+        configuration => configuration.value === value
+      ).text
+    : null;
+}
+
 /* Class names applied to the component. */
 export const STYLES = stylesheet({
   container: {
@@ -386,6 +419,37 @@ export const STYLES = stylesheet({
     lineHeight: '24px',
     alignItems: 'center',
     ...csstips.horizontal,
+  },
+  containerPadding: {
+    margin: '0px',
+    padding: '35px 30px',
+  },
+  containerSize: {
+    width: 468,
+  },
+  heading: {
+    fontSize: '22px',
+    paddingBottom: '10px',
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+    display: 'block',
+  },
+  subheading: {
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
+    fontWeight: 700,
+    fontSize: '15px',
+    paddingTop: '20px',
+    paddingBottom: '5px',
+    display: 'block',
+  },
+  paragraph: {
+    fontSize: '14px',
+    display: 'block',
+    fontWeight: 400,
+    fontFamily: 'var(--jp-ui-font-family)',
+    color: 'var(--jp-ui-font-color1)',
   },
   attribute: {
     marginRight: '4px',
@@ -417,6 +481,9 @@ export const STYLES = stylesheet({
   listRow: {
     display: 'table-row',
     boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
+  },
+  infoMessage: {
+    marginTop: '20px',
   },
 });
 

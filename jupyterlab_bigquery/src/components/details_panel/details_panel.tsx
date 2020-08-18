@@ -1,22 +1,13 @@
 import * as React from 'react';
 
-import {
-  Grid,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  withStyles,
-} from '@material-ui/core';
+import { Grid, Chip, withStyles } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
-import Editor from '@monaco-editor/react';
-import { monaco } from '@monaco-editor/react';
 
+import ReadOnlyEditor from '../shared/read_only_editor';
 import { SchemaField } from './service/list_table_details';
 import { ModelSchema } from './service/list_model_details';
 import { StripedRows } from '../shared/striped_rows';
+import { SchemaTable, ModelSchemaTable } from '../shared/schema_table';
 
 export const localStyles = stylesheet({
   title: {
@@ -43,19 +34,16 @@ export const localStyles = stylesheet({
     },
   },
   rowTitle: {
-    width: '200px',
+    width: '150px',
   },
   row: {
     display: 'flex',
     padding: '6px',
   },
-});
-
-export const TableHeadCell: React.ComponentType<any> = withStyles({
-  root: {
-    backgroundColor: '#f0f0f0',
+  bold: {
+    fontWeight: 500,
   },
-})(TableCell);
+});
 
 const StyledChip = withStyles({
   root: {
@@ -63,20 +51,6 @@ const StyledChip = withStyles({
     backgroundColor: 'rgba(25, 103, 210, 0.1)',
   },
 })(Chip);
-
-const formatFieldName = name => {
-  if (name.includes('.')) {
-    const child = name.substr(name.lastIndexOf('.') + 1);
-    const parents = name.substr(0, name.lastIndexOf('.') + 1);
-    return (
-      <div>
-        {parents} <b>{child}</b>
-      </div>
-    );
-  } else {
-    return <b>{name}</b>;
-  }
-};
 
 interface SharedDetails {
   id: string;
@@ -111,39 +85,6 @@ const getTitle = type => {
 
 export const DetailsPanel: React.SFC<Props> = props => {
   const { details, rows, detailsType } = props;
-
-  function handleEditorDidMount(_, editor) {
-    const editorElement = editor.getDomNode();
-    if (!editorElement) {
-      return;
-    }
-
-    monaco
-      .init()
-      .then(monaco => {
-        const lineHeight = editor.getOption(
-          monaco.editor.EditorOption.lineHeight
-        );
-        const lineCount = editor._modelData.viewModel.getLineCount();
-        const height = lineCount * lineHeight;
-        editorElement.style.height = `${height}px`;
-        editor.layout();
-
-        monaco.editor.defineTheme('viewQueryTheme', {
-          base: 'vs',
-          inherit: true,
-          rules: [],
-          colors: { 'editorCursor.foreground': '#FFFFFF' },
-        });
-        monaco.editor.setTheme('viewQueryTheme');
-      })
-      .catch(error =>
-        console.error(
-          'An error occurred during initialization of Monaco: ',
-          error
-        )
-      );
-  }
 
   return (
     <div className={localStyles.panel}>
@@ -183,31 +124,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
               Schema
             </div>
             {details.schema && details.schema.length > 0 ? (
-              <Table
-                size="small"
-                style={{ width: 'auto', tableLayout: 'auto' }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableHeadCell>Field name</TableHeadCell>
-                    <TableHeadCell>Type</TableHeadCell>
-                    <TableHeadCell>Mode</TableHeadCell>
-                    <TableHeadCell>Description</TableHeadCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {details.schema.map((field, index) => {
-                    return (
-                      <TableRow key={`schema_row_${index}`}>
-                        <TableCell>{formatFieldName(field.name)}</TableCell>
-                        <TableCell>{field.type}</TableCell>
-                        <TableCell>{field.mode}</TableCell>
-                        <TableCell>{field.description ?? ''}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <SchemaTable schema={details.schema} />
             ) : (
               'Table does not have a schema.'
             )}
@@ -219,28 +136,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
             <div className={localStyles.title} style={{ marginTop: '32px' }}>
               Query
             </div>
-            <Editor
-              width="100%"
-              theme={'light'}
-              language={'sql'}
-              value={details.query}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                cursorStyle: 'line-thin',
-                cursorWidth: 0,
-                renderLineHighlight: 'none',
-                overviewRulerLanes: 0,
-                overviewRulerBorder: false,
-                hideCursorInOverviewRuler: true,
-                glyphMargin: true,
-                matchBrackets: 'never',
-                occurrencesHighlight: false,
-                folding: false,
-                scrollBeyondLastLine: false,
-              }}
-              editorDidMount={handleEditorDidMount}
-            />
+            <ReadOnlyEditor query={details.query} />
           </div>
         )}
 
@@ -251,27 +147,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
             </div>
             <div>
               {details.schema_labels && details.schema_labels.length > 0 ? (
-                <Table
-                  size="small"
-                  style={{ width: 'auto', tableLayout: 'auto' }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableHeadCell>Field name</TableHeadCell>
-                      <TableHeadCell>Type</TableHeadCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {details.schema_labels.map((field, index) => {
-                      return (
-                        <TableRow key={`schema_label_row_${index}`}>
-                          <TableCell>{field.name}</TableCell>
-                          <TableCell>{field.type}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <ModelSchemaTable schema={details.schema_labels} />
               ) : (
                 'Model does not have any label columns.'
               )}
@@ -282,27 +158,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
             </div>
             <div>
               {details.feature_columns && details.feature_columns.length > 0 ? (
-                <Table
-                  size="small"
-                  style={{ width: 'auto', tableLayout: 'auto' }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableHeadCell>Field name</TableHeadCell>
-                      <TableHeadCell>Type</TableHeadCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {details.feature_columns.map((field, index) => {
-                      return (
-                        <TableRow key={`schema_feature_row_${index}`}>
-                          <TableCell>{field.name}</TableCell>
-                          <TableCell>{field.type}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <ModelSchemaTable schema={details.feature_columns} />
               ) : (
                 'Model does not have any feature columns.'
               )}

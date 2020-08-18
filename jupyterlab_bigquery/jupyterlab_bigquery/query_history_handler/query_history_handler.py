@@ -37,7 +37,7 @@ def format_value(value):
     else:
       return value
   elif isinstance(value, datetime.datetime):
-    return json.dumps(value.strftime('%b %e, %G, %l:%M:%S %p'))[1:-1]
+    return value.isoformat().__str__()
   else:
     return value.__str__()
 
@@ -52,22 +52,17 @@ def list_jobs(client, project):
   jobs = list(client.list_jobs(project))
 
   jobs_list = {}
-  job_ids = {}
+  job_ids = []
   for job in jobs:
     if job.job_type != 'query':
       continue
     jobs_list[job.job_id] = {
         'query': job.query,
         'id': job.job_id,
-        'created': format_value(job.created),
-        'time': json.dumps(job.created.strftime('%l:%M %p'))[1:-1],
+        'created': job.created.isoformat().__str__(),
         'errored': True if job.errors else False
     }
-    curr_date = json.dumps(job.created.strftime('%-m/%-d/%y'))[1:-1]
-    if curr_date in job_ids:
-      job_ids[curr_date].append(job.job_id)
-    else:
-      job_ids[curr_date] = [job.job_id]
+    job_ids.append(job.job_id)
 
   return {'jobs': jobs_list, 'jobIds': job_ids}
 
