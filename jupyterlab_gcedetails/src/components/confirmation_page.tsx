@@ -16,12 +16,9 @@
 
 import * as React from 'react';
 import { Message } from 'gcp_jupyterlab_shared';
-import {
-  HardwareConfiguration,
-  getGpuTypeText,
-  NO_ACCELERATOR_TYPE,
-  STYLES,
-} from '../data';
+import { STYLES } from '../data/styles';
+import { HardwareConfiguration } from '../data/data';
+import { getGpuTypeText, NO_ACCELERATOR_TYPE } from '../data/accelerator_types';
 import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
 

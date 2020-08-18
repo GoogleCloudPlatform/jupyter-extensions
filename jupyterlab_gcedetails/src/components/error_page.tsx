@@ -20,7 +20,9 @@ import { Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
-import { getGpuTypeText, getMachineTypeText, STYLES } from '../data';
+import { STYLES } from '../data/styles';
+import { getGpuTypeText } from '../data/accelerator_types';
+import { getMachineTypeText } from '../data/machine_types';
 
 interface Props {
   instanceDetails?: Instance;
