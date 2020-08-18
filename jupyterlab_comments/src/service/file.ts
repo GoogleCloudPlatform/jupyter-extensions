@@ -60,12 +60,6 @@ export class RegularFile {
       .editor as CodeMirrorEditor).editor;
     this.codeMirrorEditor = (widget.content as FileEditor)
       .editor as CodeMirrorEditor;
-    // let selection = this.codeMirrorEditor.getSelection();
-    // let context = this.codeMirrorEditor.doc.getSelection(); //text of the selection
-    // let startLine = selection.start.line;
-    // let endLine = selection.end.line;
-    // let startColumn = selection.start.column;
-    // let endColumn = selection.end.column;
   }
   /*
     Return an array of lines from the file that correspond to the given range object

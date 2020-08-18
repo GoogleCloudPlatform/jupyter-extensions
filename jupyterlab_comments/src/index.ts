@@ -70,7 +70,10 @@ function activate(
   // Add the command to the palette.
   palette.addItem({ command, category: 'Collaboration' });
 
-  //Command for adding new comment to currently selected text
+  /*
+  Command for adding new comment to currently selected line in the file
+  This command only support non-Notebook files
+  */
   const addNewComment = 'comments:add';
   app.commands.addCommand(addNewComment, {
     execute: () => {
@@ -79,11 +82,11 @@ function activate(
       if (!widget) {
         return;
       }
-      const selectionObj = file.editor.getSelection(); //contains start/end line and column attributes
+      const selectionObj = file.editor.getSelection(); //contains start and end line and column attributes
       const dialogWidget = new NewCommentDialogWidget(selectionObj, context);
       dialogWidget.id = 'new_comment';
 
-      app.shell.add(dialogWidget, 'bottom'); //attach widget to UI so dialog can open
+      app.shell.add(dialogWidget, 'bottom'); //attach widget to UI to display dialog
       app.shell.activateById(dialogWidget.id);
     },
     label: 'New comment',
