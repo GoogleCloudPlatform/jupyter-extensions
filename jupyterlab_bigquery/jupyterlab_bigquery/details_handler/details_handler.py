@@ -18,6 +18,9 @@ from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
 from google.cloud.bigquery_v2.gapic.enums import Model
 
 from jupyterlab_bigquery.version import VERSION
+from multiprocessing import Pool
+from functools import partial
+
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
@@ -253,6 +256,23 @@ def format_preview_rows(rows, fields):
     formatted_rows.append(formatted_row)
   return formatted_rows
 
+
+def parallel_format_preview_rows(rows, fields, num_threads=6, pool=None):
+  m_parallel_format_row = partial(parallel_format_row, fields=fields)
+  if pool is None:
+    with Pool(num_threads) as pool:
+      formatted_rows = pool.map(m_parallel_format_row, [dict(row) for row in rows])
+  else:
+    formatted_rows = pool.map(m_parallel_format_row, [dict(row) for row in rows])
+  return formatted_rows
+
+def parallel_format_row(row, fields):
+  formatted_row = []
+    
+  for field in fields:
+    name = field.name
+    check_repeated(row[name], field, formatted_row)
+  return formatted_row
 
 def check_repeated(value, field, formatted_row):
   if field.mode == 'REPEATED':

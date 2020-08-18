@@ -72,31 +72,6 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     form.appendChild(el);
   }
 
-  handleSheetExploreButton() {
-    const { query, project } = this.props.queryResult;
-
-    // build the form
-    const form = document.createElement('form');
-    this.addElementToForm(form, 'billingProjectId', project, 'input');
-    this.addElementToForm(form, 'datasourceType', 'BIGQUERY', 'input');
-    this.addElementToForm(form, 'query', query, 'textarea');
-    this.addElementToForm(
-      form,
-      'token',
-      'AC4w5VhAPXDjh8iXwpda-cBRyeH9MrTJ3A:1597279420615',
-      'input'
-    );
-
-    form.method = 'POST';
-    form.target = '_blank';
-    form.action =
-      'https://docs.google.com/spreadsheets/u/0/createWithDatasource';
-    form.style.visibility = 'hidden';
-    console.log(form);
-    document.body.appendChild(form);
-    form.submit();
-  }
-
   render() {
     const fields = this.props.queryResult.labels;
     const rows = this.props.queryResult.content;
@@ -122,9 +97,6 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
             onClick={this.handleDatastudioExploreButton.bind(this)}
           >
             Explore with Data Studio
-          </Button>
-          <Button onClick={this.handleSheetExploreButton.bind(this)}>
-            Here
           </Button>
         </div>
         {fields.length > 0 ? <BQTable fields={fields} rows={rows} /> : <></>}

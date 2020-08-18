@@ -1,6 +1,13 @@
+//@ts-nocheck
+
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import {
+  configureStore,
+  EnhancedStore,
+  createSerializableStateInvariantMiddleware,
+  getDefaultMiddleware,
+} from '@reduxjs/toolkit';
 import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
 import { ReduxReactWidget } from './redux_react_widget';
@@ -17,7 +24,21 @@ export class WidgetManager {
   private editorNumber = 1;
 
   private constructor(private app: JupyterFrontEnd) {
-    this.store = configureStore({ reducer: rootReducer });
+    // customize middle wares
+    const serializableMiddleware = createSerializableStateInvariantMiddleware({
+      ignoredPaths: ['queryEditorTab'],
+    });
+
+    const middleware = getDefaultMiddleware({
+      thunk: true,
+      immutableCheck: false,
+      serializableCheck: false,
+    });
+
+    this.store = configureStore({
+      reducer: rootReducer,
+      middleware: middleware,
+    });
 
     return this;
   }
