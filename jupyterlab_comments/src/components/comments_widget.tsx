@@ -147,18 +147,20 @@ export class CommentsComponent extends React.Component<Props, State> {
     } else {
       file = new RegularFile(currWidget as IDocumentWidget);
     }
-    const detachedCommentsList = this.state.detachedComments.map(comment => (
-      <>
-        <Comment detachedComment={comment} file={file} />
-        <Divider />
-      </>
-    ));
+    const detachedCommentsList = this.state.detachedComments.map(
+      (comment, index) => (
+        <div key={index}>
+          <Comment detachedComment={comment} file={file} />
+          <Divider />
+        </div>
+      )
+    );
     const numDetachedComments = this.state.detachedComments.length;
     const detachedLabel: string =
       'Detached (' + numDetachedComments.toString() + ')';
     const reviewCommentsList = this.state.reviewComments.map(
-      reviewCommentsArr => (
-        <>
+      (reviewCommentsArr, index) => (
+        <div key={index}>
           <CodeReview
             reviewRequest={reviewCommentsArr[0]}
             commentsList={reviewCommentsArr[1]}
@@ -170,7 +172,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             commentType="review"
             reviewHash={reviewCommentsArr[0].reviewHash}
           />
-        </>
+        </div>
       )
     );
     return (

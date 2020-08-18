@@ -79,14 +79,11 @@ function activate(
       if (!widget) {
         return;
       }
-      const editor = file.editor;
-      const selectionObj = file.editor.getSelection();
-      console.log(selectionObj);
-      console.log(editor);
+      const selectionObj = file.editor.getSelection(); //contains start/end line and column attributes
       const dialogWidget = new NewCommentDialogWidget(selectionObj, context);
       dialogWidget.id = 'new_comment';
 
-      app.shell.add(dialogWidget, 'bottom');
+      app.shell.add(dialogWidget, 'bottom'); //attach widget to UI so dialog can open
       app.shell.activateById(dialogWidget.id);
     },
     label: 'New comment',
