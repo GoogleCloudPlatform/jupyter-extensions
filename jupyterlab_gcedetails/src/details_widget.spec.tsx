@@ -19,7 +19,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { VmDetails } from './details_widget';
-import { STYLES } from './data';
+import { STYLES } from './data/styles';
 import { ServerWrapper } from './components/server_wrapper';
 import { DETAILS_RESPONSE } from './test_helpers';
 import { NotebooksService } from './service/notebooks_service';

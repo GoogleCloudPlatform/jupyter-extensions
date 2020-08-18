@@ -16,7 +16,8 @@
 
 import * as React from 'react';
 import { stylesheet, classes } from 'typestyle';
-import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
+import { STYLES } from '../data/styles';
+import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { ActionBar } from './action_bar';
 
 interface Props {
