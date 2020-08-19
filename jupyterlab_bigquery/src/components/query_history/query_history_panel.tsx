@@ -12,13 +12,12 @@ import {
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { StripedRows } from '../shared/striped_rows';
-import { formatBytes } from '../details_panel/table_details_panel';
 import ReadOnlyEditor from '../shared/read_only_editor';
 import { JobsObject, Job } from './service/query_history';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { formatTime, formatDate } from '../../utils/formatters';
+import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({

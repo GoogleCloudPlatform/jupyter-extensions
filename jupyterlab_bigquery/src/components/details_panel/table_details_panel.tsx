@@ -5,7 +5,7 @@ import {
 } from './service/list_table_details';
 import LoadingPanel from '../loading_panel';
 import { DetailsPanel } from './details_panel';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, formatBytes } from '../../utils/formatters';
 
 interface Props {
   tableDetailsService: TableDetailsService;
@@ -23,16 +23,6 @@ interface State {
 interface DetailRow {
   name: string;
   value: string | number;
-}
-
-export function formatBytes(numBytes, numDecimals = 2) {
-  if (numBytes === 0) return '0 Bytes';
-  const d = Math.floor(Math.log(numBytes) / Math.log(1024));
-  return (
-    parseFloat((numBytes / Math.pow(1024, d)).toFixed(numDecimals)) +
-    ' ' +
-    ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][d]
-  );
 }
 
 export default class TableDetailsPanel extends React.Component<Props, State> {
