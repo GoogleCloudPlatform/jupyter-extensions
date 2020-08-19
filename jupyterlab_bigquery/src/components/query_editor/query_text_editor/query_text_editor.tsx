@@ -150,6 +150,8 @@ enum QueryStates {
   ERROR,
 }
 
+const QUERY_BATCH_SIZE = 300000;
+
 class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
   QueryTextEditorState
@@ -261,7 +263,7 @@ class QueryTextEditor extends React.Component<
           this.setState({ queryState: QueryStates.READY });
         }
       },
-      300000
+      QUERY_BATCH_SIZE
     );
   }
 
