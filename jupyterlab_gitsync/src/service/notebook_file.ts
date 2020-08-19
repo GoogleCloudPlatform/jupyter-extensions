@@ -2,12 +2,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel, Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ContentsManager } from '@jupyterlab/services';
+// import { ContentsManager } from '@jupyterlab/services';
 
-import { IFile, IResolver } from './tracker';
+import { IFile } from './tracker';
 import { NotebookResolver } from './notebook_resolver';
 
-const fs = new ContentsManager();
+// const fs = new ContentsManager();
 
 // TO DO (ashleyswang): implement most functionality for NotebookFile
 // mostly a placeholder file with outline of needed functions
@@ -16,7 +16,10 @@ const fs = new ContentsManager();
 export class NotebookFile implements IFile {
   widget: NotebookPanel;
   context: DocumentRegistry.Context;
-  resolver: IResolver;
+  resolver: NotebookResolver;
+  // TO DO (ashleyswang): decide how git path is passed into NotebookFile
+  // needed for NotebookResolver handlers
+  git_path: string = 'jupyterlab_gitsync/TEST';
 
   private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
@@ -26,6 +29,7 @@ export class NotebookFile implements IFile {
     this.context = widget.context;
     this.resolver = new NotebookResolver(this);
 
+    this._getInitVersion();
     this._addListeners();
   }
 
@@ -51,14 +55,17 @@ export class NotebookFile implements IFile {
 
   async reload() {
     this._getLocalVersion();
-    this._getRemoteVersion();
+    const merged = this.resolver.mergeVersions();
+    if (merged) { await this._displayText(); }
+  }
+
+  private async _displayText() {
+    // TO DO (ashleyswang): maintain UI scroll view & cursor position
     await this.context.revert();
   }
 
-  private async _getRemoteVersion() {
-    // TO DO (ashleyswang): change to get raw string of notebook file
-    const contents = await fs.get(this.path, {content: false});
-    console.log(contents.content);
+  private async _getInitVersion() {
+    await this.resolver.sendInitRequest();
   }
 
   private async _getLocalVersion() {
@@ -71,17 +78,6 @@ export class NotebookFile implements IFile {
     return signal.connect(callback, this);
   }
 
-  // private _removeListener(signal: ISignal<any, any>, callback: any){
-  //   return signal.disconnect(callback, this);
-  // }
-
-  private _disposedListener(){
-    // TO DO (ashleyswang): add functionality to remove resources after closing document
-
-    // this._removeListener(((this.widget.content as Notebook)
-    //   .model as NotebookModel).stateChanged, this._dirtyStateListener);
-  }
-
   private _dirtyStateListener(sender: NotebookModel, value: any){
     console.log(value);
     if (value.name === 'dirty'){ this._dirtyState.emit(value.newValue); }
@@ -90,6 +86,5 @@ export class NotebookFile implements IFile {
   private _addListeners() {
     this._addListener(((this.widget.content as Notebook)
       .model as NotebookModel).stateChanged, this._dirtyStateListener);
-    this._addListener(this.widget.disposed, this._disposedListener);
   }
 }

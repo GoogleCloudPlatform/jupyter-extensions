@@ -1,4 +1,5 @@
 import { DocumentWidget, DocumentRegistry, DocumentModel } from '@jupyterlab/docregistry';
+import { Contents } from '@jupyterlab/services'
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
 
@@ -49,6 +50,10 @@ export class File implements IFile {
 
   get dirtyState(): ISignal<this, boolean> {
     return this._dirtyState;
+  }
+
+  get path() {
+    return this.widget.context.path;
   }
 
   async save() {

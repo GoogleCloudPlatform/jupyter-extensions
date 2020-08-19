@@ -154,4 +154,9 @@ export class FileTracker {
       this._updateState('dirty', true);
     }
   }
+
+  private _dirtyStateListener(sender: DocumentModel, args: any){
+    // TO DO (ashleyswang): add status indicator for dirty state
+    console.log(sender, args);
+  }
 }

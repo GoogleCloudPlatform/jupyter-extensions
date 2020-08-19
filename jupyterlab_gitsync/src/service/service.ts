@@ -15,7 +15,7 @@ export class GitSyncService {
   private _tracker: FileTracker;
   private _completed: boolean = true;
   private _running: boolean;
-  syncInterval: number = 0 * 1000;
+  syncInterval: number = 20 * 1000;
 
   private _status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning';
   private _blocked: boolean = false;

@@ -185,7 +185,6 @@ export class FileResolver implements IResolver {
         this._cursor = { line: 0, ch: 0 };
       }
       if (result.button.label === 'Resolve Conflicts') {
-        console.log('do something');
         // TO DO (ashleyswang) : open an editor for 3 way merging
       }
       if (result.button.label === 'Ignore') {
