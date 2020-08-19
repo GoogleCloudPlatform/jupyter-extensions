@@ -26,7 +26,7 @@ export interface Accelerator {
 }
 
 /**
- * AI Platform Accelerator types.
+ * The master list of AI Platform Accelerator types.
  * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
  */
@@ -46,7 +46,8 @@ export const ACCELERATOR_TYPES: Option[] = [
  * Get description text from Accelerator Type value
  */
 export function getGpuTypeText(value: string) {
-  return ACCELERATOR_TYPES.find(option => option.value === value).text;
+  const accelerator = ACCELERATOR_TYPES.find(option => option.value === value);
+  return accelerator ? accelerator.text : '';
 }
 
 /**
@@ -64,22 +65,32 @@ export const ACCELERATOR_COUNTS_1_2_4_8: Option[] = [
  * Convert nvidia-smi product_name type to match the AcceleratorType
  * enums that are used in the Notebooks API:
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest/v1beta1/projects.locations.instances#AcceleratorType
+ * This is hardcoded because currently only 5 acceleratorTypes are being used and no
+ * true mapping on nvidia-smi product_names to Notebooks API AcceleratorType exists
  */
-export function nvidiaNameToEnum(name: string): string {
-  if (name === '') return NO_ACCELERATOR_TYPE;
+const NVIDIA_TO_ACCELERATOR_TYPES = {
+  'Tesla K80': { enumValue: 'NVIDIA_TESLA_K80' },
+  'Tesla P4': { enumValue: 'NVIDIA_TESLA_P4' },
+  'Tesla P100-PCIE-16GB': { enumValue: 'NVIDIA_TESLA_P100' },
+  'Tesla T4': { enumValue: 'NVIDIA_TESLA_T4' },
+  'Tesla V100-SXM2-16GB': { enumValue: 'NVIDIA_TESLA_V100' },
+};
 
-  const accelerator = ACCELERATOR_TYPES.find(accelerator =>
-    accelerator.text.endsWith(name)
-  );
-  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR_TYPE;
+export function nvidiaNameToEnum(name: string): string {
+  const accelerator = NVIDIA_TO_ACCELERATOR_TYPES[name];
+  return accelerator ? (accelerator.enumValue as string) : NO_ACCELERATOR_TYPE;
 }
 
 /**
  * Format gcloud compute acceleratorType to match the AcceleratorType
- * enums that are used in the Notebooks API:
+ * enums that are used in the Notebooks API and ensure it exists:
  */
-function acceleratorNameToEnum(name: string): string {
-  return name.toUpperCase().replace(/-/g, '_');
+export function acceleratorNameToEnum(name: string): string {
+  const enumVal = name.toUpperCase().replace(/-/g, '_');
+  const accelerator = ACCELERATOR_TYPES.find(
+    accelerator => accelerator.value === enumVal
+  );
+  return accelerator ? (accelerator.value as string) : NO_ACCELERATOR_TYPE;
 }
 
 /*
