@@ -14,7 +14,7 @@ export class ModelDetailsWidget extends ReactWidget {
     private readonly name: string
   ) {
     super();
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-ModelIcon';
     this.title.caption = `Model Details for ${this.model_id}`;
     this.title.label = this.name;
     this.title.closable = true;
