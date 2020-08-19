@@ -274,7 +274,7 @@ class UCAIPService:
         })
     return datasets
 
-  def create_dataset(self, display_name, gcs_uri=None, bigquery_uri=None):
+  def create_dataset(self, display_name, gcs_uri=None, bigquery_table=None):
     input_config = {}
 
     if not display_name:
@@ -282,7 +282,9 @@ class UCAIPService:
 
     if gcs_uri:
       input_config["gcsSource"] = {"uri": [gcs_uri]}
-    elif bigquery_uri:
+    elif bigquery_table:
+      project, dataset, table = bigquery_table.split(".")
+      bigquery_uri = "bq://{}:{}.{}".format(project, dataset, table)
       input_config["bigquerySource"] = {"uri": bigquery_uri}
     else:
       raise ValueError("Must provide either gcs uri or bigquery uri")
