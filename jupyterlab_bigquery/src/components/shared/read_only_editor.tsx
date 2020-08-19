@@ -20,14 +20,16 @@ function handleEditorDidMount(_, editor) {
       const height = lineCount * lineHeight;
       editorElement.style.height = `${height + 0.5 * lineHeight}px`;
       editor.layout();
+      const lightTheme =
+        document.body.getAttribute('data-jp-theme-light') === 'true';
 
       monaco.editor.defineTheme('viewOnlyQueryTheme', {
-        base: 'vs',
+        base: lightTheme ? 'vs' : 'vs-dark',
         inherit: true,
         rules: [],
         colors: {
-          'editorCursor.foreground': '#FFFFFF',
-          'editorGutter.background': '#f8f9fa',
+          'editorCursor.foreground': lightTheme ? '#FFFFFF' : '#1E1E1E',
+          'editorGutter.background': lightTheme ? '#f8f9fa' : '#111111',
         },
       });
       monaco.editor.setTheme('viewOnlyQueryTheme');
@@ -60,7 +62,10 @@ const READ_ONLY_SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
 
 const ReadOnlyEditor = props => {
   return (
-    <Paper variant="outlined">
+    <Paper
+      variant="outlined"
+      style={{ border: '1px solid var(--jp-border-color2)' }}
+    >
       <Editor
         width="100%"
         theme={'vs'}

@@ -16,6 +16,7 @@ import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_edi
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { getStarterQuery } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 import InfoCard from '../shared/info_card';
 
@@ -101,7 +102,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                 );
               }}
               startIcon={<Code />}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
+              style={{
+                textTransform: 'none',
+                color: gColor('BLUE'),
+              }}
             >
               Query table
             </Button>
@@ -126,7 +130,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                 button={
                   <Button
                     size="small"
-                    style={{ textTransform: 'none' }}
+                    style={{
+                      textTransform: 'none',
+                      color: 'var(--jp-ui-font-color1)',
+                    }}
                     onClick={() => {
                       this.setState({ showPartitionCard: false });
                     }}
@@ -139,9 +146,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
             <StyledTabs
               value={this.state.currentTab}
               onChange={this.handleChange.bind(this)}
+              color={gColor('BLUE')}
             >
-              <StyledTab label="Details" />
-              <StyledTab label="Preview" />
+              <StyledTab label="Details" color={gColor('BLUE')} />
+              <StyledTab label="Preview" color={gColor('BLUE')} />
             </StyledTabs>
             <TabPanel
               value={this.state.currentTab}

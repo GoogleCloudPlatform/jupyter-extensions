@@ -15,7 +15,7 @@ export const localStyles = stylesheet({
     marginBottom: '10px',
   },
   panel: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--jp-layout-color0)',
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -45,12 +45,24 @@ export const localStyles = stylesheet({
   },
 });
 
+interface ChipProps {
+  darkMode: boolean;
+  size?: 'medium' | 'small';
+  component?: any;
+  key?: string | number;
+  label: string;
+}
+
 const StyledChip = withStyles({
   root: {
-    color: '#1967D2',
-    backgroundColor: 'rgba(25, 103, 210, 0.1)',
+    color: (props: ChipProps) =>
+      // white :  blue600
+      props.darkMode ? 'var(--jp-ui-font-color1)' : '#1A73E8',
+    backgroundColor: (props: ChipProps) =>
+      // blue300 at 30% opacity : blue600 at 10% opacity
+      props.darkMode ? 'rgba(138, 180, 248, 0.3)' : 'rgba(26, 115, 232, 0.1)',
   },
-})(Chip);
+})((props: ChipProps) => <Chip {...props} />);
 
 interface SharedDetails {
   id: string;
@@ -103,7 +115,15 @@ export const DetailsPanel: React.SFC<Props> = props => {
                 <div className={localStyles.labelContainer}>
                   {details.labels.map((value, index) => {
                     return (
-                      <StyledChip size="small" key={index} label={value} />
+                      <StyledChip
+                        size="small"
+                        key={index}
+                        label={value}
+                        darkMode={
+                          document.body.getAttribute('data-jp-theme-light') ===
+                          'false'
+                        }
+                      />
                     );
                   })}
                 </div>

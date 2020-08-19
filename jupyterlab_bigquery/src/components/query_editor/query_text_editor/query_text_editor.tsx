@@ -119,7 +119,10 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid rgb(218, 220, 224)',
+    border:
+      document.body.getAttribute('data-jp-theme-light') === 'true'
+        ? '1px solid rgb(218, 220, 224)'
+        : '1px solid var(--jp-border-color3)',
   },
   message: {
     display: 'flex',
@@ -130,7 +133,10 @@ const styleSheet = stylesheet({
     marginRight: '0.5rem',
   },
   wholeEditorInCell: {
-    border: '1px solid rgb(218, 220, 224)',
+    border:
+      document.body.getAttribute('data-jp-theme-light') === 'true'
+        ? '1px solid rgb(218, 220, 224)'
+        : '1px solid var(--jp-border-color3)',
   },
   pendingStatus: {
     display: 'flex',
@@ -145,8 +151,17 @@ const styleSheet = stylesheet({
     paddingBottom: '5px',
     paddingLeft: '10px',
     paddingRight: '10px',
-    backgroundColor: 'rgb(248, 249, 250)',
-    borderBottom: '1px solid rgb(218, 220, 224)',
+    backgroundColor:
+      document.body.getAttribute('data-jp-theme-light') === 'true'
+        ? 'rgb(248, 249, 250)'
+        : 'var(--jp-layout-color0)',
+    borderBottom:
+      document.body.getAttribute('data-jp-theme-light') === 'true'
+        ? '1px solid rgb(218, 220, 224)'
+        : '1px solid var(--jp-border-color3)',
+  },
+  icon: {
+    color: 'var(--jp-layout-color3)',
   },
 });
 
@@ -233,12 +248,14 @@ class QueryTextEditor extends React.Component<
 
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
+      const lightTheme =
+        document.body.getAttribute('data-jp-theme-light') === 'true';
       this.monacoInstance.editor.defineTheme('sqlTheme', {
-        base: 'vs',
+        base: lightTheme ? 'vs' : 'vs-dark',
         inherit: true,
         rules: [],
         colors: {
-          'editorGutter.background': '#f8f9fa',
+          'editorGutter.background': lightTheme ? '#f8f9fa' : '#111111',
         },
       });
     });
@@ -626,7 +643,7 @@ class QueryTextEditor extends React.Component<
           copy(query.trim());
         }}
       >
-        <FileCopyOutlined fontSize="small" />
+        <FileCopyOutlined fontSize="small" className={styleSheet.icon} />
       </IconButton>
     );
   }
