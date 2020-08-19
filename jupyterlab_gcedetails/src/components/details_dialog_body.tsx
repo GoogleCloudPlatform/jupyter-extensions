@@ -33,31 +33,42 @@ const DIALOG_STYLES = stylesheet({
   },
 });
 
+function loadingDetails(details: boolean, receivedError: boolean): boolean {
+  return !(details || receivedError);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
   return (
     <dl className={STYLES.containerPadding}>
-      <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
-        Notebook VM Details
-      </p>
-      {receivedError ? (
-        <p className={STYLES.paragraph}>
-          Unable to retrieve GCE VM details, please check your server logs
+      <div className={STYLES.containerSize}>
+        <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
+          Notebook VM Details
         </p>
-      ) : (
-        MAPPED_ATTRIBUTES.map(am => (
-          <div className={STYLES.listRow} key={am.label}>
-            <dt className={STYLES.dt}>{am.label}</dt>
-            <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-          </div>
-        ))
-      )}
+        {loadingDetails(Boolean(details), receivedError) ? (
+          <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
+        ) : receivedError ? (
+          <p className={STYLES.paragraph}>
+            Unable to retrieve GCE VM details, please check your server logs
+          </p>
+        ) : (
+          MAPPED_ATTRIBUTES.map(am => (
+            <div className={STYLES.listRow} key={am.label}>
+              <dt className={STYLES.dt}>{am.label}</dt>
+              <dd className={STYLES.dd}>{am.mapper(details)}</dd>
+            </div>
+          ))
+        )}
+      </div>
       <ActionBar
         primaryLabel="Update"
         secondaryLabel="Close"
         onPrimaryClick={reshapeForm}
         onSecondaryClick={onDialogClose}
+        primaryDisabled={
+          receivedError || loadingDetails(Boolean(details), receivedError)
+        }
       />
     </dl>
   );
