@@ -121,8 +121,8 @@ class GetQueryDetailsHandler(APIHandler):
   def __init__(self, application, request, **kwargs):
     super().__init__(application, request, **kwargs)
 
-    if QueryHistoryHandler.bigquery_client is None:
-      QueryHistoryHandler.bigquery_client = bigquery.Client()
+    if GetQueryDetailsHandler.bigquery_client is None:
+      GetQueryDetailsHandler.bigquery_client = bigquery.Client()
 
   @gen.coroutine
   def post(self, *args, **kwargs):
