@@ -1,30 +1,33 @@
 class BigDataManager {
-  private static queryResults = {};
+  private static queryResults: {
+    [type: string]: { [id: string]: Array<unknown> };
+  } = {};
 
-  constructor(private readonly className: string) {
-    if (!(this.className in BigDataManager.queryResults)) {
-      BigDataManager.queryResults[this.className] = {};
+  constructor(private readonly type: string) {
+    if (!(this.type in BigDataManager.queryResults)) {
+      BigDataManager.queryResults[this.type] = {};
     }
   }
 
-  resetSlot(jobId: string) {
-    this.getResults()[jobId] = [];
+  resetSlot(id: string) {
+    this.getResults()[id] = [];
   }
 
-  updateSlot(jobId: string, newBatch: []) {
-    this.getResults()[jobId].cat(newBatch);
+  updateSlot(id: string, newBatch: Array<unknown>) {
+    this.getResults()[id] = this.getResults()[id].concat(newBatch);
   }
 
-  getSlot(jobId: string) {
-    return this.getResults()[jobId];
+  getSlot(id: string) {
+    return this.getResults()[id];
   }
 
-  getSlotSize(jobId: string) {
-    return this.getResults()[jobId].length;
+  getSlotSize(id: string) {
+    const content = this.getResults()[id];
+    return content !== undefined ? content.length : 0;
   }
 
   private getResults() {
-    return BigDataManager.queryResults[this.className];
+    return BigDataManager.queryResults[this.type];
   }
 }
 

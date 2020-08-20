@@ -34,6 +34,7 @@ import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
 import ReactResizeDetector from 'react-resize-detector';
+import BigDataManager from '../../../utils/BigDataManager';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -53,6 +54,7 @@ interface QueryTextEditorProps {
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   onQueryChange?: (string) => void;
+  onQueryFInish?: (Array) => void;
   showResult?: boolean;
 }
 
@@ -60,16 +62,19 @@ interface QueryResponseType {
   content: string;
   labels: string;
   bytesProcessed: number;
+  project: string;
 }
 
 export interface QueryResult {
-  content: Array<Array<unknown>>;
+  contentLen: number;
   labels: Array<string>;
   bytesProcessed: number;
-  queryId: QueryId;
   project: string;
+  queryId: QueryId;
   query: string;
 }
+
+export type QueryContent = Array<Array<unknown>>;
 
 interface QueryRequestBodyType {
   query: string;
@@ -151,6 +156,8 @@ enum QueryStates {
   ERROR,
 }
 
+export const QUERY_DATA_TYPE = 'query_content';
+
 class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
   QueryTextEditorState
@@ -163,6 +170,8 @@ class QueryTextEditor extends React.Component<
   queryFlags: {};
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
+
+  queryManager: BigDataManager;
 
   constructor(props) {
     super(props);
@@ -190,6 +199,8 @@ class QueryTextEditor extends React.Component<
         },
       });
     });
+
+    this.queryManager = new BigDataManager(QUERY_DATA_TYPE);
   }
 
   componentDidMount() {
@@ -230,6 +241,8 @@ class QueryTextEditor extends React.Component<
       ifMsgErr: false,
     });
 
+    this.queryManager.resetSlot(this.queryId);
+
     this.job = this.pagedQueryService.request(
       { query, jobConfig: this.queryFlags, dryRunOnly: false },
       (state, _, response) => {
@@ -245,6 +258,10 @@ class QueryTextEditor extends React.Component<
           processed.queryId = this.queryId;
           processed.query = query;
 
+          this.queryManager.updateSlot(this.queryId, processed['content']);
+          processed.contentLen = this.queryManager.getSlotSize(this.queryId);
+
+          delete processed['content'];
           this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
           this.setState({
@@ -260,9 +277,13 @@ class QueryTextEditor extends React.Component<
           }, 2000);
         } else if (state === JobState.Done) {
           this.setState({ queryState: QueryStates.READY });
+
+          if (this.props.onQueryFInish) {
+            this.props.onQueryFInish(this.queryManager.getSlot(this.queryId));
+          }
         }
       },
-      2000
+      500000
     );
   }
 

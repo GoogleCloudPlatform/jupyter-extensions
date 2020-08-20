@@ -9,7 +9,6 @@ export interface QueryEditorState {
 export type QueryId = string;
 
 const DEFAULT_INIT_QUERY_STATE = {
-  content: [],
   labels: [],
   bytesProcessed: null,
   queryId: null,
@@ -34,12 +33,12 @@ const queryEditorTabSlice = createSlice({
       const queryId = queryResult.queryId;
       const newQueryState = state.queries[queryId];
 
-      newQueryState.content = newQueryState.content.concat(queryResult.content);
       newQueryState.labels = queryResult.labels;
       newQueryState.bytesProcessed = queryResult.bytesProcessed;
       newQueryState.queryId = queryId;
       newQueryState.query = queryResult.query;
       newQueryState.project = queryResult.project;
+      newQueryState.contentLen = queryResult.contentLen;
 
       state.queries = { ...state.queries, [queryId]: newQueryState };
     },
