@@ -1,7 +1,8 @@
 import * as React from 'react';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
-import { HardwareConfiguration, STYLES } from '../data';
+import { STYLES } from '../data/styles';
+import { HardwareConfiguration } from '../data/data';
 import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';

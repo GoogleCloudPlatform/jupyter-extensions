@@ -19,7 +19,8 @@ import { stylesheet } from 'typestyle';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Option, TEXT_STYLE } from '../data';
+import { TEXT_STYLE } from '../data/styles';
+import { Option } from '../data/data';
 
 interface Props {
   label?: string;

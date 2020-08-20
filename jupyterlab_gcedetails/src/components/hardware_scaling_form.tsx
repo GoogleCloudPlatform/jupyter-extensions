@@ -28,22 +28,26 @@ import {
 import { stylesheet, classes } from 'typestyle';
 import { NestedSelect } from './machine_type_select';
 import { SelectInput } from './select_input';
+import { STYLES } from '../data/styles';
+import {
+  HardwareConfiguration,
+  Details,
+  detailsToHardwareConfiguration,
+  isEqualHardwareConfiguration,
+} from '../data/data';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
   ACCELERATOR_TYPES,
-  MACHINE_TYPES,
-  HardwareConfiguration,
-  optionToMachineType,
-  machineTypeToOption,
   getGpuTypeOptionsList,
   getGpuCountOptionsList,
-  Details,
-  detailsToHardwareConfiguration,
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
-  isEqualHardwareConfiguration,
-  STYLES,
-} from '../data';
+} from '../data/accelerator_types';
+import {
+  MACHINE_TYPES,
+  optionToMachineType,
+  machineTypeToOption,
+} from '../data/machine_types';
 import { ActionBar } from './action_bar';
 
 interface Props {

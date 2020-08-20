@@ -48,15 +48,11 @@ const style = {
 
 export class CodeReview extends React.Component<Props> {
   render() {
-    const comments = this.props.commentsList.map(comment => (
-      <>
-        <Comment
-          reviewComment={comment}
-          file={this.props.file}
-          key={comment.timestamp}
-        />
+    const comments = this.props.commentsList.map((comment, index) => (
+      <div key={index}>
+        <Comment reviewComment={comment} file={this.props.file} />
         <Divider />
-      </>
+      </div>
     ));
     const reviewTimeStamp = timeAgo(
       new Date().getTime(),

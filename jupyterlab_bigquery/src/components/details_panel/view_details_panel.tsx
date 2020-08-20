@@ -50,11 +50,6 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
     }
   }
 
-  formatMs(ms) {
-    const days = ms / 86400000;
-    return `${days} day${days > 1 ? 's' : ''} 0 hr`;
-  }
-
   private async getDetails() {
     try {
       this.setState({ isLoading: true });

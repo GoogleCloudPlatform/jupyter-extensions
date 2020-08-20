@@ -27,7 +27,8 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Option, TEXT_STYLE } from '../data';
+import { TEXT_STYLE } from '../data/styles';
+import { Option } from '../data/data';
 
 const STYLES = stylesheet({
   itemGroup: {
