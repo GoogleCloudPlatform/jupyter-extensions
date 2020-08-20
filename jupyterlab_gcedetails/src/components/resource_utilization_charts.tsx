@@ -2,7 +2,7 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { ServerWrapper } from './server_wrapper';
 import { AreaChartWrapper } from './chart_wrapper';
-import { Utilization } from '../data';
+import { Utilization } from '../data/data';
 
 const AREA_CHART_BLUE = {
   stroke: '#15B2D3',

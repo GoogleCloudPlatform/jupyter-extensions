@@ -17,12 +17,12 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { classes } from 'typestyle';
+import { STYLES } from './data/styles';
 import {
   Details,
-  STYLES,
   MAPPED_ATTRIBUTES,
   REFRESHABLE_MAPPED_ATTRIBUTES,
-} from './data';
+} from './data/data';
 import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';

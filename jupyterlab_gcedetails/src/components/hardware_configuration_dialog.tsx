@@ -23,7 +23,7 @@ import {
   HardwareConfiguration,
   Details,
   detailsToHardwareConfiguration,
-} from '../data';
+} from '../data/data';
 import { ConfirmationPage } from './confirmation_page';
 import { ServerWrapper } from './server_wrapper';
 import { DetailsDialogBody } from './details_dialog_body';

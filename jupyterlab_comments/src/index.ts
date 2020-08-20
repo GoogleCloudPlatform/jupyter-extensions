@@ -24,7 +24,13 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { MainAreaWidget, ICommandPalette } from '@jupyterlab/apputils';
 
+import { FileEditor } from '@jupyterlab/fileeditor';
+
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+
 import { CommentsWidget } from './components/comments_widget';
+
+import { NewCommentDialogWidget } from './components/new_comment_dialog';
 
 function activate(
   app: JupyterFrontEnd,
@@ -37,16 +43,17 @@ function activate(
   let widget: MainAreaWidget<CommentsWidget>;
   let content: CommentsWidget;
 
+  const context = {
+    labShell: labShell,
+    docManager: docManager,
+  };
+
   // Add an application command
   const command = 'comments:open';
   app.commands.addCommand(command, {
     label: 'Notebook comments in git',
     execute: () => {
       if (!widget || widget.isDisposed) {
-        const context = {
-          labShell: labShell,
-          docManager: docManager,
-        };
         content = new CommentsWidget(context);
         widget = new MainAreaWidget<CommentsWidget>({ content });
         widget.id = 'jupyterlab_comments';
@@ -60,9 +67,36 @@ function activate(
       app.shell.activateById(widget.id);
     },
   });
-
   // Add the command to the palette.
   palette.addItem({ command, category: 'Collaboration' });
+
+  /*
+  Command for adding new comment to currently selected line in the file
+  This command only support non-Notebook files
+  */
+  const addNewComment = 'comments:add';
+  app.commands.addCommand(addNewComment, {
+    execute: () => {
+      const file = (labShell.currentWidget as IDocumentWidget)
+        .content as FileEditor;
+      if (!widget) {
+        return;
+      }
+      const selectionObj = file.editor.getSelection(); //contains start and end line and column attributes
+      const dialogWidget = new NewCommentDialogWidget(selectionObj, context);
+      dialogWidget.id = 'new_comment';
+
+      app.shell.add(dialogWidget, 'bottom'); //attach widget to UI to display dialog
+      app.shell.activateById(dialogWidget.id);
+    },
+    label: 'New comment',
+  });
+  //Add command to file editor's right click context menu
+  app.contextMenu.addItem({
+    command: addNewComment,
+    selector: '.jp-FileEditor',
+    rank: 1,
+  });
 }
 
 /**
