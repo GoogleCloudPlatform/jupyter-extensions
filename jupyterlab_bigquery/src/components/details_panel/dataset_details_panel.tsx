@@ -106,7 +106,7 @@ export default class DatasetDetailsPanel extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.container}>
-          <Header text={this.props.dataset_id} />
+          <Header>{this.props.dataset_id}</Header>
           <div className={localStyles.body}>
             <DetailsPanel
               details={this.state.details.details}
