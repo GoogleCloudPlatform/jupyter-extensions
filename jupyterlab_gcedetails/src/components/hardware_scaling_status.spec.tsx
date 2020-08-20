@@ -4,7 +4,7 @@ import { HardwareScalingStatus, Status } from './hardware_scaling_status';
 import { DETAILS_RESPONSE } from '../test_helpers';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
-import { detailsToHardwareConfiguration } from '../data';
+import { detailsToHardwareConfiguration } from '../data/data';
 import Button from '@material-ui/core/Button';
 
 describe('HardwareScalingStatus', () => {
