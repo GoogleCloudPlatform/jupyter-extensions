@@ -13,6 +13,7 @@ SUPPORTED_JOB_CONFIG_FLAGS = [
 ]
 
 NUM_THREADS = 6
+USE_PARALLEL_THRESH = 1e5
 
 class PagedQueryHandler(PagedAPIHandler):
   client = None
@@ -107,7 +108,7 @@ class PagedQueryHandler(PagedAPIHandler):
     schema_fields = format_preview_fields(en.schema)
 
     for page in en.pages:
-      if page.num_items > 1e5:
+      if page.num_items > USE_PARALLEL_THRESH:
         content = parallel_format_preview_rows(page, en.schema, pool=self.pool)
       else:
         content = format_preview_rows(page, en.schema)
