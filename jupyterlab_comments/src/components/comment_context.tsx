@@ -44,8 +44,8 @@ export class CommentContext extends React.Component<Props> {
   render() {
     const context = this.props.file.getContext(this.props.range);
     if (context) {
-      const lines = context.map(line => (
-        <div>
+      const lines = context.map((line, index) => (
+        <div key={index}>
           <p style={styles.lineNumber}> {line[0]} </p>
           <code style={styles.lineText}> {line[1]} </code>
         </div>

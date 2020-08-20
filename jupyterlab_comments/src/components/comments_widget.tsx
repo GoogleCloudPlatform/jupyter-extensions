@@ -39,12 +39,10 @@ import {
 } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CommentIcon from '@material-ui/icons/Comment';
-import { ILabShell } from '@jupyterlab/application';
-import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Comment } from '../components/comment';
 import { NewCommentThread } from '../components/start_thread';
-import { getServerRoot } from '../service/jupyterConfig';
+import { getServerRoot, Context } from '../service/jupyterConfig';
 import { CodeReview } from '../components/code_review';
 import { RegularFile, NotebookFile } from '../service/file';
 
@@ -59,11 +57,6 @@ interface State {
   serverRoot: string;
   activeTab: number;
   errorMessage: string;
-}
-
-export interface Context {
-  labShell: ILabShell;
-  docManager: IDocumentManager;
 }
 
 const localStyles = stylesheet({
@@ -154,18 +147,20 @@ export class CommentsComponent extends React.Component<Props, State> {
     } else {
       file = new RegularFile(currWidget as IDocumentWidget);
     }
-    const detachedCommentsList = this.state.detachedComments.map(comment => (
-      <>
-        <Comment detachedComment={comment} file={file} />
-        <Divider />
-      </>
-    ));
+    const detachedCommentsList = this.state.detachedComments.map(
+      (comment, index) => (
+        <div key={index}>
+          <Comment detachedComment={comment} file={file} />
+          <Divider />
+        </div>
+      )
+    );
     const numDetachedComments = this.state.detachedComments.length;
     const detachedLabel: string =
       'Detached (' + numDetachedComments.toString() + ')';
     const reviewCommentsList = this.state.reviewComments.map(
-      reviewCommentsArr => (
-        <>
+      (reviewCommentsArr, index) => (
+        <div key={index}>
           <CodeReview
             reviewRequest={reviewCommentsArr[0]}
             commentsList={reviewCommentsArr[1]}
@@ -177,7 +172,7 @@ export class CommentsComponent extends React.Component<Props, State> {
             commentType="review"
             reviewHash={reviewCommentsArr[0].reviewHash}
           />
-        </>
+        </div>
       )
     );
     return (
@@ -268,6 +263,7 @@ export class CommentsComponent extends React.Component<Props, State> {
                 const comment = createDetachedCommentFromJSON(obj, filePath);
                 comments.push(comment);
               });
+              comments.reverse();
             }
           }
           this.setState({
@@ -312,6 +308,7 @@ export class CommentsComponent extends React.Component<Props, State> {
                     );
                     comments.push(comment);
                   });
+                  comments.reverse();
                   reviews.push([request, comments]);
                 }
               });
