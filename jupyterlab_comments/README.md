@@ -2,7 +2,9 @@
 
 This extension provides support for document comments for Notebooks and other files stored in Git repositories.
 
-![alt text](https://github.com/mkalil/jupyter-extensions/blob/demo/jupyterlab_comments/screenshot.png?raw=true)
+![](https://github.com/mkalil/jupyter-extensions/blob/demo/jupyterlab_comments/screenshot.png?raw=true)
+
+[Video Demo](https://www.youtube.com/watch?v=DaQ3epqqr7k)
 
 ## Prerequisites
 
