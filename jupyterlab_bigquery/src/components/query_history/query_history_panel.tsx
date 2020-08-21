@@ -21,7 +21,7 @@ import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { StripedRows } from '../shared/striped_rows';
 import ReadOnlyEditor from '../shared/read_only_editor';
-import { JobsObject, Job } from './service/query_history';
+import { JobsObject, Job, QueryHistory } from './service/query_history';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
@@ -143,6 +143,7 @@ interface State {
   detailLoaded: boolean;
   page: number;
   rowsPerPage: number;
+  lastFetchTime: number;
 }
 
 const ErrorBox = (props: { errorMsg: string }) => {
@@ -303,11 +304,6 @@ const QueryStatus = props => {
   }
 };
 
-interface QueryHistory {
-  jobs: JobsObject;
-  jobIds: string[];
-}
-
 class QueryHistoryPanel extends React.Component<Props, State> {
   private static queryHistory: QueryHistory | undefined = undefined;
 
@@ -319,6 +315,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       detailLoaded: false,
       page: 0,
       rowsPerPage: 30,
+      lastFetchTime: 0,
     };
   }
 
@@ -329,7 +326,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     }
   }
 
-  getQueryDetails = async jobId => {
+  async getQueryDetails(jobId) {
     if (!QueryHistoryPanel.queryHistory.jobs[jobId].details) {
       try {
         const service = new QueryDetailsService();
@@ -343,9 +340,9 @@ class QueryHistoryPanel extends React.Component<Props, State> {
         );
       }
     }
-  };
+  }
 
-  processHistory = (jobIds, jobs) => {
+  processHistory(jobIds, jobs) {
     const queriesByDate = {};
     jobIds.map(jobId => {
       const date = DateTime.fromISO(jobs[jobId].created);
@@ -357,18 +354,18 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       }
     });
     return queriesByDate;
-  };
+  }
 
   private async getHistory() {
     try {
       await this.props.queryHistoryService
         .getQueryHistory(this.props.currentProject)
         .then(queryHistory => {
-          const jobIds = queryHistory.jobIds;
-          const jobs = queryHistory.jobs;
+          const { jobIds, jobs, lastFetchTime } = queryHistory;
           QueryHistoryPanel.queryHistory = {
             jobIds: jobIds,
             jobs: jobs,
+            lastFetchTime: lastFetchTime,
           };
         });
     } catch (err) {
@@ -401,8 +398,31 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     this.setState({ page: 0 });
   }
 
-  handleRefreshHistory() {
-    console.log('here');
+  async handleRefreshHistory() {
+    try {
+      await this.props.queryHistoryService
+        .getQueryHistory(
+          this.props.currentProject,
+          QueryHistoryPanel.queryHistory.lastFetchTime
+        )
+        .then(queryHistory => {
+          const { jobIds, jobs, lastFetchTime } = queryHistory;
+          QueryHistoryPanel.queryHistory.jobs = Object.assign(
+            QueryHistoryPanel.queryHistory.jobs,
+            jobs
+          );
+
+          // pre-pend since query ids are ordered by time, ascending
+          QueryHistoryPanel.queryHistory.jobIds = jobIds.concat(
+            QueryHistoryPanel.queryHistory.jobIds
+          );
+          QueryHistoryPanel.queryHistory.lastFetchTime = lastFetchTime;
+
+          this.setState({ lastFetchTime });
+        });
+    } catch (err) {
+      console.warn('Error retrieving query history', err);
+    }
   }
 
   render() {
