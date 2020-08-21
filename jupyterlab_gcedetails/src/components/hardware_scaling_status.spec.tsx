@@ -33,6 +33,7 @@ describe('HardwareScalingStatus', () => {
   const mockToken = 'mockToken';
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.useFakeTimers();
   });
 
   it('Runs through reshaping flow', async () => {
@@ -90,24 +91,21 @@ describe('HardwareScalingStatus', () => {
       Status['Refreshing Session']
     );
     expect(hardwareScalingStatus).toMatchSnapshot('Refreshing Session');
+    jest.runAllTimers();
     await mockGetUtilizationData();
-    setTimeout(() => {
-      expect(mockOnComplete).toBeCalled();
-      expect(hardwareScalingStatus.state('status')).toEqual(Status.Complete);
-      expect(hardwareScalingStatus).toMatchSnapshot('Complete');
-      hardwareScalingStatus
-        .find(Button)
-        .first()
-        .simulate('click');
-      expect(mockOnDialogClose).toBeCalled();
-    }, 1000);
+    expect(mockOnComplete).toBeCalled();
+    expect(hardwareScalingStatus.state('status')).toEqual(Status.Complete);
+    expect(hardwareScalingStatus).toMatchSnapshot('Complete');
+    hardwareScalingStatus
+      .find(Button)
+      .first()
+      .simulate('click');
+    expect(mockOnDialogClose).toBeCalled();
   });
 
   it('Renders with auth error', async () => {
-    mockAuthTokenRetrieval.mockImplementation(() => {
-      throw new Error();
-    });
-    const detailsResponse = await JSON.parse(DETAILS_RESPONSE);
+    mockAuthTokenRetrieval.mockResolvedValue(new Error());
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
@@ -119,16 +117,15 @@ describe('HardwareScalingStatus', () => {
         authTokenRetrieval={mockAuthTokenRetrieval}
       />
     );
+    await mockAuthTokenRetrieval();
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Auth Error');
   });
 
   it('Renders with stop error', async () => {
     mockAuthTokenRetrieval.mockResolvedValue(mockToken);
-    mockStopInstance.mockImplementation(() => {
-      throw new Error();
-    });
-    const detailsResponse = await JSON.parse(DETAILS_RESPONSE);
+    mockStopInstance.mockRejectedValue(new Error());
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
@@ -148,14 +145,10 @@ describe('HardwareScalingStatus', () => {
   it('Renders with operation error', async () => {
     const mockGetUtilizationData = jest.fn();
     const mockStopInstance = jest.fn();
-    mockSetMachineType.mockImplementation(() => {
-      throw new Error();
-    });
-    mockSetAccelerator.mockImplementation(() => {
-      throw new Error();
-    });
+    mockSetMachineType.mockRejectedValue(new Error());
+    mockSetAccelerator.mockRejectedValue(new Error());
     mockStartInstance.mockResolvedValue(mockInstance);
-    const detailsResponse = await JSON.parse(DETAILS_RESPONSE);
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
@@ -173,30 +166,23 @@ describe('HardwareScalingStatus', () => {
     await mockStopInstance();
     await mockStartInstance();
     await mockGetUtilizationData();
-    setTimeout(() => {
-      expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
-      expect(hardwareScalingStatus).toMatchSnapshot('Operation error');
-      hardwareScalingStatus
-        .find(Button)
-        .first()
-        .simulate('click');
-      expect(mockOnDialogClose).toBeCalled();
-    }, 1000);
+    jest.runAllTimers();
+    expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
+    expect(hardwareScalingStatus).toMatchSnapshot('Operation error');
+    hardwareScalingStatus
+      .find(Button)
+      .first()
+      .simulate('click');
+    expect(mockOnDialogClose).toBeCalled();
   });
 
   it('Renders with restart error', async () => {
     const mockGetUtilizationData = jest.fn();
     const mockStopInstance = jest.fn();
-    mockSetMachineType.mockImplementation(() => {
-      throw new Error();
-    });
-    mockSetAccelerator.mockImplementation(() => {
-      throw new Error();
-    });
-    mockStartInstance.mockImplementation(() => {
-      throw new Error();
-    });
-    const detailsResponse = await JSON.parse(DETAILS_RESPONSE);
+    mockSetMachineType.mockRejectedValue(new Error());
+    mockSetAccelerator.mockRejectedValue(new Error());
+    mockStartInstance.mockRejectedValue(new Error());
+    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
