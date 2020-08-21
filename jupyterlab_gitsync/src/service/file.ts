@@ -21,16 +21,18 @@ export class File implements IFile {
   editor: CodeMirror;
   doc: CodeMirror.doc;
   resolver: FileResolver;
-  view: {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-  };
+  view: { 
+    left: number,
+    top: number, 
+    right: number,
+    bottom: number 
+  }
+  cursor: {
+    line: number,
+    ch: number
+  }
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
-    this
-  );
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: DocumentWidget) {
@@ -58,8 +60,10 @@ export class File implements IFile {
   }
 
   async save() {
-    try {
-      await this.context.save();
+    try{
+      const text = this.doc.getValue();
+      await this._saveFile(text);
+      this.resolver.addVersion(text, 'base');
     } catch (error) {
       console.warn(error);
     }
@@ -76,6 +80,12 @@ export class File implements IFile {
   }
 
   private async _displayText(text: string) {
+    await this._saveFile(text);
+    await this.context.revert();
+    this._setEditorView();
+  }
+
+  private async _saveFile(text: string){
     const options = {
       content: text,
       format: 'text' as Contents.FileFormat,
@@ -83,8 +93,6 @@ export class File implements IFile {
       type: 'file' as Contents.ContentType,
     };
     await fs.save(this.path, options);
-    await this.context.revert();
-    this._setEditorView();
   }
 
   private async _getInitVersion() {
@@ -99,7 +107,7 @@ export class File implements IFile {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
     } catch (error) {
-      console.log(error);
+      console.warn(error);
     }
   }
 
@@ -109,8 +117,8 @@ export class File implements IFile {
   }
 
   private _getEditorView() {
-    const cursor = this.doc.getCursor();
-    this.resolver.setCursorToken(cursor);
+    this.cursor = this.doc.getCursor();
+    this.resolver.setCursorToken(this.cursor);
     const scroll = this.editor.getScrollInfo();
     this.view = {
       left: scroll.left,
@@ -121,8 +129,8 @@ export class File implements IFile {
   }
 
   private _setEditorView() {
-    const cursor = this.resolver.cursor;
-    this.doc.setCursor(cursor);
+    this.cursor = this.resolver.getCursorToken();
+    this.doc.setCursor(this.cursor);
     this.editor.scrollIntoView(this.view);
   }
 

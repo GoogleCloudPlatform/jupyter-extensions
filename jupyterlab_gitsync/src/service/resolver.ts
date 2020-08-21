@@ -2,12 +2,12 @@
 import { CodeMirror } from 'codemirror';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { default as merge } from 'diff3';
+import * as diff3 from 'node-diff3';
 
 import { IResolver } from './tracker';
 import { File } from './file';
 
-function token() {
+function token(): string {
   let token = '';
   while (token.length < 32)
     token += Math.random()
@@ -21,17 +21,20 @@ interface Versions {
   local: string;
   remote: string;
   local_tok: string;
+  merged: string;
+  merged_tok: string;
 }
 
 export class FileResolver implements IResolver {
-  _file: File;
-  _token: string = token();
-  _cursor: CodeMirror.Pos;
+  private _file: File;
+  private _token: string = token();
   private _versions: Versions = {
     base: undefined,
     local: undefined,
     remote: undefined,
     local_tok: undefined,
+    merged: undefined,
+    merged_tok: undefined
   };
 
   private _conflict: boolean;
@@ -51,10 +54,6 @@ export class FileResolver implements IResolver {
     return this._file.path;
   }
 
-  get cursor() {
-    return this._cursor;
-  }
-
   get conflict(): boolean {
     return this._conflict;
   }
@@ -67,7 +66,7 @@ export class FileResolver implements IResolver {
     return this._conflictState;
   }
 
-  setCursorToken(pos: CodeMirror.Pos) {
+  setCursorToken(pos: CodeMirror.Pos): void {
     const text = this.versions.local.split('\n');
     let line = text[pos.line];
 
@@ -76,27 +75,25 @@ export class FileResolver implements IResolver {
     line = before + this._token + after;
 
     text[pos.line] = line;
-    this.addVersion(text.join('\n'), 'local_tok');
+    this._versions.local_tok = text.join('\n');
   }
 
-  private _removeCursorToken(input: string) {
-    const text = input.split('\n');
-    for (let i = 0; i < text.length; i++) {
-      if (text[i].indexOf(this._token) > -1) {
-        const line = i;
-        const ch = text[i].indexOf(this._token);
-        this._cursor = { line: line, ch: ch };
-        break;
+  getCursorToken(): CodeMirror.Pos {
+    if (this.versions.merged_tok){
+      const text = this.versions.merged_tok.split('\n');
+      for (let i = 0; i < text.length; i++) {
+        if (text[i].indexOf(this._token) > -1) {
+          const line = i;
+          const ch = text[i].indexOf(this._token);
+          return { line: line, ch: ch };
+        }
       }
     }
-    return input.replace(this._token, '');
+    return { line: 0, ch: 0 };
   }
 
-  addVersion(
-    text: string,
-    origin: 'base' | 'local' | 'remote' | 'local_tok'
-  ): void {
-    this._versions[origin] = text;
+  addVersion(content: string, origin: 'base' | 'local' | 'remote'): void {
+    this._versions[origin] = content;
   }
 
   async mergeVersions(): Promise<string> {
@@ -104,100 +101,61 @@ export class FileResolver implements IResolver {
       this.addVersion(this.versions.local, 'base');
       return undefined;
     }
-    const merged = merge(
-      this.versions.remote,
-      this.versions.base,
-      this.versions.local_tok
-    );
-    if (this._isConflict(merged)) {
-      await this._resolveConflicts(merged);
-    } else {
-      let text = this._mergeResult(merged[0]);
-      text = this._removeCursorToken(text);
-      this.addVersion(text, 'base');
-    }
+    let result = diff3.merge(this.versions.local_tok, this.versions.base, 
+      this.versions.remote, { stringSeparator: '\n' });
+
+    if (result.conflict) {
+      result.result = result.result.map(value => {
+        switch (value){
+          case '\n<<<<<<<<<\n':
+            return '\n<<<<<<<<< LOCAL\n';
+          case '\n>>>>>>>>>\n':
+            return '\n>>>>>>>>> REMOTE\n';
+          default:
+            return value;
+        }
+      });
+    } 
+    let text = result.result.join('\n');
+    this._versions.merged_tok = text;
+    this._versions.merged = text.replace(this._token, '');
+    if (result.conflict) { await this._resolveDialog(); }
+
     this._updateState(false);
-    return this._versions.base;
+    return this.versions.merged;
   }
 
-  private _isConflict(merged): boolean {
-    return merged.length > 1 || !merged[0] || merged[0].conflict;
-  }
-
-  private _mergeResult(merged): string {
-    return merged ? merged.ok.join('') : '';
-  }
-
-  private async _resolveConflicts(merged): Promise<void> {
-    let resolved = true;
-    const result = merged.map(segment => {
-      if (segment.ok) return this._mergeResult(segment);
-
-      const base = segment.conflict.o;
-      const remote = segment.conflict.a;
-      const local = segment.conflict.b;
-
-      const content = this._resolveFalseConflict(base, remote, local);
-      if (!content) resolved = false;
-
-      return content ? content : segment;
-    });
-
-    if (resolved) {
-      let text = result.join('');
-      text = this._removeCursorToken(text);
-      this.addVersion(text, 'base');
-    } else {
-      await this._resolveDialog(result);
-    }
-  }
-
-  private _resolveFalseConflict(base, remote, local): string {
-    let ret = undefined;
-    const local_raw = local.replace(this._token, '');
-
-    if (
-      base === '' &&
-      (local_raw.startsWith(remote) || remote.startsWith(local_raw))
-    )
-      ret = (local_raw.startsWith(remote) ? local_raw : remote).replace(
-        local_raw,
-        local
-      );
-    else {
-      console.log(base);
-      console.log(local);
-      console.log(remote);
-    }
-    return ret;
-  }
-
-  private _updateState(state: boolean) {
-    if (state !== this.conflict) {
+  private _updateState(state: boolean): void {
+    if (state != this.conflict){
       this._conflict = state;
       this._conflictState.emit(state);
     }
   }
 
-  private async _resolveDialog(result): Promise<void> {
-    const body = `"${this.path}" has a conflict. Would you like to revert to a previous version?\
-      \n(Note that ignoring conflicts will stop git sync.)`;
+  private async _resolveDialog(): Promise<void> {
+    const body = 
+      `"${this.path}" has a conflict. Would you like to revert to a previous version\
+      \nor view the diff? (Note that ignoring conflicts will stop git sync.)`;
     // const resolveBtn = Dialog.okButton({ label: 'Resolve Conflicts' });
     const localBtn = Dialog.okButton({ label: 'Revert to Local' });
     const remoteBtn = Dialog.okButton({ label: 'Revert to Remote' });
+    const diffBtn = Dialog.okButton({ label: 'View Diff'})
     const ignoreBtn = Dialog.warnButton({ label: 'Ignore Conflict' });
     return showDialog({
       title: 'Merge Conflicts',
       body,
-      buttons: [ignoreBtn, remoteBtn, localBtn],
+      buttons: [ignoreBtn, remoteBtn, localBtn, diffBtn],
     }).then(result => {
       if (result.button.label === 'Revert to Local') {
-        const text = this._removeCursorToken(this._versions.local);
-        this.addVersion(text, 'base');
+        this._versions.merged = this.versions.local;
+        this._versions.merged_tok = this.versions.local_tok;
       }
       if (result.button.label === 'Revert to Remote') {
-        this.addVersion(this._versions.remote, 'base');
-        this._cursor = { line: 0, ch: 0 };
+        this._versions.merged = this.versions.remote;
+        this._versions.merged_tok = undefined;
+      }
+      if (result.button.label === 'View Diff') {
+        this._versions.merged_tok = undefined;
       }
       if (result.button.label === 'Resolve Conflicts') {
         console.log('do something');
