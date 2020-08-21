@@ -400,12 +400,15 @@ class QueryHistoryPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { hasLoaded, rowsPerPage, page } = this.state;
+    const { hasLoaded, rowsPerPage, page, openJob } = this.state;
 
     if (hasLoaded) {
-      const { openJob } = this.state;
       const { jobIds, jobs } = QueryHistoryPanel.queryHistory;
-      const queriesByDate = this.processHistory(jobIds, jobs);
+
+      const queriesByDate = this.processHistory(
+        jobIds.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        jobs
+      );
 
       return (
         <div className={localStyles.queryHistoryRoot}>
