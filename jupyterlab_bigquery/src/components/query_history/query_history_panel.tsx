@@ -308,8 +308,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       try {
         const service = new QueryDetailsService();
         await service.getQueryDetails(jobId).then(queryDetails => {
-          QueryHistoryPanel.queryHistory.jobs[jobId]['details'] =
-            queryDetails.job;
+          QueryHistoryPanel.queryHistory.jobs[jobId].details = queryDetails.job;
         });
       } catch (err) {
         console.warn(
