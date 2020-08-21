@@ -52,11 +52,14 @@ export class NotebookFile {
 }
 
 export class RegularFile {
-  editor: CodeMirror;
+  codeMirror: CodeMirror;
+  codeMirrorEditor: CodeMirrorEditor;
 
   constructor(widget: IDocumentWidget) {
-    this.editor = ((widget.content as FileEditor)
+    this.codeMirror = ((widget.content as FileEditor)
       .editor as CodeMirrorEditor).editor;
+    this.codeMirrorEditor = (widget.content as FileEditor)
+      .editor as CodeMirrorEditor;
   }
   /*
     Return an array of lines from the file that correspond to the given range object
@@ -74,7 +77,7 @@ export class RegularFile {
     }
     if (!range.endLine) {
       //Context is a single line, or part of a single line
-      const untrimmedLine: string = this.editor.getLine(range.startLine);
+      const untrimmedLine: string = this.codeMirror.getLine(range.startLine);
       //if untrimmedLine is undefined, the comment was left on a line in the file that no longer exists, so return null
       if (untrimmedLine) {
         const leftIndex = range.startColumn ? range.startColumn : 0;
@@ -97,7 +100,7 @@ export class RegularFile {
       //when range has both startLine and endLine attributes, take at most 3 lines of the file to display
       const endLine = Math.max(range.endLine, range.startLine + 3);
       for (let i = range.startLine; i < endLine; i++) {
-        contextInFile.push([i, this.editor.getLine(i)]);
+        contextInFile.push([i, this.codeMirror.getLine(i)]);
       }
       return contextInFile;
     }

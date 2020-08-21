@@ -16,6 +16,7 @@ from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
 from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
 from google.cloud.bigquery_v2.gapic.enums import Model
+from google.protobuf.wrappers_pb2 import DoubleValue, BoolValue
 
 from jupyterlab_bigquery.version import VERSION
 from multiprocessing import Pool
@@ -149,6 +150,8 @@ def format_preview_fields(schema):
 def format_preview_value(value):
   if value is None:
     return None
+  elif isinstance(value, (DoubleValue, BoolValue)):
+    return format_preview_value(value.value)
   elif isinstance(value, bytes):
     return base64.b64encode(value).__str__()[2:-1]
   elif isinstance(value, float):
@@ -215,6 +218,7 @@ def get_view_details(client, view_id):
 
 def get_model_details(client, model_id):
   model = client.get_model(model_id)
+
   return {
       'details': {
           'id':
@@ -243,8 +247,40 @@ def get_model_details(client, model_id):
           ],
           'feature_columns': [
               {'name': feat_col.name, 'type': SqlTypeNames[StandardSqlDataTypes(feat_col.type.type_kind).name].name} for feat_col in model.feature_columns
-          ]
+          ],
+          'training_runs': [format_date(datetime.datetime.fromtimestamp(run.start_time.seconds)) for run in model.training_runs]
       }
+  }
+
+def get_training_run_details(client, model_id, run_index):
+  model = client.get_model(model_id)
+  options = model.training_runs[run_index].training_options
+
+  details = {}
+
+  if model.training_runs[run_index].results:
+    details['actual_iterations'] = len(model.training_runs[run_index].results)
+
+  for field in options.ListFields():
+    field_name = field[0].name
+    value = field[1]
+    if field_name == 'data_split_method':
+      details[field_name] = Model.DataSplitMethod(value).name
+    elif field_name == 'distance_type':
+      details[field_name] = Model.DistanceType(value).name
+    elif field_name == 'learn_rate_strategy':
+      details[field_name] = Model.LearnRateStrategy(value).name
+    elif field_name == 'loss_type':
+      details[field_name] = Model.LossType(value).name
+    elif field_name == 'optimization_strategy':
+      details[field_name] = Model.OptimizationStrategy(value).name
+    elif field_name == 'kmeans_initialization_method':
+      details[field_name] = Model.KmeansEnums.KmeansInitializationMethod(value).name
+    else:
+      details[field_name] = format_preview_value(value)
+
+  return {
+    'details': details
   }
 
 def format_preview_rows(rows, fields):
@@ -379,6 +415,23 @@ class ModelDetailsHandler(APIHandler):
       post_body = self.get_json_body()
 
       self.finish(get_model_details(self.bigquery_client, post_body['modelId']))
+
+    except Exception as e:
+      app_log.exception(str(e))
+      self.set_status(500, str(e))
+      self.finish({'error': {'message': str(e)}})
+
+class TrainingRunDetailsHandler(APIHandler):
+  """Handles requests for details on a specific model training run."""
+  bigquery_client = None
+
+  @gen.coroutine
+  def post(self, *args, **kwargs):
+    try:
+      self.bigquery_client = create_bigquery_client()
+      post_body = self.get_json_body()
+
+      self.finish(get_training_run_details(self.bigquery_client, post_body['modelId'], int(post_body['runIndex'])))
 
     except Exception as e:
       app_log.exception(str(e))

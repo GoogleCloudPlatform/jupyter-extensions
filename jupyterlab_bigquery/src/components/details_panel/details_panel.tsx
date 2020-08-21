@@ -68,6 +68,7 @@ interface Props {
   rows: any[];
   // TODO(cxjia): figure out a shared typing for these rows
   detailsType: 'DATASET' | 'TABLE' | 'VIEW' | 'MODEL';
+  trainingRows?: any[];
 }
 
 const getTitle = type => {
@@ -84,7 +85,7 @@ const getTitle = type => {
 };
 
 export const DetailsPanel: React.SFC<Props> = props => {
-  const { details, rows, detailsType } = props;
+  const { details, rows, detailsType, trainingRows } = props;
 
   return (
     <div className={localStyles.panel}>
@@ -116,55 +117,59 @@ export const DetailsPanel: React.SFC<Props> = props => {
             <div className={localStyles.title}>{getTitle(detailsType)}</div>
             <StripedRows rows={rows} />
           </Grid>
+
+          {detailsType === 'MODEL' && (
+            <Grid item xs={12}>
+              <div className={localStyles.title}>Training options</div>
+              {trainingRows && <StripedRows rows={trainingRows} />}
+            </Grid>
+          )}
+
+          {(detailsType === 'TABLE' || detailsType === 'VIEW') && (
+            <Grid item xs={12}>
+              <div className={localStyles.title}>Schema</div>
+              {details.schema && details.schema.length > 0 ? (
+                <SchemaTable schema={details.schema} />
+              ) : (
+                'Table does not have a schema.'
+              )}
+            </Grid>
+          )}
+
+          {detailsType === 'VIEW' && (
+            <Grid item xs={12}>
+              <div className={localStyles.title}>Query</div>
+              <ReadOnlyEditor query={details.query} />
+            </Grid>
+          )}
+
+          {detailsType === 'MODEL' && (
+            <Grid item xs={12}>
+              <div className={localStyles.title}>Label columns</div>
+              <div>
+                {details.schema_labels && details.schema_labels.length > 0 ? (
+                  <ModelSchemaTable schema={details.schema_labels} />
+                ) : (
+                  'Model does not have any label columns.'
+                )}
+              </div>
+            </Grid>
+          )}
+
+          {detailsType === 'MODEL' && (
+            <Grid item xs={12}>
+              <div className={localStyles.title}>Feature columns</div>
+              <div>
+                {details.feature_columns &&
+                details.feature_columns.length > 0 ? (
+                  <ModelSchemaTable schema={details.feature_columns} />
+                ) : (
+                  'Model does not have any feature columns.'
+                )}
+              </div>
+            </Grid>
+          )}
         </Grid>
-
-        {(detailsType === 'TABLE' || detailsType === 'VIEW') && (
-          <div>
-            <div className={localStyles.title} style={{ marginTop: '32px' }}>
-              Schema
-            </div>
-            {details.schema && details.schema.length > 0 ? (
-              <SchemaTable schema={details.schema} />
-            ) : (
-              'Table does not have a schema.'
-            )}
-          </div>
-        )}
-
-        {detailsType === 'VIEW' && (
-          <div>
-            <div className={localStyles.title} style={{ marginTop: '32px' }}>
-              Query
-            </div>
-            <ReadOnlyEditor query={details.query} />
-          </div>
-        )}
-
-        {detailsType === 'MODEL' && (
-          <div>
-            <div className={localStyles.title} style={{ marginTop: '32px' }}>
-              Label columns
-            </div>
-            <div>
-              {details.schema_labels && details.schema_labels.length > 0 ? (
-                <ModelSchemaTable schema={details.schema_labels} />
-              ) : (
-                'Model does not have any label columns.'
-              )}
-            </div>
-
-            <div className={localStyles.title} style={{ marginTop: '24px' }}>
-              Feature columns
-            </div>
-            <div>
-              {details.feature_columns && details.feature_columns.length > 0 ? (
-                <ModelSchemaTable schema={details.feature_columns} />
-              ) : (
-                'Model does not have any feature columns.'
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

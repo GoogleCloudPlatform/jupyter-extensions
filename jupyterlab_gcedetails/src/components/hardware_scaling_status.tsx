@@ -5,7 +5,6 @@ import { STYLES } from '../data/styles';
 import { HardwareConfiguration } from '../data/data';
 import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
-import { authTokenRetrieval } from './auth_token_retrieval';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
 
@@ -27,7 +26,7 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
   })
 )(LinearProgress);
 
-enum Status {
+export enum Status {
   'Authorizing' = 0,
   'Stopping Instance' = 1,
   'Updating Machine Configuration' = 2,
@@ -67,6 +66,7 @@ interface Props {
   onDialogClose: () => void;
   onCompletion: () => void;
   detailsServer: ServerWrapper;
+  authTokenRetrieval: () => Promise<string>;
 }
 
 interface State {
@@ -146,7 +146,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     }
   }
   async componentDidMount() {
-    const { notebookService } = this.props;
+    const { notebookService, authTokenRetrieval } = this.props;
     try {
       const token = await authTokenRetrieval();
       this.setState({

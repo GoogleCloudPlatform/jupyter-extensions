@@ -4,9 +4,10 @@ import unittest
 import datetime
 from unittest.mock import Mock, MagicMock, patch
 
-from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview, get_view_details, get_model_details
+from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview, get_view_details, get_model_details, get_training_run_details
 from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
 from google.cloud.bigquery_v2.gapic.enums import Model
+from google.protobuf.wrappers_pb2 import DoubleValue, BoolValue
 
 class TestDatasetDetails(unittest.TestCase):
   def testGetDatasetDetailsFull(self):
@@ -490,7 +491,8 @@ class TestModelDetails(unittest.TestCase):
             modified = datetime.datetime(2020, 7, 15, 15, 11, 23, 32, tzinfo=None),
             model_type = 0,
             label_columns = [label_col_0, label_col_1],
-            feature_columns = [feature_col_0]
+            feature_columns = [feature_col_0],
+            training_runs = [Mock(start_time = Mock(seconds = 1234567)), Mock(start_time = Mock(seconds = 1234789))]
         )
         client.get_model = Mock(return_value = model)
 
@@ -506,7 +508,8 @@ class TestModelDetails(unittest.TestCase):
                 'last_modified': '2020-07-15T15:11:23.000032',
                 'model_type': Model.ModelType(0).name,
                 'schema_labels': [{'name': 'schema_label_0', 'type': SqlTypeNames[StandardSqlDataTypes(7).name].name}, {'name': 'schema_label_1', 'type': StandardSqlDataTypes(9).name}],
-                'feature_columns': [{'name': 'feature_col_0', 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name}]
+                'feature_columns': [{'name': 'feature_col_0', 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name}],
+                'training_runs': ['1970-01-15T01:56:07', '1970-01-15T01:59:49']
             }
         }
 
@@ -528,7 +531,8 @@ class TestModelDetails(unittest.TestCase):
             modified = datetime.datetime(2020, 7, 15, 15, 11, 23, 32, tzinfo=None),
             model_type = 0,
             label_columns = [],
-            feature_columns = []
+            feature_columns = [],
+            training_runs = [Mock(start_time = Mock(seconds = 1234567))]
         )
         client.get_model = Mock(return_value = model)
 
@@ -544,13 +548,91 @@ class TestModelDetails(unittest.TestCase):
                 'last_modified': '2020-07-15T15:11:23.000032',
                 'model_type': Model.ModelType(0).name,
                 'schema_labels': [],
-                'feature_columns': []
+                'feature_columns': [],
+                'training_runs': ['1970-01-15T01:56:07']
             }
         }
 
         result = get_model_details(client, 'some_model_id')
         self.assertEqual(expected, result)
 
+    def testGetTrainingRunDetails(self):
+        client = Mock()
+
+        options = [
+            ['data_split_column', 'column_name_1'],
+            ['data_split_eval_fraction', 0.3],
+            ['data_split_method', 1],
+            ['distance_type', 1],
+            ['early_stop', BoolValue(value=False)],
+            ['initial_learn_rate', 0.1],
+            ['input_label_columns', ['column1', 'column2']],
+            ['kmeans_initialization_column', 'column_name_2'],
+            ['kmeans_initialization_method', 1],
+            ['l1_regularization', DoubleValue(value=0.5)],
+            ['l2_regularization', DoubleValue(value=0.6)],
+            ['label_class_weights', [0.2, 0.3]],
+            ['learn_rate', 0.7],
+            ['learn_rate_strategy', 1],
+            ['loss_type', 1],
+            ['max_iterations', 20],
+            ['min_relative_progress', DoubleValue(value=0.4)],
+            ['model_uri', 'model.uri.string'],
+            ['num_clusters', 7],
+            ['optimization_strategy', 1],
+            ['warm_start', BoolValue(value=True)]
+        ]
+
+        mocked_options = []
+        for option in options:
+            option_mock = Mock()
+            option_mock.name = option[0]
+            mocked_options.append([option_mock, option[1]])
+
+        training_options = Mock()
+        training_options.ListFields = Mock(return_value = mocked_options)
+
+        training_run = Mock(
+            training_options = training_options,
+            results = ['result', 'result', 'result']
+        )
+
+        model = Mock(
+            training_runs = [training_run]
+        )
+
+        client.get_model = Mock(return_value = model)
+
+        expected = {
+            'details': {
+                'actual_iterations': 3,
+                'data_split_column': 'column_name_1',
+                'data_split_eval_fraction': 0.3,
+                'data_split_method': Model.DataSplitMethod(1).name,
+                'distance_type': Model.DistanceType(1).name,
+                'early_stop': 'False',
+                'initial_learn_rate': 0.1,
+                'input_label_columns': "['column1', 'column2']",
+                'kmeans_initialization_column': 'column_name_2',
+                'kmeans_initialization_method': Model.KmeansEnums.KmeansInitializationMethod(1).name,
+                'l1_regularization': 0.5,
+                'l2_regularization': 0.6,
+                'label_class_weights': '[0.2, 0.3]',
+                'learn_rate': 0.7,
+                'learn_rate_strategy': Model.LearnRateStrategy(1).name,
+                'loss_type': Model.LossType(1).name,
+                'max_iterations': '20',
+                'min_relative_progress': 0.4,
+                'model_uri': 'model.uri.string',
+                'num_clusters': '7',
+                'optimization_strategy': Model.OptimizationStrategy(1).name,
+                'warm_start': 'True'
+            }
+        }
+
+        self.maxDiff = None
+        result = get_training_run_details(client, 'some_model_id', 0)
+        self.assertEqual(expected, result)
 
 if __name__ == '__main__':
   unittest.main()

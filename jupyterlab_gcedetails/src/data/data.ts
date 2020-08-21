@@ -20,6 +20,7 @@ import {
   nvidiaNameToEnum,
   NO_ACCELERATOR_COUNT,
 } from './accelerator_types';
+import { GapiMachineType } from '../service/details_service';
 
 export interface Option {
   text: string;
@@ -67,6 +68,7 @@ export interface Details {
   utilization: Utilization;
   gpu: Gpu;
   acceleratorTypes: Accelerator[];
+  machineTypes: GapiMachineType[];
 }
 
 export interface HardwareConfiguration {

@@ -76,18 +76,16 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
             : localStyles.resultsContainer
         }
       >
-        <Header
-          text="Query results"
-          buttons={[
-            <Button
-              startIcon={<Equalizer fontSize="small" />}
-              onClick={this.handleDatastudioExploreButton.bind(this)}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
-            >
-              Explore with Data Studio
-            </Button>,
-          ]}
-        />
+        <Header>
+          Query results
+          <Button
+            startIcon={<Equalizer fontSize="small" />}
+            onClick={this.handleDatastudioExploreButton.bind(this)}
+            style={{ textTransform: 'none', color: '#1A73E8' }}
+          >
+            Explore with Data Studio
+          </Button>
+        </Header>
         {fields.length > 0 && <BQTable fields={fields} rows={rows} />}
       </div>
     );

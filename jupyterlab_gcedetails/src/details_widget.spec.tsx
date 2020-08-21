@@ -21,13 +21,15 @@ import * as React from 'react';
 import { VmDetails } from './details_widget';
 import { STYLES } from './data/styles';
 import { ServerWrapper } from './components/server_wrapper';
-import { DETAILS_RESPONSE } from './test_helpers';
+import { DETAILS_RESPONSE, MACHINE_TYPES_RESPONSE } from './test_helpers';
 import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
+import { DetailsService } from './service/details_service';
 
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
+  const mockGetMachineTypes = jest.fn();
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
   } as unknown) as ServerWrapper;
@@ -35,6 +37,9 @@ describe('VmDetails', () => {
   const mockNotebookService = new NotebooksService(
     mockClientTransportationService
   );
+  const mockDetailsService = ({
+    getMachineTypes: mockGetMachineTypes,
+  } as unknown) as DetailsService;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -47,22 +52,27 @@ describe('VmDetails', () => {
 
   it('Renders with details', async () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const details = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(details);
+    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
+    mockGetMachineTypes.mockReturnValue(machineTypes);
+
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
+        detailsService={mockDetailsService}
       />
     );
     expect(vmDetails).toMatchSnapshot('Retrieving');
-    await resolveValue;
+    await Promise.all([details, machineTypes]);
 
     expect(vmDetails).toMatchSnapshot('Details');
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
+    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
   });
 
-  it('Renders with error', async () => {
+  it('Renders with get details error', async () => {
     mockGetUtilizationData.mockImplementation(() => {
       throw new Error();
     });
@@ -71,6 +81,7 @@ describe('VmDetails', () => {
       <VmDetails
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
+        detailsService={mockDetailsService}
       />
     );
 
@@ -87,15 +98,19 @@ describe('VmDetails', () => {
 
   it('Opens dialog when icon is clicked', async () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const details = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(details);
+    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
+    mockGetMachineTypes.mockReturnValue(machineTypes);
+
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
+        detailsService={mockDetailsService}
       />
     );
-    await resolveValue;
+    await Promise.all([details, machineTypes]);
 
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
@@ -105,15 +120,19 @@ describe('VmDetails', () => {
 
   it('Cycles through attributes when clicked', async () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const details = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(details);
+    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
+    mockGetMachineTypes.mockReturnValue(machineTypes);
+
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
+        detailsService={mockDetailsService}
       />
     );
-    await resolveValue;
+    await Promise.all([details, machineTypes]);
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.length).toBe(2);
@@ -145,17 +164,22 @@ describe('VmDetails', () => {
 
   it('Auto-refreshes when resource utilization are displayed', async () => {
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
+    const details = Promise.resolve({ ...detailsResponse });
+    mockGetUtilizationData.mockReturnValue(details);
+    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
+    mockGetMachineTypes.mockReturnValue(machineTypes);
+
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
+        detailsService={mockDetailsService}
       />
     );
-    await resolveValue;
+    await Promise.all([details, machineTypes]);
 
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
+    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
     // Click four times to move to CPU usage
     for (let i = 0; i < 4; i++) {
       vmDetails

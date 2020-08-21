@@ -178,7 +178,7 @@ export class Comment extends React.Component<Props, State> {
         <div style={style.threadIndent} className="threadList">
           {this.state.expandThread && data.children && (
             <List>
-              {data.children.map(reply => {
+              {data.children.map((reply, index) => {
                 if (this.props.detachedComment) {
                   const detached = createDetachedCommentFromJSON(
                     reply,
@@ -188,6 +188,7 @@ export class Comment extends React.Component<Props, State> {
                     <Comment
                       detachedComment={detached}
                       file={this.props.file}
+                      key={index}
                     />
                   );
                 } else {
@@ -198,7 +199,11 @@ export class Comment extends React.Component<Props, State> {
                     data.filePath
                   );
                   return (
-                    <Comment reviewComment={review} file={this.props.file} />
+                    <Comment
+                      reviewComment={review}
+                      file={this.props.file}
+                      key={index}
+                    />
                   );
                 }
               })}

@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Paper, Collapse, LinearProgress, Icon } from '@material-ui/core';
+import {
+  Paper,
+  Collapse,
+  LinearProgress,
+  Icon,
+  TablePagination,
+} from '@material-ui/core';
 import { CheckCircle, Error } from '@material-ui/icons';
 import { stylesheet } from 'typestyle';
 import { DateTime } from 'luxon';
@@ -12,23 +18,27 @@ import {
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
 import { StripedRows } from '../shared/striped_rows';
-import { formatBytes } from '../details_panel/table_details_panel';
 import ReadOnlyEditor from '../shared/read_only_editor';
 import { JobsObject, Job } from './service/query_history';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { formatTime, formatDate } from '../../utils/formatters';
+import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
+import { TablePaginationActions } from '../shared/bq_table';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
   queryHistoryRoot: {
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     ...BASE_FONT,
   },
   body: {
-    height: '100%',
+    flex: 1,
+    minHeight: 0,
     overflowY: 'auto',
+    overflowX: 'hidden',
     backgroundColor: '#FAFAFA',
   },
   query: {
@@ -109,6 +119,15 @@ const localStyles = stylesheet({
     justifyContent: 'space-between',
     marginBottom: '14px',
   },
+  pagination: {
+    backgroundColor: 'white',
+    fontSize: '13px',
+    borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  paginationOptions: {
+    display: 'flex',
+    fontSize: '13px',
+  },
 });
 
 interface Props {
@@ -122,6 +141,8 @@ interface State {
   jobIds: string[];
   jobs: JobsObject;
   openJob: string;
+  page: number;
+  rowsPerPage: number;
 }
 
 const ErrorBox = (props: { errorMsg: string }) => {
@@ -291,6 +312,8 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       jobs: {} as JobsObject,
       jobIds: [],
       openJob: null,
+      page: 0,
+      rowsPerPage: 30,
     };
   }
 
@@ -365,20 +388,34 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     }
   }
 
+  handleChangePage(event, newPage) {
+    this.setState({ page: newPage });
+  }
+
+  handleChangeRowsPerPage(event) {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+    });
+    this.setState({ page: 0 });
+  }
+
   render() {
     if (this.state.isLoading) {
       return (
         <>
-          <Header text="Query history" /> <LoadingPanel />
+          <Header>Query history</Header> <LoadingPanel />
         </>
       );
     } else {
-      const { jobs, jobIds, openJob } = this.state;
-      const queriesByDate = this.processHistory(jobIds, jobs);
+      const { jobs, jobIds, openJob, rowsPerPage, page } = this.state;
+      const queriesByDate = this.processHistory(
+        jobIds.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        jobs
+      );
 
       return (
         <div className={localStyles.queryHistoryRoot}>
-          <Header text="Query history" />
+          <Header>Query history</Header>
           <div className={localStyles.body}>
             {Object.keys(queriesByDate).map(date => {
               return (
@@ -424,6 +461,18 @@ class QueryHistoryPanel extends React.Component<Props, State> {
               );
             })}
           </div>
+          <TablePagination
+            className={localStyles.pagination}
+            rowsPerPageOptions={[10, 30, 50, 100, 200]}
+            component="div"
+            count={jobIds.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={this.handleChangePage.bind(this)}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
+            ActionsComponent={TablePaginationActions}
+            labelRowsPerPage="Queries per page:"
+          />
         </div>
       );
     }

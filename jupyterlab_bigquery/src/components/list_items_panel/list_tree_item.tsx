@@ -220,7 +220,7 @@ export class TableResource extends Resource<TableProps> {
     }
   };
 
-  openTableDetails = (event, table) => {
+  openTableDetails = (event, table: Table) => {
     event.stopPropagation();
     const service = new TableDetailsService();
     const widgetType = TableDetailsWidget;
@@ -229,7 +229,8 @@ export class TableResource extends Resource<TableProps> {
       widgetType,
       service,
       table.id,
-      table.name
+      table.name,
+      table.partitioned
     );
   };
 

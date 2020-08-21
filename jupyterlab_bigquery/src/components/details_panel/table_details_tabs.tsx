@@ -82,30 +82,28 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
     } else {
       return (
         <div className={localStyles.tableDetailsRoot}>
-          <Header
-            text={this.props.table_name}
-            buttons={[
-              <Button
-                onClick={() => {
-                  const queryId = generateQueryId();
-                  WidgetManager.getInstance().launchWidget(
-                    QueryEditorTabWidget,
-                    'main',
+          <Header>
+            {this.props.table_name}
+            <Button
+              onClick={() => {
+                const queryId = generateQueryId();
+                WidgetManager.getInstance().launchWidget(
+                  QueryEditorTabWidget,
+                  'main',
+                  queryId,
+                  undefined,
+                  [
                     queryId,
-                    undefined,
-                    [
-                      queryId,
-                      `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
-                    ]
-                  );
-                }}
-                startIcon={<Code />}
-                style={{ textTransform: 'none', color: '#1A73E8' }}
-              >
-                Query table
-              </Button>,
-            ]}
-          ></Header>
+                    `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
+                  ]
+                );
+              }}
+              startIcon={<Code />}
+              style={{ textTransform: 'none', color: '#1A73E8' }}
+            >
+              Query table
+            </Button>
+          </Header>
           <div className={localStyles.body}>
             <StyledTabs
               value={this.state.currentTab}

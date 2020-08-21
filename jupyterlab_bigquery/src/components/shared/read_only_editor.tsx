@@ -53,6 +53,9 @@ const READ_ONLY_SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   occurrencesHighlight: false,
   folding: false,
   scrollBeyondLastLine: false,
+  scrollbar: {
+    handleMouseWheel: false,
+  },
 };
 
 const ReadOnlyEditor = props => {
