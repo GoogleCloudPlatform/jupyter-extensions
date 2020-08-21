@@ -15,6 +15,7 @@
  */
 
 import { Option } from './data';
+import { GapiMachineType } from '../service/details_service';
 
 /*
  * Machine type returned when fetching from gcloud compute command-line tool
@@ -22,6 +23,7 @@ import { Option } from './data';
 export interface MachineType {
   name: string;
   description: string;
+  guestCpus?: number;
 }
 
 export function optionToMachineType(option: Option): MachineType {
@@ -35,7 +37,6 @@ export function machineTypeToOption(machineType: MachineType): Option {
   return {
     value: machineType.name,
     text: machineType.description,
-    disabled: false,
   };
 }
 
@@ -188,4 +189,81 @@ export function getMachineTypeText(value: string) {
         configuration => configuration.value === value
       ).text
     : null;
+}
+
+function machineTypeToBaseName(machineTypeName: string): string {
+  // Group all variations of memory-optimized or compute-optimized machine types together
+  if (machineTypeName.startsWith('m1')) return 'm1-';
+  if (machineTypeName.startsWith('c2')) return 'c2-';
+
+  return machineTypeName.substring(0, machineTypeName.lastIndexOf('-') + 1);
+}
+
+const BASE_NAME_TO_DISPLAY_TEXT = {
+  'e2-highcpu-': 'E2 high-CPU',
+  'e2-highmem-': 'E2 high-memory',
+  'e2-standard-': 'E2 standard',
+  'n1-standard-': 'N1 standard',
+  'n1-highcpu-': 'N1 high-CPU',
+  'n1-highmem-': 'N1 high-memory',
+  'n1-megamem-': 'N1 megamem',
+  'n1-ultramem-': 'N1 ultramem',
+  'n2-highcpu-': 'N2 high-CPU',
+  'n2-highmem-': 'N2 high-memory',
+  'n2-standard-': 'N2 standard',
+  'c2-': 'Compute-optimized',
+  'm1-': 'Memory-optimized',
+};
+
+export function getMachineTypeOptions(machineTypes: GapiMachineType[]) {
+  if (!machineTypes || machineTypes.length === 0) return MACHINE_TYPES;
+
+  const map = new Map();
+  const machineTypeOptions = [];
+  const defaultMachineType = [];
+  const computeMachineTypes = [];
+  const memoryMachineTypes = [];
+
+  // Group machine types by their base-name
+  machineTypes.map(machineType => {
+    const key = machineTypeToBaseName(machineType.name);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key).push(machineType);
+  });
+
+  map.forEach(function(value, key) {
+    value.sort((a, b) => a.guestCpus - b.guestCpus);
+    value = value.map(item => machineTypeToOption(item));
+
+    const obj = {
+      base: {
+        value: key,
+        text: BASE_NAME_TO_DISPLAY_TEXT[key],
+      },
+      configurations: value,
+    };
+
+    // To ensure the different machine type configurations are displayed in a specific order
+    switch (key) {
+      case 'n1-standard-':
+        defaultMachineType.push(obj);
+        break;
+      case 'c2-':
+        computeMachineTypes.push(obj);
+        break;
+      case 'm1-':
+        memoryMachineTypes.push(obj);
+        break;
+      default:
+        machineTypeOptions.push(obj);
+    }
+  });
+
+  return defaultMachineType.concat(
+    machineTypeOptions,
+    computeMachineTypes,
+    memoryMachineTypes
+  );
 }
