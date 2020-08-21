@@ -6,10 +6,12 @@ import {
   LinearProgress,
   Icon,
   TablePagination,
+  IconButton,
 } from '@material-ui/core';
 import { CheckCircle, Error } from '@material-ui/icons';
 import { stylesheet } from 'typestyle';
 import { DateTime } from 'luxon';
+import { Refresh } from '@material-ui/icons';
 
 import {
   QueryHistoryService,
@@ -399,6 +401,10 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     this.setState({ page: 0 });
   }
 
+  handleRefreshHistory() {
+    console.log('here');
+  }
+
   render() {
     if (this.state.isLoading) {
       return (
@@ -415,7 +421,14 @@ class QueryHistoryPanel extends React.Component<Props, State> {
 
       return (
         <div className={localStyles.queryHistoryRoot}>
-          <Header>Query history</Header>
+          <div>
+            <Header>
+              Query history
+              <IconButton onClick={this.handleRefreshHistory.bind(this)}>
+                <Refresh fontSize={'small'} />
+              </IconButton>
+            </Header>
+          </div>
           <div className={localStyles.body}>
             {Object.keys(queriesByDate).map(date => {
               return (
