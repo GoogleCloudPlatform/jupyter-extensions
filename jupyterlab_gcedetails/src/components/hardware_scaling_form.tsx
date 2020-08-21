@@ -47,6 +47,8 @@ import {
   MACHINE_TYPES,
   optionToMachineType,
   machineTypeToOption,
+  getMachineTypeOptions,
+  MachineTypeConfiguration,
 } from '../data/machine_types';
 import { ActionBar } from './action_bar';
 
@@ -112,6 +114,7 @@ the NVIDIA GPU driver will be installed automatically on the next startup.`;
 export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
   private oldConfiguration: HardwareConfiguration;
+  private machineTypesOptions: MachineTypeConfiguration[];
 
   constructor(props: Props) {
     super(props);
@@ -144,6 +147,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           props.details.instance.cpuPlatform
         )
       : ACCELERATOR_TYPES;
+
+    this.machineTypesOptions = props.details
+      ? getMachineTypeOptions(props.details.machineTypes)
+      : MACHINE_TYPES;
   }
 
   /*
@@ -232,7 +239,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.subheading}>Machine Configuration</span>
           <NestedSelect
             label="Machine type"
-            nestedOptionsList={MACHINE_TYPES.map(machineType => ({
+            nestedOptionsList={this.machineTypesOptions.map(machineType => ({
               header: machineType.base,
               options: machineType.configurations,
             }))}
