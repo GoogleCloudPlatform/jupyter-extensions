@@ -23,6 +23,7 @@ import {
   MAPPED_ATTRIBUTES,
   REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data/data';
+import { getMachineTypeConfigurations } from './data/machine_types';
 import { ServerWrapper } from './components/server_wrapper';
 import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { WidgetPopup } from './components/widget_popup';
@@ -124,7 +125,8 @@ export class VmDetails extends React.Component<Props, State> {
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
 
-      details.machineTypes = await detailsService.getMachineTypes();
+      const machineTypes = await detailsService.getMachineTypes();
+      details.machineTypes = getMachineTypeConfigurations(machineTypes);
 
       this.setState({ details: details });
     } catch (e) {
