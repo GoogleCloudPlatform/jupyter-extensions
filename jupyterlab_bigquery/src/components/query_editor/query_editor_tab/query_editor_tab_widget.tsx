@@ -20,6 +20,7 @@ export class QueryEditorTabWidget extends ReduxReactWidget {
   ) {
     super();
     this.title.label = `Query Editor ${this.editorNumber}`;
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
     this.title.closable = true;
   }
 
