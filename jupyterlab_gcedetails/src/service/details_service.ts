@@ -15,7 +15,6 @@
  */
 
 import {
-  handleApiError,
   ServerProxyTransportService,
   InstanceMetadata,
   getMetadata,
@@ -92,7 +91,7 @@ export class DetailsService {
   }
 
   /**
-   * Returns the locationId from the object or tries to retrieve it from the
+   * Returns the zone from the object or tries to retrieve it from the
    * server if not set.
    */
   private async _getZone(): Promise<string> {
@@ -101,7 +100,7 @@ export class DetailsService {
     }
     try {
       const { zone } = await this._getMetadata();
-      // extract the location from the zone resource name
+      // extract the zone from the zone resource name
       this.zonePromise = Promise.resolve(zone.split('/').pop());
       return this.zonePromise;
     } catch (err) {
@@ -141,7 +140,7 @@ export class DetailsService {
       return response.result.items;
     } catch (err) {
       console.error(`Unable to retrieve machine types.`);
-      handleApiError(err);
+      return [];
     }
   }
 

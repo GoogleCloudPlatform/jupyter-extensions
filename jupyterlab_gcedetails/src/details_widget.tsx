@@ -37,7 +37,7 @@ import { DetailsService } from './service/details_service';
 interface Props {
   detailsServer: ServerWrapper;
   notebookService: NotebooksService;
-  detailsService?: DetailsService;
+  detailsService: DetailsService;
 }
 interface State {
   displayedAttributes: [number, number];
@@ -124,8 +124,7 @@ export class VmDetails extends React.Component<Props, State> {
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
 
-      const machineTypes = await detailsService.getMachineTypes();
-      details.machineTypes = machineTypes;
+      details.machineTypes = await detailsService.getMachineTypes();
 
       this.setState({ details: details });
     } catch (e) {

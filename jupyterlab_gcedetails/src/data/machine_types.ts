@@ -23,7 +23,6 @@ import { GapiMachineType } from '../service/details_service';
 export interface MachineType {
   name: string;
   description: string;
-  guestCpus?: number;
 }
 
 export function optionToMachineType(option: Option): MachineType {
@@ -221,8 +220,7 @@ export function getMachineTypeOptions(machineTypes: GapiMachineType[]) {
   const map = new Map();
   const machineTypeOptions = [];
   const defaultMachineType = [];
-  const computeMachineTypes = [];
-  const memoryMachineTypes = [];
+  const optimizedMachineTypes = [];
 
   // Group machine types by their base-name
   machineTypes.map(machineType => {
@@ -251,19 +249,13 @@ export function getMachineTypeOptions(machineTypes: GapiMachineType[]) {
         defaultMachineType.push(obj);
         break;
       case 'c2-':
-        computeMachineTypes.push(obj);
-        break;
       case 'm1-':
-        memoryMachineTypes.push(obj);
+        optimizedMachineTypes.push(obj);
         break;
       default:
         machineTypeOptions.push(obj);
     }
   });
 
-  return defaultMachineType.concat(
-    machineTypeOptions,
-    computeMachineTypes,
-    memoryMachineTypes
-  );
+  return defaultMachineType.concat(machineTypeOptions, optimizedMachineTypes);
 }
