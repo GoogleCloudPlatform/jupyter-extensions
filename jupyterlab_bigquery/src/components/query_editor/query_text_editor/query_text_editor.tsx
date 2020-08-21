@@ -158,6 +158,8 @@ enum QueryStates {
 
 export const QUERY_DATA_TYPE = 'query_content';
 
+const QUERY_BATCH_SIZE = 500000;
+
 class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
   QueryTextEditorState
@@ -283,7 +285,7 @@ class QueryTextEditor extends React.Component<
           }
         }
       },
-      500000
+      QUERY_BATCH_SIZE
     );
   }
 
