@@ -17,6 +17,7 @@ export class QueryHistoryWidget extends ReduxReactWidget {
   constructor(private readonly service: QueryHistoryService) {
     super();
     this.title.label = 'Query History';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
     this.title.closable = true;
   }
 
