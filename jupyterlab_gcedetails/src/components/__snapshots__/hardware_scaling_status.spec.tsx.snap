@@ -8,12 +8,29 @@ exports[`HardwareScalingStatus Renders with auth error: Auth Error 1`] = `
 />
 `;
 
+exports[`HardwareScalingStatus Renders with operation error: Operation error 1`] = `
+<ErrorPage
+  error={
+    Object {
+      "errorType": "Reshape",
+      "errorValue": "Reshape operation failed",
+    }
+  }
+  instanceDetails={
+    Object {
+      "name": "Test",
+    }
+  }
+  onDialogClose={[MockFunction]}
+/>
+`;
+
 exports[`HardwareScalingStatus Renders with restart error: Restart error 1`] = `
 <ErrorPage
   error={
     Object {
       "errorType": "Start",
-      "errorValue": [Error],
+      "errorValue": Promise {},
     }
   }
   onDialogClose={[MockFunction]}
@@ -25,7 +42,7 @@ exports[`HardwareScalingStatus Renders with stop error: Stop instance error 1`] 
   error={
     Object {
       "errorType": "Stop",
-      "errorValue": [Error],
+      "errorValue": "Stop operation failed",
     }
   }
   instanceDetails={null}
@@ -54,6 +71,31 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
   <WithStyles(WithStyles(ForwardRef(LinearProgress)))
     value={0}
     variant="determinate"
+  />
+</div>
+`;
+
+exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
+<div
+  className="containerPadding_f1ms73ho"
+>
+  <div
+    className="containerSize_fjiu9nv"
+  >
+    <p
+      className="heading_f1xburhd"
+    >
+      Complete
+    </p>
+    <p
+      className="paragraph_fssm9cv"
+    >
+      Operation complete. Enjoy your newly configured instance!
+    </p>
+  </div>
+  <ActionBar
+    onPrimaryClick={[MockFunction]}
+    primaryLabel="Close"
   />
 </div>
 `;

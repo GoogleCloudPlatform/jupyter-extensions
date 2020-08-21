@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { shallow } from 'enzyme';
 import * as React from 'react';
 import { HardwareScalingStatus, Status } from './hardware_scaling_status';
@@ -5,7 +6,10 @@ import { DETAILS_RESPONSE } from '../test_helpers';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { detailsToHardwareConfiguration } from '../data/data';
-import Button from '@material-ui/core/Button';
+
+function immediatePromise() {
+  return new Promise(r => setTimeout(r));
+}
 
 describe('HardwareScalingStatus', () => {
   const mockGetUtilizationData = jest.fn();
@@ -31,9 +35,9 @@ describe('HardwareScalingStatus', () => {
     name: 'Test',
   };
   const mockToken = 'mockToken';
+
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.useFakeTimers();
   });
 
   it('Runs through reshaping flow', async () => {
@@ -91,20 +95,16 @@ describe('HardwareScalingStatus', () => {
       Status['Refreshing Session']
     );
     expect(hardwareScalingStatus).toMatchSnapshot('Refreshing Session');
-    jest.runAllTimers();
     await mockGetUtilizationData();
+    await immediatePromise();
     expect(mockOnComplete).toBeCalled();
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Complete);
     expect(hardwareScalingStatus).toMatchSnapshot('Complete');
-    hardwareScalingStatus
-      .find(Button)
-      .first()
-      .simulate('click');
-    expect(mockOnDialogClose).toBeCalled();
   });
 
   it('Renders with auth error', async () => {
-    mockAuthTokenRetrieval.mockResolvedValue(new Error());
+    const rejectedAuth = Promise.reject('No token');
+    mockAuthTokenRetrieval.mockReturnValue(rejectedAuth);
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
@@ -117,14 +117,15 @@ describe('HardwareScalingStatus', () => {
         authTokenRetrieval={mockAuthTokenRetrieval}
       />
     );
-    await mockAuthTokenRetrieval();
+    await rejectedAuth.catch(() => {});
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Auth Error');
   });
 
   it('Renders with stop error', async () => {
     mockAuthTokenRetrieval.mockResolvedValue(mockToken);
-    mockStopInstance.mockRejectedValue(new Error());
+    const rejectedStopOperation = Promise.reject('Stop operation failed');
+    mockStopInstance.mockReturnValue(rejectedStopOperation);
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
@@ -138,6 +139,7 @@ describe('HardwareScalingStatus', () => {
       />
     );
     await mockAuthTokenRetrieval();
+    await rejectedStopOperation.catch(() => {});
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Stop instance error');
   });
@@ -145,8 +147,10 @@ describe('HardwareScalingStatus', () => {
   it('Renders with operation error', async () => {
     const mockGetUtilizationData = jest.fn();
     const mockStopInstance = jest.fn();
-    mockSetMachineType.mockRejectedValue(new Error());
-    mockSetAccelerator.mockRejectedValue(new Error());
+    const rejectedSetMachine = Promise.reject('Reshape operation failed');
+    const rejectedSetAccelerator = Promise.reject('Reshape operation failed');
+    mockSetMachineType.mockReturnValue(rejectedSetMachine);
+    mockSetAccelerator.mockReturnValue(rejectedSetAccelerator);
     mockStartInstance.mockResolvedValue(mockInstance);
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
@@ -164,24 +168,23 @@ describe('HardwareScalingStatus', () => {
     );
     await mockAuthTokenRetrieval();
     await mockStopInstance();
+    await rejectedSetMachine.catch(() => {});
+    await rejectedSetAccelerator.catch(() => {});
     await mockStartInstance();
-    await mockGetUtilizationData();
-    jest.runAllTimers();
+    await immediatePromise();
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Operation error');
-    hardwareScalingStatus
-      .find(Button)
-      .first()
-      .simulate('click');
-    expect(mockOnDialogClose).toBeCalled();
   });
 
   it('Renders with restart error', async () => {
     const mockGetUtilizationData = jest.fn();
     const mockStopInstance = jest.fn();
-    mockSetMachineType.mockRejectedValue(new Error());
-    mockSetAccelerator.mockRejectedValue(new Error());
-    mockStartInstance.mockRejectedValue(new Error());
+    const rejectedSetMachine = Promise.reject('Reshape operation failed');
+    const rejectedSetAccelerator = Promise.reject('Reshape operation failed');
+    const rejectedStartOperation = Promise.reject('Restart operation failed');
+    mockSetMachineType.mockReturnValue(rejectedSetMachine);
+    mockSetAccelerator.mockReturnValue(rejectedSetAccelerator);
+    mockStartInstance.mockRejectedValue(rejectedStartOperation);
     const detailsResponse = JSON.parse(DETAILS_RESPONSE);
     const resolveValue = Promise.resolve({ ...detailsResponse });
     mockGetUtilizationData.mockReturnValue(resolveValue);
@@ -198,6 +201,9 @@ describe('HardwareScalingStatus', () => {
     );
     await mockAuthTokenRetrieval();
     await mockStopInstance();
+    await rejectedSetMachine.catch(() => {});
+    await rejectedSetAccelerator.catch(() => {});
+    await rejectedStartOperation.catch(() => {});
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Restart error');
   });
