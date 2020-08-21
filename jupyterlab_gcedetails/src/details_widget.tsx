@@ -28,11 +28,16 @@ import { ResourceUtilizationCharts } from './components/resource_utilization_cha
 import { WidgetPopup } from './components/widget_popup';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
 import { NotebooksService } from './service/notebooks_service';
-import { ClientTransportService } from 'gcp_jupyterlab_shared';
+import {
+  ClientTransportService,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
+import { DetailsService } from './service/details_service';
 
 interface Props {
   detailsServer: ServerWrapper;
   notebookService: NotebooksService;
+  detailsService: DetailsService;
 }
 interface State {
   displayedAttributes: [number, number];
@@ -107,13 +112,21 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    const { notebookService, detailsServer } = this.props;
+    const { notebookService, detailsServer, detailsService } = this.props;
     try {
       const details = (await detailsServer.getUtilizationData()) as Details;
-      this.setState({ details: details });
+      const zone = details.instance.zone.split('/').pop();
+
       notebookService.projectId = details.project.projectId;
-      notebookService.locationId = details.instance.zone.split('/').pop();
+      notebookService.locationId = zone;
       notebookService.instanceName = details.instance.name.split('/').pop();
+
+      detailsService.projectId = details.project.projectId;
+      detailsService.zone = zone;
+
+      details.machineTypes = await detailsService.getMachineTypes();
+
+      this.setState({ details: details });
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
@@ -169,14 +182,19 @@ export class VmDetailsWidget extends ReactWidget {
   private readonly detailsUrl = `gcp/v1/details`;
   private readonly detailsServer = new ServerWrapper(this.detailsUrl);
   private readonly clientTransportService = new ClientTransportService();
+  private readonly serverProxyTransportService = new ServerProxyTransportService();
   private readonly notebookService = new NotebooksService(
     this.clientTransportService
+  );
+  private readonly detailsService = new DetailsService(
+    this.serverProxyTransportService
   );
   render() {
     return (
       <VmDetails
         detailsServer={this.detailsServer}
         notebookService={this.notebookService}
+        detailsService={this.detailsService}
       />
     );
   }

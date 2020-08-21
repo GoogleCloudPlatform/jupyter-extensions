@@ -65,7 +65,7 @@ interface TablePaginationActionsProps {
   ) => void;
 }
 
-function TablePaginationActions(props: TablePaginationActionsProps) {
+export function TablePaginationActions(props: TablePaginationActionsProps) {
   const { count, page, rowsPerPage, onChangePage } = props;
 
   const handleFirstPageButtonClick = (

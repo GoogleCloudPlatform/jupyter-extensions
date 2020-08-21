@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Paper, Collapse, LinearProgress, Icon } from '@material-ui/core';
+import {
+  Paper,
+  Collapse,
+  LinearProgress,
+  Icon,
+  TablePagination,
+} from '@material-ui/core';
 import { CheckCircle, Error } from '@material-ui/icons';
 import { stylesheet } from 'typestyle';
 import { DateTime } from 'luxon';
@@ -18,16 +24,21 @@ import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_edi
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
+import { TablePaginationActions } from '../shared/bq_table';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
   queryHistoryRoot: {
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     ...BASE_FONT,
   },
   body: {
-    height: '100%',
+    flex: 1,
+    minHeight: 0,
     overflowY: 'auto',
+    overflowX: 'hidden',
     backgroundColor: '#FAFAFA',
   },
   query: {
@@ -108,6 +119,15 @@ const localStyles = stylesheet({
     justifyContent: 'space-between',
     marginBottom: '14px',
   },
+  pagination: {
+    backgroundColor: 'white',
+    fontSize: '13px',
+    borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  paginationOptions: {
+    display: 'flex',
+    fontSize: '13px',
+  },
 });
 
 interface Props {
@@ -119,6 +139,8 @@ interface State {
   openJob: string;
   hasLoaded: boolean;
   detailLoaded: boolean;
+  page: number;
+  rowsPerPage: number;
 }
 
 const ErrorBox = (props: { errorMsg: string }) => {
@@ -293,6 +315,8 @@ class QueryHistoryPanel extends React.Component<Props, State> {
       openJob: null,
       hasLoaded: QueryHistoryPanel.queryHistory !== undefined,
       detailLoaded: false,
+      page: 0,
+      rowsPerPage: 30,
     };
   }
 
@@ -364,8 +388,19 @@ class QueryHistoryPanel extends React.Component<Props, State> {
     }
   }
 
+  handleChangePage(event, newPage) {
+    this.setState({ page: newPage });
+  }
+
+  handleChangeRowsPerPage(event) {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+    });
+    this.setState({ page: 0 });
+  }
+
   render() {
-    const { hasLoaded } = this.state;
+    const { hasLoaded, rowsPerPage, page } = this.state;
 
     if (hasLoaded) {
       const { openJob } = this.state;
@@ -431,6 +466,18 @@ class QueryHistoryPanel extends React.Component<Props, State> {
               );
             })}
           </div>
+          <TablePagination
+            className={localStyles.pagination}
+            rowsPerPageOptions={[10, 30, 50, 100, 200]}
+            component="div"
+            count={jobIds.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={this.handleChangePage.bind(this)}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
+            ActionsComponent={TablePaginationActions}
+            labelRowsPerPage="Queries per page:"
+          />
         </div>
       );
     } else {

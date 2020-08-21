@@ -11,10 +11,13 @@ export class TableDetailsWidget extends ReactWidget {
   constructor(
     private readonly service: TableDetailsService,
     private readonly table_id: string,
-    private readonly name: string
+    private readonly name: string,
+    private readonly partitioned: boolean
   ) {
     super();
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
+    this.title.iconClass = this.partitioned
+      ? 'jp-Icon jp-Icon-20 jp-PartitionedTableIcon'
+      : 'jp-Icon jp-Icon-20 jp-TableIcon';
     this.title.caption = `Table Details for ${this.table_id}`;
     this.title.label = this.name;
     this.title.closable = true;
