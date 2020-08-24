@@ -19,8 +19,10 @@ import {
   InstanceMetadata,
   getMetadata,
 } from 'gcp_jupyterlab_shared';
+import { Accelerator } from '../data/accelerator_types';
 
 type ListMachineTypesResponse = gapi.client.compute.MachineTypeList;
+type ListAcceleratorTypesResponse = gapi.client.compute.AcceleratorTypeList;
 export type GapiMachineType = gapi.client.compute.MachineType;
 
 export const COMPUTE_ENGINE_API_PATH =
@@ -30,6 +32,8 @@ export class DetailsService {
   private projectIdPromise?: Promise<string>;
   private zonePromise?: Promise<string>;
   private metadataPromise?: Promise<InstanceMetadata>;
+  private machineTypesPromise?: Promise<GapiMachineType[]>;
+  private acceleratorTypesPromise?: Promise<any>;
 
   constructor(
     private _transportService: ServerProxyTransportService,
@@ -127,6 +131,9 @@ export class DetailsService {
    * Retrieves a list of machine types available for the specified project in the specified region.
    */
   async getMachineTypes(): Promise<GapiMachineType[]> {
+    if (this.machineTypesPromise) {
+      return this.machineTypesPromise;
+    }
     try {
       const name = await this.getResourceName();
       const response = await this._transportService.submit<
@@ -137,9 +144,32 @@ export class DetailsService {
           filter: 'isSharedCpu = false',
         },
       });
-      return response.result.items;
+      this.machineTypesPromise = Promise.resolve(response.result.items);
+      return this.machineTypesPromise;
     } catch (err) {
       console.error(`Unable to retrieve machine types.`);
+      return [];
+    }
+  }
+
+  /**
+   * Retrieves a list of accelerators available for the specified project in the specified region.
+   */
+  async getAcceleratorTypes(): Promise<Accelerator[]> {
+    if (this.acceleratorTypesPromise) {
+      return this.acceleratorTypesPromise;
+    }
+    try {
+      const name = await this.getResourceName();
+      const response = await this._transportService.submit<
+        ListAcceleratorTypesResponse
+      >({
+        path: `${COMPUTE_ENGINE_API_PATH}/${name}/acceleratorTypes`,
+      });
+      this.acceleratorTypesPromise = Promise.resolve(response.result.items);
+      return this.acceleratorTypesPromise;
+    } catch (err) {
+      console.error(`Unable to retrieve accelerator types.`);
       return [];
     }
   }

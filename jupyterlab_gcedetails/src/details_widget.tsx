@@ -125,8 +125,13 @@ export class VmDetails extends React.Component<Props, State> {
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
 
-      const machineTypes = await detailsService.getMachineTypes();
+      const [machineTypes, acceleratorTypes] = await Promise.all([
+        detailsService.getMachineTypes(),
+        detailsService.getAcceleratorTypes(),
+      ]);
       details.machineTypes = getMachineTypeConfigurations(machineTypes);
+      details.acceleratorTypes = acceleratorTypes;
+      console.log(acceleratorTypes);
 
       this.setState({ details: details });
     } catch (e) {
