@@ -8,7 +8,7 @@ import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
 import { Button, Typography } from '@material-ui/core';
 import { Equalizer } from '@material-ui/icons';
-import BigDataManager from '../../../utils/BigDataManager';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -40,7 +40,7 @@ interface QueryResultsProps {
 
 class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   queryId: QueryId;
-  queryManager: BigDataManager;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -49,7 +49,7 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
       rowsPerPage: 10,
     };
     this.queryId = props.queryId;
-    this.queryManager = new BigDataManager(QUERY_DATA_TYPE);
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   handleDatastudioExploreButton() {

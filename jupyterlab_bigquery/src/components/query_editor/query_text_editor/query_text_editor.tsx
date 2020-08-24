@@ -34,7 +34,7 @@ import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
 import ReactResizeDetector from 'react-resize-detector';
-import BigDataManager from '../../../utils/BigDataManager';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -173,7 +173,7 @@ class QueryTextEditor extends React.Component<
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
 
-  queryManager: BigDataManager;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -202,7 +202,7 @@ class QueryTextEditor extends React.Component<
       });
     });
 
-    this.queryManager = new BigDataManager(QUERY_DATA_TYPE);
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   componentDidMount() {

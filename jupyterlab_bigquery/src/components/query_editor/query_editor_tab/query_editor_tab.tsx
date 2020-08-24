@@ -19,7 +19,7 @@ const localStyles = stylesheet({
     ...BASE_FONT,
   },
 });
-import BigDataManager from '../../../utils/BigDataManager';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 interface QueryEditorTabProps {
   isVisible: boolean;
@@ -29,7 +29,7 @@ interface QueryEditorTabProps {
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
   queryId: QueryId;
-  queryManager: BigDataManager;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -38,7 +38,7 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
     };
 
     this.queryId = this.props.queryId ?? generateQueryId();
-    this.queryManager = new BigDataManager(QUERY_DATA_TYPE);
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   render() {

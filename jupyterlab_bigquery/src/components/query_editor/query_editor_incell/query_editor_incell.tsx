@@ -12,7 +12,7 @@ import {
 import { DOMWidgetView } from '@jupyter-widgets/base';
 import { stylesheet } from 'typestyle';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
-import BigDataManager from '../../../utils/BigDataManager';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 const localStyles = stylesheet({
   inCellEditorRoot: {
@@ -32,7 +32,7 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
   queryId: QueryId;
   iniQuery: string;
   queryFlags: { [keys: string]: any };
-  queryManager: BigDataManager;
+  queryManager: QueryResultsManager;
 
   constructor(pros) {
     super(pros, QueryEditorInCell);
@@ -41,7 +41,7 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     this.iniQuery = this.props.ipyView.model.get('query') as string;
     const rawQueryFlags = this.props.ipyView.model.get('query_flags') as string;
     this.queryFlags = JSON.parse(rawQueryFlags);
-    this.queryManager = new BigDataManager(QUERY_DATA_TYPE);
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   render() {

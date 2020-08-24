@@ -1,11 +1,11 @@
-class BigDataManager {
+class QueryResultsManager {
   private static queryResults: {
     [type: string]: { [id: string]: Array<unknown> };
   } = {};
 
   constructor(private readonly type: string) {
-    if (!(this.type in BigDataManager.queryResults)) {
-      BigDataManager.queryResults[this.type] = {};
+    if (!(this.type in QueryResultsManager.queryResults)) {
+      QueryResultsManager.queryResults[this.type] = {};
     }
   }
 
@@ -27,8 +27,8 @@ class BigDataManager {
   }
 
   private getResults() {
-    return BigDataManager.queryResults[this.type];
+    return QueryResultsManager.queryResults[this.type];
   }
 }
 
-export default BigDataManager;
+export default QueryResultsManager;
