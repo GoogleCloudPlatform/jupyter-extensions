@@ -33,7 +33,7 @@ export class DetailsService {
   private zonePromise?: Promise<string>;
   private metadataPromise?: Promise<InstanceMetadata>;
   private machineTypesPromise?: Promise<GapiMachineType[]>;
-  private acceleratorTypesPromise?: Promise<any>;
+  private acceleratorTypesPromise?: Promise<Accelerator[]>;
 
   constructor(
     private _transportService: ServerProxyTransportService,
@@ -166,7 +166,9 @@ export class DetailsService {
       >({
         path: `${COMPUTE_ENGINE_API_PATH}/${name}/acceleratorTypes`,
       });
-      this.acceleratorTypesPromise = Promise.resolve(response.result.items);
+      this.acceleratorTypesPromise = Promise.resolve(
+        response.result.items as Accelerator[]
+      );
       return this.acceleratorTypesPromise;
     } catch (err) {
       console.error(`Unable to retrieve accelerator types.`);

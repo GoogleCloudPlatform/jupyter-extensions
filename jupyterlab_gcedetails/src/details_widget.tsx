@@ -129,11 +129,11 @@ export class VmDetails extends React.Component<Props, State> {
         detailsService.getMachineTypes(),
         detailsService.getAcceleratorTypes(),
       ]);
+
       details.machineTypes = getMachineTypeConfigurations(machineTypes);
       details.acceleratorTypes = acceleratorTypes;
-      console.log(acceleratorTypes);
 
-      this.setState({ details: details });
+      this.setState({ details });
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
