@@ -20,8 +20,7 @@ with open("README.md") as f:
   long_description = f.read()
 
 version = None
-with open(os.path.join(os.getcwd(), "jupyterlab_gitsync",
-                       "version.py")) as f:
+with open(os.path.join(os.getcwd(), "jupyterlab_gitsync", "version.py")) as f:
   for l in f:
     if l.startswith("VERSION"):
       version = l.rstrip().split(" = ")[1].replace("'", "")
@@ -36,8 +35,7 @@ if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
     ("etc/jupyter/jupyter_notebook_config.d",
-     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gitsync.json",
-     )),
+     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gitsync.json",)),
 ]
 
 setup(

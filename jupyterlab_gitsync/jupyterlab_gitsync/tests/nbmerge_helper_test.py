@@ -88,7 +88,7 @@ remote_contents = '\
    "nbformat": 4,                                             \n\
    "nbformat_minor": 4                                        \n\
   }'
- 
+
 local_contents = '{"metadata":{"kernelspec":{"display_name":"","name":""},\
   "language_info":{"name":""}},"nbformat_minor":4,"nbformat":4,"cells":\
   [{"cell_type":"code","source":"# This is a change from our LOCAL changes\\n\
@@ -100,12 +100,14 @@ local_contents = '{"metadata":{"kernelspec":{"display_name":"","name":""},\
   is a cell from the base version of the file.\\")","metadata":{"trusted":true},\
   "execution_count":null,"outputs":[]}]}'
 
+
 class TestNotebookInit(unittest.TestCase):
 
   def setUp(self):
     subprocess.call(['mkdir', 'test_files'], cwd='.')
     subprocess.call(['mkdir', 'test_files/.sync_cache'], cwd='.')
-    subprocess.call(['mkdir', 'test_files/.sync_cache/init_cache_test'], cwd='.')
+    subprocess.call(['mkdir', 'test_files/.sync_cache/init_cache_test'],
+                    cwd='.')
 
   def tearDown(self):
     subprocess.call(['rm', '-r', 'test_files'], cwd='.')
@@ -120,12 +122,17 @@ class TestNotebookInit(unittest.TestCase):
 
     updated_base = NotebookMergeHandler.update_base(None, path, dpath)
 
-    self.assertEqual(updated_base, None, msg="update_base exited with non-zero exit code")
+    self.assertEqual(updated_base,
+                     None,
+                     msg="update_base exited with non-zero exit code")
 
     with open('test_files/.sync_cache/init_cache_test/base.ipynb') as b:
       base_ud_contents = b.read()
 
-    self.assertEqual(base_ud_contents, base_contents, msg='merged.ipynb did not successfully copy into base.ipynb')
+    self.assertEqual(
+        base_ud_contents,
+        base_contents,
+        msg='merged.ipynb did not successfully copy into base.ipynb')
 
   def test_update_local(self):
 
@@ -137,7 +144,10 @@ class TestNotebookInit(unittest.TestCase):
     with open('test_files/.sync_cache/init_cache_test/local.ipynb') as l:
       local_ud_contents = l.read()
 
-    self.assertEqual(local_ud_contents, local_contents, msg='input text did not successfully copy into local.ipynb')
+    self.assertEqual(
+        local_ud_contents,
+        local_contents,
+        msg='input text did not successfully copy into local.ipynb')
 
   def test_update_remote(self):
     remote_og_path = 'test_files/init_cache_test.ipynb'
@@ -148,14 +158,20 @@ class TestNotebookInit(unittest.TestCase):
     fpath = 'init_cache_test.ipynb'
     dpath = '.sync_cache/init_cache_test'
 
-    updated_remote = NotebookMergeHandler.update_remote(None, path, fpath, dpath)
+    updated_remote = NotebookMergeHandler.update_remote(None, path, fpath,
+                                                        dpath)
 
-    self.assertEqual(updated_remote, None, msg="update_remote exited with non-zero exit code")
+    self.assertEqual(updated_remote,
+                     None,
+                     msg="update_remote exited with non-zero exit code")
 
     with open('test_files/.sync_cache/init_cache_test/remote.ipynb') as r:
       remote_ud_contents = r.read()
 
-    self.assertEqual(remote_ud_contents, remote_contents, msg='remote file did not successfully copy into remote.ipynb')
+    self.assertEqual(
+        remote_ud_contents,
+        remote_contents,
+        msg='remote file did not successfully copy into remote.ipynb')
 
   def test_merge_notebooks(self):
     with open('test_files/.sync_cache/init_cache_test/base.ipynb', 'w') as b:
@@ -170,8 +186,10 @@ class TestNotebookInit(unittest.TestCase):
 
     NotebookMergeHandler.merge_notebooks(None, path, dpath)
 
-    merged_exists = b'merged.ipynb' in subprocess.check_output(['ls', dpath], cwd=path)
-    self.assertTrue(merged_exists, msg='nbmerge failed to create new merged file')
+    merged_exists = b'merged.ipynb' in subprocess.check_output(['ls', dpath],
+                                                               cwd=path)
+    self.assertTrue(merged_exists,
+                    msg='nbmerge failed to create new merged file')
 
     with open('test_files/.sync_cache/init_cache_test/merged.ipynb') as m:
       merged_ud_contents = m.read()
@@ -179,8 +197,10 @@ class TestNotebookInit(unittest.TestCase):
     local_changes = "# This is a change from our LOCAL changes"
     remote_changes = "# This is a comment from a REMOTE change"
 
-    self.assertTrue(local_changes in merged_ud_contents, msg='local changes are not in merged.ipynb')
-    self.assertTrue(remote_changes in merged_ud_contents, msg='remote changes are not in merged.ipynb')
+    self.assertTrue(local_changes in merged_ud_contents,
+                    msg='local changes are not in merged.ipynb')
+    self.assertTrue(remote_changes in merged_ud_contents,
+                    msg='remote changes are not in merged.ipynb')
 
   def test_update_disk_file(self):
     with open('test_files/.sync_cache/init_cache_test/merged.ipynb', 'w') as m:
@@ -190,14 +210,21 @@ class TestNotebookInit(unittest.TestCase):
     fpath = 'init_cache_test.ipynb'
     dpath = '.sync_cache/init_cache_test'
 
-    updated_disk_file = NotebookMergeHandler.update_disk_file(None, path, fpath, dpath)
+    updated_disk_file = NotebookMergeHandler.update_disk_file(
+        None, path, fpath, dpath)
 
-    self.assertEqual(updated_disk_file, None, msg="update_remote exited with non-zero exit code")
+    self.assertEqual(updated_disk_file,
+                     None,
+                     msg="update_remote exited with non-zero exit code")
 
     with open('test_files/init_cache_test.ipynb') as og:
       original = og.read()
 
-    self.assertEqual(original, base_contents, msg='remote file did not successfully copy into remote.ipynb')
+    self.assertEqual(
+        original,
+        base_contents,
+        msg='remote file did not successfully copy into remote.ipynb')
+
 
 if __name__ == '__main__':
   unittest.main()

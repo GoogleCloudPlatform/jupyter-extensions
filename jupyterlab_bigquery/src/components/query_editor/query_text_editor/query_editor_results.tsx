@@ -6,7 +6,7 @@ import { QueryResult, QUERY_DATA_TYPE } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
-import { Button, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { Equalizer } from '@material-ui/icons';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 

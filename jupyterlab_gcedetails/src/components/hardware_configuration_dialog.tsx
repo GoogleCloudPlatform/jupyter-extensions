@@ -130,6 +130,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             onCompletion={onCompletion}
             detailsServer={detailsServer}
             authTokenRetrieval={authTokenRetrieval}
+            machineTypes={details && details.machineTypes}
           />
         );
     }

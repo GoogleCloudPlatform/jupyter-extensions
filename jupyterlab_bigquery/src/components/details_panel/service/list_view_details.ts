@@ -25,7 +25,7 @@ export class ViewDetailsService {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
-        'bigquery/v1/viewdetails'
+        'bigquery/v1/viewDetails'
       );
       const body = { viewId: viewId };
       const requestInit: RequestInit = {

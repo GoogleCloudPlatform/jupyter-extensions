@@ -1,13 +1,14 @@
 {
   "packages": [
     "shared/",
+    "jupyterlab_bigquery/",
     "jupyterlab_caip_optimizer/",
     "jupyterlab_comments/",
     "jupyterlab_gcedetails/",
     "jupyterlab_gcpscheduler/",
     "jupyterlab_gcsfilebrowser/",
-    "jupyterlab_ucaip/",
-    "jupyterlab_bigquery/"
+    "jupyterlab_gitsync/",
+    "jupyterlab_ucaip/"
   ],
   "version": "independent"
 }

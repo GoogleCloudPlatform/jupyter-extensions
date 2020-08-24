@@ -22,10 +22,14 @@ import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
 import { STYLES } from '../data/styles';
 import { getGpuTypeText } from '../data/accelerator_types';
-import { getMachineTypeText } from '../data/machine_types';
+import {
+  getMachineTypeText,
+  MachineTypeConfiguration,
+} from '../data/machine_types';
 
 interface Props {
   instanceDetails?: Instance;
+  machineTypes?: MachineTypeConfiguration[];
   error: ConfigurationError;
   onDialogClose: () => void;
 }
@@ -35,9 +39,12 @@ Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;
 
-function displayInstance(instance: Instance) {
+function displayInstance(instance: Instance, machineTypes) {
   const { machineType, acceleratorConfig } = instance;
-  const machineTypeText = getMachineTypeText(machineType.split('/').pop());
+  const machineTypeText = getMachineTypeText(
+    machineType.split('/').pop(),
+    machineTypes
+  );
 
   return (
     <div>
@@ -57,7 +64,7 @@ function displayInstance(instance: Instance) {
 }
 
 export function ErrorPage(props: Props) {
-  const { onDialogClose, error, instanceDetails } = props;
+  const { onDialogClose, error, instanceDetails, machineTypes } = props;
   const { errorType, errorValue } = error;
 
   return (
@@ -67,7 +74,7 @@ export function ErrorPage(props: Props) {
           className={STYLES.heading}
         >{`Failed to ${errorType} Your Machine`}</span>
         <div className={STYLES.paragraph}>{errorValue}</div>
-        {instanceDetails && displayInstance(instanceDetails)}
+        {instanceDetails && displayInstance(instanceDetails, machineTypes)}
         {errorType === ErrorType.START && (
           <div className={STYLES.infoMessage}>
             <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>

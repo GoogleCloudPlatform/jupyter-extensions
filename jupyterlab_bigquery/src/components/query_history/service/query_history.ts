@@ -1,9 +1,10 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
 
-interface QueryHistory {
+export interface QueryHistory {
   jobs: JobsObject;
   jobIds: string[];
+  lastFetchTime: number;
 }
 
 export interface JobIdsObject {
@@ -53,14 +54,18 @@ interface JobDetails {
 }
 
 export class QueryHistoryService {
-  async getQueryHistory(projectId: string): Promise<QueryHistory> {
+  async getQueryHistory(
+    projectId: string,
+    lastFetchTime?: number
+  ): Promise<QueryHistory> {
     return new Promise((resolve, reject) => {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
         'bigquery/v1/projectQueryHistory'
       );
-      const body = { projectId: projectId };
+      const body = { projectId, lastFetchTime };
+
       const requestInit: RequestInit = {
         body: JSON.stringify(body),
         method: 'POST',
@@ -79,6 +84,7 @@ export class QueryHistoryService {
           resolve({
             jobs: data.jobs,
             jobIds: data.jobIds,
+            lastFetchTime: data.lastFetchTime,
           });
         });
       });

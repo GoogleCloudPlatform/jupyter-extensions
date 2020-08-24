@@ -14,6 +14,7 @@ const DEFAULT_INIT_QUERY_STATE = {
   queryId: null,
   project: null,
   query: null,
+  contentLen: 0,
 };
 
 const initialState: QueryEditorState = {

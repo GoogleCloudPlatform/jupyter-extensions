@@ -154,7 +154,6 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
         const updatedRuns = { ...this.state.loadedRuns };
         updatedRuns[runIndex] = trainingRows;
         this.setState({ loadedRuns: updatedRuns });
-        console.log(this.state.loadedRuns);
       }
     } catch (err) {
       console.warn('Error retrieving model training run details', err);

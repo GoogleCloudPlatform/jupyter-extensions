@@ -42,6 +42,8 @@ export function machineTypeToOption(machineType: MachineType): Option {
 /**
  * AI Platform Machine types.
  * https://cloud.google.com/ai-platform/training/docs/machine-types#compare-machine-types
+ * In a format to be used by the machine type select dropdown in
+ * the hardware scaling form
  */
 export interface MachineTypeConfiguration {
   base: Option;
@@ -63,6 +65,65 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
       { value: 'n1-standard-32', text: '32 vCPUs, 120 GB RAM' },
       { value: 'n1-standard-64', text: '64 vCPUs, 240 GB RAM' },
       { value: 'n1-standard-96', text: '96 vCPUs, 360 GB RAM' },
+    ],
+  },
+  {
+    base: {
+      value: 'e2-highcpu-',
+      text: 'E2 high-CPU',
+    },
+    configurations: [
+      { value: 'e2-highcpu-2', text: 'Efficient Instance, 2 vCPUs, 2 GB RAM' },
+      { value: 'e2-highcpu-4', text: 'Efficient Instance, 4 vCPUs, 4 GB RAM' },
+      { value: 'e2-highcpu-8', text: 'Efficient Instance, 8 vCPUs, 8 GB RAM' },
+      {
+        value: 'e2-highcpu-16',
+        text: 'Efficient Instance, 16 vCPUs, 16 GB RAM',
+      },
+      {
+        value: 'e2-highcpu-32',
+        text: 'Efficient Instance, 32 vCPUs, 32 GB RAM',
+      },
+    ],
+  },
+  {
+    base: {
+      value: 'e2-highmem-',
+      text: 'E2 high-memory',
+    },
+    configurations: [
+      { value: 'e2-highmem-2', text: 'Efficient Instance, 2 vCPUs, 16 GB RAM' },
+      { value: 'e2-highmem-4', text: 'Efficient Instance, 4 vCPUs, 32 GB RAM' },
+      { value: 'e2-highmem-8', text: 'Efficient Instance, 8 vCPUs, 64 GB RAM' },
+      {
+        value: 'e2-highmem-16',
+        text: 'Efficient Instance, 16 vCPUs, 128 GB RAM',
+      },
+    ],
+  },
+  {
+    base: {
+      value: 'e2-standard-',
+      text: 'E2 standard',
+    },
+    configurations: [
+      { value: 'e2-standard-2', text: 'Efficient Instance, 2 vCPUs, 8 GB RAM' },
+      {
+        value: 'e2-standard-4',
+        text: 'Efficient Instance, 4 vCPUs, 16 GB RAM',
+      },
+      {
+        value: 'e2-standard-8',
+        text: 'Efficient Instance, 8 vCPUs, 32 GB RAM',
+      },
+      {
+        value: 'e2-standard-16',
+        text: 'Efficient Instance, 16 vCPUs, 64 GB RAM',
+      },
+      {
+        value: 'e2-standard-32',
+        text: 'Efficient Instance, 32 vCPUs, 128 GB RAM',
+      },
     ],
   },
   {
@@ -163,41 +224,76 @@ export const MACHINE_TYPES: MachineTypeConfiguration[] = [
   },
   {
     base: {
-      value: 'm1-ultramem-',
+      value: 'c2-',
+      text: 'Compute-optimized',
+    },
+    configurations: [
+      { value: 'c2-standard-4', text: 'Compute Optimized: 4 vCPUs, 16 GB RAM' },
+      { value: 'c2-standard-8', text: 'Compute Optimized: 8 vCPUs, 32 GB RAM' },
+      {
+        value: 'c2-standard-16',
+        text: 'Compute Optimized: 16 vCPUs, 64 GB RAM',
+      },
+      {
+        value: 'c2-standard-30',
+        text: 'Compute Optimized: 30 vCPUs, 120 GB RAM',
+      },
+      {
+        value: 'c2-standard-60',
+        text: 'Compute Optimized: 60 vCPUs, 240 GB RAM',
+      },
+    ],
+  },
+  {
+    base: {
+      value: 'm1-',
       text: 'Memory-optimized',
     },
     configurations: [
       { value: 'm1-ultramem-40', text: '40 vCPUs, 961 GB RAM' },
       { value: 'm1-ultramem-80', text: '80 vCPUs, 1922 GB RAM' },
-      { value: 'm1-ultramem-96', text: '96 vCPUs, 1.4 TB RAM' },
+      { value: 'm1-megamem-96', text: '96 vCPUs, 1.4 TB RAM' },
       { value: 'm1-ultramem-160', text: '160 vCPUs, 3844 GB RAM' },
     ],
   },
 ];
 
-/*
+/**
  * Get description text from Machine Type value
  */
-export function getMachineTypeText(value: string) {
-  const machineType = MACHINE_TYPES.find(machineType =>
+export function getMachineTypeText(
+  value: string,
+  machineTypes?: MachineTypeConfiguration[]
+) {
+  if (!machineTypes || machineTypes.length === 0) {
+    machineTypes = MACHINE_TYPES;
+  }
+  const machineType = machineTypes.find(machineType =>
     value.startsWith(machineType.base.value as string)
   );
 
-  return machineType
-    ? machineType.configurations.find(
-        configuration => configuration.value === value
-      ).text
-    : null;
+  const configuration =
+    machineType &&
+    machineType.configurations.find(
+      configuration => configuration.value === value
+    );
+
+  return configuration ? configuration.text : value;
 }
 
-function machineTypeToBaseName(machineTypeName: string): string {
+export function machineTypeToBaseName(machineTypeName: string): string {
   // Group all variations of memory-optimized or compute-optimized machine types together
   if (machineTypeName.startsWith('m1')) return 'm1-';
   if (machineTypeName.startsWith('c2')) return 'c2-';
 
+  if (machineTypeName.lastIndexOf('-') === -1) return machineTypeName;
   return machineTypeName.substring(0, machineTypeName.lastIndexOf('-') + 1);
 }
 
+/**
+ * If a new family of machineTypes needs to be supported it must be
+ * added to this mapping
+ */
 const BASE_NAME_TO_DISPLAY_TEXT = {
   'e2-highcpu-': 'E2 high-CPU',
   'e2-highmem-': 'E2 high-memory',
@@ -214,7 +310,14 @@ const BASE_NAME_TO_DISPLAY_TEXT = {
   'm1-': 'Memory-optimized',
 };
 
-export function getMachineTypeOptions(machineTypes: GapiMachineType[]) {
+/**
+ * Converts a list of MachineTypes retrieved using the compute API
+ * into a list of MachineTypeConfiguration to be used by the
+ * machine type select dropdown in the hardware scaling form.
+ */
+export function getMachineTypeConfigurations(
+  machineTypes: GapiMachineType[]
+): MachineTypeConfiguration[] {
   if (!machineTypes || machineTypes.length === 0) return MACHINE_TYPES;
 
   const map = new Map();
@@ -232,6 +335,7 @@ export function getMachineTypeOptions(machineTypes: GapiMachineType[]) {
   });
 
   map.forEach(function(value, key) {
+    // Sort configurations in ascending order of their number of guest CPUs
     value.sort((a, b) => a.guestCpus - b.guestCpus);
     value = value.map(item => machineTypeToOption(item));
 

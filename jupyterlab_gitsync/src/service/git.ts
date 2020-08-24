@@ -17,9 +17,9 @@ export class GitManager {
   private _syncCompleted: Signal<this, void> = new Signal<this, void>(this);
   private _mergeConflict: Signal<this, void> = new Signal<this, void>(this);
 
-  constructor(path: string, options?: {remote: string, worktree:string}) {
+  constructor(path: string, options?: { remote: string; worktree: string }) {
     this._setup(path);
-    if (options){
+    if (options) {
       this._options[0] = options.remote;
       this._options[1] = options.worktree;
     }
@@ -46,6 +46,7 @@ export class GitManager {
       method: 'POST',
       body: JSON.stringify({
         path: this._path,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         ex_path: this._executablePath,
         options: this._options,
       }),
