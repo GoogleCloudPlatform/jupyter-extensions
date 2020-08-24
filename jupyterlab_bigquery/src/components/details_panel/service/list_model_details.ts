@@ -60,7 +60,7 @@ export class ModelDetailsService {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
-        'bigquery/v1/modeldetails'
+        'bigquery/v1/modelDetails'
       );
       const body = { modelId: modelId };
       const requestInit: RequestInit = {

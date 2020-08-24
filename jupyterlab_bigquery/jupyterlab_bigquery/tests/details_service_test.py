@@ -2,9 +2,9 @@
 """Tests for details panel handlers."""
 import unittest
 import datetime
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock
 
-from jupyterlab_bigquery.details_handler.details_handler import get_dataset_details, get_table_details, get_table_preview, get_view_details, get_model_details, get_training_run_details
+from jupyterlab_bigquery.details_handler.service import BigQueryService
 from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
 from google.cloud.bigquery_v2.gapic.enums import Model
 from google.protobuf.wrappers_pb2 import DoubleValue, BoolValue
@@ -24,6 +24,7 @@ class TestDatasetDetails(unittest.TestCase):
         self_link = 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
     )
     client.get_dataset = Mock(return_value = dataset)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -39,7 +40,7 @@ class TestDatasetDetails(unittest.TestCase):
             'link': 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
     }
-    result = get_dataset_details(client, 'some_dataset_id')
+    result = bigquery.get_dataset_details('some_dataset_id')
     self.assertEqual(expected, result)
 
   def testGetDatasetDetailsEmptyFields(self):
@@ -56,6 +57,7 @@ class TestDatasetDetails(unittest.TestCase):
         self_link = 'https://bigquery.googleapis.com/bigquery/v2/projects/project_id/datasets/dataset_id'
     )
     client.get_dataset = Mock(return_value = dataset)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -72,8 +74,7 @@ class TestDatasetDetails(unittest.TestCase):
         }
     }
 
-    result = get_dataset_details(client, 'some_dataset_id')
-    self.maxDiff = None
+    result = bigquery.get_dataset_details('some_dataset_id')
     self.assertEqual(expected, result)
 
 class TestTableDetails(unittest.TestCase):
@@ -110,6 +111,7 @@ class TestTableDetails(unittest.TestCase):
         schema = [schema_field_0, schema_field_1]
     )
     client.get_table = Mock(return_value = table)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -141,7 +143,7 @@ class TestTableDetails(unittest.TestCase):
         }
     }
 
-    result = get_table_details(client, 'some_table_id')
+    result = bigquery.get_table_details('some_table_id')
     self.assertEqual(expected, result)
 
   def testGetTableDetailsEmptyFields(self):
@@ -163,6 +165,7 @@ class TestTableDetails(unittest.TestCase):
         schema = []
     )
     client.get_table = Mock(return_value = table)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -183,7 +186,7 @@ class TestTableDetails(unittest.TestCase):
         }
     }
 
-    result = get_table_details(client, 'some_table_id')
+    result = bigquery.get_table_details('some_table_id')
     self.assertEqual(expected, result)
 
   def testGetTableDetailsNestedSchema(self):
@@ -220,6 +223,7 @@ class TestTableDetails(unittest.TestCase):
         schema = [schema_field_1]
     )
     client.get_table = Mock(return_value = table)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -251,7 +255,7 @@ class TestTableDetails(unittest.TestCase):
         }
     }
 
-    result = get_table_details(client, 'some_table_id')
+    result = bigquery.get_table_details('some_table_id')
     self.assertEqual(expected, result)
   
 class TestTablePreview(unittest.TestCase):
@@ -292,13 +296,14 @@ class TestTablePreview(unittest.TestCase):
         rows.__iter__.return_value = [row_0, row_1, row_2]
 
         client.list_rows = MagicMock(return_value = rows)
+        bigquery = BigQueryService(client)
 
         expected = {
             'fields': ['field_name_0', 'field_name_1.subfield', 'field_name_1.other_subfield'],
             'rows': [['hello', '1', '2020-07-14 13:23:45.000067 '], ['goodbye', '2', None], [None, None, None]]
         }
 
-        result = get_table_preview(client, 'some_table_id')
+        result = bigquery.get_table_preview('some_table_id')
         self.assertEqual(expected, result)
 
     def testEmptyTable(self):
@@ -337,13 +342,14 @@ class TestTablePreview(unittest.TestCase):
         rows.__iter__.return_value = [row_0]
 
         client.list_rows = MagicMock(return_value = rows)
+        bigquery = BigQueryService(client)
 
         expected = {
             'fields': ['field_name_0', 'field_name_1.subfield', 'field_name_1.other_subfield'],
             'rows': [[None, None, None]]
         }
 
-        result = get_table_preview(client, 'some_table_id')
+        result = bigquery.get_table_preview('some_table_id')
         self.assertEqual(expected, result)
 
     def testRepeatedTable(self):
@@ -381,6 +387,7 @@ class TestTablePreview(unittest.TestCase):
         rows.__iter__.return_value = [row_0, row_1, row_2, row_3]
 
         client.list_rows = MagicMock(return_value = rows)
+        bigquery = BigQueryService(client)
 
         expected = {
             'fields': ['field_name_0', 'field_name_1'],
@@ -392,7 +399,7 @@ class TestTablePreview(unittest.TestCase):
             ]
         }
 
-        result = get_table_preview(client, 'some_table_id')
+        result = bigquery.get_table_preview('some_table_id')
         self.assertEqual(expected, result)
 
 class TestViewDetails(unittest.TestCase):
@@ -430,6 +437,7 @@ class TestViewDetails(unittest.TestCase):
         view_use_legacy_sql = False
     )
     client.get_table = Mock(return_value = table)
+    bigquery = BigQueryService(client)
 
     expected = {
         'details': {
@@ -460,7 +468,7 @@ class TestViewDetails(unittest.TestCase):
         }
     }
 
-    result = get_view_details(client, 'some_view_id')
+    result = bigquery.get_view_details('some_view_id')
     self.assertEqual(expected, result)
 
 
@@ -495,6 +503,7 @@ class TestModelDetails(unittest.TestCase):
             training_runs = [Mock(start_time = Mock(seconds = 1234567)), Mock(start_time = Mock(seconds = 1234789))]
         )
         client.get_model = Mock(return_value = model)
+        bigquery = BigQueryService(client)
 
         expected = {
             'details': {
@@ -513,7 +522,7 @@ class TestModelDetails(unittest.TestCase):
             }
         }
 
-        result = get_model_details(client, 'some_model_id')
+        result = bigquery.get_model_details('some_model_id')
         self.assertEqual(expected, result)
 
     def testGetModelDetailsEmptyFields(self):
@@ -535,6 +544,7 @@ class TestModelDetails(unittest.TestCase):
             training_runs = [Mock(start_time = Mock(seconds = 1234567))]
         )
         client.get_model = Mock(return_value = model)
+        bigquery = BigQueryService(client)
 
         expected = {
             'details': {
@@ -553,7 +563,7 @@ class TestModelDetails(unittest.TestCase):
             }
         }
 
-        result = get_model_details(client, 'some_model_id')
+        result = bigquery.get_model_details('some_model_id')
         self.assertEqual(expected, result)
 
     def testGetTrainingRunDetails(self):
@@ -602,6 +612,7 @@ class TestModelDetails(unittest.TestCase):
         )
 
         client.get_model = Mock(return_value = model)
+        bigquery = BigQueryService(client)
 
         expected = {
             'details': {
@@ -630,8 +641,7 @@ class TestModelDetails(unittest.TestCase):
             }
         }
 
-        self.maxDiff = None
-        result = get_training_run_details(client, 'some_model_id', 0)
+        result = bigquery.get_training_run_details('some_model_id', 0)
         self.assertEqual(expected, result)
 
 if __name__ == '__main__':

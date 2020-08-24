@@ -24,7 +24,7 @@ export class DatasetDetailsService {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
-        'bigquery/v1/datasetdetails'
+        'bigquery/v1/datasetDetails'
       );
       const body = { datasetId: datasetId };
       const requestInit: RequestInit = {
