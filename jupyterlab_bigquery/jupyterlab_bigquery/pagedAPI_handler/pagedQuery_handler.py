@@ -1,7 +1,7 @@
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 from google.cloud import bigquery
 import json
-from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_rows, parallel_format_preview_rows
+from jupyterlab_bigquery.details_handler.service import format_preview_fields, format_preview_rows, parallel_format_preview_rows
 from google.cloud.bigquery.dbapi import _helpers
 from threading import Lock
 from time import time
