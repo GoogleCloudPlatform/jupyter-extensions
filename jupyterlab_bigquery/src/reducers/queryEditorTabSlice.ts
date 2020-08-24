@@ -40,8 +40,6 @@ const queryEditorTabSlice = createSlice({
       newQueryState.queryId = queryId;
       newQueryState.query = queryResult.query;
       newQueryState.project = queryResult.project;
-
-      state.queries = { ...state.queries, [queryId]: newQueryState };
     },
     resetQueryResult(state, action: PayloadAction<QueryId>) {
       const queryId = action.payload;

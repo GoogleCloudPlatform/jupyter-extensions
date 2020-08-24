@@ -1,14 +1,19 @@
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 from google.cloud import bigquery
 import json
-from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_rows
+from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_rows, parallel_format_preview_rows
 from google.cloud.bigquery.dbapi import _helpers
 from threading import Lock
+from time import time
+
+from multiprocessing import Pool
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
     'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params'
 ]
 
+NUM_THREADS = 6
+USE_PARALLEL_THRESH = 1e5
 
 class PagedQueryHandler(PagedAPIHandler):
   client = None
@@ -17,6 +22,8 @@ class PagedQueryHandler(PagedAPIHandler):
 
   def __init__(self, application, request, **kwargs):
     super().__init__(application, request, **kwargs)
+
+    self.pool = Pool(NUM_THREADS)
 
     if PagedQueryHandler.client is None:
       PagedQueryHandler.client = bigquery.Client()
@@ -101,8 +108,13 @@ class PagedQueryHandler(PagedAPIHandler):
     schema_fields = format_preview_fields(en.schema)
 
     for page in en.pages:
+      if page.num_items > USE_PARALLEL_THRESH:
+        content = parallel_format_preview_rows(page, en.schema, pool=self.pool)
+      else:
+        content = format_preview_rows(page, en.schema)
+
       response = {
-          'content': json.dumps(format_preview_rows(page, en.schema)),
+          'content': json.dumps(content),
           'labels': json.dumps(schema_fields),
           'bytesProcessed': json.dumps(total_bytes_processed),
           'project': json.dumps(query_job.project),
