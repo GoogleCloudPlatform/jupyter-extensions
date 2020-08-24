@@ -136,11 +136,9 @@ interface Props {
 }
 
 interface State {
-  hasLoaded: boolean;
-  isLoading: boolean;
-  jobIds: string[];
-  jobs: JobsObject;
   openJob: string;
+  hasLoaded: boolean;
+  detailLoaded: boolean;
   page: number;
   rowsPerPage: number;
 }
@@ -303,36 +301,38 @@ const QueryStatus = props => {
   }
 };
 
+interface QueryHistory {
+  jobs: JobsObject;
+  jobIds: string[];
+}
+
 class QueryHistoryPanel extends React.Component<Props, State> {
+  private static queryHistory: QueryHistory | undefined = undefined;
+
   constructor(props: Props) {
     super(props);
     this.state = {
-      hasLoaded: false,
-      isLoading: false,
-      jobs: {} as JobsObject,
-      jobIds: [],
       openJob: null,
+      hasLoaded: QueryHistoryPanel.queryHistory !== undefined,
+      detailLoaded: false,
       page: 0,
       rowsPerPage: 30,
     };
   }
 
-  componentDidMount() {
-    this.getHistory();
+  async componentDidMount() {
+    if (this.state.hasLoaded === false) {
+      await this.getHistory();
+      this.setState({ hasLoaded: true });
+    }
   }
 
-  handleExpandJob = async jobId => {
-    await this.getQueryDetails(jobId);
-  };
-
   getQueryDetails = async jobId => {
-    if (!this.state.jobs[jobId].details) {
+    if (!QueryHistoryPanel.queryHistory.jobs[jobId].details) {
       try {
         const service = new QueryDetailsService();
         await service.getQueryDetails(jobId).then(queryDetails => {
-          const updatedJobs = { ...this.state.jobs };
-          updatedJobs[jobId]['details'] = queryDetails.job;
-          this.setState({ jobs: updatedJobs });
+          QueryHistoryPanel.queryHistory.jobs[jobId].details = queryDetails.job;
         });
       } catch (err) {
         console.warn(
@@ -359,18 +359,18 @@ class QueryHistoryPanel extends React.Component<Props, State> {
 
   private async getHistory() {
     try {
-      this.setState({ isLoading: true });
       await this.props.queryHistoryService
         .getQueryHistory(this.props.currentProject)
         .then(queryHistory => {
           const jobIds = queryHistory.jobIds;
           const jobs = queryHistory.jobs;
-          this.setState({ hasLoaded: true, jobIds: jobIds, jobs: jobs });
+          QueryHistoryPanel.queryHistory = {
+            jobIds: jobIds,
+            jobs: jobs,
+          };
         });
     } catch (err) {
       console.warn('Error retrieving query history', err);
-    } finally {
-      this.setState({ isLoading: false });
     }
   }
 
@@ -400,14 +400,11 @@ class QueryHistoryPanel extends React.Component<Props, State> {
   }
 
   render() {
-    if (this.state.isLoading) {
-      return (
-        <>
-          <Header>Query history</Header> <LoadingPanel />
-        </>
-      );
-    } else {
-      const { jobs, jobIds, openJob, rowsPerPage, page } = this.state;
+    const { hasLoaded, rowsPerPage, page, openJob } = this.state;
+
+    if (hasLoaded) {
+      const { jobIds, jobs } = QueryHistoryPanel.queryHistory;
+
       const queriesByDate = this.processHistory(
         jobIds.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
         jobs
@@ -432,11 +429,22 @@ class QueryHistoryPanel extends React.Component<Props, State> {
                     return (
                       <div key={`query_details_${jobId}`}>
                         <div
-                          onClick={() => {
+                          onClick={async () => {
+                            const shouldOpen = openJob !== jobId;
+
                             this.setState({
                               openJob: openJob === jobId ? null : jobId,
                             });
-                            this.getQueryDetails(jobId);
+
+                            if (shouldOpen) {
+                              this.setState({
+                                detailLoaded: false,
+                              });
+                              await this.getQueryDetails(jobId);
+                              this.setState({
+                                detailLoaded: true,
+                              });
+                            }
                           }}
                         >
                           {openJob === jobId ? (
@@ -474,6 +482,12 @@ class QueryHistoryPanel extends React.Component<Props, State> {
             labelRowsPerPage="Queries per page:"
           />
         </div>
+      );
+    } else {
+      return (
+        <>
+          <Header>Query history</Header> <LoadingPanel />
+        </>
       );
     }
   }
