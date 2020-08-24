@@ -26,9 +26,11 @@ jest.mock('gcp_jupyterlab_shared', () => {
   };
 });
 
-import { asApiResponse } from 'gcp_jupyterlab_shared';
+import {
+  asApiResponse,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
 import { DetailsService, COMPUTE_ENGINE_API_PATH } from './details_service';
-import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
 import {
   MACHINE_TYPES_RESPONSE,
   ACCELERATOR_TYPES_RESPONSE,

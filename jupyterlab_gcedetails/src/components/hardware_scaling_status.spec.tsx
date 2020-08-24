@@ -33,6 +33,12 @@ describe('HardwareScalingStatus', () => {
   } as unknown) as NotebooksService;
   const mockInstance: Instance = {
     name: 'Test',
+    machineType:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/e2-highmem-8',
+    acceleratorConfig: {
+      coreCount: '1',
+      type: 'NVIDIA_TESLA_K80',
+    },
   };
   const mockToken = 'mockToken';
 

@@ -8,6 +8,7 @@ import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
 import { MachineTypeConfiguration } from '../data/machine_types';
+import { displayInstance } from './instance_details_message';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -260,6 +261,12 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         <div className={STYLES.containerSize}>
           <p className={STYLES.heading}>{Status[status]}</p>
           <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+          {status === Status['Complete'] &&
+            displayInstance(
+              instanceDetails,
+              machineTypes,
+              'Your new configuration:'
+            )}
         </div>
         {status === Status['Complete'] ? (
           <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
