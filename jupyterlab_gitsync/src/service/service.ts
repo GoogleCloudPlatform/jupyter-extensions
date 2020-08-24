@@ -13,12 +13,12 @@ export class GitSyncService {
   /* Member Fields */
   private _git: GitManager;
   private _tracker: FileTracker;
-  private _completed: boolean = true;
+  private _completed = true;
   private _running: boolean;
   syncInterval: number = 0 * 1000;
 
   private _status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning';
-  private _blocked: boolean = false;
+  private _blocked = false;
   private _stateChange: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _statusChange: Signal<this, string> = new Signal<this, string>(this);
 
@@ -29,7 +29,7 @@ export class GitSyncService {
   }
 
   start() {
-    if (!this._blocked && !this.running){
+    if (!this._blocked && !this.running) {
       console.log('start git sync service');
       this._running = true;
       this._run();
@@ -38,7 +38,7 @@ export class GitSyncService {
   }
 
   stop() {
-    if (!this._blocked && this.running){
+    if (!this._blocked && this.running) {
       this._running = false;
       this._stateChange.emit(this.running);
       console.log('stop git sync service');
@@ -73,50 +73,52 @@ export class GitSyncService {
     return this._statusChange;
   }
 
-  private _updateStatus(status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning'){
-    if (status != this.status){
+  private _updateStatus(
+    status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning'
+  ) {
+    if (status !== this.status) {
       this._status = status;
       this._statusChange.emit(status);
     }
   }
 
   private async _run(): Promise<void> {
-    if (this.running && this.completed){
+    if (this.running && this.completed) {
       this._completed = false;
       setTimeout(async () => {
-        try{
+        try {
           await this.tracker.saveAll();
-          this._updateStatus('sync')
+          this._updateStatus('sync');
           await this.git.sync();
-          this._updateStatus('merge')
+          this._updateStatus('merge');
           await this.tracker.reloadAll();
           this._updateStatus('up-to-date');
         } catch (error) {
           console.warn(error);
-          this._updateStatus('warning')
+          this._updateStatus('warning');
         }
-        this._completed = true; 
+        this._completed = true;
         this._run();
       }, this.syncInterval);
     }
   }
 
-  private _addListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any) {
     return signal.connect(callback, this);
   }
 
-  private _conflictListener(sender: FileTracker, conflict: boolean){
-    if (!conflict && !this.running){
+  private _conflictListener(sender: FileTracker, conflict: boolean) {
+    if (!conflict && !this.running) {
       this._blocked = false;
       this.start();
-    } else if (conflict && this.running){
+    } else if (conflict && this.running) {
       this.stop();
       this._blocked = true;
     }
   }
 
-  private _dirtyStateListener(sender: FileTracker, dirty: boolean){
-    if (this.status === 'up-to-date' && dirty){
+  private _dirtyStateListener(sender: FileTracker, dirty: boolean) {
+    if (this.status === 'up-to-date' && dirty) {
       this._updateStatus('dirty');
     }
   }

@@ -5,8 +5,8 @@ import subprocess
 
 from notebook.base.handlers import APIHandler
 
-class SyncHandler(APIHandler):
 
+class SyncHandler(APIHandler):
   """
   Implements all synchronization operations
   * uses git-sync-changes bash script
@@ -20,7 +20,7 @@ class SyncHandler(APIHandler):
     options = recv['options'] if recv['options'] else []
 
     try:
-      return_code = subprocess.call([ex_path]+options, cwd=path)
+      return_code = subprocess.call([ex_path] + options, cwd=path)
       if return_code == 0:
         self.finish({'success': True})
       else:
@@ -30,7 +30,6 @@ class SyncHandler(APIHandler):
 
 
 class SetupHandler(APIHandler):
-
   """
   Sets up environment for extension to run
   * verify that working path is a git repo

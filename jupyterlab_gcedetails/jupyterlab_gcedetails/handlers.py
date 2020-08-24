@@ -132,6 +132,7 @@ async def get_gpu_details():
 
   return details
 
+
 async def get_gpu_list(zone):
   """Uses gcloud to return a list of available Accelerator Types."""
   accelerator_types = []
