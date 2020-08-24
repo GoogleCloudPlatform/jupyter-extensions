@@ -47,7 +47,6 @@ import {
   MACHINE_TYPES,
   optionToMachineType,
   machineTypeToOption,
-  getMachineTypeOptions,
   MachineTypeConfiguration,
 } from '../data/machine_types';
 import { ActionBar } from './action_bar';
@@ -149,7 +148,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       : ACCELERATOR_TYPES;
 
     this.machineTypesOptions = props.details
-      ? getMachineTypeOptions(props.details.machineTypes)
+      ? props.details.machineTypes
       : MACHINE_TYPES;
   }
 

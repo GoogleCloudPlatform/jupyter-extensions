@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { MachineType } from './machine_types';
+import { MachineType, MachineTypeConfiguration } from './machine_types';
 import {
   Accelerator,
   nvidiaNameToEnum,
   NO_ACCELERATOR_COUNT,
 } from './accelerator_types';
-import { GapiMachineType } from '../service/details_service';
 
 export interface Option {
   text: string;
@@ -68,7 +67,7 @@ export interface Details {
   utilization: Utilization;
   gpu: Gpu;
   acceleratorTypes: Accelerator[];
-  machineTypes: GapiMachineType[];
+  machineTypes: MachineTypeConfiguration[];
 }
 
 export interface HardwareConfiguration {

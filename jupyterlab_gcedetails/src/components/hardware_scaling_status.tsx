@@ -7,6 +7,7 @@ import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
+import { MachineTypeConfiguration } from '../data/machine_types';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -67,6 +68,7 @@ interface Props {
   onCompletion: () => void;
   detailsServer: ServerWrapper;
   authTokenRetrieval: () => Promise<string>;
+  machineTypes?: MachineTypeConfiguration[];
 }
 
 interface State {
@@ -245,12 +247,13 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   render() {
     const { status, error, instanceDetails } = this.state;
     const progressValue = (status / 6) * 100;
-    const { onDialogClose } = this.props;
+    const { onDialogClose, machineTypes } = this.props;
     return status === Status['Error'] ? (
       <ErrorPage
         onDialogClose={onDialogClose}
         error={error}
         instanceDetails={instanceDetails}
+        machineTypes={machineTypes}
       />
     ) : (
       <div className={STYLES.containerPadding}>
