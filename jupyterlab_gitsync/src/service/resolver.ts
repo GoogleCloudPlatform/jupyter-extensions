@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { CodeMirror } from 'codemirror';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { default as merge } from 'diff3';
 
 import { IResolver } from './tracker';
-import { File } from './File';
+import { File } from './file';
 
 function token() {
   let token = '';
@@ -34,7 +35,9 @@ export class FileResolver implements IResolver {
   };
 
   private _conflict: boolean;
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
 
   constructor(file: File) {
     this._file = file;
@@ -89,16 +92,23 @@ export class FileResolver implements IResolver {
     return input.replace(this._token, '');
   }
 
-  addVersion(text: string, origin: 'base' | 'local' | 'remote' | 'local_tok'): void {
+  addVersion(
+    text: string,
+    origin: 'base' | 'local' | 'remote' | 'local_tok'
+  ): void {
     this._versions[origin] = text;
   }
 
   async mergeVersions(): Promise<string> {
-    if (this.versions.local == this.versions.remote){
+    if (this.versions.local === this.versions.remote) {
       this.addVersion(this.versions.local, 'base');
       return undefined;
     }
-    const merged = merge(this.versions.remote, this.versions.base, this.versions.local_tok);
+    const merged = merge(
+      this.versions.remote,
+      this.versions.base,
+      this.versions.local_tok
+    );
     if (this._isConflict(merged)) {
       await this._resolveConflicts(merged);
     } else {
@@ -146,8 +156,14 @@ export class FileResolver implements IResolver {
     let ret = undefined;
     const local_raw = local.replace(this._token, '');
 
-    if (base === '' &&(local_raw.startsWith(remote) || remote.startsWith(local_raw)))
-      ret = (local_raw.startsWith(remote) ? local_raw : remote).replace(local_raw, local);
+    if (
+      base === '' &&
+      (local_raw.startsWith(remote) || remote.startsWith(local_raw))
+    )
+      ret = (local_raw.startsWith(remote) ? local_raw : remote).replace(
+        local_raw,
+        local
+      );
     else {
       console.log(base);
       console.log(local);
@@ -156,21 +172,20 @@ export class FileResolver implements IResolver {
     return ret;
   }
 
-  private _updateState(state: boolean){
-    if (state != this.conflict){
+  private _updateState(state: boolean) {
+    if (state !== this.conflict) {
       this._conflict = state;
       this._conflictState.emit(state);
     }
   }
 
   private async _resolveDialog(result): Promise<void> {
-    const body = 
-      `"${this.path}" has a conflict. Would you like to revert to a previous version?\
+    const body = `"${this.path}" has a conflict. Would you like to revert to a previous version?\
       \n(Note that ignoring conflicts will stop git sync.)`;
     // const resolveBtn = Dialog.okButton({ label: 'Resolve Conflicts' });
     const localBtn = Dialog.okButton({ label: 'Revert to Local' });
     const remoteBtn = Dialog.okButton({ label: 'Revert to Remote' });
-    const ignoreBtn = Dialog.warnButton({ label: 'Ignore Conflict' })
+    const ignoreBtn = Dialog.warnButton({ label: 'Ignore Conflict' });
     return showDialog({
       title: 'Merge Conflicts',
       body,
@@ -190,9 +205,10 @@ export class FileResolver implements IResolver {
       }
       if (result.button.label === 'Ignore') {
         this._updateState(true);
-        throw new Error('ConflictError: Unresolved conflicts in repository. Stopping sync procedure.');
+        throw new Error(
+          'ConflictError: Unresolved conflicts in repository. Stopping sync procedure.'
+        );
       }
     });
   }
-
 }

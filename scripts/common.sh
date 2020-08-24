@@ -16,11 +16,12 @@
 PYTHON_PACKAGES=(
   shared
   jupyter-gcs-contents-manager
-  jupyterlab_ucaip
   jupyterlab_bigquery
   jupyterlab_caip_optimizer
   jupyterlab_comments
   jupyterlab_gcedetails
   jupyterlab_gcpscheduler
   jupyterlab_gcsfilebrowser
+  jupyterlab_gitsync
+  jupyterlab_ucaip
 )

@@ -18,7 +18,9 @@ export class NotebookFile implements IFile {
   context: DocumentRegistry.Context;
   resolver: IResolver;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: NotebookPanel) {
@@ -42,7 +44,7 @@ export class NotebookFile implements IFile {
   }
 
   async save() {
-    try{
+    try {
       await this.context.save();
     } catch (error) {
       console.warn(error);
@@ -57,17 +59,18 @@ export class NotebookFile implements IFile {
 
   private async _getRemoteVersion() {
     // TO DO (ashleyswang): change to get raw string of notebook file
-    const contents = await fs.get(this.path, {content: false});
+    const contents = await fs.get(this.path, { content: false });
     console.log(contents.content);
   }
 
   private async _getLocalVersion() {
-    const text = ((this.widget.content as Notebook).model as NotebookModel).toString();
+    const text = ((this.widget.content as Notebook)
+      .model as NotebookModel).toString();
     console.log('toString()', text);
     this.resolver.addVersion(text, 'local');
   }
 
-  private _addListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any) {
     return signal.connect(callback, this);
   }
 
@@ -75,21 +78,24 @@ export class NotebookFile implements IFile {
   //   return signal.disconnect(callback, this);
   // }
 
-  private _disposedListener(){
+  private _disposedListener() {
     // TO DO (ashleyswang): add functionality to remove resources after closing document
-
     // this._removeListener(((this.widget.content as Notebook)
     //   .model as NotebookModel).stateChanged, this._dirtyStateListener);
   }
 
-  private _dirtyStateListener(sender: NotebookModel, value: any){
+  private _dirtyStateListener(sender: NotebookModel, value: any) {
     console.log(value);
-    if (value.name === 'dirty'){ this._dirtyState.emit(value.newValue); }
+    if (value.name === 'dirty') {
+      this._dirtyState.emit(value.newValue);
+    }
   }
 
   private _addListeners() {
-    this._addListener(((this.widget.content as Notebook)
-      .model as NotebookModel).stateChanged, this._dirtyStateListener);
+    this._addListener(
+      ((this.widget.content as Notebook).model as NotebookModel).stateChanged,
+      this._dirtyStateListener
+    );
     this._addListener(this.widget.disposed, this._disposedListener);
   }
 }
