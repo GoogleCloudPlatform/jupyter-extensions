@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import * as csstips from 'csstips';
 import * as React from 'react';
 
 import {
   css,
   CheckboxInput,
   LearnMoreLink,
-  BASE_FONT,
   Option,
   Message,
 } from 'gcp_jupyterlab_shared';
@@ -69,34 +67,11 @@ export const FORM_STYLES = stylesheet({
   checkboxContainer: {
     padding: '18px 0px 8px 0px',
   },
-  title: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
-  subtitle: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginTop: '10px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
   formContainer: {
     width: '468px',
   },
-  description: {
-    paddingBottom: '10px',
-  },
   topPadding: {
     paddingTop: '10px',
-  },
-  bottomPadding: {
-    paddingBottom: '10px',
   },
 });
 
