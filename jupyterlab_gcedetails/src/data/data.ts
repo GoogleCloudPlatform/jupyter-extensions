@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { MachineType } from './machine_types';
+import { MachineType, MachineTypeConfiguration } from './machine_types';
 import {
   Accelerator,
   nvidiaNameToEnum,
@@ -67,6 +67,7 @@ export interface Details {
   utilization: Utilization;
   gpu: Gpu;
   acceleratorTypes: Accelerator[];
+  machineTypes: MachineTypeConfiguration[];
 }
 
 export interface HardwareConfiguration {

@@ -42,25 +42,27 @@ export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
   return (
     <dl className={STYLES.containerPadding}>
-      <div className={STYLES.containerSize}>
-        <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
-          Notebook VM Details
-        </p>
-        {loadingDetails(Boolean(details), receivedError) ? (
+      <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
+        Notebook VM Details
+      </p>
+      {loadingDetails(Boolean(details), receivedError) ? (
+        <div className={STYLES.containerSize}>
           <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
-        ) : receivedError ? (
+        </div>
+      ) : receivedError ? (
+        <div className={STYLES.containerSize}>
           <p className={STYLES.paragraph}>
             Unable to retrieve GCE VM details, please check your server logs
           </p>
-        ) : (
-          MAPPED_ATTRIBUTES.map(am => (
-            <div className={STYLES.listRow} key={am.label}>
-              <dt className={STYLES.dt}>{am.label}</dt>
-              <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-            </div>
-          ))
-        )}
-      </div>
+        </div>
+      ) : (
+        MAPPED_ATTRIBUTES.map(am => (
+          <div className={STYLES.listRow} key={am.label}>
+            <dt className={STYLES.dt}>{am.label}</dt>
+            <dd className={STYLES.dd}>{am.mapper(details)}</dd>
+          </div>
+        ))
+      )}
       <ActionBar
         primaryLabel="Update"
         secondaryLabel="Close"

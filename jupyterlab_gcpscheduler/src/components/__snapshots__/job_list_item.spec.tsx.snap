@@ -32,7 +32,7 @@ exports[`JobListItem Renders for failed job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<ForwardRef(WithStyles) />}
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </div>
@@ -71,7 +71,7 @@ exports[`JobListItem Renders for running job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<ForwardRef(WithStyles) />}
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </div>
@@ -110,7 +110,7 @@ exports[`JobListItem Renders for successful job 1`] = `
   </div>
   <div>
     <IconButtonMenu
-      icon={<ForwardRef(WithStyles) />}
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </div>

@@ -54,7 +54,7 @@ exports[`Basic Comment Component Rendering detached comment should render correc
         </div>
       }
       secondary={
-        <ForwardRef(WithStyles)
+        <WithStyles(ForwardRef(Typography))
           color="textPrimary"
           style={
             Object {
@@ -64,7 +64,7 @@ exports[`Basic Comment Component Rendering detached comment should render correc
           variant="body2"
         >
           fake comment for testing React component
-        </ForwardRef(WithStyles)>
+        </WithStyles(ForwardRef(Typography))>
       }
     />
   </WithStyles(ForwardRef(ListItem))>
@@ -152,7 +152,7 @@ exports[`Basic Comment Component Rendering review comment should render correctl
         </div>
       }
       secondary={
-        <ForwardRef(WithStyles)
+        <WithStyles(ForwardRef(Typography))
           color="textPrimary"
           style={
             Object {
@@ -162,7 +162,7 @@ exports[`Basic Comment Component Rendering review comment should render correctl
           variant="body2"
         >
           fake comment for testing React component
-        </ForwardRef(WithStyles)>
+        </WithStyles(ForwardRef(Typography))>
       }
     />
   </WithStyles(ForwardRef(ListItem))>

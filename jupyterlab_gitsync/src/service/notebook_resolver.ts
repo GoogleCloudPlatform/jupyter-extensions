@@ -25,7 +25,9 @@ export class NotebookResolver implements IResolver {
   _cursor: CodeMirror.Pos;
 
   private _conflict: boolean;
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
 
   constructor(file: NotebookFile) {
     this._file = file;
@@ -54,5 +56,4 @@ export class NotebookResolver implements IResolver {
   async mergeVersions(): Promise<string> {
     return '';
   }
-
 }

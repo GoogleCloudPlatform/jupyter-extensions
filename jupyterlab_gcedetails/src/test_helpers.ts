@@ -145,6 +145,73 @@ export const DETAILS_RESPONSE = `{
   }
 }`;
 
+export const MACHINE_TYPES_RESPONSE = [
+  {
+    id: '801016',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'c2-standard-16',
+    description: 'Compute Optimized: 16 vCPUs, 64 GB RAM',
+    guestCpus: 16,
+    memoryMb: 65536,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/c2-standard-16',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '3096',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-standard-96',
+    description: '96 vCPUs, 360 GB RAM',
+    guestCpus: 96,
+    memoryMb: 368640,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-standard-96',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '10160',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-ultramem-160',
+    description: '160 vCPUs, 3844 GB RAM',
+    guestCpus: 160,
+    memoryMb: 3936256,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-ultramem-160',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '10040',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-ultramem-40',
+    description: '40 vCPUs, 961 GB RAM',
+    guestCpus: 40,
+    memoryMb: 984064,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-ultramem-40',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+];
+
 /** Returns a Promise that resolves a JSON response akin to the fetch API */
 export function asFetchResponse(result: any, ok = true): Promise<Response> {
   return Promise.resolve({

@@ -74,7 +74,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
 }
 
 export class StatusButton extends React.Component<Props, {}> {
-  // TO DO (ashleyswang): add status button to show sync state of repo 
+  // TO DO (ashleyswang): add status button to show sync state of repo
   private readonly title = 'Save All Open Files';
   private readonly style = style({ backgroundImage: 'var(--jp-icon-stop)' });
 
