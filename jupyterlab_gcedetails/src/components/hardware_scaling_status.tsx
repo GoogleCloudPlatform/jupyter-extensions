@@ -52,7 +52,7 @@ export enum Status {
   'Authorizing' = 0,
   'Stopping notebook instance' = 1,
   'Updating machine configuration' = 2,
-  'Updating GPU Configuration' = 3,
+  'Updating GPU configuration' = 3,
   'Restarting notebook instance' = 4,
   'Refreshing session' = 5,
   'Complete' = 6,
@@ -213,13 +213,13 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
             this.updateError(ErrorType.RESHAPING, err);
           }
           const nextStatus = attachGpu
-            ? 'Updating GPU Configuration'
+            ? 'Updating GPU configuration'
             : 'Restarting notebook instance';
           this.updateStatus(Status[nextStatus], setMachineTypeResult);
           break;
         }
 
-        case Status['Updating GPU Configuration']: {
+        case Status['Updating GPU configuration']: {
           let setGpuTypeResult = instanceDetails;
           try {
             setGpuTypeResult = await notebookService.setAccelerator(

@@ -52,175 +52,254 @@ exports[`HardwareScalingStatus Renders with stop error: Stop instance error 1`] 
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Authorizing (1/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={16.666666666666664}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
-    >
-      Authorizing
-    </p>
-    <p
-      className="paragraph_fssm9cv"
+      className="paragraph_f1ditx77"
     >
       Please complete the OAuth 2.0 authorization steps in the popup
     </p>
+    <p
+      className="bottomText_fz9oezr"
+    >
+      Don't close the browser tab before the update process is finished
+    </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={0}
-    variant="determinate"
-  />
 </div>
 `;
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
+  >
+    Complete
+  </p>
   <div
-    className="containerSize_fjiu9nv"
+    className="container_f1q29mf7"
   >
     <p
-      className="heading_f1xburhd"
-    >
-      Complete
-    </p>
-    <p
-      className="paragraph_fssm9cv"
+      className="paragraph_f1ditx77"
     >
       Operation complete. Enjoy your newly configured instance!
     </p>
+    <ActionBar
+      onPrimaryClick={[MockFunction]}
+      primaryLabel="Close"
+    />
   </div>
-  <ActionBar
-    onPrimaryClick={[MockFunction]}
-    primaryLabel="Close"
-  />
 </div>
 `;
 
-exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing Session 1`] = `
+exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Refreshing session (6/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={100}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
-    >
-      Refreshing Session
-    </p>
-    <p
-      className="paragraph_fssm9cv"
+      className="paragraph_f1ditx77"
     >
       Refreshing your JupyterLab session to reflect your new configuration.
     </p>
+    <p
+      className="bottomText_fz9oezr"
+    >
+      Don't close the browser tab before the update process is finished
+    </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={83.33333333333334}
-    variant="determinate"
-  />
 </div>
 `;
 
-exports[`HardwareScalingStatus Runs through reshaping flow: Starting Instance 1`] = `
+exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook instance 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Restarting notebook instance (5/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={83.33333333333334}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
+      className="paragraph_f1ditx77"
     >
-      Starting Instance
+      Restarting your newly configured notebook instance.
     </p>
     <p
-      className="paragraph_fssm9cv"
+      className="bottomText_fz9oezr"
     >
-      Restarting your instance.
+      Don't close the browser tab before the update process is finished
     </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={66.66666666666666}
-    variant="determinate"
-  />
 </div>
 `;
 
-exports[`HardwareScalingStatus Runs through reshaping flow: Stopping Instance 1`] = `
+exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook instance 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Stopping notebook instance (2/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={33.33333333333333}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
+      className="paragraph_f1ditx77"
     >
-      Stopping Instance
+      Shutting down your notebook instance for reshaping.
     </p>
     <p
-      className="paragraph_fssm9cv"
+      className="bottomText_fz9oezr"
     >
-      Shutting down instance for reshaping.
+      Don't close the browser tab before the update process is finished
     </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={16.666666666666664}
-    variant="determinate"
-  />
 </div>
 `;
 
-exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU Configuration 1`] = `
+exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configuration 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Updating GPU configuration (4/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={66.66666666666666}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
-    >
-      Updating GPU Configuration
-    </p>
-    <p
-      className="paragraph_fssm9cv"
+      className="paragraph_f1ditx77"
     >
       Reshaping GPU configuration to match your selection.
     </p>
+    <p
+      className="bottomText_fz9oezr"
+    >
+      Don't close the browser tab before the update process is finished
+    </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={50}
-    variant="determinate"
-  />
 </div>
 `;
 
-exports[`HardwareScalingStatus Runs through reshaping flow: Updating Machine Configuration 1`] = `
+exports[`HardwareScalingStatus Runs through reshaping flow: Updating machine configuration 1`] = `
 <div
-  className="containerPadding_f1ms73ho"
+  className="containerPadding_f7mmknj container_f1q29mf7"
 >
-  <div
-    className="containerSize_fjiu9nv"
+  <img
+    alt="logo"
+    className="image_f5a360f"
+    height={240}
+    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+    width={300}
+  />
+  <p
+    className="heading_f1xburhd"
   >
+    Updating machine configuration (3/6)
+  </p>
+  <div
+    className="container_f1q29mf7"
+  >
+    <WithStyles(WithStyles(ForwardRef(LinearProgress)))
+      value={50}
+      variant="determinate"
+    />
     <p
-      className="heading_f1xburhd"
-    >
-      Updating Machine Configuration
-    </p>
-    <p
-      className="paragraph_fssm9cv"
+      className="paragraph_f1ditx77"
     >
       Reshaping machine configuration to match your selection.
     </p>
+    <p
+      className="bottomText_fz9oezr"
+    >
+      Don't close the browser tab before the update process is finished
+    </p>
   </div>
-  <WithStyles(WithStyles(ForwardRef(LinearProgress)))
-    value={33.33333333333333}
-    variant="determinate"
-  />
 </div>
 `;
