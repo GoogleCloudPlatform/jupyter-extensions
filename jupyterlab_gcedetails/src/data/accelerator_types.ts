@@ -100,6 +100,8 @@ export function getGpuTypeOptionsList(
   accelerators: Accelerator[],
   cpuPlatform: string
 ): Option[] {
+  if (!accelerators || accelerators.length === 0) return ACCELERATOR_TYPES;
+
   // For more information on gpu restrictions see: https://cloud.google.com/compute/docs/gpus#restrictions
   accelerators = accelerators.filter(
     accelerator =>
@@ -125,7 +127,7 @@ export function getGpuCountOptionsList(
   accelerators: Accelerator[],
   acceleratorName: string
 ): Option[] {
-  if (acceleratorName === NO_ACCELERATOR_TYPE)
+  if (!acceleratorName || acceleratorName === NO_ACCELERATOR_TYPE)
     return ACCELERATOR_COUNTS_1_2_4_8;
 
   const accelerator = accelerators.find(

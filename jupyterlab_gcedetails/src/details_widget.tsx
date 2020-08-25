@@ -125,10 +125,15 @@ export class VmDetails extends React.Component<Props, State> {
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
 
-      const machineTypes = await detailsService.getMachineTypes();
-      details.machineTypes = getMachineTypeConfigurations(machineTypes);
+      const [machineTypes, acceleratorTypes] = await Promise.all([
+        detailsService.getMachineTypes(),
+        detailsService.getAcceleratorTypes(),
+      ]);
 
-      this.setState({ details: details });
+      details.machineTypes = getMachineTypeConfigurations(machineTypes);
+      details.acceleratorTypes = acceleratorTypes;
+
+      this.setState({ details });
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
