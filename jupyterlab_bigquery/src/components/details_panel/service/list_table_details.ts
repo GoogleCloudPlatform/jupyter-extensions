@@ -40,7 +40,7 @@ export class TableDetailsService {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
-        'bigquery/v1/tabledetails'
+        'bigquery/v1/tableDetails'
       );
       const body = { tableId: tableId };
       const requestInit: RequestInit = {
@@ -71,7 +71,7 @@ export class TableDetailsService {
       const serverSettings = ServerConnection.makeSettings();
       const requestUrl = URLExt.join(
         serverSettings.baseUrl,
-        'bigquery/v1/tablepreview'
+        'bigquery/v1/tablePreview'
       );
       const body = { tableId: tableId };
       const requestInit: RequestInit = {

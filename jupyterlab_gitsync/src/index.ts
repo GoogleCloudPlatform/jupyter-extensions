@@ -21,11 +21,11 @@ async function activate(
   shell: ILabShell,
   editor: IEditorTracker
 ) {
-  // TO DO (ashleyswang): add config method to determine path and options for git sync 
+  // TO DO (ashleyswang): add config method to determine path and options for git sync
   // path requires no slash at end for handler
   const path = './jupyterlab_gitsync/TEST';
-  const options = {remote: 'origin', worktree: 'ashleyswang/master'};
-  
+  const options = { remote: 'origin', worktree: 'ashleyswang/master' };
+
   // TO DO (ashleyswang): change so service creates git/files instead of passing in
   const git = new GitManager(path, options);
   const files = new FileTracker(shell);

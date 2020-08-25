@@ -1,4 +1,8 @@
-import { DocumentWidget, DocumentRegistry, DocumentModel } from '@jupyterlab/docregistry';
+import {
+  DocumentWidget,
+  DocumentRegistry,
+  DocumentModel,
+} from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
 
@@ -17,14 +21,16 @@ export class File implements IFile {
   editor: CodeMirror;
   doc: CodeMirror.doc;
   resolver: FileResolver;
-  view: { 
-    left: number,
-    top: number, 
-    right: number,
-    bottom: number 
-  }
+  view: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  };
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: DocumentWidget) {
@@ -52,7 +58,7 @@ export class File implements IFile {
   }
 
   async save() {
-    try{
+    try {
       await this.context.save();
     } catch (error) {
       console.warn(error);
@@ -64,7 +70,9 @@ export class File implements IFile {
     this._getLocalVersion();
     this._getEditorView();
     const text = await this.resolver.mergeVersions();
-    if (text) { await this._displayText(text); }
+    if (text) {
+      await this._displayText(text);
+    }
   }
 
   private async _displayText(text: string) {
@@ -73,7 +81,7 @@ export class File implements IFile {
       format: 'text' as Contents.FileFormat,
       path: this.path,
       type: 'file' as Contents.ContentType,
-    }
+    };
     await fs.save(this.path, options);
     await this.context.revert();
     this._setEditorView();
@@ -87,7 +95,7 @@ export class File implements IFile {
   }
 
   private async _getRemoteVersion() {
-    try{
+    try {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
     } catch (error) {
@@ -105,11 +113,11 @@ export class File implements IFile {
     this.resolver.setCursorToken(cursor);
     const scroll = this.editor.getScrollInfo();
     this.view = {
-      left: scroll.left, 
-      top: scroll.top, 
+      left: scroll.left,
+      top: scroll.top,
       right: scroll.left + scroll.clientWidth,
-      bottom: scroll.top + scroll.clientHeight
-    }
+      bottom: scroll.top + scroll.clientHeight,
+    };
   }
 
   private _setEditorView() {
@@ -118,33 +126,38 @@ export class File implements IFile {
     this.editor.scrollIntoView(this.view);
   }
 
-  private _addListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any) {
     return signal.connect(callback, this);
   }
 
-  private _removeListener(signal: ISignal<any, any>, callback: any){
+  private _removeListener(signal: ISignal<any, any>, callback: any) {
     return signal.disconnect(callback, this);
   }
 
-  private _disposedListener(){
+  private _disposedListener() {
     this._removeListener(this.resolver.conflictState, this._conflictListener);
-    this._removeListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._removeListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
   }
-  
-  private _conflictListener(sender: FileResolver, conflict: boolean){
+
+  private _conflictListener(sender: FileResolver, conflict: boolean) {
     this._conflictState.emit(conflict);
   }
 
-  private _dirtyStateListener(sender: DocumentModel, value: any){
-    if (value.name === 'dirty'){ this._dirtyState.emit(value.newValue); }
+  private _dirtyStateListener(sender: DocumentModel, value: any) {
+    if (value.name === 'dirty') {
+      this._dirtyState.emit(value.newValue);
+    }
   }
 
   private _addListeners() {
     this._addListener(this.resolver.conflictState, this._conflictListener);
-    this._addListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._addListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
     this._addListener(this.widget.disposed, this._disposedListener);
   }
-
 }

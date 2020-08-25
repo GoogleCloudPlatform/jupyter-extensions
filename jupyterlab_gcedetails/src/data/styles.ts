@@ -94,10 +94,6 @@ export const STYLES = stylesheet({
   infoMessage: {
     marginTop: '20px',
   },
-  cv: {
-    display: 'float',
-    flexDirection: 'row',
-  }
 });
 
 export const TEXT_STYLE = {

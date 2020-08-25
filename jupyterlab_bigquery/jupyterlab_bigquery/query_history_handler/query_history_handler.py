@@ -48,8 +48,12 @@ def get_table(client, tableRef):
   except:
     return 'Expired temporary table'
 
-def list_jobs(client, project):
-  jobs = list(client.list_jobs(project))
+def list_jobs(client, project, lastFetchTime=None):
+  if lastFetchTime is None:
+    jobs = list(client.list_jobs(project))
+  else:
+    min_creation_time = datetime.datetime.fromtimestamp(lastFetchTime)
+    jobs = list(client.list_jobs(project, min_creation_time=min_creation_time))
 
   jobs_list = {}
   job_ids = []
@@ -64,7 +68,8 @@ def list_jobs(client, project):
     }
     job_ids.append(job.job_id)
 
-  return {'jobs': jobs_list, 'jobIds': job_ids}
+  cur_time = datetime.datetime.utcnow().timestamp()
+  return {'jobs': jobs_list, 'jobIds': job_ids, 'lastFetchTime': cur_time}
 
 def get_job_details(client, job_id):
   job = client.get_job(job_id)
@@ -96,13 +101,23 @@ class QueryHistoryHandler(APIHandler):
   """Handles requests for view details."""
   bigquery_client = None
 
+  def __init__(self, application, request, **kwargs):
+    super().__init__(application, request, **kwargs)
+
+    if QueryHistoryHandler.bigquery_client is None:
+      QueryHistoryHandler.bigquery_client = bigquery.Client()
+
   @gen.coroutine
   def post(self, *args, **kwargs):
     try:
-      self.bigquery_client = create_bigquery_client()
       post_body = self.get_json_body()
 
-      self.finish(list_jobs(self.bigquery_client, post_body['projectId']))
+      if 'lastFetchTime' in post_body:
+        self.finish(list_jobs(QueryHistoryHandler.bigquery_client,
+          post_body['projectId'], post_body['lastFetchTime']))
+      else:
+        self.finish(list_jobs(QueryHistoryHandler.bigquery_client,
+          post_body['projectId']))
 
     except Exception as e:
       app_log.exception(str(e))
@@ -113,13 +128,18 @@ class GetQueryDetailsHandler(APIHandler):
   """Handles requests for table metadata."""
   bigquery_client = None
 
+  def __init__(self, application, request, **kwargs):
+    super().__init__(application, request, **kwargs)
+
+    if GetQueryDetailsHandler.bigquery_client is None:
+      GetQueryDetailsHandler.bigquery_client = bigquery.Client()
+
   @gen.coroutine
   def post(self, *args, **kwargs):
     try:
-      self.bigquery_client = create_bigquery_client()
       post_body = self.get_json_body()
 
-      self.finish(get_job_details(self.bigquery_client, post_body['jobId']))
+      self.finish(get_job_details(GetQueryDetailsHandler.bigquery_client, post_body['jobId']))
 
     except Exception as e:
       app_log.exception(str(e))

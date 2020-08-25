@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 from notebook.base.handlers import APIHandler
 
-from jupyterlab_bigquery.list_items_handler.create_handler import _handler, Handlers
+from jupyterlab_bigquery.create_handler.create_handler import _handler, Handlers
 
 
 class TestHandlers(unittest.TestCase):

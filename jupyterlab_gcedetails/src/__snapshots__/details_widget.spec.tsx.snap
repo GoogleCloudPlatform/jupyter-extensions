@@ -88,7 +88,7 @@ exports[`VmDetails Renders with details: Retrieving 1`] = `
 </span>
 `;
 
-exports[`VmDetails Renders with error: Received Error 1`] = `
+exports[`VmDetails Renders with get details error: Received Error 1`] = `
 <span
   className="container_f20cyc7"
 >
