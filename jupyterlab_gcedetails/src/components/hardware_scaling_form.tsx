@@ -48,11 +48,13 @@ import {
   MachineTypeConfiguration,
 } from '../data/machine_types';
 import { ActionBar } from './action_bar';
+import { PriceService } from '../service/price_service';
 
 interface Props {
   onSubmit: (configuration: HardwareConfiguration) => void;
   onDialogClose: () => void;
   details?: Details;
+  priceService: PriceService;
 }
 
 interface State {
@@ -200,10 +202,36 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     this.props.onSubmit(configuration);
   }
 
+  private displayPricingEstimation() {
+    const { details, priceService } = this.props;
+    const { configuration } = this.state;
+
+    const zone = details.instance.zone.split('/').pop();
+    const currentPrice = priceService.getPrice(zone, this.oldConfiguration);
+    const newPrice = priceService.getPrice(zone, configuration);
+    const priceDifference = (newPrice - currentPrice).toFixed(2);
+
+    return (
+      <div>
+        <span className={STYLES.subheading}>Pricing estimation:</span>
+        <div className={STYLES.paragraph}>
+          {`Your updated instance will cost an estimated
+          $${priceDifference} monthly, an estimated difference of 
+          $${priceDifference} from your current instance.`}
+        </div>
+      </div>
+    );
+  }
+
   render() {
-    const { onDialogClose } = this.props;
+    const { onDialogClose, priceService } = this.props;
     const { configuration, gpuCountOptions } = this.state;
     const { gpuType, gpuCount, attachGpu, machineType } = configuration;
+
+    const configurationModified = !isEqualHardwareConfiguration(
+      this.oldConfiguration,
+      configuration
+    );
 
     return (
       <div className={STYLES.containerPadding}>
@@ -266,6 +294,9 @@ export class HardwareScalingForm extends React.Component<Props, State> {
               </div>
             </div>
           )}
+          {configurationModified &&
+            !priceService.receivedError &&
+            this.displayPricingEstimation()}
           {attachGpu && (
             <div className={STYLES.infoMessage}>
               <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
@@ -275,10 +306,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
         <ActionBar
           primaryLabel="Next"
           onPrimaryClick={() => this.submitForm()}
-          primaryDisabled={isEqualHardwareConfiguration(
-            this.oldConfiguration,
-            configuration
-          )}
+          primaryDisabled={!configurationModified}
           secondaryLabel="Cancel"
           onSecondaryClick={onDialogClose}
         />

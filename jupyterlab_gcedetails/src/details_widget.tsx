@@ -34,12 +34,15 @@ import {
   ServerProxyTransportService,
 } from 'gcp_jupyterlab_shared';
 import { DetailsService } from './service/details_service';
+import { PriceService } from './service/price_service';
 
 interface Props {
   detailsServer: ServerWrapper;
   notebookService: NotebooksService;
   detailsService: DetailsService;
+  priceService: PriceService;
 }
+
 interface State {
   displayedAttributes: [number, number];
   details?: Details;
@@ -79,7 +82,7 @@ export class VmDetails extends React.Component<Props, State> {
 
   render() {
     const { details, receivedError, dialogDisplayed } = this.state;
-    const { detailsServer, notebookService } = this.props;
+    const { detailsServer, notebookService, priceService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -106,6 +109,7 @@ export class VmDetails extends React.Component<Props, State> {
             detailsServer={detailsServer}
             details={details}
             receivedError={receivedError}
+            priceService={priceService}
           />
         )}
       </span>
@@ -113,8 +117,14 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    const { notebookService, detailsServer, detailsService } = this.props;
+    const {
+      notebookService,
+      detailsServer,
+      detailsService,
+      priceService,
+    } = this.props;
     try {
+      await priceService.getPriceList();
       const details = (await detailsServer.getUtilizationData()) as Details;
       const zone = details.instance.zone.split('/').pop();
 
@@ -128,6 +138,7 @@ export class VmDetails extends React.Component<Props, State> {
       const [machineTypes, acceleratorTypes] = await Promise.all([
         detailsService.getMachineTypes(),
         detailsService.getAcceleratorTypes(),
+        priceService.getPriceList(),
       ]);
 
       details.machineTypes = getMachineTypeConfigurations(machineTypes);
@@ -196,12 +207,14 @@ export class VmDetailsWidget extends ReactWidget {
   private readonly detailsService = new DetailsService(
     this.serverProxyTransportService
   );
+  private readonly priceService = new PriceService();
   render() {
     return (
       <VmDetails
         detailsServer={this.detailsServer}
         notebookService={this.notebookService}
         detailsService={this.detailsService}
+        priceService={this.priceService}
       />
     );
   }

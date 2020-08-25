@@ -30,6 +30,7 @@ import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
 import { DetailsService } from './service/details_service';
+import { PriceService } from './service/price_service';
 
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
@@ -46,6 +47,7 @@ describe('VmDetails', () => {
     getMachineTypes: mockGetMachineTypes,
     getAcceleratorTypes: mockGetAcceleratorTypes,
   } as unknown) as DetailsService;
+  const mockPriceService = new PriceService();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -70,6 +72,7 @@ describe('VmDetails', () => {
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        priceService={mockPriceService}
       />
     );
     expect(vmDetails).toMatchSnapshot('Retrieving');
@@ -92,6 +95,7 @@ describe('VmDetails', () => {
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        priceService={mockPriceService}
       />
     );
 
@@ -120,6 +124,7 @@ describe('VmDetails', () => {
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        priceService={mockPriceService}
       />
     );
     await details;
@@ -145,6 +150,7 @@ describe('VmDetails', () => {
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        priceService={mockPriceService}
       />
     );
     await details;
@@ -196,6 +202,7 @@ describe('VmDetails', () => {
         detailsServer={mockServerWrapper}
         notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        priceService={mockPriceService}
       />
     );
     await details;

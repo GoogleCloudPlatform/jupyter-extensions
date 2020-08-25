@@ -75,6 +75,8 @@ export interface HardwareConfiguration {
   attachGpu: boolean;
   gpuType: string; // as Notebooks API AcceleratorType enum values
   gpuCount: string;
+  diskType?: string;
+  diskSizeGb?: string;
 }
 
 export function isEqualHardwareConfiguration(
