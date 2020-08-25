@@ -117,14 +117,10 @@ export class VmDetails extends React.Component<Props, State> {
     try {
       const details = (await detailsServer.getUtilizationData()) as Details;
       const zone = details.instance.zone.split('/').pop();
-      /*
+
       notebookService.projectId = details.project.projectId;
       notebookService.locationId = zone;
       notebookService.instanceName = details.instance.name.split('/').pop();
-      */
-      notebookService.projectId = 'jupyterlab-interns-sandbox';
-      notebookService.locationId = 'us-west1-b';
-      notebookService.instanceName = 'tensorflow-2-2-20200814-113732';
 
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
