@@ -21,11 +21,8 @@ import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
 import { STYLES } from '../data/styles';
-import { getGpuTypeText } from '../data/accelerator_types';
-import {
-  getMachineTypeText,
-  MachineTypeConfiguration,
-} from '../data/machine_types';
+import { MachineTypeConfiguration } from '../data/machine_types';
+import { displayInstance } from './instance_details_message';
 
 interface Props {
   instanceDetails?: Instance;
@@ -39,30 +36,6 @@ Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;
 
-function displayInstance(instance: Instance, machineTypes) {
-  const { machineType, acceleratorConfig } = instance;
-  const machineTypeText = getMachineTypeText(
-    machineType.split('/').pop(),
-    machineTypes
-  );
-
-  return (
-    <div>
-      <span className={STYLES.subheading}>Your current configuration:</span>
-      {machineTypeText && (
-        <div className={STYLES.paragraph}>Machine type: {machineTypeText}</div>
-      )}
-      {acceleratorConfig && (
-        <div className={STYLES.paragraph}>
-          {`GPUs: ${acceleratorConfig.coreCount} ${getGpuTypeText(
-            acceleratorConfig.type
-          )}`}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function ErrorPage(props: Props) {
   const { onDialogClose, error, instanceDetails, machineTypes } = props;
   const { errorType, errorValue } = error;
@@ -74,7 +47,12 @@ export function ErrorPage(props: Props) {
           className={STYLES.heading}
         >{`Failed to ${errorType} Your Machine`}</span>
         <div className={STYLES.paragraph}>{errorValue}</div>
-        {instanceDetails && displayInstance(instanceDetails, machineTypes)}
+        {instanceDetails &&
+          displayInstance(
+            instanceDetails,
+            machineTypes,
+            'Your current configuration:'
+          )}
         {errorType === ErrorType.START && (
           <div className={STYLES.infoMessage}>
             <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>

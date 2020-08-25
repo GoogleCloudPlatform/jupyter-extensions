@@ -10,6 +10,7 @@ import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
 import { MachineTypeConfiguration } from '../data/machine_types';
+import { displayInstance } from './instance_details_message';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
@@ -37,6 +38,9 @@ const STATUS_STYLES = stylesheet({
   },
   containerPadding: {
     padding: '50px 75px 15px 75px',
+  },
+  containerBottomPadding: {
+    paddingBottom: '20px',
   },
   image: {
     marginBottom: '40px',
@@ -297,8 +301,18 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           {status < 6 ? `${Status[status]} (${status + 1}/6)` : Status[status]}
         </p>
         {status === Status['Complete'] ? (
-          <div className={STATUS_STYLES.container}>
+          <div
+            className={
+              (STATUS_STYLES.container, STATUS_STYLES.containerBottomPadding)
+            }
+          >
             <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+            {status === Status['Complete'] &&
+              displayInstance(
+                instanceDetails,
+                machineTypes,
+                'Your new configuration:'
+              )}
             <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
           </div>
         ) : (

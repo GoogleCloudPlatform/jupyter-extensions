@@ -18,6 +18,11 @@ exports[`HardwareScalingStatus Renders with operation error: Operation error 1`]
   }
   instanceDetails={
     Object {
+      "acceleratorConfig": Object {
+        "coreCount": "1",
+        "type": "NVIDIA_TESLA_K80",
+      },
+      "machineType": "https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/e2-highmem-8",
       "name": "Test",
     }
   }
@@ -104,13 +109,31 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
     Complete
   </p>
   <div
-    className="container_f1q29mf7"
+    className="containerBottomPadding_f1uhfe4m"
   >
     <p
       className="paragraph_f1ditx77"
     >
       Operation complete. Enjoy your newly configured instance!
     </p>
+    <div>
+      <span
+        className="subheading_fgjqs4u"
+      >
+        Your new configuration:
+      </span>
+      <div
+        className="paragraph_f1ditx77"
+      >
+        Machine type: 
+        Efficient Instance, 8 vCPUs, 64 GB RAM
+      </div>
+      <div
+        className="paragraph_f1ditx77"
+      >
+        GPUs: 1 NVIDIA Tesla K80
+      </div>
+    </div>
     <ActionBar
       onPrimaryClick={[MockFunction]}
       primaryLabel="Close"

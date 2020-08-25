@@ -212,6 +212,81 @@ export const MACHINE_TYPES_RESPONSE = [
   },
 ];
 
+export const ACCELERATOR_TYPES_RESPONSE = [
+  {
+    id: '10002',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-k80',
+    description: 'NVIDIA Tesla K80',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-k80',
+    maximumCardsPerInstance: 8,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10004',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-p100',
+    description: 'NVIDIA Tesla P100',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-p100',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10007',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-p100-vws',
+    description: 'NVIDIA Tesla P100 Virtual Workstation',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-p100-vws',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10019',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-t4',
+    description: 'NVIDIA Tesla T4',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-t4',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10020',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-t4-vws',
+    description: 'NVIDIA Tesla T4 Virtual Workstation',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-t4-vws',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10008',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-v100',
+    description: 'NVIDIA Tesla V100',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-v100',
+    maximumCardsPerInstance: 8,
+    kind: 'compute#acceleratorType',
+  },
+];
+
 /** Returns a Promise that resolves a JSON response akin to the fetch API */
 export function asFetchResponse(result: any, ok = true): Promise<Response> {
   return Promise.resolve({
