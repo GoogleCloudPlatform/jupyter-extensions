@@ -1,3 +1,6 @@
+import * as diff3 from 'node-diff3';
+import _ from 'lodash';
+
 export function mergeNotebooks(base, local, remote){
   const merged = mergeMetadata(base, local, remote);
   const result = mergeCells(base, local, remote);

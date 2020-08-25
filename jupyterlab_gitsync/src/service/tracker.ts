@@ -169,5 +169,4 @@ export class FileTracker {
       this._updateState('dirty', true);
     }
   }
-
 }
