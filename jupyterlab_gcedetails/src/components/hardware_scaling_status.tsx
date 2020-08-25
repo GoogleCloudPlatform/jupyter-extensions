@@ -2,6 +2,8 @@ import * as React from 'react';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { STYLES } from '../data/styles';
+import { stylesheet, classes } from 'typestyle';
+import * as csstips from 'csstips';
 import { HardwareConfiguration } from '../data/data';
 import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
@@ -12,9 +14,10 @@ import { ErrorPage } from './error_page';
 const BorderLinearProgress = withStyles((theme: Theme) =>
   createStyles({
     root: {
-      height: 15,
-      borderRadius: 5,
-      margin: '20px 0px',
+      height: 10,
+      width: 450,
+      borderRadius: 15,
+      margin: '10px 0px',
     },
     colorPrimary: {
       backgroundColor:
@@ -27,23 +30,41 @@ const BorderLinearProgress = withStyles((theme: Theme) =>
   })
 )(LinearProgress);
 
+const STATUS_STYLES = stylesheet({
+  container: {
+    ...csstips.vertical,
+    alignItems: 'center',
+  },
+  containerPadding: {
+    padding: '50px 75px 15px 75px',
+  },
+  image: {
+    marginBottom: '40px',
+  },
+  bottomText: {
+    marginTop: '50px',
+    color: 'rgb(170, 170, 170)',
+    fontSize: '12px',
+  },
+});
+
 enum Status {
   'Authorizing' = 0,
-  'Stopping Instance' = 1,
-  'Updating Machine Configuration' = 2,
+  'Stopping notebook instance' = 1,
+  'Updating machine configuration' = 2,
   'Updating GPU Configuration' = 3,
-  'Starting Instance' = 4,
-  'Refreshing Session' = 5,
+  'Restarting notebook instance' = 4,
+  'Refreshing session' = 5,
   'Complete' = 6,
   'Error' = 7,
 }
 
 const statusInfo = [
   'Please complete the OAuth 2.0 authorization steps in the popup',
-  'Shutting down instance for reshaping.',
+  'Shutting down your notebook instance for reshaping.',
   'Reshaping machine configuration to match your selection.',
   'Reshaping GPU configuration to match your selection.',
-  'Restarting your instance.',
+  'Restarting your newly configured notebook instance.',
   'Refreshing your JupyterLab session to reflect your new configuration.',
   'Operation complete. Enjoy your newly configured instance!',
   'An error has occured, please try again later.',
@@ -150,7 +171,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     try {
       const token = await authTokenRetrieval();
       this.setState({
-        status: Status['Stopping Instance'],
+        status: Status['Stopping notebook instance'],
       });
       notebookService.setAuthToken(token);
     } catch (err) {
@@ -167,11 +188,11 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
 
     if (prevState.status !== status) {
       switch (status) {
-        case Status['Stopping Instance']: {
+        case Status['Stopping notebook instance']: {
           try {
             const stopResult = await notebookService.stop();
             this.updateStatus(
-              Status['Updating Machine Configuration'],
+              Status['Updating machine configuration'],
               stopResult
             );
           } catch (err) {
@@ -180,7 +201,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           break;
         }
 
-        case Status['Updating Machine Configuration']: {
+        case Status['Updating machine configuration']: {
           let setMachineTypeResult = instanceDetails;
           try {
             setMachineTypeResult = await notebookService.setMachineType(
@@ -191,7 +212,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           }
           const nextStatus = attachGpu
             ? 'Updating GPU Configuration'
-            : 'Starting Instance';
+            : 'Restarting notebook instance';
           this.updateStatus(Status[nextStatus], setMachineTypeResult);
           break;
         }
@@ -206,21 +227,21 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           } catch (err) {
             this.updateError(ErrorType.RESHAPING, err);
           }
-          this.updateStatus(Status['Starting Instance'], setGpuTypeResult);
+          this.updateStatus(Status['Restarting notebook instance'], setGpuTypeResult);
           break;
         }
 
-        case Status['Starting Instance']: {
+        case Status['Restarting notebook instance']: {
           try {
             const startResult = await notebookService.start();
-            this.updateStatus(Status['Refreshing Session'], startResult);
+            this.updateStatus(Status['Refreshing session'], startResult);
           } catch (err) {
             this.showError(ErrorType.START, err);
           }
           break;
         }
 
-        case Status['Refreshing Session']: {
+        case Status['Refreshing session']: {
           await this.waitForServer();
           onCompletion();
           this.setState({
@@ -244,7 +265,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
 
   render() {
     const { status, error, instanceDetails } = this.state;
-    const progressValue = (status / 6) * 100;
+    const progressValue = ((status + 1) / 6) * 100;
     const { onDialogClose } = this.props;
     return status === Status['Error'] ? (
       <ErrorPage
@@ -253,15 +274,35 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
         instanceDetails={instanceDetails}
       />
     ) : (
-      <div className={STYLES.containerPadding}>
-        <div className={STYLES.containerSize}>
-          <p className={STYLES.heading}>{Status[status]}</p>
-          <p className={STYLES.paragraph}>{statusInfo[status]}</p>
-        </div>
+      <div
+        className={classes(
+          STATUS_STYLES.containerPadding,
+          STATUS_STYLES.container
+        )}
+      >
+        <img
+          src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
+          alt="logo"
+          height={240}
+          width={300}
+          className={STATUS_STYLES.image}
+        />
+        <p className={STYLES.heading}>
+          {status < 6 ? `${Status[status]} (${status + 1}/6)` : Status[status]}
+        </p>
         {status === Status['Complete'] ? (
-          <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
+          <div className={STATUS_STYLES.container}>
+            <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+            <ActionBar onPrimaryClick={onDialogClose} primaryLabel="Close" />
+          </div>
         ) : (
-          <BorderLinearProgress variant="determinate" value={progressValue} />
+          <div className={STATUS_STYLES.container}>
+            <BorderLinearProgress variant="determinate" value={progressValue} />
+            <p className={STYLES.paragraph}>{statusInfo[status]}</p>
+            <p className={STATUS_STYLES.bottomText}>
+              Don't close the browser tab before the update process is finished
+            </p>
+          </div>
         )}
       </div>
     );

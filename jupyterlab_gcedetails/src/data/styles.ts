@@ -54,6 +54,7 @@ export const STYLES = stylesheet({
   },
   paragraph: {
     fontSize: '14px',
+    paddingTop: '2px',
     display: 'block',
     fontWeight: 400,
     fontFamily: 'var(--jp-ui-font-family)',
@@ -93,6 +94,10 @@ export const STYLES = stylesheet({
   infoMessage: {
     marginTop: '20px',
   },
+  cv: {
+    display: 'float',
+    flexDirection: 'row',
+  }
 });
 
 export const TEXT_STYLE = {
