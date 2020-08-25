@@ -54,6 +54,7 @@ export const STYLES = stylesheet({
   },
   paragraph: {
     fontSize: '14px',
+    paddingTop: '2px',
     display: 'block',
     fontWeight: 400,
     fontFamily: 'var(--jp-ui-font-family)',

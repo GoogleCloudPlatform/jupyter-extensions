@@ -72,35 +72,37 @@ describe('HardwareScalingStatus', () => {
     await mockAuthTokenRetrieval();
     expect(mockNotebookService.setAuthToken).toHaveBeenCalledWith(mockToken);
     expect(hardwareScalingStatus.state('status')).toEqual(
-      Status['Stopping Instance']
+      Status['Stopping notebook instance']
     );
-    expect(hardwareScalingStatus).toMatchSnapshot('Stopping Instance');
+    expect(hardwareScalingStatus).toMatchSnapshot('Stopping notebook instance');
     expect(mockNotebookService.stop).toBeCalled();
     await mockStopInstance();
     expect(hardwareScalingStatus.state('status')).toEqual(
-      Status['Updating Machine Configuration']
+      Status['Updating machine configuration']
     );
     expect(hardwareScalingStatus).toMatchSnapshot(
-      'Updating Machine Configuration'
+      'Updating machine configuration'
     );
     expect(mockNotebookService.setMachineType).toBeCalled();
     await mockSetMachineType();
     expect(hardwareScalingStatus.state('status')).toEqual(
-      Status['Updating GPU Configuration']
+      Status['Updating GPU configuration']
     );
-    expect(hardwareScalingStatus).toMatchSnapshot('Updating GPU Configuration');
+    expect(hardwareScalingStatus).toMatchSnapshot('Updating GPU configuration');
     expect(mockNotebookService.setAccelerator).toBeCalled();
     await mockSetAccelerator();
     expect(hardwareScalingStatus.state('status')).toEqual(
-      Status['Starting Instance']
+      Status['Restarting notebook instance']
     );
-    expect(hardwareScalingStatus).toMatchSnapshot('Starting Instance');
+    expect(hardwareScalingStatus).toMatchSnapshot(
+      'Restarting notebook instance'
+    );
     expect(mockNotebookService.start).toBeCalled();
     await mockStartInstance();
     expect(hardwareScalingStatus.state('status')).toEqual(
-      Status['Refreshing Session']
+      Status['Refreshing session']
     );
-    expect(hardwareScalingStatus).toMatchSnapshot('Refreshing Session');
+    expect(hardwareScalingStatus).toMatchSnapshot('Refreshing session');
     await mockGetUtilizationData();
     await immediatePromise();
     expect(mockOnComplete).toBeCalled();
