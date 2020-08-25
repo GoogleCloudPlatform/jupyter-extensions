@@ -26,10 +26,15 @@ jest.mock('gcp_jupyterlab_shared', () => {
   };
 });
 
-import { asApiResponse } from 'gcp_jupyterlab_shared';
+import {
+  asApiResponse,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
 import { DetailsService, COMPUTE_ENGINE_API_PATH } from './details_service';
-import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
-import { MACHINE_TYPES_RESPONSE } from '../test_helpers';
+import {
+  MACHINE_TYPES_RESPONSE,
+  ACCELERATOR_TYPES_RESPONSE,
+} from '../test_helpers';
 
 const TEST_PROJECT = 'test-project';
 const TEST_ZONE = 'test-zone';
@@ -89,6 +94,45 @@ describe('DetailsService', () => {
         params: {
           filter: 'isSharedCpu = false',
         },
+      });
+    });
+  });
+
+  describe('Get Accelerator Types', () => {
+    it('Gets all accelerator types', async () => {
+      mockSubmit.mockResolvedValue(
+        asApiResponse({
+          items: ACCELERATOR_TYPES_RESPONSE,
+        })
+      );
+
+      const response = await detailsService.getAcceleratorTypes();
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${COMPUTE_ENGINE_API_PATH}/${name}/acceleratorTypes`,
+      });
+      expect(response).toEqual(ACCELERATOR_TYPES_RESPONSE);
+    });
+
+    it('Fails to get accelerator types', async () => {
+      mockSubmit.mockResolvedValue(
+        asApiResponse({
+          done: true,
+          error: {
+            code: 400,
+            message: 'Unable to retrieve accelerator types.',
+          },
+        })
+      );
+
+      try {
+        await detailsService.getAcceleratorTypes();
+      } catch (err) {
+        expect(err).toEqual('Unable to retrieve accelerator types.');
+      }
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${COMPUTE_ENGINE_API_PATH}/${name}/acceleratorTypes`,
       });
     });
   });

@@ -31,21 +31,12 @@ import {
   NotebooksService,
   NOTEBOOKS_API_PATH,
   Instance,
-  State,
 } from './notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
 
 const TEST_PROJECT = 'test-project';
 const TEST_INSTANCE_NAME = 'test-instance-name';
 const TEST_LOCATION_ID = 'test-location-id';
-
-function getState(): State {
-  return {
-    projectId: TEST_PROJECT,
-    instanceName: TEST_INSTANCE_NAME,
-    locationId: TEST_LOCATION_ID,
-  };
-}
 
 const _setTimeout = global.setTimeout;
 
@@ -83,92 +74,6 @@ describe('NotebookInstanceServiceLayer', () => {
     notebooksService.projectId = TEST_PROJECT;
     notebooksService.instanceName = TEST_INSTANCE_NAME;
     notebooksService.locationId = TEST_LOCATION_ID;
-  });
-
-  describe('Get State', () => {
-    it('Gets fully enabled state', async () => {
-      const state = await notebooksService.getState();
-      const expectedState: State = getState();
-      expect(state).toEqual(expectedState);
-    });
-
-    it('Gets empty state with project ID from server', async () => {
-      const project = 'other-project-id';
-      notebooksService.projectId = null;
-      mockGetMetadata.mockResolvedValue({ project });
-
-      const state = await notebooksService.getState();
-      const expectedState = getState();
-      expectedState.projectId = project;
-      expect(state).toEqual(expectedState);
-    });
-
-    it('Fails to retrieve a project ID', async () => {
-      const error = {
-        result: 'Unable to retrieve metadata from VM',
-      };
-      notebooksService.projectId = null;
-      mockGetMetadata.mockRejectedValue(error);
-
-      expect.assertions(1);
-      try {
-        await notebooksService.getState();
-      } catch (err) {
-        expect(err).toEqual(error);
-      }
-    });
-
-    it('Gets empty state with instance name from server', async () => {
-      const instanceName = 'other-istance-name';
-      notebooksService.instanceName = null;
-      mockGetMetadata.mockResolvedValue({ name: instanceName });
-
-      const state = await notebooksService.getState();
-      const expectedState = getState();
-      expectedState.instanceName = instanceName;
-      expect(state).toEqual(expectedState);
-    });
-
-    it('Fails to retrieve an instance name', async () => {
-      const error = {
-        result: 'Unable to retrieve metadata from VM',
-      };
-      notebooksService.instanceName = null;
-      mockGetMetadata.mockRejectedValue(error);
-
-      expect.assertions(1);
-      try {
-        await notebooksService.getState();
-      } catch (err) {
-        expect(err).toEqual(error);
-      }
-    });
-
-    it('Gets empty state with location ID from server', async () => {
-      const zone = 'projects/test-project/zones/other-location-id';
-      notebooksService.locationId = null;
-      mockGetMetadata.mockResolvedValue({ zone });
-
-      const state = await notebooksService.getState();
-      const expectedState = getState();
-      expectedState.locationId = zone.split('/')[3];
-      expect(state).toEqual(expectedState);
-    });
-
-    it('Fails to retrieve a location ID', async () => {
-      const error = {
-        result: 'Unable to retrieve metadata from VM',
-      };
-      notebooksService.locationId = null;
-      mockGetMetadata.mockRejectedValue(error);
-
-      expect.assertions(1);
-      try {
-        await notebooksService.getState();
-      } catch (err) {
-        expect(err).toEqual(error);
-      }
-    });
   });
 
   describe('Stop Instance', () => {

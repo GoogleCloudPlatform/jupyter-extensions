@@ -21,7 +21,11 @@ import * as React from 'react';
 import { VmDetails } from './details_widget';
 import { STYLES } from './data/styles';
 import { ServerWrapper } from './components/server_wrapper';
-import { DETAILS_RESPONSE, MACHINE_TYPES_RESPONSE } from './test_helpers';
+import {
+  DETAILS_RESPONSE,
+  MACHINE_TYPES_RESPONSE,
+  ACCELERATOR_TYPES_RESPONSE,
+} from './test_helpers';
 import { NotebooksService } from './service/notebooks_service';
 import { ClientTransportService } from 'gcp_jupyterlab_shared';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
@@ -30,6 +34,7 @@ import { DetailsService } from './service/details_service';
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
   const mockGetMachineTypes = jest.fn();
+  const mockGetAcceleratorTypes = jest.fn();
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
   } as unknown) as ServerWrapper;
@@ -39,6 +44,7 @@ describe('VmDetails', () => {
   );
   const mockDetailsService = ({
     getMachineTypes: mockGetMachineTypes,
+    getAcceleratorTypes: mockGetAcceleratorTypes,
   } as unknown) as DetailsService;
 
   beforeEach(() => {
@@ -56,6 +62,8 @@ describe('VmDetails', () => {
     mockGetUtilizationData.mockReturnValue(details);
     const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
     mockGetMachineTypes.mockReturnValue(machineTypes);
+    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
+    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
 
     const vmDetails = shallow(
       <VmDetails
@@ -65,11 +73,13 @@ describe('VmDetails', () => {
       />
     );
     expect(vmDetails).toMatchSnapshot('Retrieving');
-    await Promise.all([details, machineTypes]);
+    await details;
+    await Promise.all([machineTypes, acceleratorTypes]);
 
     expect(vmDetails).toMatchSnapshot('Details');
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
   });
 
   it('Renders with get details error', async () => {
@@ -102,6 +112,8 @@ describe('VmDetails', () => {
     mockGetUtilizationData.mockReturnValue(details);
     const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
     mockGetMachineTypes.mockReturnValue(machineTypes);
+    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
+    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
 
     const vmDetails = shallow(
       <VmDetails
@@ -110,7 +122,8 @@ describe('VmDetails', () => {
         detailsService={mockDetailsService}
       />
     );
-    await Promise.all([details, machineTypes]);
+    await details;
+    await Promise.all([machineTypes, acceleratorTypes]);
 
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
@@ -124,6 +137,8 @@ describe('VmDetails', () => {
     mockGetUtilizationData.mockReturnValue(details);
     const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
     mockGetMachineTypes.mockReturnValue(machineTypes);
+    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
+    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
 
     const vmDetails = shallow(
       <VmDetails
@@ -132,7 +147,12 @@ describe('VmDetails', () => {
         detailsService={mockDetailsService}
       />
     );
-    await Promise.all([details, machineTypes]);
+    await details;
+    await Promise.all([machineTypes, acceleratorTypes]);
+
+    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
+    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.length).toBe(2);
@@ -168,6 +188,8 @@ describe('VmDetails', () => {
     mockGetUtilizationData.mockReturnValue(details);
     const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
     mockGetMachineTypes.mockReturnValue(machineTypes);
+    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
+    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
 
     const vmDetails = shallow(
       <VmDetails
@@ -176,10 +198,12 @@ describe('VmDetails', () => {
         detailsService={mockDetailsService}
       />
     );
-    await Promise.all([details, machineTypes]);
+    await details;
+    await Promise.all([machineTypes, acceleratorTypes]);
 
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
     // Click four times to move to CPU usage
     for (let i = 0; i < 4; i++) {
       vmDetails
