@@ -110,45 +110,44 @@ export class PriceService {
   private catalog: Catalog;
   private _receivedError: boolean;
 
-  async getPriceList(): Promise<any> {
+  async getPriceList(): Promise<void> {
     // Only rebuild ctalog if it hasn't been built or was built unsuccessfully
-    if (this.catalog && !this._receivedError) {
-      return this.catalog;
-    }
-    try {
-      this.catalog = new Map();
-      const response = await ServerConnection.makeRequest(
-        `${ServerConnection.defaultSettings.baseUrl}gcp/v1/pricelist`,
-        {},
-        ServerConnection.defaultSettings
-      );
-      if (!response.ok) {
-        throw { result: await response.text() };
-      }
-      const fullCatalog = await response.json();
-      Object.keys(fullCatalog).forEach(sku => {
-        if (sku.endsWith('PREEMPTIBLE')) return;
-        if (
-          sku.startsWith('CP-COMPUTEENGINE-VMIMAGE-N1') ||
-          sku.startsWith('CP-COMPUTEENGINE-VMIMAGE-E2')
-        ) {
-          this.populateCatalog(
-            sku.substring(25).toLowerCase(),
-            fullCatalog[sku],
-            true
-          );
-        } else if (sku.startsWith('GPU_')) {
-          this.populateCatalog(sku.substring(4), fullCatalog[sku], true);
-        } else if (sku === 'CP-COMPUTEENGINE-STORAGE-PD-CAPACITY') {
-          this.populateCatalog('pd-standard', fullCatalog[sku], false);
-        } else if (sku === 'CP-COMPUTEENGINE-STORAGE-PD-SSD') {
-          this.populateCatalog('pd-ssd', fullCatalog[sku], false);
+    if (!this.catalog || this._receivedError) {
+      try {
+        this.catalog = new Map();
+        const response = await ServerConnection.makeRequest(
+          `${ServerConnection.defaultSettings.baseUrl}gcp/v1/pricelist`,
+          {},
+          ServerConnection.defaultSettings
+        );
+        if (!response.ok) {
+          throw { result: await response.text() };
         }
-      });
-      this._receivedError = false;
-    } catch (err) {
-      console.error(`Unable to retrieve pricelist.`);
-      this._receivedError = true;
+        const fullCatalog = await response.json();
+        Object.keys(fullCatalog).forEach(sku => {
+          if (sku.endsWith('PREEMPTIBLE')) return;
+          if (
+            sku.startsWith('CP-COMPUTEENGINE-VMIMAGE-N1') ||
+            sku.startsWith('CP-COMPUTEENGINE-VMIMAGE-E2')
+          ) {
+            this.populateCatalog(
+              sku.substring(25).toLowerCase(),
+              fullCatalog[sku],
+              true
+            );
+          } else if (sku.startsWith('GPU_')) {
+            this.populateCatalog(sku.substring(4), fullCatalog[sku], true);
+          } else if (sku === 'CP-COMPUTEENGINE-STORAGE-PD-CAPACITY') {
+            this.populateCatalog('pd-standard', fullCatalog[sku], false);
+          } else if (sku === 'CP-COMPUTEENGINE-STORAGE-PD-SSD') {
+            this.populateCatalog('pd-ssd', fullCatalog[sku], false);
+          }
+        });
+        this._receivedError = false;
+      } catch (err) {
+        console.error(`Unable to retrieve pricelist.`);
+        this._receivedError = true;
+      }
     }
   }
 

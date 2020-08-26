@@ -209,15 +209,15 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     const zone = details.instance.zone.split('/').pop();
     const currentPrice = priceService.getPrice(zone, this.oldConfiguration);
     const newPrice = priceService.getPrice(zone, configuration);
-    const priceDifference = (newPrice - currentPrice).toFixed(2);
+    const priceDifference = (newPrice - currentPrice);
 
     return (
       <div>
-        <span className={STYLES.subheading}>Pricing estimation:</span>
+        <span className={STYLES.subheading}>Pricing Estimation:</span>
         <div className={STYLES.paragraph}>
           {`Your updated instance will cost an estimated
-          $${priceDifference} monthly, an estimated difference of 
-          $${priceDifference} from your current instance.`}
+          $${newPrice.toFixed(2)} monthly, an estimated difference of 
+          $${priceDifference.toFixed(2)} from your current instance.`}
         </div>
       </div>
     );

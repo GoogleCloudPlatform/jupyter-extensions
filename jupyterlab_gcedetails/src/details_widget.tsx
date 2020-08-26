@@ -124,7 +124,6 @@ export class VmDetails extends React.Component<Props, State> {
       priceService,
     } = this.props;
     try {
-      await priceService.getPriceList();
       const details = (await detailsServer.getUtilizationData()) as Details;
       const zone = details.instance.zone.split('/').pop();
 
