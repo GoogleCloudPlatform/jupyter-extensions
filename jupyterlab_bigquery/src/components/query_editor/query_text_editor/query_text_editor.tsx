@@ -11,6 +11,7 @@ import {
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import ReactResizeDetector from 'react-resize-detector';
 
 import {
   PlayCircleFilledRounded,
@@ -33,7 +34,6 @@ import { QueryEditorType } from './query_editor_results';
 import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
-import ReactResizeDetector from 'react-resize-detector';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -153,6 +153,29 @@ enum QueryStates {
 
 const QUERY_BATCH_SIZE = 300000;
 
+function createWorkerFromFunction(func: Function) {
+  const workerFunc = `self.onmessage=function(e){
+      const res = (${func}).call(self, e);
+      self.postMessage(res);
+      }`;
+  const funcStr = workerFunc.toString();
+
+  const blob = new Blob([funcStr], { type: 'application/javascript' });
+
+  const worker = new Worker(URL.createObjectURL(blob));
+
+  return worker;
+}
+
+function workerFunc(e) {
+  const response = e.data;
+  Object.keys(response).map(key => {
+    response[key] = JSON.parse(response[key]);
+  });
+
+  return response;
+}
+
 class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
   QueryTextEditorState
@@ -165,6 +188,8 @@ class QueryTextEditor extends React.Component<
   queryFlags: {};
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
+  ifSupportWorker: boolean;
+  jsonWorker: any;
 
   constructor(props) {
     super(props);
@@ -180,6 +205,14 @@ class QueryTextEditor extends React.Component<
     this.timeoutAlarm = null;
     this.queryId = props.queryId;
     this.queryFlags = !this.props.queryFlags ? {} : this.props.queryFlags;
+
+    // check and spawn worker
+    this.ifSupportWorker =
+      !!window.Worker && !!window.TextEncoder && !!window.TextDecoder;
+
+    if (this.ifSupportWorker) {
+      this.jsonWorker = createWorkerFromFunction(workerFunc);
+    }
 
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
@@ -234,13 +267,26 @@ class QueryTextEditor extends React.Component<
 
     this.job = this.pagedQueryService.request(
       { query, jobConfig: this.queryFlags, dryRunOnly: false },
-      (state, _, response) => {
+      async (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
 
-          Object.keys(response).map(key => {
-            response[key] = JSON.parse(response[key]);
-          });
+          // try using worker
+          if (this.ifSupportWorker) {
+            const holdProm = new Promise<void>(resolve => {
+              this.jsonWorker.addEventListener('message', message => {
+                response = message.data;
+                resolve();
+              });
+              this.jsonWorker.postMessage(response);
+            });
+
+            await holdProm;
+          } else {
+            Object.keys(response).map(key => {
+              response[key] = JSON.parse(response[key]);
+            });
+          }
 
           this.setState({ bytesProcessed: response.bytesProcessed });
           const processed = (response as unknown) as QueryResult;

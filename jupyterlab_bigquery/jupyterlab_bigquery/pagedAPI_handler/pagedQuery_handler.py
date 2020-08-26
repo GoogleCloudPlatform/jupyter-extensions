@@ -9,7 +9,7 @@ from time import time
 from multiprocessing import Pool
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
-    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params'
+    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params', 'destination_table'
 ]
 
 NUM_THREADS = 6
@@ -54,6 +54,9 @@ class PagedQueryHandler(PagedAPIHandler):
       raise ValueError(
           'use_legacy_sql shoud be boolean, instead received {}'.format(
               processed_flags['use_legacy_sql']))
+    if 'destination_table' in processed_flags:
+      processed_flags['destination'] = processed_flags['destination_table']
+      del processed_flags['destination_table']
 
     # dry run, will throw exception if fail
     dry_run_job_config = bigquery.QueryJobConfig(**processed_flags)
