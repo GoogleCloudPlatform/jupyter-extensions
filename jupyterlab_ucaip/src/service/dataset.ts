@@ -30,6 +30,13 @@ function toBase64(file: File) {
   });
 }
 
+function createRequest(body: object): RequestInit {
+  return {
+    body: JSON.stringify(body),
+    method: 'POST',
+  };
+}
+
 export abstract class DatasetService {
   static async listDatasets(): Promise<Dataset[]> {
     const data = await requestAPI<Dataset[]>('v1/datasets');
@@ -49,11 +56,30 @@ export abstract class DatasetService {
     const body = {
       datasetId: datasetId,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
+    await requestAPI('v1/deleteDataset', createRequest(body));
+  }
+
+  static async trainModel(
+    pipelineName: string,
+    datasetId: string,
+    modelName: string,
+    targetColumn: string,
+    predictionType: string,
+    objective: string,
+    budgetHours: number,
+    transformations: object[]
+  ): Promise<void> {
+    const body = {
+      pipelineName: pipelineName,
+      datasetId: datasetId,
+      modelName: modelName,
+      targetColumn: targetColumn,
+      predictionType: predictionType,
+      objective: objective,
+      budgetHours: budgetHours,
+      transformations: transformations,
     };
-    await requestAPI('v1/deleteDataset', requestInit);
+    await requestAPI('v1/trainModel', createRequest(body));
   }
 
   static async createTablesDataset(
@@ -71,10 +97,6 @@ export abstract class DatasetService {
           }
         : null,
     };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    await requestAPI('v1/createTablesDataset', requestInit);
+    await requestAPI('v1/createTablesDataset', createRequest(body));
   }
 }
