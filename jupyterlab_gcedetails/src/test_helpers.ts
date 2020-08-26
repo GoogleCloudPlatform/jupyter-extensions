@@ -145,6 +145,148 @@ export const DETAILS_RESPONSE = `{
   }
 }`;
 
+export const MACHINE_TYPES_RESPONSE = [
+  {
+    id: '801016',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'c2-standard-16',
+    description: 'Compute Optimized: 16 vCPUs, 64 GB RAM',
+    guestCpus: 16,
+    memoryMb: 65536,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/c2-standard-16',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '3096',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-standard-96',
+    description: '96 vCPUs, 360 GB RAM',
+    guestCpus: 96,
+    memoryMb: 368640,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-standard-96',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '10160',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-ultramem-160',
+    description: '160 vCPUs, 3844 GB RAM',
+    guestCpus: 160,
+    memoryMb: 3936256,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-ultramem-160',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+  {
+    id: '10040',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'n1-ultramem-40',
+    description: '40 vCPUs, 961 GB RAM',
+    guestCpus: 40,
+    memoryMb: 984064,
+    imageSpaceGb: 0,
+    maximumPersistentDisks: 128,
+    maximumPersistentDisksSizeGb: '263168',
+    zone: 'us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n1-ultramem-40',
+    isSharedCpu: false,
+    kind: 'compute#machineType',
+  },
+];
+
+export const ACCELERATOR_TYPES_RESPONSE = [
+  {
+    id: '10002',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-k80',
+    description: 'NVIDIA Tesla K80',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-k80',
+    maximumCardsPerInstance: 8,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10004',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-p100',
+    description: 'NVIDIA Tesla P100',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-p100',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10007',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-p100-vws',
+    description: 'NVIDIA Tesla P100 Virtual Workstation',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-p100-vws',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10019',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-t4',
+    description: 'NVIDIA Tesla T4',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-t4',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10020',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-t4-vws',
+    description: 'NVIDIA Tesla T4 Virtual Workstation',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-t4-vws',
+    maximumCardsPerInstance: 4,
+    kind: 'compute#acceleratorType',
+  },
+  {
+    id: '10008',
+    creationTimestamp: '1969-12-31T16:00:00.000-08:00',
+    name: 'nvidia-tesla-v100',
+    description: 'NVIDIA Tesla V100',
+    zone:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b',
+    selfLink:
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/acceleratorTypes/nvidia-tesla-v100',
+    maximumCardsPerInstance: 8,
+    kind: 'compute#acceleratorType',
+  },
+];
+
 /** Returns a Promise that resolves a JSON response akin to the fetch API */
 export function asFetchResponse(result: any, ok = true): Promise<Response> {
   return Promise.resolve({

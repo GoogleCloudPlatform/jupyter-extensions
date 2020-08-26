@@ -16,7 +16,8 @@
 
 import * as React from 'react';
 import { stylesheet, classes } from 'typestyle';
-import { MAPPED_ATTRIBUTES, Details, STYLES } from '../data';
+import { STYLES } from '../data/styles';
+import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { ActionBar } from './action_bar';
 
 interface Props {
@@ -32,6 +33,10 @@ const DIALOG_STYLES = stylesheet({
   },
 });
 
+function loadingDetails(details: boolean, receivedError: boolean): boolean {
+  return !(details || receivedError);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, reshapeForm } = props;
@@ -40,10 +45,16 @@ export function DetailsDialogBody(props: Props) {
       <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
         Notebook VM Details
       </p>
-      {receivedError ? (
-        <p className={STYLES.paragraph}>
-          Unable to retrieve GCE VM details, please check your server logs
-        </p>
+      {loadingDetails(Boolean(details), receivedError) ? (
+        <div className={STYLES.containerSize}>
+          <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
+        </div>
+      ) : receivedError ? (
+        <div className={STYLES.containerSize}>
+          <p className={STYLES.paragraph}>
+            Unable to retrieve GCE VM details, please check your server logs
+          </p>
+        </div>
       ) : (
         MAPPED_ATTRIBUTES.map(am => (
           <div className={STYLES.listRow} key={am.label}>
@@ -57,6 +68,9 @@ export function DetailsDialogBody(props: Props) {
         secondaryLabel="Close"
         onPrimaryClick={reshapeForm}
         onSecondaryClick={onDialogClose}
+        primaryDisabled={
+          receivedError || loadingDetails(Boolean(details), receivedError)
+        }
       />
     </dl>
   );

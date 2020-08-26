@@ -1,4 +1,8 @@
-import { DocumentWidget, DocumentRegistry, DocumentModel } from '@jupyterlab/docregistry';
+import {
+  DocumentWidget,
+  DocumentRegistry,
+  DocumentModel,
+} from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
 
@@ -22,6 +26,10 @@ export class File implements IFile {
     top: number, 
     right: number,
     bottom: number 
+  }
+  cursor: {
+    line: number,
+    ch: number
   }
 
   private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
@@ -53,7 +61,9 @@ export class File implements IFile {
 
   async save() {
     try{
-      await this.context.save();
+      const text = this.doc.getValue();
+      await this._saveFile(text);
+      this.resolver.addVersion(text, 'base');
     } catch (error) {
       console.warn(error);
     }
@@ -64,19 +74,25 @@ export class File implements IFile {
     this._getLocalVersion();
     this._getEditorView();
     const text = await this.resolver.mergeVersions();
-    if (text) { await this._displayText(text); }
+    if (text) {
+      await this._displayText(text);
+    }
   }
 
   private async _displayText(text: string) {
+    await this._saveFile(text);
+    await this.context.revert();
+    this._setEditorView();
+  }
+
+  private async _saveFile(text: string){
     const options = {
       content: text,
       format: 'text' as Contents.FileFormat,
       path: this.path,
       type: 'file' as Contents.ContentType,
-    }
+    };
     await fs.save(this.path, options);
-    await this.context.revert();
-    this._setEditorView();
   }
 
   private async _getInitVersion() {
@@ -87,11 +103,11 @@ export class File implements IFile {
   }
 
   private async _getRemoteVersion() {
-    try{
+    try {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
     } catch (error) {
-      console.log(error);
+      console.warn(error);
     }
   }
 
@@ -101,50 +117,55 @@ export class File implements IFile {
   }
 
   private _getEditorView() {
-    const cursor = this.doc.getCursor();
-    this.resolver.setCursorToken(cursor);
+    this.cursor = this.doc.getCursor();
+    this.resolver.setCursorToken(this.cursor);
     const scroll = this.editor.getScrollInfo();
     this.view = {
-      left: scroll.left, 
-      top: scroll.top, 
+      left: scroll.left,
+      top: scroll.top,
       right: scroll.left + scroll.clientWidth,
-      bottom: scroll.top + scroll.clientHeight
-    }
+      bottom: scroll.top + scroll.clientHeight,
+    };
   }
 
   private _setEditorView() {
-    const cursor = this.resolver.cursor;
-    this.doc.setCursor(cursor);
+    this.cursor = this.resolver.getCursorToken();
+    this.doc.setCursor(this.cursor);
     this.editor.scrollIntoView(this.view);
   }
 
-  private _addListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any) {
     return signal.connect(callback, this);
   }
 
-  private _removeListener(signal: ISignal<any, any>, callback: any){
+  private _removeListener(signal: ISignal<any, any>, callback: any) {
     return signal.disconnect(callback, this);
   }
 
-  private _disposedListener(){
+  private _disposedListener() {
     this._removeListener(this.resolver.conflictState, this._conflictListener);
-    this._removeListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._removeListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
   }
-  
-  private _conflictListener(sender: FileResolver, conflict: boolean){
+
+  private _conflictListener(sender: FileResolver, conflict: boolean) {
     this._conflictState.emit(conflict);
   }
 
-  private _dirtyStateListener(sender: DocumentModel, value: any){
-    if (value.name === 'dirty'){ this._dirtyState.emit(value.newValue); }
+  private _dirtyStateListener(sender: DocumentModel, value: any) {
+    if (value.name === 'dirty') {
+      this._dirtyState.emit(value.newValue);
+    }
   }
 
   private _addListeners() {
     this._addListener(this.resolver.conflictState, this._conflictListener);
-    this._addListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._addListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
     this._addListener(this.widget.disposed, this._disposedListener);
   }
-
 }

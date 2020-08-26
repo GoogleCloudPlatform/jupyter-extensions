@@ -1,5 +1,5 @@
 import { ServerConnection } from '@jupyterlab/services';
-import { Details } from '../data';
+import { Details } from '../data/data';
 
 export class ServerWrapper {
   private readonly serverSettings: ServerConnection.ISettings;

@@ -20,10 +20,13 @@ import { Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
 import { ActionBar } from './action_bar';
-import { getGpuTypeText, getMachineTypeText, STYLES } from '../data';
+import { STYLES } from '../data/styles';
+import { MachineTypeConfiguration } from '../data/machine_types';
+import { displayInstance } from './instance_details_message';
 
 interface Props {
   instanceDetails?: Instance;
+  machineTypes?: MachineTypeConfiguration[];
   error: ConfigurationError;
   onDialogClose: () => void;
 }
@@ -33,29 +36,8 @@ Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;
 
-function displayInstance(instance: Instance) {
-  const { machineType, acceleratorConfig } = instance;
-  const machineTypeText = getMachineTypeText(machineType.split('/').pop());
-
-  return (
-    <div>
-      <span className={STYLES.subheading}>Your current configuration:</span>
-      {machineTypeText && (
-        <div className={STYLES.paragraph}>Machine type: {machineTypeText}</div>
-      )}
-      {acceleratorConfig && (
-        <div className={STYLES.paragraph}>
-          {`GPUs: ${acceleratorConfig.coreCount} ${getGpuTypeText(
-            acceleratorConfig.type
-          )}`}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function ErrorPage(props: Props) {
-  const { onDialogClose, error, instanceDetails } = props;
+  const { onDialogClose, error, instanceDetails, machineTypes } = props;
   const { errorType, errorValue } = error;
 
   return (
@@ -65,7 +47,12 @@ export function ErrorPage(props: Props) {
           className={STYLES.heading}
         >{`Failed to ${errorType} Your Machine`}</span>
         <div className={STYLES.paragraph}>{errorValue}</div>
-        {instanceDetails && displayInstance(instanceDetails)}
+        {instanceDetails &&
+          displayInstance(
+            instanceDetails,
+            machineTypes,
+            'Your current configuration:'
+          )}
         {errorType === ErrorType.START && (
           <div className={STYLES.infoMessage}>
             <Message asError={true} asActivity={false} text={ERROR_MESSAGE}>

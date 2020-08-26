@@ -40,13 +40,6 @@ export interface Instance {
   acceleratorConfig?: AcceleratorConfig;
 }
 
-/** Service wrapper state corresponding to a Notebook Instance. */
-export interface State {
-  projectId: string;
-  instanceName: string;
-  locationId: string;
-}
-
 type Operation = gapi.client.servicemanagement.Operation;
 
 export const NOTEBOOKS_API_PATH = 'https://notebooks.googleapis.com/v1beta1';
@@ -130,31 +123,6 @@ export class NotebooksService {
 
   setAuthToken(authToken: string) {
     this._transportService.accessToken = authToken;
-  }
-
-  /**
-   * Retrieves all necessary details about the user's project to allow the
-   * extension to know whether or not Notebooks can be scheduled.
-   */
-  async getState(): Promise<State> {
-    try {
-      const [projectId, instanceName, locationId] = await Promise.all([
-        this.projectId,
-        this.instanceName,
-        this.locationId,
-      ]);
-
-      const state: State = {
-        projectId,
-        instanceName,
-        locationId,
-      };
-
-      return state;
-    } catch (err) {
-      console.error('Unable to determine project status', err);
-      throw err;
-    }
   }
 
   /** Polls the provided Operation at 1s intervals until it has completed. */

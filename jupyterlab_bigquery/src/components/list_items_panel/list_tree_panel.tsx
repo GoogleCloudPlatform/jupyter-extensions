@@ -82,12 +82,10 @@ interface State {
 const localStyles = stylesheet({
   header: {
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
+    fontWeight: 500,
+    fontSize: '14px',
     margin: 0,
     padding: '8px 12px',
-    textTransform: 'uppercase',
     flexDirection: 'row',
     display: 'flex',
     justifyContent: 'space-between',
@@ -105,11 +103,9 @@ const localStyles = stylesheet({
     overflow: 'hidden',
   },
   resourcesTitle: {
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
+    fontWeight: 500,
+    fontSize: '13px',
     margin: 0,
-    textTransform: 'uppercase',
     display: 'flex',
     flexDirection: 'row',
     marginBottom: '8px',
@@ -155,7 +151,7 @@ const localStyles = stylesheet({
     gridTemplateColumns: '1fr',
     gridTemplateRows: '1fr',
     flexGrow: 1,
-    overflow: 'scroll',
+    overflow: 'auto',
     padding: 0,
     ...csstips.flex,
   },
@@ -191,13 +187,10 @@ const localStyles = stylesheet({
     alignItems: 'center',
   },
   queryHistory: {
-    fontWeight: 600,
-    fontFamily: 'var(--jp-ui-font-family)',
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
+    fontWeight: 500,
+    fontSize: '13px',
     margin: 0,
-    padding: '8px 12px',
-    textTransform: 'uppercase',
+    padding: '10px 14px',
     '&:hover': {
       backgroundColor: '#e8e8e8',
       opacity: 1,
@@ -382,7 +375,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           <CustomSnackbar open={snackbar.open} message={snackbar.message} />
         </Portal>
         <header className={localStyles.header}>
-          <div className={localStyles.headerTitle}>BigQuery Extension</div>
+          <div className={localStyles.headerTitle}>BigQuery extension</div>
           <div className={localStyles.buttonContainer}>
             <Tooltip title="Open SQL editor">
               <Button
@@ -483,7 +476,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           className={localStyles.queryHistory}
           onClick={this.openQueryHistory}
         >
-          Query History
+          Query history
         </div>
         <DialogComponent
           header="Requirements to Enable Searching"

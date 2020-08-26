@@ -162,8 +162,8 @@ export class DatasetComponent extends React.Component<Props, State> {
   }
 
   private getDatasetId(): string {
-    const datasetId = this.props.dataset.id.split('/');
-    return datasetId[datasetId.length - 1];
+    const datasetIdParts = this.props.dataset.id.split('/');
+    return datasetIdParts[datasetIdParts.length - 1];
   }
 
   private getDatasetSource() {
@@ -342,16 +342,16 @@ ${columnString} }
                   style={{ paddingLeft: '24px', paddingTop: '3px', width: 50 }}
                   error={this.state.budgetError}
                   onChange={event => {
-                    let val = event.target.value;
-                    if (isNaN(parseInt(val))) {
-                      val = '1';
+                    let budget = event.target.value;
+                    if (isNaN(parseInt(budget))) {
+                      budget = '1';
                       this.setState({
-                        budget: val.toString(),
+                        budget: budget.toString(),
                         budgetError: true,
                       });
                     } else {
                       this.setState({
-                        budget: parseInt(val).toString(),
+                        budget: parseInt(budget).toString(),
                         budgetError: false,
                       });
                     }

@@ -14,36 +14,39 @@
  * limitations under the License.
  */
 
-import * as csstips from 'csstips';
 import * as React from 'react';
 
 import {
   css,
   CheckboxInput,
   LearnMoreLink,
-  BASE_FONT,
   Option,
   Message,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
 import { NestedSelect } from './machine_type_select';
 import { SelectInput } from './select_input';
+import { STYLES } from '../data/styles';
+import {
+  HardwareConfiguration,
+  Details,
+  detailsToHardwareConfiguration,
+  isEqualHardwareConfiguration,
+} from '../data/data';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
   ACCELERATOR_TYPES,
-  MACHINE_TYPES,
-  HardwareConfiguration,
-  optionToMachineType,
-  machineTypeToOption,
   getGpuTypeOptionsList,
   getGpuCountOptionsList,
-  Details,
-  detailsToHardwareConfiguration,
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
-  isEqualHardwareConfiguration,
-  STYLES,
-} from '../data';
+} from '../data/accelerator_types';
+import {
+  MACHINE_TYPES,
+  optionToMachineType,
+  machineTypeToOption,
+  MachineTypeConfiguration,
+} from '../data/machine_types';
 import { ActionBar } from './action_bar';
 
 interface Props {
@@ -64,34 +67,11 @@ export const FORM_STYLES = stylesheet({
   checkboxContainer: {
     padding: '18px 0px 8px 0px',
   },
-  title: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
-  subtitle: {
-    ...BASE_FONT,
-    fontWeight: 500,
-    fontSize: '15px',
-    marginTop: '10px',
-    marginBottom: '5px',
-    ...csstips.horizontal,
-    ...csstips.flex,
-  },
   formContainer: {
     width: '468px',
   },
-  description: {
-    paddingBottom: '10px',
-  },
   topPadding: {
     paddingTop: '10px',
-  },
-  bottomPadding: {
-    paddingBottom: '10px',
   },
 });
 
@@ -108,6 +88,7 @@ the NVIDIA GPU driver will be installed automatically on the next startup.`;
 export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
   private oldConfiguration: HardwareConfiguration;
+  private machineTypesOptions: MachineTypeConfiguration[];
 
   constructor(props: Props) {
     super(props);
@@ -140,6 +121,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           props.details.instance.cpuPlatform
         )
       : ACCELERATOR_TYPES;
+
+    this.machineTypesOptions = props.details
+      ? props.details.machineTypes
+      : MACHINE_TYPES;
   }
 
   /*
@@ -228,7 +213,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.subheading}>Machine Configuration</span>
           <NestedSelect
             label="Machine type"
-            nestedOptionsList={MACHINE_TYPES.map(machineType => ({
+            nestedOptionsList={this.machineTypesOptions.map(machineType => ({
               header: machineType.base,
               options: machineType.configurations,
             }))}

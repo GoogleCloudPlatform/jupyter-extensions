@@ -14,7 +14,7 @@ export class ViewDetailsWidget extends ReactWidget {
     private readonly name: string
   ) {
     super();
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-BigQueryIcon';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-ViewIcon';
     this.title.caption = `View Details for ${this.view_id}`;
     this.title.label = this.name;
     this.title.closable = true;

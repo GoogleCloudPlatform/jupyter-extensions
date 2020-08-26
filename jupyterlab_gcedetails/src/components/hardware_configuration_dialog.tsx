@@ -23,10 +23,11 @@ import {
   HardwareConfiguration,
   Details,
   detailsToHardwareConfiguration,
-} from '../data';
+} from '../data/data';
 import { ConfirmationPage } from './confirmation_page';
 import { ServerWrapper } from './server_wrapper';
 import { DetailsDialogBody } from './details_dialog_body';
+import { authTokenRetrieval } from './auth_token_retrieval';
 
 enum View {
   DETAILS,
@@ -128,6 +129,8 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             notebookService={notebookService}
             onCompletion={onCompletion}
             detailsServer={detailsServer}
+            authTokenRetrieval={authTokenRetrieval}
+            machineTypes={details && details.machineTypes}
           />
         );
     }

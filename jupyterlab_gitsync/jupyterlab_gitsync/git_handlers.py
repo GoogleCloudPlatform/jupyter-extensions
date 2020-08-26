@@ -5,8 +5,8 @@ import subprocess
 
 from notebook.base.handlers import APIHandler
 
-class SyncHandler(APIHandler):
 
+class SyncHandler(APIHandler):
   """
   Implements all synchronization operations
   * uses git-sync-changes bash script
@@ -20,7 +20,7 @@ class SyncHandler(APIHandler):
     options = recv['options'] if recv['options'] else []
 
     try:
-      return_code = subprocess.call([ex_path]+options, cwd=path)
+      return_code = subprocess.call([ex_path] + options, cwd=path)
       if return_code == 0:
         self.finish({'success': True})
       else:
@@ -30,7 +30,6 @@ class SyncHandler(APIHandler):
 
 
 class SetupHandler(APIHandler):
-
   """
   Sets up environment for extension to run
   * verify that working path is a git repo
@@ -41,11 +40,6 @@ class SetupHandler(APIHandler):
   def inside_git_repo(self, path):
     return_code = subprocess.call(['git', 'rev-parse'], cwd=path)
     return return_code == 0
-
-  def add_cache_folder(self, path):
-    file_exists = not subprocess.call(['ls', '.sync_cache'], cwd=path)
-    if not file_exists:
-      subprocess.call(['mkdir', '.sync_cache'], cwd=path)
 
   def get_sync_path(self):
     cwd = os.getcwd()
@@ -59,7 +53,6 @@ class SetupHandler(APIHandler):
 
     try:
       if self.inside_git_repo(path):
-        self.add_cache_folder(path)
         ex_path = self.get_sync_path()
         self.finish({'ex_path': ex_path})
       else:

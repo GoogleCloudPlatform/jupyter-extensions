@@ -103,24 +103,18 @@ class UCAIPService:
 
   def _build_model(self, model):
     json_formatted = json_format.MessageToDict(model._pb)
+    formatted_inputs = json_formatted.get("explanationSpec",
+                                          {}).get("metadata", {}).get("inputs")
+    deployed_models = json_formatted.get("deployedModels")
     return {
-        "id":
-            model.name,
-        "displayName":
-            model.display_name,
-        "pipelineId":
-            model.training_pipeline,
-        "createTime":
-            get_milli_time(model.create_time),
-        "updateTime":
-            get_milli_time(model.update_time),
-        "modelType":
-            parse_model_type(model),
-        "inputs":
-            json_formatted.get("explanationSpec", {}).get("metadata",
-                                                          {}).get("inputs"),
-        "deployedModels":
-            json_formatted.get("deployedModels"),
+        "id": model.name,
+        "displayName": model.display_name,
+        "pipelineId": model.training_pipeline,
+        "createTime": get_milli_time(model.create_time),
+        "updateTime": get_milli_time(model.update_time),
+        "modelType": parse_model_type(model),
+        "inputs": formatted_inputs,
+        "deployedModels": deployed_models
     }
 
   def get_models(self):
@@ -501,8 +495,8 @@ class UCAIPService:
                                       artifact_uri="gs://{}/{}".format(
                                           bucket.name, key),
                                       container_spec=container_spec)
-    return self._model_client.upload_model(parent=self._parent,
-                                           model=model).result()
+    response = self._model_client.upload_model(parent=self._parent, model=model)
+    return response.result()
 
   def get_dataset_details(self, dataset_id):
     df = self.import_dataset(dataset_id)
@@ -510,25 +504,20 @@ class UCAIPService:
     return [{"fieldName": column} for column in columns]
 
   def _build_create_training_pipeline_response(self, response):
+    split = response.input_data_config.fraction_split
+    training_task_inputs = json_format.MessageToDict(
+        response._pb.training_task_inputs)
+    model_display_name = response.model_to_upload.display_name
     return {
-        "training_display_name":
-            response.display_name,
-        "training_task_inputs":
-            json_format.MessageToDict(response._pb.training_task_inputs),
-        "state":
-            response.state,
-        "create_time":
-            response.create_time,
-        "dataset_id":
-            response.input_data_config.dataset_id,
-        "training_fraction":
-            response.input_data_config.fraction_split.training_fraction,
-        "validation_fraction":
-            response.input_data_config.fraction_split.validation_fraction,
-        "test_fraction":
-            response.input_data_config.fraction_split.test_fraction,
-        "model_display_name":
-            response.model_to_upload.display_name
+        "training_display_name": response.display_name,
+        "training_task_inputs": training_task_inputs,
+        "state": response.state,
+        "create_time": response.create_time,
+        "dataset_id": response.input_data_config.dataset_id,
+        "training_fraction": split.training_fraction,
+        "validation_fraction": split.validation_fraction,
+        "test_fraction": split.test_fraction,
+        "model_display_name": model_display_name
     }
 
   def create_training_pipeline(self, training_pipeline_name, dataset_id,
