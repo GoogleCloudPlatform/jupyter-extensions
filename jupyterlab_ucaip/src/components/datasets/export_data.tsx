@@ -38,6 +38,7 @@ interface State {
   error: string | null;
   loading: boolean;
   sessions: Option[];
+  dataframes: Option[];
   // TODO @josiegarza make this a part of source
   kernelId: string;
   errorOpen: boolean;
@@ -108,6 +109,10 @@ export class ExportData extends React.Component<Props, State> {
     super(props);
     this.submit = this.submit.bind(this);
     this.toggleImport = this.toggleImport.bind(this);
+    this.toggleFile = this.toggleFile.bind(this);
+    this.createDatasetModel = this.createDatasetModel.bind(this);
+    this.getDataframesModel = this.getDataframesModel.bind(this);
+    this.updateDataframes = this.updateDataframes.bind(this);
     this.state = {
       from: 'computer',
       source: null,
@@ -115,6 +120,7 @@ export class ExportData extends React.Component<Props, State> {
       error: null,
       loading: false,
       sessions: null,
+      dataframes: null,
       kernelId: null,
       errorOpen: false,
     };
@@ -141,7 +147,7 @@ export class ExportData extends React.Component<Props, State> {
           });
           break;
         case 'dataframe':
-          this.initializeSession(this.state.kernelId);
+          this.initializeSession(this.state.kernelId, this.createDatasetModel);
           break;
         default:
       }
@@ -166,7 +172,9 @@ export class ExportData extends React.Component<Props, State> {
     const running = manager.sessions.running();
     const sessions: Option[] = [];
     let current = running.next();
-    this.setState({ kernelId: current['kernel']['id'] });
+    const kernelId = current['kernel']['id'];
+    this.setState({ kernelId: kernelId });
+    this.toggleFile(kernelId);
     while (current) {
       if (current.name !== '') {
         sessions.push({
@@ -179,7 +187,7 @@ export class ExportData extends React.Component<Props, State> {
     this.setState({ sessions: sessions });
   }
 
-  private initializeSession(kernelId: string) {
+  private initializeSession(kernelId: string, initializedCallback: Function) {
     const manager = this.context.app.serviceManager;
     const kernelPreference = {
       id: kernelId,
@@ -194,11 +202,11 @@ export class ExportData extends React.Component<Props, State> {
         console.error(`Failed to initialize the session.\n${reason}`);
       })
       .then(() => {
-        this.createKernelModel(session);
+        initializedCallback(session);
       });
   }
 
-  private createKernelModel(session: ClientSession) {
+  private createDatasetModel(session: ClientSession) {
     const model = new KernelModel(
       session,
       () => {
@@ -211,11 +219,28 @@ export class ExportData extends React.Component<Props, State> {
     );
     model.receivedSuccess.connect(this.refresh);
     model.receivedError.connect(this.uploadDataFrameError);
-    model.createCSV(this.state.name, this.state.source);
+    model.createDataset(this.state.name, this.state.source);
+  }
+
+  private getDataframesModel(session: ClientSession) {
+    const model = new KernelModel(session);
+    model.receivedSuccess.connect(this.updateDataframes);
+    model.getDataframes();
   }
 
   private refresh(emitter: KernelModel) {
     emitter.refresh();
+  }
+
+  private updateDataframes(emitter: KernelModel) {
+    const emitted = JSON.parse(
+      emitter.output.substring(1, emitter.output.length - 1)
+    );
+    const dataframes = emitted.map(df => ({
+      value: df,
+      text: df,
+    }));
+    this.setState({ dataframes: dataframes });
   }
 
   private uploadDataFrameError(emitter: KernelModel, title: string) {
@@ -238,12 +263,12 @@ export class ExportData extends React.Component<Props, State> {
 
   private validateBigQuery(source: string) {
     const regex = new RegExp(
-      'bq://[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+.[a-zA-Z0-9_-]+'
+      '[a-zA-Z0-9_-]+([:]|[.])[a-zA-Z0-9_-]+[.][a-zA-Z0-9_-]+'
     );
     if (regex.test(source)) {
       this.setState({ error: null });
     } else {
-      this.setState({ error: 'Invalid BigQuery uri' });
+      this.setState({ error: 'Invalid BigQuery table ID' });
     }
   }
 
@@ -256,6 +281,11 @@ export class ExportData extends React.Component<Props, State> {
     if (event.target.value === 'dataframe') {
       this.getSessions();
     }
+  }
+
+  private toggleFile(kernelId: string) {
+    this.initializeSession(kernelId, this.getDataframesModel);
+    this.setState({ kernelId: kernelId });
   }
 
   private getDialog(): JSX.Element {
@@ -274,7 +304,6 @@ export class ExportData extends React.Component<Props, State> {
             !this.state.name ||
             !this.state.source
           }
-          height={'460px'}
         >
           <RadioInput
             value={this.state.from}
@@ -342,8 +371,8 @@ export class ExportData extends React.Component<Props, State> {
     } else if (from === 'bigquery') {
       return (
         <TextInput
-          placeholder="bq://example:abc.xyz"
-          label="BigQuery URI"
+          placeholder="project.dataset.table"
+          label="BigQuery table ID"
           onChange={event => {
             const source = event.target.value;
             this.validateBigQuery(source);
@@ -370,12 +399,12 @@ export class ExportData extends React.Component<Props, State> {
             label={'Select file'}
             options={this.state.sessions}
             onChange={event => {
-              this.setState({ kernelId: event.target.value });
+              this.toggleFile(event.target.value);
             }}
           />
-          <TextInput
-            placeholder="df"
-            label="Dataframe variable from selected kernel"
+          <SelectInput
+            label={'Select dataframe variable'}
+            options={this.state.dataframes}
             onChange={event => {
               const source = event.target.value;
               this.setState({ source: source });
