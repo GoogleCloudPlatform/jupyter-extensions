@@ -29,6 +29,7 @@ export class TableDetailsWidget extends ReactWidget {
         isVisible={this.isVisible}
         table_id={this.table_id}
         table_name={this.name}
+        partitioned={this.partitioned}
         tableDetailsService={this.service}
       />
     );
