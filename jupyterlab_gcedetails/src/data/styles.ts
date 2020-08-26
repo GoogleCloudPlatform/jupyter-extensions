@@ -29,11 +29,13 @@ export const STYLES = stylesheet({
     ...csstips.horizontal,
   },
   containerPadding: {
+    backgroundColor: 'var(--jp-layout-color3)',
     margin: '0px',
     padding: '35px 30px',
   },
   containerSize: {
     width: 468,
+    backgroundColor: 'var(--jp-layout-color3)',
   },
   heading: {
     fontSize: '22px',
@@ -72,14 +74,17 @@ export const STYLES = stylesheet({
   },
   dt: {
     display: 'table-cell',
-    fontWeight: 'bold',
-    lineHeight: '20px',
+    fontWeight: 500,
+    lineHeight: '30px',
     padding: '2px',
     verticalAlign: 'top',
+    color: 'grey',
   },
   dd: {
     padding: '2px 2px 2px 24px',
+    lineHeight: '30px',
     verticalAlign: 'top',
+    color: 'grey',
   },
   icon: {
     display: 'inline-block',
