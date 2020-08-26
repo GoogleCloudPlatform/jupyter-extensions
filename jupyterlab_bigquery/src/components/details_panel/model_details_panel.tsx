@@ -15,6 +15,7 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { localStyles } from './dataset_details_panel';
 import { formatDate } from '../../utils/formatters';
+import { getStarterQuery } from '../../utils/starter_queries';
 
 interface Props {
   modelDetailsService: ModelDetailsService;
@@ -208,10 +209,7 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [
-                    queryId,
-                    `SELECT * FROM ML.PREDICT(MODEL \`${this.props.modelId}\`, )`,
-                  ]
+                  [queryId, getStarterQuery('MODEL', this.props.modelId)]
                 );
               }}
               startIcon={<Code />}

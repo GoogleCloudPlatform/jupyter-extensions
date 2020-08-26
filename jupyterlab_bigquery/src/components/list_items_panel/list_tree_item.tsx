@@ -30,6 +30,7 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
+import { getStarterQuery } from '../../utils/starter_queries';
 
 import '../../../style/index.css';
 
@@ -130,7 +131,35 @@ export class Resource<T extends ResourceProps> extends React.Component<
   };
 
   copyBoilerplateQuery = dataTreeItem => {
-    Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
+    Clipboard.copyToSystem(getStarterQuery(dataTreeItem.type, dataTreeItem.id));
+  };
+
+  queryResource = dataTreeItem => {
+    const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
+    const query = getStarterQuery(dataTreeItem.type, dataTreeItem.id);
+
+    const curWidget = notebookTrack.currentWidget;
+
+    const incellEnabled = WidgetManager.getInstance().getIncellEnabled();
+
+    if (!incellEnabled || !curWidget || !curWidget.content.isVisible) {
+      // no active notebook or not visible
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query]
+      );
+    } else {
+      // exist notebook and visible
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code = '%%bigquery_editor\n\n' + query;
+      cell.model.value.text = code;
+    }
   };
 
   getIcon = iconType => {
@@ -162,8 +191,16 @@ export class ModelResource extends Resource<ModelProps> {
 
   contextMenuItems = [
     {
+      label: 'Query model',
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
+    },
+    {
       label: 'Copy model ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Copy boilerplate query',
+      handler: dataTreeItem => this.copyBoilerplateQuery(dataTreeItem),
     },
   ];
 
@@ -193,34 +230,6 @@ export class TableResource extends Resource<TableProps> {
   constructor(props: TableProps) {
     super(props);
   }
-
-  queryTable = dataTreeItem => {
-    const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
-    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
-
-    const curWidget = notebookTrack.currentWidget;
-
-    const incellEnabled = WidgetManager.getInstance().getIncellEnabled();
-
-    if (!incellEnabled || !curWidget || !curWidget.content.isVisible) {
-      // no active notebook or not visible
-      const queryId = generateQueryId();
-      WidgetManager.getInstance().launchWidget(
-        QueryEditorTabWidget,
-        'main',
-        queryId,
-        undefined,
-        [queryId, query]
-      );
-    } else {
-      // exist notebook and visible
-      const notebook = curWidget.content;
-      NotebookActions.insertBelow(notebook);
-      const cell = notebookTrack.activeCell;
-      const code = '%%bigquery_editor\n\n' + query;
-      cell.model.value.text = code;
-    }
-  };
 
   openTableDetails = (event, table: Table) => {
     event.stopPropagation();
@@ -260,7 +269,7 @@ export class TableResource extends Resource<TableProps> {
   tableContextMenuItems = [
     {
       label: 'Query table',
-      handler: dataTreeItem => this.queryTable(dataTreeItem),
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
     },
     {
       label: 'Copy table ID',
@@ -274,8 +283,16 @@ export class TableResource extends Resource<TableProps> {
 
   public viewContextMenuItems = [
     {
+      label: 'Query view',
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
+    },
+    {
       label: 'Copy view ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Copy boilerplate query',
+      handler: dataTreeItem => this.copyBoilerplateQuery(dataTreeItem),
     },
   ];
 

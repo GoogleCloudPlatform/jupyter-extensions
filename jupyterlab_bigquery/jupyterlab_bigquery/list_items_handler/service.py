@@ -89,6 +89,7 @@ class BigQueryService:
           'id': model_full_id,
           'name': model.model_id,
           'datasetId': dataset_id,
+          'type': 'MODEL'
       }
       model_ids.append(model_full_id)
 
