@@ -186,5 +186,5 @@ def _create_tables_dataset(args):
   else:
     UCAIPService.get().create_dataset(display_name=args["displayName"],
                                       gcs_uri=args.get("gcsSource"),
-                                      bigquery_uri=args.get("bigquerySource"))
+                                      bigquery_table=args.get("bigquerySource"))
   return {"success": True}

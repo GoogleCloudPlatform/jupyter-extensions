@@ -263,12 +263,12 @@ export class ExportData extends React.Component<Props, State> {
 
   private validateBigQuery(source: string) {
     const regex = new RegExp(
-      'bq://[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+.[a-zA-Z0-9_-]+'
+      '[a-zA-Z0-9_-]+([:]|[.])[a-zA-Z0-9_-]+[.][a-zA-Z0-9_-]+'
     );
     if (regex.test(source)) {
       this.setState({ error: null });
     } else {
-      this.setState({ error: 'Invalid BigQuery uri' });
+      this.setState({ error: 'Invalid BigQuery table ID' });
     }
   }
 
@@ -371,8 +371,8 @@ export class ExportData extends React.Component<Props, State> {
     } else if (from === 'bigquery') {
       return (
         <TextInput
-          placeholder="bq://example:abc.xyz"
-          label="BigQuery URI"
+          placeholder="project.dataset.table"
+          label="BigQuery table ID"
           onChange={event => {
             const source = event.target.value;
             this.validateBigQuery(source);
