@@ -98,6 +98,12 @@ def predict(endpoint_id: str, instance: object) -> object:
   return UCAIPService.get().predict_tables(endpoint_id, instance)
 
 
+def deploy_model(model_id: str, machine_type: str,
+                 min_replicas: int = 1, endpoint_id: str = None):
+  return UCAIPService.get().deploy_model(model_id, machine_type,
+                                         min_replicas, endpoint_id)
+
+
 def create_training_pipeline(
     display_name: str, dataset_id: str, model_name: str, target_column: str,
     prediction_type: str, objective: str, budget_hours: int,
