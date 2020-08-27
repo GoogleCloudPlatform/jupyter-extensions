@@ -24,6 +24,7 @@ import {
   POST,
   ApiRequest,
 } from 'gcp_jupyterlab_shared';
+import { extractLast } from '../data/data';
 
 const POLL_INTERVAL = 5000;
 const POLL_RETRIES = 3;
@@ -216,7 +217,7 @@ export class NotebooksService {
     try {
       const { zone } = await this._getMetadata();
       // extract the location from the zone resource name
-      const locationId = zone.split('/').pop();
+      const locationId = extractLast(zone);
       this.locationIdPromise = Promise.resolve(locationId);
       return this.locationIdPromise;
     } catch (err) {

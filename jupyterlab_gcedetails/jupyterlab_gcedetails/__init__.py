@@ -14,7 +14,7 @@
 
 from notebook.utils import url_path_join
 
-from .handlers import VmDetailsHandler
+from .handlers import VmDetailsHandler, PricelistHandler
 from .version import VERSION
 
 __version__ = VERSION
@@ -39,4 +39,5 @@ def load_jupyter_server_extension(nb_server_app):
   app.add_handlers(host_pattern, [
       (url_path_join(gcp_v1_endpoint,
                      'details'), VmDetailsHandler, dict(gce_details={})),
+      (url_path_join(gcp_v1_endpoint, 'pricelist'), PricelistHandler),
   ])

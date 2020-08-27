@@ -20,6 +20,7 @@ import {
   getMetadata,
 } from 'gcp_jupyterlab_shared';
 import { Accelerator } from '../data/accelerator_types';
+import { extractLast } from '../data/data';
 
 type ListMachineTypesResponse = gapi.client.compute.MachineTypeList;
 type ListAcceleratorTypesResponse = gapi.client.compute.AcceleratorTypeList;
@@ -105,7 +106,7 @@ export class DetailsService {
     try {
       const { zone } = await this._getMetadata();
       // extract the zone from the zone resource name
-      this.zonePromise = Promise.resolve(zone.split('/').pop());
+      this.zonePromise = Promise.resolve(extractLast(zone));
       return this.zonePromise;
     } catch (err) {
       console.error('Unable to obtain GCP Zone', err);
