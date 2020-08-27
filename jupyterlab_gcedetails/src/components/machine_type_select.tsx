@@ -40,12 +40,16 @@ const STYLES = stylesheet({
     paddingTop: '8px',
     paddingBottom: '8px',
     width: '468px',
+    backgroundColor: 'var(--jp-layout-color2)',
   },
   nestedSelect: {
     display: 'block',
   },
   input: {
     marginTop: '2px',
+  },
+  text: {
+    color: 'var(--jp-ui-font-color1)',
   },
 });
 
@@ -108,7 +112,7 @@ class HeaderItem extends React.Component<HeaderItemProps, HeaderItemState> {
             primary={label}
             primaryTypographyProps={{ style: TEXT_STYLE }}
           />
-          <ChevronRightRoundedIcon />
+          <ChevronRightRoundedIcon className={STYLES.text} />
         </ListItem>
       </div>
     );
@@ -271,7 +275,7 @@ export class NestedSelect extends React.Component<
 
     return (
       <div className={STYLES.nestedSelect}>
-        {label && <label>{label}</label>}
+        {label && <label className={STYLES.text}>{label}</label>}
         <TextField
           className={STYLES.input}
           value={this.displayValue(value)}

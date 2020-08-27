@@ -31,6 +31,7 @@ export const STYLES = stylesheet({
   containerPadding: {
     margin: '0px',
     padding: '35px 30px',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   containerSize: {
     width: 468,
@@ -76,10 +77,12 @@ export const STYLES = stylesheet({
     lineHeight: '20px',
     padding: '2px',
     verticalAlign: 'top',
+    color: 'var(--jp-ui-font-color1)',
   },
   dd: {
     padding: '2px 2px 2px 24px',
     verticalAlign: 'top',
+    color: 'var(--jp-ui-font-color1)',
   },
   icon: {
     display: 'inline-block',
@@ -89,7 +92,7 @@ export const STYLES = stylesheet({
   },
   listRow: {
     display: 'table-row',
-    boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color0)',
+    boxShadow: 'inset 0 -1px 0 0 var(--jp-border-color1)',
   },
   infoMessage: {
     marginTop: '20px',
@@ -99,4 +102,5 @@ export const STYLES = stylesheet({
 export const TEXT_STYLE = {
   fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
+  color: 'var(--jp-ui-font-color1)',
 };

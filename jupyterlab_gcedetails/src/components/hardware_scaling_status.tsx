@@ -35,6 +35,7 @@ const STATUS_STYLES = stylesheet({
   container: {
     ...csstips.vertical,
     alignItems: 'center',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   containerPadding: {
     padding: '50px 75px 15px 75px',
@@ -44,11 +45,13 @@ const STATUS_STYLES = stylesheet({
   },
   image: {
     marginBottom: '40px',
+    height: 240,
+    width: 300,
   },
   bottomText: {
     marginTop: '50px',
-    color: 'rgb(170, 170, 170)',
     fontSize: '12px',
+    color: 'var(--jp-ui-font-color2)',
   },
 });
 
@@ -290,13 +293,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
           STATUS_STYLES.container
         )}
       >
-        <img
-          src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-          alt="logo"
-          height={240}
-          width={300}
-          className={STATUS_STYLES.image}
-        />
+        <span className={classes(STATUS_STYLES.image, 'jp-CaipIcon')} />
         <p className={STYLES.heading}>
           {status < 6 ? `${Status[status]} (${status + 1}/6)` : Status[status]}
         </p>
