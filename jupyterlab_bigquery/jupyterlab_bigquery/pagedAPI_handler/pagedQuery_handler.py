@@ -117,10 +117,10 @@ class PagedQueryHandler(PagedAPIHandler):
         content = format_preview_rows(page, en.schema)
 
       response = {
-          'content': json.dumps(content),
-          'labels': json.dumps(schema_fields),
-          'bytesProcessed': json.dumps(total_bytes_processed),
-          'project': json.dumps(query_job.project),
+          'content': content,
+          'labels': schema_fields,
+          'bytesProcessed': total_bytes_processed,
+          'project': query_job.project,
       }
       yield response
 
