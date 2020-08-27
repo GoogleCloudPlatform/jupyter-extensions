@@ -34,6 +34,7 @@ import { QueryEditorType } from './query_editor_results';
 import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -53,6 +54,7 @@ interface QueryTextEditorProps {
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   onQueryChange?: (string) => void;
+  onQueryFInish?: (Array) => void;
   showResult?: boolean;
 }
 
@@ -60,16 +62,19 @@ interface QueryResponseType {
   content: string;
   labels: string;
   bytesProcessed: number;
+  project: string;
 }
 
 export interface QueryResult {
-  content: Array<Array<unknown>>;
+  contentLen: number;
   labels: Array<string>;
   bytesProcessed: number;
-  queryId: QueryId;
   project: string;
+  queryId: QueryId;
   query: string;
 }
+
+export type QueryContent = Array<Array<unknown>>;
 
 interface QueryRequestBodyType {
   query: string;
@@ -151,7 +156,9 @@ enum QueryStates {
   ERROR,
 }
 
-const QUERY_BATCH_SIZE = 300000;
+export const QUERY_DATA_TYPE = 'query_content';
+
+const QUERY_BATCH_SIZE = 500000;
 
 function createWorkerFromFunction(func: Function) {
   const workerFunc = `self.onmessage=function(e){
@@ -191,6 +198,8 @@ class QueryTextEditor extends React.Component<
   ifSupportWorker: boolean;
   jsonWorker: any;
 
+  queryManager: QueryResultsManager;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -225,6 +234,8 @@ class QueryTextEditor extends React.Component<
         },
       });
     });
+
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   componentDidMount() {
@@ -265,6 +276,8 @@ class QueryTextEditor extends React.Component<
       ifMsgErr: false,
     });
 
+    this.queryManager.resetSlot(this.queryId);
+
     this.job = this.pagedQueryService.request(
       { query, jobConfig: this.queryFlags, dryRunOnly: false },
       async (state, _, response) => {
@@ -293,6 +306,10 @@ class QueryTextEditor extends React.Component<
           processed.queryId = this.queryId;
           processed.query = query;
 
+          this.queryManager.updateSlot(this.queryId, processed['content']);
+          processed.contentLen = this.queryManager.getSlotSize(this.queryId);
+
+          delete processed['content'];
           this.props.updateQueryResult(processed);
         } else if (state === JobState.Fail) {
           this.setState({
@@ -308,6 +325,10 @@ class QueryTextEditor extends React.Component<
           }, 2000);
         } else if (state === JobState.Done) {
           this.setState({ queryState: QueryStates.READY });
+
+          if (this.props.onQueryFInish) {
+            this.props.onQueryFInish(this.queryManager.getSlot(this.queryId));
+          }
         }
       },
       QUERY_BATCH_SIZE
