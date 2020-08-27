@@ -159,11 +159,13 @@ enum QueryStates {
 export const QUERY_DATA_TYPE = 'query_content';
 
 const QUERY_BATCH_SIZE = 500000;
+const JSON_BATCH_SIZE = 20000;
 
 function createWorkerFromFunction(func: Function) {
-  const workerFunc = `self.onmessage=function(e){
-      const res = (${func}).call(self, e);
-      self.postMessage(res);
+  const workerFunc = `
+      const JSON_BATCH_SIZE=${JSON_BATCH_SIZE};
+      onmessage=function(e){
+      (${func}).call(this, e);
       }`;
   const funcStr = workerFunc.toString();
 
@@ -175,12 +177,18 @@ function createWorkerFromFunction(func: Function) {
 }
 
 function workerFunc(e) {
-  const response = e.data;
-  Object.keys(response).map(key => {
-    response[key] = JSON.parse(response[key]);
-  });
+  const contentBuffer = e.data;
 
-  return response;
+  const textDecoder = new TextDecoder();
+  const content = textDecoder.decode(contentBuffer);
+  const parsedContent = JSON.parse(content);
+
+  for (let i = 0; i < parsedContent.length; i += JSON_BATCH_SIZE) {
+    const batch = parsedContent.slice(i, i + JSON_BATCH_SIZE);
+
+    this.postMessage({ batch, finish: false });
+  }
+  this.postMessage({ batch: undefined, finish: true });
 }
 
 class QueryTextEditor extends React.Component<
@@ -284,33 +292,45 @@ class QueryTextEditor extends React.Component<
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
 
-          // try using worker
-          if (this.ifSupportWorker) {
-            const holdProm = new Promise<void>(resolve => {
-              this.jsonWorker.addEventListener('message', message => {
-                response = message.data;
-                resolve();
-              });
-              this.jsonWorker.postMessage(response);
-            });
-
-            await holdProm;
-          } else {
-            Object.keys(response).map(key => {
-              response[key] = JSON.parse(response[key]);
-            });
-          }
-
           this.setState({ bytesProcessed: response.bytesProcessed });
+
+          const content = response['content'];
+          delete response['content'];
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
           processed.query = query;
 
-          this.queryManager.updateSlot(this.queryId, processed['content']);
-          processed.contentLen = this.queryManager.getSlotSize(this.queryId);
+          // try using worker
+          if (this.ifSupportWorker) {
+            new Promise<void>(resolve => {
+              this.jsonWorker.onmessage = message => {
+                const { batch, finish } = message.data;
 
-          delete processed['content'];
-          this.props.updateQueryResult(processed);
+                this.queryManager.updateSlot(this.queryId, batch);
+
+                if (finish) {
+                  resolve();
+                } else {
+                  processed.contentLen = this.queryManager.getSlotSize(
+                    this.queryId
+                  );
+                  this.props.updateQueryResult(processed);
+                }
+              };
+              const textEncoder = new TextEncoder();
+              const contentArr = textEncoder.encode(content);
+              const contentBuffer = contentArr.buffer;
+
+              this.jsonWorker.postMessage(contentBuffer, [contentBuffer]);
+            });
+
+            // await holdProm;
+          } else {
+            const processedContent = JSON.parse(content);
+            this.queryManager.updateSlot(this.queryId, processedContent);
+            processed.contentLen = this.queryManager.getSlotSize(this.queryId);
+            this.props.updateQueryResult(processed);
+          }
         } else if (state === JobState.Fail) {
           this.setState({
             queryState: QueryStates.ERROR,
