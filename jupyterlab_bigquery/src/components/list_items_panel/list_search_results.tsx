@@ -207,10 +207,14 @@ export default class ListSearchResults extends React.Component<
 
   render() {
     const { context, searchResults } = this.props;
-    return searchResults.map(result => (
-      <div key={result.id} className={localStyles.root}>
-        {BuildSearchResult(result, context)}
-      </div>
-    ));
+    if (searchResults.length > 0) {
+      return searchResults.map(result => (
+        <div key={result.id} className={localStyles.root}>
+          {BuildSearchResult(result, context)}
+        </div>
+      ));
+    } else {
+      return <div>No items match your search.</div>;
+    }
   }
 }

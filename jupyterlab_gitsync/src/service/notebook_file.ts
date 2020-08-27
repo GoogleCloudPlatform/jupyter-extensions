@@ -1,7 +1,7 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel, Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { ISignal, Signal } from '@lumino/signaling';
-import { ContentsManager, Contents } from '@jupyterlab/services'
+import { ContentsManager, Contents } from '@jupyterlab/services';
 
 import { IFile } from './tracker';
 import { NotebookResolver } from './notebook_resolver';
@@ -14,18 +14,20 @@ export class NotebookFile implements IFile {
   context: DocumentRegistry.Context;
   resolver: NotebookResolver;
   view: {
-    left: number,
-    top: number
-  }
+    left: number;
+    top: number;
+  };
   cursor: {
-    index: number,
+    index: number;
     pos: {
-      line: number,
-      column: number
-    }
-  }
+      line: number;
+      column: number;
+    };
+  };
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: NotebookPanel) {
@@ -59,7 +61,7 @@ export class NotebookFile implements IFile {
   }
 
   async save() {
-    try{
+    try {
       const content = (this.content.model as NotebookModel).toJSON();
       await this._saveFile(content);
       this.resolver.addVersion(content, 'base');
@@ -73,22 +75,24 @@ export class NotebookFile implements IFile {
     this._getLocalVersion();
     this._getEditorView();
     const merged = await this.resolver.mergeVersions();
-    if (merged) { await this._displayText(merged); }
+    if (merged) {
+      await this._displayText(merged);
+    }
   }
 
   private async _displayText(merged) {
-    await this._saveFile(merged)
+    await this._saveFile(merged);
     await this.context.revert();
     this._setEditorView();
   }
 
-  private async _saveFile(content: any){
+  private async _saveFile(content: any) {
     const options = {
       content: content,
       format: 'json' as Contents.FileFormat,
       path: this.path,
       type: 'notebook' as Contents.ContentType,
-    }
+    };
     await fs.save(this.path, options);
   }
 
@@ -100,7 +104,7 @@ export class NotebookFile implements IFile {
   }
 
   private async _getRemoteVersion() {
-    try{
+    try {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
     } catch (error) {
@@ -113,20 +117,20 @@ export class NotebookFile implements IFile {
     this.resolver.addVersion(content, 'local');
   }
 
-  private _getEditorView(){
+  private _getEditorView() {
     this.view = {
       left: this.content.node.scrollLeft,
-      top: this.content.node.scrollTop
+      top: this.content.node.scrollTop,
     };
     const activeIndex = this.activeCellIndex;
     const cursorPos = this.activeCell.editor.getCursorPosition();
     this.resolver.setCursorToken(activeIndex, cursorPos);
   }
 
-  private _setEditorView(){
+  private _setEditorView() {
     this.cursor = this.resolver.getCursorToken();
 
-    if (this.cursor){
+    if (this.cursor) {
       this.content.activeCellIndex = this.cursor.index;
       this.activeCell.editor.setCursorPosition(this.cursor.pos);
     }
@@ -135,16 +139,20 @@ export class NotebookFile implements IFile {
     this.content.node.scrollTop = this.view.top;
   }
 
-  private _addListener(signal: ISignal<any, any>, callback: any){
+  private _addListener(signal: ISignal<any, any>, callback: any) {
     return signal.connect(callback, this);
   }
 
-  private _dirtyStateListener(sender: NotebookModel, value: any){
-    if (value.name === 'dirty'){ this._dirtyState.emit(value.newValue); }
+  private _dirtyStateListener(sender: NotebookModel, value: any) {
+    if (value.name === 'dirty') {
+      this._dirtyState.emit(value.newValue);
+    }
   }
 
   private _addListeners() {
-    this._addListener((this.content.model as NotebookModel).stateChanged, 
-      this._dirtyStateListener);
+    this._addListener(
+      (this.content.model as NotebookModel).stateChanged,
+      this._dirtyStateListener
+    );
   }
 }

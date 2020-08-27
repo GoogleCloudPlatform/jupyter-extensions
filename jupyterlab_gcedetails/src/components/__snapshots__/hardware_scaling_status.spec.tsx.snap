@@ -57,14 +57,10 @@ exports[`HardwareScalingStatus Renders with stop error: Stop instance error 1`] 
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -72,7 +68,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
     Authorizing (1/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={16.666666666666664}
@@ -84,7 +80,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
       Please complete the OAuth 2.0 authorization steps in the popup
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
@@ -94,14 +90,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -144,14 +136,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -159,7 +147,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1
     Refreshing session (6/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={100}
@@ -171,7 +159,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1
       Refreshing your JupyterLab session to reflect your new configuration.
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
@@ -181,14 +169,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook instance 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -196,7 +180,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook 
     Restarting notebook instance (5/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={83.33333333333334}
@@ -208,7 +192,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook 
       Restarting your newly configured notebook instance.
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
@@ -218,14 +202,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook 
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook instance 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -233,7 +213,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook in
     Stopping notebook instance (2/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={33.33333333333333}
@@ -245,7 +225,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook in
       Shutting down your notebook instance for reshaping.
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
@@ -255,14 +235,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook in
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configuration 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -270,7 +246,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configu
     Updating GPU configuration (4/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={66.66666666666666}
@@ -282,7 +258,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configu
       Reshaping GPU configuration to match your selection.
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
@@ -292,14 +268,10 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configu
 
 exports[`HardwareScalingStatus Runs through reshaping flow: Updating machine configuration 1`] = `
 <div
-  className="containerPadding_f7mmknj container_f1q29mf7"
+  className="containerPadding_f7mmknj container_f11ewvlg"
 >
-  <img
-    alt="logo"
-    className="image_f5a360f"
-    height={240}
-    src="https://lh3.googleusercontent.com/jXKgFfRZMYEO2Dl81SENWsvj0crnYUmR-8H7UFiHwPxI5BfIJjN23xVeUOdL4IZMu0oO38zE59AM=e14-rj-sc0xffffff-w1270"
-    width={300}
+  <span
+    className="image_fc8jh0z jp-CaipIcon"
   />
   <p
     className="heading_f1xburhd"
@@ -307,7 +279,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating machine con
     Updating machine configuration (3/6)
   </p>
   <div
-    className="container_f1q29mf7"
+    className="container_f11ewvlg"
   >
     <WithStyles(WithStyles(ForwardRef(LinearProgress)))
       value={50}
@@ -319,7 +291,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating machine con
       Reshaping machine configuration to match your selection.
     </p>
     <p
-      className="bottomText_fz9oezr"
+      className="bottomText_f1vi2ddg"
     >
       Don't close the browser tab before the update process is finished
     </p>
