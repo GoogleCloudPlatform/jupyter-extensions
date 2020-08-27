@@ -209,7 +209,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     const configuration = { ...this.state.configuration };
     if (!configuration.attachGpu) {
       /*
-       * If machine originally had a GPU we want to explicilty attach an
+       * If configuration originally had a GPU we want to explicity attach an
        * accelerator of type NO_ACCELERATOR_TYPE through the Notebooks API to remove it
        */
       configuration.attachGpu = this.oldConfiguration
