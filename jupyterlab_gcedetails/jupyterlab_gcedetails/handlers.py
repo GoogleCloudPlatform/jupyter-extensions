@@ -171,8 +171,7 @@ class PricelistHandler(APIHandler):
   async def get(self):
     try:
       pricelist = await get_pricelist()
-      response = pricelist.get('gcp_price_list', {})
-      self.finish(response)
+      self.finish(pricelist)
     except:
       msg = 'Unexpected error obtaining pricelist'
       app_log.exception(msg)

@@ -32,6 +32,7 @@ import {
   Details,
   detailsToHardwareConfiguration,
   isEqualHardwareConfiguration,
+  extractLast,
 } from '../data/data';
 import {
   ACCELERATOR_COUNTS_1_2_4_8,
@@ -60,6 +61,7 @@ interface Props {
 interface State {
   configuration: HardwareConfiguration;
   gpuCountOptions: Option[];
+  newConfigurationPrice: number | undefined;
 }
 
 export const FORM_STYLES = stylesheet({
@@ -91,6 +93,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
   private oldConfiguration: HardwareConfiguration;
   private machineTypesOptions: MachineTypeConfiguration[];
+  private oldConfigurationPrice: number | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -115,6 +118,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
             props.details.gpu.name
           )
         : ACCELERATOR_COUNTS_1_2_4_8,
+      newConfigurationPrice: undefined,
     };
 
     this.gpuTypeOptions = props.details
@@ -127,6 +131,8 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     this.machineTypesOptions = props.details
       ? props.details.machineTypes
       : MACHINE_TYPES;
+
+    this.getOldConfigurationPrice();
   }
 
   /*
@@ -148,18 +154,18 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({
-      configuration: {
-        ...this.state.configuration,
-        attachGpu: event.target.checked,
-        gpuType: event.target.checked
-          ? (this.gpuTypeOptions[0].value as string)
-          : NO_ACCELERATOR_TYPE,
-        gpuCount: event.target.checked
-          ? (this.state.gpuCountOptions[0].value as string)
-          : NO_ACCELERATOR_COUNT,
-      },
-    });
+    const configuration = {
+      ...this.state.configuration,
+      attachGpu: event.target.checked,
+      gpuType: event.target.checked
+        ? (this.gpuTypeOptions[0].value as string)
+        : NO_ACCELERATOR_TYPE,
+      gpuCount: event.target.checked
+        ? (this.state.gpuCountOptions[0].value as string)
+        : NO_ACCELERATOR_COUNT,
+    };
+    this.setState({ configuration });
+    this.updatePricingEstimation(configuration);
   }
 
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -167,25 +173,36 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       this.props.details.acceleratorTypes,
       event.target.value
     );
+    const configuration = {
+      ...this.state.configuration,
+      gpuType: event.target.value,
+      gpuCount: newGpuCountOptions[0].value as string,
+    };
     this.setState({
-      configuration: {
-        ...this.state.configuration,
-        gpuType: event.target.value,
-        gpuCount: newGpuCountOptions[0].value as string,
-      },
+      configuration,
       gpuCountOptions: newGpuCountOptions,
     });
+    this.updatePricingEstimation(configuration);
+  }
+
+  private onGpuCountChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const configuration = {
+      ...this.state.configuration,
+      gpuCount: event.target.value,
+    };
+    this.setState({ configuration });
+    this.updatePricingEstimation(configuration);
   }
 
   private onMachineTypeChange(newMachineType: Option) {
     const canAttachGpu = this.canAttachGpu(newMachineType.value as string);
-    this.setState({
-      configuration: {
-        ...this.state.configuration,
-        machineType: optionToMachineType(newMachineType),
-        attachGpu: this.state.configuration.attachGpu && canAttachGpu,
-      },
-    });
+    const configuration = {
+      ...this.state.configuration,
+      machineType: optionToMachineType(newMachineType),
+      attachGpu: this.state.configuration.attachGpu && canAttachGpu,
+    };
+    this.setState({ configuration });
+    this.updatePricingEstimation(configuration);
   }
 
   private submitForm() {
@@ -202,36 +219,64 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     this.props.onSubmit(configuration);
   }
 
-  private displayPricingEstimation() {
+  private async getOldConfigurationPrice() {
     const { details, priceService } = this.props;
-    const { configuration } = this.state;
 
-    const zone = details.instance.zone.split('/').pop();
-    const currentPrice = priceService.getPrice(zone, this.oldConfiguration);
-    const newPrice = priceService.getPrice(zone, configuration);
-    const priceDifference = (newPrice - currentPrice);
+    const zone = extractLast(details.instance.zone);
+    this.oldConfigurationPrice = await priceService.getPrice(
+      zone,
+      this.oldConfiguration
+    );
+  }
+
+  private async updatePricingEstimation(configuration) {
+    const { details, priceService } = this.props;
+
+    const zone = extractLast(details.instance.zone);
+    const newConfigurationPrice = await priceService.getPrice(
+      zone,
+      configuration
+    );
+    this.setState({
+      newConfigurationPrice,
+    });
+  }
+
+  private displayPricingEstimation(oldPrice: number, newPrice: number) {
+    const priceDifference = newPrice - oldPrice;
 
     return (
       <div>
         <span className={STYLES.subheading}>Pricing Estimation:</span>
         <div className={STYLES.paragraph}>
           {`Your updated instance will cost an estimated
-          $${newPrice.toFixed(2)} monthly, an estimated difference of 
-          $${priceDifference.toFixed(2)} from your current instance.`}
+          $${newPrice.toFixed(2)} monthly, an estimated 
+          ${priceDifference < 0 ? 'decrease' : 'increase'} of 
+          $${Math.abs(priceDifference).toFixed(2)} from your 
+          current instance.`}
         </div>
       </div>
     );
   }
 
   render() {
-    const { onDialogClose, priceService } = this.props;
-    const { configuration, gpuCountOptions } = this.state;
+    const { onDialogClose } = this.props;
+    const {
+      configuration,
+      gpuCountOptions,
+      newConfigurationPrice,
+    } = this.state;
     const { gpuType, gpuCount, attachGpu, machineType } = configuration;
 
     const configurationModified = !isEqualHardwareConfiguration(
       this.oldConfiguration,
       configuration
     );
+
+    const shouldDisplayPricingEstimation =
+      configurationModified &&
+      newConfigurationPrice &&
+      this.oldConfigurationPrice;
 
     return (
       <div className={STYLES.containerPadding}>
@@ -282,21 +327,16 @@ export class HardwareScalingForm extends React.Component<Props, State> {
                   name="gpuCount"
                   value={gpuCount}
                   options={gpuCountOptions}
-                  onChange={e =>
-                    this.setState({
-                      configuration: {
-                        ...this.state.configuration,
-                        gpuCount: e.target.value,
-                      },
-                    })
-                  }
+                  onChange={e => this.onGpuCountChange(e)}
                 />
               </div>
             </div>
           )}
-          {configurationModified &&
-            !priceService.receivedError &&
-            this.displayPricingEstimation()}
+          {shouldDisplayPricingEstimation &&
+            this.displayPricingEstimation(
+              this.oldConfigurationPrice,
+              newConfigurationPrice
+            )}
           {attachGpu && (
             <div className={STYLES.infoMessage}>
               <Message asError={false} asActivity={false} text={INFO_MESSAGE} />

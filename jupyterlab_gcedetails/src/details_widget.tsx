@@ -22,6 +22,7 @@ import {
   Details,
   MAPPED_ATTRIBUTES,
   REFRESHABLE_MAPPED_ATTRIBUTES,
+  extractLast,
 } from './data/data';
 import { getMachineTypeConfigurations } from './data/machine_types';
 import { ServerWrapper } from './components/server_wrapper';
@@ -117,19 +118,14 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async getAndSetDetailsFromServer() {
-    const {
-      notebookService,
-      detailsServer,
-      detailsService,
-      priceService,
-    } = this.props;
+    const { notebookService, detailsServer, detailsService } = this.props;
     try {
       const details = (await detailsServer.getUtilizationData()) as Details;
-      const zone = details.instance.zone.split('/').pop();
+      const zone = extractLast(details.instance.zone);
 
       notebookService.projectId = details.project.projectId;
       notebookService.locationId = zone;
-      notebookService.instanceName = details.instance.name.split('/').pop();
+      notebookService.instanceName = extractLast(details.instance.name);
 
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
@@ -137,7 +133,6 @@ export class VmDetails extends React.Component<Props, State> {
       const [machineTypes, acceleratorTypes] = await Promise.all([
         detailsService.getMachineTypes(),
         detailsService.getAcceleratorTypes(),
-        priceService.getPriceList(),
       ]);
 
       details.machineTypes = getMachineTypeConfigurations(machineTypes);

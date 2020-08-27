@@ -35,7 +35,6 @@ import { PriceService } from './service/price_service';
 describe('VmDetails', () => {
   const mockGetUtilizationData = jest.fn();
   const mockGetMachineTypes = jest.fn();
-  const mockGetPriceList = jest.fn(() => Promise.resolve());
   const mockGetAcceleratorTypes = jest.fn();
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
@@ -48,9 +47,7 @@ describe('VmDetails', () => {
     getMachineTypes: mockGetMachineTypes,
     getAcceleratorTypes: mockGetAcceleratorTypes,
   } as unknown) as DetailsService;
-  const mockPriceService = ({
-    getPriceList: mockGetPriceList,
-  } as unknown) as PriceService;
+  const mockPriceService = new PriceService();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -86,7 +83,6 @@ describe('VmDetails', () => {
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
     expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetPriceList).toHaveBeenCalledTimes(1);
   });
 
   it('Renders with get details error', async () => {
@@ -163,7 +159,6 @@ describe('VmDetails', () => {
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
     expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetPriceList).toHaveBeenCalledTimes(1);
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.length).toBe(2);
@@ -216,7 +211,6 @@ describe('VmDetails', () => {
     expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
     expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
     expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetPriceList).toHaveBeenCalledTimes(1);
 
     // Click four times to move to CPU usage
     for (let i = 0; i < 4; i++) {
