@@ -24,13 +24,15 @@ const localStyles = stylesheet({
   },
 });
 
+// TODO: figure out type so only material ui icons accepted,
+// and make it work with using .type
+type MaterialUIIcon = any;
+
 interface InfoCardProps {
   message: React.ReactNode;
   button?: React.ReactNode;
   color: string;
-  // TODO: figure out type so only material ui icons accepted,
-  // and make it work with using .type
-  icon: any;
+  icon: MaterialUIIcon;
 }
 
 // Card with matching colored strip and icon, and info message
