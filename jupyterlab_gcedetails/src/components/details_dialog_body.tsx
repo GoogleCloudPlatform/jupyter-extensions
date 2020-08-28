@@ -18,7 +18,55 @@ import * as React from 'react';
 import { stylesheet, classes } from 'typestyle';
 import { STYLES } from '../data/styles';
 import { MAPPED_ATTRIBUTES, Details } from '../data/data';
+import { makeStyles } from '@material-ui/core/styles';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
 import { ActionBar } from './action_bar';
+
+const useStyles = makeStyles({
+  table: {
+    minWidth: 350,
+  },
+  container: {
+    boxShadow: 'none',
+    elevation: 0,
+    backgroundColor: 'var(--jp-layout-color1)',
+  },
+  textColor: {
+    color: 'var(--jp-ui-font-color1)',
+  },
+});
+
+function SimpleTable(details: Details) {
+  const tableClasses = useStyles();
+
+  return (
+    <TableContainer className={tableClasses.container} component={Paper}>
+      <Table className={tableClasses.table} aria-label="simple table">
+        <TableBody>
+          {MAPPED_ATTRIBUTES.map(am => (
+            <TableRow key={am.label}>
+              <TableCell
+                className={tableClasses.textColor}
+                component="th"
+                scope="row"
+              >
+                {am.label}
+              </TableCell>
+              <TableCell className={tableClasses.textColor} align="right">
+                {am.mapper(details)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
 
 interface Props {
   details: Details;
@@ -56,12 +104,7 @@ export function DetailsDialogBody(props: Props) {
           </p>
         </div>
       ) : (
-        MAPPED_ATTRIBUTES.map(am => (
-          <div className={STYLES.listRow} key={am.label}>
-            <dt className={STYLES.dt}>{am.label}</dt>
-            <dd className={STYLES.dd}>{am.mapper(details)}</dd>
-          </div>
-        ))
+        SimpleTable(details)
       )}
       <ActionBar
         primaryLabel="Update"
