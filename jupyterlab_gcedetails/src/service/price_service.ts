@@ -28,6 +28,11 @@ type Catalog = Map<string, Map<string, number>>;
 export class PriceService {
   private catalog: Catalog;
 
+  // Exposed for testing purposes only
+  set _catalog(catalog: Catalog) {
+    this.catalog = catalog;
+  }
+
   private async buildCatalog(): Promise<void> {
     // Only attempt to build the catalog once
     if (this.catalog) {
