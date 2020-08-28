@@ -2,12 +2,13 @@
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
-import { QueryResult } from './query_text_editor';
+import { QueryResult, QUERY_DATA_TYPE } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
 import { Button } from '@material-ui/core';
 import { Equalizer } from '@material-ui/icons';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -39,6 +40,7 @@ interface QueryResultsProps {
 
 class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   queryId: QueryId;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -47,6 +49,7 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
       rowsPerPage: 10,
     };
     this.queryId = props.queryId;
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   handleDatastudioExploreButton() {
@@ -66,7 +69,7 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
 
   render() {
     const fields = this.props.queryResult.labels;
-    const rows = this.props.queryResult.content;
+    const rows = this.queryManager.getSlot(this.queryId);
 
     return (
       <div
@@ -98,7 +101,7 @@ const mapStateToProps = (state, ownProps) => {
 
   if (!queryResult) {
     queryResult = {
-      content: [],
+      contentLen: 0,
       labels: [],
       bytesProcessed: null,
       queryId: queryId,

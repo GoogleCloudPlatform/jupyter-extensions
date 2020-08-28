@@ -23,6 +23,7 @@ import {
 } from '../data/machine_types';
 import { STYLES } from '../data/styles';
 import { getGpuTypeText } from '../data/accelerator_types';
+import { extractLast } from '../data/data';
 
 export function displayInstance(
   instance: Instance,
@@ -31,7 +32,7 @@ export function displayInstance(
 ) {
   const { machineType, acceleratorConfig } = instance;
   const machineTypeText = getMachineTypeText(
-    machineType.split('/').pop(),
+    extractLast(machineType),
     machineTypes
   );
 

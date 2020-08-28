@@ -1,6 +1,6 @@
 import React from 'react';
 import QueryTextEditor, {
-  QueryResult,
+  QUERY_DATA_TYPE,
 } from '../query_text_editor/query_text_editor';
 import QueryResults from '../query_text_editor/query_editor_results';
 import {
@@ -19,17 +19,17 @@ const localStyles = stylesheet({
     ...BASE_FONT,
   },
 });
-import { connect } from 'react-redux';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 interface QueryEditorTabProps {
   isVisible: boolean;
   queryId?: string;
   iniQuery?: string;
-  queries: { [key: string]: QueryResult };
 }
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
   queryId: QueryId;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -38,14 +38,11 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
     };
 
     this.queryId = this.props.queryId ?? generateQueryId();
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   render() {
-    const { queries } = this.props;
-
-    const queryResult = queries[this.queryId];
-    // eslint-disable-next-line no-extra-boolean-cast
-    const showResult = !!queryResult && queryResult.content.length > 0;
+    const showResult = this.queryManager.getSlotSize(this.queryId) > 0;
 
     return (
       <div className={localStyles.queryTextEditorRoot}>
@@ -59,8 +56,4 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
   }
 }
 
-const mapStateToProps = state => {
-  return { queries: state.queryEditorTab.queries };
-};
-
-export default connect(mapStateToProps)(QueryEditorTab);
+export default QueryEditorTab;

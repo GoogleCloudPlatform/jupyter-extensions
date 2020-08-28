@@ -34,7 +34,7 @@ export class FileResolver implements IResolver {
     remote: undefined,
     local_tok: undefined,
     merged: undefined,
-    merged_tok: undefined
+    merged_tok: undefined,
   };
 
   private _conflict: boolean;
@@ -79,7 +79,7 @@ export class FileResolver implements IResolver {
   }
 
   getCursorToken(): CodeMirror.Pos {
-    if (this.versions.merged_tok){
+    if (this.versions.merged_tok) {
       const text = this.versions.merged_tok.split('\n');
       for (let i = 0; i < text.length; i++) {
         if (text[i].indexOf(this._token) > -1) {
@@ -101,12 +101,16 @@ export class FileResolver implements IResolver {
       this.addVersion(this.versions.local, 'base');
       return undefined;
     }
-    let result = diff3.merge(this.versions.local_tok, this.versions.base, 
-      this.versions.remote, { stringSeparator: '\n' });
+    const result = diff3.merge(
+      this.versions.local_tok,
+      this.versions.base,
+      this.versions.remote,
+      { stringSeparator: '\n' }
+    );
 
     if (result.conflict) {
       result.result = result.result.map(value => {
-        switch (value){
+        switch (value) {
           case '\n<<<<<<<<<\n':
             return '\n<<<<<<<<< LOCAL\n';
           case '\n>>>>>>>>>\n':
@@ -115,31 +119,32 @@ export class FileResolver implements IResolver {
             return value;
         }
       });
-    } 
-    let text = result.result.join('\n');
+    }
+    const text = result.result.join('\n');
     this._versions.merged_tok = text;
     this._versions.merged = text.replace(this._token, '');
-    if (result.conflict) { await this._resolveDialog(); }
+    if (result.conflict) {
+      await this._resolveDialog();
+    }
 
     this._updateState(false);
     return this.versions.merged;
   }
 
   private _updateState(state: boolean): void {
-    if (state != this.conflict){
+    if (state !== this.conflict) {
       this._conflict = state;
       this._conflictState.emit(state);
     }
   }
 
   private async _resolveDialog(): Promise<void> {
-    const body = 
-      `"${this.path}" has a conflict. Would you like to revert to a previous version\
+    const body = `"${this.path}" has a conflict. Would you like to revert to a previous version\
       \nor view the diff? (Note that ignoring conflicts will stop git sync.)`;
     // const resolveBtn = Dialog.okButton({ label: 'Resolve Conflicts' });
     const localBtn = Dialog.okButton({ label: 'Revert to Local' });
     const remoteBtn = Dialog.okButton({ label: 'Revert to Remote' });
-    const diffBtn = Dialog.okButton({ label: 'View Diff'})
+    const diffBtn = Dialog.okButton({ label: 'View Diff' });
     const ignoreBtn = Dialog.warnButton({ label: 'Ignore Conflict' });
     return showDialog({
       title: 'Merge Conflicts',

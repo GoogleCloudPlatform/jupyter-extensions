@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-const mockGetMetadata = jest.fn();
-jest.mock('gcp_jupyterlab_shared', () => {
-  const orig = jest.requireActual('gcp_jupyterlab_shared');
-
-  return {
-    __esModule: true,
-    ...orig,
-    getMetadata: mockGetMetadata,
-  };
-});
-
 import {
   asApiResponse,
   ServerProxyTransportService,

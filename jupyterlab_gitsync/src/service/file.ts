@@ -21,18 +21,20 @@ export class File implements IFile {
   editor: CodeMirror;
   doc: CodeMirror.doc;
   resolver: FileResolver;
-  view: { 
-    left: number,
-    top: number, 
-    right: number,
-    bottom: number 
-  }
+  view: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  };
   cursor: {
-    line: number,
-    ch: number
-  }
+    line: number;
+    ch: number;
+  };
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: DocumentWidget) {
@@ -60,7 +62,7 @@ export class File implements IFile {
   }
 
   async save() {
-    try{
+    try {
       const text = this.doc.getValue();
       await this._saveFile(text);
       this.resolver.addVersion(text, 'base');
@@ -85,7 +87,7 @@ export class File implements IFile {
     this._setEditorView();
   }
 
-  private async _saveFile(text: string){
+  private async _saveFile(text: string) {
     const options = {
       content: text,
       format: 'text' as Contents.FileFormat,

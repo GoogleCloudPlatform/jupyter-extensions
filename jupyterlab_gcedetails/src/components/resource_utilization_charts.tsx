@@ -51,9 +51,11 @@ const STYLES = stylesheet({
   chartTitleSmall: {
     fontSize: '15px',
     marginLeft: '20px',
+    color: 'var(--jp-ui-font-color1)',
   },
   utilizationChartsContainer: {
     padding: '10px 20px 20px 0px',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   flexspan: {
     display: 'flex',
