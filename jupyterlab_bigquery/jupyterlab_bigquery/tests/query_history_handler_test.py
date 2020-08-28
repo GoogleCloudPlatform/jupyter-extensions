@@ -229,7 +229,6 @@ class TestQueryHistory(unittest.TestCase):
     }
 
     got = get_job_details(mock_client, 'dummy_job')
-    self.maxDiff = None
     self.assertEqual(wanted, got)
 
 

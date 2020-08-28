@@ -2,16 +2,16 @@
 """Request handler classes for the extensions."""
 
 import base64
+import datetime
 import json
 import math
-import datetime
-from multiprocessing import Pool
 from functools import partial
+from multiprocessing import Pool
 
 from google.cloud import bigquery
-from google.cloud.bigquery.enums import StandardSqlDataTypes, SqlTypeNames
+from google.cloud.bigquery.enums import SqlTypeNames, StandardSqlDataTypes
 from google.cloud.bigquery_v2.gapic.enums import Model
-from google.protobuf.wrappers_pb2 import DoubleValue, BoolValue
+from google.protobuf.wrappers_pb2 import BoolValue, DoubleValue
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 

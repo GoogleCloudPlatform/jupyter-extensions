@@ -39,8 +39,8 @@ class TestDatasetDetails(unittest.TestCase):
                                               23,
                                               32,
                                               tzinfo=None),
-                   self_link='https://bigquery.googleapis.com/bigquery\
-            /v2/projects/project_id/datasets/dataset_id')
+                   self_link='https://bigquery.googleapis.com/bigquery' + \
+            '/v2/projects/project_id/datasets/dataset_id')
     client.get_dataset = Mock(return_value=dataset)
     bigquery = BigQueryService(client)
 
@@ -64,8 +64,8 @@ class TestDatasetDetails(unittest.TestCase):
             'project':
                 'project_id',
             'link':
-                'https://bigquery.googleapis.com/bigquery\
-                    /v2/projects/project_id/datasets/dataset_id'
+                'https://bigquery.googleapis.com/bigquery' + \
+                    '/v2/projects/project_id/datasets/dataset_id'
         }
     }
     result = bigquery.get_dataset_details('some_dataset_id')
@@ -95,8 +95,8 @@ class TestDatasetDetails(unittest.TestCase):
                                               23,
                                               32,
                                               tzinfo=None),
-                   self_link='https://bigquery.googleapis.com\
-            /bigquery/v2/projects/project_id/datasets/dataset_id')
+                   self_link='https://bigquery.googleapis.com' + \
+            '/bigquery/v2/projects/project_id/datasets/dataset_id')
     client.get_dataset = Mock(return_value=dataset)
     bigquery = BigQueryService(client)
 
@@ -121,8 +121,8 @@ class TestDatasetDetails(unittest.TestCase):
             'project':
                 'project_id',
             'link':
-                'https://bigquery.googleapis.com\
-                    /bigquery/v2/projects/project_id/datasets/dataset_id'
+                'https://bigquery.googleapis.com' + \
+                    '/bigquery/v2/projects/project_id/datasets/dataset_id'
         }
     }
 
@@ -178,8 +178,8 @@ class TestTableDetails(unittest.TestCase):
                                             23,
                                             32,
                                             tzinfo=None),
-                 self_link='https://bigquery.googleapis.com/bigquery\
-            /v2/projects/project_id/datasets/dataset_id',
+                 self_link='https://bigquery.googleapis.com/bigquery' + \
+            '/v2/projects/project_id/datasets/dataset_id',
                  num_rows=123456,
                  num_bytes=2000000,
                  schema=[schema_field_0, schema_field_1])
@@ -208,8 +208,8 @@ class TestTableDetails(unittest.TestCase):
             'dataset':
                 'dataset_id',
             'link':
-                'https://bigquery.googleapis.com/\
-                    bigquery/v2/projects/project_id/datasets/dataset_id',
+                'https://bigquery.googleapis.com/' + \
+                    'bigquery/v2/projects/project_id/datasets/dataset_id',
             'num_rows':
                 123456,
             'num_bytes':
@@ -257,8 +257,8 @@ class TestTableDetails(unittest.TestCase):
                                             23,
                                             32,
                                             tzinfo=None),
-                 self_link='https://bigquery.googleapis.com/\
-            bigquery/v2/projects/project_id/datasets/dataset_id',
+                 self_link='https://bigquery.googleapis.com/' + \
+            'bigquery/v2/projects/project_id/datasets/dataset_id',
                  num_rows=0,
                  num_bytes=0,
                  schema=[])
@@ -288,8 +288,8 @@ class TestTableDetails(unittest.TestCase):
             'dataset':
                 'dataset_id',
             'link':
-                'https://bigquery.googleapis.com/\
-                    bigquery/v2/projects/project_id/datasets/dataset_id',
+                'https://bigquery.googleapis.com/' + \
+                    'bigquery/v2/projects/project_id/datasets/dataset_id',
             'num_rows':
                 0,
             'num_bytes':
@@ -348,8 +348,8 @@ class TestTableDetails(unittest.TestCase):
                                             23,
                                             32,
                                             tzinfo=None),
-                 self_link='https://bigquery.googleapis.com/bigquery\
-            /v2/projects/project_id/datasets/dataset_id',
+                 self_link='https://bigquery.googleapis.com/bigquery' + \
+                    '/v2/projects/project_id/datasets/dataset_id',
                  num_rows=123456,
                  num_bytes=2000000,
                  schema=[schema_field_1])
@@ -378,8 +378,8 @@ class TestTableDetails(unittest.TestCase):
             'dataset':
                 'dataset_id',
             'link':
-                'https://bigquery.googleapis.com/bigquery\
-                    /v2/projects/project_id/datasets/dataset_id',
+                'https://bigquery.googleapis.com/bigquery' + \
+                    '/v2/projects/project_id/datasets/dataset_id',
             'num_rows':
                 123456,
             'num_bytes':
@@ -561,8 +561,8 @@ class TestViewDetails(unittest.TestCase):
         created=datetime.datetime(2020, 7, 14, 13, 23, 45, 67, tzinfo=None),
         expires=datetime.datetime(2021, 7, 14, 13, 23, 45, 67, tzinfo=None),
         modified=datetime.datetime(2020, 7, 15, 15, 11, 23, 32, tzinfo=None),
-        self_link='https://bigquery.googleapis.com/bigquery/v2/\
-            projects/project_id/datasets/dataset_id/view_id',
+        self_link='https://bigquery.googleapis.com/bigquery/v2/' + \
+            'projects/project_id/datasets/dataset_id/view_id',
         schema=[schema_field_0, schema_field_1],
         view_query='SELECT * FROM `project_id.dataset_id.table_id LIMIT 200',
         view_use_legacy_sql=False)
@@ -589,8 +589,8 @@ class TestViewDetails(unittest.TestCase):
             'dataset':
                 'dataset_id',
             'link':
-                'https://bigquery.googleapis.com/bigquery\
-                    /v2/projects/project_id/datasets/dataset_id/view_id',
+                'https://bigquery.googleapis.com/bigquery' + \
+                    '/v2/projects/project_id/datasets/dataset_id/view_id',
             'schema': [{
                 'name': 'field_name_0',
                 'type': 'STRING',
