@@ -101,10 +101,12 @@ def format_preview_rows(rows, fields):
 def parallel_format_preview_rows(rows, fields, num_threads=6, pool=None):
   m_parallel_format_row = partial(parallel_format_row, fields=fields)
   if pool is None:
-    with Pool(num_threads) as pool:
-      formatted_rows = pool.map(m_parallel_format_row, [dict(row) for row in rows])
+    with Pool(num_threads) as p_pool:
+      formatted_rows = p_pool.map(m_parallel_format_row,
+                                  [dict(row) for row in rows])
   else:
-    formatted_rows = pool.map(m_parallel_format_row, [dict(row) for row in rows])
+    formatted_rows = pool.map(m_parallel_format_row,
+                              [dict(row) for row in rows])
   return formatted_rows
 
 

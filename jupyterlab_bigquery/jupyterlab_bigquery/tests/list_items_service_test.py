@@ -17,13 +17,13 @@ class TestListTree(unittest.TestCase):
     bigquery = BigQueryService(mock_client)
 
     wanted = {
-      'projects': {
-        'dummy_project1': {
-          'id': 'dummy_project1',
-          'name': 'dummy_project1',
-        }
-      },
-      'projectIds': ['dummy_project1']
+        'projects': {
+            'dummy_project1': {
+                'id': 'dummy_project1',
+                'name': 'dummy_project1',
+            }
+        },
+        'projectIds': ['dummy_project1']
     }
 
     got = bigquery.list_projects()
@@ -31,7 +31,7 @@ class TestListTree(unittest.TestCase):
 
   def testListDatasets(self):
     gcp_datasets = [
-          DatasetListItem({
+        DatasetListItem({
             'dataset_id': "dummy_dataset1",
             'friendly_name': None,
             'full_dataset_id': None,
@@ -40,10 +40,10 @@ class TestListTree(unittest.TestCase):
             'reference': None,
             'access_entries': None,
             'datasetReference': {
-              'projectId': 'dummy_project1',
-              'datasetId': 'dummy_dataset1',
+                'projectId': 'dummy_project1',
+                'datasetId': 'dummy_dataset1',
             }
-          })
+        })
     ]
 
     mock_client = Mock()
@@ -51,14 +51,14 @@ class TestListTree(unittest.TestCase):
     bigquery = BigQueryService(mock_client)
 
     wanted = {
-      'datasets': {
-        'dummy_project1.dummy_dataset1': {
-          'id': 'dummy_project1.dummy_dataset1',
-          'name': 'dummy_dataset1',
-          'projectId': 'dummy_project1',
-        }
-      },
-      'datasetIds': ['dummy_project1.dummy_dataset1']
+        'datasets': {
+            'dummy_project1.dummy_dataset1': {
+                'id': 'dummy_project1.dummy_dataset1',
+                'name': 'dummy_dataset1',
+                'projectId': 'dummy_project1',
+            }
+        },
+        'datasetIds': ['dummy_project1.dummy_dataset1']
     }
 
     got = bigquery.list_datasets('dummy_project1')
@@ -66,7 +66,7 @@ class TestListTree(unittest.TestCase):
 
   def testListTables(self):
     gcp_tables = [
-          TableListItem({
+        TableListItem({
             'clustering_fields': None,
             'created': None,
             'dataset_id': 'dummy_dataset1',
@@ -83,11 +83,11 @@ class TestListTree(unittest.TestCase):
             'time_partitioning': None,
             'view_use_legacy_sql': None,
             'tableReference': {
-              'projectId': 'dummy_project1',
-              'datasetId': 'dummy_dataset1',
-              'tableId': 'dummy_table1',
+                'projectId': 'dummy_project1',
+                'datasetId': 'dummy_dataset1',
+                'tableId': 'dummy_table1',
             }
-          })
+        })
     ]
 
     mock_client = Mock()
@@ -95,16 +95,16 @@ class TestListTree(unittest.TestCase):
     bigquery = BigQueryService(mock_client)
 
     wanted = {
-      'tables': {
-        'dummy_project1.dummy_dataset1.dummy_table1': {
-          'id': 'dummy_project1.dummy_dataset1.dummy_table1',
-          'name': 'dummy_table1',
-          'datasetId': 'dummy_dataset1',
-          'type': None,
-          'partitioned': False,
-        }
-      },
-      'tableIds': ['dummy_project1.dummy_dataset1.dummy_table1']
+        'tables': {
+            'dummy_project1.dummy_dataset1.dummy_table1': {
+                'id': 'dummy_project1.dummy_dataset1.dummy_table1',
+                'name': 'dummy_table1',
+                'datasetId': 'dummy_dataset1',
+                'type': None,
+                'partitioned': False,
+            }
+        },
+        'tableIds': ['dummy_project1.dummy_dataset1.dummy_table1']
     }
 
     got = bigquery.list_tables('dummy_dataset1')
@@ -123,14 +123,14 @@ class TestListTree(unittest.TestCase):
     bigquery = BigQueryService(mock_client)
 
     wanted = {
-      'models': {
-        'dummy_project1.dummy_dataset1.dummy_model1': {
-          'id': 'dummy_project1.dummy_dataset1.dummy_model1',
-          'name': 'dummy_model1',
-          'datasetId': 'dummy_dataset1',
-        }
-      },
-      'modelIds': ['dummy_project1.dummy_dataset1.dummy_model1']
+        'models': {
+            'dummy_project1.dummy_dataset1.dummy_model1': {
+                'id': 'dummy_project1.dummy_dataset1.dummy_model1',
+                'name': 'dummy_model1',
+                'datasetId': 'dummy_dataset1',
+            }
+        },
+        'modelIds': ['dummy_project1.dummy_dataset1.dummy_model1']
     }
 
     got = bigquery.list_models('dummy_dataset1')
@@ -140,22 +140,30 @@ class TestListTree(unittest.TestCase):
     gcp_entries = []
 
     mock_dataset = Mock()
-    mock_dataset.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset'
+    mock_dataset.linked_resource = '//bigquery.googleapis.com/projects\
+        /dummy_project/datasets/dummy_dataset'
+
     mock_dataset.search_result_subtype = 'entry.dataset'
     gcp_entries.append(mock_dataset)
 
     mock_table = Mock()
-    mock_table.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/tables/dummy_table'
+    mock_table.linked_resource = '//bigquery.googleapis.com/projects\
+        /dummy_project/datasets/dummy_dataset/tables/dummy_table'
+
     mock_table.search_result_subtype = 'entry.table'
     gcp_entries.append(mock_table)
 
     mock_view = Mock()
-    mock_view.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/tables/dummy_view'
+    mock_view.linked_resource = '//bigquery.googleapis.com/projects\
+        /dummy_project/datasets/dummy_dataset/tables/dummy_view'
+
     mock_view.search_result_subtype = 'entry.table.view'
     gcp_entries.append(mock_view)
 
     mock_model = Mock()
-    mock_model.linked_resource = '//bigquery.googleapis.com/projects/dummy_project/datasets/dummy_dataset/models/dummy_model'
+    mock_model.linked_resource = '//bigquery.googleapis.com/projects\
+        /dummy_project/datasets/dummy_dataset/models/dummy_model'
+
     mock_model.search_result_subtype = 'entry.model'
     gcp_entries.append(mock_model)
 
@@ -164,32 +172,34 @@ class TestListTree(unittest.TestCase):
 
     bigquery = BigQueryService(None, mock_client)
 
-    wanted = {'results': [
-      {
-        'type': 'dataset',
-        'parent': 'dummy_project',
-        'name': 'dummy_dataset',
-        'id': 'dummy_project.dummy_dataset',
-      },
-      {
-        'type': 'table',
-        'parent': 'dummy_dataset',
-        'name': 'dummy_table',
-        'id': 'dummy_project.dummy_dataset.dummy_table',
-      },
-      {
-        'type': 'view',
-        'parent': 'dummy_dataset',
-        'name': 'dummy_view',
-        'id': 'dummy_project.dummy_dataset.dummy_view',
-      },
-      {
-        'type': 'model',
-        'parent': 'dummy_dataset',
-        'name': 'dummy_model',
-        'id': 'dummy_project.dummy_dataset.dummy_model',
-      },
-    ]}
+    wanted = {
+        'results': [
+            {
+                'type': 'dataset',
+                'parent': 'dummy_project',
+                'name': 'dummy_dataset',
+                'id': 'dummy_project.dummy_dataset',
+            },
+            {
+                'type': 'table',
+                'parent': 'dummy_dataset',
+                'name': 'dummy_table',
+                'id': 'dummy_project.dummy_dataset.dummy_table',
+            },
+            {
+                'type': 'view',
+                'parent': 'dummy_dataset',
+                'name': 'dummy_view',
+                'id': 'dummy_project.dummy_dataset.dummy_view',
+            },
+            {
+                'type': 'model',
+                'parent': 'dummy_dataset',
+                'name': 'dummy_model',
+                'id': 'dummy_project.dummy_dataset.dummy_model',
+            },
+        ]
+    }
 
     got = bigquery.search_projects('dummy', 'dummy_project')
     self.assertEqual(wanted, got)
@@ -201,11 +211,12 @@ class TestListTree(unittest.TestCase):
     bigquery = BigQueryService(None)
 
     wanted = {
-      'id': 'dummy_project1',
-      'name': 'dummy_project1',
+        'id': 'dummy_project1',
+        'name': 'dummy_project1',
     }
     got = bigquery.get_project(mock_client)
     self.assertEqual(wanted, got)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -4,7 +4,6 @@ import unittest
 import datetime
 from unittest.mock import Mock, MagicMock, patch
 
-from google.cloud.bigquery.job import QueryJob
 from jupyterlab_bigquery.query_history_handler.query_history_handler import get_table, list_jobs, get_job_details
 
 
@@ -39,24 +38,34 @@ class TestQueryHistory(unittest.TestCase):
                                               tzinfo=None),
                     errors='error')
 
-    gcp_jobs = [mock_job]
+    with patch('jupyterlab_bigquery.query_history_handler'+\
+            '.query_history_handler.datetime.datetime') as fake_datetime:
+      timestamp = 1
 
-    mock_client = Mock()
-    mock_client.list_jobs = MagicMock(return_value=gcp_jobs)
+      gcp_jobs = [mock_job]
 
-    wanted = {
-        'jobs': {
-            'dummy_job': {
-                'query': 'SELECT * FROM *',
-                'id': 'dummy_job',
-                'created': '2020-07-14T13:23:45.000067',
-                'errored': True,
-            }
-        },
-        'jobIds': ['dummy_job'],
-    }
+      mock_client = Mock()
+      mock_client.list_jobs = MagicMock(return_value=gcp_jobs)
 
-    got = list_jobs(mock_client, 'dummy_dataset1')
+      wanted = {
+          'jobs': {
+              'dummy_job': {
+                  'query': 'SELECT * FROM *',
+                  'id': 'dummy_job',
+                  'created': '2020-07-14T13:23:45.000067',
+                  'errored': True,
+              }
+          },
+          'jobIds': ['dummy_job'],
+          'lastFetchTime': timestamp
+      }
+
+      fake_utc = MagicMock()
+      fake_utc.timestamp.return_value = timestamp
+      fake_datetime.utcnow.return_value = fake_utc
+
+      got = list_jobs(mock_client, 'dummy_dataset1')
+
     self.assertEqual(wanted, got)
 
   def testGetJobDetails(self):
@@ -149,7 +158,8 @@ class TestQueryHistory(unittest.TestCase):
             'location':
                 'query',
             'message':
-                'Syntax error: Expected end of input but got identifier "FROMs" at [1:10]'
+                'Syntax error: Expected end of input but\
+                     got identifier "FROMs" at [1:10]'
         }],
         error_result={
             'reason':
@@ -157,7 +167,8 @@ class TestQueryHistory(unittest.TestCase):
             'location':
                 'query',
             'message':
-                'Syntax error: Expected end of input but got identifier "FROMs" at [1:10]'
+                'Syntax error: Expected end of input but\
+                     got identifier "FROMs" at [1:10]'
         },
         cache_hit=None,
         project=None)
@@ -199,7 +210,8 @@ class TestQueryHistory(unittest.TestCase):
             'location':
                 'query',
             'message':
-                'Syntax error: Expected end of input but got identifier "FROMs" at [1:10]'
+                'Syntax error: Expected end of input but\
+                     got identifier "FROMs" at [1:10]'
         }],
         'errorResult': {
             'reason':
@@ -207,7 +219,8 @@ class TestQueryHistory(unittest.TestCase):
             'location':
                 'query',
             'message':
-                'Syntax error: Expected end of input but got identifier "FROMs" at [1:10]'
+                'Syntax error: Expected end of input but\
+                     got identifier "FROMs" at [1:10]'
         },
         'from_cache':
             None,
