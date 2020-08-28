@@ -71,19 +71,6 @@ export const STYLES = stylesheet({
       },
     },
   },
-  dt: {
-    display: 'table-cell',
-    fontWeight: 'bold',
-    lineHeight: '20px',
-    padding: '2px',
-    verticalAlign: 'top',
-    color: 'var(--jp-ui-font-color1)',
-  },
-  dd: {
-    padding: '2px 2px 2px 24px',
-    verticalAlign: 'top',
-    color: 'var(--jp-ui-font-color1)',
-  },
   icon: {
     display: 'inline-block',
     height: '18px',
