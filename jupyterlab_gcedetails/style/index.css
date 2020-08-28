@@ -23,3 +23,8 @@
   background-image: url('./images/graphs-icon.png');
   background-size: contain;
 }
+
+.jp-CaipIcon {
+  background-image: url('./images/caip_logo.png');
+  background-size: contain;
+}

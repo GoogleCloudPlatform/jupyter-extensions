@@ -22,6 +22,7 @@ import {
   Details,
   MAPPED_ATTRIBUTES,
   REFRESHABLE_MAPPED_ATTRIBUTES,
+  extractLast,
 } from './data/data';
 import { getMachineTypeConfigurations } from './data/machine_types';
 import { ServerWrapper } from './components/server_wrapper';
@@ -34,12 +35,15 @@ import {
   ServerProxyTransportService,
 } from 'gcp_jupyterlab_shared';
 import { DetailsService } from './service/details_service';
+import { PriceService } from './service/price_service';
 
 interface Props {
   detailsServer: ServerWrapper;
   notebookService: NotebooksService;
   detailsService: DetailsService;
+  priceService: PriceService;
 }
+
 interface State {
   displayedAttributes: [number, number];
   details?: Details;
@@ -79,7 +83,7 @@ export class VmDetails extends React.Component<Props, State> {
 
   render() {
     const { details, receivedError, dialogDisplayed } = this.state;
-    const { detailsServer, notebookService } = this.props;
+    const { detailsServer, notebookService, priceService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -106,6 +110,7 @@ export class VmDetails extends React.Component<Props, State> {
             detailsServer={detailsServer}
             details={details}
             receivedError={receivedError}
+            priceService={priceService}
           />
         )}
       </span>
@@ -116,11 +121,11 @@ export class VmDetails extends React.Component<Props, State> {
     const { notebookService, detailsServer, detailsService } = this.props;
     try {
       const details = (await detailsServer.getUtilizationData()) as Details;
-      const zone = details.instance.zone.split('/').pop();
+      const zone = extractLast(details.instance.zone);
 
       notebookService.projectId = details.project.projectId;
       notebookService.locationId = zone;
-      notebookService.instanceName = details.instance.name.split('/').pop();
+      notebookService.instanceName = extractLast(details.instance.name);
 
       detailsService.projectId = details.project.projectId;
       detailsService.zone = zone;
@@ -196,12 +201,14 @@ export class VmDetailsWidget extends ReactWidget {
   private readonly detailsService = new DetailsService(
     this.serverProxyTransportService
   );
+  private readonly priceService = new PriceService();
   render() {
     return (
       <VmDetails
         detailsServer={this.detailsServer}
         notebookService={this.notebookService}
         detailsService={this.detailsService}
+        priceService={this.priceService}
       />
     );
   }

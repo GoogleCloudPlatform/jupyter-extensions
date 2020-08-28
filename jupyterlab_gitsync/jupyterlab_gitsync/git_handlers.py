@@ -41,11 +41,6 @@ class SetupHandler(APIHandler):
     return_code = subprocess.call(['git', 'rev-parse'], cwd=path)
     return return_code == 0
 
-  def add_cache_folder(self, path):
-    file_exists = not subprocess.call(['ls', '.sync_cache'], cwd=path)
-    if not file_exists:
-      subprocess.call(['mkdir', '.sync_cache'], cwd=path)
-
   def get_sync_path(self):
     cwd = os.getcwd()
     ex_path = 'jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes/git-sync-changes'
@@ -58,7 +53,6 @@ class SetupHandler(APIHandler):
 
     try:
       if self.inside_git_repo(path):
-        self.add_cache_folder(path)
         ex_path = self.get_sync_path()
         self.finish({'ex_path': ex_path})
       else:

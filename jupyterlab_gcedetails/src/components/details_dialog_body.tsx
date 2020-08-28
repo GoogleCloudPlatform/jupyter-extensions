@@ -29,13 +29,12 @@ import { ActionBar } from './action_bar';
 
 const useStyles = makeStyles({
   table: {
-    minWidth: 300,
-    backgroundColor: 'var(--jp-layout-color3)',
+    minWidth: 350,
   },
   container: {
     boxShadow: 'none',
     elevation: 0,
-    backgroundColor: 'var(--jp-layout-color3)',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   textColor: {
     color: 'var(--jp-ui-font-color1)',
