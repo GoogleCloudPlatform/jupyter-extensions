@@ -694,7 +694,7 @@ class TestModelDetails(unittest.TestCase):
                 'name': 'feature_col_0',
                 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name
             }],
-            'training_runs': ['1970-01-15T01:56:07', '1970-01-15T01:59:49']
+            'training_runs': ['1970-01-15T06:56:07+00:00', '1970-01-15T06:59:49+00:00']
         }
     }
 
@@ -755,7 +755,7 @@ class TestModelDetails(unittest.TestCase):
             'model_type': Model.ModelType(0).name,
             'schema_labels': [],
             'feature_columns': [],
-            'training_runs': ['1970-01-15T01:56:07']
+            'training_runs': ['1970-01-15T06:56:07+00:00']
         }
     }
 

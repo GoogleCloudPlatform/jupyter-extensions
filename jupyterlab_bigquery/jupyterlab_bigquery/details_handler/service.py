@@ -314,7 +314,7 @@ class BigQueryService:
             } for feat_col in model.feature_columns],
             'training_runs': [
                 format_date(
-                    datetime.datetime.fromtimestamp(run.start_time.seconds))
+                    datetime.datetime.fromtimestamp(run.start_time.seconds, datetime.timezone.utc))
                 for run in model.training_runs
             ]
         }
