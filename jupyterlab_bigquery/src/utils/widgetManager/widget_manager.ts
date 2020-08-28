@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
