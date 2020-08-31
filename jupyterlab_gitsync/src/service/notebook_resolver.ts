@@ -19,9 +19,9 @@ interface Versions {
   base: any;
   local: any;
   remote: any;
-  local_tok: any;
+  localTok: any;
   merged: any;
-  merged_tok: string[][];
+  mergedTok: string[][];
 }
 
 export class NotebookResolver implements IResolver {
@@ -31,13 +31,15 @@ export class NotebookResolver implements IResolver {
     base: undefined,
     local: undefined,
     remote: undefined,
-    local_tok: undefined,
+    localTok: undefined,
     merged: undefined,
-    merged_tok: undefined,
+    mergedTok: undefined,
   };
 
   private _conflict: boolean;
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
 
   constructor(file: NotebookFile) {
     this._file = file;
@@ -75,12 +77,12 @@ export class NotebookResolver implements IResolver {
 
     text[pos.line] = line;
     json.cells[index].source = text.join('\n');
-    this._versions.local_tok = json;
+    this._versions.localTok = json;
   }
 
   getCursorToken(): { index: number; pos: CodeEditor.IPosition } {
-    if (this.versions.merged_tok) {
-      const input = this.versions.merged_tok;
+    if (this.versions.mergedTok) {
+      const input = this.versions.mergedTok;
       for (let i = 0; i < input.length; i++) {
         if (input[i].join('').indexOf(this._token) > -1) {
           const index = i;
@@ -105,12 +107,12 @@ export class NotebookResolver implements IResolver {
   async mergeVersions(): Promise<any> {
     const result = nbmerge(
       this.versions.base,
-      this.versions.local_tok,
+      this.versions.localTok,
       this.versions.remote
     );
 
     const text = JSON.stringify(result.content).replace(this._token, '');
-    this._versions.merged_tok = result.source;
+    this._versions.mergedTok = result.source;
     this._versions.merged = JSON.parse(text);
     if (result.conflict) {
       await this._resolveDialog();
@@ -142,14 +144,14 @@ export class NotebookResolver implements IResolver {
     }).then(async result => {
       if (result.button.label === 'Revert to Local') {
         this._versions.merged = this.versions.local;
-        this._versions.merged_tok = this.versions.local_tok;
+        this._versions.mergedTok = this.versions.localTok;
       }
       if (result.button.label === 'Revert to Remote') {
         this._versions.merged = this.versions.remote;
-        this._versions.merged_tok = undefined;
+        this._versions.mergedTok = undefined;
       }
       if (result.button.label === 'View Diff') {
-        this._versions.merged_tok = undefined;
+        this._versions.mergedTok = undefined;
       }
       if (result.button.label === 'Resolve Conflicts') {
         // TO DO (ashleyswang) : open an editor for 3 way merging

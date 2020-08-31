@@ -130,17 +130,20 @@ async def get_gpu_details():
 
   return details
 
+
 async def get_pricelist():
   """Retrieves JSON-formatted pricelist data from cloud pricing calculator."""
   client = AsyncHTTPClient()
   pricelist = {}
   try:
     app_log.debug('Retrieving pricelist')
-    response = await client.fetch("https://cloudpricingcalculator.appspot.com/static/data/pricelist.json")
+    response = await client.fetch(
+        "https://cloudpricingcalculator.appspot.com/static/data/pricelist.json")
     pricelist = json.loads(response.body)
   except HTTPClientError as e:
     app_log.error('Unable to retrieve pricelist %s: %s', e.code, e.message)
   return pricelist
+
 
 class VmDetailsHandler(APIHandler):
   """Handler to obtain details from the metadata server and local system."""
@@ -164,6 +167,7 @@ class VmDetailsHandler(APIHandler):
     self.details[UTILIZATION] = get_resource_utilization()
     self.details[GPU] = await get_gpu_details()
     self.finish(self.details)
+
 
 class PricelistHandler(APIHandler):
   """Returns pricing information for instance price estimation."""
