@@ -127,7 +127,11 @@ export function getGpuCountOptionsList(
   accelerators: Accelerator[],
   acceleratorName: string
 ): Option[] {
-  if (!acceleratorName || acceleratorName === NO_ACCELERATOR_TYPE)
+  if (
+    !acceleratorName ||
+    acceleratorName === NO_ACCELERATOR_TYPE ||
+    !accelerators
+  )
     return ACCELERATOR_COUNTS_1_2_4_8;
 
   const accelerator = accelerators.find(

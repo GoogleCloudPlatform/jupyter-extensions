@@ -6,6 +6,7 @@ import { DETAILS_RESPONSE } from '../test_helpers';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { detailsToHardwareConfiguration } from '../data/data';
+import { MachineTypeConfiguration } from '../data/machine_types';
 
 function immediatePromise() {
   return new Promise(r => setTimeout(r));
@@ -41,7 +42,17 @@ describe('HardwareScalingStatus', () => {
     },
   };
   const mockToken = 'mockToken';
-
+  const mockMachineTypes: MachineTypeConfiguration[] = [
+    {
+      base: { value: 'e2-', text: 'Efficient Instance' },
+      configurations: [
+        {
+          value: 'e2-highmem-8',
+          text: 'Efficient Instance, 8 vCPUs, 64 GB RAM',
+        },
+      ],
+    },
+  ];
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -64,6 +75,7 @@ describe('HardwareScalingStatus', () => {
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
       />
     );
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Authorizing);
@@ -123,6 +135,7 @@ describe('HardwareScalingStatus', () => {
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
       />
     );
     await rejectedAuth.catch(() => {});
@@ -144,6 +157,7 @@ describe('HardwareScalingStatus', () => {
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
       />
     );
     await mockAuthTokenRetrieval();
@@ -172,6 +186,7 @@ describe('HardwareScalingStatus', () => {
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
       />
     );
     await mockAuthTokenRetrieval();
@@ -205,6 +220,7 @@ describe('HardwareScalingStatus', () => {
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
       />
     );
     await mockAuthTokenRetrieval();
