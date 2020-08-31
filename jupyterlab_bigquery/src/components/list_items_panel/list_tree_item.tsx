@@ -30,7 +30,7 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
-import { getStarterQuery } from '../../utils/starter_queries';
+import { getStarterQuery, QueryType } from '../../utils/starter_queries';
 import { gColor } from '../shared/styles';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
@@ -116,6 +116,14 @@ interface ResourceState {
   loading: boolean;
 }
 
+interface DataTreeItem {
+  id: string;
+  datasetId: string;
+  name: string;
+  type: QueryType;
+  legacySql?: boolean;
+}
+
 export class Resource<T extends ResourceProps> extends React.Component<
   T,
   ResourceState
@@ -132,9 +140,13 @@ export class Resource<T extends ResourceProps> extends React.Component<
     Clipboard.copyToSystem(getStarterQuery(dataTreeItem.type, dataTreeItem.id));
   };
 
-  queryResource = dataTreeItem => {
+  queryResource = (dataTreeItem: DataTreeItem): void => {
     const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
-    const query = getStarterQuery(dataTreeItem.type, dataTreeItem.id);
+    const query = getStarterQuery(
+      dataTreeItem.type,
+      dataTreeItem.id,
+      dataTreeItem.legacySql
+    );
 
     const curWidget = notebookTrack.currentWidget;
 
@@ -148,14 +160,17 @@ export class Resource<T extends ResourceProps> extends React.Component<
         'main',
         queryId,
         undefined,
-        [queryId, query]
+        [queryId, query, dataTreeItem.legacySql]
       );
     } else {
       // exist notebook and visible
       const notebook = curWidget.content;
       NotebookActions.insertBelow(notebook);
       const cell = notebookTrack.activeCell;
-      const code = '%%bigquery_editor\n\n' + query;
+      const code =
+        `%%bigquery_editor ${
+          dataTreeItem.legacySql ? '--use_legacy_sql' : ''
+        }\n\n` + query;
       cell.model.value.text = code;
     }
   };

@@ -8,7 +8,8 @@ export class QueryEditorTabWidget extends ReduxReactWidget {
   constructor(
     private editorNumber: number,
     private queryId: string,
-    private iniQuery: string
+    private iniQuery: string,
+    private useLegacySql?: boolean
   ) {
     super();
     this.title.label = `Query Editor ${this.editorNumber}`;
@@ -22,6 +23,7 @@ export class QueryEditorTabWidget extends ReduxReactWidget {
         isVisible={this.isVisible}
         queryId={this.queryId}
         iniQuery={this.iniQuery}
+        useLegacySql={this.useLegacySql ?? false}
       />
     );
   }
