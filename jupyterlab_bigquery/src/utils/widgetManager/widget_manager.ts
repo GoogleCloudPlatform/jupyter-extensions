@@ -20,7 +20,10 @@ export class WidgetManager {
   private store: EnhancedStore;
   private editorNumber = 1;
 
-  private constructor(private app: JupyterFrontEnd) {
+  private constructor(
+    private app: JupyterFrontEnd,
+    private incellEnabled: boolean
+  ) {
     // customize middle wares
 
     const middleware = getDefaultMiddleware({
@@ -37,14 +40,18 @@ export class WidgetManager {
     return this;
   }
 
-  static initInstance(app: JupyterFrontEnd) {
+  static initInstance(app: JupyterFrontEnd, incellEnabled: boolean) {
     if (WidgetManager.instance === undefined) {
-      WidgetManager.instance = new WidgetManager(app);
+      WidgetManager.instance = new WidgetManager(app, incellEnabled);
     }
   }
 
   static getInstance(): WidgetManager {
     return WidgetManager.instance;
+  }
+
+  getIncellEnabled(): boolean {
+    return this.incellEnabled;
   }
 
   getStore(): EnhancedStore {

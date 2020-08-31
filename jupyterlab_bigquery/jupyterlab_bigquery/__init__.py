@@ -1,11 +1,18 @@
 """Initialize server endpoints for extension"""
 from notebook.utils import url_path_join
+from notebook.base.handlers import app_log
 
 from jupyterlab_bigquery.create_handler import Handlers
 from jupyterlab_bigquery.version import VERSION
 from jupyterlab_bigquery.query_history_handler import QueryHistoryHandler, GetQueryDetailsHandler
 from jupyterlab_bigquery.pagedAPI_handler import PagedQueryHandler
-from jupyterlab_bigquery.query_incell_editor import QueryIncellEditor, _cell_magic
+
+in_cell_editor_enabled = False
+try:
+  from jupyterlab_bigquery.query_incell_editor import QueryIncellEditor, _cell_magic
+  in_cell_editor_enabled = True
+except ModuleNotFoundError:
+  app_log.warning("Does not support in-cell editor")
 
 __version__ = VERSION
 
@@ -47,9 +54,13 @@ def load_jupyter_server_extension(nb_server_app):
 def load_ipython_extension(ipython):
   """Called by IPython when this module is loaded as an IPython extension."""
 
-  ipython.register_magic_function(_cell_magic,
-                                  magic_kind="line",
-                                  magic_name="bigquery_editor")
-  ipython.register_magic_function(_cell_magic,
-                                  magic_kind="cell",
-                                  magic_name="bigquery_editor")
+  if in_cell_editor_enabled:
+    ipython.register_magic_function(_cell_magic,
+                                    magic_kind="line",
+                                    magic_name="bigquery_editor")
+    ipython.register_magic_function(_cell_magic,
+                                    magic_kind="cell",
+                                    magic_name="bigquery_editor")
+
+  else:
+    print("in_cell_editor not enabled. Try 'pip install ipywidgets traitlets'")

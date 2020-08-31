@@ -200,7 +200,9 @@ export class TableResource extends Resource<TableProps> {
 
     const curWidget = notebookTrack.currentWidget;
 
-    if (!curWidget || !curWidget.content.isVisible) {
+    const incellEnabled = WidgetManager.getInstance().getIncellEnabled();
+
+    if (!incellEnabled || !curWidget || !curWidget.content.isVisible) {
       // no active notebook or not visible
       const queryId = generateQueryId();
       WidgetManager.getInstance().launchWidget(
