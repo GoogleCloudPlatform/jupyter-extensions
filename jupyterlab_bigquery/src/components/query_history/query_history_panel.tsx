@@ -27,6 +27,7 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
 import { TablePaginationActions } from '../shared/bq_table';
+import InfoCard from '../shared/info_card';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
@@ -146,30 +147,6 @@ interface State {
   lastFetchTime: number;
 }
 
-const ErrorBox = (props: { errorMsg: string }) => {
-  return (
-    <Paper
-      style={{
-        display: 'flex',
-        alignItems: 'stretch',
-        marginBottom: '12px',
-      }}
-      elevation={1}
-      variant="outlined"
-    >
-      <div style={{ width: '6px', backgroundColor: '#e60000' }} />
-      <div style={{ padding: '8px', display: 'flex', alignItems: 'center' }}>
-        <Error
-          fontSize="default"
-          htmlColor="rgb(230, 0, 0)"
-          className={localStyles.icon}
-        />
-        {props.errorMsg}
-      </div>
-    </Paper>
-  );
-};
-
 const QueryDetails = (props: { job: Job }) => {
   const { details, created, errored, query } = props.job;
   const rows = [
@@ -233,7 +210,13 @@ const QueryDetails = (props: { job: Job }) => {
         </button>
       </div>
 
-      {errored && <ErrorBox errorMsg={details.errorResult.message} />}
+      {errored && (
+        <InfoCard
+          color="#DA4336"
+          message={details.errorResult.message}
+          icon={<Error />}
+        />
+      )}
 
       <div style={{ marginBottom: '12px' }}>
         <ReadOnlyEditor query={query} />
