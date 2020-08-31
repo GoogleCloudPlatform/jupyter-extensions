@@ -26,7 +26,7 @@ import { displayInstance } from './instance_details_message';
 
 interface Props {
   instanceDetails?: Instance;
-  machineTypes?: MachineTypeConfiguration[];
+  machineTypes: MachineTypeConfiguration[];
   error: ConfigurationError;
   onDialogClose: () => void;
 }

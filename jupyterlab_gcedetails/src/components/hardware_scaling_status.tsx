@@ -96,7 +96,7 @@ interface Props {
   onCompletion: () => void;
   detailsServer: ServerWrapper;
   authTokenRetrieval: () => Promise<string>;
-  machineTypes?: MachineTypeConfiguration[];
+  machineTypes: MachineTypeConfiguration[];
 }
 
 interface State {
