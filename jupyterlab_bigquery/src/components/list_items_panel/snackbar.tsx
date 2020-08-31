@@ -9,6 +9,7 @@ interface Props {
   open: boolean;
   message: string;
   closeSnackbar: any;
+  autoHideDuration: number;
 }
 
 function CustomSnackbar(props: React.PropsWithChildren<Props>) {
@@ -21,12 +22,14 @@ function CustomSnackbar(props: React.PropsWithChildren<Props>) {
     }
     props.closeSnackbar();
   };
+
   return (
     <Snackbar
       anchorOrigin={{
         vertical: 'bottom',
         horizontal: 'right',
       }}
+      autoHideDuration={props.autoHideDuration}
       open={props.open}
       onClose={handleClose}
       message={props.message}
