@@ -86,7 +86,7 @@ class PagedAPIHandler(APIHandler, ABC):
             job_id] = query_generator, job, time.time()
         app_log.log(INFO, 'Successfully started query %s', job_id)
 
-    self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
+    self.finish({'id': job_id, 'error': error})
 
   def _onContinue(self, load):
     job_id = load['id']
@@ -121,9 +121,9 @@ class PagedAPIHandler(APIHandler, ABC):
                     error)
 
     self.finish({
-        'finish': json.dumps(finish),
-        'load': json.dumps(load),
-        'error': json.dumps(error)
+        'finish': finish,
+        'load': load,
+        'error': error,
     })
 
   def _onCancel(self, load):
@@ -139,7 +139,7 @@ class PagedAPIHandler(APIHandler, ABC):
         app_log.log(INFO, 'Successfully canceled query %s', job_id)
         error = None
 
-    self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
+    self.finish({'id': job_id, 'error': error})
 
   @abstractmethod
   def query(self, request_body, page_size):

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
+import { Warning } from '@material-ui/icons';
 
 import LoadingPanel from '../loading_panel';
 import {
@@ -7,6 +8,7 @@ import {
   TablePreview,
 } from './service/list_table_details';
 import { BQTable } from '../shared/bq_table';
+import InfoCard from '../shared/info_card';
 
 const localStyles = stylesheet({
   previewBody: {
@@ -14,6 +16,7 @@ const localStyles = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
+    paddingTop: '12px',
   },
 });
 
@@ -83,13 +86,18 @@ export default class TablePreviewPanel extends React.Component<Props, State> {
         <div className={localStyles.previewBody}>
           {rows.length > 0 ? (
             <div className={localStyles.previewBody}>
-              <br />
               <div>(First 100 rows)</div>
               <br />
               <BQTable rows={rows} fields={fields} />
             </div>
           ) : (
-            <div>This table is empty.</div>
+            <div className={localStyles.previewBody}>
+              <InfoCard
+                color="#FBBC04"
+                message="This table is empty."
+                icon={<Warning />}
+              />
+            </div>
           )}
         </div>
       );
