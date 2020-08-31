@@ -27,7 +27,7 @@ import {
 import { ConfirmationPage } from './confirmation_page';
 import { ServerWrapper } from './server_wrapper';
 import { DetailsDialogBody } from './details_dialog_body';
-import { authTokenRetrieval } from './auth_token_retrieval';
+import { authTokenRetrieval } from '../service/auth_token_retrieval';
 import { PriceService } from '../service/price_service';
 
 enum View {

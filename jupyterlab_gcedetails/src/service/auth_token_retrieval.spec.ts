@@ -1,5 +1,7 @@
 import { authTokenRetrieval } from './auth_token_retrieval';
 
+const ORIGIN = 'https://tokenserver-dot-beatrix-dev.uc.r.appspot.com';
+
 describe('authTokenRetrieval', () => {
   const openWindowSpy = jest.spyOn(window, 'open');
   beforeEach(() => {
@@ -16,7 +18,7 @@ describe('authTokenRetrieval', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { credentials: 'AUTHTOKEN' },
-        origin: 'https://jupyterlab-interns-sandbox.uc.r.appspot.com',
+        origin: ORIGIN,
       })
     );
     const token = await tokenPromise;
@@ -36,7 +38,7 @@ describe('authTokenRetrieval', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { error: 'Something bad' },
-        origin: 'https://jupyterlab-interns-sandbox.uc.r.appspot.com',
+        origin: ORIGIN,
       })
     );
     await tokenPromise;
@@ -52,7 +54,7 @@ describe('authTokenRetrieval', () => {
       expect(err).toBe('User exited authentication flow');
     });
     expect(openWindowSpy).toHaveBeenCalledWith(
-      'https://jupyterlab-interns-sandbox.uc.r.appspot.com/authorize',
+      `${ORIGIN}/authorize`,
       '_authPopup',
       'left=100,top=100,width=400,height=400'
     );
