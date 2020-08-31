@@ -42,8 +42,7 @@ async function activateDetailsWidget(
 
   const clientTransportService = new ClientTransportService();
   const serverProxyTransportService = new ServerProxyTransportService();
-  const detailsUrl = `gcp/v1/details`;
-  const detailsServer = new ServerWrapper(detailsUrl);
+  const detailsServer = new ServerWrapper();
 
   let notebooksService: NotebooksService;
   let detailsService: DetailsService;

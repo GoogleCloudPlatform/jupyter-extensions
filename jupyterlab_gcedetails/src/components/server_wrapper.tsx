@@ -5,11 +5,10 @@ export class ServerWrapper {
   private readonly serverSettings: ServerConnection.ISettings;
   private readonly url: string;
   constructor(
-    endpoint: string,
     serverSettings: ServerConnection.ISettings = ServerConnection.defaultSettings
   ) {
     this.serverSettings = serverSettings;
-    this.url = this.serverSettings.baseUrl + endpoint;
+    this.url = this.serverSettings.baseUrl + `gcp/v1/details`;
   }
 
   async getUtilizationData(): Promise<Details> {
