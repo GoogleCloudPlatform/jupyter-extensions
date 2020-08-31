@@ -1,11 +1,8 @@
-//@ts-nocheck
-
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   configureStore,
   EnhancedStore,
-  createSerializableStateInvariantMiddleware,
   getDefaultMiddleware,
 } from '@reduxjs/toolkit';
 import rootReducer from '../../reducers';
@@ -25,9 +22,6 @@ export class WidgetManager {
 
   private constructor(private app: JupyterFrontEnd) {
     // customize middle wares
-    const serializableMiddleware = createSerializableStateInvariantMiddleware({
-      ignoredPaths: ['queryEditorTab'],
-    });
 
     const middleware = getDefaultMiddleware({
       thunk: true,

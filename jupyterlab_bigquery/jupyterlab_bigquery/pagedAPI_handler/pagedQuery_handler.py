@@ -1,12 +1,11 @@
-from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
-from google.cloud import bigquery
 import json
-from jupyterlab_bigquery.details_handler.service import format_preview_fields, format_preview_rows, parallel_format_preview_rows
-from google.cloud.bigquery.dbapi import _helpers
 from threading import Lock
-from time import time
-
 from multiprocessing import Pool
+from google.cloud.bigquery.dbapi import _helpers
+from google.cloud import bigquery
+
+from jupyterlab_bigquery.details_handler.service import format_preview_fields, format_preview_rows, parallel_format_preview_rows
+from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
     'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params'
@@ -14,6 +13,7 @@ SUPPORTED_JOB_CONFIG_FLAGS = [
 
 NUM_THREADS = 6
 USE_PARALLEL_THRESH = 1e5
+
 
 class PagedQueryHandler(PagedAPIHandler):
   client = None
@@ -77,12 +77,12 @@ class PagedQueryHandler(PagedAPIHandler):
     total_bytes_processed = dry_run_job.total_bytes_processed
 
     if dryRunOnly:
-      job_id = 'dry_run' if dry_run_job.job_id is None else  dry_run_job.job_id
+      job_id = 'dry_run' if dry_run_job.job_id is None else dry_run_job.job_id
       yield dry_run_job, job_id
       yield {
-        'content': json.dumps(None),
-        'labels': json.dumps(None),
-        'bytesProcessed': json.dumps(total_bytes_processed)
+          'content': json.dumps(None),
+          'labels': json.dumps(None),
+          'bytesProcessed': json.dumps(total_bytes_processed)
       }
       return
 

@@ -18,7 +18,8 @@ def load_jupyter_server_extension(nb_server_app):
   """
       Called when the extension is loaded.
       Args:
-          nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
+          nb_server_app (NotebookWebApplication):
+            handle to the Notebook webserver instance.
       """
   host_pattern = '.*$'
   app = nb_server_app.web_app

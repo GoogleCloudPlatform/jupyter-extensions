@@ -31,6 +31,8 @@ def _get_view_details(args):
 def _get_model_details(args):
   return BigQueryService.get().get_model_details(args["modelId"])
 
+
 @_handler("POST", "trainingRunDetails")
 def _get_training_run_details(args):
-  return BigQueryService.get().get_training_run_details(args["modelId"], int(args["runIndex"]))
+  return BigQueryService.get().get_training_run_details(args["modelId"],
+                                                        int(args["runIndex"]))
