@@ -35,15 +35,12 @@ import {
   extractLast,
 } from '../data/data';
 import {
-  ACCELERATOR_COUNTS_1_2_4_8,
-  ACCELERATOR_TYPES,
   getGpuTypeOptionsList,
   getGpuCountOptionsList,
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
 } from '../data/accelerator_types';
 import {
-  MACHINE_TYPES,
   optionToMachineType,
   machineTypeToOption,
   MachineTypeConfiguration,
@@ -54,7 +51,7 @@ import { PriceService } from '../service/price_service';
 interface Props {
   onSubmit: (configuration: HardwareConfiguration) => void;
   onDialogClose: () => void;
-  details?: Details;
+  details: Details;
   priceService: PriceService;
 }
 
@@ -80,9 +77,6 @@ export const FORM_STYLES = stylesheet({
 });
 
 const N1_MACHINE_PREFIX = 'n1-';
-const DEFAULT_MACHINE_TYPE = optionToMachineType(
-  MACHINE_TYPES[0].configurations[0]
-);
 const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance, 
 the available GPU types and the minimum number of GPUs that can be selected may vary. `;
 const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
@@ -98,39 +92,23 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.oldConfiguration = props.details
-      ? detailsToHardwareConfiguration(props.details)
-      : null;
+    this.oldConfiguration = detailsToHardwareConfiguration(props.details);
 
     this.state = {
-      configuration: this.oldConfiguration
-        ? this.oldConfiguration
-        : {
-            machineType: DEFAULT_MACHINE_TYPE,
-            attachGpu: false,
-            gpuType: NO_ACCELERATOR_TYPE,
-            gpuCount: NO_ACCELERATOR_COUNT,
-          },
+      configuration: this.oldConfiguration,
       // update the gpu count options based on the selected gpu type
-      gpuCountOptions: props.details
-        ? getGpuCountOptionsList(
-            props.details.acceleratorTypes,
-            props.details.gpu.name
-          )
-        : ACCELERATOR_COUNTS_1_2_4_8,
+      gpuCountOptions: getGpuCountOptionsList(
+        props.details.acceleratorTypes,
+        props.details.gpu.name
+      ),
       newConfigurationPrice: undefined,
     };
 
-    this.gpuTypeOptions = props.details
-      ? getGpuTypeOptionsList(
-          props.details.acceleratorTypes,
-          props.details.instance.cpuPlatform
-        )
-      : ACCELERATOR_TYPES;
-
-    this.machineTypesOptions = props.details
-      ? props.details.machineTypes
-      : MACHINE_TYPES;
+    this.gpuTypeOptions = getGpuTypeOptionsList(
+      props.details.acceleratorTypes,
+      props.details.instance.cpuPlatform
+    );
+    this.machineTypesOptions = props.details.machineTypes;
 
     this.getOldConfigurationPrice();
   }

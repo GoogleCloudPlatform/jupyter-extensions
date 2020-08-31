@@ -23,19 +23,71 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
+import {
+  getMetadata,
+  ClientTransportService,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
+import { NotebooksService } from './service/notebooks_service';
+import { extractLast } from './data/data';
+import { DetailsService } from './service/details_service';
+import { PriceService } from './service/price_service';
+import { ServerWrapper } from './components/server_wrapper';
+
+async function activateDetailsWidget(
+  app: JupyterFrontEnd,
+  statusbar: IStatusBar
+) {
+  console.debug('Activating GCP Details Extension');
+
+  const clientTransportService = new ClientTransportService();
+  const serverProxyTransportService = new ServerProxyTransportService();
+  const detailsServer = new ServerWrapper();
+
+  let notebooksService: NotebooksService;
+  let detailsService: DetailsService;
+  let priceService: PriceService;
+  let initializationError = false;
+
+  try {
+    const details = await getMetadata();
+
+    notebooksService = new NotebooksService(
+      clientTransportService,
+      details.project,
+      extractLast(details.name),
+      extractLast(details.zone)
+    );
+    detailsService = new DetailsService(
+      serverProxyTransportService,
+      details.project,
+      extractLast(details.zone)
+    );
+    priceService = new PriceService();
+  } catch (err) {
+    initializationError = true;
+  }
+
+  const detailsWidget = new VmDetailsWidget(
+    detailsServer,
+    notebooksService,
+    detailsService,
+    priceService,
+    initializationError
+  );
+
+  statusbar.registerStatusItem('gceDetails', {
+    item: detailsWidget,
+    align: 'left',
+  });
+}
 
 // Default export for the front-end plugin providing GCE details.
 const gceDetails: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab_gcedetails',
   requires: [IStatusBar],
   autoStart: true,
-  activate: (_: JupyterFrontEnd, statusbar: IStatusBar) => {
-    const detailsWidget = new VmDetailsWidget();
-    statusbar.registerStatusItem('gceDetails', {
-      item: detailsWidget,
-      align: 'left',
-    });
-  },
+  activate: activateDetailsWidget,
 };
 
 export default gceDetails;

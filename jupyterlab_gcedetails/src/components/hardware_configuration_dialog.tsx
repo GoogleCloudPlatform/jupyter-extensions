@@ -94,6 +94,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             receivedError={receivedError}
           />
         );
+
       case View.FORM:
         return (
           <HardwareScalingForm
@@ -114,9 +115,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
           <ConfirmationPage
             onDialogClose={onClose}
             formData={hardwareConfiguration}
-            currentConfiguration={
-              details && detailsToHardwareConfiguration(details)
-            }
+            currentConfiguration={detailsToHardwareConfiguration(details)}
             onSubmit={() => {
               this.setState({
                 view: View.STATUS,
@@ -134,7 +133,7 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             onCompletion={onCompletion}
             detailsServer={detailsServer}
             authTokenRetrieval={authTokenRetrieval}
-            machineTypes={details && details.machineTypes}
+            machineTypes={details.machineTypes}
           />
         );
     }

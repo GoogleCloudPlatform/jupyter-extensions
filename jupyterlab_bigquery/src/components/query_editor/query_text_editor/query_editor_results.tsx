@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
@@ -89,7 +88,9 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
             Explore with Data Studio
           </Button>
         </Header>
-        {fields.length > 0 && <BQTable fields={fields} rows={rows} />}
+        {fields.length > 0 && (
+          <BQTable fields={fields} rows={rows as (string | number)[][]} />
+        )}
       </div>
     );
   }
