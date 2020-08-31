@@ -103,15 +103,11 @@ class PagedJob<RequestType, ResponseType> {
         this.serverSettings
       ).then(response => {
         response.json().then(content => {
-          const err = JSON.parse(content.error);
+          const err = content.error;
           // eslint-disable-next-line no-extra-boolean-cast
           if (!!err) {
             reject(err);
             return;
-          }
-
-          for (const key in content) {
-            content[key] = JSON.parse(content[key]);
           }
 
           resolve(content);

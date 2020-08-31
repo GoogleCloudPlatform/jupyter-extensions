@@ -8,7 +8,7 @@ from jupyterlab_bigquery.details_handler.service import format_preview_fields, f
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
-    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params'
+    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params', 'destination_table'
 ]
 
 NUM_THREADS = 6
@@ -54,6 +54,9 @@ class PagedQueryHandler(PagedAPIHandler):
       raise ValueError(
           'use_legacy_sql shoud be boolean, instead received {}'.format(
               processed_flags['use_legacy_sql']))
+    if 'destination_table' in processed_flags:
+      processed_flags['destination'] = processed_flags['destination_table']
+      del processed_flags['destination_table']
 
     # dry run, will throw exception if fail
     dry_run_job_config = bigquery.QueryJobConfig(**processed_flags)
@@ -115,9 +118,9 @@ class PagedQueryHandler(PagedAPIHandler):
 
       response = {
           'content': json.dumps(content),
-          'labels': json.dumps(schema_fields),
-          'bytesProcessed': json.dumps(total_bytes_processed),
-          'project': json.dumps(query_job.project),
+          'labels': schema_fields,
+          'bytesProcessed': total_bytes_processed,
+          'project': query_job.project,
       }
       yield response
 
