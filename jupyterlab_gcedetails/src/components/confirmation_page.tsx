@@ -25,7 +25,7 @@ import { ActionBar } from './action_bar';
 interface Props {
   formData: HardwareConfiguration;
   onDialogClose: () => void;
-  currentConfiguration?: HardwareConfiguration;
+  currentConfiguration: HardwareConfiguration;
   onSubmit: () => void;
 }
 
@@ -61,8 +61,7 @@ export function ConfirmationPage(props: Props) {
       <div className={STYLES.containerSize}>
         <span className={STYLES.heading}>Hardware Scaling Limits</span>
         <HardwareConfigurationDescription />
-        {currentConfiguration &&
-          displayConfiguration(currentConfiguration, 'Old Configuration')}
+        {displayConfiguration(currentConfiguration, 'Old Configuration')}
         {displayConfiguration(formData, 'New Configuration')}
         <div className={STYLES.infoMessage}>
           <Message asError={false} asActivity={false} text={INFO_MESSAGE} />

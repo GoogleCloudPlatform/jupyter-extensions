@@ -2,25 +2,18 @@
 """Request handler classes for the extensions."""
 
 import base64
-import json
-import re
-import tornado.gen as gen
-import os
 import math
-
-import json
 import datetime
-
-from collections import namedtuple
 from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
-
-from jupyterlab_bigquery.version import VERSION
+import tornado.gen as gen
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
+
 def create_bigquery_client():
   return bigquery.Client()
+
 
 def format_value(value):
   if value is None:
@@ -41,12 +34,14 @@ def format_value(value):
   else:
     return value.__str__()
 
+
 def get_table(client, tableRef):
   try:
     table_id = client.get_table(tableRef).id
     return table_id
   except:
     return 'Expired temporary table'
+
 
 def list_jobs(client, project, lastFetchTime=None):
   if lastFetchTime is None:
@@ -64,16 +59,17 @@ def list_jobs(client, project, lastFetchTime=None):
         'query': job.query,
         'id': job.job_id,
         'created': job.created.isoformat().__str__(),
-        'errored': True if job.errors else False
+        'errored': bool(job.errors)
     }
     job_ids.append(job.job_id)
 
   cur_time = datetime.datetime.utcnow().timestamp()
   return {'jobs': jobs_list, 'jobIds': job_ids, 'lastFetchTime': cur_time}
 
+
 def get_job_details(client, job_id):
   job = client.get_job(job_id)
-  
+
   job_details = {
       'query': job.query,
       'id': job_id,
@@ -113,16 +109,19 @@ class QueryHistoryHandler(APIHandler):
       post_body = self.get_json_body()
 
       if 'lastFetchTime' in post_body:
-        self.finish(list_jobs(QueryHistoryHandler.bigquery_client,
-          post_body['projectId'], post_body['lastFetchTime']))
+        self.finish(
+            list_jobs(QueryHistoryHandler.bigquery_client,
+                      post_body['projectId'], post_body['lastFetchTime']))
       else:
-        self.finish(list_jobs(QueryHistoryHandler.bigquery_client,
-          post_body['projectId']))
+        self.finish(
+            list_jobs(QueryHistoryHandler.bigquery_client,
+                      post_body['projectId']))
 
     except Exception as e:
       app_log.exception(str(e))
       self.set_status(500, str(e))
       self.finish({'error': {'message': str(e)}})
+
 
 class GetQueryDetailsHandler(APIHandler):
   """Handles requests for table metadata."""
@@ -139,7 +138,9 @@ class GetQueryDetailsHandler(APIHandler):
     try:
       post_body = self.get_json_body()
 
-      self.finish(get_job_details(GetQueryDetailsHandler.bigquery_client, post_body['jobId']))
+      self.finish(
+          get_job_details(GetQueryDetailsHandler.bigquery_client,
+                          post_body['jobId']))
 
     except Exception as e:
       app_log.exception(str(e))

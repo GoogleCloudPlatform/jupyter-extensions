@@ -1,6 +1,6 @@
 import inspect
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock
 
 from notebook.base.handlers import APIHandler
 
@@ -17,7 +17,8 @@ class TestHandlers(unittest.TestCase):
       func(args)
 
     # Ensure handler is a subclass of APIHandler
-    self.assertTrue(APIHandler in inspect.getmro(Handlers.get().get_handlers()["_test"]))
+    self.assertTrue(
+        APIHandler in inspect.getmro(Handlers.get().get_handlers()["_test"]))
 
   def testHandlerDecoratorGet(self):
     func = MagicMock()

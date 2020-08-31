@@ -1,6 +1,6 @@
 class QueryResultsManager {
   private static queryResults: {
-    [type: string]: { [id: string]: Array<unknown> };
+    [type: string]: { [id: string]: Array<Array<unknown>> };
   } = {};
 
   constructor(private readonly type: string) {

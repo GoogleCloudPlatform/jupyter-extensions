@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
-  import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
 import json
-from notebook.base.handlers import app_log
 from logging import INFO, WARN
 import time
+from notebook.base.handlers import app_log
+from jupyterlab_bigquery.pagedAPI_handler.pagedAPI_handler\
+  import PagedAPIHandler, START_STATE, CONTINUE_STATE, CANCEL_STATE, CLEAR_GENERATORS_MAX_IDILE_SEC
 
 
 class DummyPageAPI(PagedAPIHandler):
@@ -192,6 +192,7 @@ class TestPagedHandlerContinue(unittest.TestCase):
 
     def err_gen():
       raise err
+      # unreachable, but make this function a generator
       yield res
 
     gen = err_gen()
@@ -396,9 +397,6 @@ class TestPagedHandlerClearGenerators(unittest.TestCase):
     # check generator cleared
     val = self.dummy_pagedAPI.generator_pool[job_id]
     self.assertIsNone(val)
-
-    # check log
-    log_args = fake_app_log.call_args[0]
 
     # ensure cancel called
     self.cancel_mock.assert_called_with(job_obj)

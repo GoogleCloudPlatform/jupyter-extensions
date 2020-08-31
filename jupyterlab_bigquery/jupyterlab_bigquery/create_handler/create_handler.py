@@ -38,6 +38,7 @@ class Handlers():
 
 def _create_get_handler(handler):
   """Create GET handler"""
+
   class GetHandler(Handler):
 
     @gen.coroutine
@@ -53,6 +54,7 @@ def _create_get_handler(handler):
 
 def _create_post_handler(handler):
   """Create POST handler"""
+
   class PostHandler(Handler):
 
     @gen.coroutine

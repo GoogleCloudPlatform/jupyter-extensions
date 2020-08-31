@@ -1,9 +1,9 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
-from jupyterlab_bigquery.pagedAPI_handler.pagedQuery_handler import PagedQueryHandler
+from unittest.mock import MagicMock, patch
 import json
 from google.cloud import bigquery
 import google.cloud.bigquery.dbapi._helpers
+from jupyterlab_bigquery.pagedAPI_handler.pagedQuery_handler import PagedQueryHandler
 
 
 def multiple_return_helper(return_values):
@@ -143,8 +143,8 @@ class TestPagedQueryHandler(unittest.TestCase):
       next(gen)
 
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -187,6 +187,8 @@ class TestPagedQueryHandler(unittest.TestCase):
     result_mock = MagicMock()
 
     fake_en.pages = [MagicMock()] * gen_len
+    for page in fake_en.pages:
+      page.num_items = 1
     run_job.result = result_mock
     result_mock.return_value = fake_en
 
@@ -201,8 +203,8 @@ class TestPagedQueryHandler(unittest.TestCase):
       next(gen)
 
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -281,6 +283,8 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
     result_mock = MagicMock()
 
     fake_en.pages = [MagicMock()]
+    for page in fake_en.pages:
+      page.num_items = 1
     run_job.result = result_mock
     result_mock.return_value = fake_en
 
@@ -291,8 +295,8 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
     return dry_run_config, full_run_config
 
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -325,8 +329,8 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
     self.assertNotIn(flag, full_run_config)
 
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -366,8 +370,8 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
     self.assertNotIn(flag, full_run_config)
 
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'
@@ -394,8 +398,8 @@ class TestPagedQueryHandlerFlags(unittest.TestCase):
 
   @patch.object(google.cloud.bigquery.dbapi._helpers, 'to_query_parameters')
   @patch.object(json, 'dumps')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_fields')
-  @patch('jupyterlab_bigquery.details_handler.format_preview_rows')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_fields')
+  @patch('jupyterlab_bigquery.details_handler.service.format_preview_rows')
   @patch(
       'jupyterlab_bigquery.pagedAPI_handler.'+\
       'pagedQuery_handler.PagedQueryHandler.client.query'

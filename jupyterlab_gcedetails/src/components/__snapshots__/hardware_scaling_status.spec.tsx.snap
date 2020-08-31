@@ -4,6 +4,22 @@ exports[`HardwareScalingStatus Renders with auth error: Auth Error 1`] = `
 <ErrorPage
   error={null}
   instanceDetails={null}
+  machineTypes={
+    Array [
+      Object {
+        "base": Object {
+          "text": "Efficient Instance",
+          "value": "e2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
+            "value": "e2-highmem-8",
+          },
+        ],
+      },
+    ]
+  }
   onDialogClose={[MockFunction]}
 />
 `;
@@ -26,6 +42,22 @@ exports[`HardwareScalingStatus Renders with operation error: Operation error 1`]
       "name": "Test",
     }
   }
+  machineTypes={
+    Array [
+      Object {
+        "base": Object {
+          "text": "Efficient Instance",
+          "value": "e2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
+            "value": "e2-highmem-8",
+          },
+        ],
+      },
+    ]
+  }
   onDialogClose={[MockFunction]}
 />
 `;
@@ -37,6 +69,22 @@ exports[`HardwareScalingStatus Renders with restart error: Restart error 1`] = `
       "errorType": "Start",
       "errorValue": Promise {},
     }
+  }
+  machineTypes={
+    Array [
+      Object {
+        "base": Object {
+          "text": "Efficient Instance",
+          "value": "e2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
+            "value": "e2-highmem-8",
+          },
+        ],
+      },
+    ]
   }
   onDialogClose={[MockFunction]}
 />
@@ -51,6 +99,22 @@ exports[`HardwareScalingStatus Renders with stop error: Stop instance error 1`] 
     }
   }
   instanceDetails={null}
+  machineTypes={
+    Array [
+      Object {
+        "base": Object {
+          "text": "Efficient Instance",
+          "value": "e2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
+            "value": "e2-highmem-8",
+          },
+        ],
+      },
+    ]
+  }
   onDialogClose={[MockFunction]}
 />
 `;
