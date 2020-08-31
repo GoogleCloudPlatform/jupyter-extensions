@@ -41,6 +41,9 @@ export const STYLES = stylesheet({
     cursor: 'pointer',
     pointerEvents: 'none',
   },
+  textColor: {
+    color: 'var(--jp-ui-font-color1)',
+  },
 });
 
 const iconComponent = props => {
@@ -52,7 +55,7 @@ export function SelectInput(props: Props) {
 
   return (
     <div>
-      {label && <label>{label}</label>}
+      {label && <label className={STYLES.textColor}>{label}</label>}
       <TextField
         className={STYLES.select}
         select
@@ -76,6 +79,11 @@ export function SelectInput(props: Props) {
               horizontal: 'left',
             },
             getContentAnchorEl: null,
+            MenuListProps: {
+              style: {
+                backgroundColor: 'var(--jp-layout-color1)',
+              },
+            },
           },
         }}
         InputProps={{
