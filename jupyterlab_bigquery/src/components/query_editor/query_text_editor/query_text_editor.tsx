@@ -92,6 +92,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   wrappingStrategy: 'advanced',
   minimap: { enabled: false },
   cursorStyle: 'line-thin',
+  scrollBeyondLastLine: false,
 };
 
 const styleSheet = stylesheet({
