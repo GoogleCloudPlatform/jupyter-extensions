@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HardwareScalingForm Successfully initializes form: Initial Form 1`] = `
+<div
+  className="containerPadding_f1sxy5ln"
+>
+  <div
+    className="formContainer_fjiu9nv"
+  >
+    <span
+      className="heading_f1xburhd"
+    >
+      Hardware Scaling Limits
+    </span>
+    <HardwareConfigurationDescription />
+    <span
+      className="subheading_fgjqs4u"
+    >
+      Machine Configuration
+    </span>
+    <NestedSelect
+      label="Machine type"
+      nestedOptionsList={
+        Array [
+          Object {
+            "header": Object {
+              "text": "N1 Standard",
+              "value": "n1-",
+            },
+            "options": Array [
+              Object {
+                "text": "2 vCPU, 7.5 GB RAM",
+                "value": "n1-standard-2",
+              },
+              Object {
+                "text": "4 vCPU, 15 GB RAM",
+                "value": "n1-standard-4",
+              },
+            ],
+          },
+          Object {
+            "header": Object {
+              "text": "N2 Standard",
+              "value": "n2-",
+            },
+            "options": Array [
+              Object {
+                "text": "4 vCPU, 15 GB RAM",
+                "value": "n2-standard-4",
+              },
+            ],
+          },
+        ]
+      }
+      onChange={[Function]}
+      value={
+        Object {
+          "text": "4 vCPU, 15 GB RAM",
+          "value": "n1-standard-4",
+        }
+      }
+    />
+    <span
+      className="subheading_fgjqs4u"
+    >
+      GPU Configuration
+    </span>
+    <p
+      className="paragraph_f1ditx77"
+    >
+      Based on the zone, framework, and machine type of the instance, 
+the available GPU types and the minimum number of GPUs that can be selected may vary. 
+      <LearnMoreLink
+        href="https://cloud.google.com/compute/docs/gpus"
+      />
+    </p>
+    <div
+      className="checkboxContainer_fnw4z3z"
+    >
+      <CheckboxInput
+        checked={false}
+        className="checkbox_ff3k5ad"
+        disabled={false}
+        label="Attach GPUs"
+        name="attachGpu"
+        onChange={[Function]}
+      />
+    </div>
+  </div>
+  <ActionBar
+    onPrimaryClick={[Function]}
+    onSecondaryClick={[MockFunction]}
+    primaryDisabled={true}
+    primaryLabel="Next"
+    secondaryLabel="Cancel"
+  />
+</div>
+`;

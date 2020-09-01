@@ -43,7 +43,6 @@ import {
 import {
   optionToMachineType,
   machineTypeToOption,
-  MachineTypeConfiguration,
 } from '../data/machine_types';
 import { ActionBar } from './action_bar';
 import { PriceService } from '../service/price_service';
@@ -86,7 +85,6 @@ the NVIDIA GPU driver will be installed automatically on the next startup.`;
 export class HardwareScalingForm extends React.Component<Props, State> {
   private gpuTypeOptions: Option[];
   private oldConfiguration: HardwareConfiguration;
-  private machineTypesOptions: MachineTypeConfiguration[];
   private oldConfigurationPrice: number | undefined;
 
   constructor(props: Props) {
@@ -108,7 +106,6 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       props.details.acceleratorTypes,
       props.details.instance.cpuPlatform
     );
-    this.machineTypesOptions = props.details.machineTypes;
 
     this.getOldConfigurationPrice();
   }
@@ -173,11 +170,19 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   private onMachineTypeChange(newMachineType: Option) {
-    const canAttachGpu = this.canAttachGpu(newMachineType.value as string);
+    const attachGpu =
+      this.state.configuration.attachGpu &&
+      this.canAttachGpu(newMachineType.value as string);
     const configuration = {
       ...this.state.configuration,
       machineType: optionToMachineType(newMachineType),
-      attachGpu: this.state.configuration.attachGpu && canAttachGpu,
+      attachGpu,
+      gpuType: attachGpu
+        ? this.state.configuration.gpuType
+        : NO_ACCELERATOR_TYPE,
+      gpuCount: attachGpu
+        ? this.state.configuration.gpuType
+        : NO_ACCELERATOR_COUNT,
     };
     this.setState({ configuration });
     this.updatePricingEstimation(configuration);
@@ -226,8 +231,8 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     return (
       <div>
         <span className={STYLES.subheading}>Pricing Estimation:</span>
-        <div className={STYLES.paragraph}>
-          {`Your updated instance will cost an estimated
+        <div id="pricing-information" className={STYLES.paragraph}>
+          {`Your updated instance will cost an estimated 
           $${newPrice.toFixed(2)} monthly, an estimated 
           ${priceDifference < 0 ? 'decrease' : 'increase'} of 
           $${Math.abs(priceDifference).toFixed(2)} from your 
@@ -238,7 +243,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   render() {
-    const { onDialogClose } = this.props;
+    const { onDialogClose, details } = this.props;
     const {
       configuration,
       gpuCountOptions,
@@ -264,7 +269,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
           <span className={STYLES.subheading}>Machine Configuration</span>
           <NestedSelect
             label="Machine type"
-            nestedOptionsList={this.machineTypesOptions.map(machineType => ({
+            nestedOptionsList={details.machineTypes.map(machineType => ({
               header: machineType.base,
               options: machineType.configurations,
             }))}
