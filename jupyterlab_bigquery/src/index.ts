@@ -16,10 +16,12 @@ import { ReduxReactWidget } from './utils/widgetManager/redux_react_widget';
 
 async function activate(
   app: JupyterFrontEnd,
-  registry: IJupyterWidgetRegistry,
-  notebookTrack: INotebookTracker
+  notebookTrack: INotebookTracker,
+  registry: IJupyterWidgetRegistry
 ) {
-  WidgetManager.initInstance(app);
+  const inCellEnabled = !!registry;
+
+  WidgetManager.initInstance(app, inCellEnabled);
   const manager = WidgetManager.getInstance();
   const context = {
     app: app,
@@ -38,11 +40,13 @@ async function activate(
     { rank: 100 }
   );
 
-  registry.registerWidget({
-    name: 'bigquery_query_incell_editor',
-    version: '0.0.1',
-    exports: QueryEditorInCellWidgetsExport,
-  });
+  if (inCellEnabled) {
+    registry.registerWidget({
+      name: 'bigquery_query_incell_editor',
+      version: '0.0.1',
+      exports: QueryEditorInCellWidgetsExport,
+    });
+  }
 }
 
 /**
@@ -51,7 +55,8 @@ async function activate(
 const BigQueryPlugin: JupyterFrontEndPlugin<void> = {
   id: 'bigquery:bigquery',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  requires: [IJupyterWidgetRegistry as any, INotebookTracker],
+  requires: [INotebookTracker],
+  optional: [IJupyterWidgetRegistry as any],
   activate: activate,
   autoStart: true,
 };

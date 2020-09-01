@@ -1,6 +1,7 @@
 import React from 'react';
 import QueryTextEditor, {
-  QUERY_DATA_TYPE, QueryResult,
+  QUERY_DATA_TYPE,
+  QueryResult,
 } from '../query_text_editor/query_text_editor';
 import QueryResults from '../query_text_editor/query_editor_results';
 import {
