@@ -121,8 +121,8 @@ export class HardwareScalingForm extends React.Component<Props, State> {
    */
   private canAttachGpu(machineTypeName: string): boolean {
     const { framework } = this.props.details.instance.attributes;
-    const isValidFramework = GPU_INCOMPATIBLE_FRAMEWORKS.every(
-      incompatibleFramework => !framework.startsWith(incompatibleFramework)
+    const isValidFramework = !GPU_INCOMPATIBLE_FRAMEWORKS.some(
+      incompatibleFramework => framework.startsWith(incompatibleFramework)
     );
     const isValidMachineType = machineTypeName.startsWith(N1_MACHINE_PREFIX);
     return isValidFramework && isValidMachineType;
