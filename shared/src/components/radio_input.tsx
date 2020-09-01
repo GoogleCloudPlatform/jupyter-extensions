@@ -1,7 +1,7 @@
 import { FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import * as React from 'react';
-import { COLORS } from '../styles';
+import { COLORS, css } from '../styles';
 import { Option } from '../utils';
 
 interface RadioInputProps {
@@ -50,6 +50,7 @@ export function RadioInput(props: RadioInputProps) {
               value={o.value}
               control={<Radio />}
               label={o.text}
+              className={css.primaryTextColor}
             />
           ))}
       </RadioGroup>

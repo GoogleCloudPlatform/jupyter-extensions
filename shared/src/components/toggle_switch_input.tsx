@@ -16,6 +16,7 @@
 
 import { Switch, FormControlLabel, withStyles } from '@material-ui/core';
 import * as React from 'react';
+import { css } from '../styles';
 
 interface LabelProps {
   label?: string;
@@ -44,6 +45,7 @@ export function ToggleSwitch(props: LabelProps) {
         />
       }
       label={label}
+      className={css.primaryTextColor}
     />
   );
 }

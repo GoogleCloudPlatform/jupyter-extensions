@@ -40,13 +40,14 @@ const STYLES = stylesheet({
     paddingTop: '8px',
     paddingBottom: '8px',
     width: '468px',
-    backgroundColor: 'var(--jp-layout-color2)',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   nestedSelect: {
     display: 'block',
   },
   input: {
     marginTop: '2px',
+    backgroundColor: 'var(--jp-layout-color1)',
   },
   text: {
     color: 'var(--jp-ui-font-color1)',
