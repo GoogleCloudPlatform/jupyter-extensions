@@ -1,0 +1,182 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HardwareScalingForm Shows confirmation view after form view: Confirmation View 1`] = `
+<WithStyles(ForwardRef(Dialog))
+  open={true}
+>
+  <ConfirmationPage
+    currentConfiguration={
+      Object {
+        "attachGpu": false,
+        "gpuCount": "0",
+        "gpuType": "ACCELERATOR_TYPE_UNSPECIFIED",
+        "machineType": Object {
+          "description": "4 vCPU, 15 GB RAM",
+          "name": "n1-standard-4",
+        },
+      }
+    }
+    formData={
+      Object {
+        "attachGpu": false,
+        "gpuCount": "0",
+        "gpuType": "ACCELERATOR_TYPE_UNSPECIFIED",
+        "machineType": Object {
+          "description": "4 vCPU, 15 GB RAM",
+          "name": "n1-standard-4",
+        },
+      }
+    }
+    onDialogClose={[MockFunction]}
+    onSubmit={[Function]}
+  />
+</WithStyles(ForwardRef(Dialog))>
+`;
+
+exports[`HardwareScalingForm Shows form view after details view: Form View 1`] = `
+<WithStyles(ForwardRef(Dialog))
+  open={true}
+>
+  <HardwareScalingForm
+    details={
+      Object {
+        "acceleratorTypes": Array [
+          Object {
+            "description": "Nvidia Tesla K80",
+            "maximumCardsPerInstance": 4,
+            "name": "NVIDIA_TESLA_K80",
+          },
+          Object {
+            "description": "Nvidia Tesla T4",
+            "maximumCardsPerInstance": 8,
+            "name": "NVIDIA_TESLA_T4",
+          },
+        ],
+        "gpu": Object {
+          "count": "0",
+          "cuda_version": "10.1",
+          "driver_version": "418.87.01",
+          "gpu": 0,
+          "memory": 0,
+          "name": null,
+          "temperature": 0,
+        },
+        "instance": Object {
+          "attributes": Object {
+            "framework": "PyTorch:1.4",
+            "title": "PyTorch/fastai/CUDA10.0",
+            "version": "44",
+          },
+          "cpuPlatform": "Intel Broadwell",
+          "id": 127546640929027970,
+          "image": "projects/deeplearning-platform-release/global/images/pytorch-1-4-cu101-notebooks-20200302",
+          "machineType": Object {
+            "description": "4 vCPU, 15 GB RAM",
+            "name": "n1-standard-4",
+          },
+          "name": "pytorch",
+          "zone": "projects/123456/zones/us-west1-b",
+        },
+        "machineTypes": Array [
+          Object {
+            "base": Object {
+              "text": "N1 Standard",
+              "value": "n1-",
+            },
+            "configurations": Array [
+              Object {
+                "text": "2 vCPU, 7.5 GB RAM",
+                "value": "n1-standard-2",
+              },
+              Object {
+                "text": "4 vCPU, 15 GB RAM",
+                "value": "n1-standard-4",
+              },
+            ],
+          },
+          Object {
+            "base": Object {
+              "text": "N2 Standard",
+              "value": "n2-",
+            },
+            "configurations": Array [
+              Object {
+                "text": "4 vCPU, 15 GB RAM",
+                "value": "n2-standard-4",
+              },
+            ],
+          },
+        ],
+        "project": Object {
+          "numericProjectId": 123456,
+          "projectId": "test-project",
+        },
+        "utilization": Object {
+          "cpu": 50,
+          "memory": 16,
+        },
+      }
+    }
+    onDialogClose={[MockFunction]}
+    onSubmit={[Function]}
+    priceService={Object {}}
+  />
+</WithStyles(ForwardRef(Dialog))>
+`;
+
+exports[`HardwareScalingForm Shows status view after confirmation view: Status View 1`] = `
+<WithStyles(ForwardRef(Dialog))
+  open={true}
+>
+  <HardwareScalingStatus
+    authTokenRetrieval={[Function]}
+    detailsServer={Object {}}
+    hardwareConfiguration={
+      Object {
+        "attachGpu": false,
+        "gpuCount": "0",
+        "gpuType": "ACCELERATOR_TYPE_UNSPECIFIED",
+        "machineType": Object {
+          "description": "4 vCPU, 15 GB RAM",
+          "name": "n1-standard-4",
+        },
+      }
+    }
+    machineTypes={
+      Array [
+        Object {
+          "base": Object {
+            "text": "N1 Standard",
+            "value": "n1-",
+          },
+          "configurations": Array [
+            Object {
+              "text": "2 vCPU, 7.5 GB RAM",
+              "value": "n1-standard-2",
+            },
+            Object {
+              "text": "4 vCPU, 15 GB RAM",
+              "value": "n1-standard-4",
+            },
+          ],
+        },
+        Object {
+          "base": Object {
+            "text": "N2 Standard",
+            "value": "n2-",
+          },
+          "configurations": Array [
+            Object {
+              "text": "4 vCPU, 15 GB RAM",
+              "value": "n2-standard-4",
+            },
+          ],
+        },
+      ]
+    }
+    notebookService={Object {}}
+    onCompletion={[MockFunction]}
+    onDialogClose={[MockFunction]}
+  />
+</WithStyles(ForwardRef(Dialog))>
+`;
