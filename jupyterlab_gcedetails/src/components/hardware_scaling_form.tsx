@@ -77,6 +77,7 @@ export const FORM_STYLES = stylesheet({
 });
 
 const N1_MACHINE_PREFIX = 'n1-';
+const GPU_INCOMPATIBLE_FRAMEWORKS = ['R:3', 'NumPy/SciPy/scikit-learn'];
 const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance, 
 the available GPU types and the minimum number of GPUs that can be selected may vary. `;
 const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
@@ -119,7 +120,12 @@ export class HardwareScalingForm extends React.Component<Props, State> {
    * Currently only N1 general-purpose machines support GPUs: https://cloud.google.com/compute/docs/gpus#restrictions
    */
   private canAttachGpu(machineTypeName: string): boolean {
-    return machineTypeName.startsWith(N1_MACHINE_PREFIX);
+    const { framework } = this.props.details.instance.attributes;
+    const isValidFramework = GPU_INCOMPATIBLE_FRAMEWORKS.every(
+      incompatibleFramework => !framework.startsWith(incompatibleFramework)
+    );
+    const isValidMachineType = machineTypeName.startsWith(N1_MACHINE_PREFIX);
+    return isValidFramework && isValidMachineType;
   }
 
   private gpuRestrictionMessage() {
