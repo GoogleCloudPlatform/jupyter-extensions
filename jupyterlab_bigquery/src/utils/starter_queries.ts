@@ -1,8 +1,6 @@
-export function getStarterQuery(
-  type: 'MODEL' | 'TABLE' | 'VIEW',
-  resourceId: string
-) {
-  console.log('type: ', type);
+type QueryType = 'MODEL' | 'TABLE' | 'VIEW';
+
+export function getStarterQuery(type: QueryType, resourceId: string) {
   if (type === 'MODEL') {
     return `SELECT * FROM ML.PREDICT(MODEL \`${resourceId}\`, )`;
   } else {
