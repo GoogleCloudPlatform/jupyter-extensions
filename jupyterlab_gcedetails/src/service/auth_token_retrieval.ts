@@ -1,7 +1,7 @@
 export function authTokenRetrieval(): Promise<string> {
   let authPopup: Window;
   let timer: number;
-  const authOrigin = 'https://jupyterlab-interns-sandbox.uc.r.appspot.com';
+  const authOrigin = 'https://tokenserver-dot-beatrix-dev.uc.r.appspot.com';
   return new Promise<string>((resolve, reject) => {
     const listener = (message: MessageEvent) => {
       if (
