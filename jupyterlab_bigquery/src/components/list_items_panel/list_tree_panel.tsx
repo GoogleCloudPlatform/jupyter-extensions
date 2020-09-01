@@ -198,6 +198,10 @@ const localStyles = stylesheet({
       cursor: 'pointer',
     },
   },
+  input: {
+    backgroundColor: 'var(--jp-input-active-background)',
+    color: 'var(--jp-ui-font-color1)',
+  },
 });
 
 class ListItemsPanel extends React.Component<Props, State> {
@@ -494,7 +498,7 @@ class ListItemsPanel extends React.Component<Props, State> {
               To start using BigQuery's Search feature, you'll need to first
               enable the{' '}
               <a
-                style={{ color: 'blue' }}
+                style={{ color: gColor('BLUE'), textDecoration: 'underline' }}
                 href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
               >
                 Google Data Catalog API
@@ -508,6 +512,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           header="Pin a Project"
           open={pinProjectDialogOpen}
           onSubmit={() => this.addNewProject(pinnedProject)}
+          submitDisabled={this.state.pinnedProject === ''}
           onCancel={this.handleClosePinProject}
           onClose={this.handleClosePinProject}
           submitLabel="Pin Project"
@@ -523,6 +528,7 @@ class ListItemsPanel extends React.Component<Props, State> {
                 Enter a project name: <br /> <br />
               </p>
               <input
+                className={localStyles.input}
                 type="text"
                 value={this.state.pinnedProject}
                 onChange={this.handlePinnedProjectChange}

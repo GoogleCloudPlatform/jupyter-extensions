@@ -32,7 +32,7 @@ const localStyles = stylesheet({
     color: COLORS.white,
     $nest: {
       '&:disabled': {
-        backgroundColor: '#bfbfbf',
+        backgroundColor: 'var(--jp-layout-color3)',
       },
       '&:hover': {
         cursor: 'pointer',
@@ -41,8 +41,8 @@ const localStyles = stylesheet({
     },
   },
   disabled: {
-    backgroundColor: 'var(--md-grey-300, #e0e0e0)',
-    color: 'var(--md-grey-500, #9e9e9e)',
+    backgroundColor: 'var(--jp-border-color2)',
+    color: 'var(--jp-layout-color4)',
     cursor: 'not-allowed',
   },
 });

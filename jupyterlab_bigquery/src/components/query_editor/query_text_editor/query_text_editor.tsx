@@ -651,7 +651,7 @@ class QueryTextEditor extends React.Component<
           );
         }}
       >
-        <FullscreenOutlined />
+        <FullscreenOutlined className={styleSheet.icon} />
       </IconButton>
     );
   }
