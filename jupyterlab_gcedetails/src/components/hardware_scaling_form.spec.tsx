@@ -418,12 +418,7 @@ describe('HardwareScalingForm', () => {
     });
   });
 
-  it('Displays correct pricing information', async () => {
-    const expectedPricingInformation = `Your updated instance will cost an estimated
-    $4.00 monthly, an estimated
-    increase of
-    $1.00 from your
-    current instance.`.replace(/\s/g, '');
+  it('Displays correct pricing estimation', async () => {
     const oldConfigurationPrice = Promise.resolve(OLD_CONFIGURATION_PRICE);
     const newConfigurationPrice = Promise.resolve(NEW_CONFIGURATION_PRICE);
     mockGetPrice.mockReturnValue(oldConfigurationPrice);
@@ -448,11 +443,7 @@ describe('HardwareScalingForm', () => {
 
     await newConfigurationPrice;
     hardwareScalingForm.update();
-    const pricingInformation = hardwareScalingForm
-      .find('[id="pricing-information"]')
-      .text()
-      .replace(/\s/g, '');
 
-    expect(pricingInformation).toEqual(expectedPricingInformation);
+    expect(hardwareScalingForm).toMatchSnapshot('Form With Price Estimation');
   });
 });
