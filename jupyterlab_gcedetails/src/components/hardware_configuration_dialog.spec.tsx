@@ -70,6 +70,7 @@ describe('HardwareScalingForm', () => {
     );
 
     expect(hardwareConfigurationDialog.state('view')).toEqual(View.DETAILS);
+    expect(hardwareConfigurationDialog).toMatchSnapshot('Details View');
   });
 
   it('Shows form view after details view', async () => {
