@@ -97,7 +97,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     this.oldConfiguration = detailsToHardwareConfiguration(props.details);
     this.state = {
       configuration: this.oldConfiguration,
-      // update the gpu count options based on the selected gpu type
+      // Update the gpu count options based on the selected gpu type
       gpuCountOptions: getGpuCountOptionsList(
         props.details.acceleratorTypes,
         props.details.gpu.name
@@ -119,9 +119,15 @@ export class HardwareScalingForm extends React.Component<Props, State> {
    */
   private canAttachGpu(machineTypeName: string): boolean {
     const { framework } = this.props.details.instance.attributes;
-    const isValidFramework = !GPU_INCOMPATIBLE_FRAMEWORKS.some(
-      incompatibleFramework => framework.startsWith(incompatibleFramework)
-    );
+
+    /** Assume framework is compatible if it can't be fetched as the
+     * reshaping process will catch this error anyways.
+     */
+    const isValidFramework = framework
+      ? !GPU_INCOMPATIBLE_FRAMEWORKS.some(incompatibleFramework =>
+          framework.startsWith(incompatibleFramework)
+        )
+      : true;
     const isValidMachineType = machineTypeName.startsWith(N1_MACHINE_PREFIX);
     return isValidFramework && isValidMachineType;
   }
@@ -189,7 +195,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   private submitForm() {
     const configuration = { ...this.state.configuration };
     if (!configuration.attachGpu) {
-      /*
+      /**
        * If configuration originally had a GPU we want to explicity attach an
        * accelerator of type NO_ACCELERATOR_TYPE through the Notebooks API to remove it
        */
