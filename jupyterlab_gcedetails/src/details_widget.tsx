@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ReactWidget } from '@jupyterlab/apputils';
 import * as React from 'react';
+import { ReactWidget } from '@jupyterlab/apputils';
 import { classes } from 'typestyle';
 import { STYLES } from './data/styles';
 import {
@@ -24,28 +24,28 @@ import {
   REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data/data';
 import { getMachineTypeConfigurations } from './data/machine_types';
-import { ServerWrapper } from './components/server_wrapper';
-import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
-import { WidgetPopup } from './components/widget_popup';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
+import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
+import { ServerWrapper } from './components/server_wrapper';
+import { WidgetPopup } from './components/widget_popup';
 import { NotebooksService } from './service/notebooks_service';
 import { DetailsService } from './service/details_service';
 import { PriceService } from './service/price_service';
 
 interface Props {
   detailsServer: ServerWrapper;
-  notebookService: NotebooksService;
   detailsService: DetailsService;
+  notebookService: NotebooksService;
   priceService: PriceService;
   initializationError?: boolean;
 }
 
 interface State {
-  displayedAttributes: [number, number];
-  details?: Details;
   receivedError: boolean;
   shouldRefresh: boolean;
   dialogDisplayed: boolean;
+  displayedAttributes: [number, number];
+  details?: Details;
 }
 
 const ICON_CLASS = 'jp-VmStatusIcon';
@@ -79,7 +79,7 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   render() {
-    const { details, receivedError, dialogDisplayed } = this.state;
+    const { details, dialogDisplayed, receivedError } = this.state;
     const { detailsServer, notebookService, priceService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
@@ -95,19 +95,19 @@ export class VmDetails extends React.Component<Props, State> {
         <WidgetPopup>
           <ResourceUtilizationCharts detailsServer={detailsServer} />
         </WidgetPopup>
-        <span className={classes(STYLES.interactiveHover)}>
+        <span className={STYLES.interactiveHover}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>
         {dialogDisplayed && (
           <HardwareConfigurationDialog
             open={dialogDisplayed}
-            onClose={() => this.setState({ dialogDisplayed: false })}
-            notebookService={notebookService}
-            onCompletion={() => this.initializeDetailsFromServer()}
-            detailsServer={detailsServer}
             details={details}
+            detailsServer={detailsServer}
             receivedError={receivedError}
+            notebookService={notebookService}
             priceService={priceService}
+            onClose={() => this.setState({ dialogDisplayed: false })}
+            onCompletion={() => this.initializeDetailsFromServer()}
           />
         )}
       </span>
@@ -210,8 +210,8 @@ export class VmDetailsWidget extends ReactWidget {
     return (
       <VmDetails
         detailsServer={this.detailsServer}
-        notebookService={this.notebookService}
         detailsService={this.detailsService}
+        notebookService={this.notebookService}
         priceService={this.priceService}
         initializationError={this.initializationError}
       />

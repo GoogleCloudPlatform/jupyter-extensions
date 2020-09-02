@@ -17,19 +17,18 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import * as React from 'react';
-
 import { Option } from 'gcp_jupyterlab_shared';
-import { PriceService } from '../service/price_service';
-import { HardwareConfiguration } from '../data/data';
 import { shallow } from 'enzyme';
 import { HardwareScalingForm } from './hardware_scaling_form';
+import { ActionBar } from './action_bar';
 import {
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
   ACCELERATOR_COUNTS_1_2_4_8,
 } from '../data/accelerator_types';
-import { ActionBar } from './action_bar';
+import { HardwareConfiguration } from '../data/data';
 import { MachineTypeConfiguration } from '../data/machine_types';
+import { PriceService } from '../service/price_service';
 import { DETAILS } from '../test_helpers';
 
 interface HardwareScalingFormInstance extends React.Component<{}, {}> {

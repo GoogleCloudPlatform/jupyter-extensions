@@ -10,7 +10,7 @@ exports[`HardwareScalingForm Displays correct pricing estimation: Form With Pric
     <span
       className="heading_f1xburhd"
     >
-      Hardware Scaling Limits
+      Modify Hardware Configuration
     </span>
     <HardwareConfigurationDescription />
     <span
@@ -190,7 +190,7 @@ exports[`HardwareScalingForm Successfully initializes form: Initial Form 1`] = `
     <span
       className="heading_f1xburhd"
     >
-      Hardware Scaling Limits
+      Modify Hardware Configuration
     </span>
     <HardwareConfigurationDescription />
     <span
