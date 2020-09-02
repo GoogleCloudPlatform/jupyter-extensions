@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button } from '@material-ui/core';
 import { Code, Info } from '@material-ui/icons';
+import { stylesheet } from 'typestyle';
 
 import {
   TableDetailsService,
@@ -14,7 +15,7 @@ import TablePreviewPanel from './table_preview';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { stylesheet } from 'typestyle';
+import { getStarterQuery } from '../../utils/starter_queries';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 import InfoCard from '../shared/info_card';
 
@@ -96,10 +97,7 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [
-                    queryId,
-                    `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
-                  ]
+                  [queryId, getStarterQuery('TABLE', this.props.table_id)]
                 );
               }}
               startIcon={<Code />}

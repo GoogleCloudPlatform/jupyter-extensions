@@ -6,6 +6,7 @@ from google.cloud import bigquery
 from google.cloud.datacatalog import DataCatalogClient, types
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
+MODEL = 'MODEL'
 
 
 class BigQueryService:
@@ -89,6 +90,7 @@ class BigQueryService:
           'id': model_full_id,
           'name': model.model_id,
           'datasetId': dataset_id,
+          'type': MODEL
       }
       model_ids.append(model_full_id)
 
