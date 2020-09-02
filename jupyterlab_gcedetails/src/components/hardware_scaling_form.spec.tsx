@@ -1,9 +1,26 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /* eslint-disable @typescript-eslint/camelcase */
+
 import * as React from 'react';
 
 import { Option } from 'gcp_jupyterlab_shared';
 import { PriceService } from '../service/price_service';
-import { Details, HardwareConfiguration } from '../data/data';
+import { HardwareConfiguration } from '../data/data';
 import { shallow } from 'enzyme';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import {
@@ -13,6 +30,7 @@ import {
 } from '../data/accelerator_types';
 import { ActionBar } from './action_bar';
 import { MachineTypeConfiguration } from '../data/machine_types';
+import { DETAILS } from '../test_helpers';
 
 interface HardwareScalingFormInstance extends React.Component<{}, {}> {
   gpuTypeOptions: Option[];
@@ -33,68 +51,6 @@ const INITIAL_STATE = {
   },
   gpuCountOptions: ACCELERATOR_COUNTS_1_2_4_8,
   newConfigurationPrice: undefined,
-};
-
-const DETAILS: Details = {
-  gpu: {
-    cuda_version: '10.1',
-    driver_version: '418.87.01',
-    gpu: 0,
-    memory: 0,
-    name: null,
-    temperature: 0,
-    count: '0',
-  },
-  instance: {
-    attributes: {
-      framework: 'PyTorch:1.4',
-      title: 'PyTorch/fastai/CUDA10.0',
-      version: '44',
-    },
-    cpuPlatform: 'Intel Broadwell',
-    id: 127546640929027970,
-    image:
-      'projects/deeplearning-platform-release/global/images/pytorch-1-4-cu101-notebooks-20200302',
-    machineType: {
-      description: '4 vCPU, 15 GB RAM',
-      name: 'n1-standard-4',
-    },
-    name: 'pytorch',
-    zone: 'projects/123456/zones/us-west1-b',
-  },
-  project: {
-    numericProjectId: 123456,
-    projectId: 'test-project',
-  },
-  utilization: {
-    cpu: 50,
-    memory: 16,
-  },
-  machineTypes: [
-    {
-      base: { value: 'n1-', text: 'N1 Standard' },
-      configurations: [
-        { value: 'n1-standard-2', text: '2 vCPU, 7.5 GB RAM' },
-        { value: 'n1-standard-4', text: '4 vCPU, 15 GB RAM' },
-      ],
-    },
-    {
-      base: { value: 'n2-', text: 'N2 Standard' },
-      configurations: [{ value: 'n2-standard-4', text: '4 vCPU, 15 GB RAM' }],
-    },
-  ],
-  acceleratorTypes: [
-    {
-      name: 'NVIDIA_TESLA_K80',
-      description: 'Nvidia Tesla K80',
-      maximumCardsPerInstance: 4,
-    },
-    {
-      name: 'NVIDIA_TESLA_T4',
-      description: 'Nvidia Tesla T4',
-      maximumCardsPerInstance: 8,
-    },
-  ],
 };
 
 const OLD_CONFIGURATION_PRICE = 3;

@@ -72,7 +72,7 @@ interface Props {
   details: Details;
   receivedError: boolean;
   onDialogClose: () => void;
-  reshapeForm: () => void;
+  onUpdate: () => void;
 }
 
 const DIALOG_STYLES = stylesheet({
@@ -87,7 +87,7 @@ function loadingDetails(details: boolean, receivedError: boolean): boolean {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DetailsDialogBody(props: Props) {
-  const { details, receivedError, onDialogClose, reshapeForm } = props;
+  const { details, receivedError, onDialogClose, onUpdate } = props;
   return (
     <dl className={STYLES.containerPadding}>
       <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
@@ -109,7 +109,7 @@ export function DetailsDialogBody(props: Props) {
       <ActionBar
         primaryLabel="Update"
         secondaryLabel="Close"
-        onPrimaryClick={reshapeForm}
+        onPrimaryClick={onUpdate}
         onSecondaryClick={onDialogClose}
         primaryDisabled={
           receivedError || loadingDetails(Boolean(details), receivedError)
