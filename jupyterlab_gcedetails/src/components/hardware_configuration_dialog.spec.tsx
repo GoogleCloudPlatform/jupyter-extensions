@@ -15,24 +15,23 @@
  */
 
 import * as React from 'react';
-
-import { PriceService } from '../service/price_service';
 import { shallow } from 'enzyme';
+import { ConfirmationPage } from './confirmation_page';
+import { DetailsDialogBody } from './details_dialog_body';
 import {
   HardwareConfigurationDialog,
   View,
 } from './hardware_configuration_dialog';
-import { ServerWrapper } from './server_wrapper';
-import { NotebooksService } from '../service/notebooks_service';
-import { DETAILS } from '../test_helpers';
-import { DetailsDialogBody } from './details_dialog_body';
 import { HardwareScalingForm } from './hardware_scaling_form';
-import { ConfirmationPage } from './confirmation_page';
 import { HardwareScalingStatus } from './hardware_scaling_status';
+import { ServerWrapper } from './server_wrapper';
 import {
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
 } from '../data/accelerator_types';
+import { NotebooksService } from '../service/notebooks_service';
+import { PriceService } from '../service/price_service';
+import { DETAILS } from '../test_helpers';
 
 const CONFIGURATION = {
   machineType: {

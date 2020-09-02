@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { Dialog } from '@material-ui/core';
 import * as React from 'react';
+import { Dialog } from '@material-ui/core';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import { HardwareScalingStatus } from './hardware_scaling_status';
-import { NotebooksService } from '../service/notebooks_service';
+import { ConfirmationPage } from './confirmation_page';
+import { ServerWrapper } from './server_wrapper';
+import { DetailsDialogBody } from './details_dialog_body';
 import {
   HardwareConfiguration,
   Details,
   detailsToHardwareConfiguration,
 } from '../data/data';
-import { ConfirmationPage } from './confirmation_page';
-import { ServerWrapper } from './server_wrapper';
-import { DetailsDialogBody } from './details_dialog_body';
 import { authTokenRetrieval } from '../service/auth_token_retrieval';
+import { NotebooksService } from '../service/notebooks_service';
 import { PriceService } from '../service/price_service';
 
 export enum View {
@@ -39,13 +39,13 @@ export enum View {
 
 interface Props {
   open: boolean;
-  onClose: () => void;
+  receivedError: boolean;
+  detailsServer: ServerWrapper;
   notebookService: NotebooksService;
+  priceService: PriceService;
+  onClose: () => void;
   onCompletion: () => void;
   details?: Details;
-  detailsServer: ServerWrapper;
-  receivedError: boolean;
-  priceService: PriceService;
 }
 
 interface State {
@@ -70,34 +70,36 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
 
   private getDisplay() {
     const {
-      onClose,
-      notebookService,
       details,
-      onCompletion,
-      detailsServer,
       receivedError,
+      detailsServer,
+      notebookService,
       priceService,
+      onClose,
+      onCompletion,
     } = this.props;
-    const { view, hardwareConfiguration } = this.state;
+    const { hardwareConfiguration, view } = this.state;
 
     switch (view) {
       case View.DETAILS:
         return (
           <DetailsDialogBody
+            details={details}
+            receivedError={receivedError}
             onDialogClose={onClose}
             onUpdate={() => {
               this.setState({
                 view: View.FORM,
               });
             }}
-            details={details}
-            receivedError={receivedError}
           />
         );
 
       case View.FORM:
         return (
           <HardwareScalingForm
+            details={details}
+            priceService={priceService}
             onDialogClose={onClose}
             onSubmit={(config: HardwareConfiguration) => {
               this.setState({
@@ -105,17 +107,15 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
                 hardwareConfiguration: config,
               });
             }}
-            details={details}
-            priceService={priceService}
           />
         );
 
       case View.CONFIRMATION:
         return (
           <ConfirmationPage
-            onDialogClose={onClose}
             formData={hardwareConfiguration}
             currentConfiguration={detailsToHardwareConfiguration(details)}
+            onDialogClose={onClose}
             onSubmit={() => {
               this.setState({
                 view: View.STATUS,
@@ -127,13 +127,13 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
       case View.STATUS:
         return (
           <HardwareScalingStatus
-            onDialogClose={onClose}
-            hardwareConfiguration={hardwareConfiguration}
-            notebookService={notebookService}
-            onCompletion={onCompletion}
-            detailsServer={detailsServer}
-            authTokenRetrieval={authTokenRetrieval}
             machineTypes={details.machineTypes}
+            hardwareConfiguration={hardwareConfiguration}
+            authTokenRetrieval={authTokenRetrieval}
+            detailsServer={detailsServer}
+            notebookService={notebookService}
+            onDialogClose={onClose}
+            onCompletion={onCompletion}
           />
         );
     }

@@ -1,15 +1,31 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as csstips from 'csstips';
 import * as React from 'react';
+import { stylesheet, classes } from 'typestyle';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { STYLES } from '../data/styles';
-import { stylesheet, classes } from 'typestyle';
-import * as csstips from 'csstips';
 import { HardwareConfiguration } from '../data/data';
+import { MachineTypeConfiguration } from '../data/machine_types';
 import { ActionBar } from './action_bar';
 import { NotebooksService, Instance } from '../service/notebooks_service';
 import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
-import { MachineTypeConfiguration } from '../data/machine_types';
 import { displayInstance } from './instance_details_message';
 
 const BorderLinearProgress = withStyles((theme: Theme) =>
@@ -175,6 +191,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
       }
     }
   }
+
   async componentDidMount() {
     const { notebookService, authTokenRetrieval } = this.props;
     try {

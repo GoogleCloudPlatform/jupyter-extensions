@@ -70,10 +70,12 @@ describe('NotebookInstanceServiceLayer', () => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    notebooksService = new NotebooksService(transportService, null);
-    notebooksService.projectId = TEST_PROJECT;
-    notebooksService.instanceName = TEST_INSTANCE_NAME;
-    notebooksService.locationId = TEST_LOCATION_ID;
+    notebooksService = new NotebooksService(
+      transportService,
+      TEST_PROJECT,
+      TEST_INSTANCE_NAME,
+      TEST_LOCATION_ID
+    );
   });
 
   describe('Stop Instance', () => {

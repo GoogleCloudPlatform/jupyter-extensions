@@ -19,13 +19,16 @@ import { Message } from 'gcp_jupyterlab_shared';
 import { STYLES } from '../data/styles';
 import { HardwareConfiguration } from '../data/data';
 import { getGpuTypeText, NO_ACCELERATOR_TYPE } from '../data/accelerator_types';
-import { HardwareConfigurationDescription } from './hardware_scaling_form';
 import { ActionBar } from './action_bar';
+import {
+  HardwareConfigurationDescription,
+  TITLE,
+} from './hardware_configuration_description';
 
 interface Props {
   formData: HardwareConfiguration;
-  onDialogClose: () => void;
   currentConfiguration: HardwareConfiguration;
+  onDialogClose: () => void;
   onSubmit: () => void;
 }
 
@@ -54,12 +57,12 @@ function displayConfiguration(
 }
 
 export function ConfirmationPage(props: Props) {
-  const { onDialogClose, formData, currentConfiguration, onSubmit } = props;
+  const { formData, currentConfiguration, onDialogClose, onSubmit } = props;
 
   return (
     <div className={STYLES.containerPadding}>
       <div className={STYLES.containerSize}>
-        <span className={STYLES.heading}>Hardware Scaling Limits</span>
+        <span className={STYLES.heading}>{TITLE}</span>
         <HardwareConfigurationDescription />
         {displayConfiguration(currentConfiguration, 'Old Configuration')}
         {displayConfiguration(formData, 'New Configuration')}

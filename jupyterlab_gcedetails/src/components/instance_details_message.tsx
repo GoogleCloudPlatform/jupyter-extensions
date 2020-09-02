@@ -15,7 +15,6 @@
  */
 
 import * as React from 'react';
-
 import { Instance } from '../service/notebooks_service';
 import {
   MachineTypeConfiguration,

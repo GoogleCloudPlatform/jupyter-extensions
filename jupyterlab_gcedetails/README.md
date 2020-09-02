@@ -1,7 +1,8 @@
 # GCP Notebooks Details extension
 
 `jupyterlab_gcedetails` - Provides a simple status-bar widget that conveys
-information about the GCE VM that JupyterLab is running on.
+configuration and usage information about the GCE VM that JupyterLab is running on 
+and allows users to update the GCE VM configuration.
 
 ![Demo](https://storage.googleapis.com/deeplearning-platform-ui-public/jupyterlab_gcedetails_demo.gif)
 

@@ -16,8 +16,6 @@
 
 import * as React from 'react';
 import { stylesheet, classes } from 'typestyle';
-import { STYLES } from '../data/styles';
-import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -25,6 +23,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { STYLES } from '../data/styles';
+import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { ActionBar } from './action_bar';
 
 const useStyles = makeStyles({
@@ -81,7 +81,7 @@ const DIALOG_STYLES = stylesheet({
   },
 });
 
-function loadingDetails(details: boolean, receivedError: boolean): boolean {
+function isLoadingDetails(details: boolean, receivedError: boolean): boolean {
   return !(details || receivedError);
 }
 
@@ -93,7 +93,7 @@ export function DetailsDialogBody(props: Props) {
       <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
         Notebook VM Details
       </p>
-      {loadingDetails(Boolean(details), receivedError) ? (
+      {isLoadingDetails(Boolean(details), receivedError) ? (
         <div className={STYLES.containerSize}>
           <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
         </div>
@@ -112,7 +112,7 @@ export function DetailsDialogBody(props: Props) {
         onPrimaryClick={onUpdate}
         onSecondaryClick={onDialogClose}
         primaryDisabled={
-          receivedError || loadingDetails(Boolean(details), receivedError)
+          receivedError || isLoadingDetails(Boolean(details), receivedError)
         }
       />
     </dl>
