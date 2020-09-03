@@ -31,8 +31,7 @@ import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { getStarterQuery } from '../../utils/starter_queries';
-
-import '../../../style/index.css';
+import { gColor } from '../shared/styles';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -75,7 +74,6 @@ const localStyles = stylesheet({
   resourceIcons: {
     display: 'flex',
     alignContent: 'center',
-    color: 'var(--jp-layout-color3)',
   },
   datasetName: {
     flexDirection: 'row',
@@ -440,7 +438,7 @@ export class DatasetResource extends Resource<DatasetProps> {
               }))}
             >
               <div className={localStyles.datasetName}>
-                <Icon style={{ display: 'flex', alignContent: 'center' }}>
+                <Icon className={localStyles.resourceIcons}>
                   <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
                 </Icon>
                 <div className={localStyles.resourceName}>{dataset.name}</div>
@@ -476,6 +474,7 @@ export class DatasetResource extends Resource<DatasetProps> {
             <CircularProgress
               size={20}
               className={localStyles.circularProgress}
+              style={{ color: gColor('BLUE') }}
             />
           )}
         </TreeItem>
@@ -622,6 +621,7 @@ export class ProjectResource extends Resource<ProjectProps> {
             <CircularProgress
               size={20}
               className={localStyles.circularProgress}
+              style={{ color: gColor('BLUE') }}
             />
           )}
         </TreeItem>

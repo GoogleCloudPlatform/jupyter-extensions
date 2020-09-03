@@ -9,6 +9,7 @@ import {
   TableRow,
   TablePagination,
   IconButton,
+  withStyles,
 } from '@material-ui/core';
 import {
   KeyboardArrowLeft,
@@ -17,19 +18,10 @@ import {
   LastPage,
 } from '@material-ui/icons';
 
-import { TableHeadCell } from './schema_table';
+import { TableHeadCell, StyledTableRow } from './schema_table';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
-  tableCell: {
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    maxWidth: '500px',
-  },
-  pagination: {
-    backgroundColor: 'white',
-    fontSize: '13px',
-  },
   paginationOptions: {
     display: 'flex',
     fontSize: '13px',
@@ -44,6 +36,53 @@ const localStyles = stylesheet({
     color: 'gray',
   },
 });
+
+const StyledIconButton = withStyles({
+  root: {
+    color: 'var(--jp-ui-font-color1)',
+    '&.Mui-disabled': {
+      color: 'var(--jp-ui-font-color3)',
+    },
+  },
+})(IconButton);
+
+const StyledTableCell = withStyles({
+  root: {
+    color: 'var(--jp-ui-font-color1)',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    maxWidth: '500px',
+    fontSize: '13px',
+    BASE_FONT,
+    border: 0,
+  },
+})(TableCell);
+
+export const StyledPagination: React.ComponentType<any> = withStyles({
+  root: {
+    backgroundColor: 'var(--jp-layout-color0)',
+    color: 'var(--jp-ui-font-color1)',
+    fontSize: '13px',
+    borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  selectIcon: {
+    color: 'var(--jp-ui-font-color1)',
+  },
+  menuItem: {
+    color: 'var(--jp-ui-font-color1)',
+    backgroundColor: 'var(--jp-layout-color0)',
+    '&.Mui-selected': {
+      backgroundColor: 'var(--jp-layout-color2)',
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)',
+      },
+    },
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)',
+    },
+  },
+})(TablePagination);
 
 interface Props {
   rows: (string | number)[][];
@@ -94,24 +133,34 @@ export function TablePaginationActions(props: TablePaginationActionsProps) {
 
   return (
     <div className={localStyles.paginationOptions}>
-      <IconButton onClick={handleFirstPageButtonClick} disabled={page === 0}>
+      <StyledIconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        size="small"
+      >
         <FirstPage />
-      </IconButton>
-      <IconButton onClick={handleBackButtonClick} disabled={page === 0}>
+      </StyledIconButton>
+      <StyledIconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        size="small"
+      >
         <KeyboardArrowLeft />
-      </IconButton>
-      <IconButton
+      </StyledIconButton>
+      <StyledIconButton
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        size="small"
       >
         <KeyboardArrowRight />
-      </IconButton>
-      <IconButton
+      </StyledIconButton>
+      <StyledIconButton
         onClick={handleLastPageButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        size="small"
       >
         <LastPage />
-      </IconButton>
+      </StyledIconButton>
     </div>
   );
 }
@@ -144,7 +193,13 @@ export class BQTable extends React.Component<Props, State> {
     return (
       <>
         <div className={localStyles.scrollable}>
-          <Table size="small" style={{ width: 'auto', tableLayout: 'auto' }}>
+          <Table
+            size="small"
+            style={{
+              width: 'auto',
+              tableLayout: 'auto',
+            }}
+          >
             <TableHead>
               <TableRow>
                 {fields.map((field, index) => (
@@ -156,32 +211,32 @@ export class BQTable extends React.Component<Props, State> {
               {rows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, indexRow) => (
-                  <TableRow key={'table_row_' + indexRow}>
-                    <TableCell>{page * rowsPerPage + indexRow + 1}</TableCell>
+                  <StyledTableRow key={'table_row_' + indexRow}>
+                    <StyledTableCell>
+                      {page * rowsPerPage + indexRow + 1}
+                    </StyledTableCell>
                     {row.map((cell, indexCell) => (
-                      <TableCell
-                        className={localStyles.tableCell}
+                      <StyledTableCell
                         key={'table_row_' + indexRow + '_cell' + indexCell}
                       >
                         {cell ?? <div className={localStyles.null}>null</div>}
-                      </TableCell>
+                      </StyledTableCell>
                     ))}
-                  </TableRow>
+                  </StyledTableRow>
                 ))}
             </TableBody>
           </Table>
         </div>
         {/* TODO(cxjia): hide table pagination when result rows <= 10 */}
-        <TablePagination
-          className={localStyles.pagination}
+        <StyledPagination
           rowsPerPageOptions={[10, 30, 50, 100, 200]}
-          component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={this.handleChangePage.bind(this)}
           onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
           ActionsComponent={TablePaginationActions}
+          component="div"
         />
       </>
     );

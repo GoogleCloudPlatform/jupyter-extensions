@@ -15,7 +15,12 @@ const localStyles = stylesheet({
 });
 
 export const getStripedStyle = index => {
-  return { background: index % 2 ? 'white' : '#fafafa' };
+  return {
+    background:
+      index % 2
+        ? 'var(--jp-layout-color0)'
+        : 'var(--jp-rendermime-table-row-background)',
+  };
 };
 
 export const StripedRows = props => {

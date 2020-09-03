@@ -18,13 +18,15 @@ export const localStyles = stylesheet({
   },
 });
 
+// TODO: style for dark mode. Currently does not match striped rows
 export const TableHeadCell: React.ComponentType<any> = withStyles({
   root: {
-    backgroundColor: '#f8f9fa',
+    color: 'var(--jp-ui-font-color1)',
+    backgroundColor: 'var(--jp-rendermime-table-row-background)',
     whiteSpace: 'nowrap',
     fontSize: '13px',
     padding: '4px 16px 4px 16px',
-    borderTop: '1px  solid var(--jp-border-color2)',
+    border: 0,
     BASE_FONT,
   },
 })(TableCell);
@@ -46,10 +48,18 @@ const formatFieldName = name => {
 
 const StyledTableCell = withStyles({
   root: {
+    color: 'var(--jp-ui-font-color1)',
     fontSize: '13px',
     BASE_FONT,
+    border: 0,
   },
 })(TableCell);
+
+export const StyledTableRow = withStyles({
+  root: {
+    borderBottom: '1px solid var(--jp-border-color2)',
+  },
+})(TableRow);
 
 export const SchemaTable = (props: { schema: any }) => {
   return (
@@ -62,15 +72,19 @@ export const SchemaTable = (props: { schema: any }) => {
           <TableHeadCell>Description</TableHeadCell>
         </TableRow>
       </TableHead>
-      <TableBody>
+      <TableBody
+        style={{
+          backgroundColor: 'var(--jp-layout-color0)',
+        }}
+      >
         {props.schema.map((field, index) => {
           return (
-            <TableRow key={`schema_row_${index}`}>
+            <StyledTableRow key={`schema_row_${index}`}>
               <StyledTableCell>{formatFieldName(field.name)}</StyledTableCell>
               <StyledTableCell>{field.type}</StyledTableCell>
               <StyledTableCell>{field.mode}</StyledTableCell>
               <StyledTableCell>{field.description ?? ''}</StyledTableCell>
-            </TableRow>
+            </StyledTableRow>
           );
         })}
       </TableBody>
@@ -87,13 +101,18 @@ export const ModelSchemaTable = (props: { schema: any }) => {
           <TableHeadCell>Type</TableHeadCell>
         </TableRow>
       </TableHead>
-      <TableBody>
+      <TableBody
+        style={{
+          color: 'var(--jp-ui-font-color1)',
+          backgroundColor: 'var(--jp-layout-color0)',
+        }}
+      >
         {props.schema.map((field, index) => {
           return (
-            <TableRow key={`schema_row_${index}`}>
+            <StyledTableRow key={`schema_row_${index}`}>
               <StyledTableCell>{formatFieldName(field.name)}</StyledTableCell>
               <StyledTableCell>{field.type}</StyledTableCell>
-            </TableRow>
+            </StyledTableRow>
           );
         })}
       </TableBody>

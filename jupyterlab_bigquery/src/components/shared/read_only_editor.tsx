@@ -3,6 +3,7 @@ import { Paper } from '@material-ui/core';
 import Editor from '@monaco-editor/react';
 import { monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import { isDarkTheme } from '../../utils/dark_theme';
 
 function handleEditorDidMount(_, editor) {
   const editorElement = editor.getDomNode();
@@ -22,12 +23,12 @@ function handleEditorDidMount(_, editor) {
       editor.layout();
 
       monaco.editor.defineTheme('viewOnlyQueryTheme', {
-        base: 'vs',
+        base: isDarkTheme() ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [],
         colors: {
-          'editorCursor.foreground': '#FFFFFF',
-          'editorGutter.background': '#f8f9fa',
+          'editorCursor.foreground': isDarkTheme() ? '#1E1E1E' : '#FFFFFF',
+          'editorGutter.background': isDarkTheme() ? '#111111' : '#f8f9fa',
         },
       });
       monaco.editor.setTheme('viewOnlyQueryTheme');
@@ -60,7 +61,10 @@ const READ_ONLY_SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
 
 const ReadOnlyEditor = props => {
   return (
-    <Paper variant="outlined">
+    <Paper
+      variant="outlined"
+      style={{ border: '1px solid var(--jp-border-color2)' }}
+    >
       <Editor
         width="100%"
         theme={'vs'}

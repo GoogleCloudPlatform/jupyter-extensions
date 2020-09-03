@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { Paper } from '@material-ui/core';
+import { Paper, withStyles } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
 
 const localStyles = stylesheet({
   container: {
+    root: {
+      backgroundColor: 'var(--jp-layout-color0)',
+    },
     display: 'flex',
     alignItems: 'stretch',
     marginBottom: '12px',
-    backgroundColor: 'var(--jp-layout-color0)',
     justifyContent: 'space-between',
     paddingRight: '12px',
   },
@@ -24,6 +26,19 @@ const localStyles = stylesheet({
   },
 });
 
+const StyledPaper = withStyles({
+  root: {
+    backgroundColor: 'var(--jp-layout-color0)',
+    border: '1px solid var(--jp-border-color2)',
+    color: 'var(--jp-ui-font-color1)',
+    display: 'flex',
+    alignItems: 'stretch',
+    marginBottom: '12px',
+    justifyContent: 'space-between',
+    paddingRight: '12px',
+  },
+})(Paper);
+
 // TODO: figure out type so only material ui icons accepted,
 // and make it work with using .type
 type MaterialUIIcon = any;
@@ -39,7 +54,7 @@ interface InfoCardProps {
 const InfoCard = (props: InfoCardProps) => {
   const { message, color, icon, button } = props;
   return (
-    <Paper className={localStyles.container} variant="outlined">
+    <StyledPaper className={localStyles.container} variant="outlined">
       <div className={localStyles.leftSide}>
         <div style={{ width: '6px', backgroundColor: color }} />
         <div className={localStyles.messageSpace}>
@@ -53,7 +68,7 @@ const InfoCard = (props: InfoCardProps) => {
         </div>
       </div>
       {button}
-    </Paper>
+    </StyledPaper>
   );
 };
 

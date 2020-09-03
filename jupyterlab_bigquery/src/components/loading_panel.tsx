@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { CircularProgress } from '@material-ui/core';
 import { stylesheet } from 'typestyle';
+import { gColor } from './shared/styles';
 
 const localStyles = stylesheet({
   container: {
@@ -15,7 +16,7 @@ const localStyles = stylesheet({
 const LoadingPanel = () => {
   return (
     <div className={localStyles.container}>
-      <CircularProgress />
+      <CircularProgress style={{ color: gColor('BLUE') }} />
     </div>
   );
 };

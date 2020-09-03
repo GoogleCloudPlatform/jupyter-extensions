@@ -9,6 +9,7 @@ import {
 } from './service/list_table_details';
 import { BQTable } from '../shared/bq_table';
 import InfoCard from '../shared/info_card';
+import { gColor } from '../shared/styles';
 
 const localStyles = stylesheet({
   previewBody: {
@@ -93,7 +94,7 @@ export default class TablePreviewPanel extends React.Component<Props, State> {
           ) : (
             <div className={localStyles.previewBody}>
               <InfoCard
-                color="#FBBC04"
+                color={gColor('YELLOW')}
                 message="This table is empty."
                 icon={<Warning />}
               />
