@@ -37,11 +37,10 @@ const localStyles = stylesheet({
   },
 });
 
-// TODO: style for dark mode. Currently the disabled buttons are not visible.
 const StyledIconButton = withStyles({
   root: {
     color: 'var(--jp-ui-font-color1)',
-    '&$disabled': {
+    '&.Mui-disabled': {
       color: 'var(--jp-ui-font-color3)',
     },
   },
@@ -60,7 +59,6 @@ const StyledTableCell = withStyles({
   },
 })(TableCell);
 
-// TODO: style for dark mode. Currently the page selection dropdown when highlighted is unreadable.
 export const StyledPagination: React.ComponentType<any> = withStyles({
   root: {
     backgroundColor: 'var(--jp-layout-color0)',
@@ -74,7 +72,7 @@ export const StyledPagination: React.ComponentType<any> = withStyles({
   menuItem: {
     color: 'var(--jp-ui-font-color1)',
     backgroundColor: 'var(--jp-layout-color0)',
-    '&$selected': {
+    '&.Mui-selected': {
       backgroundColor: 'var(--jp-layout-color2)',
       '&:hover': {
         backgroundColor: 'var(--jp-layout-color2)',
