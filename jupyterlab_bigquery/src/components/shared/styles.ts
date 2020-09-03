@@ -1,9 +1,10 @@
+import { isDarkTheme } from '../../utils/dark_theme';
+
 /** Google theme colors. Blue 600, green red yellow 500 for light theme. All 300 vallues for dark theme.*/
 type Color = 'BLUE' | 'RED' | 'GREEN' | 'YELLOW';
 
 export function gColor(color: Color) {
-  const darkTheme =
-    document.body.getAttribute('data-jp-theme-light') === 'false';
+  const darkTheme = isDarkTheme();
   switch (color) {
     case 'BLUE':
       return darkTheme ? '#8AB4F8' : '#1A73E8';

@@ -35,6 +35,7 @@ import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
+import { isDarkTheme } from '../../../utils/dark_theme';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -119,10 +120,7 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    border:
-      document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? '1px solid rgb(218, 220, 224)'
-        : '1px solid var(--jp-border-color3)',
+    border: '1px solid var(--jp-border-color2)',
   },
   message: {
     display: 'flex',
@@ -133,10 +131,7 @@ const styleSheet = stylesheet({
     marginRight: '0.5rem',
   },
   wholeEditorInCell: {
-    border:
-      document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? '1px solid rgb(218, 220, 224)'
-        : '1px solid var(--jp-border-color3)',
+    border: '1px solid var(--jp-border-color2)',
   },
   pendingStatus: {
     display: 'flex',
@@ -151,14 +146,8 @@ const styleSheet = stylesheet({
     paddingBottom: '5px',
     paddingLeft: '10px',
     paddingRight: '10px',
-    backgroundColor:
-      document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? 'rgb(248, 249, 250)'
-        : 'var(--jp-layout-color0)',
-    borderBottom:
-      document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? '1px solid rgb(218, 220, 224)'
-        : '1px solid var(--jp-border-color3)',
+    backgroundColor: 'var(--jp-layout-color0)',
+    borderBottom: '1px solid var(--jp-border-color2)',
   },
   icon: {
     color: 'var(--jp-layout-color3)',
@@ -248,14 +237,12 @@ class QueryTextEditor extends React.Component<
 
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
-      const lightTheme =
-        document.body.getAttribute('data-jp-theme-light') === 'true';
       this.monacoInstance.editor.defineTheme('sqlTheme', {
-        base: lightTheme ? 'vs' : 'vs-dark',
+        base: isDarkTheme() ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [],
         colors: {
-          'editorGutter.background': lightTheme ? '#f8f9fa' : '#111111',
+          'editorGutter.background': isDarkTheme() ? '#111111' : '#f8f9fa',
         },
       });
     });

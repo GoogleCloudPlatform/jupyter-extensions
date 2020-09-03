@@ -193,10 +193,7 @@ const localStyles = stylesheet({
     margin: 0,
     padding: '10px 14px',
     '&:hover': {
-      backgroundColor:
-        document.body.getAttribute('data-jp-theme-light') === 'true'
-          ? '#e8e8e8'
-          : 'var(--jp-layout-color2)',
+      backgroundColor: 'var(--jp-layout-color2)',
       opacity: 1,
       cursor: 'pointer',
     },

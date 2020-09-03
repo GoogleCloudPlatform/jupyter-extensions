@@ -8,6 +8,7 @@ import { SchemaField } from './service/list_table_details';
 import { ModelSchema } from './service/list_model_details';
 import { StripedRows } from '../shared/striped_rows';
 import { SchemaTable, ModelSchemaTable } from '../shared/schema_table';
+import { isDarkTheme } from '../../utils/dark_theme';
 
 export const localStyles = stylesheet({
   title: {
@@ -46,7 +47,7 @@ export const localStyles = stylesheet({
 });
 
 interface ChipProps {
-  darkMode: boolean;
+  darkmode: boolean;
   size?: 'medium' | 'small';
   component?: any;
   key?: string | number;
@@ -57,10 +58,10 @@ const StyledChip = withStyles({
   root: {
     color: (props: ChipProps) =>
       // white :  blue600
-      props.darkMode ? 'var(--jp-ui-font-color1)' : '#1A73E8',
+      props.darkmode ? 'var(--jp-ui-font-color1)' : '#1A73E8',
     backgroundColor: (props: ChipProps) =>
       // blue300 at 30% opacity : blue600 at 10% opacity
-      props.darkMode ? 'rgba(138, 180, 248, 0.3)' : 'rgba(26, 115, 232, 0.1)',
+      props.darkmode ? 'rgba(138, 180, 248, 0.3)' : 'rgba(26, 115, 232, 0.1)',
   },
 })((props: ChipProps) => <Chip {...props} />);
 
@@ -119,10 +120,7 @@ export const DetailsPanel: React.SFC<Props> = props => {
                         size="small"
                         key={index}
                         label={value}
-                        darkMode={
-                          document.body.getAttribute('data-jp-theme-light') ===
-                          'false'
-                        }
+                        darkmode={isDarkTheme()}
                       />
                     );
                   })}

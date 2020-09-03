@@ -5,6 +5,7 @@ import { QueryResult, QUERY_DATA_TYPE } from './query_text_editor';
 import { QueryId } from '../../../reducers/queryEditorTabSlice';
 import { Header } from '../../shared/header';
 import { BQTable } from '../../shared/bq_table';
+import { gColor } from '../../shared/styles';
 import { Button } from '@material-ui/core';
 import { Equalizer } from '@material-ui/icons';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
@@ -83,7 +84,7 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
           <Button
             startIcon={<Equalizer fontSize="small" />}
             onClick={this.handleDatastudioExploreButton.bind(this)}
-            style={{ textTransform: 'none', color: '#1A73E8' }}
+            style={{ textTransform: 'none', color: gColor('BLUE') }}
           >
             Explore with Data Studio
           </Button>

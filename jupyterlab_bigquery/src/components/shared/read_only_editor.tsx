@@ -3,6 +3,7 @@ import { Paper } from '@material-ui/core';
 import Editor from '@monaco-editor/react';
 import { monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import { isDarkTheme } from '../../utils/dark_theme';
 
 function handleEditorDidMount(_, editor) {
   const editorElement = editor.getDomNode();
@@ -20,16 +21,14 @@ function handleEditorDidMount(_, editor) {
       const height = lineCount * lineHeight;
       editorElement.style.height = `${height + 0.5 * lineHeight}px`;
       editor.layout();
-      const lightTheme =
-        document.body.getAttribute('data-jp-theme-light') === 'true';
 
       monaco.editor.defineTheme('viewOnlyQueryTheme', {
-        base: lightTheme ? 'vs' : 'vs-dark',
+        base: isDarkTheme() ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [],
         colors: {
-          'editorCursor.foreground': lightTheme ? '#FFFFFF' : '#1E1E1E',
-          'editorGutter.background': lightTheme ? '#f8f9fa' : '#111111',
+          'editorCursor.foreground': isDarkTheme() ? '#1E1E1E' : '#FFFFFF',
+          'editorGutter.background': isDarkTheme() ? '#111111' : '#f8f9fa',
         },
       });
       monaco.editor.setTheme('viewOnlyQueryTheme');

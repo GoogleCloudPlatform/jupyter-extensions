@@ -19,9 +19,7 @@ export const getStripedStyle = index => {
     background:
       index % 2
         ? 'var(--jp-layout-color0)'
-        : document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? '#fafafa'
-        : 'var(--jp-border-color3)',
+        : 'var(--jp-rendermime-table-row-background)',
   };
 };
 

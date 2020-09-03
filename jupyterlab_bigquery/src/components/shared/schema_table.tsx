@@ -18,14 +18,11 @@ export const localStyles = stylesheet({
   },
 });
 
-// TODO: style for dark mode. Currently defaults to bordercolor3
+// TODO: style for dark mode. Currently does not match striped rows
 export const TableHeadCell: React.ComponentType<any> = withStyles({
   root: {
     color: 'var(--jp-ui-font-color1)',
-    backgroundColor:
-      document.body.getAttribute('data-jp-theme-light') === 'true'
-        ? '#fafafa'
-        : 'var(--jp-border-color3)',
+    backgroundColor: 'var(--jp-rendermime-table-row-background)',
     whiteSpace: 'nowrap',
     fontSize: '13px',
     padding: '4px 16px 4px 16px',
