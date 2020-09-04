@@ -28,6 +28,7 @@ interface QueryEditorTabProps {
   isVisible: boolean;
   queryId?: string;
   iniQuery?: string;
+  useLegacySql?: boolean;
 }
 
 class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
@@ -52,6 +53,8 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.props.iniQuery}
+          /* eslint-disable-next-line @typescript-eslint/camelcase */
+          queryFlags={{ use_legacy_sql: this.props.useLegacySql }}
         />
         {showResult && <QueryResults queryId={this.queryId} />}
       </div>

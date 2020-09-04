@@ -98,7 +98,15 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [queryId, getStarterQuery('VIEW', this.props.view_id)]
+                  [
+                    queryId,
+                    getStarterQuery(
+                      'VIEW',
+                      this.props.view_id,
+                      this.state.details.details.legacy_sql
+                    ),
+                    this.state.details.details.legacy_sql,
+                  ]
                 );
               }}
               startIcon={<Code />}

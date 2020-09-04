@@ -71,6 +71,7 @@ class BigQueryService:
           'name': table.table_id,
           'datasetId': dataset_id,
           'type': table.table_type,
+          'legacySql': table.view_use_legacy_sql,
           'partitioned': bool(table.partitioning_type),
       }
       table_ids.append(table_full_id)
