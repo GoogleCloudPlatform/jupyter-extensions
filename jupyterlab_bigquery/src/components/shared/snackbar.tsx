@@ -5,6 +5,8 @@ import { Snackbar, IconButton } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { closeSnackbar } from '../../reducers/snackbarSlice';
 
+export const COPIED_AUTOHIDE_DURATION = 2000;
+
 interface Props {
   open: boolean;
   message: string;

@@ -41,7 +41,7 @@ import {
 import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
 import { DialogComponent, BASE_FONT } from 'gcp_jupyterlab_shared';
-import CustomSnackbar from './snackbar';
+import CustomSnackbar from '../shared/snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;

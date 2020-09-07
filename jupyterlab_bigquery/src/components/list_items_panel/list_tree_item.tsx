@@ -32,6 +32,7 @@ import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { getStarterQuery, QueryType } from '../../utils/starter_queries';
 import { gColor } from '../shared/styles';
+import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -135,7 +136,7 @@ export class Resource<T extends ResourceProps> extends React.Component<
   copyID = dataTreeItem => {
     this.props.openSnackbar({
       message: 'ID copied',
-      autoHideDuration: 2000,
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
     });
     Clipboard.copyToSystem(dataTreeItem.id);
   };
@@ -143,7 +144,7 @@ export class Resource<T extends ResourceProps> extends React.Component<
   copyBoilerplateQuery = dataTreeItem => {
     this.props.openSnackbar({
       message: 'Query copied',
-      autoHideDuration: 2000,
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
     });
     Clipboard.copyToSystem(getStarterQuery(dataTreeItem.type, dataTreeItem.id));
   };

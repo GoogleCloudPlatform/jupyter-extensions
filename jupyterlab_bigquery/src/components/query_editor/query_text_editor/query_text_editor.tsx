@@ -37,6 +37,7 @@ import { formatBytes } from '../../../utils/formatters';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { isDarkTheme } from '../../../utils/dark_theme';
 import { SnackbarState, openSnackbar } from '../../../reducers/snackbarSlice';
+import { COPIED_AUTOHIDE_DURATION } from '../../shared/snackbar';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -633,7 +634,7 @@ class QueryTextEditor extends React.Component<
           copy(query.trim());
           this.props.openSnackbar({
             message: 'Query copied',
-            autoHideDuration: 2000,
+            autoHideDuration: COPIED_AUTOHIDE_DURATION,
           });
         }}
       >
