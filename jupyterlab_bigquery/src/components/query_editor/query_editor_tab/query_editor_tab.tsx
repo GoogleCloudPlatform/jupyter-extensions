@@ -23,7 +23,7 @@ const localStyles = stylesheet({
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { connect } from 'react-redux';
 
-interface QueryEditorTabProps {
+export interface QueryEditorTabProps {
   queries: { [key: string]: QueryResult };
   isVisible: boolean;
   queryId?: string;
@@ -31,7 +31,14 @@ interface QueryEditorTabProps {
   useLegacySql?: boolean;
 }
 
-class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
+export interface QueryEditorTabState {
+  isVisible: boolean;
+}
+
+class QueryEditorTab extends React.Component<
+  QueryEditorTabProps,
+  QueryEditorTabState
+> {
   queryId: QueryId;
   queryManager: QueryResultsManager;
 
@@ -67,3 +74,4 @@ const mapStateToProps = state => {
 };
 
 export default connect(mapStateToProps)(QueryEditorTab);
+export { QueryEditorTab };

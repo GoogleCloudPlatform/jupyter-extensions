@@ -113,3 +113,4 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 export default connect(mapStateToProps)(QueryResults);
+export { QueryResults };
