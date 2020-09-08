@@ -4,11 +4,9 @@ import {
   Paper,
   Collapse,
   LinearProgress,
-  Icon,
   IconButton,
   withStyles,
 } from '@material-ui/core';
-import { CheckCircle, Error } from '@material-ui/icons';
 import { stylesheet } from 'typestyle';
 import { DateTime } from 'luxon';
 import { Refresh } from '@material-ui/icons';
@@ -17,18 +15,13 @@ import {
   QueryHistoryService,
   QueryDetailsService,
 } from './service/query_history';
+import { QueryDetails } from './query_details';
+import { QueryBar } from './query_bar';
+import { QueryStatusBar } from './query_status_bar';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
-import { StripedRows } from '../shared/striped_rows';
-import ReadOnlyEditor from '../shared/read_only_editor';
-import { JobsObject, Job, QueryHistory } from './service/query_history';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
-import { WidgetManager } from '../../utils/widgetManager/widget_manager';
-import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
-import InfoCard from '../shared/info_card';
+import { QueryHistory } from './service/query_history';
 import { TablePaginationActions, StyledPagination } from '../shared/bq_table';
-import { gColor } from '../shared/styles';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
@@ -45,72 +38,15 @@ const localStyles = stylesheet({
     overflowX: 'hidden',
     backgroundColor: 'var(--jp-layout-color2)',
   },
-  query: {
-    flex: 1,
-    minWidth: 0,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  queryBar: {
-    display: 'flex',
-    overflow: 'hidden',
-    padding: '0px 10px 0px 10px',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    backgroundColor: 'var(--jp-layout-color0)',
-    alignItems: 'center',
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  queryStatusBar: {
-    padding: '10px 12px 10px 12px',
-    color: 'var(--jp-ui-inverse-font-color1)',
-    marginTop: '10px',
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  icon: {
-    marginRight: '12px',
-  },
   refreshIcon: {
     color: 'var(--jp-ui-font-color1)',
   },
   dateGroup: {
     marginBottom: '12px',
   },
-  queryTime: {
-    width: '85px',
-    color: 'gray',
-  },
   openDetails: {
     marginBottom: '10px',
     padding: '14px',
-  },
-  openQueryButton: {
-    display: 'flex',
-    alignItems: 'center',
-    color: 'var(--jp-ui-font-color1)',
-    border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    backgroundColor: 'var(--jp-layout-color0)',
-    '&:hover': {
-      boxShadow: '1px 1px 3px 0px var(--jp-border-color2)',
-      cursor: 'pointer',
-    },
-  },
-  openQueryButtonSmall: {
-    border: 'var(--jp-border-width) solid var(--jp-layout-color0)',
-    backgroundColor: 'var(--jp-layout-color0)',
-    '&:hover': {
-      border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-      cursor: 'pointer',
-    },
-  },
-  detailsTopArea: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '14px',
   },
 });
 
@@ -145,158 +81,6 @@ interface State {
   rowsPerPage: number;
   lastFetchTime: number;
 }
-
-const QueryDetails = (props: { job: Job }) => {
-  const { details, created, errored, query } = props.job;
-  const rows = [
-    {
-      name: 'Job ID',
-      value: `${details.project}:${details.location}.${details.id}`,
-    },
-    { name: 'User', value: details.user },
-    { name: 'Location', value: details.location },
-    { name: 'Creation time', value: formatDate(details.created) },
-    { name: 'Start time', value: formatDate(details.started) },
-    { name: 'End time', value: formatDate(details.ended) },
-    {
-      name: 'Duration',
-      value: details.duration
-        ? `${details.duration.toFixed(1)} sec`
-        : '0.0 sec',
-    },
-    {
-      name: 'Bytes processed',
-      value: details.bytesProcessed
-        ? formatBytes(details.bytesProcessed, 2)
-        : details.from_cache
-        ? '0 B (results cached)'
-        : '0 B',
-    },
-    { name: 'Job priority', value: details.priority },
-    { name: 'Destination table', value: details.destination },
-    { name: 'Use legacy SQL', value: details.useLegacySql ? 'true' : 'false' },
-  ];
-  return (
-    <div>
-      <div className={localStyles.detailsTopArea}>
-        <div>
-          {!errored && `Query completed in ${details.duration.toFixed(3)} sec`}
-          <div className={localStyles.queryTime}>{formatTime(created)}</div>
-        </div>
-        <button
-          className={localStyles.openQueryButton}
-          onClick={() => {
-            const queryId = generateQueryId();
-            WidgetManager.getInstance().launchWidget(
-              QueryEditorTabWidget,
-              'main',
-              queryId,
-              undefined,
-              [queryId, query]
-            );
-          }}
-        >
-          <Icon
-            style={{
-              display: 'flex',
-              alignContent: 'center',
-            }}
-          >
-            <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
-          </Icon>
-          Open query in editor
-        </button>
-      </div>
-
-      {errored && (
-        <InfoCard
-          color={gColor('RED')}
-          message={details.errorResult.message}
-          icon={<Error />}
-        />
-      )}
-
-      <div style={{ marginBottom: '12px' }}>
-        <ReadOnlyEditor query={query} />
-      </div>
-
-      <StripedRows rows={rows} />
-    </div>
-  );
-};
-
-// clickable bar when query details are not open
-const QueryBar = (props: { jobs: JobsObject; jobId: string }) => {
-  const { jobs, jobId } = props;
-  return (
-    <div className={localStyles.queryBar}>
-      <div className={localStyles.queryTime}>
-        {formatTime(jobs[jobId].created)}
-      </div>
-      {jobs[jobId].errored ? (
-        <Error
-          fontSize="inherit"
-          className={localStyles.icon}
-          style={{ fill: gColor('RED') }}
-        />
-      ) : (
-        <CheckCircle
-          fontSize="inherit"
-          className={localStyles.icon}
-          style={{ fill: gColor('GREEN') }}
-        />
-      )}
-      <div className={localStyles.query}>{jobs[jobId].query}</div>
-      <button
-        className={localStyles.openQueryButtonSmall}
-        onClick={event => {
-          event.stopPropagation();
-          const queryId = generateQueryId();
-          WidgetManager.getInstance().launchWidget(
-            QueryEditorTabWidget,
-            'main',
-            queryId,
-            undefined,
-            [queryId, jobs[jobId].query]
-          );
-        }}
-      >
-        <Icon
-          style={{
-            display: 'flex',
-            alignContent: 'center',
-          }}
-        >
-          <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
-        </Icon>
-      </button>
-    </div>
-  );
-};
-
-// clickable bar when query details are open
-const QueryStatus = props => {
-  const failed = props.failed;
-  if (failed) {
-    return (
-      <div
-        className={localStyles.queryStatusBar}
-        style={{ backgroundColor: gColor('RED') }}
-      >
-        Query failed
-      </div>
-    );
-  } else {
-    return (
-      <div
-        className={localStyles.queryStatusBar}
-        style={{ backgroundColor: gColor('GREEN') }}
-      >
-        Query succeeded
-      </div>
-    );
-  }
-};
 
 class QueryHistoryPanel extends React.Component<Props, State> {
   private static queryHistory: QueryHistory | undefined = undefined;
@@ -474,7 +258,7 @@ class QueryHistoryPanel extends React.Component<Props, State> {
                           }}
                         >
                           {openJob === jobId ? (
-                            <QueryStatus failed={jobs[jobId].errored} />
+                            <QueryStatusBar failed={jobs[jobId].errored} />
                           ) : (
                             <QueryBar jobId={jobId} jobs={jobs} />
                           )}
