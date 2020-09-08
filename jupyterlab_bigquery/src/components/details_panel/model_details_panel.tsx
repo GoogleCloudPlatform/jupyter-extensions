@@ -15,6 +15,8 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { localStyles } from './dataset_details_panel';
 import { formatDate } from '../../utils/formatters';
+import { getStarterQuery } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
 
 interface Props {
   modelDetailsService: ModelDetailsService;
@@ -65,10 +67,32 @@ const displayOptionNames = {
 };
 
 const StyledMenuItem = withStyles({
-  selected: {
-    color: '#1A73E8',
+  root: {
+    color: 'var(--jp-ui-font-color1)',
+    backgroundColor: 'var(--jp-layout-color0)',
+    '&$selected': {
+      backgroundColor: 'var(--jp-layout-color2)',
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)',
+      },
+    },
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)',
+    },
   },
+  selected: {},
 })(MenuItem);
+
+// TODO: style for dark mode. Currently the container is still constant white.
+const StyledSelect = withStyles({
+  root: {
+    marginLeft: '36px',
+    color: 'var(--jp-ui-font-color1)',
+  },
+  icon: {
+    color: 'var(--jp-ui-font-color1)',
+  },
+})(Select);
 
 export default class ModelDetailsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -173,14 +197,13 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
               {this.props.modelName}
               {this.state.details.details.training_runs &&
               this.state.details.details.training_runs.length > 1 ? (
-                <Select
+                <StyledSelect
                   value={this.state.currentRun}
                   onChange={event => {
                     this.setState({ currentRun: event.target.value as number });
                     this.getTrainingRunDetails(event.target.value as number);
                   }}
                   disableUnderline
-                  style={{ marginLeft: '36px' }}
                 >
                   {this.state.details.details.training_runs &&
                     this.state.details.details.training_runs.map(
@@ -195,7 +218,7 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
                         );
                       }
                     )}
-                </Select>
+                </StyledSelect>
               ) : (
                 undefined
               )}
@@ -208,14 +231,14 @@ export default class ModelDetailsPanel extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [
-                    queryId,
-                    `SELECT * FROM ML.PREDICT(MODEL \`${this.props.modelId}\`, )`,
-                  ]
+                  [queryId, getStarterQuery('MODEL', this.props.modelId)]
                 );
               }}
               startIcon={<Code />}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
+              style={{
+                textTransform: 'none',
+                color: gColor('BLUE'),
+              }}
             >
               Query model
             </Button>

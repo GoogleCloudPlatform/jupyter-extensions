@@ -35,6 +35,7 @@ import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
+import { isDarkTheme } from '../../../utils/dark_theme';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -119,7 +120,7 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid rgb(218, 220, 224)',
+    border: '1px solid var(--jp-border-color2)',
   },
   message: {
     display: 'flex',
@@ -130,7 +131,7 @@ const styleSheet = stylesheet({
     marginRight: '0.5rem',
   },
   wholeEditorInCell: {
-    border: '1px solid rgb(218, 220, 224)',
+    border: '1px solid var(--jp-border-color2)',
   },
   pendingStatus: {
     display: 'flex',
@@ -145,8 +146,11 @@ const styleSheet = stylesheet({
     paddingBottom: '5px',
     paddingLeft: '10px',
     paddingRight: '10px',
-    backgroundColor: 'rgb(248, 249, 250)',
-    borderBottom: '1px solid rgb(218, 220, 224)',
+    backgroundColor: 'var(--jp-layout-color0)',
+    borderBottom: '1px solid var(--jp-border-color2)',
+  },
+  icon: {
+    color: 'var(--jp-layout-color3)',
   },
 });
 
@@ -234,11 +238,11 @@ class QueryTextEditor extends React.Component<
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
       this.monacoInstance.editor.defineTheme('sqlTheme', {
-        base: 'vs',
+        base: isDarkTheme() ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [],
         colors: {
-          'editorGutter.background': '#f8f9fa',
+          'editorGutter.background': isDarkTheme() ? '#111111' : '#f8f9fa',
         },
       });
     });
@@ -626,7 +630,7 @@ class QueryTextEditor extends React.Component<
           copy(query.trim());
         }}
       >
-        <FileCopyOutlined fontSize="small" />
+        <FileCopyOutlined fontSize="small" className={styleSheet.icon} />
       </IconButton>
     );
   }

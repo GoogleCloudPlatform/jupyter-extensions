@@ -39,9 +39,11 @@ describe('DetailsService', () => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    detailsService = new DetailsService(transportService);
-    detailsService.projectId = TEST_PROJECT;
-    detailsService.zone = TEST_ZONE;
+    detailsService = new DetailsService(
+      transportService,
+      TEST_PROJECT,
+      TEST_ZONE
+    );
   });
 
   describe('Get Machine Types', () => {

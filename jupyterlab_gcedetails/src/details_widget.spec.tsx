@@ -15,21 +15,20 @@
  */
 
 jest.mock('@jupyterlab/apputils');
-import { shallow } from 'enzyme';
-import * as React from 'react';
 
+import * as React from 'react';
+import { shallow } from 'enzyme';
 import { VmDetails } from './details_widget';
-import { STYLES } from './data/styles';
-import { ServerWrapper } from './components/server_wrapper';
 import {
   DETAILS_RESPONSE,
   MACHINE_TYPES_RESPONSE,
   ACCELERATOR_TYPES_RESPONSE,
 } from './test_helpers';
-import { NotebooksService } from './service/notebooks_service';
-import { ClientTransportService } from 'gcp_jupyterlab_shared';
+import { STYLES } from './data/styles';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
+import { ServerWrapper } from './components/server_wrapper';
 import { DetailsService } from './service/details_service';
+import { NotebooksService } from './service/notebooks_service';
 import { PriceService } from './service/price_service';
 
 describe('VmDetails', () => {
@@ -39,15 +38,12 @@ describe('VmDetails', () => {
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
   } as unknown) as ServerWrapper;
-  const mockClientTransportationService = new ClientTransportService();
-  const mockNotebookService = new NotebooksService(
-    mockClientTransportationService
-  );
   const mockDetailsService = ({
     getMachineTypes: mockGetMachineTypes,
     getAcceleratorTypes: mockGetAcceleratorTypes,
   } as unknown) as DetailsService;
-  const mockPriceService = new PriceService();
+  const mockNotebookService = {} as NotebooksService;
+  const mockPriceService = {} as PriceService;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -70,12 +66,13 @@ describe('VmDetails', () => {
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
-        notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
     expect(vmDetails).toMatchSnapshot('Retrieving');
+
     await details;
     await Promise.all([machineTypes, acceleratorTypes]);
 
@@ -93,17 +90,19 @@ describe('VmDetails', () => {
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
-        notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
-
     expect(vmDetails).toMatchSnapshot('Received Error');
+
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
+
     expect(vmDetails.state('dialogDisplayed')).toEqual(true);
     expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
+
     const hardwareConfigurationDialog = vmDetails.find(
       HardwareConfigurationDialog
     );
@@ -122,16 +121,18 @@ describe('VmDetails', () => {
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
-        notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
+
     await details;
     await Promise.all([machineTypes, acceleratorTypes]);
 
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
+
     expect(vmDetails.state('dialogDisplayed')).toEqual(true);
     expect(vmDetails.find(HardwareConfigurationDialog)).toHaveLength(1);
   });
@@ -148,11 +149,12 @@ describe('VmDetails', () => {
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
-        notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
+
     await details;
     await Promise.all([machineTypes, acceleratorTypes]);
 
@@ -200,11 +202,12 @@ describe('VmDetails', () => {
     const vmDetails = shallow(
       <VmDetails
         detailsServer={mockServerWrapper}
-        notebookService={mockNotebookService}
         detailsService={mockDetailsService}
+        notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
+
     await details;
     await Promise.all([machineTypes, acceleratorTypes]);
 

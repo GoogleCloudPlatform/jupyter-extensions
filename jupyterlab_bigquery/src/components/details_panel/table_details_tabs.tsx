@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button } from '@material-ui/core';
 import { Code, Info } from '@material-ui/icons';
+import { stylesheet } from 'typestyle';
 
 import {
   TableDetailsService,
@@ -14,7 +15,8 @@ import TablePreviewPanel from './table_preview';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { stylesheet } from 'typestyle';
+import { getStarterQuery } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 import InfoCard from '../shared/info_card';
 
@@ -96,14 +98,14 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [
-                    queryId,
-                    `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
-                  ]
+                  [queryId, getStarterQuery('TABLE', this.props.table_id)]
                 );
               }}
               startIcon={<Code />}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
+              style={{
+                textTransform: 'none',
+                color: gColor('BLUE'),
+              }}
             >
               Query table
             </Button>
@@ -128,7 +130,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                 button={
                   <Button
                     size="small"
-                    style={{ textTransform: 'none' }}
+                    style={{
+                      textTransform: 'none',
+                      color: 'var(--jp-ui-font-color1)',
+                    }}
                     onClick={() => {
                       this.setState({ showPartitionCard: false });
                     }}
@@ -141,9 +146,10 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
             <StyledTabs
               value={this.state.currentTab}
               onChange={this.handleChange.bind(this)}
+              color={gColor('BLUE')}
             >
-              <StyledTab label="Details" />
-              <StyledTab label="Preview" />
+              <StyledTab label="Details" color={gColor('BLUE')} />
+              <StyledTab label="Preview" color={gColor('BLUE')} />
             </StyledTabs>
             <TabPanel
               value={this.state.currentTab}

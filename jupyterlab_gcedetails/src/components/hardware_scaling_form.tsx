@@ -15,7 +15,6 @@
  */
 
 import * as React from 'react';
-
 import {
   css,
   CheckboxInput,
@@ -24,6 +23,7 @@ import {
   Message,
 } from 'gcp_jupyterlab_shared';
 import { stylesheet, classes } from 'typestyle';
+import { ActionBar } from './action_bar';
 import { NestedSelect } from './machine_type_select';
 import { SelectInput } from './select_input';
 import { STYLES } from '../data/styles';
@@ -44,14 +44,17 @@ import {
   optionToMachineType,
   machineTypeToOption,
 } from '../data/machine_types';
-import { ActionBar } from './action_bar';
 import { PriceService } from '../service/price_service';
+import {
+  HardwareConfigurationDescription,
+  TITLE,
+} from './hardware_configuration_description';
 
 interface Props {
-  onSubmit: (configuration: HardwareConfiguration) => void;
-  onDialogClose: () => void;
   details: Details;
   priceService: PriceService;
+  onSubmit: (configuration: HardwareConfiguration) => void;
+  onDialogClose: () => void;
 }
 
 interface State {
@@ -92,17 +95,15 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     super(props);
 
     this.oldConfiguration = detailsToHardwareConfiguration(props.details);
-
     this.state = {
       configuration: this.oldConfiguration,
-      // update the gpu count options based on the selected gpu type
+      // Update the gpu count options based on the selected gpu type
       gpuCountOptions: getGpuCountOptionsList(
         props.details.acceleratorTypes,
         props.details.gpu.name
       ),
       newConfigurationPrice: undefined,
     };
-
     this.gpuTypeOptions = getGpuTypeOptionsList(
       props.details.acceleratorTypes,
       props.details.instance.cpuPlatform
@@ -118,20 +119,17 @@ export class HardwareScalingForm extends React.Component<Props, State> {
    */
   private canAttachGpu(machineTypeName: string): boolean {
     const { framework } = this.props.details.instance.attributes;
-    const isValidFramework = !GPU_INCOMPATIBLE_FRAMEWORKS.some(
-      incompatibleFramework => framework.startsWith(incompatibleFramework)
-    );
+
+    /** Assume framework is compatible if it can't be fetched as the
+     * reshaping process will catch this error anyways.
+     */
+    const isValidFramework = framework
+      ? !GPU_INCOMPATIBLE_FRAMEWORKS.some(incompatibleFramework =>
+          framework.startsWith(incompatibleFramework)
+        )
+      : true;
     const isValidMachineType = machineTypeName.startsWith(N1_MACHINE_PREFIX);
     return isValidFramework && isValidMachineType;
-  }
-
-  private gpuRestrictionMessage() {
-    return (
-      <p className={STYLES.paragraph}>
-        {GPU_RESTRICTION_MESSAGE}
-        <LearnMoreLink href={GPU_RESTRICTION_LINK} />
-      </p>
-    );
   }
 
   private onAttachGpuChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -197,7 +195,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   private submitForm() {
     const configuration = { ...this.state.configuration };
     if (!configuration.attachGpu) {
-      /*
+      /**
        * If configuration originally had a GPU we want to explicity attach an
        * accelerator of type NO_ACCELERATOR_TYPE through the Notebooks API to remove it
        */
@@ -248,6 +246,15 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     );
   }
 
+  private gpuRestrictionMessage() {
+    return (
+      <p className={STYLES.paragraph}>
+        {GPU_RESTRICTION_MESSAGE}
+        <LearnMoreLink href={GPU_RESTRICTION_LINK} />
+      </p>
+    );
+  }
+
   render() {
     const { onDialogClose, details } = this.props;
     const {
@@ -270,7 +277,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
     return (
       <div className={STYLES.containerPadding}>
         <div className={FORM_STYLES.formContainer}>
-          <span className={STYLES.heading}>Hardware Scaling Limits</span>
+          <span className={STYLES.heading}>{TITLE}</span>
           <HardwareConfigurationDescription />
           <span className={STYLES.subheading}>Machine Configuration</span>
           <NestedSelect
@@ -342,19 +349,4 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       </div>
     );
   }
-}
-
-const DESCRIPTION = `The hardware scaling limits you configured will be the
-max capacity allowed for this notebook. You'll only pay for the time the 
-hardware resources are on. `;
-const LINK = 'https://cloud.google.com/compute/all-pricing';
-
-// tslint:disable-next-line:enforce-name-casing
-export function HardwareConfigurationDescription() {
-  return (
-    <p className={STYLES.paragraph}>
-      {DESCRIPTION}
-      <LearnMoreLink href={LINK} />
-    </p>
-  );
 }

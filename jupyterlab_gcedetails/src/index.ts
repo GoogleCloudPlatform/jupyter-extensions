@@ -18,7 +18,6 @@
 import '../style/index.css';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { VmDetailsWidget } from './details_widget';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
@@ -28,9 +27,10 @@ import {
   ClientTransportService,
   ServerProxyTransportService,
 } from 'gcp_jupyterlab_shared';
-import { NotebooksService } from './service/notebooks_service';
-import { extractLast } from './data/data';
+import { VmDetailsWidget } from './details_widget';
 import { DetailsService } from './service/details_service';
+import { extractLast } from './data/data';
+import { NotebooksService } from './service/notebooks_service';
 import { PriceService } from './service/price_service';
 import { ServerWrapper } from './components/server_wrapper';
 

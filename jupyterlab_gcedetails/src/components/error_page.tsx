@@ -15,7 +15,6 @@
  */
 
 import * as React from 'react';
-
 import { Message, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import { ConfigurationError, ErrorType } from './hardware_scaling_status';
 import { Instance } from '../service/notebooks_service';
