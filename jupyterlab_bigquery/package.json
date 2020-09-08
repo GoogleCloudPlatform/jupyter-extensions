@@ -31,7 +31,7 @@
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
-    "test": "jest --coverage --passWithNoTests",
+    "test": "jest --coverage",
     "test-python": "../scripts/run_python_tests.sh coverage",
     "test-watch": "jest --watch",
     "watch": "tsc -b -w"
@@ -89,6 +89,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
+    "eslint": "^7.8.1",
     "jest": "^26.4.2",
     "jest-junit": "^10.0.0",
     "redux-devtools": "^3.5.0",

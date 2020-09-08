@@ -1,0 +1,700 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailsPanel Renders a read-only editor for views 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          description of view
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          <div
+            className="labelContainer_f14ovan"
+          >
+            <WithStyles(Component)
+              darkmode={false}
+              key="0"
+              label="label: value"
+              size="small"
+            />
+            <WithStyles(Component)
+              darkmode={false}
+              key="1"
+              label="another label: another value"
+              size="small"
+            />
+          </div>
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          View info
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Schema
+        </div>
+        Table does not have a schema.
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Query
+        </div>
+        <ReadOnlyEditor
+          query="SELECT * FROM \`projectId.datasetId.tableId\` LIMIT 100"
+        />
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for datasets with description and labels 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          description of dataset
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          <div
+            className="labelContainer_f14ovan"
+          >
+            <WithStyles(Component)
+              darkmode={false}
+              key="0"
+              label="label: value"
+              size="small"
+            />
+            <WithStyles(Component)
+              darkmode={false}
+              key="1"
+              label="another label: another value"
+              size="small"
+            />
+          </div>
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Dataset info
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for datasets without description and labels 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Dataset info
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for models with label columns and feature columns 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          description of model
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          <div
+            className="labelContainer_f14ovan"
+          >
+            <WithStyles(Component)
+              darkmode={false}
+              key="0"
+              label="label: value"
+              size="small"
+            />
+            <WithStyles(Component)
+              darkmode={false}
+              key="1"
+              label="another label: another value"
+              size="small"
+            />
+          </div>
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Model details
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Training options
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "training option",
+                "value": "training value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Label columns
+        </div>
+        <div>
+          <Component
+            schema={
+              Array [
+                Object {
+                  "name": "predicted_field",
+                  "type": "FLOAT",
+                },
+              ]
+            }
+          />
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Feature columns
+        </div>
+        <div>
+          <Component
+            schema={
+              Array [
+                Object {
+                  "name": "feature_0",
+                  "type": "INTEGER",
+                },
+                Object {
+                  "name": "feature_1",
+                  "type": "FLOAT",
+                },
+              ]
+            }
+          />
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for models without label columns or feature columns 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Model details
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Training options
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "training option",
+                "value": "training value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Label columns
+        </div>
+        <div>
+          Model does not have any label columns.
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Feature columns
+        </div>
+        <div>
+          Model does not have any feature columns.
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for tables with all values populated 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          description of table
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          <div
+            className="labelContainer_f14ovan"
+          >
+            <WithStyles(Component)
+              darkmode={false}
+              key="0"
+              label="label: value"
+              size="small"
+            />
+            <WithStyles(Component)
+              darkmode={false}
+              key="1"
+              label="another label: another value"
+              size="small"
+            />
+          </div>
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Table info
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Schema
+        </div>
+        <Component
+          schema={
+            Array [
+              Object {
+                "description": "this field is a record",
+                "mode": "NULLABLE",
+                "name": "record",
+                "type": "RECORD",
+              },
+              Object {
+                "description": "this field is a string and a child",
+                "mode": "NULLABLE",
+                "name": "record.child",
+                "type": "STRING",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
+
+exports[`DetailsPanel Renders for tables without schema 1`] = `
+<div
+  className="panel_f1x07ye"
+>
+  <div
+    className="detailsBody_fmw8kkq"
+  >
+    <WithStyles(ForwardRef(Grid))
+      container={true}
+      spacing={4}
+    >
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Description
+        </div>
+        <div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={6}
+      >
+        <div>
+          <div
+            className="title_fvro9lr"
+          >
+            Labels
+          </div>
+          None
+        </div>
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Table info
+        </div>
+        <Component
+          rows={
+            Array [
+              Object {
+                "name": "name",
+                "value": "value",
+              },
+              Object {
+                "name": "another name",
+                "value": "another value",
+              },
+            ]
+          }
+        />
+      </WithStyles(ForwardRef(Grid))>
+      <WithStyles(ForwardRef(Grid))
+        item={true}
+        xs={12}
+      >
+        <div
+          className="title_fvro9lr"
+        >
+          Schema
+        </div>
+        Table does not have a schema.
+      </WithStyles(ForwardRef(Grid))>
+    </WithStyles(ForwardRef(Grid))>
+  </div>
+</div>
+`;
