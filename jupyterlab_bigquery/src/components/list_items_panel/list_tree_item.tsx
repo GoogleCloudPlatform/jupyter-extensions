@@ -190,7 +190,7 @@ export class ModelResource extends Resource<ModelProps> {
   }
 
   openModelDetails = (event, model) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new ModelDetailsService();
     const widgetType = ModelDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -203,6 +203,10 @@ export class ModelResource extends Resource<ModelProps> {
   };
 
   contextMenuItems = [
+    {
+      label: 'Open model details',
+      handler: dataTreeItem => this.openModelDetails(null, dataTreeItem),
+    },
     {
       label: 'Query model',
       handler: dataTreeItem => this.queryResource(dataTreeItem),
@@ -245,7 +249,7 @@ export class TableResource extends Resource<TableProps> {
   }
 
   openTableDetails = (event, table: Table) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new TableDetailsService();
     const widgetType = TableDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -259,7 +263,7 @@ export class TableResource extends Resource<TableProps> {
   };
 
   openViewDetails = (event, view) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new ViewDetailsService();
     const widgetType = ViewDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -281,6 +285,10 @@ export class TableResource extends Resource<TableProps> {
 
   tableContextMenuItems = [
     {
+      label: 'Open table details',
+      handler: dataTreeItem => this.openTableDetails(null, dataTreeItem),
+    },
+    {
       label: 'Query table',
       handler: dataTreeItem => this.queryResource(dataTreeItem),
     },
@@ -295,6 +303,10 @@ export class TableResource extends Resource<TableProps> {
   ];
 
   public viewContextMenuItems = [
+    {
+      label: 'Open view details',
+      handler: dataTreeItem => this.openViewDetails(null, dataTreeItem),
+    },
     {
       label: 'Query view',
       handler: dataTreeItem => this.queryResource(dataTreeItem),
@@ -428,6 +440,10 @@ export class DatasetResource extends Resource<DatasetProps> {
   };
 
   contextMenuItems = [
+    {
+      label: 'Open dataset details',
+      handler: dataTreeItem => this.openDatasetDetails(null, dataTreeItem),
+    },
     {
       label: 'Copy dataset ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
