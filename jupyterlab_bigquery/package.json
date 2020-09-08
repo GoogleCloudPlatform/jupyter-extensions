@@ -78,27 +78,32 @@
     "@babel/core": "^7.8.7",
     "@babel/preset-env": "^7.8.7",
     "@jupyterlab/testutils": "^1.2.2",
+    "@testing-library/react": "^11.0.0",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/fs-extra": "^8.1.0",
     "@types/jest": "^26.0.10",
     "@types/react": "~16.8.18",
     "@types/react-dom": "^16.8.4",
+    "@types/react-test-renderer": "^16.9.3",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
+    "eslint": "^7.8.1",
     "jest": "^26.4.2",
     "jest-junit": "^10.0.0",
     "redux-devtools": "^3.5.0",
+    "redux-mock-store": "^1.5.4",
     "rimraf": "^3.0.0",
     "ts-jest": "^26.2.0",
     "typescript": "^3.8.3"
   },
   "peerDependencies": {
     "react": "~16.8.4",
-    "react-dom": "~16.8.4"
+    "react-dom": "~16.8.4",
+    "react-test-renderer": "^16.8.4"
   },
   "jupyterlab": {
     "extension": true,
