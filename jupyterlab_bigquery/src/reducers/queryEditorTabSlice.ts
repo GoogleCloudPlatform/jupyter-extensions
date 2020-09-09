@@ -40,6 +40,7 @@ const queryEditorTabSlice = createSlice({
       newQueryState.query = queryResult.query;
       newQueryState.project = queryResult.project;
       newQueryState.contentLen = queryResult.contentLen;
+      newQueryState.duration = queryResult.duration;
 
       state.queries = { ...state.queries, [queryId]: newQueryState };
     },

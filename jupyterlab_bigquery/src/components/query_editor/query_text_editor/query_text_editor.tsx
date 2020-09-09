@@ -68,6 +68,7 @@ interface QueryResponseType {
   labels: string;
   bytesProcessed: number;
   project: string;
+  duration: number;
 }
 
 export interface QueryResult {
@@ -77,6 +78,7 @@ export interface QueryResult {
   project: string;
   queryId: QueryId;
   query: string;
+  duration: number;
 }
 
 export type QueryContent = Array<Array<unknown>>;
@@ -332,8 +334,6 @@ class QueryTextEditor extends React.Component<
 
               this.jsonWorker.postMessage(contentBuffer, [contentBuffer]);
             });
-
-            // await holdProm;
           } else {
             const processedContent = JSON.parse(content);
             this.queryManager.updateSlot(this.queryId, processedContent);
