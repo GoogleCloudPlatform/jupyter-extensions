@@ -227,17 +227,18 @@ export class BQTable extends React.Component<Props, State> {
             </TableBody>
           </Table>
         </div>
-        {/* TODO(cxjia): hide table pagination when result rows <= 10 */}
-        <StyledPagination
-          rowsPerPageOptions={[10, 30, 50, 100, 200]}
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={this.handleChangePage.bind(this)}
-          onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
-          ActionsComponent={TablePaginationActions}
-          component="div"
-        />
+        {rows.length > 10 && (
+          <StyledPagination
+            rowsPerPageOptions={[10, 30, 50, 100, 200]}
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={this.handleChangePage.bind(this)}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
+            ActionsComponent={TablePaginationActions}
+            component="div"
+          />
+        )}
       </>
     );
   }
