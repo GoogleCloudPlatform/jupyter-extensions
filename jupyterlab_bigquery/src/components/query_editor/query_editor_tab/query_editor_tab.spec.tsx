@@ -13,23 +13,13 @@ jest.mock('../../../utils/QueryResultsManager.ts', () => {
   };
 });
 
-import { Provider } from 'react-redux';
-import configureMockStore from 'redux-mock-store';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
-import { QueryEditorTab } from './query_editor_tab';
-import {
-  QueryTextEditor,
-  QueryResult,
-} from '../query_text_editor/query_text_editor';
-import { QueryResults } from '../query_text_editor/query_editor_results';
+import { QueryEditorTab, QueryEditorTabProps } from './query_editor_tab';
+import QueryTextEditor from '../query_text_editor/query_text_editor';
+import QueryResults from '../query_text_editor/query_editor_results';
 
 describe('Query editor tab', () => {
-  let props: any;
-  let store: any;
-
-  const mockStore = configureMockStore();
-
   const iniProps = {
     isVisible: true,
     queryId: '123123',
@@ -37,51 +27,34 @@ describe('Query editor tab', () => {
   };
 
   it('empty query', () => {
-    const state = {
-      queryEditorTab: { queries: ([] as unknown) as QueryResult },
-    };
+    const props = (Object.assign(
+      {},
+      iniProps
+    ) as unknown) as QueryEditorTabProps;
 
-    store = mockStore(() => state);
-
-    props = Object.assign({}, iniProps);
-
-    const wrapper = mount(
-      <Provider store={store}>
-        <QueryEditorTab {...props} />
-      </Provider>
-    );
+    const wrapper = shallow(<QueryEditorTab {...props} />);
 
     expect(wrapper.find(QueryTextEditor).exists()).toBeTruthy();
     expect(wrapper.find(QueryResults).exists()).toBeFalsy();
   });
-  it('some query', async () => {
-    const state = {
-      queryEditorTab: {
-        queries: {
-          [iniProps.queryId]: {
-            contentLen: 1,
-            labels: ['a'],
-            bytesProcessed: 100,
-            project: 'project',
-            queryId: iniProps.queryId,
-            query: 'query',
-          },
-        },
-      },
-    };
+  it('some query', () => {
     slotSize = 1;
 
-    store = mockStore(() => state);
+    const props = (Object.assign(
+      {
+        [iniProps.queryId]: {
+          contentLen: 1,
+          labels: ['a'],
+          bytesProcessed: 100,
+          project: 'project',
+          queryId: iniProps.queryId,
+          query: 'query',
+        },
+      },
+      iniProps
+    ) as unknown) as QueryEditorTabProps;
 
-    props = Object.assign({}, iniProps);
-
-    const wrapper = mount(
-      <Provider store={store}>
-        <QueryEditorTab {...props} />
-      </Provider>
-    );
-
-    await store.dispatch({ type: 'ANY' });
+    const wrapper = shallow(<QueryEditorTab {...props} />);
 
     expect(wrapper.find(QueryTextEditor).exists()).toBeTruthy();
     expect(wrapper.find(QueryResults).exists()).toBeTruthy();
