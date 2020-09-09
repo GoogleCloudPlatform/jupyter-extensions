@@ -17,10 +17,12 @@ SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
 
 def format_date(date):
+  '''Returns a date object in ISO format as a string.'''
   return date.isoformat().__str__()
 
 
 def format_detail_field(formatted_schema, field, field_name):
+  '''Recursively appends names of child fields if field is a record, adding period delimiters.'''
   if field.field_type == 'RECORD':
     formatted_schema.append({
         'name': field_name + field.name,
@@ -41,6 +43,7 @@ def format_detail_field(formatted_schema, field, field_name):
 
 
 def format_detail_schema(schema):
+  '''Formats all schema field names for display in details panel schema table.'''
   formatted_schema = []
   for field in schema:
     format_detail_field(formatted_schema, field, '')
@@ -48,6 +51,7 @@ def format_detail_schema(schema):
 
 
 def format_preview_field(formatted_fields, field, field_name):
+  '''Formats field header by recursively listing child fields, or just listing the field name if it is a repeated field.'''
   if field.field_type == 'RECORD':
     if field.mode == 'REPEATED':
       formatted_fields.append(field.name)
@@ -60,6 +64,7 @@ def format_preview_field(formatted_fields, field, field_name):
 
 
 def format_preview_fields(schema):
+  '''Formats table preview header cells.'''
   formatted_fields = []
   for field in schema:
     format_preview_field(formatted_fields, field, '')
@@ -67,6 +72,7 @@ def format_preview_fields(schema):
 
 
 def format_preview_value(value):
+  '''Formats a table preview cell value so that it can be displayed as a string.'''
   if value is None:
     return None
   elif isinstance(value, (DoubleValue, BoolValue)):
@@ -89,6 +95,7 @@ def format_preview_value(value):
 
 
 def format_preview_rows(rows, fields):
+  '''Formats table preview body cells.'''
   formatted_rows = []
   for row in rows:
     formatted_row = []
@@ -99,6 +106,7 @@ def format_preview_rows(rows, fields):
 
 
 def parallel_format_preview_rows(rows, fields, num_threads=6, pool=None):
+  '''Formats table preview body cells in parallel.'''
   m_parallel_format_row = partial(parallel_format_row, fields=fields)
   if pool is None:
     with Pool(num_threads) as p_pool:
@@ -111,6 +119,7 @@ def parallel_format_preview_rows(rows, fields, num_threads=6, pool=None):
 
 
 def parallel_format_row(row, fields):
+  '''Formats an individual table preview row, adapted for parallel processing.'''
   formatted_row = []
 
   for field in fields:
@@ -120,6 +129,7 @@ def parallel_format_row(row, fields):
 
 
 def check_repeated(value, field, formatted_row):
+  '''Flattens a value if respective field is not repeated, otherwise just dumps the value as a string.'''
   if field.mode == 'REPEATED':
     formatted_row.append(json.dumps(value, default=format_preview_value))
   else:
@@ -127,6 +137,7 @@ def check_repeated(value, field, formatted_row):
 
 
 def handle_records(value, field, formatted_row):
+  '''Flattens records into individual preview cells by recursively appending children fields as cells.'''
   if field.field_type == 'RECORD':
     if value is None:
       for sub_field in field.fields:
@@ -160,6 +171,7 @@ class BigQueryService:
     return cls._instance
 
   def get_dataset_details(self, dataset_id):
+    '''Returns basic metadata for a dataset.'''
     dataset = self._client.get_dataset(dataset_id)
     return {
         'details': {
@@ -189,6 +201,7 @@ class BigQueryService:
     }
 
   def get_table_details(self, table_id):
+    '''Returns basic metadata for a table.'''
     table = self._client.get_table(table_id)
     return {
         'details': {
@@ -227,6 +240,7 @@ class BigQueryService:
     }
 
   def get_table_preview(self, table_id):
+    '''Returns 100 preview rows for a table, with records flattened unless they are repeated.'''
     table = self._client.get_table(table_id)
     rows = self._client.list_rows(table, max_results=100)
     fields = rows.schema
@@ -237,6 +251,7 @@ class BigQueryService:
     }
 
   def get_view_details(self, view_id):
+    '''Returns basic metadata for a view.'''
     view = self._client.get_table(view_id)
 
     return {
@@ -273,6 +288,7 @@ class BigQueryService:
     }
 
   def get_model_details(self, model_id):
+    '''Returns basic metadata for a model, as well as an array of training run dates.'''
     model = self._client.get_model(model_id)
 
     return {
@@ -314,13 +330,15 @@ class BigQueryService:
             } for feat_col in model.feature_columns],
             'training_runs': [
                 format_date(
-                    datetime.datetime.fromtimestamp(run.start_time.seconds, datetime.timezone.utc))
+                    datetime.datetime.fromtimestamp(run.start_time.seconds,
+                                                    datetime.timezone.utc))
                 for run in model.training_runs
             ]
         }
     }
 
   def get_training_run_details(self, model_id, run_index):
+    '''Returns basic details on an individual training run for a model.'''
     model = self._client.get_model(model_id)
     options = model.training_runs[run_index].training_options
 

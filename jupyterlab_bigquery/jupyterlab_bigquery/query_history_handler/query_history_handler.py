@@ -16,6 +16,7 @@ def create_bigquery_client():
 
 
 def format_value(value):
+  '''Formats non-string values so they can be properly displayed.'''
   if value is None:
     return None
   elif isinstance(value, bytes):
@@ -36,6 +37,7 @@ def format_value(value):
 
 
 def get_table(client, tableRef):
+  '''Gets a table ID from a particular table ref.'''
   try:
     table_id = client.get_table(tableRef).id
     return table_id
@@ -44,6 +46,7 @@ def get_table(client, tableRef):
 
 
 def list_jobs(client, project, lastFetchTime=None):
+  '''Returns all jobs that have type 'query' in chronological order.'''
   if lastFetchTime is None:
     jobs = list(client.list_jobs(project))
   else:
@@ -68,6 +71,7 @@ def list_jobs(client, project, lastFetchTime=None):
 
 
 def get_job_details(client, job_id):
+  '''Returns details about a specific job.'''
   job = client.get_job(job_id)
 
   job_details = {
@@ -94,7 +98,7 @@ def get_job_details(client, job_id):
 
 
 class QueryHistoryHandler(APIHandler):
-  """Handles requests for view details."""
+  """Handles requests for query history."""
   bigquery_client = None
 
   def __init__(self, application, request, **kwargs):
@@ -124,7 +128,7 @@ class QueryHistoryHandler(APIHandler):
 
 
 class GetQueryDetailsHandler(APIHandler):
-  """Handles requests for table metadata."""
+  """Handles requests for details of a specific past query."""
   bigquery_client = None
 
   def __init__(self, application, request, **kwargs):
