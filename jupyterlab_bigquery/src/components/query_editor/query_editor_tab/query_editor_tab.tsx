@@ -55,8 +55,6 @@ class QueryEditorTab extends React.Component<
   render() {
     const showResult = this.queryManager.getSlotSize(this.queryId) > 0;
 
-    console.log(showResult);
-
     return (
       <div className={localStyles.queryTextEditorRoot}>
         <QueryTextEditor
