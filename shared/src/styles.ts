@@ -55,6 +55,7 @@ export const css = stylesheet({
     fontWeight: 500,
   },
   button: {
+    color: COLORS.base,
     backgroundColor: COLORS.white,
     borderWidth: '1px',
     borderStyle: 'solid',
