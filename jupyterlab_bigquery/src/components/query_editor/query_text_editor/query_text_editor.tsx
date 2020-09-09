@@ -79,6 +79,7 @@ export interface QueryResult {
   queryId: QueryId;
   query: string;
   duration: number;
+  queryFlags?: { [keys: string]: any };
 }
 
 export type QueryContent = Array<Array<unknown>>;
@@ -310,6 +311,7 @@ class QueryTextEditor extends React.Component<
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
           processed.query = query;
+          processed.queryFlags = this.queryFlags;
 
           // try using worker
           if (this.ifSupportWorker) {

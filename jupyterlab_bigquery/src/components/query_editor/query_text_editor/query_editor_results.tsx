@@ -8,6 +8,8 @@ import { gColor } from '../../shared/styles';
 import { Button, Typography } from '@material-ui/core';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { formatBytes } from '../../../utils/formatters';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
+import { NotebookActions } from '@jupyterlab/notebook';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -77,6 +79,42 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     window.open(url);
   }
 
+  handleDataFrameButton() {
+    const notebookTrack = WidgetManager.getInstance().getNotebookTracker();
+    const curWidget = notebookTrack.currentWidget;
+
+    const { query, queryFlags } = this.props.queryResult;
+
+    const processedFlags = {};
+    let ifEmpty = true;
+
+    for (const [k, v] of Object.entries(queryFlags)) {
+      // eslint-disable-next-line no-extra-boolean-cast
+      if (!!v) {
+        processedFlags[k] = v;
+        ifEmpty = false;
+      }
+    }
+
+    const notebook = curWidget.content;
+    NotebookActions.insertBelow(notebook);
+    const cell = notebookTrack.activeCell;
+
+    let code = '';
+    if (ifEmpty) {
+      code = `query = '${query.trim()}'\njob = client.query(query)`;
+    } else {
+      const flagsJson = JSON.stringify(processedFlags, null, 2);
+
+      code =
+        `flags=${flagsJson}\n` +
+        `job_config = bigquery.QueryJobConfig(**flags)\n` +
+        `query = '${query.trim()}'\n` +
+        `job = client.query(query, job_config=job_config)`;
+    }
+    cell.model.value.text = code;
+  }
+
   renderMessage() {
     const { duration, bytesProcessed } = this.props.queryResult;
 
@@ -102,7 +140,10 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
 
   renderDataFrameButton() {
     return (
-      <Button style={{ textTransform: 'none', color: gColor('BLUE') }}>
+      <Button
+        onClick={this.handleDataFrameButton.bind(this)}
+        style={{ textTransform: 'none', color: gColor('BLUE') }}
+      >
         Query and load as DataFrame
       </Button>
     );
