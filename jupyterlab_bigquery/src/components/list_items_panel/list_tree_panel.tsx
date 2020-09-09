@@ -41,7 +41,7 @@ import {
 import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
 import { DialogComponent, BASE_FONT } from 'gcp_jupyterlab_shared';
-import CustomSnackbar from './snackbar';
+import CustomSnackbar from '../shared/snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;
@@ -198,6 +198,10 @@ const localStyles = stylesheet({
       cursor: 'pointer',
     },
   },
+  input: {
+    backgroundColor: 'var(--jp-input-active-background)',
+    color: 'var(--jp-ui-font-color1)',
+  },
 });
 
 class ListItemsPanel extends React.Component<Props, State> {
@@ -251,10 +255,10 @@ class ListItemsPanel extends React.Component<Props, State> {
     } catch (err) {
       console.warn('Error searching', err.message);
       this.handleOpenSearchDialog();
-      this.props.openSnackbar(
-        `Error: Searching not allowed in project ${project}. 
-        Enable the Data Catalog API in this project to continue.`
-      );
+      this.props.openSnackbar({
+        message: `Error: Searching not allowed in project ${project}. 
+        Enable the Data Catalog API in this project to continue.`,
+      });
     }
   }
 
@@ -294,7 +298,9 @@ class ListItemsPanel extends React.Component<Props, State> {
           this.props.addProject(project);
         } else {
           console.log('This project does not exist');
-          this.props.openSnackbar(`Project ${newProjectId} does not exist.`);
+          this.props.openSnackbar({
+            message: `Project ${newProjectId} does not exist.`,
+          });
         }
       });
     } catch (err) {
@@ -373,7 +379,11 @@ class ListItemsPanel extends React.Component<Props, State> {
     return (
       <div className={localStyles.panel}>
         <Portal>
-          <CustomSnackbar open={snackbar.open} message={snackbar.message} />
+          <CustomSnackbar
+            open={snackbar.open}
+            message={snackbar.message}
+            autoHideDuration={snackbar.autoHideDuration}
+          />
         </Portal>
         <header className={localStyles.header}>
           <div className={localStyles.headerTitle}>BigQuery extension</div>
@@ -494,7 +504,7 @@ class ListItemsPanel extends React.Component<Props, State> {
               To start using BigQuery's Search feature, you'll need to first
               enable the{' '}
               <a
-                style={{ color: 'blue' }}
+                style={{ color: gColor('BLUE'), textDecoration: 'underline' }}
                 href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
               >
                 Google Data Catalog API
@@ -508,6 +518,7 @@ class ListItemsPanel extends React.Component<Props, State> {
           header="Pin a Project"
           open={pinProjectDialogOpen}
           onSubmit={() => this.addNewProject(pinnedProject)}
+          submitDisabled={this.state.pinnedProject === ''}
           onCancel={this.handleClosePinProject}
           onClose={this.handleClosePinProject}
           submitLabel="Pin Project"
@@ -523,6 +534,7 @@ class ListItemsPanel extends React.Component<Props, State> {
                 Enter a project name: <br /> <br />
               </p>
               <input
+                className={localStyles.input}
                 type="text"
                 value={this.state.pinnedProject}
                 onChange={this.handlePinnedProjectChange}

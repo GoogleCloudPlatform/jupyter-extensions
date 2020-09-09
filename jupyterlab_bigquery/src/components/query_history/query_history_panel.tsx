@@ -249,7 +249,8 @@ const QueryBar = (props: { jobs: JobsObject; jobId: string }) => {
       <div className={localStyles.query}>{jobs[jobId].query}</div>
       <button
         className={localStyles.openQueryButtonSmall}
-        onClick={() => {
+        onClick={event => {
+          event.stopPropagation();
           const queryId = generateQueryId();
           WidgetManager.getInstance().launchWidget(
             QueryEditorTabWidget,

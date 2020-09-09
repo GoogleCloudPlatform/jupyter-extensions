@@ -36,6 +36,8 @@ import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widge
 import { formatBytes } from '../../../utils/formatters';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { isDarkTheme } from '../../../utils/dark_theme';
+import { SnackbarState, openSnackbar } from '../../../reducers/snackbarSlice';
+import { COPIED_AUTOHIDE_DURATION } from '../../shared/snackbar';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -57,6 +59,8 @@ interface QueryTextEditorProps {
   onQueryChange?: (string) => void;
   onQueryFInish?: (Array) => void;
   showResult?: boolean;
+  snackbar: SnackbarState;
+  openSnackbar: any;
 }
 
 interface QueryResponseType {
@@ -92,6 +96,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   wrappingStrategy: 'advanced',
   minimap: { enabled: false },
   cursorStyle: 'line-thin',
+  scrollBeyondLastLine: false,
 };
 
 const styleSheet = stylesheet({
@@ -628,6 +633,10 @@ class QueryTextEditor extends React.Component<
         onClick={_ => {
           const query = this.editor.getValue();
           copy(query.trim());
+          this.props.openSnackbar({
+            message: 'Query copied',
+            autoHideDuration: COPIED_AUTOHIDE_DURATION,
+          });
         }}
       >
         <FileCopyOutlined fontSize="small" className={styleSheet.icon} />
@@ -651,7 +660,7 @@ class QueryTextEditor extends React.Component<
           );
         }}
       >
-        <FullscreenOutlined />
+        <FullscreenOutlined className={styleSheet.icon} />
       </IconButton>
     );
   }
@@ -727,14 +736,16 @@ class QueryTextEditor extends React.Component<
   }
 }
 
-const mapStateToProps = _ => {
-  return {};
+const mapStateToProps = state => {
+  const snackbar = state.snackbar;
+  return { snackbar };
 };
 
 const mapDispatchToProps = {
   updateQueryResult,
   resetQueryResult,
   deleteQueryEntry,
+  openSnackbar,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);

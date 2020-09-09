@@ -2,10 +2,10 @@ import { Dialog } from '@material-ui/core';
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { BASE_FONT, COLORS } from '../styles';
+import { BASE_FONT } from '../styles';
 import { ActionBar } from './action_bar';
 import { SubmitButton } from './submit_button';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 interface Props {
   header?: string;
@@ -24,6 +24,8 @@ interface Props {
 
 const dialogStyle = stylesheet({
   header: {
+    backgroundColor: 'var(--jp-layout-color1)',
+    color: 'var(--jp-ui-font-color1)',
     ...BASE_FONT,
     fontWeight: 500,
     fontSize: '15px',
@@ -32,8 +34,8 @@ const dialogStyle = stylesheet({
     ...csstips.center,
   },
   main: {
-    backgroundColor: COLORS.white,
-    color: COLORS.base,
+    backgroundColor: 'var(--jp-layout-color1)',
+    color: 'var(--jp-ui-font-color1)',
     padding: '16px',
     width: '480px',
     ...BASE_FONT,
@@ -41,26 +43,29 @@ const dialogStyle = stylesheet({
   },
 });
 
-function getPaper(height: string) {
-  let classes = null;
-  if (height) {
-    classes = makeStyles({
-      paper: {
-        minHeight: height,
-      },
-    });
-    return classes().paper;
-  }
-  return null;
+interface StyledDialogProps {
+  keepMounted: boolean;
+  open: boolean;
+  height?: string;
 }
+
+const StyledDialog = withStyles({
+  paper: {
+    minHeight: (props: StyledDialogProps) => props.height ?? 0,
+    backgroundColor: 'var(--jp-layout-color1)',
+    color: 'var(--jp-ui-font-color1)',
+  },
+})((props: StyledDialogProps) => {
+  return <Dialog {...props} />;
+});
 
 /** Funtional Component for a common dialog interface with cancel and submit buttons. */
 export function DialogComponent(props: Props) {
   return (
-    <Dialog
+    <StyledDialog
       keepMounted={props.keepMounted}
       open={props.open}
-      classes={{ paper: getPaper(props.height) }}
+      height={props.height}
     >
       {props.header && (
         <header className={dialogStyle.header}>{props.header}</header>
@@ -80,6 +85,6 @@ export function DialogComponent(props: Props) {
           />
         )}
       </ActionBar>
-    </Dialog>
+    </StyledDialog>
   );
 }

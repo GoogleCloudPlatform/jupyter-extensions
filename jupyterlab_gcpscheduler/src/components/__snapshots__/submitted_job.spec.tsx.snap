@@ -109,7 +109,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     onDialogClose={[MockFunction]}
   >
     <button
-      className="button_fyf4elf"
+      className="button_f23yboz"
       onClick={[MockFunction]}
       type="button"
     >
@@ -236,7 +236,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     onDialogClose={[MockFunction]}
   >
     <button
-      className="button_fyf4elf"
+      className="button_f23yboz"
       onClick={[MockFunction]}
       type="button"
     >
