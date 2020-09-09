@@ -41,7 +41,7 @@ import {
 import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
 import { DialogComponent, BASE_FONT } from 'gcp_jupyterlab_shared';
-import CustomSnackbar from './snackbar';
+import CustomSnackbar from '../shared/snackbar';
 
 interface Props {
   listProjectsService: ListProjectsService;
@@ -251,10 +251,10 @@ class ListItemsPanel extends React.Component<Props, State> {
     } catch (err) {
       console.warn('Error searching', err.message);
       this.handleOpenSearchDialog();
-      this.props.openSnackbar(
-        `Error: Searching not allowed in project ${project}. 
-        Enable the Data Catalog API in this project to continue.`
-      );
+      this.props.openSnackbar({
+        message: `Error: Searching not allowed in project ${project}. 
+        Enable the Data Catalog API in this project to continue.`,
+      });
     }
   }
 
@@ -294,7 +294,9 @@ class ListItemsPanel extends React.Component<Props, State> {
           this.props.addProject(project);
         } else {
           console.log('This project does not exist');
-          this.props.openSnackbar(`Project ${newProjectId} does not exist.`);
+          this.props.openSnackbar({
+            message: `Project ${newProjectId} does not exist.`,
+          });
         }
       });
     } catch (err) {
@@ -373,7 +375,11 @@ class ListItemsPanel extends React.Component<Props, State> {
     return (
       <div className={localStyles.panel}>
         <Portal>
-          <CustomSnackbar open={snackbar.open} message={snackbar.message} />
+          <CustomSnackbar
+            open={snackbar.open}
+            message={snackbar.message}
+            autoHideDuration={snackbar.autoHideDuration}
+          />
         </Portal>
         <header className={localStyles.header}>
           <div className={localStyles.headerTitle}>BigQuery extension</div>

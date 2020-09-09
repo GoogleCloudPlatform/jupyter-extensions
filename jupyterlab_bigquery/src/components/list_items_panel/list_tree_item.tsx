@@ -32,6 +32,7 @@ import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { getStarterQuery, QueryType } from '../../utils/starter_queries';
 import { gColor } from '../shared/styles';
+import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -86,6 +87,7 @@ interface ResourceProps {
   context: Context;
   updateProject?: any;
   updateDataset?: any;
+  openSnackbar?: any;
 }
 
 export interface ModelProps extends ResourceProps {
@@ -105,7 +107,6 @@ export interface ProjectProps extends ResourceProps {
   project: Project;
   updateProject: any;
   updateDataset: any;
-  openSnackbar: any;
   removeProject: any;
   collapseAll?: boolean;
   updateCollapseAll?: any;
@@ -133,10 +134,18 @@ export class Resource<T extends ResourceProps> extends React.Component<
   }
 
   copyID = dataTreeItem => {
+    this.props.openSnackbar({
+      message: 'ID copied',
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
+    });
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
   copyBoilerplateQuery = dataTreeItem => {
+    this.props.openSnackbar({
+      message: 'Query copied',
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
+    });
     Clipboard.copyToSystem(getStarterQuery(dataTreeItem.type, dataTreeItem.id));
   };
 
@@ -473,6 +482,7 @@ export class DatasetResource extends Resource<DatasetProps> {
                   <TableResource
                     context={this.props.context}
                     table={dataset.tables[tableId]}
+                    openSnackbar={this.props.openSnackbar}
                   />
                 </div>
               ))}
@@ -481,6 +491,7 @@ export class DatasetResource extends Resource<DatasetProps> {
                   <ModelResource
                     context={this.props.context}
                     model={dataset.models[modelId]}
+                    openSnackbar={this.props.openSnackbar}
                   />
                 </div>
               ))}
@@ -510,7 +521,7 @@ export class ProjectResource extends Resource<ProjectProps> {
   listDatasetsService = new ListDatasetsService();
 
   handleOpenSnackbar = error => {
-    this.props.openSnackbar(error);
+    this.props.openSnackbar({ message: error });
   };
 
   expandProject = project => {
@@ -627,6 +638,7 @@ export class ProjectResource extends Resource<ProjectProps> {
                   context={this.props.context}
                   dataset={project.datasets[datasetId]}
                   updateDataset={this.props.updateDataset}
+                  openSnackbar={this.props.openSnackbar}
                 />
               </div>
             ))
