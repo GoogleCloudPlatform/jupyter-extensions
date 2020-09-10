@@ -379,7 +379,7 @@ export class DatasetResource extends Resource<DatasetProps> {
     super(props);
     this.state = {
       expanded: [],
-      loading: true,
+      loading: false,
     };
   }
 
