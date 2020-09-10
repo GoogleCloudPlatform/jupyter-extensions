@@ -99,7 +99,7 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   scrollBeyondLastLine: false,
 };
 
-const styleSheet = stylesheet({
+export const styleSheet = stylesheet({
   queryButton: {
     marginTop: ' 2px',
     marginBottom: ' 2px',
@@ -159,7 +159,7 @@ const styleSheet = stylesheet({
   },
 });
 
-enum QueryStates {
+export enum QueryStates {
   READY,
   PENDING,
   ERROR,
@@ -551,6 +551,7 @@ class QueryTextEditor extends React.Component<
         size="small"
         startIcon={<PauseCircleOutline />}
         color="primary"
+        className="cancel-button"
       >
         {this.renderButtontext('stop')}
       </Button>
@@ -608,7 +609,7 @@ class QueryTextEditor extends React.Component<
             color="error"
             fontSize="small"
           />
-          {this.renderOptionalText(message)}
+          <div className="err-msg">{this.renderOptionalText(message)}</div>
         </div>
       );
     } else if (readableSize !== null) {
@@ -620,7 +621,7 @@ class QueryTextEditor extends React.Component<
             fontSize="small"
             htmlColor="rgb(15, 157, 88)"
           />
-          {this.renderOptionalText(sizeMsg)}
+          <div className="size-msg">{this.renderOptionalText(sizeMsg)}</div>
         </div>
       );
     }
@@ -638,6 +639,7 @@ class QueryTextEditor extends React.Component<
             autoHideDuration: COPIED_AUTOHIDE_DURATION,
           });
         }}
+        className="copy-button"
       >
         <FileCopyOutlined fontSize="small" className={styleSheet.icon} />
       </IconButton>
@@ -659,6 +661,7 @@ class QueryTextEditor extends React.Component<
             [queryId, query]
           );
         }}
+        className="open-tab-editor"
       >
         <FullscreenOutlined className={styleSheet.icon} />
       </IconButton>
@@ -749,3 +752,4 @@ const mapDispatchToProps = {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);
+export { QueryTextEditor };
