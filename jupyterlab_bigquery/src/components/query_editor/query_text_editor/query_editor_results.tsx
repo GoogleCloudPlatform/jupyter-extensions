@@ -100,13 +100,17 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
     NotebookActions.insertBelow(notebook);
     const cell = notebookTrack.activeCell;
 
-    let code = '';
+    let code =
+      `# The following two lines are only necessary to run once.\n` +
+      `# Comment out otherwise for speed-up.\n` +
+      `from google.cloud.bigquery import Client, QueryJobConfig\n` +
+      `client = Client()\n\n`;
     if (ifEmpty) {
-      code = `query = '${query.trim()}'\njob = client.query(query)`;
+      code += `query = '${query.trim()}'\n` + `job = client.query(query)`;
     } else {
       const flagsJson = JSON.stringify(processedFlags, null, 2);
 
-      code =
+      code +=
         `flags=${flagsJson}\n` +
         `job_config = bigquery.QueryJobConfig(**flags)\n` +
         `query = '${query.trim()}'\n` +
