@@ -11,7 +11,7 @@
     "link": "lerna run link --stream",
     "pack": "lerna exec npm pack --parallel",
     "lint": "lerna run lint --parallel",
-    "test": "lerna run test --parallel",
+    "test": "lerna run test",
     "watch": "lerna run watch --parallel"
   },
   "repository": {
