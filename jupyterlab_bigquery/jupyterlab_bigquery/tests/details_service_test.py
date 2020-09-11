@@ -444,8 +444,8 @@ class TestTablePreview(unittest.TestCase):
             'field_name_0', 'field_name_1.subfield',
             'field_name_1.other_subfield'
         ],
-        'rows': [['hello', '1', '2020-07-14 13:23:45.000067 '],
-                 ['goodbye', '2', None], [None, None, None]]
+        'rows': [['hello', 1, '2020-07-14 13:23:45.000067 '],
+                 ['goodbye', 2, None], [None, None, None]]
     }
 
     result = bigquery.get_table_preview('some_table_id')
@@ -534,7 +534,7 @@ class TestTablePreview(unittest.TestCase):
 
 class TestViewDetails(unittest.TestCase):
   # identidal to testGetTableDetailsFull except
-  #  for additional query and legacy sql properties
+  # for additional query and legacy sql properties
   # and removal of location property
   def testGetViewDetailsFull(self):
     client = Mock()
@@ -688,7 +688,7 @@ class TestModelDetails(unittest.TestCase):
                 'type': SqlTypeNames[StandardSqlDataTypes(7).name].name
             }, {
                 'name': 'schema_label_1',
-                'type': StandardSqlDataTypes(9).name
+                'type': SqlTypeNames[StandardSqlDataTypes(9).name].name
             }],
             'feature_columns': [{
                 'name': 'feature_col_0',
@@ -836,13 +836,13 @@ class TestModelDetails(unittest.TestCase):
             'loss_type':
                 Model.LossType(1).name,
             'max_iterations':
-                '20',
+                20,
             'min_relative_progress':
                 0.4,
             'model_uri':
                 'model.uri.string',
             'num_clusters':
-                '7',
+                7,
             'optimization_strategy':
                 Model.OptimizationStrategy(1).name,
             'warm_start':

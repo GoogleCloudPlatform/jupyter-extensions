@@ -90,6 +90,10 @@ def format_preview_value(value):
       return value
   elif isinstance(value, datetime.datetime):
     return json.dumps(value.strftime('%Y-%m-%d %H:%M:%S.%f %Z'))[1:-1]
+  elif isinstance(value, bool):
+    return value.__str__()
+  elif isinstance(value, int):
+    return value
   else:
     return value.__str__()
 

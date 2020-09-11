@@ -68,7 +68,7 @@ exports[`HardwareScalingForm Displays correct pricing estimation: Form With Pric
     <p
       className="paragraph_f1ditx77"
     >
-      Based on the zone, framework, and machine type of the instance, 
+      Based on the zone, framework, and machine type of the instance,
 the available GPU types and the minimum number of GPUs that can be selected may vary. 
       <LearnMoreLink
         href="https://cloud.google.com/compute/docs/gpus"
@@ -152,10 +152,10 @@ the available GPU types and the minimum number of GPUs that can be selected may 
         className="paragraph_f1ditx77"
         id="pricing-information"
       >
-        Your updated instance will cost an estimated 
-          $4.00 monthly, an estimated 
-          increase of 
-          $1.00 from your 
+        Your updated instance will cost an estimated
+          $4.00 monthly, an estimated
+          increase of
+          $1.00 from your
           current instance.
       </div>
     </div>
@@ -165,7 +165,7 @@ the available GPU types and the minimum number of GPUs that can be selected may 
       <Message
         asActivity={false}
         asError={false}
-        text="If you have chosen to attach GPUs to your instance, 
+        text="If you have chosen to attach GPUs to your instance,
 the NVIDIA GPU driver will be installed automatically on the next startup."
       />
     </div>
@@ -248,7 +248,7 @@ exports[`HardwareScalingForm Successfully initializes form: Initial Form 1`] = `
     <p
       className="paragraph_f1ditx77"
     >
-      Based on the zone, framework, and machine type of the instance, 
+      Based on the zone, framework, and machine type of the instance,
 the available GPU types and the minimum number of GPUs that can be selected may vary. 
       <LearnMoreLink
         href="https://cloud.google.com/compute/docs/gpus"

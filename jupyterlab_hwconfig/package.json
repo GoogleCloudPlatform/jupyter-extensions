@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "jupyterlab_gcedetails",
-  "version": "0.9.0",
-  "description": "Google Compute Engine Instance Details extension",
+  "name": "jupyterlab_hwconfig",
+  "version": "0.9.1",
+  "description": "CAIP Notebooks Hardware Configuration extension",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "build-python": "npm pack && python setup.py sdist bdist_wheel",
-    "clean": "rimraf build dist lib *tsbuildinfo *tgz",
+    "clean": "rimraf coverage lib build dist *egg-info *tsbuildinfo *tgz",
     "e2e-test": "jest -c jest-puppeteer.config.js",
     "install-extension": "../scripts/dev-install.sh",
     "lint-warnings": "eslint \"src/**/*.{ts,tsx}\" --fix --quiet",
@@ -79,7 +79,7 @@
     "discovery": {
       "server": {
         "base": {
-          "name": "jupyterlab_gcedetails",
+          "name": "jupyterlab_hwconfig",
           "managers": [
             "pip"
           ]

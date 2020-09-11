@@ -84,7 +84,7 @@ const StyledMenuItem = withStyles({
 })(MenuItem);
 
 // TODO: style for dark mode. Currently the container is still constant white.
-const StyledSelect = withStyles({
+export const StyledSelect = withStyles({
   root: {
     marginLeft: '36px',
     color: 'var(--jp-ui-font-color1)',

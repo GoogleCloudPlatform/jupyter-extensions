@@ -30,7 +30,7 @@ interface Props {
   onDialogClose: () => void;
 }
 
-const ERROR_MESSAGE = `You must manually start your instance from the Google 
+const ERROR_MESSAGE = `You must manually start your instance from the Google
 Cloud Console to continue using this Notebook. `;
 const LINK = `https://console.cloud.google.com/ai-platform/notebooks/`;
 const LINK_TEXT = `View Cloud Console`;

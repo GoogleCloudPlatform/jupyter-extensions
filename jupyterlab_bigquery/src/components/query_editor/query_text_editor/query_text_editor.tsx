@@ -68,6 +68,7 @@ interface QueryResponseType {
   labels: string;
   bytesProcessed: number;
   project: string;
+  duration: number;
 }
 
 export interface QueryResult {
@@ -77,6 +78,8 @@ export interface QueryResult {
   project: string;
   queryId: QueryId;
   query: string;
+  duration: number;
+  queryFlags?: { [keys: string]: any };
 }
 
 export type QueryContent = Array<Array<unknown>>;
@@ -174,7 +177,7 @@ function createWorkerFromFunction(func: Function) {
   const workerFunc = `
       const JSON_BATCH_SIZE=${JSON_BATCH_SIZE};
       onmessage=function(e){
-      (${func}).call(this, e);
+      (${func}).call(this, e, JSON_BATCH_SIZE);
       }`;
   const funcStr = workerFunc.toString();
 
@@ -185,15 +188,15 @@ function createWorkerFromFunction(func: Function) {
   return worker;
 }
 
-function workerFunc(e) {
+function workerFunc(e, batchSize) {
   const contentBuffer = e.data;
 
   const textDecoder = new TextDecoder();
   const content = textDecoder.decode(contentBuffer);
   const parsedContent = JSON.parse(content);
 
-  for (let i = 0; i < parsedContent.length; i += JSON_BATCH_SIZE) {
-    const batch = parsedContent.slice(i, i + JSON_BATCH_SIZE);
+  for (let i = 0; i < parsedContent.length; i += batchSize) {
+    const batch = parsedContent.slice(i, i + batchSize);
 
     this.postMessage({ batch, finish: false });
   }
@@ -308,6 +311,7 @@ class QueryTextEditor extends React.Component<
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
           processed.query = query;
+          processed.queryFlags = this.queryFlags;
 
           // try using worker
           if (this.ifSupportWorker) {
@@ -332,8 +336,6 @@ class QueryTextEditor extends React.Component<
 
               this.jsonWorker.postMessage(contentBuffer, [contentBuffer]);
             });
-
-            // await holdProm;
           } else {
             const processedContent = JSON.parse(content);
             this.queryManager.updateSlot(this.queryId, processedContent);
