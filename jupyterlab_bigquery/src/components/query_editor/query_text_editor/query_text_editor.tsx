@@ -177,7 +177,7 @@ function createWorkerFromFunction(func: Function) {
   const workerFunc = `
       const JSON_BATCH_SIZE=${JSON_BATCH_SIZE};
       onmessage=function(e){
-      (${func}).call(this, e);
+      (${func}).call(this, e, JSON_BATCH_SIZE);
       }`;
   const funcStr = workerFunc.toString();
 
@@ -188,15 +188,15 @@ function createWorkerFromFunction(func: Function) {
   return worker;
 }
 
-function workerFunc(e) {
+function workerFunc(e, batchSize) {
   const contentBuffer = e.data;
 
   const textDecoder = new TextDecoder();
   const content = textDecoder.decode(contentBuffer);
   const parsedContent = JSON.parse(content);
 
-  for (let i = 0; i < parsedContent.length; i += JSON_BATCH_SIZE) {
-    const batch = parsedContent.slice(i, i + JSON_BATCH_SIZE);
+  for (let i = 0; i < parsedContent.length; i += batchSize) {
+    const batch = parsedContent.slice(i, i + batchSize);
 
     this.postMessage({ batch, finish: false });
   }
