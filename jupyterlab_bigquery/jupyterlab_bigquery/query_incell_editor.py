@@ -6,7 +6,6 @@ from google.cloud.bigquery.dbapi import _helpers
 from IPython.core import magic_arguments
 from traitlets import Unicode, Any
 from ipywidgets import DOMWidget
-import pandas as pd
 
 module_name = 'bigquery_query_incell_editor'
 module_version = '0.0.1'
