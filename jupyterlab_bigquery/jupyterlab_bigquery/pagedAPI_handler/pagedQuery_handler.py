@@ -8,7 +8,8 @@ from jupyterlab_bigquery.details_handler.service import format_preview_fields, f
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
-    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params', 'destination_table'
+    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params',
+    'destination_table'
 ]
 
 NUM_THREADS = 6
@@ -109,6 +110,7 @@ class PagedQueryHandler(PagedAPIHandler):
     # send contents
     en = query_job.result(page_size)
     schema_fields = format_preview_fields(en.schema)
+    duration = (query_job.ended - query_job.started).total_seconds()
 
     for page in en.pages:
       if page.num_items > USE_PARALLEL_THRESH:
@@ -121,6 +123,7 @@ class PagedQueryHandler(PagedAPIHandler):
           'labels': schema_fields,
           'bytesProcessed': total_bytes_processed,
           'project': query_job.project,
+          'duration': duration,
       }
       yield response
 

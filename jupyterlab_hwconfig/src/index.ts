@@ -35,10 +35,10 @@ import { PriceService } from './service/price_service';
 import { ServerWrapper } from './components/server_wrapper';
 
 async function activateDetailsWidget(
-  app: JupyterFrontEnd,
+  _app: JupyterFrontEnd,
   statusbar: IStatusBar
 ) {
-  console.debug('Activating GCP Details Extension');
+  console.debug('Activating Hardware Configuration extension');
 
   const clientTransportService = new ClientTransportService();
   const serverProxyTransportService = new ServerProxyTransportService();
@@ -76,18 +76,18 @@ async function activateDetailsWidget(
     initializationError
   );
 
-  statusbar.registerStatusItem('gceDetails', {
+  statusbar.registerStatusItem('hwConfig', {
     item: detailsWidget,
     align: 'left',
   });
 }
 
 // Default export for the front-end plugin providing GCE details.
-const gceDetails: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab_gcedetails',
+const hwConfig: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterlab_hwconfig',
   requires: [IStatusBar],
   autoStart: true,
   activate: activateDetailsWidget,
 };
 
-export default gceDetails;
+export default hwConfig;

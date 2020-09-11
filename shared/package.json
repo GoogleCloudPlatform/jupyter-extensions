@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "build-python": "npm pack && python setup.py sdist bdist_wheel",
-    "clean": "rimraf lib *tsbuildinfo",
+    "clean": "rimraf coverage lib build dist *egg-info *tsbuildinfo *tgz",
     "install-shared": "../scripts/shared-install.sh",
     "link": "jupyter labextension link --log-level=INFO",
     "lint-warnings": "eslint \"**/*.{ts,tsx}\" --fix --quiet",

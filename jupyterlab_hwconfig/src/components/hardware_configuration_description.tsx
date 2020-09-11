@@ -19,8 +19,8 @@ import { STYLES } from '../data/styles';
 import { LearnMoreLink } from 'gcp_jupyterlab_shared';
 
 export const TITLE = 'Modify Hardware Configuration';
-const DESCRIPTION = `Modify the hardware configuration of your 
-virtual machine as you need. The options available for the 
+const DESCRIPTION = `Modify the hardware configuration of your
+virtual machine as you need. The options available for the
 hardware are configured by your administors. `;
 const LINK = 'https://cloud.google.com/compute/all-pricing';
 

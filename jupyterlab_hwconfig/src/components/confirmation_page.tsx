@@ -32,7 +32,7 @@ interface Props {
   onSubmit: () => void;
 }
 
-const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this 
+const INFO_MESSAGE = `Updating your configuration will take 5-10 minutes. During this
 time you will not be able to access your notebook instance.`;
 
 function displayConfiguration(

@@ -21,7 +21,7 @@ __version__ = VERSION
 
 
 def _jupyter_server_extension_paths():
-  return [{'module': 'jupyterlab_gcedetails'}]
+  return [{'module': 'jupyterlab_hwconfig'}]
 
 
 def load_jupyter_server_extension(nb_server_app):

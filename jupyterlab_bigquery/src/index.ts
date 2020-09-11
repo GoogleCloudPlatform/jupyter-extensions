@@ -21,7 +21,7 @@ async function activate(
 ) {
   const inCellEnabled = !!registry;
 
-  WidgetManager.initInstance(app, inCellEnabled);
+  WidgetManager.initInstance(app, inCellEnabled, notebookTrack);
   const manager = WidgetManager.getInstance();
   const context = {
     app: app,
