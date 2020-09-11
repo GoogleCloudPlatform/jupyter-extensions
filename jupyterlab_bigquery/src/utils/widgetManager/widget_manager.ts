@@ -9,6 +9,7 @@ import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
 import { ReduxReactWidget } from './redux_react_widget';
 import { QueryEditorTabWidget } from '../../components/query_editor/query_editor_tab/query_editor_tab_widget';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A class that manages dataset widget instances in the Main area
@@ -22,7 +23,8 @@ export class WidgetManager {
 
   private constructor(
     private app: JupyterFrontEnd,
-    private incellEnabled: boolean
+    private incellEnabled: boolean,
+    private notebookTrack: INotebookTracker
   ) {
     // customize middle wares
 
@@ -40,9 +42,17 @@ export class WidgetManager {
     return this;
   }
 
-  static initInstance(app: JupyterFrontEnd, incellEnabled: boolean) {
+  static initInstance(
+    app: JupyterFrontEnd,
+    incellEnabled: boolean,
+    notebookTrack: INotebookTracker
+  ) {
     if (WidgetManager.instance === undefined) {
-      WidgetManager.instance = new WidgetManager(app, incellEnabled);
+      WidgetManager.instance = new WidgetManager(
+        app,
+        incellEnabled,
+        notebookTrack
+      );
     }
   }
 
@@ -56,6 +66,10 @@ export class WidgetManager {
 
   getStore(): EnhancedStore {
     return this.store;
+  }
+
+  getNotebookTracker(): INotebookTracker {
+    return this.notebookTrack;
   }
 
   launchWidget(

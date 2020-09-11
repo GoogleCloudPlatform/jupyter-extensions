@@ -68,6 +68,7 @@ interface QueryResponseType {
   labels: string;
   bytesProcessed: number;
   project: string;
+  duration: number;
 }
 
 export interface QueryResult {
@@ -77,6 +78,8 @@ export interface QueryResult {
   project: string;
   queryId: QueryId;
   query: string;
+  duration: number;
+  queryFlags?: { [keys: string]: any };
 }
 
 export type QueryContent = Array<Array<unknown>>;
@@ -308,6 +311,7 @@ class QueryTextEditor extends React.Component<
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
           processed.query = query;
+          processed.queryFlags = this.queryFlags;
 
           // try using worker
           if (this.ifSupportWorker) {
@@ -332,8 +336,6 @@ class QueryTextEditor extends React.Component<
 
               this.jsonWorker.postMessage(contentBuffer, [contentBuffer]);
             });
-
-            // await holdProm;
           } else {
             const processedContent = JSON.parse(content);
             this.queryManager.updateSlot(this.queryId, processedContent);
