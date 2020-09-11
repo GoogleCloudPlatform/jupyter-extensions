@@ -3,9 +3,9 @@ import { classes } from 'typestyle';
 
 import {
   ControlButton,
-  SaveButton,
+  SettingsButton,
+  StatusButton,
   SyncButton,
-  ReloadButton,
 } from './toolbar_buttons';
 
 import { toolbarClass } from '../style/toolbar';
@@ -31,10 +31,10 @@ export class Toolbar extends React.Component<Props> {
   render(): React.ReactElement {
     return (
       <div className={classes('jp-Toolbar', toolbarClass)}>
+        <StatusButton service={this.props.service} />
         <ControlButton service={this.props.service} />
-        <SaveButton service={this.props.service} />
         <SyncButton service={this.props.service} />
-        <ReloadButton service={this.props.service} />
+        <SettingsButton service={this.props.service} />
       </div>
     );
   }
