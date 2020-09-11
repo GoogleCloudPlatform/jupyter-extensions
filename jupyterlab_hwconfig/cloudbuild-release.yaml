@@ -43,8 +43,8 @@ steps:
         '-h',
         'Cache-Control:no-cache,max-age=0',
         'cp',
-        'dist/jupyterlab_gcedetails*.tar.gz',
-        'gs://deeplearning-platform-ui-public/jupyterlab_gcedetails-latest.tar.gz',
+        'dist/jupyterlab_hwconfig*.tar.gz',
+        'gs://deeplearning-platform-ui-public/jupyterlab_hwconfig-latest.tar.gz',
       ]
     waitFor: ['package']
 tags: ['release']

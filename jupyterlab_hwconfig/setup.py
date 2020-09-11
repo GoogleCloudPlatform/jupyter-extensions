@@ -20,7 +20,7 @@ with open("README.md") as f:
   long_description = f.read()
 
 version = None
-with open(os.path.join(os.getcwd(), "jupyterlab_gcedetails",
+with open(os.path.join(os.getcwd(), "jupyterlab_hwconfig",
                        "version.py")) as f:
   for l in f:
     if l.startswith("VERSION"):
@@ -29,20 +29,20 @@ with open(os.path.join(os.getcwd(), "jupyterlab_gcedetails",
 if not version:
   raise RuntimeError("Unable to determine version")
 
-npm_package = "jupyterlab_gcedetails-{}.tgz".format(version)
+npm_package = "jupyterlab_hwconfig-{}.tgz".format(version)
 if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
   raise FileNotFoundError("Cannot find NPM package. Did you run `npm pack`?")
 
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
     ("etc/jupyter/jupyter_notebook_config.d",
-     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_gcedetails.json",)),
+     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_hwconfig.json",)),
 ]
 
 setup(
-    name="jupyterlab_gcedetails",
+    name="jupyterlab_hwconfig",
     version=version,
-    description="GCP Notebooks Details Extension",
+    description="CAIP Notebooks Hardware Configuration extension",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GoogleCloudPlatform/jupyter-extensions",
@@ -52,7 +52,7 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "jupyterlab~=1.2.0",
-        "psutil==5.7.0",
-        "gcp_jupyterlab_shared>=1.0.5",
+        "psutil>=5.7.0",
+        "gcp_jupyterlab_shared>=1.0.8",
     ],
 )
