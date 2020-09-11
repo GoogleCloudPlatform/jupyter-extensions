@@ -25,9 +25,6 @@ interface QueryEditorInCellProps {
   ipyView: DOMWidgetView;
 }
 
-// flag from python, requesting dataframe
-const DEST_VAL_FLAG = 'destination_var';
-
 export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
   queryId: QueryId;
   iniQuery: string;
@@ -57,18 +54,6 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
           onQueryChange={query => {
             this.props.ipyView.model.set('query', query);
             this.props.ipyView.touch();
-          }}
-          onQueryFInish={queryResult => {
-            if (this.queryFlags[DEST_VAL_FLAG]) {
-              const dfData = {
-                content: queryResult,
-                labels: this.props.queries[this.queryId].labels,
-              };
-
-              const val = showResult ? JSON.stringify(dfData) : '';
-              this.props.ipyView.model.set('result', val);
-              this.props.ipyView.touch();
-            }
           }}
         />
         {showResult ? (
