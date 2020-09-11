@@ -80,10 +80,10 @@ export const FORM_STYLES = stylesheet({
 
 const N1_MACHINE_PREFIX = 'n1-';
 const GPU_INCOMPATIBLE_FRAMEWORKS = ['R:3', 'NumPy/SciPy/scikit-learn'];
-const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance, 
+const GPU_RESTRICTION_MESSAGE = `Based on the zone, framework, and machine type of the instance,
 the available GPU types and the minimum number of GPUs that can be selected may vary. `;
 const GPU_RESTRICTION_LINK = 'https://cloud.google.com/compute/docs/gpus';
-const INFO_MESSAGE = `If you have chosen to attach GPUs to your instance, 
+const INFO_MESSAGE = `If you have chosen to attach GPUs to your instance,
 the NVIDIA GPU driver will be installed automatically on the next startup.`;
 
 export class HardwareScalingForm extends React.Component<Props, State> {
@@ -236,10 +236,10 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       <div>
         <span className={STYLES.subheading}>Pricing Estimation:</span>
         <div id="pricing-information" className={STYLES.paragraph}>
-          {`Your updated instance will cost an estimated 
-          $${newPrice.toFixed(2)} monthly, an estimated 
-          ${priceDifference < 0 ? 'decrease' : 'increase'} of 
-          $${Math.abs(priceDifference).toFixed(2)} from your 
+          {`Your updated instance will cost an estimated
+          $${newPrice.toFixed(2)} monthly, an estimated
+          ${priceDifference < 0 ? 'decrease' : 'increase'} of
+          $${Math.abs(priceDifference).toFixed(2)} from your
           current instance.`}
         </div>
       </div>
