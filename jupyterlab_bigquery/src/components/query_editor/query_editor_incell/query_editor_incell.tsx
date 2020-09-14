@@ -20,7 +20,7 @@ const localStyles = stylesheet({
   },
 });
 
-interface QueryEditorInCellProps {
+export interface QueryEditorInCellProps {
   queries: { [key: string]: QueryResult };
   ipyView: DOMWidgetView;
 }
