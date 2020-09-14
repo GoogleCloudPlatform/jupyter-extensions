@@ -3,9 +3,11 @@ from threading import Lock
 from multiprocessing import Pool
 from google.cloud.bigquery.dbapi import _helpers
 from google.cloud import bigquery
+from google.api_core.client_info import ClientInfo
 
 from jupyterlab_bigquery.details_handler.service import format_preview_fields, format_preview_rows, parallel_format_preview_rows
 from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
+from jupyterlab_bigquery.version import VERSION
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
     'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params',
@@ -27,7 +29,8 @@ class PagedQueryHandler(PagedAPIHandler):
     self.pool = Pool(NUM_THREADS)
 
     if PagedQueryHandler.client is None:
-      PagedQueryHandler.client = bigquery.Client()
+      PagedQueryHandler.client = bigquery.Client(client_info=ClientInfo(
+          user_agent='jupyterlab_bigquery/{}'.format(VERSION)))
       PagedQueryHandler.orig_project = PagedQueryHandler.client.project
 
   def query(self, request_body, page_size):
