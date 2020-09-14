@@ -1,5 +1,4 @@
 import { requestAPI } from './request_api';
-import { GitSyncService } from './service';
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**
@@ -20,7 +19,6 @@ export class GitManager {
   private _setupChange: Signal<this, string> = new Signal<this, string>(this);
 
   constructor(){
-    this._service = service;
     this.setup('.');
   }
 
