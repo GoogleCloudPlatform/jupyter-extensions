@@ -113,7 +113,7 @@ export class GitSyncService {
   }
 
   private _updateStatus(status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning', error?: string) {
-    if (status != this.status){
+    if (status !== this.status){
       this._status = status;
       this._statusChange.emit({
         status: status,

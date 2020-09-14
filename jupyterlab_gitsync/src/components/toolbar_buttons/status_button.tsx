@@ -86,7 +86,7 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
   private _addListeners() {
     this.props.service.statusChange.connect((_, value) => {
       console.log(value.status);
-      if (value.status != this.state.status){
+      if (value.status !== this.state.status){
         switch (value.status) {
           case 'up-to-date':
             this._setUpToDateState();

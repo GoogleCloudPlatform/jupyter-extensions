@@ -8,9 +8,10 @@ import {
 import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { GitSyncService } from './service';
-import { File } from './file';
+import { TextFile } from './text_file';
 import { NotebookFile } from './notebook_file';
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IResolver {
   file: IFile;
   path: string;
@@ -21,6 +22,7 @@ export interface IResolver {
   mergeVersions(): Promise<any>;
 }
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IFile {
   widget: IDocumentWidget;
   context: DocumentRegistry.Context;
@@ -90,10 +92,10 @@ export class FileTracker {
     const signal = (type === 'conflict') ? this._conflictState : this._dirtyState;
 
     if (state !== curr){
-      if (type == 'conflict') {
+      if (type === 'conflict') {
         this.conflict = state;
       }
-      if (type == 'dirty') {
+      if (type === 'dirty') {
         this.dirty = state;
       } 
       signal.emit(state);
@@ -112,7 +114,7 @@ export class FileTracker {
     let file = this.opened.find(file => file.path === widget.context.path);
     if (file) this.current = file;
     else {
-      file = (widget instanceof NotebookPanel) ? new NotebookFile(widget) : new File(widget);
+      file = (widget instanceof NotebookPanel) ? new NotebookFile(widget) : new TextFile(widget);
       this.current = file;
       this.opened.push(file);
 
@@ -131,7 +133,7 @@ export class FileTracker {
     this._removeListener(file.dirtyState, this._dirtyStateListener);
   }
 
-  private _conflictListener(sender: File, conflict: boolean) {
+  private _conflictListener(sender: IFile, conflict: boolean) {
     if (!conflict) {
       const i = this.conflicts.indexOf(sender);
       this.conflicts.splice(i, 1);
@@ -144,7 +146,7 @@ export class FileTracker {
     }
   }
   
-  private _dirtyStateListener(sender: File, dirty: boolean) {
+  private _dirtyStateListener(sender: IFile, dirty: boolean) {
     if (!dirty) {
       const i = this.changed.indexOf(sender);
       this.changed.splice(i, 1);

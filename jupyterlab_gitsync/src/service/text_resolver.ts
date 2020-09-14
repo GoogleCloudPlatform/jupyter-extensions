@@ -5,7 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import * as diff3 from 'node-diff3';
 
 import { IResolver } from './tracker';
-import { File } from './file';
+import { TextFile } from './text_file';
 
 function token(): string {
   let token = '';
@@ -25,8 +25,8 @@ interface Versions {
   merged_tok: string;
 }
 
-export class FileResolver implements IResolver {
-  private _file: File;
+export class TextResolver implements IResolver {
+  private _file: TextFile;
   private _token: string = token();
   private _versions: Versions = {
     base: undefined,
@@ -42,11 +42,11 @@ export class FileResolver implements IResolver {
     this
   );
 
-  constructor(file: File) {
+  constructor(file: TextFile) {
     this._file = file;
   }
 
-  get file(): File {
+  get file(): TextFile {
     return this._file;
   }
 
