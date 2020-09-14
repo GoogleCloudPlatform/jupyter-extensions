@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { GitSyncService } from '../service/service';
 import { Toolbar } from './toolbar';
+import { GitSetup } from './setup';
 
 import { panel } from '../style/panel';
 
@@ -20,6 +21,7 @@ export class Panel extends React.Component<Props> {
     return (
       <div className={panel}>
         <Toolbar service={this.props.service} />
+        <GitSetup service={this.props.service} />
       </div>
     );
   }

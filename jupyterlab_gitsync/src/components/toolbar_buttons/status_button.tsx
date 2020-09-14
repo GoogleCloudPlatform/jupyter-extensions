@@ -1,4 +1,5 @@
 import React from 'react';
+import { classes, style } from 'typestyle';
 
 import { Props } from '../panel';
 
@@ -8,19 +9,26 @@ import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import DoneIcon from '@material-ui/icons/Done';
 
-
 interface StatusButtonState {
   title: string;
   icon: any;
   status: string;
 }
 
+const disableHoverClass = style({
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'transparent !important',
+    },
+  },
+});
+
 export class StatusButton extends React.Component<Props, StatusButtonState> {
   constructor(props) {
     super(props);
     this.state = {
       title: 'All Files Up To Date',
-      icon: <DoneAllIcon fontSize='small'/>,
+      icon: <DoneAllIcon color="action" fontSize='small'/>,
       status: 'up-to-date',
     };
   }
@@ -32,9 +40,11 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
   render() {
     return (
       <IconButton
+        className={classes(disableHoverClass)}
         title={this.state.title}
         color='inherit'
-        disabled
+        disableFocusRipple
+        disableRipple
       >
         {this.state.icon}
       </IconButton>
@@ -44,7 +54,7 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
   private _setUpToDateState(): void {
     this.setState({
       title: 'All Files Up To Date',
-      icon: <DoneAllIcon fontSize='small'/>,
+      icon: <DoneAllIcon color="action" fontSize='small'/>,
       status: 'up-to-date',
     })
   }
@@ -60,7 +70,7 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
   private _setDirtyState(): void {
     this.setState({
       title: 'Files have Unpushed Changes',
-      icon: <DoneIcon fontSize='small'/>,
+      icon: <DoneIcon color="action" fontSize='small'/>,
       status: 'dirty',
     })
   }

@@ -1,6 +1,6 @@
 import { ILabShell } from '@jupyterlab/application';
 import { ISignal, Signal } from '@lumino/signaling';
-import { FileTracker } from './tracker';
+import { FileTracker, IFile } from './tracker';
 import { GitManager } from './git';
 
 
@@ -13,6 +13,7 @@ import { GitManager } from './git';
 
 export class GitSyncService {
   /* Member Fields */
+  private _shell: ILabShell;
   private _git: GitManager;
   private _tracker: FileTracker;
   private _completed: boolean = true;
@@ -26,8 +27,9 @@ export class GitSyncService {
   private _setupChange: Signal<this, any> = new Signal<this, any>(this);
 
   constructor(shell: ILabShell) {
+    this._shell = shell;
     this._git = new GitManager();
-    this._tracker = new FileTracker(shell);
+    this._tracker = new FileTracker(this);
     this._addListeners();
   } 
 
@@ -37,6 +39,10 @@ export class GitSyncService {
 
   get completed(): boolean {
     return this._completed;
+  }
+
+  get shell(): ILabShell {
+    return this._shell;
   }
 
   get git(): GitManager {
@@ -80,19 +86,24 @@ export class GitSyncService {
     }
   }
 
-  async setup(path?: string, branch?: string) {
+  async setup(file?: IFile, branch?: string) {
     try{
-      if (path && path !== this.git.path) { 
+      if (file && (!file.repoPath || file.repoPath !== this.git.path)) {
+        const path = file.repoPath ? file.repoPath : file.path.substring(0, file.path.lastIndexOf('/'));
         await this.git.setup(path);
+        if (!file.repoPath) file.repoPath = this.git.path;
+        const repoPath = this.git.path.substring(this.git.path.lastIndexOf('/')+1);
         this._setupChange.emit({
           status: 'success', 
-          value: `Changed repository path to "${this.git.path}". Current checked-out branch is "${this.git.branch}".`
-        });
+          attrib: 'path',
+          value: `Changed repository path to "${repoPath}". Current checked-out branch is "${this.git.branch}".`
+        });       
       }
       if (branch && branch !== this.git.branch) {
         await this.git.changeBranch(branch);
         this._setupChange.emit({
           status: 'success', 
+          attrib: 'branch',
           value: `Checked-out to branch "${this.git.branch}".`
         });
       }

@@ -7,6 +7,7 @@ import {
 } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
 
+import { GitSyncService } from './service';
 import { File } from './file';
 import { NotebookFile } from './notebook_file';
 
@@ -27,6 +28,7 @@ export interface IFile {
   conflictState: ISignal<this, boolean>;
   dirtyState: ISignal<this, boolean>;
   resolver: IResolver;
+  repoPath: string;
 
   save(): Promise<void>;
   reload(): Promise<void>;
@@ -34,6 +36,7 @@ export interface IFile {
 
 export class FileTracker {
   /* Member Fields */
+  service: GitSyncService;
   shell: ILabShell;
   current: IFile;
   opened: IFile[] = [];
@@ -46,8 +49,9 @@ export class FileTracker {
   private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
-  constructor(shell: ILabShell) {
-    this.shell = shell;
+  constructor(service: GitSyncService) {
+    this.service = service;
+    this.shell = this.service.shell;
     this._addListener(this.shell.currentChanged, this._updateCurrent);
   }
 
@@ -100,6 +104,7 @@ export class FileTracker {
     const current = this.shell.currentWidget;
     if (current instanceof DocumentWidget) {
       this._updateFiles(current);
+      this.service.setup(this.current);
     }
   }
 

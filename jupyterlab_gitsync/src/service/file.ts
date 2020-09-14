@@ -31,6 +31,7 @@ export class File implements IFile {
     line: number;
     ch: number;
   };
+  repoPath: string = undefined;
 
   private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
