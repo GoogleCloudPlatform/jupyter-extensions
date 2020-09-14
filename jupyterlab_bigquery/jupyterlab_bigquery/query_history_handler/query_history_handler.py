@@ -15,7 +15,7 @@ SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
 def create_bigquery_client():
   return bigquery.Client(client_info=ClientInfo(
-      user_agent='jupyterlab_bigquery/{}'.format(VERSION)))
+      user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))
 
 
 def format_value(value):
@@ -110,7 +110,7 @@ class QueryHistoryHandler(APIHandler):
     if QueryHistoryHandler.bigquery_client is None:
       QueryHistoryHandler.bigquery_client = bigquery.Client(
           client_info=ClientInfo(
-              user_agent='jupyterlab_bigquery/{}'.format(VERSION)))
+              user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))
 
   @gen.coroutine
   def post(self, *args, **kwargs):
@@ -142,7 +142,7 @@ class GetQueryDetailsHandler(APIHandler):
     if GetQueryDetailsHandler.bigquery_client is None:
       GetQueryDetailsHandler.bigquery_client = bigquery.Client(
           client_info=ClientInfo(
-              user_agent='jupyterlab_bigquery/{}'.format(VERSION)))
+              user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))
 
   @gen.coroutine
   def post(self, *args, **kwargs):
