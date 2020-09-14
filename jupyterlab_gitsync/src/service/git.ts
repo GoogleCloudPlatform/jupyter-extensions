@@ -13,7 +13,6 @@ export class GitManager {
   private _path: string = undefined;
   private _branch: string = undefined;
   private _collab: boolean = true;
-  private _executablePath: string = undefined;
   private _branches: string[] = [];
 
   private _setupChange: Signal<this, string> = new Signal<this, string>(this);
@@ -52,8 +51,8 @@ export class GitManager {
 
   async changeBranch(branch: string) {
     const create = (branch in this.branches);
-    this._setupChange.emit('start');
-    if (this.path && this._executablePath){
+    if (this.path){
+      this._setupChange.emit('start');
       const init: RequestInit = {
         method: 'POST',
         body: JSON.stringify({
@@ -77,7 +76,7 @@ export class GitManager {
   }
 
   async sync() {
-    if (this.path && this._executablePath){
+    if (this.path){
       const init: RequestInit = {
         method: 'POST',
         body: JSON.stringify({

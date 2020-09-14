@@ -63,6 +63,7 @@
     "csstips": "1.2.0",
     "lodash": "^4.17.20",
     "node-diff3": "^2.1.0",
+    "react-scroll": "^1.8.1",
     "typestyle": "^2.1.0"
   },
   "devDependencies": {

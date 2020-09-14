@@ -14,16 +14,8 @@ async function activate(
   app: JupyterFrontEnd,
   shell: ILabShell,
 ) {
-  // TO DO (ashleyswang): add config method to determine path and options for git sync 
-  // path requires no './' at beginning and no '/' at end for handler
-  // const path = 'jupyterlab_gitsync/TEST';
-  // const options = {remote: 'origin', worktree: 'ashleyswang/master'};
-  
-  // TO DO (ashleyswang): change so service creates git/files instead of passing in
   const service = new GitSyncService(shell);
-
   const widget = new GitSyncWidget(service);
-  widget.addClass('jp-CookiesIcon');
   app.shell.add(widget, 'left', { rank: 100 });
   console.log('git widget activated');
 
