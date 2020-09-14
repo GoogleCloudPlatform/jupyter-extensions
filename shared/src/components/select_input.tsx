@@ -17,6 +17,7 @@
 import * as React from 'react';
 import { Option } from '../utils';
 import { css } from '../styles';
+import { classes } from 'typestyle';
 
 interface SelectInputProps {
   label?: string;
@@ -33,7 +34,14 @@ export function SelectInput(props: SelectInputProps) {
   return (
     <div className={css.inputContainer}>
       {label && <label>{label}</label>}
-      <select className={css.input} {...inputProps}>
+      <select
+        className={classes(
+          css.input,
+          css.secondaryBackgroundColor,
+          css.primaryTextColor
+        )}
+        {...inputProps}
+      >
         {options &&
           options.map((o, i) => (
             <option key={i} value={o.value}>

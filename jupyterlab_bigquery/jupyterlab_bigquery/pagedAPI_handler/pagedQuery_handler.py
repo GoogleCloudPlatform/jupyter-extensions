@@ -1,19 +1,20 @@
-from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
-from google.cloud import bigquery
 import json
-from jupyterlab_bigquery.details_handler import format_preview_fields, format_preview_rows, parallel_format_preview_rows
-from google.cloud.bigquery.dbapi import _helpers
 from threading import Lock
-from time import time
-
 from multiprocessing import Pool
+from google.cloud.bigquery.dbapi import _helpers
+from google.cloud import bigquery
+
+from jupyterlab_bigquery.details_handler.service import format_preview_fields, format_preview_rows, parallel_format_preview_rows
+from jupyterlab_bigquery.pagedAPI_handler import PagedAPIHandler
 
 SUPPORTED_JOB_CONFIG_FLAGS = [
-    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params'
+    'maximum_bytes_billed', 'use_legacy_sql', 'project', 'params',
+    'destination_table'
 ]
 
 NUM_THREADS = 6
 USE_PARALLEL_THRESH = 1e5
+
 
 class PagedQueryHandler(PagedAPIHandler):
   client = None
@@ -54,6 +55,9 @@ class PagedQueryHandler(PagedAPIHandler):
       raise ValueError(
           'use_legacy_sql shoud be boolean, instead received {}'.format(
               processed_flags['use_legacy_sql']))
+    if 'destination_table' in processed_flags:
+      processed_flags['destination'] = processed_flags['destination_table']
+      del processed_flags['destination_table']
 
     # dry run, will throw exception if fail
     dry_run_job_config = bigquery.QueryJobConfig(**processed_flags)
@@ -77,12 +81,12 @@ class PagedQueryHandler(PagedAPIHandler):
     total_bytes_processed = dry_run_job.total_bytes_processed
 
     if dryRunOnly:
-      job_id = 'dry_run' if dry_run_job.job_id is None else  dry_run_job.job_id
+      job_id = 'dry_run' if dry_run_job.job_id is None else dry_run_job.job_id
       yield dry_run_job, job_id
       yield {
-        'content': json.dumps(None),
-        'labels': json.dumps(None),
-        'bytesProcessed': json.dumps(total_bytes_processed)
+          'content': json.dumps(None),
+          'labels': json.dumps(None),
+          'bytesProcessed': json.dumps(total_bytes_processed)
       }
       return
 
@@ -106,6 +110,7 @@ class PagedQueryHandler(PagedAPIHandler):
     # send contents
     en = query_job.result(page_size)
     schema_fields = format_preview_fields(en.schema)
+    duration = (query_job.ended - query_job.started).total_seconds()
 
     for page in en.pages:
       if page.num_items > USE_PARALLEL_THRESH:
@@ -115,9 +120,10 @@ class PagedQueryHandler(PagedAPIHandler):
 
       response = {
           'content': json.dumps(content),
-          'labels': json.dumps(schema_fields),
-          'bytesProcessed': json.dumps(total_bytes_processed),
-          'project': json.dumps(query_job.project),
+          'labels': schema_fields,
+          'bytesProcessed': total_bytes_processed,
+          'project': query_job.project,
+          'duration': duration,
       }
       yield response
 

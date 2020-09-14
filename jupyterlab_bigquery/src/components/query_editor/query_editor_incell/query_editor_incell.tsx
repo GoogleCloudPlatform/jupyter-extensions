@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import QueryTextEditor, {
   QueryResult,
+  QUERY_DATA_TYPE,
 } from '../query_text_editor/query_text_editor';
 import { connect } from 'react-redux';
 import QueryResults from '../query_text_editor/query_editor_results';
@@ -11,6 +12,7 @@ import {
 import { DOMWidgetView } from '@jupyter-widgets/base';
 import { stylesheet } from 'typestyle';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 
 const localStyles = stylesheet({
   inCellEditorRoot: {
@@ -18,15 +20,19 @@ const localStyles = stylesheet({
   },
 });
 
-interface QueryEditorInCellProps {
+export interface QueryEditorInCellProps {
   queries: { [key: string]: QueryResult };
   ipyView: DOMWidgetView;
 }
+
+// flag from python, requesting dataframe
+const DEST_VAL_FLAG = 'destination_var';
 
 export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
   queryId: QueryId;
   iniQuery: string;
   queryFlags: { [keys: string]: any };
+  queryManager: QueryResultsManager;
 
   constructor(pros) {
     super(pros, QueryEditorInCell);
@@ -35,17 +41,11 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
     this.iniQuery = this.props.ipyView.model.get('query') as string;
     const rawQueryFlags = this.props.ipyView.model.get('query_flags') as string;
     this.queryFlags = JSON.parse(rawQueryFlags);
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   render() {
-    const { queries } = this.props;
-
-    const queryResult = queries[this.queryId];
-    // eslint-disable-next-line no-extra-boolean-cast
-    const showResult = !!queryResult && queryResult.content.length > 0;
-    const val = showResult ? JSON.stringify(queryResult) : '';
-    this.props.ipyView.model.set('result', val);
-    this.props.ipyView.touch();
+    const showResult = this.queryManager.getSlotSize(this.queryId) > 0;
 
     return (
       <div className={localStyles.inCellEditorRoot}>
@@ -57,6 +57,18 @@ export class QueryEditorInCell extends Component<QueryEditorInCellProps, {}> {
           onQueryChange={query => {
             this.props.ipyView.model.set('query', query);
             this.props.ipyView.touch();
+          }}
+          onQueryFInish={queryResult => {
+            if (this.queryFlags[DEST_VAL_FLAG]) {
+              const dfData = {
+                content: queryResult,
+                labels: this.props.queries[this.queryId].labels,
+              };
+
+              const val = showResult ? JSON.stringify(dfData) : '';
+              this.props.ipyView.model.set('result', val);
+              this.props.ipyView.touch();
+            }
           }}
         />
         {showResult ? (

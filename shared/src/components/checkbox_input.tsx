@@ -17,6 +17,7 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
+import { css } from '../styles';
 
 interface CheckboxInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -34,7 +35,7 @@ export function CheckboxInput(props: CheckboxInputProps) {
   return (
     <div className={containerStyle}>
       <input type="checkbox" {...inputProps} />
-      {label && <span>{label}</span>}
+      {label && <span className={css.primaryTextColor}>{label}</span>}
     </div>
   );
 }

@@ -55,6 +55,7 @@ export const css = stylesheet({
     fontWeight: 500,
   },
   button: {
+    color: COLORS.base,
     backgroundColor: COLORS.white,
     borderWidth: '1px',
     borderStyle: 'solid',
@@ -144,5 +145,17 @@ export const css = stylesheet({
   },
   errorRow: {
     marginTop: '8px',
+  },
+  primaryTextColor: {
+    color: 'var(--jp-ui-font-color1)',
+  },
+  primaryBackgroundColor: {
+    backgroundColor: 'var(--jp-layout-color1)',
+  },
+  secondaryTextColor: {
+    color: 'var(--jp-ui-font-color2)',
+  },
+  secondaryBackgroundColor: {
+    backgroundColor: 'var(--jp-layout-color2)',
   },
 });

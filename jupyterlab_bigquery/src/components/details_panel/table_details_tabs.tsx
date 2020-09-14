@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button } from '@material-ui/core';
-import { Code } from '@material-ui/icons';
+import { Code, Info } from '@material-ui/icons';
+import { stylesheet } from 'typestyle';
 
 import {
   TableDetailsService,
@@ -14,8 +15,10 @@ import TablePreviewPanel from './table_preview';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { stylesheet } from 'typestyle';
+import { getStarterQuery } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
+import InfoCard from '../shared/info_card';
 
 export const localStyles = stylesheet({
   body: {
@@ -40,6 +43,7 @@ interface Props {
   isVisible: boolean;
   table_id: string;
   table_name: string;
+  partitioned: boolean;
 }
 
 interface State {
@@ -48,6 +52,7 @@ interface State {
   details: TableDetails;
   rows: DetailRow[];
   currentTab: number;
+  showPartitionCard: boolean;
 }
 
 interface DetailRow {
@@ -69,6 +74,7 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
       details: { details: {} } as TableDetails,
       rows: [],
       currentTab: TabInds.details,
+      showPartitionCard: true,
     };
   }
 
@@ -92,25 +98,58 @@ export default class TableDetailsTabs extends React.Component<Props, State> {
                   'main',
                   queryId,
                   undefined,
-                  [
-                    queryId,
-                    `SELECT * FROM \`${this.props.table_id}\` LIMIT 1000`,
-                  ]
+                  [queryId, getStarterQuery('TABLE', this.props.table_id)]
                 );
               }}
               startIcon={<Code />}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
+              style={{
+                textTransform: 'none',
+                color: gColor('BLUE'),
+              }}
             >
               Query table
             </Button>
           </Header>
           <div className={localStyles.body}>
+            {this.props.partitioned && this.state.showPartitionCard && (
+              <InfoCard
+                message={
+                  <div>
+                    This is a partitioned table.{' '}
+                    <a
+                      style={{ textDecoration: 'underline' }}
+                      href="https://cloud.google.com/bigquery/docs/partitioned-tables?_ga=2.65379946.-555088760.1592854116"
+                      target="_blank"
+                    >
+                      Learn more
+                    </a>
+                  </div>
+                }
+                color="gray"
+                icon={<Info />}
+                button={
+                  <Button
+                    size="small"
+                    style={{
+                      textTransform: 'none',
+                      color: 'var(--jp-ui-font-color1)',
+                    }}
+                    onClick={() => {
+                      this.setState({ showPartitionCard: false });
+                    }}
+                  >
+                    Dismiss
+                  </Button>
+                }
+              />
+            )}
             <StyledTabs
               value={this.state.currentTab}
               onChange={this.handleChange.bind(this)}
+              color={gColor('BLUE')}
             >
-              <StyledTab label="Details" />
-              <StyledTab label="Preview" />
+              <StyledTab label="Details" color={gColor('BLUE')} />
+              <StyledTab label="Preview" color={gColor('BLUE')} />
             </StyledTabs>
             <TabPanel
               value={this.state.currentTab}

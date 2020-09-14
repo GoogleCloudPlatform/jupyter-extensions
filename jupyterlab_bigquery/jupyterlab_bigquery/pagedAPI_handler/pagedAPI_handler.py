@@ -1,11 +1,10 @@
-from enum import Enum
-from notebook.base.handlers import APIHandler, app_log
+import time
 from logging import INFO, WARN
 import json
 from threading import Lock, Timer
-from collections import deque, defaultdict
+from collections import defaultdict
 from abc import ABC, abstractmethod
-import time
+from notebook.base.handlers import APIHandler, app_log
 
 START_STATE = 'start'
 CONTINUE_STATE = 'continue'
@@ -17,13 +16,14 @@ CLEAR_GENERATORS_MAX_IDILE_SEC = 1200
 
 class PagedAPIHandler(APIHandler, ABC):
   '''
-    Enables easy to use paged/batched API requests between front end and backend.
-    User needs to implement query and cancel to provide a generator and the ability
-    to cancel a job (if necessary).  Exceptions can be safely raised from these method,
+    Enables easy to use paged/batched API requests between front end
+    and backend.  User needs to implement query and cancel to provide
+    a generator and the ability to cancel a job (if necessary).
+    Exceptions can be safely raised from these method,
     they will will be sent to front end.
   '''
 
-  # job_id: deque[(generator, job_obj, last_touch)], remove after done
+  # job_id: (generator, job_obj, last_touch), remove after done
   generator_pool = defaultdict(lambda: None)
   generator_lock = Lock()
 
@@ -46,7 +46,7 @@ class PagedAPIHandler(APIHandler, ABC):
           del generator
           app_log.log(INFO, 'Deleted {} due to long idle time {}', job_id,
                       idle_time)
-      
+
       for job_id in job_ids_to_delete:
         del PagedAPIHandler.generator_pool[job_id]
 
@@ -86,7 +86,7 @@ class PagedAPIHandler(APIHandler, ABC):
             job_id] = query_generator, job, time.time()
         app_log.log(INFO, 'Successfully started query %s', job_id)
 
-    self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
+    self.finish({'id': job_id, 'error': error})
 
   def _onContinue(self, load):
     job_id = load['id']
@@ -121,9 +121,9 @@ class PagedAPIHandler(APIHandler, ABC):
                     error)
 
     self.finish({
-        'finish': json.dumps(finish),
-        'load': json.dumps(load),
-        'error': json.dumps(error)
+        'finish': finish,
+        'load': load,
+        'error': error,
     })
 
   def _onCancel(self, load):
@@ -139,15 +139,16 @@ class PagedAPIHandler(APIHandler, ABC):
         app_log.log(INFO, 'Successfully canceled query %s', job_id)
         error = None
 
-    self.finish({'id': json.dumps(job_id), 'error': json.dumps(error)})
+    self.finish({'id': job_id, 'error': error})
 
   @abstractmethod
   def query(self, request_body, page_size):
     '''
       User imeplemented generator.
       Follow this rules:
-      1, first return is (job_object, id).  job_object is sent to cancel when canceling job.
-          id is a unique identifier.  Safe to throw exception, will pass to front end
+      1, first return is (job_object, id).  job_object is sent to
+          cancel when canceling job. id is a unique identifier.
+          Safe to throw exception, will pass to front end
           https://googleapis.dev/python/bigquery/latest/_modules/google/cloud/bigquery/job.html
       2, following return are the results
     '''

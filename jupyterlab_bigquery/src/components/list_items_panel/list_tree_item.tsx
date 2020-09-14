@@ -30,8 +30,9 @@ import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
 import { ModelDetailsWidget } from '../details_panel/model_details_widget';
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
-
-import '../../../style/index.css';
+import { getStarterQuery, QueryType } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
+import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
 
@@ -74,7 +75,6 @@ const localStyles = stylesheet({
   resourceIcons: {
     display: 'flex',
     alignContent: 'center',
-    color: 'var(--jp-layout-color3)',
   },
   datasetName: {
     flexDirection: 'row',
@@ -87,6 +87,7 @@ interface ResourceProps {
   context: Context;
   updateProject?: any;
   updateDataset?: any;
+  openSnackbar?: any;
 }
 
 export interface ModelProps extends ResourceProps {
@@ -106,7 +107,6 @@ export interface ProjectProps extends ResourceProps {
   project: Project;
   updateProject: any;
   updateDataset: any;
-  openSnackbar: any;
   removeProject: any;
   collapseAll?: boolean;
   updateCollapseAll?: any;
@@ -115,6 +115,14 @@ export interface ProjectProps extends ResourceProps {
 interface ResourceState {
   expanded: string[];
   loading: boolean;
+}
+
+interface DataTreeItem {
+  id: string;
+  datasetId: string;
+  name: string;
+  type: QueryType;
+  legacySql?: boolean;
 }
 
 export class Resource<T extends ResourceProps> extends React.Component<
@@ -126,11 +134,54 @@ export class Resource<T extends ResourceProps> extends React.Component<
   }
 
   copyID = dataTreeItem => {
+    this.props.openSnackbar({
+      message: 'ID copied',
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
+    });
     Clipboard.copyToSystem(dataTreeItem.id);
   };
 
   copyBoilerplateQuery = dataTreeItem => {
-    Clipboard.copyToSystem(`SELECT * FROM \`${dataTreeItem.id}\``);
+    this.props.openSnackbar({
+      message: 'Query copied',
+      autoHideDuration: COPIED_AUTOHIDE_DURATION,
+    });
+    Clipboard.copyToSystem(getStarterQuery(dataTreeItem.type, dataTreeItem.id));
+  };
+
+  queryResource = (dataTreeItem: DataTreeItem): void => {
+    const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
+    const query = getStarterQuery(
+      dataTreeItem.type,
+      dataTreeItem.id,
+      dataTreeItem.legacySql
+    );
+
+    const curWidget = notebookTrack.currentWidget;
+
+    const incellEnabled = WidgetManager.getInstance().getIncellEnabled();
+
+    if (!incellEnabled || !curWidget || !curWidget.content.isVisible) {
+      // no active notebook or not visible
+      const queryId = generateQueryId();
+      WidgetManager.getInstance().launchWidget(
+        QueryEditorTabWidget,
+        'main',
+        queryId,
+        undefined,
+        [queryId, query, dataTreeItem.legacySql]
+      );
+    } else {
+      // exist notebook and visible
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      const code =
+        `%%bigquery_editor ${
+          dataTreeItem.legacySql ? '--use_legacy_sql' : ''
+        }\n\n` + query;
+      cell.model.value.text = code;
+    }
   };
 
   getIcon = iconType => {
@@ -148,7 +199,7 @@ export class ModelResource extends Resource<ModelProps> {
   }
 
   openModelDetails = (event, model) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new ModelDetailsService();
     const widgetType = ModelDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -162,8 +213,20 @@ export class ModelResource extends Resource<ModelProps> {
 
   contextMenuItems = [
     {
+      label: 'Open model details',
+      handler: dataTreeItem => this.openModelDetails(null, dataTreeItem),
+    },
+    {
+      label: 'Query model',
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
+    },
+    {
       label: 'Copy model ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Copy boilerplate query',
+      handler: dataTreeItem => this.copyBoilerplateQuery(dataTreeItem),
     },
   ];
 
@@ -194,34 +257,8 @@ export class TableResource extends Resource<TableProps> {
     super(props);
   }
 
-  queryTable = dataTreeItem => {
-    const notebookTrack = this.props.context.notebookTrack as INotebookTracker;
-    const query = `SELECT * FROM \`${dataTreeItem.id}\` LIMIT 100`;
-
-    const curWidget = notebookTrack.currentWidget;
-
-    if (!curWidget || !curWidget.content.isVisible) {
-      // no active notebook or not visible
-      const queryId = generateQueryId();
-      WidgetManager.getInstance().launchWidget(
-        QueryEditorTabWidget,
-        'main',
-        queryId,
-        undefined,
-        [queryId, query]
-      );
-    } else {
-      // exist notebook and visible
-      const notebook = curWidget.content;
-      NotebookActions.insertBelow(notebook);
-      const cell = notebookTrack.activeCell;
-      const code = '%%bigquery_editor\n\n' + query;
-      cell.model.value.text = code;
-    }
-  };
-
   openTableDetails = (event, table: Table) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new TableDetailsService();
     const widgetType = TableDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -235,7 +272,7 @@ export class TableResource extends Resource<TableProps> {
   };
 
   openViewDetails = (event, view) => {
-    event.stopPropagation();
+    event && event.stopPropagation();
     const service = new ViewDetailsService();
     const widgetType = ViewDetailsWidget;
     this.props.context.manager.launchWidgetForId(
@@ -257,8 +294,12 @@ export class TableResource extends Resource<TableProps> {
 
   tableContextMenuItems = [
     {
+      label: 'Open table details',
+      handler: dataTreeItem => this.openTableDetails(null, dataTreeItem),
+    },
+    {
       label: 'Query table',
-      handler: dataTreeItem => this.queryTable(dataTreeItem),
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
     },
     {
       label: 'Copy table ID',
@@ -272,8 +313,20 @@ export class TableResource extends Resource<TableProps> {
 
   public viewContextMenuItems = [
     {
+      label: 'Open view details',
+      handler: dataTreeItem => this.openViewDetails(null, dataTreeItem),
+    },
+    {
+      label: 'Query view',
+      handler: dataTreeItem => this.queryResource(dataTreeItem),
+    },
+    {
       label: 'Copy view ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
+    },
+    {
+      label: 'Copy boilerplate query',
+      handler: dataTreeItem => this.copyBoilerplateQuery(dataTreeItem),
     },
   ];
 
@@ -326,7 +379,7 @@ export class DatasetResource extends Resource<DatasetProps> {
     super(props);
     this.state = {
       expanded: [],
-      loading: true,
+      loading: false,
     };
   }
 
@@ -397,6 +450,10 @@ export class DatasetResource extends Resource<DatasetProps> {
 
   contextMenuItems = [
     {
+      label: 'Open dataset details',
+      handler: dataTreeItem => this.openDatasetDetails(null, dataTreeItem),
+    },
+    {
       label: 'Copy dataset ID',
       handler: dataTreeItem => this.copyID(dataTreeItem),
     },
@@ -421,7 +478,7 @@ export class DatasetResource extends Resource<DatasetProps> {
               }))}
             >
               <div className={localStyles.datasetName}>
-                <Icon style={{ display: 'flex', alignContent: 'center' }}>
+                <Icon className={localStyles.resourceIcons}>
                   <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
                 </Icon>
                 <div className={localStyles.resourceName}>{dataset.name}</div>
@@ -441,6 +498,7 @@ export class DatasetResource extends Resource<DatasetProps> {
                   <TableResource
                     context={this.props.context}
                     table={dataset.tables[tableId]}
+                    openSnackbar={this.props.openSnackbar}
                   />
                 </div>
               ))}
@@ -449,6 +507,7 @@ export class DatasetResource extends Resource<DatasetProps> {
                   <ModelResource
                     context={this.props.context}
                     model={dataset.models[modelId]}
+                    openSnackbar={this.props.openSnackbar}
                   />
                 </div>
               ))}
@@ -457,6 +516,7 @@ export class DatasetResource extends Resource<DatasetProps> {
             <CircularProgress
               size={20}
               className={localStyles.circularProgress}
+              style={{ color: gColor('BLUE') }}
             />
           )}
         </TreeItem>
@@ -477,7 +537,7 @@ export class ProjectResource extends Resource<ProjectProps> {
   listDatasetsService = new ListDatasetsService();
 
   handleOpenSnackbar = error => {
-    this.props.openSnackbar(error);
+    this.props.openSnackbar({ message: error });
   };
 
   expandProject = project => {
@@ -594,6 +654,7 @@ export class ProjectResource extends Resource<ProjectProps> {
                   context={this.props.context}
                   dataset={project.datasets[datasetId]}
                   updateDataset={this.props.updateDataset}
+                  openSnackbar={this.props.openSnackbar}
                 />
               </div>
             ))
@@ -603,6 +664,7 @@ export class ProjectResource extends Resource<ProjectProps> {
             <CircularProgress
               size={20}
               className={localStyles.circularProgress}
+              style={{ color: gColor('BLUE') }}
             />
           )}
         </TreeItem>

@@ -1,17 +1,15 @@
-//@ts-nocheck
-
 import { ReactWidget, MainAreaWidget } from '@jupyterlab/apputils';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   configureStore,
   EnhancedStore,
-  createSerializableStateInvariantMiddleware,
   getDefaultMiddleware,
 } from '@reduxjs/toolkit';
 import rootReducer from '../../reducers';
 import { Widget } from '@phosphor/widgets';
 import { ReduxReactWidget } from './redux_react_widget';
 import { QueryEditorTabWidget } from '../../components/query_editor/query_editor_tab/query_editor_tab_widget';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A class that manages dataset widget instances in the Main area
@@ -23,11 +21,12 @@ export class WidgetManager {
   private store: EnhancedStore;
   private editorNumber = 1;
 
-  private constructor(private app: JupyterFrontEnd) {
+  private constructor(
+    private app: JupyterFrontEnd,
+    private incellEnabled: boolean,
+    private notebookTrack: INotebookTracker
+  ) {
     // customize middle wares
-    const serializableMiddleware = createSerializableStateInvariantMiddleware({
-      ignoredPaths: ['queryEditorTab'],
-    });
 
     const middleware = getDefaultMiddleware({
       thunk: true,
@@ -43,9 +42,17 @@ export class WidgetManager {
     return this;
   }
 
-  static initInstance(app: JupyterFrontEnd) {
+  static initInstance(
+    app: JupyterFrontEnd,
+    incellEnabled: boolean,
+    notebookTrack: INotebookTracker
+  ) {
     if (WidgetManager.instance === undefined) {
-      WidgetManager.instance = new WidgetManager(app);
+      WidgetManager.instance = new WidgetManager(
+        app,
+        incellEnabled,
+        notebookTrack
+      );
     }
   }
 
@@ -53,8 +60,16 @@ export class WidgetManager {
     return WidgetManager.instance;
   }
 
+  getIncellEnabled(): boolean {
+    return this.incellEnabled;
+  }
+
   getStore(): EnhancedStore {
     return this.store;
+  }
+
+  getNotebookTracker(): INotebookTracker {
+    return this.notebookTrack;
   }
 
   launchWidget(

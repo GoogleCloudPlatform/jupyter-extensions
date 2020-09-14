@@ -4,11 +4,9 @@ import {
   Paper,
   Collapse,
   LinearProgress,
-  Icon,
-  TablePagination,
   IconButton,
+  withStyles,
 } from '@material-ui/core';
-import { CheckCircle, Error } from '@material-ui/icons';
 import { stylesheet } from 'typestyle';
 import { DateTime } from 'luxon';
 import { Refresh } from '@material-ui/icons';
@@ -17,16 +15,13 @@ import {
   QueryHistoryService,
   QueryDetailsService,
 } from './service/query_history';
+import { QueryDetails } from './query_details';
+import { QueryBar } from './query_bar';
+import { QueryStatusBar } from './query_status_bar';
 import { Header } from '../shared/header';
 import LoadingPanel from '../loading_panel';
-import { StripedRows } from '../shared/striped_rows';
-import ReadOnlyEditor from '../shared/read_only_editor';
-import { JobsObject, Job, QueryHistory } from './service/query_history';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
-import { WidgetManager } from '../../utils/widgetManager/widget_manager';
-import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { formatTime, formatDate, formatBytes } from '../../utils/formatters';
-import { TablePaginationActions } from '../shared/bq_table';
+import { QueryHistory } from './service/query_history';
+import { TablePaginationActions, StyledPagination } from '../shared/bq_table';
 import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
@@ -41,96 +36,37 @@ const localStyles = stylesheet({
     minHeight: 0,
     overflowY: 'auto',
     overflowX: 'hidden',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: 'var(--jp-layout-color2)',
   },
-  query: {
-    flex: 1,
-    minWidth: 0,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  queryBar: {
-    display: 'flex',
-    overflow: 'hidden',
-    padding: '0px 10px 0px 10px',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    backgroundColor: 'white',
-    alignItems: 'center',
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  queryStatusBarFailed: {
-    padding: '10px 12px 10px 12px',
-    color: 'white',
-    backgroundColor: '#DA4336',
-    marginTop: '10px',
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  queryStatusBarSucceeded: {
-    padding: '10px 12px 10px 12px',
-    color: 'white',
-    backgroundColor: '#00C752',
-    marginTop: '10px',
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  icon: {
-    marginRight: '12px',
+  refreshIcon: {
+    color: 'var(--jp-ui-font-color1)',
   },
   dateGroup: {
     marginBottom: '12px',
-  },
-  dateHeading: {
-    fontSize: '18px',
-    marginLeft: '10px',
-    padding: '10px 0px 10px 0px',
-  },
-  queryTime: {
-    width: '85px',
-    color: 'gray',
   },
   openDetails: {
     marginBottom: '10px',
     padding: '14px',
   },
-  openQueryButton: {
-    display: 'flex',
-    alignItems: 'center',
-    border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    backgroundColor: 'white',
-    '&:hover': {
-      boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.5)',
-      cursor: 'pointer',
-    },
-  },
-  openQueryButtonSmall: {
-    border: 'var(--jp-border-width) solid white',
-    backgroundColor: 'white',
-    '&:hover': {
-      border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-      cursor: 'pointer',
-    },
-  },
-  detailsTopArea: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '14px',
-  },
-  pagination: {
-    backgroundColor: 'white',
-    fontSize: '13px',
-    borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  },
-  paginationOptions: {
-    display: 'flex',
-    fontSize: '13px',
-  },
 });
+
+const HeadingPaper = withStyles({
+  root: {
+    fontSize: '18px',
+    padding: '10px 0px 10px 10px',
+    backgroundColor: 'var(--jp-layout-color0)',
+    color: 'var(--jp-ui-font-color1)',
+  },
+})(Paper);
+
+const StyledPaper = withStyles({
+  root: {
+    fontSize: '13px',
+    padding: '10px 0px 10px 10px',
+    backgroundColor: 'var(--jp-layout-color0)',
+    color: 'var(--jp-ui-font-color1)',
+  },
+})(Paper);
 
 interface Props {
   queryHistoryService: QueryHistoryService;
@@ -145,164 +81,6 @@ interface State {
   rowsPerPage: number;
   lastFetchTime: number;
 }
-
-const ErrorBox = (props: { errorMsg: string }) => {
-  return (
-    <Paper
-      style={{
-        display: 'flex',
-        alignItems: 'stretch',
-        marginBottom: '12px',
-      }}
-      elevation={1}
-      variant="outlined"
-    >
-      <div style={{ width: '6px', backgroundColor: '#e60000' }} />
-      <div style={{ padding: '8px', display: 'flex', alignItems: 'center' }}>
-        <Error
-          fontSize="default"
-          htmlColor="rgb(230, 0, 0)"
-          className={localStyles.icon}
-        />
-        {props.errorMsg}
-      </div>
-    </Paper>
-  );
-};
-
-const QueryDetails = (props: { job: Job }) => {
-  const { details, created, errored, query } = props.job;
-  const rows = [
-    {
-      name: 'Job ID',
-      value: `${details.project}:${details.location}.${details.id}`,
-    },
-    { name: 'User', value: details.user },
-    { name: 'Location', value: details.location },
-    { name: 'Creation time', value: formatDate(details.created) },
-    { name: 'Start time', value: formatDate(details.started) },
-    { name: 'End time', value: formatDate(details.ended) },
-    {
-      name: 'Duration',
-      value: details.duration
-        ? `${details.duration.toFixed(1)} sec`
-        : '0.0 sec',
-    },
-    {
-      name: 'Bytes processed',
-      value: details.bytesProcessed
-        ? formatBytes(details.bytesProcessed, 2)
-        : details.from_cache
-        ? '0 B (results cached)'
-        : '0 B',
-    },
-    { name: 'Job priority', value: details.priority },
-    { name: 'Destination table', value: details.destination },
-    { name: 'Use legacy SQL', value: details.useLegacySql ? 'true' : 'false' },
-  ];
-  return (
-    <div>
-      <div className={localStyles.detailsTopArea}>
-        <div>
-          {!errored && `Query completed in ${details.duration.toFixed(3)} sec`}
-          <div className={localStyles.queryTime}>{formatTime(created)}</div>
-        </div>
-        <button
-          className={localStyles.openQueryButton}
-          onClick={() => {
-            const queryId = generateQueryId();
-            WidgetManager.getInstance().launchWidget(
-              QueryEditorTabWidget,
-              'main',
-              queryId,
-              undefined,
-              [queryId, query]
-            );
-          }}
-        >
-          <Icon
-            style={{
-              display: 'flex',
-              alignContent: 'center',
-            }}
-            color="primary"
-          >
-            <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
-          </Icon>
-          Open query in editor
-        </button>
-      </div>
-
-      {errored && <ErrorBox errorMsg={details.errorResult.message} />}
-
-      <div style={{ marginBottom: '12px' }}>
-        <ReadOnlyEditor query={query} />
-      </div>
-
-      <StripedRows rows={rows} />
-    </div>
-  );
-};
-
-// clickable bar when query details are not open
-const QueryBar = (props: { jobs: JobsObject; jobId: string }) => {
-  const { jobs, jobId } = props;
-  return (
-    <div className={localStyles.queryBar}>
-      <div className={localStyles.queryTime}>
-        {formatTime(jobs[jobId].created)}
-      </div>
-      {jobs[jobId].errored ? (
-        <Error
-          fontSize="inherit"
-          htmlColor="rgb(230, 0, 0)"
-          className={localStyles.icon}
-        />
-      ) : (
-        <CheckCircle
-          fontSize="inherit"
-          htmlColor="rgb(0, 199, 82)"
-          className={localStyles.icon}
-        />
-      )}
-      <div className={localStyles.query}>{jobs[jobId].query}</div>
-      <button
-        className={localStyles.openQueryButtonSmall}
-        onClick={() => {
-          const queryId = generateQueryId();
-          WidgetManager.getInstance().launchWidget(
-            QueryEditorTabWidget,
-            'main',
-            queryId,
-            undefined,
-            [queryId, jobs[jobId].query]
-          );
-        }}
-      >
-        <Icon
-          style={{
-            display: 'flex',
-            alignContent: 'center',
-          }}
-        >
-          <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
-        </Icon>
-      </button>
-    </div>
-  );
-};
-
-// clickable bar when query details are open
-const QueryStatus = props => {
-  const failed = props.failed;
-  if (failed) {
-    return <div className={localStyles.queryStatusBarFailed}>Query failed</div>;
-  } else {
-    return (
-      <div className={localStyles.queryStatusBarSucceeded}>Query succeeded</div>
-    );
-  }
-};
 
 class QueryHistoryPanel extends React.Component<Props, State> {
   private static queryHistory: QueryHistory | undefined = undefined;
@@ -438,14 +216,15 @@ class QueryHistoryPanel extends React.Component<Props, State> {
 
       return (
         <div className={localStyles.queryHistoryRoot}>
-          <div>
-            <Header>
-              Query history
-              <IconButton onClick={this.handleRefreshHistory.bind(this)}>
-                <Refresh fontSize={'small'} />
-              </IconButton>
-            </Header>
-          </div>
+          <Header>
+            Query history
+            <IconButton
+              onClick={this.handleRefreshHistory.bind(this)}
+              size="small"
+            >
+              <Refresh className={localStyles.refreshIcon} />
+            </IconButton>
+          </Header>
           <div className={localStyles.body}>
             {Object.keys(queriesByDate).map(date => {
               return (
@@ -453,11 +232,9 @@ class QueryHistoryPanel extends React.Component<Props, State> {
                   className={localStyles.dateGroup}
                   key={`query_history_date_${date}`}
                 >
-                  <Paper variant="outlined" square>
-                    <div className={localStyles.dateHeading}>
-                      {this.displayDate(date)}
-                    </div>
-                  </Paper>
+                  <HeadingPaper variant="outlined" square>
+                    {this.displayDate(date)}
+                  </HeadingPaper>
                   {queriesByDate[date].map(jobId => {
                     return (
                       <div key={`query_details_${jobId}`}>
@@ -481,16 +258,19 @@ class QueryHistoryPanel extends React.Component<Props, State> {
                           }}
                         >
                           {openJob === jobId ? (
-                            <QueryStatus failed={jobs[jobId].errored} />
+                            <QueryStatusBar failed={jobs[jobId].errored} />
                           ) : (
                             <QueryBar jobId={jobId} jobs={jobs} />
                           )}
                         </div>
                         <Collapse in={openJob === jobId}>
                           {jobs[jobId].details ? (
-                            <Paper square className={localStyles.openDetails}>
+                            <StyledPaper
+                              square
+                              className={localStyles.openDetails}
+                            >
                               <QueryDetails job={jobs[jobId]} />
-                            </Paper>
+                            </StyledPaper>
                           ) : (
                             <LinearProgress />
                           )}
@@ -502,10 +282,8 @@ class QueryHistoryPanel extends React.Component<Props, State> {
               );
             })}
           </div>
-          <TablePagination
-            className={localStyles.pagination}
+          <StyledPagination
             rowsPerPageOptions={[10, 30, 50, 100, 200]}
-            component="div"
             count={jobIds.length}
             rowsPerPage={rowsPerPage}
             page={page}
@@ -513,14 +291,15 @@ class QueryHistoryPanel extends React.Component<Props, State> {
             onChangeRowsPerPage={this.handleChangeRowsPerPage.bind(this)}
             ActionsComponent={TablePaginationActions}
             labelRowsPerPage="Queries per page:"
+            component="div"
           />
         </div>
       );
     } else {
       return (
-        <>
+        <div className={localStyles.queryHistoryRoot}>
           <Header>Query history</Header> <LoadingPanel />
-        </>
+        </div>
       );
     }
   }

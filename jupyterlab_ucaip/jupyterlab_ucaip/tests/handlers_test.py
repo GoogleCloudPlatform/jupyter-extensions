@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 from notebook.base.handlers import APIHandler
 from jupyterlab_ucaip.handlers import _handler, handlers
 
+
 class TestHandlers(unittest.TestCase):
   """Testing the uCAIP extension handlers"""
 
@@ -38,6 +39,7 @@ class TestHandlers(unittest.TestCase):
 
     handlers["_test"].post(MagicMock())
     func.assert_called()
+
 
 if __name__ == "__main__":
   unittest.main()

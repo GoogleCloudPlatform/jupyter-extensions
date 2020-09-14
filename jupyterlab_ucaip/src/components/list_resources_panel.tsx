@@ -162,7 +162,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             <span>
               <Button
                 disabled={this.state.isLoading}
-                color="secondary"
+                color="primary"
                 size="small"
                 startIcon={<Icon>publish</Icon>}
                 onClick={_ => {
@@ -180,7 +180,7 @@ export class ListResourcesPanel extends React.Component<Props, State> {
             <span>
               <Button
                 disabled={this.state.isLoading}
-                color="secondary"
+                color="primary"
                 size="small"
                 startIcon={<Icon>add</Icon>}
                 onClick={_ => {
@@ -200,6 +200,9 @@ export class ListResourcesPanel extends React.Component<Props, State> {
       isLoading: this.state.isLoading,
       height: this.props.height - 80 - (this.state.showSearch ? 25 : 0),
       width: this.props.width,
+      paging: true,
+      pageSize: 20,
+      pageSizeOptions: [20],
     };
     return {
       [ResourceType.Dataset]: (
@@ -278,9 +281,6 @@ export class ListResourcesPanel extends React.Component<Props, State> {
               },
             },
           ]}
-          paging={true}
-          pageSize={20}
-          pageSizeOptions={[20]}
         />
       ),
       [ResourceType.Model]: (

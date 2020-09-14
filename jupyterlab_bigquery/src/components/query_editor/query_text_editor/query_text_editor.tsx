@@ -11,6 +11,7 @@ import {
 } from '../../../reducers/queryEditorTabSlice';
 
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import ReactResizeDetector from 'react-resize-detector';
 
 import {
   PlayCircleFilledRounded,
@@ -33,7 +34,10 @@ import { QueryEditorType } from './query_editor_results';
 import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
 import { QueryEditorTabWidget } from '../query_editor_tab/query_editor_tab_widget';
 import { formatBytes } from '../../../utils/formatters';
-import ReactResizeDetector from 'react-resize-detector';
+import QueryResultsManager from '../../../utils/QueryResultsManager';
+import { isDarkTheme } from '../../../utils/dark_theme';
+import { SnackbarState, openSnackbar } from '../../../reducers/snackbarSlice';
+import { COPIED_AUTOHIDE_DURATION } from '../../shared/snackbar';
 
 interface QueryTextEditorState {
   queryState: QueryStates;
@@ -53,23 +57,32 @@ interface QueryTextEditorProps {
   editorType?: QueryEditorType;
   queryFlags?: { [keys: string]: any };
   onQueryChange?: (string) => void;
+  onQueryFInish?: (Array) => void;
   showResult?: boolean;
+  snackbar: SnackbarState;
+  openSnackbar: any;
 }
 
 interface QueryResponseType {
   content: string;
   labels: string;
   bytesProcessed: number;
+  project: string;
+  duration: number;
 }
 
 export interface QueryResult {
-  content: Array<Array<unknown>>;
+  contentLen: number;
   labels: Array<string>;
   bytesProcessed: number;
-  queryId: QueryId;
   project: string;
+  queryId: QueryId;
   query: string;
+  duration: number;
+  queryFlags?: { [keys: string]: any };
 }
+
+export type QueryContent = Array<Array<unknown>>;
 
 interface QueryRequestBodyType {
   query: string;
@@ -86,9 +99,10 @@ const SQL_EDITOR_OPTIONS: editor.IEditorConstructionOptions = {
   wrappingStrategy: 'advanced',
   minimap: { enabled: false },
   cursorStyle: 'line-thin',
+  scrollBeyondLastLine: false,
 };
 
-const styleSheet = stylesheet({
+export const styleSheet = stylesheet({
   queryButton: {
     marginTop: ' 2px',
     marginBottom: ' 2px',
@@ -114,7 +128,7 @@ const styleSheet = stylesheet({
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid rgb(218, 220, 224)',
+    border: '1px solid var(--jp-border-color2)',
   },
   message: {
     display: 'flex',
@@ -125,7 +139,7 @@ const styleSheet = stylesheet({
     marginRight: '0.5rem',
   },
   wholeEditorInCell: {
-    border: '1px solid rgb(218, 220, 224)',
+    border: '1px solid var(--jp-border-color2)',
   },
   pendingStatus: {
     display: 'flex',
@@ -140,18 +154,54 @@ const styleSheet = stylesheet({
     paddingBottom: '5px',
     paddingLeft: '10px',
     paddingRight: '10px',
-    backgroundColor: 'rgb(248, 249, 250)',
-    borderBottom: '1px solid rgb(218, 220, 224)',
+    backgroundColor: 'var(--jp-layout-color0)',
+    borderBottom: '1px solid var(--jp-border-color2)',
+  },
+  icon: {
+    color: 'var(--jp-layout-color3)',
   },
 });
 
-enum QueryStates {
+export enum QueryStates {
   READY,
   PENDING,
   ERROR,
 }
 
-const QUERY_BATCH_SIZE = 300000;
+export const QUERY_DATA_TYPE = 'query_content';
+
+const QUERY_BATCH_SIZE = 500000;
+const JSON_BATCH_SIZE = 20000;
+
+function createWorkerFromFunction(func: Function) {
+  const workerFunc = `
+      const JSON_BATCH_SIZE=${JSON_BATCH_SIZE};
+      onmessage=function(e){
+      (${func}).call(this, e, JSON_BATCH_SIZE);
+      }`;
+  const funcStr = workerFunc.toString();
+
+  const blob = new Blob([funcStr], { type: 'application/javascript' });
+
+  const worker = new Worker(URL.createObjectURL(blob));
+
+  return worker;
+}
+
+function workerFunc(e, batchSize) {
+  const contentBuffer = e.data;
+
+  const textDecoder = new TextDecoder();
+  const content = textDecoder.decode(contentBuffer);
+  const parsedContent = JSON.parse(content);
+
+  for (let i = 0; i < parsedContent.length; i += batchSize) {
+    const batch = parsedContent.slice(i, i + batchSize);
+
+    this.postMessage({ batch, finish: false });
+  }
+  this.postMessage({ batch: undefined, finish: true });
+}
 
 class QueryTextEditor extends React.Component<
   QueryTextEditorProps,
@@ -165,6 +215,10 @@ class QueryTextEditor extends React.Component<
   queryFlags: {};
 
   pagedQueryService: PagedService<QueryRequestBodyType, QueryResponseType>;
+  ifSupportWorker: boolean;
+  jsonWorker: any;
+
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -181,17 +235,27 @@ class QueryTextEditor extends React.Component<
     this.queryId = props.queryId;
     this.queryFlags = !this.props.queryFlags ? {} : this.props.queryFlags;
 
+    // check and spawn worker
+    this.ifSupportWorker =
+      !!window.Worker && !!window.TextEncoder && !!window.TextDecoder;
+
+    if (this.ifSupportWorker) {
+      this.jsonWorker = createWorkerFromFunction(workerFunc);
+    }
+
     monaco.init().then(monacoInstance => {
       this.monacoInstance = monacoInstance;
       this.monacoInstance.editor.defineTheme('sqlTheme', {
-        base: 'vs',
+        base: isDarkTheme() ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [],
         colors: {
-          'editorGutter.background': '#f8f9fa',
+          'editorGutter.background': isDarkTheme() ? '#111111' : '#f8f9fa',
         },
       });
     });
+
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   componentDidMount() {
@@ -232,22 +296,52 @@ class QueryTextEditor extends React.Component<
       ifMsgErr: false,
     });
 
+    this.queryManager.resetSlot(this.queryId);
+
     this.job = this.pagedQueryService.request(
       { query, jobConfig: this.queryFlags, dryRunOnly: false },
-      (state, _, response) => {
+      async (state, _, response) => {
         if (state === JobState.Pending) {
           response = response as QueryResponseType;
 
-          Object.keys(response).map(key => {
-            response[key] = JSON.parse(response[key]);
-          });
-
           this.setState({ bytesProcessed: response.bytesProcessed });
+
+          const content = response['content'];
+          delete response['content'];
           const processed = (response as unknown) as QueryResult;
           processed.queryId = this.queryId;
           processed.query = query;
+          processed.queryFlags = this.queryFlags;
 
-          this.props.updateQueryResult(processed);
+          // try using worker
+          if (this.ifSupportWorker) {
+            new Promise<void>(resolve => {
+              this.jsonWorker.onmessage = message => {
+                const { batch, finish } = message.data;
+
+                this.queryManager.updateSlot(this.queryId, batch);
+
+                if (finish) {
+                  resolve();
+                } else {
+                  processed.contentLen = this.queryManager.getSlotSize(
+                    this.queryId
+                  );
+                  this.props.updateQueryResult(processed);
+                }
+              };
+              const textEncoder = new TextEncoder();
+              const contentArr = textEncoder.encode(content);
+              const contentBuffer = contentArr.buffer;
+
+              this.jsonWorker.postMessage(contentBuffer, [contentBuffer]);
+            });
+          } else {
+            const processedContent = JSON.parse(content);
+            this.queryManager.updateSlot(this.queryId, processedContent);
+            processed.contentLen = this.queryManager.getSlotSize(this.queryId);
+            this.props.updateQueryResult(processed);
+          }
         } else if (state === JobState.Fail) {
           this.setState({
             queryState: QueryStates.ERROR,
@@ -262,6 +356,10 @@ class QueryTextEditor extends React.Component<
           }, 2000);
         } else if (state === JobState.Done) {
           this.setState({ queryState: QueryStates.READY });
+
+          if (this.props.onQueryFInish) {
+            this.props.onQueryFInish(this.queryManager.getSlot(this.queryId));
+          }
         }
       },
       QUERY_BATCH_SIZE
@@ -455,6 +553,7 @@ class QueryTextEditor extends React.Component<
         size="small"
         startIcon={<PauseCircleOutline />}
         color="primary"
+        className="cancel-button"
       >
         {this.renderButtontext('stop')}
       </Button>
@@ -512,7 +611,7 @@ class QueryTextEditor extends React.Component<
             color="error"
             fontSize="small"
           />
-          {this.renderOptionalText(message)}
+          <div className="err-msg">{this.renderOptionalText(message)}</div>
         </div>
       );
     } else if (readableSize !== null) {
@@ -524,7 +623,7 @@ class QueryTextEditor extends React.Component<
             fontSize="small"
             htmlColor="rgb(15, 157, 88)"
           />
-          {this.renderOptionalText(sizeMsg)}
+          <div className="size-msg">{this.renderOptionalText(sizeMsg)}</div>
         </div>
       );
     }
@@ -537,9 +636,14 @@ class QueryTextEditor extends React.Component<
         onClick={_ => {
           const query = this.editor.getValue();
           copy(query.trim());
+          this.props.openSnackbar({
+            message: 'Query copied',
+            autoHideDuration: COPIED_AUTOHIDE_DURATION,
+          });
         }}
+        className="copy-button"
       >
-        <FileCopyOutlined fontSize="small" />
+        <FileCopyOutlined fontSize="small" className={styleSheet.icon} />
       </IconButton>
     );
   }
@@ -559,8 +663,9 @@ class QueryTextEditor extends React.Component<
             [queryId, query]
           );
         }}
+        className="open-tab-editor"
       >
-        <FullscreenOutlined />
+        <FullscreenOutlined className={styleSheet.icon} />
       </IconButton>
     );
   }
@@ -636,14 +741,17 @@ class QueryTextEditor extends React.Component<
   }
 }
 
-const mapStateToProps = _ => {
-  return {};
+const mapStateToProps = state => {
+  const snackbar = state.snackbar;
+  return { snackbar };
 };
 
 const mapDispatchToProps = {
   updateQueryResult,
   resetQueryResult,
   deleteQueryEntry,
+  openSnackbar,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(QueryTextEditor);
+export { QueryTextEditor };

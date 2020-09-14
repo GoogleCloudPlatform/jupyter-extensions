@@ -3,9 +3,10 @@
 
 import re
 from google.cloud import bigquery
-from google.cloud.datacatalog import DataCatalogClient, enums, types
+from google.cloud.datacatalog import DataCatalogClient, types
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
+MODEL = 'MODEL'
 
 
 class BigQueryService:
@@ -32,10 +33,10 @@ class BigQueryService:
   def list_projects(self):
     project = self._client.project
     projects_list = {
-      format(project): {
-        'id': format(project),
-        'name': format(project),
-      }
+        format(project): {
+            'id': format(project),
+            'name': format(project),
+        }
     }
     project_ids = [format(project)]
     return {'projects': projects_list, 'projectIds': project_ids}
@@ -63,13 +64,15 @@ class BigQueryService:
     tables_list = {}
     table_ids = []
     for table in tables:
-      table_full_id = '{}.{}.{}'.format(table.project, table.dataset_id, table.table_id)
+      table_full_id = '{}.{}.{}'.format(table.project, table.dataset_id,
+                                        table.table_id)
       tables_list[table_full_id] = {
-        'id': table_full_id,
-        'name': table.table_id,
-        'datasetId': dataset_id,
-        'type': table.table_type,
-        'partitioned': True if table.partitioning_type else False,
+          'id': table_full_id,
+          'name': table.table_id,
+          'datasetId': dataset_id,
+          'type': table.table_type,
+          'legacySql': table.view_use_legacy_sql,
+          'partitioned': bool(table.partitioning_type),
       }
       table_ids.append(table_full_id)
 
@@ -82,11 +85,13 @@ class BigQueryService:
     models_list = {}
     model_ids = []
     for model in models:
-      model_full_id = '{}.{}.{}'.format(model.project, model.dataset_id, model.model_id)
+      model_full_id = '{}.{}.{}'.format(model.project, model.dataset_id,
+                                        model.model_id)
       models_list[model_full_id] = {
-        'id': model_full_id,
-        'name': model.model_id,
-        'datasetId': dataset_id,
+          'id': model_full_id,
+          'name': model.model_id,
+          'datasetId': dataset_id,
+          'type': MODEL
       }
       model_ids.append(model_full_id)
 

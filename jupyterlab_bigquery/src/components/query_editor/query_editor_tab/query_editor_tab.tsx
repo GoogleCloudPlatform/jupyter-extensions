@@ -1,5 +1,6 @@
 import React from 'react';
 import QueryTextEditor, {
+  QUERY_DATA_TYPE,
   QueryResult,
 } from '../query_text_editor/query_text_editor';
 import QueryResults from '../query_text_editor/query_editor_results';
@@ -19,17 +20,27 @@ const localStyles = stylesheet({
     ...BASE_FONT,
   },
 });
+import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { connect } from 'react-redux';
 
-interface QueryEditorTabProps {
+export interface QueryEditorTabProps {
+  queries: { [key: string]: QueryResult };
   isVisible: boolean;
   queryId?: string;
   iniQuery?: string;
-  queries: { [key: string]: QueryResult };
+  useLegacySql?: boolean;
 }
 
-class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
+export interface QueryEditorTabState {
+  isVisible: boolean;
+}
+
+class QueryEditorTab extends React.Component<
+  QueryEditorTabProps,
+  QueryEditorTabState
+> {
   queryId: QueryId;
+  queryManager: QueryResultsManager;
 
   constructor(props) {
     super(props);
@@ -38,20 +49,19 @@ class QueryEditorTab extends React.Component<QueryEditorTabProps, {}> {
     };
 
     this.queryId = this.props.queryId ?? generateQueryId();
+    this.queryManager = new QueryResultsManager(QUERY_DATA_TYPE);
   }
 
   render() {
-    const { queries } = this.props;
-
-    const queryResult = queries[this.queryId];
-    // eslint-disable-next-line no-extra-boolean-cast
-    const showResult = !!queryResult && queryResult.content.length > 0;
+    const showResult = this.queryManager.getSlotSize(this.queryId) > 0;
 
     return (
       <div className={localStyles.queryTextEditorRoot}>
         <QueryTextEditor
           queryId={this.queryId}
           iniQuery={this.props.iniQuery}
+          /* eslint-disable-next-line @typescript-eslint/camelcase */
+          queryFlags={{ use_legacy_sql: this.props.useLegacySql }}
         />
         {showResult && <QueryResults queryId={this.queryId} />}
       </div>
@@ -64,3 +74,4 @@ const mapStateToProps = state => {
 };
 
 export default connect(mapStateToProps)(QueryEditorTab);
+export { QueryEditorTab };

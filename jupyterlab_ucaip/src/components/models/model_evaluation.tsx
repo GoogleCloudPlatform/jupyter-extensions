@@ -7,6 +7,7 @@ import {
   Grid,
   Slider,
   Paper,
+  withStyles,
 } from '@material-ui/core';
 import { Bar, BarChart, Tooltip, YAxis, XAxis } from 'recharts';
 import * as React from 'react';
@@ -17,6 +18,7 @@ import {
   ModelEvaluation,
 } from '../../service/model';
 import { stylesheet } from 'typestyle';
+import { BASE_FONT } from 'gcp_jupyterlab_shared';
 
 interface Props {
   model: Model;
@@ -50,17 +52,27 @@ interface ConfusionMatrixProps {
   confusionMatrix: any[];
 }
 
+const StyledTableCell = withStyles({
+  root: {
+    fontSize: '13px',
+    BASE_FONT,
+  },
+})(TableCell);
+
 const localStyles = stylesheet({
-  header: {
-    fontSize: '15px',
-    fontWeight: 600,
+  title: {
+    fontSize: '16px',
     letterSpacing: '1px',
-    margin: 0,
-    padding: '8px 12px 12px 8px',
+    padding: '24px 0px 10px 8px',
+    fontFamily: 'Roboto',
   },
   paper: {
     padding: 8,
     textAlign: 'center',
+    ...BASE_FONT,
+  },
+  base: {
+    ...BASE_FONT,
   },
 });
 
@@ -162,7 +174,7 @@ export class ConfusionMatrix extends React.Component<ConfusionMatrixProps> {
     if (this.props.confusionMatrix) {
       return (
         <Grid item xs={12} key={'confusionMatrix'}>
-          <header className={localStyles.header}>Confusion Matrix</header>
+          <div className={localStyles.title}>Confusion Matrix</div>
           {this.getConfusionMatrix()}
         </Grid>
       );
@@ -180,7 +192,7 @@ export class FeatureImportance extends React.Component<FeatureImportanceProps> {
     if (this.props.featureImportance) {
       return (
         <Grid item xs={12}>
-          <header className={localStyles.header}>Feature Importance</header>
+          <div className={localStyles.title}>Feature Importance</div>
           <BarChart
             width={500}
             height={35 * this.props.featureImportance.length}
@@ -247,7 +259,10 @@ export class EvaluationTable extends React.Component<Props, State> {
   private getConfidenceSlider(sliderMarks: any[]): JSX.Element {
     if (sliderMarks) {
       return (
-        <p style={{ marginBottom: 16, marginLeft: 16 }}>
+        <p
+          style={{ marginBottom: 16, marginLeft: 16 }}
+          className={localStyles.base}
+        >
           Confidence Threshold
           <Slider
             step={null}
@@ -382,8 +397,8 @@ export class EvaluationTable extends React.Component<Props, State> {
                 <TableBody>
                   {evaluationTable.map(row => (
                     <TableRow key={row.key}>
-                      <TableCell scope="row">{row.key}</TableCell>
-                      <TableCell align="right">{row.val}</TableCell>
+                      <StyledTableCell scope="row">{row.key}</StyledTableCell>
+                      <StyledTableCell align="right">{row.val}</StyledTableCell>
                     </TableRow>
                   ))}
                 </TableBody>

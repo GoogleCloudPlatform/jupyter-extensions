@@ -1,6 +1,6 @@
 {
   "name": "gcp_jupyterlab_shared",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Shared libraries for JupyterLab extensions",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "build-python": "npm pack && python setup.py sdist bdist_wheel",
-    "clean": "rimraf lib *tsbuildinfo",
+    "clean": "rimraf coverage lib build dist *egg-info *tsbuildinfo *tgz",
     "install-shared": "../scripts/shared-install.sh",
     "link": "jupyter labextension link --log-level=INFO",
     "lint-warnings": "eslint \"**/*.{ts,tsx}\" --fix --quiet",

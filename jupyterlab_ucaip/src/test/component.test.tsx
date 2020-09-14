@@ -98,7 +98,7 @@ describe('Rendering of ExportData Component', () => {
     const bigQueryUri = exportData.find(TextInput).at(1);
     bigQueryUri.simulate('change', { target: { value: 'invalid uri' } });
     expect(exportData.state('source')).toEqual('invalid uri');
-    expect(exportData.state('error')).toEqual('Invalid BigQuery uri');
+    expect(exportData.state('error')).toEqual('Invalid BigQuery table ID');
   });
 });
 

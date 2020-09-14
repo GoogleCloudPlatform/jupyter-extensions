@@ -53,7 +53,8 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "google-cloud-storage>=1.24.1", "jupyterlab~=1.2.0",
+        "google-cloud-storage>=1.24.1",
+        "jupyterlab~=1.2.0",
         "pandas>=1.0.5",
         "gcsfs>=0.6.2",
         "gcp_jupyterlab_shared",

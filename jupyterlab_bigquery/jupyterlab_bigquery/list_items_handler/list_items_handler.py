@@ -1,9 +1,8 @@
 # Lint as: python3
 """Decorators that create handlers for the data tree"""
 
-import jupyterlab_bigquery.list_items_handler.create_handler
 from jupyterlab_bigquery.list_items_handler.service import BigQueryService
-from jupyterlab_bigquery.list_items_handler.create_handler import _handler
+from jupyterlab_bigquery.create_handler.create_handler import _handler
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
@@ -32,6 +31,7 @@ def _list_models(args):
 def _search(args):
   return BigQueryService.get().search_projects(args["searchKey"],
                                                args["projectId"])
+
 
 @_handler("POST", "getProject")
 def _get_project(args):

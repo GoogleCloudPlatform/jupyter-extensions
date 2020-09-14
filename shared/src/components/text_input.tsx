@@ -41,7 +41,12 @@ export function TextInput(props: TextInputProps) {
     <div className={classes(css.inputContainer, hasError && 'error')}>
       {label && <label>{label}</label>}
       <input
-        className={classes(css.input, hasError && 'error')}
+        className={classes(
+          css.input,
+          css.secondaryBackgroundColor,
+          css.primaryTextColor,
+          hasError && 'error'
+        )}
         {...inputProps}
       />
     </div>

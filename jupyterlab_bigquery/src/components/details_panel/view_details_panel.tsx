@@ -11,6 +11,8 @@ import { WidgetManager } from '../../utils/widgetManager/widget_manager';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
 import { localStyles } from './dataset_details_panel';
 import { formatDate } from '../../utils/formatters';
+import { getStarterQuery } from '../../utils/starter_queries';
+import { gColor } from '../shared/styles';
 
 interface Props {
   viewDetailsService: ViewDetailsService;
@@ -98,12 +100,20 @@ export default class ViewDetailsPanel extends React.Component<Props, State> {
                   undefined,
                   [
                     queryId,
-                    `SELECT * FROM \`${this.props.view_id}\` LIMIT 1000`,
+                    getStarterQuery(
+                      'VIEW',
+                      this.props.view_id,
+                      this.state.details.details.legacy_sql
+                    ),
+                    this.state.details.details.legacy_sql,
                   ]
                 );
               }}
               startIcon={<Code />}
-              style={{ textTransform: 'none', color: '#1A73E8' }}
+              style={{
+                textTransform: 'none',
+                color: gColor('BLUE'),
+              }}
             >
               Query view
             </Button>

@@ -8,6 +8,7 @@ import { SchemaField } from './service/list_table_details';
 import { ModelSchema } from './service/list_model_details';
 import { StripedRows } from '../shared/striped_rows';
 import { SchemaTable, ModelSchemaTable } from '../shared/schema_table';
+import { isDarkTheme } from '../../utils/dark_theme';
 
 export const localStyles = stylesheet({
   title: {
@@ -15,7 +16,7 @@ export const localStyles = stylesheet({
     marginBottom: '10px',
   },
   panel: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--jp-layout-color0)',
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -45,12 +46,24 @@ export const localStyles = stylesheet({
   },
 });
 
+interface ChipProps {
+  darkmode: boolean;
+  size?: 'medium' | 'small';
+  component?: any;
+  key?: string | number;
+  label: string;
+}
+
 const StyledChip = withStyles({
   root: {
-    color: '#1967D2',
-    backgroundColor: 'rgba(25, 103, 210, 0.1)',
+    color: (props: ChipProps) =>
+      // white :  blue600
+      props.darkmode ? 'var(--jp-ui-font-color1)' : '#1A73E8',
+    backgroundColor: (props: ChipProps) =>
+      // blue300 at 30% opacity : blue600 at 10% opacity
+      props.darkmode ? 'rgba(138, 180, 248, 0.3)' : 'rgba(26, 115, 232, 0.1)',
   },
-})(Chip);
+})((props: ChipProps) => <Chip {...props} />);
 
 interface SharedDetails {
   id: string;
@@ -103,7 +116,12 @@ export const DetailsPanel: React.SFC<Props> = props => {
                 <div className={localStyles.labelContainer}>
                   {details.labels.map((value, index) => {
                     return (
-                      <StyledChip size="small" key={index} label={value} />
+                      <StyledChip
+                        size="small"
+                        key={index}
+                        label={value}
+                        darkmode={isDarkTheme()}
+                      />
                     );
                   })}
                 </div>

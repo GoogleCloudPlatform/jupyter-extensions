@@ -3,15 +3,21 @@ import { withStyles, Tabs, Tab } from '@material-ui/core';
 
 export const StyledTabs: React.ComponentType<any> = withStyles({
   root: {
-    borderBottom: '1px solid #e8e8e8',
+    borderBottom: '1px solid var(--jp-border-color2)',
     minHeight: 'auto',
     padding: 0,
   },
   indicator: {
-    backgroundColor: '#0d68ff',
     height: '2.5px',
+    backgroundColor: (props: StyledTabsProps) => props.color,
   },
-})(Tabs);
+})((props: StyledTabsProps) => <Tabs {...props} />);
+
+interface StyledTabsProps {
+  value: string | number;
+  onChange: () => void;
+  color: string;
+}
 
 export const StyledTab: React.ComponentType<StyledTabProps> = withStyles({
   root: {
@@ -20,14 +26,16 @@ export const StyledTab: React.ComponentType<StyledTabProps> = withStyles({
     minHeight: 'auto',
     fontSize: '13px',
     '&:hover': {
-      color: '#0d68ff',
+      color: (props: StyledTabProps) => props.color,
       opacity: 1,
     },
-    '&$selected': {
-      color: '#0d68ff',
+    '&selected': {
+      color: (props: StyledTabProps) => props.color,
+      opacity: 1,
     },
     '&:focus': {
-      color: '#0d68ff',
+      color: (props: StyledTabProps) => props.color,
+      opacity: 1,
     },
   },
   selected: {},
@@ -35,6 +43,7 @@ export const StyledTab: React.ComponentType<StyledTabProps> = withStyles({
 
 interface StyledTabProps {
   label: string;
+  color: string;
 }
 
 interface TabPanelProps {

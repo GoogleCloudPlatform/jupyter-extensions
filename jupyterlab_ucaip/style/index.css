@@ -29,3 +29,8 @@
   background-image: url('./images/model_training-24px.svg');
   background-size: contain;
 }
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/jupyterlab_ucaip/style/fonts/Roboto-Regular.ttf') format('truetype');
+}

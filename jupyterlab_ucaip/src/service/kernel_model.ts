@@ -7,8 +7,8 @@ import { ISignal, Signal } from '@phosphor/signaling';
 export class KernelModel {
   constructor(
     session: IClientSession,
-    refresh: () => void,
-    onError: (error: string) => void
+    refresh?: () => void,
+    onError?: (error: string) => void
   ) {
     this._session = session;
     this._refresh = refresh;
@@ -59,13 +59,24 @@ export class KernelModel {
     return this._receivedError;
   }
 
-  createCSV(name: string, df: string) {
+  executeCode(code: string) {
     if (!this._session || !this._session.kernel) {
       return;
     }
-    const run = `import jupyterlab_ucaip
+    this.future = this._session.kernel.requestExecute({ code: code });
+  }
+
+  createDataset(name: string, df: string) {
+    const code = `import jupyterlab_ucaip
 jupyterlab_ucaip.create_dataset(display_name="${name}", dataframe=${df})`;
-    this.future = this._session.kernel.requestExecute({ code: run });
+    this.executeCode(code);
+  }
+
+  getDataframes() {
+    const code = `import pandas
+import json
+json.dumps([name for name, val in globals().items() if isinstance(val, pandas.DataFrame) and name[0] != "_"])`;
+    this.executeCode(code);
   }
 
   private _onIOPub = (msg: KernelMessage.IIOPubMessage) => {
@@ -74,6 +85,7 @@ jupyterlab_ucaip.create_dataset(display_name="${name}", dataframe=${df})`;
       case 'execute_result':
       case 'display_data':
       case 'update_display_data':
+        this._output = msg.content['data']['text/plain'];
         this._receivedSuccess.emit();
         break;
       case 'error':

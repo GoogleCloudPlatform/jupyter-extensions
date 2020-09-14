@@ -1,11 +1,11 @@
-from ipywidgets import DOMWidget
-from traitlets import Unicode, Any
-from IPython.core import magic_arguments
-from google.cloud.bigquery.dbapi import _helpers
 import ast
 import json
-import IPython
 from functools import partial
+import IPython
+from google.cloud.bigquery.dbapi import _helpers
+from IPython.core import magic_arguments
+from traitlets import Unicode, Any
+from ipywidgets import DOMWidget
 import pandas as pd
 
 module_name = 'bigquery_query_incell_editor'
@@ -29,9 +29,8 @@ class QueryIncellEditor(DOMWidget):
 @magic_arguments.argument(
     "destination_var",
     nargs="?",
-    help=(
-        "If provided, save the output to this variable instead of displaying it."
-    ),
+    help=("If provided, save the output to this\
+           variable instead of displaying it."),
 )
 @magic_arguments.argument(
     "--destination_table",
@@ -92,9 +91,9 @@ def _cell_magic(line, query=None):
       params = ast.literal_eval("".join(args.params))
       _helpers.to_query_parameters(params)
     except Exception:
-      raise SyntaxError(
-          "--params is not a correctly formatted JSON string or a JSON "
-          "serializable dictionary")
+      raise SyntaxError("--params is not a correctly formatted\
+             JSON string or a JSON "
+                        "serializable dictionary")
 
   query_flags = {
       'destination_table': args.destination_table,
