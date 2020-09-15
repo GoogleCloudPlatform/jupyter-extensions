@@ -24,6 +24,7 @@ export class NotebookFile implements IFile {
       column: number;
     };
   };
+  repoPath: string = undefined;
 
   private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
