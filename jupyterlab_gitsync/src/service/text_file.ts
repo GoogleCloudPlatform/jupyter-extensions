@@ -1,7 +1,7 @@
 import {
   DocumentWidget,
   DocumentRegistry,
-  DocumentModel,
+  DocumentModel
 } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
@@ -11,16 +11,16 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeMirror } from 'codemirror';
 
 import { IFile } from './tracker';
-import { FileResolver } from './resolver';
+import { TextResolver } from './text_resolver';
 
 const fs = new ContentsManager();
 
-export class File implements IFile {
+export class TextFile implements IFile {
   widget: DocumentWidget;
   context: DocumentRegistry.Context;
   editor: CodeMirror;
   doc: CodeMirror.doc;
-  resolver: FileResolver;
+  resolver: TextResolver;
   view: {
     left: number;
     top: number;
@@ -31,10 +31,9 @@ export class File implements IFile {
     line: number;
     ch: number;
   };
+  repoPath: string = undefined;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
-    this
-  );
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: DocumentWidget) {
@@ -43,7 +42,7 @@ export class File implements IFile {
     this.editor = ((widget.content as FileEditor)
       .editor as CodeMirrorEditor).editor;
     this.doc = this.editor.doc;
-    this.resolver = new FileResolver(this);
+    this.resolver = new TextResolver(this);
 
     this._getInitVersion();
     this._addListeners();
@@ -79,6 +78,8 @@ export class File implements IFile {
     if (text) {
       await this._displayText(text);
     }
+    ((this.widget.content as FileEditor)
+      .model as DocumentModel).dirty = false;
   }
 
   private async _displayText(text: string) {
@@ -146,13 +147,11 @@ export class File implements IFile {
 
   private _disposedListener() {
     this._removeListener(this.resolver.conflictState, this._conflictListener);
-    this._removeListener(
-      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
-      this._dirtyStateListener
-    );
+    this._removeListener(((this.widget.content as FileEditor)
+      .model as DocumentModel).stateChanged, this._dirtyStateListener);
   }
-
-  private _conflictListener(sender: FileResolver, conflict: boolean) {
+  
+  private _conflictListener(sender: TextResolver, conflict: boolean) {
     this._conflictState.emit(conflict);
   }
 
@@ -164,10 +163,9 @@ export class File implements IFile {
 
   private _addListeners() {
     this._addListener(this.resolver.conflictState, this._conflictListener);
-    this._addListener(
-      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
-      this._dirtyStateListener
-    );
+    this._addListener(((this.widget.content as FileEditor)
+      .model as DocumentModel).stateChanged, this._dirtyStateListener);
     this._addListener(this.widget.disposed, this._disposedListener);
   }
+
 }

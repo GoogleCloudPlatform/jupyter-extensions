@@ -24,10 +24,9 @@ export class NotebookFile implements IFile {
       column: number;
     };
   };
+  repoPath: string = undefined;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
-    this
-  );
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: NotebookPanel) {
@@ -78,6 +77,7 @@ export class NotebookFile implements IFile {
     if (merged) {
       await this._displayText(merged);
     }
+    (this.content.model as NotebookModel).dirty = false;
   }
 
   private async _displayText(merged) {
@@ -150,9 +150,6 @@ export class NotebookFile implements IFile {
   }
 
   private _addListeners() {
-    this._addListener(
-      (this.content.model as NotebookModel).stateChanged,
-      this._dirtyStateListener
-    );
+    this._addListener((this.content.model as NotebookModel).stateChanged, this._dirtyStateListener);
   }
 }

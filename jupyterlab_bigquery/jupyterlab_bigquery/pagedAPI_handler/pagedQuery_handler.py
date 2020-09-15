@@ -129,4 +129,3 @@ class PagedQueryHandler(PagedAPIHandler):
 
   def cancel(self, job):
     job.cancel()
-    job.cancel()

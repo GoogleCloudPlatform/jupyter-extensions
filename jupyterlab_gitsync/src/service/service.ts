@@ -1,6 +1,8 @@
-import { FileTracker } from './tracker';
-import { GitManager } from './git';
+import { ILabShell } from '@jupyterlab/application';
 import { ISignal, Signal } from '@lumino/signaling';
+import { FileTracker, IFile } from './tracker';
+import { GitManager } from './git';
+
 
 /**
  *
@@ -11,21 +13,60 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 export class GitSyncService {
   /* Member Fields */
+  private _shell: ILabShell;
   private _git: GitManager;
   private _tracker: FileTracker;
-  private _completed = true;
+  private _completed: boolean = true;
   private _running: boolean;
   syncInterval: number = 10 * 1000;
 
-  private _status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning';
-  private _blocked = false;
+  private _status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning' = 'up-to-date';
+  private _blocked: boolean = false;
   private _stateChange: Signal<this, boolean> = new Signal<this, boolean>(this);
-  private _statusChange: Signal<this, string> = new Signal<this, string>(this);
+  private _statusChange: Signal<this, any> = new Signal<this, any>(this);
+  private _setupChange: Signal<this, any> = new Signal<this, any>(this);
 
-  constructor(git: GitManager, tracker: FileTracker) {
-    this._git = git;
-    this._tracker = tracker;
+  constructor(shell: ILabShell) {
+    this._shell = shell;
+    this._git = new GitManager();
+    this._tracker = new FileTracker(this);
     this._addListeners();
+  } 
+
+  get running(): boolean {
+    return this._running;
+  }
+
+  get completed(): boolean {
+    return this._completed;
+  }
+
+  get shell(): ILabShell {
+    return this._shell;
+  }
+
+  get git(): GitManager {
+    return this._git;
+  }
+
+  get tracker(): FileTracker {
+    return this._tracker;
+  }
+
+  get status(): string {
+    return this._status;
+  }
+
+  get stateChange(): ISignal<this, boolean> {
+    return this._stateChange;
+  }
+
+  get statusChange(): ISignal<this, any> {
+    return this._statusChange;
+  }
+
+  get setupChange(): ISignal<this, any> {
+    return this._setupChange;
   }
 
   start() {
@@ -45,40 +86,53 @@ export class GitSyncService {
     }
   }
 
-  get running(): boolean {
-    return this._running;
+  async setup(file?: IFile, branch?: string) {
+    try{
+      if (file && (!file.repoPath || file.repoPath !== this.git.path)) {
+        const path = file.repoPath ? file.repoPath : file.path.substring(0, file.path.lastIndexOf('/'));
+        await this.git.setup(path);
+        if (!file.repoPath) file.repoPath = this.git.path;
+        const repoPath = this.git.path.substring(this.git.path.lastIndexOf('/')+1);
+        this._setupChange.emit({
+          status: 'success', 
+          attrib: 'path',
+          value: `Changed repository path to "${repoPath}". Current checked-out branch is "${this.git.branch}".`
+        });       
+      }
+      if (branch && branch !== this.git.branch) {
+        await this.git.changeBranch(branch);
+        this._setupChange.emit({
+          status: 'success', 
+          attrib: 'branch',
+          value: `Checked-out to branch "${this.git.branch}".`
+        });
+      }
+    } catch (error) {
+      this._setupChange.emit({status: 'error', value: error.toString()});
+    }
   }
 
-  get completed(): boolean {
-    return this._completed;
-  }
-
-  get git(): GitManager {
-    return this._git;
-  }
-
-  get tracker(): FileTracker {
-    return this._tracker;
-  }
-
-  get status(): string {
-    return this._status;
-  }
-
-  get stateChange(): ISignal<this, boolean> {
-    return this._stateChange;
-  }
-
-  get statusChange(): ISignal<this, string> {
-    return this._statusChange;
-  }
-
-  private _updateStatus(
-    status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning'
-  ) {
-    if (status !== this.status) {
+  private _updateStatus(status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning', error?: string) {
+    if (status !== this.status){
       this._status = status;
-      this._statusChange.emit(status);
+      this._statusChange.emit({
+        status: status,
+        error: error
+      });
+    }
+  }
+
+  async sync(): Promise<void> {
+    try {
+      await this.tracker.saveAll();
+      this._updateStatus('sync')
+      await this.git.sync();
+      this._updateStatus('merge')
+      await this.tracker.reloadAll();
+      this._updateStatus('up-to-date');
+    } catch (error) {
+      console.warn(error);
+      this._updateStatus('warning', error.toString())
     }
   }
 
@@ -86,18 +140,8 @@ export class GitSyncService {
     if (this.running && this.completed) {
       this._completed = false;
       setTimeout(async () => {
-        try {
-          await this.tracker.saveAll();
-          this._updateStatus('sync');
-          await this.git.sync();
-          this._updateStatus('merge');
-          await this.tracker.reloadAll();
-          this._updateStatus('up-to-date');
-        } catch (error) {
-          console.warn(error);
-          this._updateStatus('warning');
-        }
-        this._completed = true;
+        await this.sync();
+        this._completed = true; 
         this._run();
       }, this.syncInterval);
     }
