@@ -15,16 +15,15 @@ export const logPanelClass = style({
 });
 
 export const logEntryClass = style({
-  padding: '2px', 
+  padding: '2px',
 });
 
 export const logEntryTimeClass = style({
-  width: '30%', 
+  width: '30%',
   fontSize: '14px',
 });
 
 export const logEntryValueClass = style({
-  width: '70%', 
+  width: '70%',
   fontSize: '14px',
 });
-

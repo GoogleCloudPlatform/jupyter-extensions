@@ -2,19 +2,19 @@ import React from 'react';
 
 import { Props } from '../panel';
 
-import { 
-  Button, 
-  Dialog, 
-  DialogActions, 
-  DialogContent, 
-  DialogTitle, 
-  Grid, 
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
   IconButton,
   Input,
   InputAdornment,
   Slider,
   Tooltip,
-  Typography, 
+  Typography,
 } from '@material-ui/core';
 
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -26,30 +26,33 @@ interface SettingsButtonState {
   value: number | string;
 }
 
-export class SettingsButton extends React.Component<Props, SettingsButtonState> {
+export class SettingsButton extends React.Component<
+  Props,
+  SettingsButtonState
+> {
   readonly maxInterval = 120;
 
   constructor(props) {
     super(props);
     this.state = {
       open: false,
-      value: this.props.service.syncInterval/1000,
-    }
+      value: this.props.service.syncInterval / 1000,
+    };
   }
 
   render() {
     return (
       <React.Fragment>
         <IconButton
-          title='Settings'
-          color='inherit'
+          title="Settings"
+          color="inherit"
           onClick={() => this._onClick()}
         >
-          <SettingsIcon fontSize='small'/>
+          <SettingsIcon fontSize="small" />
         </IconButton>
 
-        <Dialog 
-          open={this.state.open} 
+        <Dialog
+          open={this.state.open}
           onClose={() => this._onClose()}
           fullWidth
         >
@@ -57,31 +60,33 @@ export class SettingsButton extends React.Component<Props, SettingsButtonState> 
           <DialogContent>
             <Grid container alignItems="center" spacing={2}>
               <Grid item xs={11}>
-                <Typography id="input-slider">
-                  Sync Frequency
-                </Typography>
+                <Typography id="input-slider">Sync Frequency</Typography>
               </Grid>
               <Grid item xs={1}>
                 <Tooltip title="Time between each sync with remote repository. After each sync, the extension will wait before syncing again.">
-                  <HelpOutlineIcon
-                    color="disabled"
-                  />
+                  <HelpOutlineIcon color="disabled" />
                 </Tooltip>
               </Grid>
               <Grid item xs={1}>
-                <TimerIcon/>
+                <TimerIcon />
               </Grid>
               <Grid item xs={7}>
                 <Slider
-                  value={typeof this.state.value === 'number' ? this.state.value/(this.maxInterval/100) : 0}
-                  onChange={(event, value) => this._onSliderChange(event, value)}
+                  value={
+                    typeof this.state.value === 'number'
+                      ? this.state.value / (this.maxInterval / 100)
+                      : 0
+                  }
+                  onChange={(event, value) =>
+                    this._onSliderChange(event, value)
+                  }
                   aria-labelledby="sync-interval-slider"
                 />
               </Grid>
               <Grid item xs={4}>
                 <Input
                   value={this.state.value}
-                  onChange={(event) => this._onInputChange(event)}
+                  onChange={event => this._onInputChange(event)}
                   onBlur={() => this._onBlur()}
                   margin="dense"
                   inputProps={{
@@ -120,17 +125,19 @@ export class SettingsButton extends React.Component<Props, SettingsButtonState> 
   }
 
   private _onSave(): void {
-    this.props.service.syncInterval = typeof this.state.value === 'number' ? this.state.value*1000 : 0;
+    this.props.service.syncInterval =
+      typeof this.state.value === 'number' ? this.state.value * 1000 : 0;
     this.setState({ open: false });
   }
 
   private _onSliderChange(event, value): void {
-    const interval = Math.round(value*(this.maxInterval/100));
+    const interval = Math.round(value * (this.maxInterval / 100));
     this.setState({ value: interval });
   }
 
   private _onInputChange(event): void {
-    const interval = event.target.value === '' ? '' : Number(event.target.value);
+    const interval =
+      event.target.value === '' ? '' : Number(event.target.value);
     this.setState({ value: interval });
   }
 
@@ -141,5 +148,4 @@ export class SettingsButton extends React.Component<Props, SettingsButtonState> 
       this.setState({ value: this.maxInterval });
     }
   }
-
 }

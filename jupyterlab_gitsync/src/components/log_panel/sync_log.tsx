@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { classes, style } from 'typestyle';
-import { animateScroll } from "react-scroll";
+import { animateScroll } from 'react-scroll';
 
-import { 
+import {
   logPanelClass,
   logEntryClass,
   logEntryTimeClass,
@@ -26,18 +26,18 @@ interface SyncLogState {
 }
 
 const hiddenClass = style({
-  display: 'none', 
+  display: 'none',
 });
 
 export class SyncLog extends React.Component<Props, SyncLogState> {
-  scroll: boolean = false;
+  scroll = false;
 
   constructor(props) {
     super(props);
     this.state = {
       hidden: false,
       entries: [],
-    }
+    };
   }
 
   componentDidMount() {
@@ -53,7 +53,7 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
       hidden: true,
     });
   }
-  
+
   unhideComponent() {
     this.setState({
       hidden: false,
@@ -61,47 +61,54 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
   }
 
   render(): React.ReactElement {
-    return(
-      <List 
-        id="GitSyncLog" 
-        className={this.state.hidden ? classes(logPanelClass, hiddenClass) : classes(logPanelClass)}
+    return (
+      <List
+        id="GitSyncLog"
+        className={
+          this.state.hidden
+            ? classes(logPanelClass, hiddenClass)
+            : classes(logPanelClass)
+        }
       >
         {this._renderEntries()}
       </List>
     );
   }
 
-  private _renderEntries(){
+  private _renderEntries() {
     return this.state.entries.map((entry, index) => {
       return (
         <React.Fragment key={`${index}-fragment`}>
-          {(index) ? <Divider /> : undefined }
-          <ListItem key={`${index}-listItem`} className={classes(logEntryClass)}>
-            <Typography 
-              className={classes(logEntryTimeClass)} 
+          {index ? <Divider /> : undefined}
+          <ListItem
+            key={`${index}-listItem`}
+            className={classes(logEntryClass)}
+          >
+            <Typography
+              className={classes(logEntryTimeClass)}
               color="textSecondary"
               variant="body2"
               key={`${index}-time`}
-            > 
-              {entry.date.toTimeString().split(' ')[0]} 
+            >
+              {entry.date.toTimeString().split(' ')[0]}
             </Typography>
-            <Typography 
-              className={classes(logEntryValueClass)} 
-              color={entry.error ? "error" : "textPrimary"}
+            <Typography
+              className={classes(logEntryValueClass)}
+              color={entry.error ? 'error' : 'textPrimary'}
               variant="body2"
               key={`${index}-value`}
-            > 
+            >
               {entry.value}
             </Typography>
           </ListItem>
         </React.Fragment>
-      )
+      );
     });
   }
 
   private _addListeners() {
     this.props.service.statusChange.connect((_, value) => {
-      let entries = this.state.entries;
+      const entries = this.state.entries;
       switch (value.status) {
         case 'sync':
           entries.push({
@@ -110,7 +117,7 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
           });
           break;
         case 'up-to-date':
-          entries[entries.length -1] = {
+          entries[entries.length - 1] = {
             date: new Date(),
             value: 'Synced and merged changes from remote repository.',
           };
@@ -124,11 +131,11 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
           break;
       }
       this.scroll = true;
-      this.setState({ entries: entries});
+      this.setState({ entries: entries });
     });
 
     this.props.service.setupChange.connect((_, value) => {
-      let entries = this.state.entries;
+      const entries = this.state.entries;
       entries.push({
         date: new Date(),
         value: value.value,
@@ -138,14 +145,13 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
     });
 
     this.props.service.stateChange.connect((_, running) => {
-      let entries = this.state.entries;
-      if (running){
+      const entries = this.state.entries;
+      if (running) {
         entries.push({
           date: new Date(),
           value: 'Starting sync with git repository.',
         });
-      }
-      else if (!running){
+      } else if (!running) {
         entries.push({
           date: new Date(),
           value: 'Stopping sync service.',
@@ -159,8 +165,8 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
   private _scrollToBottom() {
     this.scroll = false;
     animateScroll.scrollToBottom({
-      containerId: "GitSyncLog",
-      duration: 500
+      containerId: 'GitSyncLog',
+      duration: 500,
     });
   }
 }

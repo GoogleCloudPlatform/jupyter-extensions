@@ -1,21 +1,13 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
 
-import {
-  SyncLog,
-} from './log_panel';
+import { SyncLog } from './log_panel';
 
 import { Props } from './panel';
 
-import { 
-  logDisplayClass,
-  logDisplayTabClass,
-} from '../style/log';
+import { logDisplayClass, logDisplayTabClass } from '../style/log';
 
-import { 
-  Tab, 
-  Tabs,
-} from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
 
 interface LogDisplayState {
   value: number;
@@ -28,11 +20,11 @@ export class LogDisplay extends React.Component<Props, LogDisplayState> {
     super(props);
     this.state = {
       value: 0,
-    }
+    };
   }
 
   render(): React.ReactElement {
-    return(
+    return (
       <div className={classes(logDisplayClass)}>
         <Tabs
           value={this.state.value}
@@ -41,16 +33,16 @@ export class LogDisplay extends React.Component<Props, LogDisplayState> {
           textColor="primary"
           onChange={(event, value) => this._onChange(event, value)}
         >
-          <Tab label="Sync Log" className={classes(logDisplayTabClass)}/>
-          <Tab label="Conflicts" className={classes(logDisplayTabClass)}/>
+          <Tab label="Sync Log" className={classes(logDisplayTabClass)} />
+          <Tab label="Conflicts" className={classes(logDisplayTabClass)} />
         </Tabs>
-        <SyncLog service={this.props.service} ref={this.SyncLogElement}/>
+        <SyncLog service={this.props.service} ref={this.SyncLogElement} />
       </div>
     );
   }
 
-  private _onChange(event, value){
-    if (value !== 0){
+  private _onChange(event, value) {
+    if (value !== 0) {
       this.SyncLogElement.current.hideComponent();
     } else {
       this.SyncLogElement.current.unhideComponent();

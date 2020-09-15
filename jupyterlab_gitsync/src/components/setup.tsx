@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
 
-import {
-  GitPathSetup,
-  GitBranchSetup,
-} from './git_setup';
+import { GitPathSetup, GitBranchSetup } from './git_setup';
 
 import { setupClass } from '../style/setup';
 
@@ -16,11 +13,11 @@ export class GitSetup extends React.Component<Props, {}> {
   }
 
   render(): React.ReactElement {
-    return(
+    return (
       <div className={classes(setupClass)}>
-        <GitPathSetup service={this.props.service}/>
-        <GitBranchSetup service={this.props.service}/>
+        <GitPathSetup service={this.props.service} />
+        <GitBranchSetup service={this.props.service} />
       </div>
     );
-  }  
+  }
 }

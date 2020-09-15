@@ -10,10 +10,7 @@ import { GitSyncService } from './service/service';
 import { GitSyncWidget } from './components/panel';
 import { ContentsManager, Contents } from '@jupyterlab/services';
 
-async function activate(
-  app: JupyterFrontEnd,
-  shell: ILabShell,
-) {
+async function activate(app: JupyterFrontEnd, shell: ILabShell) {
   const service = new GitSyncService(shell);
   const widget = new GitSyncWidget(service);
   app.shell.add(widget, 'left', { rank: 100 });
@@ -23,12 +20,11 @@ async function activate(
   const options = {
     type: 'directory' as Contents.ContentType,
     content: true,
-  }
+  };
 
   const x = (await fs.get('.', options)).content;
-  const dir = x.flatMap(file => (file.type === 'directory') ? [file] : []);
+  const dir = x.flatMap(file => (file.type === 'directory' ? [file] : []));
   console.log(dir);
-
 }
 /**
  * The JupyterLab plugin.
