@@ -16,11 +16,14 @@ class BigQueryService:
 
   _instance = None
 
-  def __init__(self,
-               client=bigquery.Client(client_info=ClientInfo(
-                   user_agent='jupyterlab_gcpextension/{}'.format(VERSION))),
-               datacatalog_client=DataCatalogClient(client_info=ClientInfo(
-                   user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))):
+  def __init__(
+      self,
+      client=bigquery.Client(client_info=ClientInfo(
+          user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
+              VERSION))),
+      datacatalog_client=DataCatalogClient(client_info=ClientInfo(
+          user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
+              VERSION)))):
     self._client = client
     self._datacatalog_client = datacatalog_client
 

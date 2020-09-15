@@ -30,7 +30,8 @@ class PagedQueryHandler(PagedAPIHandler):
 
     if PagedQueryHandler.client is None:
       PagedQueryHandler.client = bigquery.Client(client_info=ClientInfo(
-          user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))
+          user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
+              VERSION)))
       PagedQueryHandler.orig_project = PagedQueryHandler.client.project
 
   def query(self, request_body, page_size):

@@ -165,7 +165,7 @@ class BigQueryService:
 
   def __init__(self,
                client=bigquery.Client(client_info=ClientInfo(
-                   user_agent='jupyterlab_gcpextension/{}'.format(VERSION)))):
+                   user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(VERSION)))):
     self._client = client
 
   @property
