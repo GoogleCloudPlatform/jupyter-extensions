@@ -12,7 +12,7 @@ export class GitManager {
   // Member Fields
   private _path: string = undefined;
   private _branch: string = undefined;
-  private _collab = true;
+  private _collab: boolean = true;
   private _branches: string[] = [];
 
   private _setupChange: Signal<this, string> = new Signal<this, string>(this);

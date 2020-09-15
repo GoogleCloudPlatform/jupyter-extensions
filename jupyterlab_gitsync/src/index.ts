@@ -21,10 +21,6 @@ async function activate(app: JupyterFrontEnd, shell: ILabShell) {
     type: 'directory' as Contents.ContentType,
     content: true,
   };
-
-  const x = (await fs.get('.', options)).content;
-  const dir = x.flatMap(file => (file.type === 'directory' ? [file] : []));
-  console.log(dir);
 }
 /**
  * The JupyterLab plugin.

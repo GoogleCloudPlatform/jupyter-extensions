@@ -15,7 +15,7 @@ export class GitSyncService {
   private _shell: ILabShell;
   private _git: GitManager;
   private _tracker: FileTracker;
-  private _completed = true;
+  private _completed: boolean = true;
   private _running: boolean;
   syncInterval: number = 10 * 1000;
 
