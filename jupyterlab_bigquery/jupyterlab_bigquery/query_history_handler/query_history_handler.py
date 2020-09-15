@@ -6,13 +6,17 @@ import math
 import datetime
 from notebook.base.handlers import APIHandler, app_log
 from google.cloud import bigquery
+from google.api_core.client_info import ClientInfo
 import tornado.gen as gen
+from jupyterlab_bigquery.version import VERSION
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
 
 def create_bigquery_client():
-  return bigquery.Client()
+  return bigquery.Client(client_info=ClientInfo(
+      user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
+          VERSION)))
 
 
 def format_value(value):
@@ -105,7 +109,10 @@ class QueryHistoryHandler(APIHandler):
     super().__init__(application, request, **kwargs)
 
     if QueryHistoryHandler.bigquery_client is None:
-      QueryHistoryHandler.bigquery_client = bigquery.Client()
+      QueryHistoryHandler.bigquery_client = bigquery.Client(
+          client_info=ClientInfo(
+              user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.
+              format(VERSION)))
 
   @gen.coroutine
   def post(self, *args, **kwargs):
@@ -135,7 +142,10 @@ class GetQueryDetailsHandler(APIHandler):
     super().__init__(application, request, **kwargs)
 
     if GetQueryDetailsHandler.bigquery_client is None:
-      GetQueryDetailsHandler.bigquery_client = bigquery.Client()
+      GetQueryDetailsHandler.bigquery_client = bigquery.Client(
+          client_info=ClientInfo(
+              user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.
+              format(VERSION)))
 
   @gen.coroutine
   def post(self, *args, **kwargs):

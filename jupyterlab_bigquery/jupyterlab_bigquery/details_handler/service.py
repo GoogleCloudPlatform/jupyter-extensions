@@ -12,6 +12,8 @@ from google.cloud import bigquery
 from google.cloud.bigquery.enums import SqlTypeNames, StandardSqlDataTypes
 from google.cloud.bigquery_v2.gapic.enums import Model
 from google.protobuf.wrappers_pb2 import BoolValue, DoubleValue
+from google.api_core.client_info import ClientInfo
+from jupyterlab_bigquery.version import VERSION
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
 
@@ -161,7 +163,9 @@ class BigQueryService:
 
   _instance = None
 
-  def __init__(self, client=bigquery.Client()):
+  def __init__(self,
+               client=bigquery.Client(client_info=ClientInfo(
+                   user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(VERSION)))):
     self._client = client
 
   @property
