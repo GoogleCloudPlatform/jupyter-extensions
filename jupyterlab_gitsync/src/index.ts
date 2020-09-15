@@ -8,19 +8,12 @@ import {
 
 import { GitSyncService } from './service/service';
 import { GitSyncWidget } from './components/panel';
-import { ContentsManager, Contents } from '@jupyterlab/services';
 
 async function activate(app: JupyterFrontEnd, shell: ILabShell) {
   const service = new GitSyncService(shell);
   const widget = new GitSyncWidget(service);
   app.shell.add(widget, 'left', { rank: 100 });
   console.log('git widget activated');
-
-  const fs = new ContentsManager();
-  const options = {
-    type: 'directory' as Contents.ContentType,
-    content: true,
-  };
 }
 /**
  * The JupyterLab plugin.
