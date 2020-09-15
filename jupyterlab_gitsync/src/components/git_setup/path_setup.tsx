@@ -9,22 +9,22 @@ import {
   setupItemInnerClass,
 } from '../../style/setup';
 
-import FormControl from "@material-ui/core/FormControl";
+import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import OutlinedInput from "@material-ui/core/OutlinedInput";
+import OutlinedInput from '@material-ui/core/OutlinedInput';
 
 interface GitPathState {
   path: string;
 }
 
 export class GitPathSetup extends React.Component<Props, GitPathState> {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
-      path: this.props.service.git.path ? 
-        this._shortenPath(this.props.service.git.path) : 
-        'No Git Repository Found',
-    }
+      path: this.props.service.git.path
+        ? this._shortenPath(this.props.service.git.path)
+        : 'No Git Repository Found',
+    };
   }
 
   componentDidMount() {
@@ -32,17 +32,19 @@ export class GitPathSetup extends React.Component<Props, GitPathState> {
   }
 
   render(): React.ReactElement {
-    return(
+    return (
       <FormControl
         className={classes(setupItemClass)}
         disabled
-        variant='outlined'
+        variant="outlined"
       >
-        <FormHelperText className={setupHelperTextClass}>Repository</FormHelperText>
+        <FormHelperText className={setupHelperTextClass}>
+          Repository
+        </FormHelperText>
         <OutlinedInput
           className={classes(setupItemInnerClass)}
           value={this.state.path}
-          style={{color: "var(--jp-ui-font-color0)"}}
+          style={{ color: 'var(--jp-ui-font-color0)' }}
         />
       </FormControl>
     );
@@ -52,15 +54,14 @@ export class GitPathSetup extends React.Component<Props, GitPathState> {
     this.props.service.setupChange.connect((_, value) => {
       if (value.status === 'success' && value.attrib === 'path')
         this.setState({
-          path: this.props.service.git.path ? 
-            this._shortenPath(this.props.service.git.path) : 
-            'No Git Repository Found',
+          path: this.props.service.git.path
+            ? this._shortenPath(this.props.service.git.path)
+            : 'No Git Repository Found',
         });
     });
   }
 
   private _shortenPath(path: string): string {
-    return path.substring(path.lastIndexOf('/')+1);
+    return path.substring(path.lastIndexOf('/') + 1);
   }
-
 }

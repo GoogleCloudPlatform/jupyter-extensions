@@ -13,11 +13,11 @@ export class SyncButton extends React.Component<Props, {}> {
   render() {
     return (
       <IconButton
-        title='Sync Repository Once'
-        color='inherit'
+        title="Sync Repository Once"
+        color="inherit"
         onClick={() => this._onClick()}
       >
-        <SyncIcon fontSize='small'/>
+        <SyncIcon fontSize="small" />
       </IconButton>
     );
   }

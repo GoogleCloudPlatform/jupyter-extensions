@@ -6,7 +6,6 @@ import { IconButton } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 
-
 interface ControlButtonState {
   title: string;
   icon: any;
@@ -18,7 +17,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
     super(props);
     this.state = {
       title: 'Start Auto Sync',
-      icon: <PlayArrowIcon fontSize='small'/>,
+      icon: <PlayArrowIcon fontSize="small" />,
       isRunning: false,
     };
   }
@@ -31,7 +30,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
     return (
       <IconButton
         title={this.state.title}
-        color='inherit'
+        color="inherit"
         onClick={() => this._onClick()}
       >
         {this.state.icon}
@@ -50,7 +49,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
   private _setRunState() {
     this.setState({
       title: 'Pause Auto Sync',
-      icon: <PauseIcon fontSize='small'/>,
+      icon: <PauseIcon fontSize="small" />,
       isRunning: true,
     });
   }
@@ -58,7 +57,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
   private _setStopState() {
     this.setState({
       title: 'Start Auto Sync',
-      icon: <PlayArrowIcon fontSize='small'/>,
+      icon: <PlayArrowIcon fontSize="small" />,
       isRunning: false,
     });
   }

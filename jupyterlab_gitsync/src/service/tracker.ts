@@ -44,11 +44,13 @@ export class FileTracker {
   opened: IFile[] = [];
   conflicts: IFile[] = [];
   changed: IFile[] = [];
-  
+
   conflict: boolean;
   dirty: boolean;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(service: GitSyncService) {
@@ -88,16 +90,16 @@ export class FileTracker {
   }
 
   private _updateState(type: 'conflict' | 'dirty', state: boolean) {
-    const curr = (type === 'conflict') ? this.conflict : this.dirty;
-    const signal = (type === 'conflict') ? this._conflictState : this._dirtyState;
+    const curr = type === 'conflict' ? this.conflict : this.dirty;
+    const signal = type === 'conflict' ? this._conflictState : this._dirtyState;
 
-    if (state !== curr){
+    if (state !== curr) {
       if (type === 'conflict') {
         this.conflict = state;
       }
       if (type === 'dirty') {
         this.dirty = state;
-      } 
+      }
       signal.emit(state);
     }
   }
@@ -114,7 +116,10 @@ export class FileTracker {
     let file = this.opened.find(file => file.path === widget.context.path);
     if (file) this.current = file;
     else {
-      file = (widget instanceof NotebookPanel) ? new NotebookFile(widget) : new TextFile(widget);
+      file =
+        widget instanceof NotebookPanel
+          ? new NotebookFile(widget)
+          : new TextFile(widget);
       this.current = file;
       this.opened.push(file);
 
@@ -137,7 +142,7 @@ export class FileTracker {
     if (!conflict) {
       const i = this.conflicts.indexOf(sender);
       this.conflicts.splice(i, 1);
-      if (this.conflicts.length === 0){
+      if (this.conflicts.length === 0) {
         this._updateState('conflict', false);
       }
     } else {
@@ -145,12 +150,12 @@ export class FileTracker {
       this._updateState('conflict', true);
     }
   }
-  
+
   private _dirtyStateListener(sender: IFile, dirty: boolean) {
     if (!dirty) {
       const i = this.changed.indexOf(sender);
       this.changed.splice(i, 1);
-      if (this.changed.length === 0){
+      if (this.changed.length === 0) {
         this._updateState('dirty', false);
       }
     } else {
@@ -158,5 +163,4 @@ export class FileTracker {
       this._updateState('dirty', true);
     }
   }
-
 }
