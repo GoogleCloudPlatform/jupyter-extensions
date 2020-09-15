@@ -6,11 +6,15 @@ from google.cloud.bigquery.dbapi import _helpers
 from IPython.core import magic_arguments
 from traitlets import Unicode, Any
 from ipywidgets import DOMWidget
-import pandas as pd
 from jupyterlab_bigquery.version import VERSION
 
 module_name = 'bigquery_query_incell_editor'
 module_version = VERSION
+
+UNSUPPORTED_ARGS = [
+    'destination_var', 'max_results', 'dry_run', 'use_legacy_sql',
+    'use_bqstorage_api', 'use_rest_api', 'verbose'
+]
 
 
 class QueryIncellEditor(DOMWidget):
@@ -23,15 +27,13 @@ class QueryIncellEditor(DOMWidget):
 
   query = Unicode().tag(sync=True)
   query_flags = Unicode().tag(sync=True)
-  result = Any().tag(sync=True)
 
 
 @magic_arguments.magic_arguments()
 @magic_arguments.argument(
     "destination_var",
     nargs="?",
-    help=("If provided, save the output to this\
-           variable instead of displaying it."),
+    help=("Unsupported flag.  Placeholder to match bigquery magic."),
 )
 @magic_arguments.argument(
     "--destination_table",
@@ -51,10 +53,47 @@ class QueryIncellEditor(DOMWidget):
     ),
 )
 @magic_arguments.argument(
+    "--max_results",
+    default=None,
+    help=("Unsupported flag.  Placeholder to match bigquery magic."),
+)
+@magic_arguments.argument(
     "--maximum_bytes_billed",
     default=None,
     help=("maximum_bytes_billed to use for executing this query. Defaults to "
           "the context default_query_job_config.maximum_bytes_billed."),
+)
+@magic_arguments.argument(
+    "--dry_run",
+    action="store_true",
+    default=False,
+    help=("Unsupported flag.  Placeholder to match bigquery magic."),
+)
+@magic_arguments.argument(
+    "--use_legacy_sql",
+    action="store_true",
+    default=False,
+    help=("Sets query to use Legacy SQL instead of Standard SQL. Defaults to "
+          "Standard SQL if this argument is not used."),
+)
+@magic_arguments.argument(
+    "--use_bqstorage_api",
+    action="store_true",
+    default=None,
+    help=(
+        "[Deprecated] Unsupported flag.  Placeholder to match bigquery magic."),
+)
+@magic_arguments.argument(
+    "--use_rest_api",
+    action="store_true",
+    default=False,
+    help=("Unsupported flag.  Placeholder to match bigquery magic."),
+)
+@magic_arguments.argument(
+    "--verbose",
+    action="store_true",
+    default=False,
+    help=("Unsupported flag.  Placeholder to match bigquery magic."),
 )
 @magic_arguments.argument(
     "--params",
@@ -67,15 +106,21 @@ class QueryIncellEditor(DOMWidget):
           "reference can be made by including a '$' before the variable "
           "name (ex. $my_dict_var)."),
 )
-@magic_arguments.argument(
-    "--use_legacy_sql",
-    action="store_true",
-    default=False,
-    help=("Sets query to use Legacy SQL instead of Standard SQL. Defaults to "
-          "Standard SQL if this argument is not used."),
-)
 def _cell_magic(line, query=None):
   args = magic_arguments.parse_argstring(_cell_magic, line)
+
+  args_dict = vars(args)
+
+  active_unsupport_args = []
+  for unsupport_arg in UNSUPPORTED_ARGS:
+    if args_dict[unsupport_arg] is not None and args_dict[
+        unsupport_arg] is not False:
+      active_unsupport_args.append(unsupport_arg)
+
+  if len(active_unsupport_args) > 0:
+    active_unsupport_args.sort()
+
+    print(F"Unsupported args: {', '.join(active_unsupport_args)}")
 
   params = None
 
@@ -102,20 +147,9 @@ def _cell_magic(line, query=None):
       'maximum_bytes_billed': maximum_bytes_billed,
       'params': params,
       'use_legacy_sql': args.use_legacy_sql,
-      'destination_var': args.destination_var,
   }
 
   e = QueryIncellEditor()
   e.query = query if isinstance(query, str) else ''
   e.query_flags = json.dumps(query_flags)
-  if args.destination_var:
-    e.observe(partial(handler, args.destination_var, e))
   return e
-
-
-def handler(dest_val, e, _):
-  val = e.result
-  if val:
-    val = json.loads(val)
-    df = pd.DataFrame(val['content'], columns=val['labels'])
-    IPython.get_ipython().push({dest_val: df})
