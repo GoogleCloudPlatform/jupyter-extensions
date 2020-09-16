@@ -44,7 +44,7 @@ async function activate(
     registry.registerWidget({
       name: 'bigquery_query_incell_editor',
       // IMPORTANT: this version has to match that in the query_incell_editor.py
-      version: '0.1.0',
+      version: '0.1.1',
       exports: QueryEditorInCellWidgetsExport,
     });
   }
