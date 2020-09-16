@@ -1,3 +1,4 @@
+import copy from 'copy-to-clipboard';
 import React, { Component } from 'react';
 import { stylesheet } from 'typestyle';
 import { connect } from 'react-redux';
@@ -8,8 +9,6 @@ import { gColor } from '../../shared/styles';
 import { Button, Typography } from '@material-ui/core';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { formatBytes } from '../../../utils/formatters';
-import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
-import { NotebookActions } from '@jupyterlab/notebook';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -80,9 +79,6 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   }
 
   handleDataFrameButton() {
-    const notebookTrack = WidgetManager.getInstance().getNotebookTracker();
-    const curWidget = notebookTrack.currentWidget;
-
     const { query, queryFlags } = this.props.queryResult;
 
     const processedFlags = {};
@@ -96,17 +92,13 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
       }
     }
 
-    const notebook = curWidget.content;
-    NotebookActions.insertBelow(notebook);
-    const cell = notebookTrack.activeCell;
-
     let code =
       `# The following two lines are only necessary to run once.\n` +
       `# Comment out otherwise for speed-up.\n` +
       `from google.cloud.bigquery import Client, QueryJobConfig\n` +
       `client = Client()\n\n`;
     if (ifEmpty) {
-      code += `query = '${query.trim()}'\n` + `job = client.query(query)`;
+      code += `query = '${query.trim()}'\n` + `job = client.query(query)\n`;
     } else {
       const flagsJson = JSON.stringify(processedFlags, null, 2);
 
@@ -114,9 +106,10 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
         `flags=${flagsJson}\n` +
         `job_config = bigquery.QueryJobConfig(**flags)\n` +
         `query = '${query.trim()}'\n` +
-        `job = client.query(query, job_config=job_config)`;
+        `job = client.query(query, job_config=job_config)\n`;
     }
-    cell.model.value.text = code;
+    code += `df = job.to_dataframe()`;
+    copy(code);
   }
 
   renderMessage() {

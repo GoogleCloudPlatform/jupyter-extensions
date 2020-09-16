@@ -12,8 +12,8 @@ module_name = 'bigquery_query_incell_editor'
 module_version = VERSION
 
 UNSUPPORTED_ARGS = [
-    'destination_var', 'max_results', 'dry_run', 'use_legacy_sql',
-    'use_bqstorage_api', 'use_rest_api', 'verbose'
+    'destination_var', 'max_results', 'dry_run', 'use_bqstorage_api',
+    'use_rest_api', 'verbose'
 ]
 
 
@@ -150,6 +150,6 @@ def _cell_magic(line, query=None):
   }
 
   e = QueryIncellEditor()
-  e.query = query if isinstance(query, str) else ''
+  e.query = query.strip('\n') if isinstance(query, str) else ''
   e.query_flags = json.dumps(query_flags)
   return e

@@ -488,6 +488,7 @@ export class DatasetResource extends Resource<DatasetProps> {
           onDoubleClick={event => this.openDatasetDetails(event, dataset)}
           onLabelClick={event => event.preventDefault()}
           onIconClick={() => this.handleExpandDataset(dataset)}
+          style={{ width: '100%' }}
         >
           {Array.isArray(dataset.tableIds) &&
           Array.isArray(dataset.modelIds) &&
