@@ -13,12 +13,11 @@ export class GitManager {
   private _path: string = undefined;
   private _branch: string = undefined;
   private _collab: boolean = true;
-  private _executablePath: string = undefined;
   private _branches: string[] = [];
 
   private _setupChange: Signal<this, string> = new Signal<this, string>(this);
 
-  constructor(){
+  constructor() {
     this.setup('.');
   }
 
@@ -39,7 +38,7 @@ export class GitManager {
   }
 
   get options(): string[] {
-    return (this.collab) ? ['origin', 'jp-shared/'+this.branch] : []
+    return this.collab ? ['origin', 'jp-shared/' + this.branch] : [];
   }
 
   get branches(): string[] {
@@ -51,22 +50,22 @@ export class GitManager {
   }
 
   async changeBranch(branch: string) {
-    const create = (branch in this.branches);
-    this._setupChange.emit('start');
-    if (this.path && this._executablePath){
+    const create = branch in this.branches;
+    if (this.path) {
+      this._setupChange.emit('start');
       const init: RequestInit = {
         method: 'POST',
         body: JSON.stringify({
           path: this._path,
-          branch: branch, 
-          create: create
+          branch: branch,
+          create: create,
         }),
       };
 
       const response = await requestAPI('v1/branch', init);
 
       if (response.success) {
-        this._branch = branch
+        this._branch = branch;
         if (create) this._branches.push(branch);
         this._setupChange.emit('finish');
       } else {
@@ -77,7 +76,7 @@ export class GitManager {
   }
 
   async sync() {
-    if (this.path && this._executablePath){
+    if (this.path) {
       const init: RequestInit = {
         method: 'POST',
         body: JSON.stringify({
@@ -89,7 +88,7 @@ export class GitManager {
       const response = await requestAPI('v1/sync', init);
 
       if (response.success) {
-        if (response.curr_branch !== this.branch){
+        if (response.curr_branch !== this.branch) {
           this._branch = response.curr_branch;
           this._setupChange.emit('change');
         }
@@ -121,5 +120,4 @@ export class GitManager {
     }
     console.log(this.path, this.branch, this.branches, this.options);
   }
-
 }

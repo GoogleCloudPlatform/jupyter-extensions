@@ -28,7 +28,7 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
     super(props);
     this.state = {
       title: 'All Files Up To Date',
-      icon: <DoneAllIcon color="action" fontSize='small'/>,
+      icon: <DoneAllIcon color="action" fontSize="small" />,
       status: 'up-to-date',
     };
   }
@@ -42,7 +42,7 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
       <IconButton
         className={classes(disableHoverClass)}
         title={this.state.title}
-        color='inherit'
+        color="inherit"
         disableFocusRipple
         disableRipple
       >
@@ -54,9 +54,9 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
   private _setUpToDateState(): void {
     this.setState({
       title: 'All Files Up To Date',
-      icon: <DoneAllIcon color="action" fontSize='small'/>,
+      icon: <DoneAllIcon color="action" fontSize="small" />,
       status: 'up-to-date',
-    })
+    });
   }
 
   private _setSyncState(): void {
@@ -64,29 +64,28 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
       title: 'Syncing with Remote Repository',
       icon: <CircularProgress size={20} />,
       status: 'sync',
-    })
+    });
   }
 
   private _setDirtyState(): void {
     this.setState({
       title: 'Files have Unpushed Changes',
-      icon: <DoneIcon color="action" fontSize='small'/>,
+      icon: <DoneIcon color="action" fontSize="small" />,
       status: 'dirty',
-    })
+    });
   }
 
   private _setWarningState(): void {
     this.setState({
       title: 'Error has Occurred',
-      icon: <SyncProblemIcon fontSize='small'/>,
+      icon: <SyncProblemIcon fontSize="small" />,
       status: 'warning',
-    })
+    });
   }
 
   private _addListeners() {
     this.props.service.statusChange.connect((_, value) => {
-      console.log(value.status);
-      if (value.status !== this.state.status){
+      if (value.status !== this.state.status) {
         switch (value.status) {
           case 'up-to-date':
             this._setUpToDateState();

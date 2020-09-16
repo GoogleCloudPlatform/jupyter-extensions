@@ -1,7 +1,7 @@
 import {
   DocumentWidget,
   DocumentRegistry,
-  DocumentModel
+  DocumentModel,
 } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
@@ -33,7 +33,9 @@ export class TextFile implements IFile {
   };
   repoPath: string = undefined;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(this);
+  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
+    this
+  );
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
   constructor(widget: DocumentWidget) {
@@ -78,8 +80,7 @@ export class TextFile implements IFile {
     if (text) {
       await this._displayText(text);
     }
-    ((this.widget.content as FileEditor)
-      .model as DocumentModel).dirty = false;
+    ((this.widget.content as FileEditor).model as DocumentModel).dirty = false;
   }
 
   private async _displayText(text: string) {
@@ -147,10 +148,12 @@ export class TextFile implements IFile {
 
   private _disposedListener() {
     this._removeListener(this.resolver.conflictState, this._conflictListener);
-    this._removeListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._removeListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
   }
-  
+
   private _conflictListener(sender: TextResolver, conflict: boolean) {
     this._conflictState.emit(conflict);
   }
@@ -163,9 +166,10 @@ export class TextFile implements IFile {
 
   private _addListeners() {
     this._addListener(this.resolver.conflictState, this._conflictListener);
-    this._addListener(((this.widget.content as FileEditor)
-      .model as DocumentModel).stateChanged, this._dirtyStateListener);
+    this._addListener(
+      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      this._dirtyStateListener
+    );
     this._addListener(this.widget.disposed, this._disposedListener);
   }
-
 }
