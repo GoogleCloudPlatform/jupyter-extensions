@@ -9,6 +9,10 @@ import { gColor } from '../../shared/styles';
 import { Button, Typography } from '@material-ui/core';
 import QueryResultsManager from '../../../utils/QueryResultsManager';
 import { formatBytes } from '../../../utils/formatters';
+import { WidgetManager } from '../../../utils/widgetManager/widget_manager';
+import { NotebookActions } from '@jupyterlab/notebook';
+import { SnackbarState, openSnackbar } from '../../../reducers/snackbarSlice';
+import { COPIED_AUTOHIDE_DURATION } from '../../shared/snackbar';
 
 const localStyles = stylesheet({
   resultsContainer: {
@@ -47,6 +51,8 @@ interface QueryResultsProps {
   queryResult: QueryResult;
   queryId: QueryId;
   editorType?: QueryEditorType;
+  snackbar: SnackbarState;
+  openSnackbar: any;
 }
 
 class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
@@ -81,6 +87,8 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   handleDataFrameButton() {
     const { query, queryFlags } = this.props.queryResult;
 
+    const ifIncell = this.props.editorType === 'IN_CELL';
+
     const processedFlags = {};
     let ifEmpty = true;
 
@@ -109,7 +117,21 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
         `job = client.query(query, job_config=job_config)\n`;
     }
     code += `df = job.to_dataframe()`;
-    copy(code);
+
+    if (ifIncell) {
+      const notebookTrack = WidgetManager.getInstance().getNotebookTracker();
+      const curWidget = notebookTrack.currentWidget;
+      const notebook = curWidget.content;
+      NotebookActions.insertBelow(notebook);
+      const cell = notebookTrack.activeCell;
+      cell.model.value.text = code;
+    } else {
+      copy(code);
+      this.props.openSnackbar({
+        message: 'Code copied',
+        autoHideDuration: COPIED_AUTOHIDE_DURATION,
+      });
+    }
   }
 
   renderMessage() {
@@ -136,12 +158,13 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
   }
 
   renderDataFrameButton() {
+    const ifIncell = this.props.editorType === 'IN_CELL';
     return (
       <Button
         onClick={this.handleDataFrameButton.bind(this)}
         style={{ textTransform: 'none', color: gColor('BLUE') }}
       >
-        Query and load as DataFrame
+        {ifIncell ? 'Query and load as DataFrame' : 'Copy code for DataFrame'}
       </Button>
     );
   }
@@ -180,6 +203,7 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
 
 const mapStateToProps = (state, ownProps) => {
   const queryId = ownProps.queryId;
+  const snackbar = state.snackbar;
   let queryResult = state.queryEditorTab.queries[queryId];
 
   if (!queryResult) {
@@ -190,8 +214,12 @@ const mapStateToProps = (state, ownProps) => {
       queryId: queryId,
     } as QueryResult;
   }
-  return { queryResult: queryResult };
+  return { queryResult: queryResult, snackbar };
 };
 
-export default connect(mapStateToProps)(QueryResults);
+const mapDispatchToProps = {
+  openSnackbar,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(QueryResults);
 export { QueryResults };

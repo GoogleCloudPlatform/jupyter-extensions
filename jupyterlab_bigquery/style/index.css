@@ -1,6 +1,8 @@
 .jp-BigQueryIcon {
   background-image: url('./images/BigQuery.svg');
   filter: initial !important;
+  width: 24px;
+  height: 24px;
 }
 .jp-DatasetIcon {
   background-image: url('./images/dataset_20px.svg');
