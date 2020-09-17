@@ -16,6 +16,10 @@ import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
+const hiddenClass = style({
+  display: 'none',
+});
+
 interface SyncLogState {
   hidden: boolean;
   entries: {
@@ -24,10 +28,6 @@ interface SyncLogState {
     error?: boolean;
   }[];
 }
-
-const hiddenClass = style({
-  display: 'none',
-});
 
 export class SyncLog extends React.Component<Props, SyncLogState> {
   scroll = false;
@@ -144,7 +144,7 @@ export class SyncLog extends React.Component<Props, SyncLogState> {
       this.setState({ entries: entries });
     });
 
-    this.props.service.stateChange.connect((_, running) => {
+    this.props.service.runningChange.connect((_, running) => {
       const entries = this.state.entries;
       if (running) {
         entries.push({

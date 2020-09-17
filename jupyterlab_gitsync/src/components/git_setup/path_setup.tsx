@@ -9,9 +9,7 @@ import {
   setupItemInnerClass,
 } from '../../style/setup';
 
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
+import { FormControl, FormHelperText, OutlinedInput } from '@material-ui/core';
 
 interface GitPathState {
   path: string;

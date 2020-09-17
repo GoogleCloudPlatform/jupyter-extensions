@@ -17,9 +17,9 @@ import {
   Typography,
 } from '@material-ui/core';
 
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SettingsIcon from '@material-ui/icons/Settings';
 import TimerIcon from '@material-ui/icons/Timer';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 interface SettingsButtonState {
   open: boolean;
@@ -107,7 +107,11 @@ export class SettingsButton extends React.Component<
             <Button onClick={() => this._onClose()} color="primary">
               Cancel
             </Button>
-            <Button onClick={() => this._onSave()} color="primary">
+            <Button
+              onClick={() => this._onSave()}
+              color="primary"
+              variant="contained"
+            >
               Save
             </Button>
           </DialogActions>

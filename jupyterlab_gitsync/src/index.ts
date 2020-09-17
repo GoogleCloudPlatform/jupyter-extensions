@@ -5,12 +5,17 @@ import {
   JupyterFrontEndPlugin,
   ILabShell,
 } from '@jupyterlab/application';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { GitSyncService } from './service/service';
 import { GitSyncWidget } from './components/panel';
 
-async function activate(app: JupyterFrontEnd, shell: ILabShell) {
-  const service = new GitSyncService(shell);
+async function activate(
+  app: JupyterFrontEnd,
+  shell: ILabShell,
+  manager: IDocumentManager
+) {
+  const service = new GitSyncService(shell, manager);
   const widget = new GitSyncWidget(service);
   app.shell.add(widget, 'left', { rank: 100 });
   console.log('git widget activated');
@@ -20,7 +25,7 @@ async function activate(app: JupyterFrontEnd, shell: ILabShell) {
  */
 const GitSyncPlugin: JupyterFrontEndPlugin<void> = {
   id: 'gitsync:gitsync',
-  requires: [ILabShell],
+  requires: [ILabShell, IDocumentManager],
   activate: activate,
   autoStart: true,
 };

@@ -3,6 +3,7 @@ import {
   DocumentRegistry,
   DocumentModel,
 } from '@jupyterlab/docregistry';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
 
@@ -16,10 +17,8 @@ import { TextResolver } from './text_resolver';
 const fs = new ContentsManager();
 
 export class TextFile implements IFile {
+  manager: IDocumentManager;
   widget: DocumentWidget;
-  context: DocumentRegistry.Context;
-  editor: CodeMirror;
-  doc: CodeMirror.doc;
   resolver: TextResolver;
   view: {
     left: number;
@@ -33,17 +32,12 @@ export class TextFile implements IFile {
   };
   repoPath: string = undefined;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
-    this
-  );
+  private _mergeState: Signal<this, string> = new Signal<this, string>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
-  constructor(widget: DocumentWidget) {
+  constructor(widget: DocumentWidget, manager: IDocumentManager) {
+    this.manager = manager;
     this.widget = widget;
-    this.context = widget.context;
-    this.editor = ((widget.content as FileEditor)
-      .editor as CodeMirrorEditor).editor;
-    this.doc = this.editor.doc;
     this.resolver = new TextResolver(this);
 
     this._getInitVersion();
@@ -54,17 +48,29 @@ export class TextFile implements IFile {
     return this.widget.context.path;
   }
 
-  get conflictState(): ISignal<this, boolean> {
-    return this._conflictState;
+  get content(): FileEditor {
+    return this.widget.content as FileEditor;
+  }
+
+  get context(): DocumentRegistry.Context {
+    return this.widget.context;
+  }
+
+  get editor(): CodeMirror {
+    return (this.content.editor as CodeMirrorEditor).editor;
+  }
+
+  get mergeState(): ISignal<this, string> {
+    return this._mergeState;
   }
 
   get dirtyState(): ISignal<this, boolean> {
     return this._dirtyState;
   }
 
-  async save() {
+  async save(): Promise<void> {
     try {
-      const text = this.doc.getValue();
+      const text = this.editor.getValue();
       await this._saveFile(text);
       this.resolver.addVersion(text, 'base');
     } catch (error) {
@@ -72,24 +78,40 @@ export class TextFile implements IFile {
     }
   }
 
-  async reload() {
+  async viewDiff(): Promise<void> {
+    this.widget = this.manager.openOrReveal(this.path) as DocumentWidget;
+    await this.context.ready;
+    const text = this.resolver.versions.merged;
+    this.editor.setValue(text);
+  }
+
+  async reveal(): Promise<void> {
+    this.widget = this.manager.openOrReveal(this.path) as DocumentWidget;
+    await this.context.ready;
+  }
+
+  async markResolved(): Promise<void> {
+    await this.save();
+    this._mergeState.emit('resolved');
+  }
+
+  async reload(): Promise<TextFile> {
     await this._getRemoteVersion();
     this._getLocalVersion();
     this._getEditorView();
-    const text = await this.resolver.mergeVersions();
-    if (text) {
-      await this._displayText(text);
-    }
-    ((this.widget.content as FileEditor).model as DocumentModel).dirty = false;
+    const text = this.resolver.mergeVersions();
+    if (text) await this._displayText(text);
+    (this.content.model as DocumentModel).dirty = false;
+    return this.resolver.conflict ? this : undefined;
   }
 
-  private async _displayText(text: string) {
+  private async _displayText(text: string): Promise<void> {
     await this._saveFile(text);
     await this.context.revert();
     this._setEditorView();
   }
 
-  private async _saveFile(text: string) {
+  private async _saveFile(text: string): Promise<void> {
     const options = {
       content: text,
       format: 'text' as Contents.FileFormat,
@@ -99,14 +121,14 @@ export class TextFile implements IFile {
     await fs.save(this.path, options);
   }
 
-  private async _getInitVersion() {
+  private async _getInitVersion(): Promise<void> {
     const contents = await fs.get(this.path);
     this.resolver.addVersion(contents.content, 'base');
     this.resolver.addVersion(contents.content, 'remote');
     this.resolver.addVersion(contents.content, 'local');
   }
 
-  private async _getRemoteVersion() {
+  private async _getRemoteVersion(): Promise<void> {
     try {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
@@ -115,13 +137,13 @@ export class TextFile implements IFile {
     }
   }
 
-  private _getLocalVersion() {
-    const text = this.doc.getValue();
+  private _getLocalVersion(): void {
+    const text = this.editor.getValue();
     this.resolver.addVersion(text, 'local');
   }
 
-  private _getEditorView() {
-    this.cursor = this.doc.getCursor();
+  private _getEditorView(): void {
+    this.cursor = this.editor.getCursor();
     this.resolver.setCursorToken(this.cursor);
     const scroll = this.editor.getScrollInfo();
     this.view = {
@@ -132,9 +154,9 @@ export class TextFile implements IFile {
     };
   }
 
-  private _setEditorView() {
+  private _setEditorView(): void {
     this.cursor = this.resolver.getCursorToken();
-    this.doc.setCursor(this.cursor);
+    this.editor.setCursor(this.cursor);
     this.editor.scrollIntoView(this.view);
   }
 
@@ -147,15 +169,10 @@ export class TextFile implements IFile {
   }
 
   private _disposedListener() {
-    this._removeListener(this.resolver.conflictState, this._conflictListener);
     this._removeListener(
-      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      (this.content.model as DocumentModel).stateChanged,
       this._dirtyStateListener
     );
-  }
-
-  private _conflictListener(sender: TextResolver, conflict: boolean) {
-    this._conflictState.emit(conflict);
   }
 
   private _dirtyStateListener(sender: DocumentModel, value: any) {
@@ -165,9 +182,8 @@ export class TextFile implements IFile {
   }
 
   private _addListeners() {
-    this._addListener(this.resolver.conflictState, this._conflictListener);
     this._addListener(
-      ((this.widget.content as FileEditor).model as DocumentModel).stateChanged,
+      (this.content.model as DocumentModel).stateChanged,
       this._dirtyStateListener
     );
     this._addListener(this.widget.disposed, this._disposedListener);
