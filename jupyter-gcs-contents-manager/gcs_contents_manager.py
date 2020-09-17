@@ -404,6 +404,9 @@ class GCSContentsManager(ContentsManager):
       contents = model['content']
       if model['type'] == 'notebook':
         contents = nbformat.writes(nbformat.from_dict(contents))
+      elif model['type'] == 'file' and model['format'] == 'base64':
+        b64_bytes = contents.encode('ascii')
+        contents = base64.decodebytes(b64_bytes)
 
       # GCS doesn't allow specifying the key version, so drop it if present
       if blob.kms_key_name:
