@@ -39,7 +39,6 @@ def load_jupyter_server_extension(nb_server_app):
   add_detached_route_pattern = url_path_join(base_url, '/addDetachedComment')
   add_review_route_pattern = url_path_join(base_url, '/addReviewComment')
 
-
   web_app.add_handlers(host_pattern, [
       (detached_comments_route_pattern, DetachedCommentsHandler),
       (review_comments_route_pattern, ReviewCommentsHandler),

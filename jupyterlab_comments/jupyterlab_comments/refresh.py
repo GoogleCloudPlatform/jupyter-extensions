@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from traitlets.config.configurable import Configurable
 from traitlets import Int
 
+
 class Refresh(Configurable):
 
-    #Time interval for checking for new comments and refreshing the frontend
-    interval = Int(10, config=True)
+  #Time interval for checking for new comments and refreshing the frontend
+  interval = Int(10, config=True)
 
-    def __init__(self, **kwargs):
-        super(Refresh, self).__init__(**kwargs)
+  def __init__(self, **kwargs):
+    super(Refresh, self).__init__(**kwargs)
 
-    def get_interval(self):
-        return self.interval
+  def get_interval(self):
+    return self.interval

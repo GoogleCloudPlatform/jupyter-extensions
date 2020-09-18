@@ -28,8 +28,7 @@ if not os.path.exists(os.path.join(os.getcwd(), npm_package)):
 data_files = [
     ("share/jupyter/lab/extensions", (npm_package,)),
     ("etc/jupyter/jupyter_notebook_config.d",
-     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_comments.json",
-     )),
+     ("jupyter-config/jupyter_notebook_config.d/jupyterlab_comments.json",)),
 ]
 
 setup(

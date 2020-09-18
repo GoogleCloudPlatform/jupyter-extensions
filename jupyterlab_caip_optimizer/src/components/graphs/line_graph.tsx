@@ -5,6 +5,7 @@ import { AxisPropsList } from '../trial_visualization';
 import { getTooltipHTML, colorScheme } from './graph_utils';
 
 // D3 Tooltip library: https://github.com/caged/d3-tip
+// eslint-disable-next-line no-import-assign
 d3.tip = d3Tip;
 
 interface Data {

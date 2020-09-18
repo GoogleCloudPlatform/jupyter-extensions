@@ -674,15 +674,23 @@ class TestModelDetails(unittest.TestCase):
 
     expected = {
         'details': {
-            'id': 'project_id.dataset_id.model_id',
-            'name': 'model_id',
-            'description': 'description of model',
+            'id':
+                'project_id.dataset_id.model_id',
+            'name':
+                'model_id',
+            'description':
+                'description of model',
             'labels': ['label_0: value_0', 'label_1: value_1'],
-            'date_created': '2020-07-14T13:23:45.000067',
-            'last_modified': '2020-07-15T15:11:23.000032',
-            'expires': '2021-07-14T13:23:45.000067',
-            'location': 'US',
-            'model_type': Model.ModelType(0).name,
+            'date_created':
+                '2020-07-14T13:23:45.000067',
+            'last_modified':
+                '2020-07-15T15:11:23.000032',
+            'expires':
+                '2021-07-14T13:23:45.000067',
+            'location':
+                'US',
+            'model_type':
+                Model.ModelType(0).name,
             'schema_labels': [{
                 'name': 'schema_label_0',
                 'type': SqlTypeNames[StandardSqlDataTypes(7).name].name
@@ -694,7 +702,9 @@ class TestModelDetails(unittest.TestCase):
                 'name': 'feature_col_0',
                 'type': SqlTypeNames[StandardSqlDataTypes(8).name].name
             }],
-            'training_runs': ['1970-01-15T06:56:07+00:00', '1970-01-15T06:59:49+00:00']
+            'training_runs': [
+                '1970-01-15T06:56:07+00:00', '1970-01-15T06:59:49+00:00'
+            ]
         }
     }
 

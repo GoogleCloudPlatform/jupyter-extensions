@@ -20,8 +20,7 @@ with open("README.md") as f:
   long_description = f.read()
 
 version = None
-with open(os.path.join(os.getcwd(), "jupyterlab_hwconfig",
-                       "version.py")) as f:
+with open(os.path.join(os.getcwd(), "jupyterlab_hwconfig", "version.py")) as f:
   for l in f:
     if l.startswith("VERSION"):
       version = l.rstrip().split(" = ")[1].replace("'", "")
