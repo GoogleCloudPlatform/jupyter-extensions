@@ -10,6 +10,7 @@ interface ControlButtonState {
   title: string;
   icon: any;
   isRunning: boolean;
+  disabled: boolean;
 }
 
 export class ControlButton extends React.Component<Props, ControlButtonState> {
@@ -19,6 +20,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
       title: 'Start Auto Sync',
       icon: <PlayArrowIcon fontSize="small" />,
       isRunning: false,
+      disabled: false,
     };
   }
 
@@ -32,6 +34,7 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
         title={this.state.title}
         color="inherit"
         onClick={() => this._onClick()}
+        disabled={this.state.disabled}
       >
         {this.state.icon}
       </IconButton>
@@ -63,9 +66,13 @@ export class ControlButton extends React.Component<Props, ControlButtonState> {
   }
 
   private _addListeners() {
-    this.props.service.stateChange.connect((_, running) => {
+    this.props.service.runningChange.connect((_, running) => {
       if (running && !this.state.isRunning) this._setRunState();
       else if (!running && this.state.isRunning) this._setStopState();
+    });
+
+    this.props.service.blockedChange.connect((_, blocked) => {
+      this.setState({ disabled: blocked });
     });
   }
 }

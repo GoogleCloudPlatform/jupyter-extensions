@@ -1,4 +1,5 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { NotebookPanel, Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ContentsManager, Contents } from '@jupyterlab/services';
@@ -9,9 +10,8 @@ import { NotebookResolver } from './notebook_resolver';
 const fs = new ContentsManager();
 
 export class NotebookFile implements IFile {
+  manager: IDocumentManager;
   widget: NotebookPanel;
-  content: Notebook;
-  context: DocumentRegistry.Context;
   resolver: NotebookResolver;
   view: {
     left: number;
@@ -26,15 +26,12 @@ export class NotebookFile implements IFile {
   };
   repoPath: string = undefined;
 
-  private _conflictState: Signal<this, boolean> = new Signal<this, boolean>(
-    this
-  );
+  private _mergeState: Signal<this, string> = new Signal<this, string>(this);
   private _dirtyState: Signal<this, boolean> = new Signal<this, boolean>(this);
 
-  constructor(widget: NotebookPanel) {
+  constructor(widget: NotebookPanel, manager: IDocumentManager) {
+    this.manager = manager;
     this.widget = widget;
-    this.content = widget.content;
-    this.context = widget.context;
     this.resolver = new NotebookResolver(this);
 
     this._getInitVersion();
@@ -45,8 +42,16 @@ export class NotebookFile implements IFile {
     return this.widget.context.path;
   }
 
-  get conflictState(): ISignal<this, boolean> {
-    return this._conflictState;
+  get content(): Notebook {
+    return this.widget.content;
+  }
+
+  get context(): DocumentRegistry.Context {
+    return this.widget.context;
+  }
+
+  get mergeState(): ISignal<this, string> {
+    return this._mergeState;
   }
 
   get dirtyState(): ISignal<this, boolean> {
@@ -61,7 +66,7 @@ export class NotebookFile implements IFile {
     return this.content.activeCellIndex;
   }
 
-  async save() {
+  async save(): Promise<void> {
     try {
       const content = (this.content.model as NotebookModel).toJSON();
       await this._saveFile(content);
@@ -71,24 +76,40 @@ export class NotebookFile implements IFile {
     }
   }
 
-  async reload() {
+  async viewDiff(): Promise<void> {
+    this.widget = this.manager.openOrReveal(this.path) as NotebookPanel;
+    await this.context.ready;
+    const json = this.resolver.versions.merged;
+    this.content.model.fromJSON(json);
+  }
+
+  async reveal(): Promise<void> {
+    this.widget = this.manager.openOrReveal(this.path) as NotebookPanel;
+    await this.context.ready;
+  }
+
+  async markResolved(): Promise<void> {
+    await this.save();
+    this._mergeState.emit('resolved');
+  }
+
+  async reload(): Promise<NotebookFile> {
     await this._getRemoteVersion();
     this._getLocalVersion();
     this._getEditorView();
-    const merged = await this.resolver.mergeVersions();
-    if (merged) {
-      await this._displayText(merged);
-    }
+    const merged = this.resolver.mergeVersions();
+    if (merged) await this._displayText(merged);
     (this.content.model as NotebookModel).dirty = false;
+    return this.resolver.conflict ? this : undefined;
   }
 
-  private async _displayText(merged) {
+  private async _displayText(merged): Promise<void> {
     await this._saveFile(merged);
     await this.context.revert();
     this._setEditorView();
   }
 
-  private async _saveFile(content: any) {
+  private async _saveFile(content: any): Promise<void> {
     const options = {
       content: content,
       format: 'json' as Contents.FileFormat,
@@ -98,14 +119,14 @@ export class NotebookFile implements IFile {
     await fs.save(this.path, options);
   }
 
-  private async _getInitVersion() {
+  private async _getInitVersion(): Promise<void> {
     const contents = await fs.get(this.path);
     this.resolver.addVersion(contents.content, 'base');
     this.resolver.addVersion(contents.content, 'remote');
     this.resolver.addVersion(contents.content, 'local');
   }
 
-  private async _getRemoteVersion() {
+  private async _getRemoteVersion(): Promise<void> {
     try {
       const contents = await fs.get(this.path);
       this.resolver.addVersion(contents.content, 'remote');
@@ -114,12 +135,12 @@ export class NotebookFile implements IFile {
     }
   }
 
-  private _getLocalVersion() {
+  private _getLocalVersion(): void {
     const content = (this.content.model as NotebookModel).toJSON();
     this.resolver.addVersion(content, 'local');
   }
 
-  private _getEditorView() {
+  private _getEditorView(): void {
     this.view = {
       left: this.content.node.scrollLeft,
       top: this.content.node.scrollTop,
@@ -129,7 +150,7 @@ export class NotebookFile implements IFile {
     this.resolver.setCursorToken(activeIndex, cursorPos);
   }
 
-  private _setEditorView() {
+  private _setEditorView(): void {
     this.cursor = this.resolver.getCursorToken();
 
     if (this.cursor) {

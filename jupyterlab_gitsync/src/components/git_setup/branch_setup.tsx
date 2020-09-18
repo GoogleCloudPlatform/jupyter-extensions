@@ -9,10 +9,12 @@ import {
   setupItemInnerClass,
 } from '../../style/setup';
 
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import {
+  FormControl,
+  FormHelperText,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
 
 interface GitBranchState {
   disabled: boolean;

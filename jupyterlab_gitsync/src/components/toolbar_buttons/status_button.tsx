@@ -3,11 +3,10 @@ import { classes, style } from 'typestyle';
 
 import { Props } from '../panel';
 
-import { IconButton } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import SyncProblemIcon from '@material-ui/icons/SyncProblem';
-import DoneAllIcon from '@material-ui/icons/DoneAll';
+import { CircularProgress, IconButton } from '@material-ui/core';
 import DoneIcon from '@material-ui/icons/Done';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
+import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 
 interface StatusButtonState {
   title: string;

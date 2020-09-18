@@ -323,3 +323,9 @@ export function mergeNotebooks(base, local, remote) {
   merged.cells = result.value;
   return { content: merged, conflict: result.conflict, source: result.source };
 }
+
+export function notebooksAreEqual(local, remote) {
+  const local_str = getContents(local.cells, CELL_DIVIDER);
+  const remote_str = getContents(remote.cells, CELL_DIVIDER);
+  return local_str === remote_str;
+}
