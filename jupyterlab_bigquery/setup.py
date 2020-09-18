@@ -57,6 +57,6 @@ setup(
         "google-cloud-datacatalog~=1.0.0",
         "ipywidgets>=7.5.1",
         "traitlets>=4.3.3",
-        "pandas"
+        "pandas",
     ],
 )

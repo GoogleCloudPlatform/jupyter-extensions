@@ -18,10 +18,10 @@ def load_jupyter_server_extension(nb_server_app):
   """
   host_pattern = '.*$'
   app = nb_server_app.web_app
-  gcp_v1_endpoint = url_path_join(
-    app.settings['base_url'], 'jupyterlab_gitsync', 'v1')
+  gcp_v1_endpoint = url_path_join(app.settings['base_url'],
+                                  'jupyterlab_gitsync', 'v1')
   app.add_handlers(host_pattern, [
-    (url_path_join(gcp_v1_endpoint, 'sync') + '(.*)', SyncHandler),
-    (url_path_join(gcp_v1_endpoint, 'setup') + '(.*)', SetupHandler),
-    (url_path_join(gcp_v1_endpoint, 'branch') + '(.*)', BranchHandler),
+      (url_path_join(gcp_v1_endpoint, 'sync') + '(.*)', SyncHandler),
+      (url_path_join(gcp_v1_endpoint, 'setup') + '(.*)', SetupHandler),
+      (url_path_join(gcp_v1_endpoint, 'branch') + '(.*)', BranchHandler),
   ])
