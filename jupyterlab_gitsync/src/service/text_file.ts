@@ -70,8 +70,8 @@ export class TextFile implements IFile {
 
   async save(): Promise<void> {
     try {
+      await this.context.save();
       const text = this.editor.getValue();
-      await this._saveFile(text);
       this.resolver.addVersion(text, 'base');
     } catch (error) {
       console.warn(error);
@@ -101,12 +101,20 @@ export class TextFile implements IFile {
     this._getEditorView();
     const text = this.resolver.mergeVersions();
     if (text) await this._displayText(text);
+    else await this._revertDisk();
     (this.content.model as DocumentModel).dirty = false;
     return this.resolver.conflict ? this : undefined;
   }
 
   private async _displayText(text: string): Promise<void> {
     await this._saveFile(text);
+    await this.context.revert();
+    this.cursor = this.resolver.getCursorToken();
+    this._setEditorView();
+  }
+
+  private async _revertDisk(): Promise<void> {
+    await this._saveFile(this.resolver.versions.local);
     await this.context.revert();
     this._setEditorView();
   }
@@ -155,7 +163,6 @@ export class TextFile implements IFile {
   }
 
   private _setEditorView(): void {
-    this.cursor = this.resolver.getCursorToken();
     this.editor.setCursor(this.cursor);
     this.editor.scrollIntoView(this.view);
   }

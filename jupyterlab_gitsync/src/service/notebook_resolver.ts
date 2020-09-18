@@ -100,8 +100,9 @@ export class NotebookResolver implements IResolver {
   }
 
   mergeVersions(): INotebookContent {
-    if (nbEquals(this.versions.local, this.versions.remote)) {
+    if (nbEquals(this.versions.base, this.versions.remote)) {
       this.addVersion(this.versions.local, 'base');
+      this._conflict = false;
       return undefined;
     }
 

@@ -68,8 +68,8 @@ export class NotebookFile implements IFile {
 
   async save(): Promise<void> {
     try {
+      await this.context.save();
       const content = (this.content.model as NotebookModel).toJSON();
-      await this._saveFile(content);
       this.resolver.addVersion(content, 'base');
     } catch (error) {
       console.warn(error);
@@ -99,12 +99,20 @@ export class NotebookFile implements IFile {
     this._getEditorView();
     const merged = this.resolver.mergeVersions();
     if (merged) await this._displayText(merged);
+    else await this._revertDisk();
     (this.content.model as NotebookModel).dirty = false;
     return this.resolver.conflict ? this : undefined;
   }
 
   private async _displayText(merged): Promise<void> {
     await this._saveFile(merged);
+    await this.context.revert();
+    this.cursor = this.resolver.getCursorToken();
+    this._setEditorView();
+  }
+
+  private async _revertDisk(): Promise<void> {
+    await this._saveFile(this.resolver.versions.local);
     await this.context.revert();
     this._setEditorView();
   }
@@ -151,8 +159,6 @@ export class NotebookFile implements IFile {
   }
 
   private _setEditorView(): void {
-    this.cursor = this.resolver.getCursorToken();
-
     if (this.cursor) {
       this.content.activeCellIndex = this.cursor.index;
       this.activeCell.editor.setCursorPosition(this.cursor.pos);
