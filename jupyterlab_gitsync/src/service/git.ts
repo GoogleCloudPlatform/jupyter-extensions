@@ -99,7 +99,6 @@ export class GitManager {
   }
 
   async setup(path: string) {
-    console.log('start setup');
     this._setupChange.emit('start');
     this._path = undefined;
 
@@ -118,6 +117,5 @@ export class GitManager {
       this._setupChange.emit('finish');
       throw Error(response.error);
     }
-    console.log(this.path, this.branch, this.branches, this.options);
   }
 }

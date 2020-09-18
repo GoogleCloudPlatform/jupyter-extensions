@@ -6,6 +6,7 @@ import { Props } from '../panel';
 import { CircularProgress, IconButton } from '@material-ui/core';
 import DoneIcon from '@material-ui/icons/Done';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
+import SyncDisabledIcon from '@material-ui/icons/SyncDisabled';
 import SyncProblemIcon from '@material-ui/icons/SyncProblem';
 
 interface StatusButtonState {
@@ -76,9 +77,17 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
 
   private _setWarningState(): void {
     this.setState({
-      title: 'Error has Occurred',
+      title: 'An Error has Occurred',
       icon: <SyncProblemIcon fontSize="small" />,
       status: 'warning',
+    });
+  }
+
+  private _setConflictState(): void {
+    this.setState({
+      title: 'Files have Unresolved Conflicts',
+      icon: <SyncDisabledIcon fontSize="small" />,
+      status: 'conflict',
     });
   }
 
@@ -98,8 +107,15 @@ export class StatusButton extends React.Component<Props, StatusButtonState> {
           case 'warning':
             this._setWarningState();
             break;
+          case 'conflict':
+            this._setConflictState();
+            break;
         }
       }
+    });
+
+    this.props.service.blockedChange.connect((_, isBlocked) => {
+      if (!isBlocked) this._setDirtyState();
     });
   }
 }

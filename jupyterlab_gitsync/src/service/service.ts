@@ -21,8 +21,13 @@ export class GitSyncService {
   private _running: boolean;
   syncInterval: number = 10 * 1000;
 
-  private _status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning' =
-    'up-to-date';
+  private _status:
+    | 'sync'
+    | 'merge'
+    | 'up-to-date'
+    | 'dirty'
+    | 'warning'
+    | 'conflict' = 'up-to-date';
   private _blocked = false;
   private _blockedChange: Signal<this, boolean> = new Signal<this, boolean>(
     this
@@ -87,7 +92,6 @@ export class GitSyncService {
 
   start() {
     if (!this._blocked && !this.running) {
-      console.log('start git sync service');
       this._running = true;
       this._run();
       this._runningChange.emit(this.running);
@@ -98,7 +102,6 @@ export class GitSyncService {
     if (!this._blocked && this.running) {
       this._running = false;
       this._runningChange.emit(this.running);
-      console.log('stop git sync service');
     }
   }
 
@@ -148,7 +151,8 @@ export class GitSyncService {
       await this.git.sync();
       this._updateStatus('merge');
       await this.tracker.reloadAll();
-      this._updateStatus('up-to-date');
+      if (this.tracker.conflict) this._updateStatus('conflict');
+      else this._updateStatus('up-to-date');
     } catch (error) {
       console.warn(error);
       this._updateStatus('warning', error.toString());
@@ -174,7 +178,7 @@ export class GitSyncService {
   }
 
   private _updateStatus(
-    status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning',
+    status: 'sync' | 'merge' | 'up-to-date' | 'dirty' | 'warning' | 'conflict',
     error?: string
   ) {
     if (status !== this.status) {
@@ -192,8 +196,10 @@ export class GitSyncService {
 
   private _conflictListener(sender: FileTracker, conflict: boolean) {
     this._updateBlocked(conflict);
-    if (this.running) this._runningChange.emit(!conflict);
-    console.log('conflict update from service');
+    if (this.running) {
+      this._run();
+      this._runningChange.emit(!conflict);
+    }
   }
 
   private _dirtyStateListener(sender: FileTracker, dirty: boolean) {

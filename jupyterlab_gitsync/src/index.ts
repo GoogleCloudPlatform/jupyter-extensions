@@ -18,7 +18,6 @@ async function activate(
   const service = new GitSyncService(shell, manager);
   const widget = new GitSyncWidget(service);
   app.shell.add(widget, 'left', { rank: 100 });
-  console.log('git widget activated');
 }
 /**
  * The JupyterLab plugin.
