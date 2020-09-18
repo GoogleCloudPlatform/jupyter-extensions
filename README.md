@@ -8,6 +8,10 @@ for the Jupyter and JupyterLab environments.
 The following steps only need to be completed once to setup your initial
 development environment.
 
+**Note**: If at any point you want to go through these steps on a fresh
+JupyterLab environment, you can run `pipenv --rm` to remove the virtual
+environment.
+
 1. Clone this repository.
 
    - `git clone git@github.com:GoogleCloudPlatform/jupyter-extensions.git`
@@ -29,17 +33,24 @@ development environment.
 1. Run `pipenv shell` to activate the virtual Python environment with the
    necessary dependencies installed.
 
+1. Run `cd shared/` and then `npm run install-shared` to install the shared
+   package.
+
 1. Run `npm run link` to link the [gcp-jupyterlab-shared](./shared/client)
    package into the JupyterLab environment.
 
    - This allows local development on the common frontend components library
      to be used in other extensions without needing to publish and re-install
      updated versions of the packages.
+   - If you are having trouble running this command, try restarting these
+     steps on a new JupyterLab environment (see Note above).
 
 1. `cd` into the folder of the extension you plan to develop and run
    `npm run install-extension`. This installs the extension in the
    JupyterLab environment in development mode. Afterwards, `cd` back to the root
    of the repository.
+
+   - Run `jupyter labextension install @jupyter-widgets/jupyterlab-manager@1.1` if your extension requires ipywidget. Currently, this is a requirement for the jupyterlab_bigquery extension.
 
 1. Run `npm run watch` to start the TypeScript compiler in watch mode. This will
    watch for changes in any of the TypeScript sources.
@@ -59,3 +70,16 @@ development environment.
      a new file to the project.
 
 You can then open JupyterLab at one of the links shown in the logging output.
+
+## Testing on an AI Platform Notebook
+
+If you would like to test an extension in an AI Platform Notebook, you can do so
+by following these steps.
+
+1. Create a new AI Platform Notebook from the Cloud Console.
+
+1. `cd` into the directory of the extension you wish to install.
+
+1. Run `../scripts/deploy.sh` passing the instance's name and zone as arguments.
+
+   - ie. `../scripts/deploy.sh test-instance us-east1-b`

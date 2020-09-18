@@ -17,7 +17,7 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { mount, shallow } from 'enzyme';
-import { Message, ToggleSwitch } from 'gcp-jupyterlab-shared';
+import { Message, ToggleSwitch } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import {
@@ -28,6 +28,8 @@ import {
   WEEK,
   MONTH,
   SCHEDULE_TYPES,
+  ACCELERATOR_TYPES,
+  ACCELERATOR_TYPES_REDUCED,
 } from '../data';
 import { GcpService, RunNotebookRequest } from '../service/gcp';
 import { GetPermissionsResponse } from '../service/project_state';
@@ -121,16 +123,19 @@ describe('SchedulerForm', () => {
       CUSTOM
     );
 
-    expect(schedulerForm.find('select[name="masterType"]')).toHaveLength(1);
-    expect(schedulerForm.find('select[name="acceleratorType"]')).toHaveLength(
-      1
-    );
-    expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
-      1
+    await immediatePromise();
+    expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual(
+      expect.objectContaining({
+        acceleratorCount: '',
+        acceleratorType: '',
+        masterType: 'n1-standard-4',
+        scaleTier: 'CUSTOM',
+      })
     );
   });
 
   it('Updates available Accelerator Types based on selected Master Type', async () => {
+    spyOn(global.Date, 'now').and.returnValue(1593194344000);
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
@@ -138,10 +143,12 @@ describe('SchedulerForm', () => {
       'scaleTier',
       CUSTOM
     );
-
     expect(
-      schedulerForm.find('select[name="acceleratorType"]').find('option')
-    ).toHaveLength(5);
+      schedulerForm
+        .find('select[name="acceleratorType"]')
+        .find('option')
+        .map(o => o.prop('value'))
+    ).toEqual(ACCELERATOR_TYPES.map(a => a.value));
 
     simulateFieldChange(
       schedulerForm,
@@ -151,8 +158,67 @@ describe('SchedulerForm', () => {
     );
 
     expect(
-      schedulerForm.find('select[name="acceleratorType"]').find('option')
-    ).toHaveLength(3);
+      schedulerForm
+        .find('select[name="acceleratorType"]')
+        .find('option')
+        .map(o => o.prop('value'))
+    ).toEqual(ACCELERATOR_TYPES_REDUCED.map(a => a.value));
+
+    await immediatePromise();
+    expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual(
+      expect.objectContaining({
+        acceleratorCount: '',
+        acceleratorType: '',
+        masterType: 'n1-standard-64',
+        scaleTier: 'CUSTOM',
+      })
+    );
+  });
+
+  it('Updates acceleratorCount based on acceleratorType', async () => {
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="scaleTier"]',
+      'scaleTier',
+      CUSTOM
+    );
+    expect(schedulerForm.find('select[name="acceleratorCount"]').length).toBe(
+      0
+    );
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="acceleratorType"]',
+      'acceleratorType',
+      'NVIDIA_TESLA_P4'
+    );
+
+    await immediatePromise();
+    expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual(
+      expect.objectContaining({
+        acceleratorCount: '1',
+        acceleratorType: 'NVIDIA_TESLA_P4',
+        masterType: 'n1-standard-4',
+        scaleTier: 'CUSTOM',
+      })
+    );
+
+    simulateFieldChange(
+      schedulerForm,
+      'select[name="acceleratorType"]',
+      'acceleratorType',
+      ''
+    );
+
+    await immediatePromise();
+    expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual(
+      expect.objectContaining({
+        acceleratorCount: '',
+        acceleratorType: '',
+        masterType: 'n1-standard-4',
+        scaleTier: 'CUSTOM',
+      })
+    );
   });
 
   it('Toggles Schedule visibility based on Frequency', async () => {

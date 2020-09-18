@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IconButtonMenu Renders menu items 1`] = `
+<span>
+  <WithStyles(WithStyles(ForwardRef(IconButton)))
+    onClick={[Function]}
+  >
+    <MoreVertIcon />
+  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  <WithStyles(ForwardRef(Menu))
+    onClose={[Function]}
+    open={false}
+  >
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 1
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 2
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 3
+    </WithStyles(ForwardRef(MenuItem))>
+  </WithStyles(ForwardRef(Menu))>
+</span>
+`;
+
+exports[`IconButtonMenu Renders with provided icon 1`] = `
+<span>
+  <WithStyles(WithStyles(ForwardRef(IconButton)))
+    onClick={[Function]}
+  >
+    <AddIcon />
+  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  <WithStyles(ForwardRef(Menu))
+    onClose={[Function]}
+    open={false}
+  >
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 1
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 2
+    </WithStyles(ForwardRef(MenuItem))>
+    <WithStyles(ForwardRef(MenuItem))
+      onClick={[Function]}
+    >
+      Item 3
+    </WithStyles(ForwardRef(MenuItem))>
+  </WithStyles(ForwardRef(Menu))>
+</span>
+`;

@@ -15,15 +15,18 @@
  */
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { ServerConnection } from '@jupyterlab/services';
 
-import { handleApiError, TransportService } from './transport';
+import {
+  handleApiError,
+  TransportService,
+  POST,
+  InstanceMetadata,
+  getMetadata,
+} from 'gcp_jupyterlab_shared';
 import {
   CLOUD_FUNCTION_NAME,
   CLOUD_FUNCTION_REGION,
   BUCKET_NAME_SUFFIX,
-  POST,
-  GET,
   removeFromList,
   CLOUD_FUNCTION_ARCHIVE,
 } from '../data';
@@ -148,9 +151,8 @@ const SCHEDULE_PERMISSIONS: ReadonlySet<string> = new Set([
  *  2) Recurring scheduled execution on AI Platform via Cloud Scheduler
  */
 export class ProjectStateService {
-  private readonly serverSettings = ServerConnection.defaultSettings;
-  private readonly projectUrl = `${this.serverSettings.baseUrl}gcp/v1/project`;
   private projectIdPromise?: Promise<string>;
+  private metadataPromise?: Promise<InstanceMetadata>;
 
   constructor(private _transportService: TransportService, projectId?: string) {
     if (projectId) {
@@ -489,18 +491,27 @@ export class ProjectStateService {
       return this.projectIdPromise;
     }
     try {
-      const response = await ServerConnection.makeRequest(
-        this.projectUrl,
-        { method: GET },
-        this.serverSettings
-      );
-      const { project } = await response.json();
+      const { project } = await this._getMetadata();
       this.projectIdPromise = Promise.resolve(project);
       return this.projectIdPromise;
     } catch (err) {
-      console.error('Unable to obtain GCP Project');
+      console.error('Unable to obtain GCP Project', err);
       throw err;
     }
+  }
+
+  /**
+   * Retrieves the VM Metadata from the server
+   */
+  private _getMetadata(): Promise<InstanceMetadata> {
+    if (this.metadataPromise) {
+      return this.metadataPromise;
+    }
+    this.metadataPromise = getMetadata().catch(err => {
+      console.error('Unable to obtain VM Metadata');
+      throw err;
+    });
+    return this.metadataPromise;
   }
 
   private _populateGetPermissionsResponse(

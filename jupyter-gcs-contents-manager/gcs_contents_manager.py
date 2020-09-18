@@ -349,10 +349,9 @@ class GCSContentsManager(ContentsManager):
         first_slash = suffix.find('/')
         if first_slash < 0:
           child_path = posixpath.join(normalized_path, suffix)
-          add_child(
-              suffix,
-              self._blob_model(child_path, b, content=False),
-              override_existing=True)
+          add_child(suffix,
+                    self._blob_model(child_path, b, content=False),
+                    override_existing=True)
         else:
           subdir = suffix[0:first_slash]
           if subdir:
@@ -405,6 +404,9 @@ class GCSContentsManager(ContentsManager):
       contents = model['content']
       if model['type'] == 'notebook':
         contents = nbformat.writes(nbformat.from_dict(contents))
+      elif model['type'] == 'file' and model['format'] == 'base64':
+        b64_bytes = contents.encode('ascii')
+        contents = base64.decodebytes(b64_bytes)
 
       # GCS doesn't allow specifying the key version, so drop it if present
       if blob.kms_key_name:
@@ -549,18 +551,20 @@ class CombinedContentsManager(ContentsManager):
       if path == path_prefix or path.startswith(path_prefix + '/'):
         relative_path = path[len(path_prefix):]
         return self._content_managers[path_prefix], relative_path, path_prefix
-    raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
+    if '/' in path:
+      path_parts = path.split('/', 1)
+      return None, path_parts[1], path_parts[0]
+    return None, path, ''
 
   def is_hidden(self, path):
     try:
       cm, relative_path, unused_path_prefix = self._content_manager_for_path(
           path)
+      if not cm:
+        return False
       return cm.is_hidden(relative_path)
     except HTTPError as err:
-      if err.status_code == 404:
-        return False
-      else:
-        raise err
+      raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
@@ -569,12 +573,11 @@ class CombinedContentsManager(ContentsManager):
     try:
       cm, relative_path, unused_path_prefix = self._content_manager_for_path(
           path)
+      if not cm:
+        return False
       return cm.file_exists(relative_path)
     except HTTPError as err:
-      if err.status_code == 404:
-        return False
-      else:
-        raise err
+      raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
@@ -585,12 +588,11 @@ class CombinedContentsManager(ContentsManager):
     try:
       cm, relative_path, unused_path_prefix = self._content_manager_for_path(
           path)
+      if not cm:
+        return False
       return cm.dir_exists(relative_path)
     except HTTPError as err:
-      if err.status_code == 404:
-        return False
-      else:
-        raise err
+      raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
@@ -631,6 +633,8 @@ class CombinedContentsManager(ContentsManager):
       return dir_obj
     try:
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
+      if not cm:
+        raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
       model = cm.get(relative_path, content=content, type=type, format=format)
       self._make_model_relative(model, path_prefix)
       return model
@@ -647,8 +651,10 @@ class CombinedContentsManager(ContentsManager):
       self.run_pre_save_hook(model=model, path=path)
 
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if relative_path in ['', '/']:
+      if (relative_path in ['', '/']) or (path_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
+      if not cm:
+        raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
 
       if 'path' in model:
         model['path'] = relative_path
@@ -668,8 +674,10 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
-      if relative_path in ['', '/']:
+      if (relative_path in ['', '/']) or (path_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
+      if not cm:
+        raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
       return cm.delete_file(relative_path)
     except OSError as err:
       # The built-in file contents manager will not attempt to wrap permissions
@@ -694,13 +702,21 @@ class CombinedContentsManager(ContentsManager):
     if (old_path in ['', '/']) or (new_path in ['', '/']):
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
-      old_cm, old_relative_path, _ = self._content_manager_for_path(old_path)
-      if old_relative_path in ['', '/']:
+      old_cm, old_relative_path, old_prefix = self._content_manager_for_path(
+          old_path)
+      if (old_relative_path in ['', '/']) or (old_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
+      if not old_cm:
+        raise HTTPError(404,
+                        'No content manager defined for "{}"'.format(old_path))
 
-      new_cm, new_relative_path, _ = self._content_manager_for_path(new_path)
-      if new_relative_path in ['', '/']:
+      new_cm, new_relative_path, new_prefix = self._content_manager_for_path(
+          new_path)
+      if (new_relative_path in ['', '/']) or (new_prefix in ['', '/']):
         raise HTTPError(403, 'The top-level directory contents are read-only')
+      if not new_cm:
+        raise HTTPError(404,
+                        'No content manager defined for "{}"'.format(new_path))
 
       if old_cm != new_cm:
         raise HTTPError(400, 'Unsupported rename across file systems')

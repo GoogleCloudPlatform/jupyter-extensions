@@ -26,7 +26,7 @@ import {
   SubmitButton,
   TextInput,
   ToggleSwitch,
-} from 'gcp-jupyterlab-shared';
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { GcpService, RunNotebookRequest } from '../service/gcp';
@@ -134,6 +134,7 @@ export class InnerSchedulerForm extends React.Component<
     this._onScaleTierChanged = this._onScaleTierChanged.bind(this);
     this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
     this._onMasterTypeChanged = this._onMasterTypeChanged.bind(this);
+    this._onAcceleratorTypeChange = this._onAcceleratorTypeChange.bind(this);
     this._onFormReset = this._onFormReset.bind(this);
     this.updateCronSchedule = this.updateCronSchedule.bind(this);
   }
@@ -224,17 +225,19 @@ export class InnerSchedulerForm extends React.Component<
                 name="acceleratorType"
                 value={values.acceleratorType}
                 options={this.acceleratorTypeOptions}
-                onChange={handleChange}
+                onChange={this._onAcceleratorTypeChange}
               />
             </div>
             <div className={css.flex1}>
-              <SelectInput
-                label="Accelerator count"
-                name="acceleratorCount"
-                value={values.acceleratorCount}
-                options={ACCELERATOR_COUNTS_1_2_4_8}
-                onChange={handleChange}
-              />
+              {values.acceleratorType && (
+                <SelectInput
+                  label="Accelerator count"
+                  name="acceleratorCount"
+                  value={values.acceleratorCount}
+                  options={ACCELERATOR_COUNTS_1_2_4_8}
+                  onChange={handleChange}
+                />
+              )}
             </div>
           </div>
         )}
@@ -317,12 +320,7 @@ export class InnerSchedulerForm extends React.Component<
       e.target.value === '' ? '' : this.acceleratorTypeOptions[0].value,
       false
     );
-    setFieldValue(
-      'acceleratorCount',
-      e.target.value === '' ? '' : ACCELERATOR_COUNTS_1_2_4_8[0].value,
-      false
-    );
-
+    setFieldValue('acceleratorCount', '', false);
     handleChange(e);
   }
 
@@ -341,11 +339,7 @@ export class InnerSchedulerForm extends React.Component<
       isCustom ? this.acceleratorTypeOptions[0].value : '',
       false
     );
-    setFieldValue(
-      'acceleratorCount',
-      isCustom ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '',
-      false
-    );
+    setFieldValue('acceleratorCount', '', false);
 
     handleChange(e);
   }
@@ -358,6 +352,14 @@ export class InnerSchedulerForm extends React.Component<
         ? this.props.permissions.toSchedule
         : this.props.permissions.toExecute;
     setFieldValue('scheduleType', value);
+    handleChange(e);
+  }
+
+  private _onAcceleratorTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const { handleChange, setFieldValue } = this.props;
+    const value = e.target.value;
+    const count = value ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '';
+    setFieldValue('acceleratorCount', count);
     handleChange(e);
   }
 

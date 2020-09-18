@@ -1,0 +1,60 @@
+{
+  "name": "gcp_jupyterlab_shared",
+  "version": "1.0.8",
+  "description": "Shared libraries for JupyterLab extensions",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*.{d.ts,js}"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.prod.json",
+    "build-python": "npm pack && python setup.py sdist bdist_wheel",
+    "clean": "rimraf coverage lib build dist *egg-info *tsbuildinfo *tgz",
+    "install-shared": "../scripts/shared-install.sh",
+    "link": "jupyter labextension link --log-level=INFO",
+    "lint-warnings": "eslint \"**/*.{ts,tsx}\" --fix --quiet",
+    "lint": "npm run lint-warnings -- --quiet",
+    "prepack": "npm run clean && npm run build",
+    "test": "jest --coverage",
+    "test-python": "../scripts/run_python_tests.sh coverage",
+    "test-watch": "jest --watch",
+    "watch": "tsc -b -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GoogleCloudPlatform/jupyter-extensions.git"
+  },
+  "author": "Google",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/GoogleCloudPlatform/jupyter-extensions/issues"
+  },
+  "homepage": "https://github.com/GoogleCloudPlatform/jupyter-extensions#readme",
+  "dependencies": {
+    "@jupyterlab/services": "^4.2.2",
+    "@material-ui/core": "^4.10.1",
+    "@material-ui/icons": "^4.9.1",
+    "csstips": "^1.2.0",
+    "date-fns": "^2.14.0",
+    "material-table": "^1.62.0",
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4",
+    "typestyle": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "@types/react": "~16.8.18",
+    "@types/react-dom": "^16.8.4",
+    "@types/gapi": "0.0.39",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "enzyme-to-json": "^3.4.4",
+    "eslint": "^7.9.0",
+    "jest": "^26.4.2",
+    "jest-junit": "^10.0.0",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^26.2.0",
+    "typescript": "^3.8.3"
+  }
+}

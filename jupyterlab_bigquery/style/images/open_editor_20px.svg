@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39 (31667) - http://www.bohemiancoding.com/sketch -->
+    <title>20/open-editor</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="All-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="20/open-editor">
+            <polygon id="Container" points="0 0 20 0 20 20 0 20"></polygon>
+            <path d="M13,17 L14.9941413,17 C16.1029399,17 17,16.1019465 17,14.9941413 L17,5.00585866 C17,3.89706013 16.1019465,3 14.9941413,3 L5.00585866,3 C3.89706013,3 3,3.89805351 3,5.00585866 L3,14.9941413 C3,16.1029399 3.89805351,17 5.00585866,17 L7,17 L5,15 L5,7 L15,7 L15,15 L13,17 Z M9,8 L11,8 L11,13 L9,13 L9,8 Z M10,17 L14,13 L6,13 L10,17 Z" id="Open-Copy" fill="#000000"></path>
+        </g>
+    </g>
+</svg>

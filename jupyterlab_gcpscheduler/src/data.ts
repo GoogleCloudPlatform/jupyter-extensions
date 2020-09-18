@@ -17,10 +17,6 @@
 /** Helpers for UI selections */
 const GCR_PREFIX = 'gcr.io/deeplearning-platform-release';
 
-/** Constant for GET requests */
-export const GET = 'GET';
-/** Constant for POST requests */
-export const POST = 'POST';
 /** Custom ScaleTier allows selection of AI Platform Machine type */
 export const CUSTOM = 'CUSTOM';
 /** Indicates a single Notebook run */
@@ -120,6 +116,7 @@ export const CONTAINER_IMAGES: Option[] = [
     value: `${GCR_PREFIX}/r-cpu.3-6:latest`,
     text: 'R 3.6 (with r-essentials)',
   },
+  { value: `${GCR_PREFIX}/beam-notebooks:latest`, text: 'Apache Beam' },
 ];
 
 /**
@@ -173,6 +170,7 @@ export const MASTER_TYPES: Option[] = [
  * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
  */
 export const ACCELERATOR_TYPES: Option[] = [
+  { value: '', text: 'None' },
   { value: 'NVIDIA_TESLA_K80', text: 'NVIDIA Tesla K80' },
   { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
   { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
@@ -186,6 +184,7 @@ export const ACCELERATOR_TYPES: Option[] = [
  * https://cloud.google.com/ai-platform/training/docs/using-gpus#compute-engine-machine-types-with-gpu
  */
 export const ACCELERATOR_TYPES_REDUCED: Option[] = [
+  { value: '', text: 'None' },
   { value: 'NVIDIA_TESLA_P4', text: 'NVIDIA Tesla P4' },
   { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
   { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },

@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.jp-UcaipIcon {
+  background-image: url('./images/storage_24px.svg');
+  background-size: contain;
+}
+
+.jp-UcaipIcon-TABLE {
+  background-image: url('./images/table_chart-24px.svg');
+  background-size: contain;
+}
+
+.jp-UcaipIcon-IMAGE {
+  background-image: url('./images/image-24px.svg');
+  background-size: contain;
+}
+
+.jp-UcaipIcon-OTHER {
+  background-image: url('./images/storage_24px.svg');
+  background-size: contain;
+}
+
+.jp-UcaipIcon-model {
+  background-image: url('./images/emoji_objects-24px.svg');
+  background-size: contain;
+}
+
+.jp-UcaipIcon-training {
+  background-image: url('./images/model_training-24px.svg');
+  background-size: contain;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/jupyterlab_ucaip/style/fonts/Roboto-Regular.ttf') format('truetype');
+}

@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "name": "auth_token_server",
+  "version": "1.0.0",
+  "description": "Dedicated authorization token server designed to work from popup",
+  "main": "build/index.js",
+  "files": [
+    "secrets.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf build *tsbuildinfo *tgz",
+    "predeploy": "npm run clean && npm run test && npm run build",
+    "deploy": "gcloud --project beatrix-dev app deploy",
+    "start": "node build/index.js",
+    "start:dev": "nodemon build/index.js",
+    "test": "eslint --fix --quiet index.ts",
+    "watch": "tsc -b -w"
+  },
+  "author": "GCP AI Platform Notebooks Frontend Team",
+  "license": "Apache",
+  "dependencies": {
+    "express": "^4.17.1",
+    "google-auth-library": "^6.0.6"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.7",
+    "eslint": "^7.9.0",
+    "nodemon": "^2.0.4",
+    "rimraf": "^3.0.0",
+    "typescript": "^3.8.3"
+  }
+}

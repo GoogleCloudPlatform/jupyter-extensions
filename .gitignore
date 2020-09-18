@@ -53,11 +53,15 @@ typings/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
+# Yarn files
 .yarn-integrity
+yarn.lock
 
 # dotenv environment variables file
 .env
+
+# json secrets
+*.secrets.json
 
 # next.js build output
 .next
@@ -85,3 +89,6 @@ __pycache__
 
 # TypeScript Build Info
 *.tsbuildinfo
+
+# macOS Folder Settings
+*.DS_Store

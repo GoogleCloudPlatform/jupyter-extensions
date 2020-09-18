@@ -18,7 +18,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { Dialog } from '@material-ui/core';
 import { shallow } from 'enzyme';
-import { IconButtonMenu } from 'gcp-jupyterlab-shared';
+import { IconButtonMenu } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import { GcpService } from '../service/gcp';
@@ -29,7 +29,7 @@ import {
   ClientTransportService,
   ServerProxyTransportService,
   TransportService,
-} from '../service/transport';
+} from 'gcp_jupyterlab_shared';
 import { ProjectStateService, ProjectState } from '../service/project_state';
 import { ActionBar } from './action_bar';
 import { Initializer } from './initialization/initializer';
@@ -273,7 +273,7 @@ describe('SchedulerDialog', () => {
       .find(IconButtonMenu)
       .dive()
       .findWhere(w => w.text() === 'Reset configuration')
-      .parent()
+      .first()
       .simulate('click');
     expect(settings.save).toHaveBeenCalledWith('{}');
   });

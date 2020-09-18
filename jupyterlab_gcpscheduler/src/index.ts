@@ -35,7 +35,7 @@ import {
   GcpSchedulerWidget,
 } from './components/scheduler_widget';
 import { GcpService } from './service/gcp';
-import { ServerProxyTransportService } from './service/transport';
+import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from './service/project_state';
 
 /** Adds a Scheduler button to the Notebook toolbar. */

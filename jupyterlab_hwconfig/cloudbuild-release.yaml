@@ -1,0 +1,50 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+  - name: 'node:10-alpine'
+    entrypoint: 'npm'
+    args: ['--unsafe-perm', 'install']
+  - name: 'node:10-alpine'
+    entrypoint: 'npm'
+    args: ['run', 'test']
+  - name: 'node:10-alpine'
+    entrypoint: 'npm'
+    args: ['pack']
+  - name: 'python:3-alpine'
+    id: 'package'
+    args: ['python', 'setup.py', 'sdist', 'bdist_wheel']
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'copy-tagged-versions'
+    args:
+      [
+        '-h',
+        'Cache-Control:no-cache,max-age=0',
+        'cp',
+        'dist/*',
+        'gs://deeplearning-platform-ui-public/',
+      ]
+    waitFor: ['package']
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'copy-latest-tarball'
+    args:
+      [
+        '-h',
+        'Cache-Control:no-cache,max-age=0',
+        'cp',
+        'dist/jupyterlab_hwconfig*.tar.gz',
+        'gs://deeplearning-platform-ui-public/jupyterlab_hwconfig-latest.tar.gz',
+      ]
+    waitFor: ['package']
+tags: ['release']

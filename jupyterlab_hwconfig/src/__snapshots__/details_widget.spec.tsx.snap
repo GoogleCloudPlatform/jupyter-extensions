@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VmDetails Renders with details: Details 1`] = `
+<span
+  className="container_f20cyc7"
+>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show all details"
+  />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
+  <span
+    className="interactiveHover_feuq7k1"
+  >
+    <span
+      className="attribute_f1pfon3k"
+      key="0"
+      onClick={[Function]}
+      title="VM Name - Click to cycle"
+    >
+      pytorch
+       | 
+    </span>
+    <span
+      className="attribute_f1pfon3k"
+      key="1"
+      onClick={[Function]}
+      title="Project - Click to cycle"
+    >
+      test-project
+    </span>
+  </span>
+</span>
+`;
+
+exports[`VmDetails Renders with details: Retrieving 1`] = `
+<span
+  className="container_f20cyc7"
+>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show all details"
+  />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Promise {},
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
+  <span
+    className="interactiveHover_feuq7k1"
+  >
+    Retrieving VM Details...
+  </span>
+</span>
+`;
+
+exports[`VmDetails Renders with get details error: Received Error 1`] = `
+<span
+  className="container_f20cyc7"
+>
+  <span
+    className="icon_fptpv5r jp-VmStatusIcon interactiveHover_feuq7k1"
+    onClick={[Function]}
+    title="Show all details"
+  />
+  <WidgetPopup>
+    <ResourceUtilizationCharts
+      detailsServer={
+        Object {
+          "getUtilizationData": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "throw",
+                "value": [Error],
+              },
+            ],
+          },
+        }
+      }
+    />
+  </WidgetPopup>
+  <span
+    className="interactiveHover_feuq7k1"
+  >
+    Error retrieving VM Details
+  </span>
+</span>
+`;

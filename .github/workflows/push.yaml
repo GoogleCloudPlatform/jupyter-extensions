@@ -1,0 +1,47 @@
+name: Postpush
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Install Pipenv
+        run: pip install pipenv
+      - name: Build TypeScript
+        run: npm ci &&
+          npm run bootstrap &&
+          npm run build
+      - name: Build Python
+        run: pipenv install -d &&
+          source $(pipenv --venv)/bin/activate &&
+          scripts/build_python_packages.sh
+      - name: Run Tests
+        run: source $(pipenv --venv)/bin/activate &&
+          scripts/run_all_tests.sh
+      - name: Upload Python Shared
+        uses: actions/upload-artifact@v2
+        with:
+          name: gcp_jupyterlab_shared_server_${{ github.sha }}
+          path: shared/dist/*.tar.gz
+      - name: Upload TS Shared
+        uses: actions/upload-artifact@v2
+        with:
+          name: gcp_jupyterlab_shared_client_${{ github.sha }}
+          path: shared/*.tgz
+      - name: Upload Extensions
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab_extensions_${{ github.sha }}
+          path: jupyter*/dist/*.tar.gz

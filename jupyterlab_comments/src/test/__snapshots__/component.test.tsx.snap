@@ -1,0 +1,213 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Basic Comment Component Rendering detached comment should render correctly 1`] = `
+<Fragment>
+  <WithStyles(ForwardRef(ListItem))
+    key="context"
+  >
+    <CommentContext
+      filePath="fake/path"
+      range="none"
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <WithStyles(ForwardRef(ListItem))
+    alignItems="flex-start"
+    key="comment"
+  >
+    <WithStyles(ForwardRef(ListItemAvatar))>
+      <WithStyles(ForwardRef(Avatar))
+        alt="avatar"
+      />
+    </WithStyles(ForwardRef(ListItemAvatar))>
+    <WithStyles(ForwardRef(ListItemText))
+      primary={
+        <div>
+          <p
+            style={
+              Object {
+                "display": "inline",
+                "fontSize": 15,
+                "fontWeight": 500,
+                "textAlign": "left",
+              }
+            }
+          >
+             
+            mkalil
+             
+          </p>
+          <p
+            style={
+              Object {
+                "color": "grey",
+                "display": "inline",
+                "fontSize": 10,
+                "paddingLeft": 10,
+                "textAlign": "left",
+              }
+            }
+          >
+             
+            2020
+             
+          </p>
+        </div>
+      }
+      secondary={
+        <WithStyles(ForwardRef(Typography))
+          color="textPrimary"
+          style={
+            Object {
+              "display": "inline",
+            }
+          }
+          variant="body2"
+        >
+          fake comment for testing React component
+        </WithStyles(ForwardRef(Typography))>
+      }
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <div
+    style={
+      Object {
+        "display": "inlineBlock",
+        "paddingLeft": 60,
+      }
+    }
+  >
+    <WithStyles(ForwardRef(Button))
+      className="replyButton"
+      color="primary"
+      onClick={[Function]}
+      size="small"
+    >
+       
+      Reply
+       
+    </WithStyles(ForwardRef(Button))>
+  </div>
+  <div
+    className="threadList"
+    style={
+      Object {
+        "paddingLeft": 50,
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`Basic Comment Component Rendering review comment should render correctly 1`] = `
+<Fragment>
+  <WithStyles(ForwardRef(ListItem))
+    key="context"
+  >
+    <CommentContext
+      filePath="fake/path"
+      range="none"
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <WithStyles(ForwardRef(ListItem))
+    alignItems="flex-start"
+    key="comment"
+  >
+    <WithStyles(ForwardRef(ListItemAvatar))>
+      <WithStyles(ForwardRef(Avatar))
+        alt="avatar"
+      />
+    </WithStyles(ForwardRef(ListItemAvatar))>
+    <WithStyles(ForwardRef(ListItemText))
+      primary={
+        <div>
+          <p
+            style={
+              Object {
+                "display": "inline",
+                "fontSize": 15,
+                "fontWeight": 500,
+                "textAlign": "left",
+              }
+            }
+          >
+             
+            mkalil
+             
+          </p>
+          <p
+            style={
+              Object {
+                "color": "grey",
+                "display": "inline",
+                "fontSize": 10,
+                "paddingLeft": 10,
+                "textAlign": "left",
+              }
+            }
+          >
+             
+            2020
+             
+          </p>
+        </div>
+      }
+      secondary={
+        <WithStyles(ForwardRef(Typography))
+          color="textPrimary"
+          style={
+            Object {
+              "display": "inline",
+            }
+          }
+          variant="body2"
+        >
+          fake comment for testing React component
+        </WithStyles(ForwardRef(Typography))>
+      }
+    />
+  </WithStyles(ForwardRef(ListItem))>
+  <div
+    style={
+      Object {
+        "display": "inlineBlock",
+        "paddingLeft": 60,
+      }
+    }
+  >
+    <WithStyles(ForwardRef(Button))
+      className="replyButton"
+      color="primary"
+      onClick={[Function]}
+      size="small"
+    >
+       
+      Reply
+       
+    </WithStyles(ForwardRef(Button))>
+  </div>
+  <div
+    className="threadList"
+    style={
+      Object {
+        "paddingLeft": 50,
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`Comment editor components should render correctly should render new comment thread editor 1`] = `
+<CommentEditor
+  commentType="detached"
+  currFilePath="fake/path"
+  serverRoot="fake/path"
+/>
+`;
+
+exports[`Comment editor components should render correctly should render new reply comment editor 1`] = `
+<ReplyEditor
+  commentType="detached"
+  currFilePath="fake/path"
+  hash="hash"
+/>
+`;

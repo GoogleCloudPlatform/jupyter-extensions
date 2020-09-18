@@ -1,0 +1,39 @@
+.jp-BigQueryIcon {
+  background-image: url('./images/BigQuery.svg');
+  filter: initial !important;
+  width: 24px;
+  height: 24px;
+}
+.jp-DatasetIcon {
+  background-image: url('./images/dataset_20px.svg');
+}
+.jp-TableIcon {
+  background-image: url('./images/table_20px.svg');
+}
+.jp-PartitionedTableIcon {
+  background-image: url('./images/table_partitioned_18px.svg');
+}
+.jp-ViewIcon {
+  background-image: url('./images/table_view_24px.svg');
+}
+.jp-ModelIcon {
+  background-image: url('./images/model_20px.svg');
+}
+.jp-OpenEditorIcon {
+  background-image: url('./images/open_editor_20px.svg');
+}
+.jp-OutputArea-child .jp-OutputArea-output {
+  overflow: auto;
+}
+
+.jp-Icon {
+  background-size: contain;
+}
+
+[data-jp-theme-light='true'] .jp-Icon {
+  filter: invert(0.4);
+}
+
+[data-jp-theme-light='false'] .jp-Icon {
+  filter: invert(0.6);
+}

@@ -1,0 +1,32 @@
+name: Presubmit
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Install Pipenv
+        run: pip install pipenv
+      - name: Build TypeScript
+        run: npm ci &&
+          npm run bootstrap &&
+          npm run build
+      - name: Build Python
+        run: pipenv install -d &&
+          source $(pipenv --venv)/bin/activate &&
+          scripts/build_python_packages.sh
+      - name: Run Tests
+        run: source $(pipenv --venv)/bin/activate &&
+          scripts/run_all_tests.sh
