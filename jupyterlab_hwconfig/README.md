@@ -46,3 +46,23 @@ To run end-to-end tests, perform the following steps.
    export INSTANCE=<instance>
    npm run e2e-test
    ```
+
+### User installation
+
+To install this extension in AI Platform Notebooks, perform the following steps.
+
+1. Connect to instance via SSH.
+2. Enter the following commands:
+
+```
+sudo -i
+. /opt/conda/etc/profile.d/conda.sh
+conda activate base
+EXTENSION=jupyterlab_gcedetails-latest.tar.gz
+gsutil cp gs://deeplearning-platform-ui-public/$EXTENSION /tmp/
+pip install /tmp/$EXTENSION
+jupyter lab build
+service jupyter restart
+```
+
+3. Open Jupyter UI and verify on the low left corner plugin is [installed](https://storage.googleapis.com/dl-platform-public-content/extensions/gce_info.png)
