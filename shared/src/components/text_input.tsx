@@ -16,8 +16,8 @@
 
 import * as React from 'react';
 import { classes } from 'typestyle';
-
-import { css } from '../styles';
+import {INPUT_TEXT_STYLE} from '../styles';
+import TextField from '@material-ui/core/TextField';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disabled?: boolean;
@@ -35,20 +35,24 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 /** Funtional Component for text input fields */
 // tslint:disable-next-line:enforce-name-casing
 export function TextInput(props: TextInputProps) {
-  const { label, hasError, ...inputProps } = props;
+  const { label, hasError, value, ...inputProps } = props;
 
   return (
-    <div className={classes(css.inputContainer, hasError && 'error')}>
-      {label && <label>{label}</label>}
-      <input
-        className={classes(
-          css.input,
-          css.secondaryBackgroundColor,
-          css.primaryTextColor,
+    <TextField className={classes(
           hasError && 'error'
         )}
-        {...inputProps}
-      />
-    </div>
+        variant="outlined"
+        margin="dense"
+        fullWidth={true}
+        label={label}
+        inputProps={{
+          style: INPUT_TEXT_STYLE,
+          value,
+          ...inputProps}}
+        InputProps={{
+          style: INPUT_TEXT_STYLE,
+        }}
+      >
+    </TextField>
   );
 }

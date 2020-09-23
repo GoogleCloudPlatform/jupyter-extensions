@@ -16,14 +16,13 @@
 
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
-
+import { Button } from '@material-ui/core';
 import { COLORS, css } from '../styles';
 
 interface Props {
   actionPending: boolean;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   text: string;
-  style?: any;
 }
 
 const localStyles = stylesheet({
@@ -53,17 +52,16 @@ const localStyles = stylesheet({
 // tslint:disable-next-line:enforce-name-casing
 export function SubmitButton(props: Props) {
   return (
-    <button
+    <Button
       className={classes(
         css.button,
         props.actionPending ? localStyles.disabled : localStyles.submit
       )}
-      type="button"
       disabled={props.actionPending}
       onClick={props.onClick}
-      style={props.style}
+      color='primary'
     >
       {props.text}
-    </button>
+    </Button>
   );
 }

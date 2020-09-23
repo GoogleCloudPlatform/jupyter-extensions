@@ -47,6 +47,12 @@ export const BASE_FONT: types.CSSProperties = {
   fontSize: 'var(--jp-ui-font-size1, 13px)',
 };
 
+export const INPUT_TEXT_STYLE = {
+  fontFamily: BASE_FONT.fontFamily as string,
+  fontSize: BASE_FONT.fontSize as number,
+  color: 'var(--jp-ui-font-color1)',
+};
+
 /** Global styles that are useful across components */
 export const css = stylesheet({
   column: csstips.vertical,

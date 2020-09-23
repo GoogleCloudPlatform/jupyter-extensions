@@ -15,6 +15,7 @@
  */
 
 export * from './components/action_bar';
+export * from './components/badge';
 export * from './components/checkbox_input';
 export * from './components/context_menu';
 export * from './components/dialog';

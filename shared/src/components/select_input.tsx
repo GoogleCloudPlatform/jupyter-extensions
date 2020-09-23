@@ -13,42 +13,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import * as React from 'react';
-import { Option } from '../utils';
-import { css } from '../styles';
-import { classes } from 'typestyle';
+import TextField from '@material-ui/core/TextField';
+import { stylesheet } from 'typestyle';
+import MenuItem from '@material-ui/core/MenuItem';
+import {INPUT_TEXT_STYLE} from '../styles';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
-interface SelectInputProps {
+interface Option {
+  text: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
+export const STYLES = stylesheet({
+  select: {
+    display: 'block',
+    marginTop: '5px',
+    marginBottom: '5px',
+  },
+  icon: {
+    right: '14px',
+    position: 'absolute',
+    cursor: 'pointer',
+    pointerEvents: 'none',
+  },
+});
+
+const iconComponent = props => {
+  return <ArrowDropDownIcon className={STYLES.icon} />;
+};
+
+interface Props {
   label?: string;
   name?: string;
   value?: string;
   options?: Option[];
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-/** Funtional Component for select fields */
-// tslint:disable-next-line:enforce-name-casing
-export function SelectInput(props: SelectInputProps) {
-  const { label, options, ...inputProps } = props;
+
+export function SelectInput(props: Props) {
+  const { label, name, value, options, onChange } = props;
   return (
-    <div className={css.inputContainer}>
-      {label && <label>{label}</label>}
-      <select
-        className={classes(
-          css.input,
-          css.secondaryBackgroundColor,
-          css.primaryTextColor
-        )}
-        {...inputProps}
-      >
-        {options &&
-          options.map((o, i) => (
-            <option key={i} value={o.value}>
-              {o.text}
-            </option>
+    <div  className={STYLES.select}>
+    <TextField 
+      variant="outlined" 
+      margin="dense"
+      fullWidth={true}
+      id={name} 
+      label={label} 
+      value={value} 
+      onChange={onChange} 
+      inputProps={{
+        name: name,
+      }}
+      InputProps={{
+        style: INPUT_TEXT_STYLE,
+      }}
+      InputLabelProps={{shrink:true}}
+      SelectProps={{
+        IconComponent: iconComponent,
+        displayEmpty: true,
+      }}
+      select>
+         {options &&
+          options.map(option => (
+            <MenuItem
+              key={option.value}
+              value={option.value}
+              style={INPUT_TEXT_STYLE}
+            >
+              {option.text}
+            </MenuItem>
           ))}
-      </select>
-    </div>
+      </TextField>
+      </div>
   );
 }
