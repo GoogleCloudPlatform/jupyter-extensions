@@ -27,6 +27,7 @@ export class GitPathSetup extends React.Component<Props, GitPathState> {
 
   componentDidMount() {
     this._addListeners();
+    this._setPath();
   }
 
   render(): React.ReactElement {
@@ -57,6 +58,16 @@ export class GitPathSetup extends React.Component<Props, GitPathState> {
             : 'No Git Repository Found',
         });
     });
+  }
+
+  private _setPath() {
+    setTimeout(() => {
+      this.setState({
+        path: this.props.service.git.path
+          ? this._shortenPath(this.props.service.git.path)
+          : 'No Git Repository Found',
+      });
+    }, 2000);
   }
 
   private _shortenPath(path: string): string {

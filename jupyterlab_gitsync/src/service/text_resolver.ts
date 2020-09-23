@@ -88,8 +88,9 @@ export class TextResolver implements IResolver {
   }
 
   mergeVersions(): string {
-    if (this.versions.local === this.versions.remote) {
+    if (this.versions.base === this.versions.remote) {
       this.addVersion(this.versions.local, 'base');
+      this._conflict = false;
       return undefined;
     }
 
