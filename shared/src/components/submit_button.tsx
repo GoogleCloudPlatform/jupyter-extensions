@@ -59,7 +59,7 @@ export function SubmitButton(props: Props) {
       )}
       disabled={props.actionPending}
       onClick={props.onClick}
-      color='primary'
+      color="primary"
     >
       {props.text}
     </Button>

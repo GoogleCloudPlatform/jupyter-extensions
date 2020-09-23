@@ -386,7 +386,9 @@ class ListItemsPanel extends React.Component<Props, State> {
           />
         </Portal>
         <header className={localStyles.header}>
-          <div className={localStyles.headerTitle}>BigQuery extension <Badge value="alpha"/></div>
+          <div className={localStyles.headerTitle}>
+            BigQuery extension <Badge value="alpha" />
+          </div>
           <div className={localStyles.buttonContainer}>
             <Tooltip title="Open SQL editor">
               <Button

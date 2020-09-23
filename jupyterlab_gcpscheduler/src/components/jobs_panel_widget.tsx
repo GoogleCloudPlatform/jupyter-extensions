@@ -19,7 +19,7 @@ import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, Message, Badge} from 'gcp_jupyterlab_shared';
+import { BASE_FONT, COLORS, Message, Badge } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
@@ -134,7 +134,9 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     return (
       <div className={localStyles.panel}>
         <div className={localStyles.headerContainer}>
-          <header className={localStyles.header}>{TITLE_TEXT} <Badge value="alpha"/></header>
+          <header className={localStyles.header}>
+            {TITLE_TEXT} <Badge value="alpha" />
+          </header>
           <SlimIconButton title="Refresh Jobs" onClick={() => this._getJobs()}>
             <RefreshIcon />
           </SlimIconButton>

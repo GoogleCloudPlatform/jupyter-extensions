@@ -17,7 +17,7 @@ import * as React from 'react';
 import TextField from '@material-ui/core/TextField';
 import { stylesheet } from 'typestyle';
 import MenuItem from '@material-ui/core/MenuItem';
-import {INPUT_TEXT_STYLE} from '../styles';
+import { INPUT_TEXT_STYLE } from '../styles';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 interface Option {
@@ -52,32 +52,32 @@ interface Props {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-
 export function SelectInput(props: Props) {
   const { label, name, value, options, onChange } = props;
   return (
-    <div  className={STYLES.select}>
-    <TextField 
-      variant="outlined" 
-      margin="dense"
-      fullWidth={true}
-      id={name} 
-      label={label} 
-      value={value} 
-      onChange={onChange} 
-      inputProps={{
-        name: name,
-      }}
-      InputProps={{
-        style: INPUT_TEXT_STYLE,
-      }}
-      InputLabelProps={{shrink:true}}
-      SelectProps={{
-        IconComponent: iconComponent,
-        displayEmpty: true,
-      }}
-      select>
-         {options &&
+    <div className={STYLES.select}>
+      <TextField
+        variant="outlined"
+        margin="dense"
+        fullWidth={true}
+        id={name}
+        label={label}
+        value={value}
+        onChange={onChange}
+        inputProps={{
+          name: name,
+        }}
+        InputProps={{
+          style: INPUT_TEXT_STYLE,
+        }}
+        InputLabelProps={{ shrink: true }}
+        SelectProps={{
+          IconComponent: iconComponent,
+          displayEmpty: true,
+        }}
+        select
+      >
+        {options &&
           options.map(option => (
             <MenuItem
               key={option.value}
@@ -88,6 +88,6 @@ export function SelectInput(props: Props) {
             </MenuItem>
           ))}
       </TextField>
-      </div>
+    </div>
   );
 }

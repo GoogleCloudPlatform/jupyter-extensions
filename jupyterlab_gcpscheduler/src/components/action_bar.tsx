@@ -43,9 +43,7 @@ const actionBar = style({
 export function ActionBar(props: Props) {
   return (
     <div className={actionBar}>
-      <Button
-        onClick={props.onDialogClose}
-      >
+      <Button onClick={props.onDialogClose}>
         {props.closeLabel || 'Close'}
       </Button>
       {props.children}

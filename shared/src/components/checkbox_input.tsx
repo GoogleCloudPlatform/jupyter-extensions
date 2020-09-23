@@ -17,11 +17,11 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
-import {FormControlLabel, withStyles } from '@material-ui/core';
+import { FormControlLabel, withStyles } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import {INPUT_TEXT_STYLE} from '../styles';
+import { INPUT_TEXT_STYLE } from '../styles';
 
 interface CheckboxInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -37,21 +37,19 @@ const containerStyle = style({
 const StyledLabel = withStyles({
   label: {
     ...INPUT_TEXT_STYLE,
-     marginRight:0,
-    },
+    marginRight: 0,
+  },
 })(FormControlLabel);
-
 
 /** Funtional Component for Checkbox input fields */
 export function CheckboxInput(props: CheckboxInputProps) {
   const { label, checked, ...inputProps } = props;
   return (
     <div className={containerStyle}>
-    <StyledLabel
+      <StyledLabel
         control={
           <Checkbox
-            inputProps = {{...inputProps, checked,
-            }}
+            inputProps={{ ...inputProps, checked }}
             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
             checkedIcon={<CheckBoxIcon fontSize="small" />}
             size="small"
@@ -61,6 +59,6 @@ export function CheckboxInput(props: CheckboxInputProps) {
         }
         label={label}
       />
-      </div>
+    </div>
   );
 }

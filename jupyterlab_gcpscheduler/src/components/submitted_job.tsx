@@ -166,9 +166,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
           </div>
         </dl>
         <ActionBar closeLabel="Done" onDialogClose={onDialogClose}>
-          <Button onClick={onFormReset}>
-            Submit another job
-          </Button>
+          <Button onClick={onFormReset}>Submit another job</Button>
         </ActionBar>
       </div>
     );

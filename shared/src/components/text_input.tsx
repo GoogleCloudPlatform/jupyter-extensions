@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { classes } from 'typestyle';
-import {INPUT_TEXT_STYLE} from '../styles';
+import { INPUT_TEXT_STYLE } from '../styles';
 import TextField from '@material-ui/core/TextField';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -35,24 +35,22 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 /** Funtional Component for text input fields */
 // tslint:disable-next-line:enforce-name-casing
 export function TextInput(props: TextInputProps) {
-  const { label, hasError, value, ...inputProps } = props;
+  const { label, hasError, ...inputProps } = props;
 
   return (
-    <TextField className={classes(
-          hasError && 'error'
-        )}
-        variant="outlined"
-        margin="dense"
-        fullWidth={true}
-        label={label}
-        inputProps={{
-          style: INPUT_TEXT_STYLE,
-          value,
-          ...inputProps}}
-        InputProps={{
-          style: INPUT_TEXT_STYLE,
-        }}
-      >
-    </TextField>
+    <TextField
+      className={classes(hasError && 'error')}
+      variant="outlined"
+      margin="dense"
+      fullWidth={true}
+      label={label}
+      inputProps={{
+        style: INPUT_TEXT_STYLE,
+        ...inputProps,
+      }}
+      InputProps={{
+        style: INPUT_TEXT_STYLE,
+      }}
+    ></TextField>
   );
 }

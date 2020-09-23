@@ -16,22 +16,22 @@
 
 import * as React from 'react';
 import { Chip } from '@material-ui/core';
-import {withStyles } from '@material-ui/core';
-import {COLORS, BASE_FONT} from '../styles'
+import { withStyles } from '@material-ui/core';
+import { COLORS, BASE_FONT } from '../styles';
 
 interface BadgeProps {
   value?: string;
 }
 
 const StyledChip = withStyles({
-    root: {
-        color: COLORS.white,
-        backgroundColor: '#555555',
-        borderRadius: 0,
-        fontFamily: BASE_FONT.fontFamily as string,
-        fontSize: 10 as number,
-        fontWeight: 100,
-    }
+  root: {
+    color: COLORS.white,
+    backgroundColor: '#555555',
+    borderRadius: 0,
+    fontFamily: BASE_FONT.fontFamily as string,
+    fontSize: 10 as number,
+    fontWeight: 100,
+  },
 })(Chip);
 
 /** Funtional Component for select fields */
