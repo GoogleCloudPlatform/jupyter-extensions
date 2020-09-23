@@ -40,7 +40,7 @@ import {
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
-import { DialogComponent, BASE_FONT, Badge } from 'gcp_jupyterlab_shared';
+import { DialogComponent, BASE_FONT } from 'gcp_jupyterlab_shared';
 import CustomSnackbar from '../shared/snackbar';
 
 interface Props {
@@ -387,7 +387,7 @@ class ListItemsPanel extends React.Component<Props, State> {
         </Portal>
         <header className={localStyles.header}>
           <div className={localStyles.headerTitle}>
-            BigQuery extension <Badge value="alpha" />
+            BigQuery extension
           </div>
           <div className={localStyles.buttonContainer}>
             <Tooltip title="Open SQL editor">
