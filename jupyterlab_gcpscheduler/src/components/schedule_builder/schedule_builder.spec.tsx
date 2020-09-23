@@ -18,7 +18,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { DAY, MONTH, WEEK } from '../../data';
-import { simulateFieldChange } from '../../test_helpers';
+import { simulateFieldChange, createReactWrapper } from '../../test_helpers';
 import { ScheduleBuilder } from './schedule_builder';
 
 describe('ScheduleBuilder', () => {
@@ -90,7 +90,7 @@ describe('ScheduleBuilder', () => {
     expect(scheduleBuilder.find('DayScheduleBuilder')).toHaveLength(0);
     simulateFieldChange(
       scheduleBuilder,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       DAY
     );
@@ -103,11 +103,10 @@ describe('ScheduleBuilder', () => {
     const scheduleBuilder = shallow(<ScheduleBuilder {...mockProps} />);
     expect(scheduleBuilder.find('HourScheduleBuilder')).toHaveLength(1);
     simulateFieldChange(
-      scheduleBuilder
-        .find('HourScheduleBuilder')
-        .dive()
-        .find('TextInput[name="frequency"]')
-        .dive(),
+      createReactWrapper(
+        scheduleBuilder.find('HourScheduleBuilder').dive(),
+        'TextInput[name="frequency"]'
+      ),
       'input[name="frequency"]',
       'frequency',
       '4'

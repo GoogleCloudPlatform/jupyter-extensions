@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
-
+import { Button } from '@material-ui/core';
 import { SubmittedJob } from './submitted_job';
 import { TEST_PROJECT } from '../test_helpers';
 import { RunNotebookRequest } from '../service/gcp';
@@ -62,7 +62,7 @@ describe('SubmittedJob', () => {
 
   it('Invokes onFormReset when Submit another job is clicked', async () => {
     const creator = shallow(<SubmittedJob {...mockProps} />);
-    creator.find('button').simulate('click');
+    creator.find(Button).simulate('click');
     expect(mockOnFormReset).toHaveBeenCalled();
   });
 });

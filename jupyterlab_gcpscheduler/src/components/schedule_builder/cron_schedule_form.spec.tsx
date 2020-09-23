@@ -17,7 +17,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { simulateFieldChange } from '../../test_helpers';
+import { simulateFieldChange, createReactWrapper } from '../../test_helpers';
 import { CronScheduleBuilder } from './cron_schedule_form';
 
 describe('CronScheduleBuilder', () => {
@@ -36,9 +36,9 @@ describe('CronScheduleBuilder', () => {
   });
 
   it('Triggers callback when schedule is changed', async () => {
-    const dayScheduleBuilder = shallow(<CronScheduleBuilder {...mockProps} />);
+    const cronScheduleBuilder = shallow(<CronScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput').dive(),
+      createReactWrapper(cronScheduleBuilder, 'TextInput'),
       'input[name="schedule"]',
       'schedule',
       '* * * * *'
@@ -47,15 +47,15 @@ describe('CronScheduleBuilder', () => {
   });
 
   it('Displays error when schedule is empty', async () => {
-    const dayScheduleBuilder = shallow(<CronScheduleBuilder {...mockProps} />);
+    const cronScheduleBuilder = shallow(<CronScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput').dive(),
+      createReactWrapper(cronScheduleBuilder, 'TextInput'),
       'input[name="schedule"]',
       'schedule',
       ''
     );
     expect(mockProps.onScheduleChange).toBeCalledTimes(1);
-    expect(dayScheduleBuilder.find('FieldError').props()).toEqual({
+    expect(cronScheduleBuilder.find('FieldError').props()).toEqual({
       message: 'Frequency is required',
     });
   });

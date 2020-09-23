@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { HOUR, MONTH } from '../../data';
-import { simulateFieldChange } from '../../test_helpers';
+import { simulateFieldChange, createReactWrapper } from '../../test_helpers';
 import { HourScheduleBuilder } from './hour_schedule_form';
 import { SchedulerBuilderProps } from './schedule_builder';
 
@@ -41,7 +41,7 @@ describe('HourScheduleBuilder', () => {
   it('Triggers onScheduleChange when frequency is changed', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(hourScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '10'
@@ -53,7 +53,10 @@ describe('HourScheduleBuilder', () => {
   it('Triggers onScheduleChange when specifiedMinute is changed', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="specifiedMinute"]').dive(),
+      createReactWrapper(
+        hourScheduleBuilder,
+        'TextInput[name="specifiedMinute"]'
+      ),
       'input[name="specifiedMinute"]',
       'specifiedMinute',
       '43'
@@ -65,8 +68,11 @@ describe('HourScheduleBuilder', () => {
   it('Triggers onScheduleChange when frequencyType is changed', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('SelectInput[name="frequencyType"]').dive(),
-      'select[name="frequencyType"]',
+      createReactWrapper(
+        hourScheduleBuilder,
+        'SelectInput[name="frequencyType"]'
+      ),
+      'input[name="frequencyType"]',
       'frequencyType',
       MONTH
     );
@@ -77,7 +83,7 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when frequency is invalid ( less than 1 )', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(hourScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '0'
@@ -96,7 +102,7 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when frequency is invalid ( greater than 24) ', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(hourScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '25'
@@ -115,7 +121,7 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when frequency is invalid (null or empty) ', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(hourScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       ''
@@ -134,7 +140,10 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when specifiedMinute is invalid (null or empty)', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="specifiedMinute"]').dive(),
+      createReactWrapper(
+        hourScheduleBuilder,
+        'TextInput[name="specifiedMinute"]'
+      ),
       'input[name="specifiedMinute"]',
       'specifiedMinute',
       ''
@@ -153,7 +162,10 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when specifiedMinute is invalid (out of range - high)', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="specifiedMinute"]').dive(),
+      createReactWrapper(
+        hourScheduleBuilder,
+        'TextInput[name="specifiedMinute"]'
+      ),
       'input[name="specifiedMinute"]',
       'specifiedMinute',
       '120'
@@ -172,7 +184,10 @@ describe('HourScheduleBuilder', () => {
   it('Displays error when specifiedMinute is invalid (out of range - low)', async () => {
     const hourScheduleBuilder = shallow(<HourScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      hourScheduleBuilder.find('TextInput[name="specifiedMinute"]').dive(),
+      createReactWrapper(
+        hourScheduleBuilder,
+        'TextInput[name="specifiedMinute"]'
+      ),
       'input[name="specifiedMinute"]',
       'specifiedMinute',
       '-1'

@@ -49,7 +49,7 @@ describe('WeekScheduleBuilder', () => {
     const weekScheduleBuilder = mount(<WeekScheduleBuilder {...mockProps} />);
     simulateFieldChange(
       weekScheduleBuilder,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       DAY
     );

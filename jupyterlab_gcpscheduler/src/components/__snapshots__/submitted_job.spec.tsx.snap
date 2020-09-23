@@ -108,13 +108,11 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     closeLabel="Done"
     onDialogClose={[MockFunction]}
   >
-    <button
-      className="button_f23yboz"
+    <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
-      type="button"
     >
       Submit another job
-    </button>
+    </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>
 `;
@@ -235,13 +233,11 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     closeLabel="Done"
     onDialogClose={[MockFunction]}
   >
-    <button
-      className="button_f23yboz"
+    <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
-      type="button"
     >
       Submit another job
-    </button>
+    </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>
 `;

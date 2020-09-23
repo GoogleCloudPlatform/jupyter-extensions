@@ -11,6 +11,10 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
       className="header_f10v7dh6"
     >
       AI Platform Notebook Jobs
+       
+      <Badge
+        value="alpha"
+      />
     </header>
     <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
@@ -36,6 +40,10 @@ exports[`GcpScheduledJobsPanel Shows error if jobs cannot be retrieved 1`] = `
       className="header_f10v7dh6"
     >
       AI Platform Notebook Jobs
+       
+      <Badge
+        value="alpha"
+      />
     </header>
     <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
@@ -62,6 +70,10 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
       className="header_f10v7dh6"
     >
       AI Platform Notebook Jobs
+       
+      <Badge
+        value="alpha"
+      />
     </header>
     <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
@@ -88,6 +100,10 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
       className="header_f10v7dh6"
     >
       AI Platform Notebook Jobs
+       
+      <Badge
+        value="alpha"
+      />
     </header>
     <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
@@ -210,6 +226,10 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
       className="header_f10v7dh6"
     >
       AI Platform Notebook Jobs
+       
+      <Badge
+        value="alpha"
+      />
     </header>
     <WithStyles(WithStyles(ForwardRef(IconButton)))
       onClick={[Function]}
