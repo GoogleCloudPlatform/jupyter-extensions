@@ -109,16 +109,14 @@ describe('SchedulerForm', () => {
 
   it('Toggles visibility based on Scale tier', async () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    expect(schedulerForm.find('select[name="masterType"]')).toHaveLength(0);
-    expect(schedulerForm.find('select[name="acceleratorType"]')).toHaveLength(
-      0
-    );
-    expect(schedulerForm.find('select[name="acceleratorCount"]')).toHaveLength(
+    expect(schedulerForm.find('input[name="masterType"]')).toHaveLength(0);
+    expect(schedulerForm.find('input[name="acceleratorType"]')).toHaveLength(0);
+    expect(schedulerForm.find('input[name="acceleratorCount"]')).toHaveLength(
       0
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scaleTier"]',
+      'input[name="scaleTier"]',
       'scaleTier',
       CUSTOM
     );
@@ -139,30 +137,25 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'select[name="scaleTier"]',
+      'input[name="scaleTier"]',
       'scaleTier',
       CUSTOM
     );
+
     expect(
-      schedulerForm
-        .find('select[name="acceleratorType"]')
-        .find('option')
-        .map(o => o.prop('value'))
-    ).toEqual(ACCELERATOR_TYPES.map(a => a.value));
+      schedulerForm.find('SelectInput[name="acceleratorType"]').prop('options')
+    ).toEqual(ACCELERATOR_TYPES);
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="masterType"]',
+      'input[name="masterType"]',
       'masterType',
       'n1-standard-64'
     );
 
     expect(
-      schedulerForm
-        .find('select[name="acceleratorType"]')
-        .find('option')
-        .map(o => o.prop('value'))
-    ).toEqual(ACCELERATOR_TYPES_REDUCED.map(a => a.value));
+      schedulerForm.find('SelectInput[name="acceleratorType"]').prop('options')
+    ).toEqual(ACCELERATOR_TYPES_REDUCED);
 
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual(
@@ -179,16 +172,14 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'select[name="scaleTier"]',
+      'input[name="scaleTier"]',
       'scaleTier',
       CUSTOM
     );
-    expect(schedulerForm.find('select[name="acceleratorCount"]').length).toBe(
-      0
-    );
+    expect(schedulerForm.find('input[name="acceleratorCount"]').length).toBe(0);
     simulateFieldChange(
       schedulerForm,
-      'select[name="acceleratorType"]',
+      'input[name="acceleratorType"]',
       'acceleratorType',
       'NVIDIA_TESLA_P4'
     );
@@ -205,7 +196,7 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="acceleratorType"]',
+      'input[name="acceleratorType"]',
       'acceleratorType',
       ''
     );
@@ -228,7 +219,7 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
@@ -243,7 +234,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('input[name="frequency"]')).toHaveLength(0);
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
@@ -297,7 +288,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     schedulerForm.update();
 
-    expect(schedulerForm.find('select[name="imageUri"]').props().value).toBe(
+    expect(schedulerForm.find('input[name="imageUri"]').props().value).toBe(
       'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest'
     );
   });
@@ -328,7 +319,7 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
@@ -359,14 +350,14 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       DAY
     );
@@ -394,14 +385,14 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       MONTH
     );
@@ -429,7 +420,7 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
@@ -458,14 +449,14 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       WEEK
     );
@@ -505,14 +496,14 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="frequencyType"]',
+      'input[name="frequencyType"]',
       'frequencyType',
       WEEK
     );
@@ -584,7 +575,7 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );
@@ -652,7 +643,7 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'select[name="scaleTier"]',
+      'input[name="scaleTier"]',
       'scaleTier',
       'BASIC'
     );
@@ -872,43 +863,43 @@ describe('SchedulerForm', () => {
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="region"]',
+      'input[name="region"]',
       'region',
       'us-east1'
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scaleTier"]',
+      'input[name="scaleTier"]',
       'scaleTier',
       CUSTOM
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="masterType"]',
+      'input[name="masterType"]',
       'masterType',
       'n1-standard-16'
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="acceleratorType"]',
+      'input[name="acceleratorType"]',
       'acceleratorType',
       'NVIDIA_TESLA_K80'
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="acceleratorCount"]',
+      'input[name="acceleratorCount"]',
       'acceleratorCount',
       '1'
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="imageUri"]',
+      'input[name="imageUri"]',
       'imageUri',
       String(CONTAINER_IMAGES[2].value)
     );
     simulateFieldChange(
       schedulerForm,
-      'select[name="scheduleType"]',
+      'input[name="scheduleType"]',
       'scheduleType',
       RECURRING
     );

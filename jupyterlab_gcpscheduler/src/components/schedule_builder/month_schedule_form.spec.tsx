@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { DAY, MONTH } from '../../data';
-import { simulateFieldChange } from '../../test_helpers';
+import { simulateFieldChange, createReactWrapper } from '../../test_helpers';
 import { MonthScheduleBuilder } from './month_schedule_form';
 import { SchedulerBuilderProps } from './schedule_builder';
 
@@ -43,8 +43,8 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('SelectInput[name="frequency"]').dive(),
-      'select[name="frequency"]',
+      createReactWrapper(monthScheduleBuilder, 'SelectInput[name="frequency"]'),
+      'input[name="frequency"]',
       'frequency',
       '6'
     );
@@ -57,7 +57,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedDay"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedDay"]'
+      ),
       'input[name="specifiedDay"]',
       'specifiedDay',
       '12'
@@ -71,8 +74,11 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('SelectInput[name="frequencyType"]').dive(),
-      'select[name="frequencyType"]',
+      createReactWrapper(
+        monthScheduleBuilder,
+        'SelectInput[name="frequencyType"]'
+      ),
+      'input[name="frequencyType"]',
       'frequencyType',
       DAY
     );
@@ -85,7 +91,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedTime"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedTime"]'
+      ),
       'input[name="specifiedTime"]',
       'specifiedTime',
       '14:00'
@@ -99,7 +108,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedDay"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedDay"]'
+      ),
       'input[name="specifiedDay"]',
       'specifiedDay',
       ''
@@ -120,7 +132,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedDay"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedDay"]'
+      ),
       'input[name="specifiedDay"]',
       'specifiedDay',
       '32'
@@ -141,7 +156,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedDay"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedDay"]'
+      ),
       'input[name="specifiedDay"]',
       'specifiedDay',
       '-1'
@@ -162,7 +180,10 @@ describe('MonthScheduleBuilder', () => {
       <MonthScheduleBuilder {...mockProps} />
     );
     simulateFieldChange(
-      monthScheduleBuilder.find('TextInput[name="specifiedTime"]').dive(),
+      createReactWrapper(
+        monthScheduleBuilder,
+        'TextInput[name="specifiedTime"]'
+      ),
       'input[name="specifiedTime"]',
       'specifiedTime',
       ''

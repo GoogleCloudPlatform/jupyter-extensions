@@ -1,7 +1,7 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
-import { css } from '../styles';
+import { Button } from '@material-ui/core';
 
 interface Props {
   children?: React.ReactNode;
@@ -24,9 +24,7 @@ const actionBar = style({
 export function ActionBar(props: Props) {
   return (
     <div className={actionBar}>
-      <button type="button" className={css.button} onClick={props.onClick}>
-        {props.closeLabel || 'Close'}
-      </button>
+      <Button onClick={props.onClick}>{props.closeLabel || 'Close'}</Button>
       {props.children}
     </div>
   );

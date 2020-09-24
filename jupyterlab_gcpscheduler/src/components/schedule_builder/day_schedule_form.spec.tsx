@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { DAY, MONTH } from '../../data';
-import { simulateFieldChange } from '../../test_helpers';
+import { simulateFieldChange, createReactWrapper } from '../../test_helpers';
 import { DayScheduleBuilder } from './day_schedule_form';
 import { SchedulerBuilderProps } from './schedule_builder';
 
@@ -41,7 +41,7 @@ describe('DayScheduleBuilder', () => {
   it('Triggers onScheduleChange when frequency is changed', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '10'
@@ -53,7 +53,7 @@ describe('DayScheduleBuilder', () => {
   it('Triggers onScheduleChange when specifiedTime is changed', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="specifiedTime"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="specifiedTime"]'),
       'input[name="specifiedTime"]',
       'specifiedTime',
       '09:00'
@@ -65,8 +65,8 @@ describe('DayScheduleBuilder', () => {
   it('Triggers onScheduleChange when frequencyType is changed', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('SelectInput').dive(),
-      'select[name="frequencyType"]',
+      createReactWrapper(dayScheduleBuilder, 'SelectInput'),
+      'input[name="frequencyType"]',
       'frequencyType',
       MONTH
     );
@@ -77,7 +77,7 @@ describe('DayScheduleBuilder', () => {
   it('Displays error when frequency is invalid ( less than 1 )', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '0'
@@ -96,7 +96,7 @@ describe('DayScheduleBuilder', () => {
   it('Displays error when frequency is invalid ( greater than 364) ', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       '365'
@@ -115,7 +115,7 @@ describe('DayScheduleBuilder', () => {
   it('Displays error when frequency is invalid (null or empty) ', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="frequency"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="frequency"]'),
       'input[name="frequency"]',
       'frequency',
       ''
@@ -134,7 +134,7 @@ describe('DayScheduleBuilder', () => {
   it('Displays error when specifiedTime is invalid (null or empty)', async () => {
     const dayScheduleBuilder = shallow(<DayScheduleBuilder {...mockProps} />);
     simulateFieldChange(
-      dayScheduleBuilder.find('TextInput[name="specifiedTime"]').dive(),
+      createReactWrapper(dayScheduleBuilder, 'TextInput[name="specifiedTime"]'),
       'input[name="specifiedTime"]',
       'specifiedTime',
       ''

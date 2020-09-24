@@ -18,6 +18,7 @@ import { withStyles } from '@material-ui/core';
 import { CheckCircle } from '@material-ui/icons';
 import { COLORS, css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
+import { Button } from '@material-ui/core';
 import { classes, stylesheet } from 'typestyle';
 
 import {
@@ -165,9 +166,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
           </div>
         </dl>
         <ActionBar closeLabel="Done" onDialogClose={onDialogClose}>
-          <button className={css.button} type="button" onClick={onFormReset}>
-            Submit another job
-          </button>
+          <Button onClick={onFormReset}>Submit another job</Button>
         </ActionBar>
       </div>
     );

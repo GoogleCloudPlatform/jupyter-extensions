@@ -38,6 +38,7 @@ export const COLORS = {
   link: 'var(--jp-content-link-color, #3367d6)',
   red: 'var(--jp-error-color1, #d93025)',
   white: 'var(--jp-layout-color1, white)',
+  inverse: 'var(--jp-ui-inverse-layout-color4, #555555)',
 };
 
 /** Base extension font style */
@@ -45,6 +46,12 @@ export const BASE_FONT: types.CSSProperties = {
   color: COLORS.base,
   fontFamily: ROBOTO_FONT,
   fontSize: 'var(--jp-ui-font-size1, 13px)',
+};
+
+export const INPUT_TEXT_STYLE = {
+  fontFamily: BASE_FONT.fontFamily as string,
+  fontSize: BASE_FONT.fontSize as number,
+  color: 'var(--jp-ui-font-color1)',
 };
 
 /** Global styles that are useful across components */

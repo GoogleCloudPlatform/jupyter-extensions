@@ -312,7 +312,7 @@ export class InnerSchedulerForm extends React.Component<
     );
   }
 
-  private _onMasterTypeChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+  private _onMasterTypeChanged(e: React.ChangeEvent<HTMLInputElement>) {
     this.acceleratorTypeOptions = getAcceleratorTypes(e.target.value);
     const { handleChange, setFieldValue } = this.props;
     setFieldValue(
@@ -324,7 +324,7 @@ export class InnerSchedulerForm extends React.Component<
     handleChange(e);
   }
 
-  private _onScaleTierChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+  private _onScaleTierChanged(e: React.ChangeEvent<HTMLInputElement>) {
     const { handleChange, setFieldValue } = this.props;
     const isCustom = e.target.value === CUSTOM;
     if (isCustom) {
@@ -344,7 +344,7 @@ export class InnerSchedulerForm extends React.Component<
     handleChange(e);
   }
 
-  private _onScheduleTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  private _onScheduleTypeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { handleChange, setFieldValue } = this.props;
     const value = e.target.value;
     this.missingPermissions =
@@ -355,7 +355,7 @@ export class InnerSchedulerForm extends React.Component<
     handleChange(e);
   }
 
-  private _onAcceleratorTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  private _onAcceleratorTypeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { handleChange, setFieldValue } = this.props;
     const value = e.target.value;
     const count = value ? ACCELERATOR_COUNTS_1_2_4_8[0].value : '';

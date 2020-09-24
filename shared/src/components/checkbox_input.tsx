@@ -17,7 +17,11 @@
 import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
-import { css } from '../styles';
+import { FormControlLabel, withStyles } from '@material-ui/core';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { INPUT_TEXT_STYLE } from '../styles';
 
 interface CheckboxInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -27,15 +31,34 @@ interface CheckboxInputProps
 const containerStyle = style({
   ...csstips.horizontal,
   ...csstips.center,
+  marginRight: 0,
 });
+
+const StyledLabel = withStyles({
+  label: {
+    ...INPUT_TEXT_STYLE,
+    marginRight: 0,
+  },
+})(FormControlLabel);
 
 /** Funtional Component for Checkbox input fields */
 export function CheckboxInput(props: CheckboxInputProps) {
-  const { label, ...inputProps } = props;
+  const { label, checked, ...inputProps } = props;
   return (
     <div className={containerStyle}>
-      <input type="checkbox" {...inputProps} />
-      {label && <span className={css.primaryTextColor}>{label}</span>}
+      <StyledLabel
+        control={
+          <Checkbox
+            inputProps={{ ...inputProps, checked }}
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            size="small"
+            checked={checked}
+            color="primary"
+          />
+        }
+        label={label}
+      />
     </div>
   );
 }

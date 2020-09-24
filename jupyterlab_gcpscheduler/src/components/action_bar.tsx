@@ -18,7 +18,7 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
 
-import { css } from 'gcp_jupyterlab_shared';
+import { Button } from '@material-ui/core';
 import { OnDialogClose } from './dialog';
 
 interface Props {
@@ -43,13 +43,9 @@ const actionBar = style({
 export function ActionBar(props: Props) {
   return (
     <div className={actionBar}>
-      <button
-        type="button"
-        className={css.button}
-        onClick={props.onDialogClose}
-      >
+      <Button onClick={props.onDialogClose}>
         {props.closeLabel || 'Close'}
-      </button>
+      </Button>
       {props.children}
     </div>
   );

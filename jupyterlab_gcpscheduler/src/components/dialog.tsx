@@ -26,6 +26,7 @@ import {
   MenuCloseHandler,
   SmallMenuItem,
   Message,
+  Badge,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
@@ -172,7 +173,9 @@ export class SchedulerDialog extends React.Component<Props, State> {
     return (
       <Dialog open={this._isOpen()}>
         <header className={localStyles.header}>
-          <span className={localStyles.title}>Schedule a notebook run</span>
+          <span className={localStyles.title}>
+            Schedule a notebook run <Badge value="alpha" />
+          </span>
           <IconButtonMenu
             menuItems={menuCloseHandler => [
               <SmallMenuItem key="viewAllJobs">

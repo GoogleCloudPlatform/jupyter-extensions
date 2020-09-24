@@ -18,7 +18,7 @@
 import { ProjectState } from './service/project_state';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { AiPlatformJob } from './service/gcp';
-
+import { mount } from 'enzyme';
 export const TEST_PROJECT = 'test-project';
 
 /** Returns a blank project state. */
@@ -98,6 +98,16 @@ export function triggeredResolver(
     done = true;
   };
   return { resolve, promise };
+}
+
+// Converts ShallowWrapper to ReactWrapper
+export function createReactWrapper(wrapper: ShallowWrapper, selector: string) {
+  return mount(
+    wrapper
+      .find(selector)
+      .dive()
+      .get(0)
+  );
 }
 
 // Simulates a form input change

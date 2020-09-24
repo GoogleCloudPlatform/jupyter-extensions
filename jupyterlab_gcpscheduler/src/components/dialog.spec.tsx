@@ -21,6 +21,7 @@ import { shallow } from 'enzyme';
 import { IconButtonMenu } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
+import { Button } from '@material-ui/core';
 import { GcpService } from '../service/gcp';
 import { LaunchSchedulerRequest, SchedulerDialog, GcpSettings } from './dialog';
 import { INotebookModel } from '@jupyterlab/notebook';
@@ -212,7 +213,7 @@ describe('SchedulerDialog', () => {
     dialog
       .find(ActionBar)
       .dive()
-      .find('button')
+      .find(Button)
       .simulate('click');
     expect(dialog.state('dialogClosedByUser')).toBe(true);
   });
