@@ -26,11 +26,16 @@ interface BadgeProps {
 const StyledChip = withStyles({
   root: {
     color: COLORS.white,
-    backgroundColor: '#555555',
+    backgroundColor: COLORS.inverse,
     borderRadius: 0,
     fontFamily: BASE_FONT.fontFamily as string,
-    fontSize: 10 as number,
+    fontSize: 10,
     fontWeight: 100,
+    paddingLeft: 1,
+    paddingRight: 1,
+    marginLeft: 4,
+    marginRight: 4,
+    lineHeight: .8,
   },
 })(Chip);
 
