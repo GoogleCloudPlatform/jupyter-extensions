@@ -47,6 +47,19 @@ class TestGCSDirectory(unittest.TestCase):
       got = handlers.getPathContents(req, storage_client)
       self.assertEqual(wanted, got)
 
+  def testGetPathContentsRootEmpty(self):
+    requests = ['/', '']
+    gcs_buckets = []
+
+    storage_client = Mock()
+    storage_client.list_buckets = MagicMock(return_value=gcs_buckets)
+
+    wanted = {'type': 'directory', 'content': []}
+
+    for req in requests:
+      got = handlers.getPathContents(req, storage_client)
+      self.assertEqual(wanted, got)
+
   def testGetPathContentsDir(self):
     requests = ['dummy_bucket1/', 'dummy_bucket1']
 
@@ -87,6 +100,26 @@ class TestGCSDirectory(unittest.TestCase):
       got = handlers.getPathContents(req, storage_client)
       self.assertDictEqual(wanted, got)
 
+  def testGetPathContentsDirEmpty(self):
+    requests = ['dummy_bucket1/', 'dummy_bucket1']
+
+    dummy_bucket1 = Bucket(client=Mock(), name='dummy_bucket1')
+
+    gcs_buckets = [
+        dummy_bucket1,
+    ]
+    gcs_blobs = []
+
+    storage_client = Mock()
+    storage_client.list_buckets = MagicMock(return_value=gcs_buckets)
+    storage_client.list_blobs = MagicMock(return_value=gcs_blobs)
+
+    wanted = {'type': 'directory', 'content': []}
+
+    for req in requests:
+      got = handlers.getPathContents(req, storage_client)
+      self.assertDictEqual(wanted, got)
+
   def testGetPathContentsSubDir(self):
     requests = ['dummy_bucket1/subdir/', 'dummy_bucket1/subdir']
 
@@ -122,6 +155,32 @@ class TestGCSDirectory(unittest.TestCase):
             },
         ]
     }
+
+    for req in requests:
+      got = handlers.getPathContents(req, storage_client)
+      self.assertEqual(wanted['content'], got['content'])
+
+    with self.assertRaises(handlers.FileNotFound):
+      req = 'dummy_bucket1/sub'
+      handlers.getPathContents(req, storage_client)
+
+  def testGetPathContentsSubDirEmpty(self):
+    requests = ['dummy_bucket1/subdir/', 'dummy_bucket1/subdir']
+
+    dummy_bucket1 = Bucket(client=Mock(), name='dummy_bucket1')
+
+    gcs_buckets = [
+        dummy_bucket1,
+    ]
+    gcs_blobs = [
+        Blob(name='subdir/', bucket=dummy_bucket1),
+    ]
+
+    storage_client = Mock()
+    storage_client.list_buckets = MagicMock(return_value=gcs_buckets)
+    storage_client.list_blobs = MagicMock(return_value=gcs_blobs)
+
+    wanted = {'type': 'directory', 'content': []}
 
     for req in requests:
       got = handlers.getPathContents(req, storage_client)
