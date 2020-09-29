@@ -35,7 +35,6 @@ const StyledChip = withStyles({
     paddingRight: 1,
     marginLeft: 4,
     marginRight: 4,
-    lineHeight: 0.8,
   },
 })(Chip);
 

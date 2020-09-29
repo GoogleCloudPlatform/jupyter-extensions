@@ -22,7 +22,8 @@ import tornado.testing
 from google.auth.exceptions import RefreshError
 from tornado.web import Application
 from tornado.httpclient import HTTPClientError
-from gcp_jupyterlab_shared import VERSION, handlers, test_data
+from gcp_jupyterlab_shared import handlers, test_data
+from .version import VERSION
 
 PATH = '/gcp/v1'
 TEST_PROJECT = 'test-project'
