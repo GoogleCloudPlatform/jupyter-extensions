@@ -15,8 +15,8 @@
  */
 
 import * as React from 'react';
+import { Area, AreaChart, CartesianGrid, Tooltip, YAxis } from 'recharts';
 import { stylesheet } from 'typestyle';
-import { AreaChart, Area, Tooltip, CartesianGrid, YAxis } from 'recharts';
 
 interface ChartProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,9 +55,9 @@ export function AreaChartWrapper(props: ChartProps) {
   } = props;
   return (
     <div className={STYLES.chartContainer}>
-      <h1 className={titleClass}>{`${title} - ${
-        data[data.length - 1][dataKey]
-      }%`}</h1>
+      <h1 className={titleClass}>
+        {`${title} - ${data[data.length - 1][dataKey]}%`}
+      </h1>
       <AreaChart {...areaChartProps} data={data}>
         <Area {...areaProps} {...chartColor} dataKey={dataKey} />
         <Tooltip />

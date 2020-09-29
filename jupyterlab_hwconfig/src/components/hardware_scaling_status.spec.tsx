@@ -39,10 +39,12 @@ describe('HardwareScalingStatus', () => {
   const mockSetAuthToken = jest.fn();
   const mockOnComplete = jest.fn();
   const mockOnDialogClose = jest.fn();
+  const mockHasAuthToken = jest.fn();
   const mockServerWrapper = ({
     getUtilizationData: mockGetUtilizationData,
   } as unknown) as ServerWrapper;
   const mockNotebookService = ({
+    hasAuthToken: mockHasAuthToken,
     stop: mockStopInstance,
     setMachineType: mockSetMachineType,
     setAccelerator: mockSetAccelerator,
@@ -72,6 +74,7 @@ describe('HardwareScalingStatus', () => {
   ];
   beforeEach(() => {
     jest.resetAllMocks();
+    mockAuthTokenRetrieval.mockReturnValue(false);
   });
 
   it('Runs through reshaping flow', async () => {
@@ -247,5 +250,25 @@ describe('HardwareScalingStatus', () => {
     await rejectedStartOperation.catch(() => {});
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Restart error');
+  });
+
+  it('Bypasses external retrieval if Notebooks service has token', async () => {
+    const hardwareConfig = detailsToHardwareConfiguration(
+      JSON.parse(DETAILS_RESPONSE)
+    );
+    mockHasAuthToken.mockReturnValue(true);
+    const hardwareScalingStatus = shallow(
+      <HardwareScalingStatus
+        detailsServer={mockServerWrapper}
+        notebookService={mockNotebookService}
+        onCompletion={mockOnComplete}
+        onDialogClose={mockOnDialogClose}
+        hardwareConfiguration={hardwareConfig}
+        authTokenRetrieval={mockAuthTokenRetrieval}
+        machineTypes={mockMachineTypes}
+      />
+    );
+    expect(hardwareScalingStatus).toBeDefined();
+    expect(mockAuthTokenRetrieval).not.toBeCalled();
   });
 });

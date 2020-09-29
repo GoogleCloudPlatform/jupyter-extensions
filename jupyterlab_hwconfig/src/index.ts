@@ -32,6 +32,8 @@ import { DetailsService } from './service/details_service';
 import { extractLast } from './data/data';
 import { NotebooksService } from './service/notebooks_service';
 import { PriceService } from './service/price_service';
+import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
+import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
 import { ServerWrapper } from './components/server_wrapper';
 
 async function activateDetailsWidget(
@@ -91,3 +93,12 @@ const hwConfig: JupyterFrontEndPlugin<void> = {
 };
 
 export default hwConfig;
+
+// Export component and service classes
+export {
+  HardwareConfigurationDialog,
+  DetailsService,
+  NotebooksService,
+  ResourceUtilizationCharts,
+  VmDetailsWidget,
+};

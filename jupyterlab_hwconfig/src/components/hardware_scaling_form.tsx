@@ -15,18 +15,20 @@
  */
 
 import * as React from 'react';
+import { classes, stylesheet } from 'typestyle';
+import { STYLES } from '../data/styles';
+import { PriceService } from '../service/price_service';
+import { ActionBar } from './action_bar';
+import { NestedSelect } from './machine_type_select';
+import { SelectInput } from './select_input';
 import {
   css,
   CheckboxInput,
   LearnMoreLink,
   Option,
   Message,
+  Badge,
 } from 'gcp_jupyterlab_shared';
-import { stylesheet, classes } from 'typestyle';
-import { ActionBar } from './action_bar';
-import { NestedSelect } from './machine_type_select';
-import { SelectInput } from './select_input';
-import { STYLES } from '../data/styles';
 import {
   HardwareConfiguration,
   Details,
@@ -44,7 +46,6 @@ import {
   optionToMachineType,
   machineTypeToOption,
 } from '../data/machine_types';
-import { PriceService } from '../service/price_service';
 import {
   HardwareConfigurationDescription,
   TITLE,
@@ -64,9 +65,6 @@ interface State {
 }
 
 export const FORM_STYLES = stylesheet({
-  checkbox: {
-    marginRight: '10px',
-  },
   checkboxContainer: {
     padding: '18px 0px 8px 0px',
   },
@@ -275,77 +273,84 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       this.oldConfigurationPrice;
 
     return (
-      <div className={STYLES.containerPadding}>
-        <div className={FORM_STYLES.formContainer}>
-          <span className={STYLES.heading}>{TITLE}</span>
-          <HardwareConfigurationDescription />
-          <span className={STYLES.subheading}>Machine Configuration</span>
-          <NestedSelect
-            label="Machine type"
-            nestedOptionsList={details.machineTypes.map(machineType => ({
-              header: machineType.base,
-              options: machineType.configurations,
-            }))}
-            onChange={machineType => this.onMachineTypeChange(machineType)}
-            value={machineTypeToOption(machineType)}
-          />
-          <span className={STYLES.subheading}>GPU Configuration</span>
-          {this.gpuRestrictionMessage()}
-          <div className={FORM_STYLES.checkboxContainer}>
-            <CheckboxInput
-              label="Attach GPUs"
-              className={FORM_STYLES.checkbox}
-              name="attachGpu"
-              checked={attachGpu && this.canAttachGpu(machineType.name)}
-              onChange={e => this.onAttachGpuChange(e)}
-              disabled={!this.canAttachGpu(machineType.name)}
+      <div>
+        <header className={STYLES.dialogHeader}>
+          {TITLE} <Badge value="Alpha" />
+        </header>
+        <div className={STYLES.containerPadding}>
+          <div className={FORM_STYLES.formContainer}>
+            <HardwareConfigurationDescription />
+            <span className={STYLES.subheading}>Machine Configuration</span>
+            <NestedSelect
+              label="Machine type"
+              nestedOptionsList={details.machineTypes.map(machineType => ({
+                header: machineType.base,
+                options: machineType.configurations,
+              }))}
+              onChange={machineType => this.onMachineTypeChange(machineType)}
+              value={machineTypeToOption(machineType)}
             />
-          </div>
-          {attachGpu && this.canAttachGpu(machineType.name) && (
-            <div
-              className={classes(
-                css.scheduleBuilderRow,
-                FORM_STYLES.topPadding
-              )}
-            >
-              <div className={css.flex1}>
-                <SelectInput
-                  label="GPU type"
-                  name="gpuType"
-                  value={gpuType}
-                  options={this.gpuTypeOptions}
-                  onChange={e => this.onGpuTypeChange(e)}
-                />
-              </div>
-              <div className={css.flex1}>
-                <SelectInput
-                  label="Number of GPUs"
-                  name="gpuCount"
-                  value={gpuCount}
-                  options={gpuCountOptions}
-                  onChange={e => this.onGpuCountChange(e)}
-                />
-              </div>
+            <span className={STYLES.subheading}>GPU Configuration</span>
+            {this.gpuRestrictionMessage()}
+            <div className={FORM_STYLES.checkboxContainer}>
+              <CheckboxInput
+                label="Attach GPUs"
+                name="attachGpu"
+                checked={attachGpu && this.canAttachGpu(machineType.name)}
+                onChange={e => this.onAttachGpuChange(e)}
+                disabled={!this.canAttachGpu(machineType.name)}
+              />
             </div>
-          )}
-          {shouldDisplayPricingEstimation &&
-            this.displayPricingEstimation(
-              this.oldConfigurationPrice,
-              newConfigurationPrice
+            {attachGpu && this.canAttachGpu(machineType.name) && (
+              <div
+                className={classes(
+                  css.scheduleBuilderRow,
+                  FORM_STYLES.topPadding
+                )}
+              >
+                <div className={css.flex1}>
+                  <SelectInput
+                    label="GPU type"
+                    name="gpuType"
+                    value={gpuType}
+                    options={this.gpuTypeOptions}
+                    onChange={e => this.onGpuTypeChange(e)}
+                  />
+                </div>
+                <div className={css.flex1}>
+                  <SelectInput
+                    label="Number of GPUs"
+                    name="gpuCount"
+                    value={gpuCount}
+                    options={gpuCountOptions}
+                    onChange={e => this.onGpuCountChange(e)}
+                  />
+                </div>
+              </div>
             )}
-          {attachGpu && (
-            <div className={STYLES.infoMessage}>
-              <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
-            </div>
-          )}
+            {shouldDisplayPricingEstimation &&
+              this.displayPricingEstimation(
+                this.oldConfigurationPrice,
+                newConfigurationPrice
+              )}
+            {attachGpu && (
+              <div className={STYLES.infoMessage}>
+                <Message
+                  asError={false}
+                  asActivity={false}
+                  text={INFO_MESSAGE}
+                />
+              </div>
+            )}
+          </div>
+          <ActionBar
+            primaryLabel="Next"
+            onPrimaryClick={() => this.submitForm()}
+            primaryDisabled={!configurationModified}
+            secondaryLabel="Cancel"
+            onSecondaryClick={onDialogClose}
+          />
         </div>
-        <ActionBar
-          primaryLabel="Next"
-          onPrimaryClick={() => this.submitForm()}
-          primaryDisabled={!configurationModified}
-          secondaryLabel="Cancel"
-          onSecondaryClick={onDialogClose}
-        />
       </div>
     );
   }

@@ -36,6 +36,14 @@ export const STYLES = stylesheet({
   containerSize: {
     width: 468,
   },
+  dialogHeader: {
+    ...BASE_FONT,
+    fontWeight: 500,
+    fontSize: '15px',
+    margin: '16px 16px 0 16px',
+    ...csstips.horizontal,
+    ...csstips.center,
+  },
   heading: {
     fontSize: '22px',
     paddingBottom: '10px',

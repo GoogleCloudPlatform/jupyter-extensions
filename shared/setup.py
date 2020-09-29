@@ -21,7 +21,7 @@ with open("README.md") as f:
 
 version = None
 with open(os.path.join(os.getcwd(), "gcp_jupyterlab_shared",
-                       "__init__.py")) as f:
+                       "version.py")) as f:
   for l in f:
     if l.startswith("VERSION"):
       version = l.rstrip().split(" = ")[1].replace("'", "")
@@ -46,7 +46,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "google-auth>=1.6.3",
+        "google-auth>=1.22.0",
         "jupyterlab~=1.2.0",
         "requests>=2.22.0",
     ],

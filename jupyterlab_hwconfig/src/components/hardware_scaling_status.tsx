@@ -194,16 +194,19 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
 
   async componentDidMount() {
     const { notebookService, authTokenRetrieval } = this.props;
-    try {
-      const token = await authTokenRetrieval();
-      this.setState({
-        status: Status['Stopping notebook instance'],
-      });
-      notebookService.setAuthToken(token);
-    } catch (err) {
-      this.setState({ status: Status.Error });
-      console.log(err);
+    if (!notebookService.hasAuthToken()) {
+      try {
+        const token = await authTokenRetrieval();
+        notebookService.setAuthToken(token);
+      } catch (err) {
+        this.setState({ status: Status.Error });
+        console.error(err);
+        return;
+      }
     }
+    this.setState({
+      status: Status['Stopping notebook instance'],
+    });
     window.addEventListener('beforeunload', this.preventPageClose);
   }
 

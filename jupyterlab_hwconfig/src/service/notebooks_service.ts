@@ -64,6 +64,7 @@ export class NotebooksService {
   private instanceNamePromise?: Promise<string>;
   private locationIdPromise?: Promise<string>;
   private metadataPromise?: Promise<InstanceMetadata>;
+  private authTokenWasSet = false;
 
   constructor(
     private _transportService: ClientTransportService,
@@ -122,8 +123,13 @@ export class NotebooksService {
     this._transportService = transportService;
   }
 
-  setAuthToken(authToken: string) {
+  hasAuthToken() {
+    return this.authTokenWasSet;
+  }
+
+  setAuthToken(authToken: string, shouldRemember = false) {
     this._transportService.accessToken = authToken;
+    this.authTokenWasSet = shouldRemember;
   }
 
   /** Polls the provided Operation at 1s intervals until it has completed. */
