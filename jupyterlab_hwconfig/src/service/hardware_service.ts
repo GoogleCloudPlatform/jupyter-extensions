@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import { ServerConnection } from '@jupyterlab/services';
 import {
-  ServerProxyTransportService,
   InstanceMetadata,
   getMetadata,
+  TransportService,
 } from 'gcp_jupyterlab_shared';
 import { Accelerator } from '../data/accelerator_types';
-import { extractLast } from '../data/data';
+import { extractLast, DetailsResponse } from '../data/data';
 
 type ListMachineTypesResponse = gapi.client.compute.MachineTypeList;
 type ListAcceleratorTypesResponse = gapi.client.compute.AcceleratorTypeList;
@@ -29,18 +30,25 @@ export type GapiMachineType = gapi.client.compute.MachineType;
 export const COMPUTE_ENGINE_API_PATH =
   'https://compute.googleapis.com/compute/v1';
 
-export class DetailsService {
+/**
+ * Returns information about the underlying Notebook instance as well as helper
+ * methods for other hardware resource types.
+ */
+export class HardwareService {
   private projectIdPromise?: Promise<string>;
   private zonePromise?: Promise<string>;
   private metadataPromise?: Promise<InstanceMetadata>;
   private machineTypesPromise?: Promise<GapiMachineType[]>;
   private acceleratorTypesPromise?: Promise<Accelerator[]>;
+  private readonly detailsUrl: string;
 
   constructor(
-    private _transportService: ServerProxyTransportService,
+    private _transportService: TransportService,
     projectId?: string,
-    zone?: string
+    zone?: string,
+    private readonly serverSettings: ServerConnection.ISettings = ServerConnection.defaultSettings
   ) {
+    this.detailsUrl = this.serverSettings.baseUrl + `gcp/v1/details`;
     if (projectId) {
       this.projectIdPromise = Promise.resolve(projectId);
     }
@@ -73,7 +81,7 @@ export class DetailsService {
     }
   }
 
-  set transportService(transportService: ServerProxyTransportService) {
+  set transportService(transportService: TransportService) {
     this._transportService = transportService;
   }
 
@@ -126,6 +134,18 @@ export class DetailsService {
       throw err;
     });
     return this.metadataPromise;
+  }
+
+  async getVmDetails(): Promise<DetailsResponse> {
+    const response = await ServerConnection.makeRequest(
+      this.detailsUrl,
+      {},
+      this.serverSettings
+    );
+    if (!response.ok) {
+      throw new Error(`Unable to retrieve details from ${this.detailsUrl}`);
+    }
+    return response.json();
   }
 
   /**

@@ -18,9 +18,11 @@ import * as React from 'react';
 import { Popper, Fade, Paper } from '@material-ui/core';
 import { classes } from 'typestyle';
 import { STYLES } from '../data/styles';
+import { HardwareService } from '../service/hardware_service';
+import { ResourceUtilizationCharts } from './resource_utilization_charts';
 
 interface Props {
-  children: React.ReactNode;
+  hardwareService: HardwareService;
 }
 
 interface State {
@@ -29,7 +31,8 @@ interface State {
 
 const GRAPH_ICON_CLASS = 'jp-UtilizationGraphsIcon';
 
-export class WidgetPopup extends React.Component<Props, State> {
+/** Wraps resource utilization charts with icon button popper. */
+export class ResourceChartPopper extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -38,6 +41,7 @@ export class WidgetPopup extends React.Component<Props, State> {
   }
 
   render() {
+    const { hardwareService } = this.props;
     const { anchorEl } = this.state;
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -50,16 +54,15 @@ export class WidgetPopup extends React.Component<Props, State> {
     const id = open ? 'widget-popper' : undefined;
 
     return (
-      <React.Fragment>
-        <span
-          className={classes(
-            GRAPH_ICON_CLASS,
-            STYLES.icon,
-            STYLES.interactiveHover
-          )}
-          title="Show resource utilization"
-          onClick={handleClick}
-        ></span>
+      <span
+        className={classes(
+          GRAPH_ICON_CLASS,
+          STYLES.icon,
+          STYLES.interactiveHover
+        )}
+        title="Show resource utilization"
+        onClick={handleClick}
+      >
         <Popper
           id={id}
           open={open}
@@ -69,11 +72,13 @@ export class WidgetPopup extends React.Component<Props, State> {
         >
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
-              <Paper elevation={5}>{this.props.children}</Paper>
+              <Paper elevation={5}>
+                <ResourceUtilizationCharts hardwareService={hardwareService} />
+              </Paper>
             </Fade>
           )}
         </Popper>
-      </React.Fragment>
+      </span>
     );
   }
 }

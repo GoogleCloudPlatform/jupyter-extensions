@@ -28,13 +28,12 @@ import {
   ServerProxyTransportService,
 } from 'gcp_jupyterlab_shared';
 import { VmDetailsWidget } from './details_widget';
-import { DetailsService } from './service/details_service';
-import { extractLast } from './data/data';
+import { HardwareService } from './service/hardware_service';
+import { extractLast, DetailsResponse } from './data/data';
 import { NotebooksService } from './service/notebooks_service';
 import { PriceService } from './service/price_service';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
-import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
-import { ServerWrapper } from './components/server_wrapper';
+import { ResourceChartPopper } from './components/resource_chart_popper';
 
 async function activateDetailsWidget(
   _app: JupyterFrontEnd,
@@ -44,26 +43,24 @@ async function activateDetailsWidget(
 
   const clientTransportService = new ClientTransportService();
   const serverProxyTransportService = new ServerProxyTransportService();
-  const detailsServer = new ServerWrapper();
 
   let notebooksService: NotebooksService;
-  let detailsService: DetailsService;
+  let hardwareService: HardwareService;
   let priceService: PriceService;
   let initializationError = false;
 
   try {
-    const details = await getMetadata();
-
+    const metadata = await getMetadata();
     notebooksService = new NotebooksService(
       clientTransportService,
-      details.project,
-      extractLast(details.name),
-      extractLast(details.zone)
+      metadata.project,
+      extractLast(metadata.name),
+      extractLast(metadata.zone)
     );
-    detailsService = new DetailsService(
+    hardwareService = new HardwareService(
       serverProxyTransportService,
-      details.project,
-      extractLast(details.zone)
+      metadata.project,
+      extractLast(metadata.zone)
     );
     priceService = new PriceService();
   } catch (err) {
@@ -71,9 +68,8 @@ async function activateDetailsWidget(
   }
 
   const detailsWidget = new VmDetailsWidget(
-    detailsServer,
     notebooksService,
-    detailsService,
+    hardwareService,
     priceService,
     initializationError
   );
@@ -94,11 +90,12 @@ const hwConfig: JupyterFrontEndPlugin<void> = {
 
 export default hwConfig;
 
-// Export component and service classes
+// Export classes that may need to be assembled in a seperate extension
 export {
+  DetailsResponse,
   HardwareConfigurationDialog,
-  DetailsService,
+  HardwareService,
   NotebooksService,
-  ResourceUtilizationCharts,
-  VmDetailsWidget,
+  PriceService,
+  ResourceChartPopper,
 };

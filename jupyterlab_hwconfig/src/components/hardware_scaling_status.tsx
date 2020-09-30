@@ -23,8 +23,8 @@ import { STYLES } from '../data/styles';
 import { HardwareConfiguration } from '../data/data';
 import { MachineTypeConfiguration } from '../data/machine_types';
 import { ActionBar } from './action_bar';
+import { HardwareService } from '../service/hardware_service';
 import { NotebooksService, Instance } from '../service/notebooks_service';
-import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
 import { displayInstance } from './instance_details_message';
 
@@ -106,13 +106,13 @@ export interface ConfigurationError {
 }
 
 interface Props {
+  authTokenRetrieval: () => Promise<string>;
   hardwareConfiguration: HardwareConfiguration;
+  hardwareService: HardwareService;
   notebookService: NotebooksService;
+  machineTypes: MachineTypeConfiguration[];
   onDialogClose: () => void;
   onCompletion: () => void;
-  detailsServer: ServerWrapper;
-  authTokenRetrieval: () => Promise<string>;
-  machineTypes: MachineTypeConfiguration[];
 }
 
 interface State {
@@ -181,7 +181,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   private async waitForServer() {
     for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
       try {
-        await this.props.detailsServer.getUtilizationData();
+        await this.props.hardwareService.getVmDetails();
         break;
       } catch (err) {
         if (tries === this.NUM_RETRIES - 1) {
@@ -210,7 +210,7 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
     window.addEventListener('beforeunload', this.preventPageClose);
   }
 
-  async componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(_prevProps, prevState) {
     const { status, error, instanceDetails } = this.state;
     const { hardwareConfiguration, notebookService, onCompletion } = this.props;
     const { machineType, attachGpu, gpuType, gpuCount } = hardwareConfiguration;

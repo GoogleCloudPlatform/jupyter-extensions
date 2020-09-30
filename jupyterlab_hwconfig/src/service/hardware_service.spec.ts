@@ -18,7 +18,7 @@ import {
   asApiResponse,
   ServerProxyTransportService,
 } from 'gcp_jupyterlab_shared';
-import { DetailsService, COMPUTE_ENGINE_API_PATH } from './details_service';
+import { HardwareService, COMPUTE_ENGINE_API_PATH } from './hardware_service';
 import {
   MACHINE_TYPES_RESPONSE,
   ACCELERATOR_TYPES_RESPONSE,
@@ -33,13 +33,13 @@ describe('DetailsService', () => {
   const transportService = ({
     submit: mockSubmit,
   } as unknown) as ServerProxyTransportService;
-  let detailsService: DetailsService;
+  let detailsService: HardwareService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
 
-    detailsService = new DetailsService(
+    detailsService = new HardwareService(
       transportService,
       TEST_PROJECT,
       TEST_ZONE

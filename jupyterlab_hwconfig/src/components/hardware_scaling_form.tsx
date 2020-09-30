@@ -31,7 +31,7 @@ import {
 } from 'gcp_jupyterlab_shared';
 import {
   HardwareConfiguration,
-  Details,
+  DetailsResponse,
   detailsToHardwareConfiguration,
   isEqualHardwareConfiguration,
   extractLast,
@@ -41,10 +41,12 @@ import {
   getGpuCountOptionsList,
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
+  Accelerator,
 } from '../data/accelerator_types';
 import {
   optionToMachineType,
   machineTypeToOption,
+  MachineTypeConfiguration,
 } from '../data/machine_types';
 import {
   HardwareConfigurationDescription,
@@ -52,7 +54,9 @@ import {
 } from './hardware_configuration_description';
 
 interface Props {
-  details: Details;
+  acceleratorTypes: Accelerator[];
+  details: DetailsResponse;
+  machineTypes: MachineTypeConfiguration[];
   priceService: PriceService;
   onSubmit: (configuration: HardwareConfiguration) => void;
   onDialogClose: () => void;
@@ -97,13 +101,13 @@ export class HardwareScalingForm extends React.Component<Props, State> {
       configuration: this.oldConfiguration,
       // Update the gpu count options based on the selected gpu type
       gpuCountOptions: getGpuCountOptionsList(
-        props.details.acceleratorTypes,
+        props.acceleratorTypes,
         props.details.gpu.name
       ),
       newConfigurationPrice: undefined,
     };
     this.gpuTypeOptions = getGpuTypeOptionsList(
-      props.details.acceleratorTypes,
+      props.acceleratorTypes,
       props.details.instance.cpuPlatform
     );
 
@@ -147,7 +151,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
 
   private onGpuTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newGpuCountOptions = getGpuCountOptionsList(
-      this.props.details.acceleratorTypes,
+      this.props.acceleratorTypes,
       event.target.value
     );
     const configuration = {
@@ -254,7 +258,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
   }
 
   render() {
-    const { onDialogClose, details } = this.props;
+    const { onDialogClose, machineTypes } = this.props;
     const {
       configuration,
       gpuCountOptions,
@@ -283,7 +287,7 @@ export class HardwareScalingForm extends React.Component<Props, State> {
             <span className={STYLES.subheading}>Machine Configuration</span>
             <NestedSelect
               label="Machine type"
-              nestedOptionsList={details.machineTypes.map(machineType => ({
+              nestedOptionsList={machineTypes.map(machineType => ({
                 header: machineType.base,
                 options: machineType.configurations,
               }))}

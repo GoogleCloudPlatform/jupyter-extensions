@@ -22,7 +22,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
 import { Badge } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-import { Details, MAPPED_ATTRIBUTES } from '../data/data';
+import { DetailsResponse, MAPPED_ATTRIBUTES } from '../data/data';
 import { STYLES } from '../data/styles';
 import { ActionBar } from './action_bar';
 
@@ -40,7 +40,7 @@ const useStyles = makeStyles({
   },
 });
 
-function SimpleTable(details: Details) {
+function SimpleTable(details: DetailsResponse) {
   const tableClasses = useStyles();
 
   return (
@@ -68,7 +68,7 @@ function SimpleTable(details: Details) {
 }
 
 interface Props {
-  details: Details;
+  details: DetailsResponse;
   receivedError: boolean;
   onDialogClose: () => void;
   onUpdate: () => void;

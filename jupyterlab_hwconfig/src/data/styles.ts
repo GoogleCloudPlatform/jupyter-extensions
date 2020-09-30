@@ -80,6 +80,7 @@ export const STYLES = stylesheet({
     },
   },
   icon: {
+    cursor: 'pointer',
     display: 'inline-block',
     height: '18px',
     marginRight: '4px',

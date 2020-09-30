@@ -55,7 +55,7 @@ export function handleError(err: any) {
 }
 
 /**
- * Wraps around the GCP AI Platform Notebooks API to manage notebook resources in Google Cloud.
+ * Wraps around the GCP AI Platform Notebooks API to manage notebook resources. *
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest
  * Must set authToken before making requests
  */

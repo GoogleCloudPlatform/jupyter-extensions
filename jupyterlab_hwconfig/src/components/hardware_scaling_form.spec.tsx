@@ -29,7 +29,7 @@ import {
 import { HardwareConfiguration } from '../data/data';
 import { MachineTypeConfiguration } from '../data/machine_types';
 import { PriceService } from '../service/price_service';
-import { DETAILS } from '../test_helpers';
+import { ACCELERATOR_TYPES, DETAILS, MACHINE_TYPES } from '../test_helpers';
 
 interface HardwareScalingFormInstance extends React.Component<{}, {}> {
   gpuTypeOptions: Option[];
@@ -76,9 +76,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(oldConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -101,9 +103,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -134,9 +138,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -178,9 +184,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -221,9 +229,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -258,9 +268,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );
@@ -315,7 +327,7 @@ describe('HardwareScalingForm', () => {
     ).toEqual(true);
   });
 
-  it('Attaches GPU of type ACCELERATOR_TYPE_UNSPECIFIED and count ACCELERATOR_COUNT_UNSPECIFIED if user removes gpu', async () => {
+  it('Attaches unspecified GPU type and count if user removes GPU', async () => {
     const newConfigurationPrice = Promise.resolve(NEW_CONFIGURATION_PRICE);
     mockGetPrice.mockReturnValue(newConfigurationPrice);
     const detailsWithGpu = {
@@ -332,9 +344,11 @@ describe('HardwareScalingForm', () => {
     };
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={detailsWithGpu}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={detailsWithGpu}
         priceService={mockPriceService}
       />
     );
@@ -379,9 +393,11 @@ describe('HardwareScalingForm', () => {
     mockGetPrice.mockReturnValue(oldConfigurationPrice);
     const hardwareScalingForm = shallow(
       <HardwareScalingForm
+        acceleratorTypes={ACCELERATOR_TYPES}
+        details={DETAILS}
+        machineTypes={MACHINE_TYPES}
         onSubmit={mockOnSubmit}
         onDialogClose={mockOnDialogClose}
-        details={DETAILS}
         priceService={mockPriceService}
       />
     );

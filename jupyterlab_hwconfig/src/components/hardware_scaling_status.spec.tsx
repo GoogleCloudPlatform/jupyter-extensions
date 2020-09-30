@@ -19,18 +19,14 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { HardwareScalingStatus, Status } from './hardware_scaling_status';
-import { DETAILS_RESPONSE } from '../test_helpers';
+import { DETAILS_RESPONSE, flush, MACHINE_TYPES } from '../test_helpers';
+import { HardwareService } from '../service/hardware_service';
 import { NotebooksService, Instance } from '../service/notebooks_service';
-import { ServerWrapper } from './server_wrapper';
 import { detailsToHardwareConfiguration } from '../data/data';
-import { MachineTypeConfiguration } from '../data/machine_types';
-
-function immediatePromise() {
-  return new Promise(r => setTimeout(r));
-}
 
 describe('HardwareScalingStatus', () => {
-  const mockGetUtilizationData = jest.fn();
+  const detailsResponse = JSON.parse(DETAILS_RESPONSE);
+  const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
   const mockStopInstance = jest.fn();
   const mockSetMachineType = jest.fn();
   const mockSetAccelerator = jest.fn();
@@ -40,9 +36,10 @@ describe('HardwareScalingStatus', () => {
   const mockOnComplete = jest.fn();
   const mockOnDialogClose = jest.fn();
   const mockHasAuthToken = jest.fn();
-  const mockServerWrapper = ({
-    getUtilizationData: mockGetUtilizationData,
-  } as unknown) as ServerWrapper;
+  const mockGetDetails = jest.fn();
+  const mockHardwareService = ({
+    getVmDetails: mockGetDetails,
+  } as unknown) as HardwareService;
   const mockNotebookService = ({
     hasAuthToken: mockHasAuthToken,
     stop: mockStopInstance,
@@ -51,58 +48,44 @@ describe('HardwareScalingStatus', () => {
     start: mockStartInstance,
     setAuthToken: mockSetAuthToken,
   } as unknown) as NotebooksService;
-  const mockInstance: Instance = {
+  const fakeInstance: Instance = {
     name: 'Test',
     machineType:
-      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/e2-highmem-8',
+      'https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n2-standard-4',
     acceleratorConfig: {
       coreCount: '1',
       type: 'NVIDIA_TESLA_K80',
     },
   };
-  const mockToken = 'mockToken';
-  const mockMachineTypes: MachineTypeConfiguration[] = [
-    {
-      base: { value: 'e2-', text: 'Efficient Instance' },
-      configurations: [
-        {
-          value: 'e2-highmem-8',
-          text: 'Efficient Instance, 8 vCPUs, 64 GB RAM',
-        },
-      ],
-    },
-  ];
+  const fakeToken = 'mockToken';
   beforeEach(() => {
     jest.resetAllMocks();
     mockAuthTokenRetrieval.mockReturnValue(false);
+    mockGetDetails.mockReturnValue(Promise.resolve(detailsResponse));
   });
 
   it('Runs through reshaping flow', async () => {
-    mockAuthTokenRetrieval.mockResolvedValue(mockToken);
-    mockStopInstance.mockResolvedValue(mockInstance);
-    mockSetMachineType.mockResolvedValue(mockInstance);
-    mockSetAccelerator.mockResolvedValue(mockInstance);
-    mockStartInstance.mockResolvedValue(mockInstance);
-    const detailsResponse = await JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
-    const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
+    mockAuthTokenRetrieval.mockResolvedValue(fakeToken);
+    mockStopInstance.mockResolvedValue(fakeInstance);
+    mockSetMachineType.mockResolvedValue(fakeInstance);
+    mockSetAccelerator.mockResolvedValue(fakeInstance);
+    mockStartInstance.mockResolvedValue(fakeInstance);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Authorizing);
     expect(hardwareScalingStatus).toMatchSnapshot('Authorizing');
     expect(mockAuthTokenRetrieval).toBeCalled();
     await mockAuthTokenRetrieval();
-    expect(mockNotebookService.setAuthToken).toHaveBeenCalledWith(mockToken);
+    expect(mockNotebookService.setAuthToken).toHaveBeenCalledWith(fakeToken);
     expect(hardwareScalingStatus.state('status')).toEqual(
       Status['Stopping notebook instance']
     );
@@ -135,8 +118,7 @@ describe('HardwareScalingStatus', () => {
       Status['Refreshing session']
     );
     expect(hardwareScalingStatus).toMatchSnapshot('Refreshing session');
-    await mockGetUtilizationData();
-    await immediatePromise();
+    await flush();
     expect(mockOnComplete).toBeCalled();
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Complete);
     expect(hardwareScalingStatus).toMatchSnapshot('Complete');
@@ -145,17 +127,15 @@ describe('HardwareScalingStatus', () => {
   it('Renders with auth error', async () => {
     const rejectedAuth = Promise.reject('No token');
     mockAuthTokenRetrieval.mockReturnValue(rejectedAuth);
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     await rejectedAuth.catch(() => {});
@@ -164,20 +144,18 @@ describe('HardwareScalingStatus', () => {
   });
 
   it('Renders with stop error', async () => {
-    mockAuthTokenRetrieval.mockResolvedValue(mockToken);
+    mockAuthTokenRetrieval.mockResolvedValue(fakeToken);
     const rejectedStopOperation = Promise.reject('Stop operation failed');
     mockStopInstance.mockReturnValue(rejectedStopOperation);
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     await mockAuthTokenRetrieval();
@@ -187,26 +165,20 @@ describe('HardwareScalingStatus', () => {
   });
 
   it('Renders with operation error', async () => {
-    const mockGetUtilizationData = jest.fn();
-    const mockStopInstance = jest.fn();
     const rejectedSetMachine = Promise.reject('Reshape operation failed');
     const rejectedSetAccelerator = Promise.reject('Reshape operation failed');
     mockSetMachineType.mockReturnValue(rejectedSetMachine);
     mockSetAccelerator.mockReturnValue(rejectedSetAccelerator);
-    mockStartInstance.mockResolvedValue(mockInstance);
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
-    const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
+    mockStartInstance.mockResolvedValue(fakeInstance);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     await mockAuthTokenRetrieval();
@@ -214,33 +186,27 @@ describe('HardwareScalingStatus', () => {
     await rejectedSetMachine.catch(() => {});
     await rejectedSetAccelerator.catch(() => {});
     await mockStartInstance();
-    await immediatePromise();
+    await flush();
     expect(hardwareScalingStatus.state('status')).toEqual(Status.Error);
     expect(hardwareScalingStatus).toMatchSnapshot('Operation error');
   });
 
   it('Renders with restart error', async () => {
-    const mockGetUtilizationData = jest.fn();
-    const mockStopInstance = jest.fn();
     const rejectedSetMachine = Promise.reject('Reshape operation failed');
     const rejectedSetAccelerator = Promise.reject('Reshape operation failed');
     const rejectedStartOperation = Promise.reject('Restart operation failed');
     mockSetMachineType.mockReturnValue(rejectedSetMachine);
     mockSetAccelerator.mockReturnValue(rejectedSetAccelerator);
     mockStartInstance.mockRejectedValue(rejectedStartOperation);
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const resolveValue = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(resolveValue);
-    const hardwareConfig = detailsToHardwareConfiguration(detailsResponse);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     await mockAuthTokenRetrieval();
@@ -253,19 +219,20 @@ describe('HardwareScalingStatus', () => {
   });
 
   it('Bypasses external retrieval if Notebooks service has token', async () => {
-    const hardwareConfig = detailsToHardwareConfiguration(
-      JSON.parse(DETAILS_RESPONSE)
-    );
+    mockStopInstance.mockResolvedValue(fakeInstance);
+    mockSetMachineType.mockResolvedValue(fakeInstance);
+    mockSetAccelerator.mockResolvedValue(fakeInstance);
+    mockStartInstance.mockResolvedValue(fakeInstance);
     mockHasAuthToken.mockReturnValue(true);
     const hardwareScalingStatus = shallow(
       <HardwareScalingStatus
-        detailsServer={mockServerWrapper}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         onCompletion={mockOnComplete}
         onDialogClose={mockOnDialogClose}
         hardwareConfiguration={hardwareConfig}
         authTokenRetrieval={mockAuthTokenRetrieval}
-        machineTypes={mockMachineTypes}
+        machineTypes={MACHINE_TYPES}
       />
     );
     expect(hardwareScalingStatus).toBeDefined();

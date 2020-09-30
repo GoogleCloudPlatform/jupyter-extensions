@@ -20,7 +20,7 @@ import { stylesheet } from 'typestyle';
 import { Utilization } from '../data/data';
 import { STYLES } from '../data/styles';
 import { AreaChartWrapper } from './chart_wrapper';
-import { ServerWrapper } from './server_wrapper';
+import { HardwareService } from '../service/hardware_service';
 
 const AREA_CHART_BLUE = {
   stroke: '#15B2D3',
@@ -55,7 +55,7 @@ interface GpuUtilization {
 }
 
 interface Props {
-  detailsServer: ServerWrapper;
+  hardwareService: HardwareService;
 }
 
 interface State {
@@ -72,7 +72,7 @@ const LOCAL_STYLES = stylesheet({
     color: 'var(--jp-ui-font-color1)',
   },
   utilizationChartsContainer: {
-    padding: '10px 20px 20px 0px',
+    padding: '0 20px 20px 0',
     backgroundColor: 'var(--jp-layout-color1)',
   },
   flexspan: {
@@ -167,7 +167,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
 
   private async pollUtilizationData() {
     try {
-      const details = await this.props.detailsServer.getUtilizationData();
+      const details = await this.props.hardwareService.getVmDetails();
       const data = this.state.data.slice(1);
       data.push(details.utilization);
       if (details.gpu.name) {
