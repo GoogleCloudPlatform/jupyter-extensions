@@ -156,6 +156,26 @@ def matching_directory(path, storage_client):
   return blobs_matching
 
 
+def directory_exist(path, storage_client):
+  """Find if directory prefix exist.
+
+  Returns:
+    Boolean if directory prefix exist.
+  """
+
+  # TODO(cbwilkes): Add tests for matching_blobs.
+  # TODO(cbwilkes): Return matching blobs for directories.
+  bucket_name, blob_path = parse_path(path)
+
+  # List blobs in the bucket with the blob_path prefix
+  blobs = prefixed_blobs(bucket_name, blob_path, storage_client)
+
+  blob_pattern = re.compile("^%s.*" % blob_path) if re.match(
+      ".*/$", path) else re.compile("^%s/.*" % blob_path)
+  blobs_matching = [b for b in blobs if blob_pattern.match(b.name)]
+  return len(blobs_matching)
+
+
 def matching_directory_contents(path, storage_client):
   """Find blobs within a directory.
 
@@ -209,8 +229,17 @@ def getPathContents(path, storage_client):
     blobs_prefixed = prefixed_blobs(bucket_name, blob_path, storage_client)
 
     blobs_matching = matching_blobs(path, storage_client)
+    directories_matching = matching_directory(path, storage_client)
 
-    if len(blobs_matching) == 1:  # Single blob
+    dir_exist = directory_exist(path, storage_client)
+
+    # Bucket root or directory within bucket
+    if not blob_path or dir_exist:
+      return {
+          'type': 'directory',
+          'content': list_dir(bucket_name, blob_path, blobs_prefixed),
+      }
+    elif len(blobs_matching) == 1:  # Single blob
       blob = blobs_matching[0]
       file_bytes = BytesIO()
       blob.download_to_file(file_bytes)
@@ -230,11 +259,7 @@ def getPathContents(path, storage_client):
           }
       }
     else:
-      contents = list_dir(bucket_name, blob_path, blobs_prefixed)
-      if contents:  # Directory
-        return {'type': 'directory', 'content': contents}
-      else:
-        raise FileNotFound('File "%s" not found' % path)
+      raise FileNotFound('File "%s" not found' % path)
 
 
 def delete(path, storage_client):
