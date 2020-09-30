@@ -1,278 +1,288 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HardwareScalingForm Displays correct pricing estimation: Form With Price Estimation 1`] = `
-<div
-  className="containerPadding_f1sxy5ln"
->
-  <div
-    className="formContainer_fjiu9nv"
+<div>
+  <header
+    className="dialogHeader_fst2s1z"
   >
-    <span
-      className="heading_f1xburhd"
-    >
-      Modify Hardware Configuration
-    </span>
-    <HardwareConfigurationDescription />
-    <span
-      className="subheading_fgjqs4u"
-    >
-      Machine Configuration
-    </span>
-    <NestedSelect
-      label="Machine type"
-      nestedOptionsList={
-        Array [
-          Object {
-            "header": Object {
-              "text": "N1 Standard",
-              "value": "n1-",
-            },
-            "options": Array [
-              Object {
-                "text": "2 vCPU, 7.5 GB RAM",
-                "value": "n1-standard-2",
-              },
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n1-standard-4",
-              },
-            ],
-          },
-          Object {
-            "header": Object {
-              "text": "N2 Standard",
-              "value": "n2-",
-            },
-            "options": Array [
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n2-standard-4",
-              },
-            ],
-          },
-        ]
-      }
-      onChange={[Function]}
-      value={
-        Object {
-          "text": "4 vCPU, 15 GB RAM",
-          "value": "n1-standard-4",
-        }
-      }
+    Modify Hardware Configuration
+     
+    <Badge
+      value="Alpha"
     />
-    <span
-      className="subheading_fgjqs4u"
-    >
-      GPU Configuration
-    </span>
-    <p
-      className="paragraph_f1ditx77"
-    >
-      Based on the zone, framework, and machine type of the instance,
-the available GPU types and the minimum number of GPUs that can be selected may vary. 
-      <LearnMoreLink
-        href="https://cloud.google.com/compute/docs/gpus"
-      />
-    </p>
+  </header>
+  <div
+    className="containerPadding_f1sxy5ln"
+  >
     <div
-      className="checkboxContainer_fnw4z3z"
+      className="formContainer_fjiu9nv"
     >
-      <CheckboxInput
-        checked={true}
-        className="checkbox_ff3k5ad"
-        disabled={false}
-        label="Attach GPUs"
-        name="attachGpu"
-        onChange={[Function]}
-      />
-    </div>
-    <div
-      className="scheduleBuilderRow_f1mxc792 topPadding_f1isojz5"
-    >
-      <div
-        className="flex1_fiw0lep"
-      >
-        <SelectInput
-          label="GPU type"
-          name="gpuType"
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "Nvidia Tesla K80",
-                "value": "NVIDIA_TESLA_K80",
-              },
-              Object {
-                "text": "Nvidia Tesla T4",
-                "value": "NVIDIA_TESLA_T4",
-              },
-            ]
-          }
-          value="NVIDIA_TESLA_K80"
-        />
-      </div>
-      <div
-        className="flex1_fiw0lep"
-      >
-        <SelectInput
-          label="Number of GPUs"
-          name="gpuCount"
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "1",
-                "value": "1",
-              },
-              Object {
-                "text": "2",
-                "value": "2",
-              },
-              Object {
-                "text": "4",
-                "value": "4",
-              },
-              Object {
-                "text": "8",
-                "value": "8",
-              },
-            ]
-          }
-          value="1"
-        />
-      </div>
-    </div>
-    <div>
+      <HardwareConfigurationDescription />
       <span
         className="subheading_fgjqs4u"
       >
-        Pricing Estimation:
+        Machine Configuration
       </span>
-      <div
-        className="paragraph_f1ditx77"
-        id="pricing-information"
+      <NestedSelect
+        label="Machine type"
+        nestedOptionsList={
+          Array [
+            Object {
+              "header": Object {
+                "text": "N1 Standard",
+                "value": "n1-",
+              },
+              "options": Array [
+                Object {
+                  "text": "2 vCPU, 7.5 GB RAM",
+                  "value": "n1-standard-2",
+                },
+                Object {
+                  "text": "4 vCPU, 15 GB RAM",
+                  "value": "n1-standard-4",
+                },
+              ],
+            },
+            Object {
+              "header": Object {
+                "text": "N2 Standard",
+                "value": "n2-",
+              },
+              "options": Array [
+                Object {
+                  "text": "4 vCPU, 15 GB RAM",
+                  "value": "n2-standard-4",
+                },
+              ],
+            },
+          ]
+        }
+        onChange={[Function]}
+        value={
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          }
+        }
+      />
+      <span
+        className="subheading_fgjqs4u"
       >
-        Your updated instance will cost an estimated
+        GPU Configuration
+      </span>
+      <p
+        className="paragraph_f1ditx77"
+      >
+        Based on the zone, framework, and machine type of the instance,
+the available GPU types and the minimum number of GPUs that can be selected may vary. 
+        <LearnMoreLink
+          href="https://cloud.google.com/compute/docs/gpus"
+        />
+      </p>
+      <div
+        className="checkboxContainer_fnw4z3z"
+      >
+        <CheckboxInput
+          checked={true}
+          disabled={false}
+          label="Attach GPUs"
+          name="attachGpu"
+          onChange={[Function]}
+        />
+      </div>
+      <div
+        className="scheduleBuilderRow_f1mxc792 topPadding_f1isojz5"
+      >
+        <div
+          className="flex1_fiw0lep"
+        >
+          <SelectInput
+            label="GPU type"
+            name="gpuType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "Nvidia Tesla K80",
+                  "value": "NVIDIA_TESLA_K80",
+                },
+                Object {
+                  "text": "Nvidia Tesla T4",
+                  "value": "NVIDIA_TESLA_T4",
+                },
+              ]
+            }
+            value="NVIDIA_TESLA_K80"
+          />
+        </div>
+        <div
+          className="flex1_fiw0lep"
+        >
+          <SelectInput
+            label="Number of GPUs"
+            name="gpuCount"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "1",
+                  "value": "1",
+                },
+                Object {
+                  "text": "2",
+                  "value": "2",
+                },
+                Object {
+                  "text": "4",
+                  "value": "4",
+                },
+                Object {
+                  "text": "8",
+                  "value": "8",
+                },
+              ]
+            }
+            value="1"
+          />
+        </div>
+      </div>
+      <div>
+        <span
+          className="subheading_fgjqs4u"
+        >
+          Pricing Estimation:
+        </span>
+        <div
+          className="paragraph_f1ditx77"
+          id="pricing-information"
+        >
+          Your updated instance will cost an estimated
           $4.00 monthly, an estimated
           increase of
           $1.00 from your
           current instance.
+        </div>
+      </div>
+      <div
+        className="infoMessage_fzzj7d9"
+      >
+        <Message
+          asActivity={false}
+          asError={false}
+          text="If you have chosen to attach GPUs to your instance,
+the NVIDIA GPU driver will be installed automatically on the next startup."
+        />
       </div>
     </div>
-    <div
-      className="infoMessage_fzzj7d9"
-    >
-      <Message
-        asActivity={false}
-        asError={false}
-        text="If you have chosen to attach GPUs to your instance,
-the NVIDIA GPU driver will be installed automatically on the next startup."
-      />
-    </div>
+    <ActionBar
+      onPrimaryClick={[Function]}
+      onSecondaryClick={[MockFunction]}
+      primaryDisabled={false}
+      primaryLabel="Next"
+      secondaryLabel="Cancel"
+    />
   </div>
-  <ActionBar
-    onPrimaryClick={[Function]}
-    onSecondaryClick={[MockFunction]}
-    primaryDisabled={false}
-    primaryLabel="Next"
-    secondaryLabel="Cancel"
-  />
 </div>
 `;
 
 exports[`HardwareScalingForm Successfully initializes form: Initial Form 1`] = `
-<div
-  className="containerPadding_f1sxy5ln"
->
-  <div
-    className="formContainer_fjiu9nv"
+<div>
+  <header
+    className="dialogHeader_fst2s1z"
   >
-    <span
-      className="heading_f1xburhd"
-    >
-      Modify Hardware Configuration
-    </span>
-    <HardwareConfigurationDescription />
-    <span
-      className="subheading_fgjqs4u"
-    >
-      Machine Configuration
-    </span>
-    <NestedSelect
-      label="Machine type"
-      nestedOptionsList={
-        Array [
-          Object {
-            "header": Object {
-              "text": "N1 Standard",
-              "value": "n1-",
-            },
-            "options": Array [
-              Object {
-                "text": "2 vCPU, 7.5 GB RAM",
-                "value": "n1-standard-2",
-              },
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n1-standard-4",
-              },
-            ],
-          },
-          Object {
-            "header": Object {
-              "text": "N2 Standard",
-              "value": "n2-",
-            },
-            "options": Array [
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n2-standard-4",
-              },
-            ],
-          },
-        ]
-      }
-      onChange={[Function]}
-      value={
-        Object {
-          "text": "4 vCPU, 15 GB RAM",
-          "value": "n1-standard-4",
-        }
-      }
+    Modify Hardware Configuration
+     
+    <Badge
+      value="Alpha"
     />
-    <span
-      className="subheading_fgjqs4u"
-    >
-      GPU Configuration
-    </span>
-    <p
-      className="paragraph_f1ditx77"
-    >
-      Based on the zone, framework, and machine type of the instance,
-the available GPU types and the minimum number of GPUs that can be selected may vary. 
-      <LearnMoreLink
-        href="https://cloud.google.com/compute/docs/gpus"
-      />
-    </p>
+  </header>
+  <div
+    className="containerPadding_f1sxy5ln"
+  >
     <div
-      className="checkboxContainer_fnw4z3z"
+      className="formContainer_fjiu9nv"
     >
-      <CheckboxInput
-        checked={false}
-        className="checkbox_ff3k5ad"
-        disabled={false}
-        label="Attach GPUs"
-        name="attachGpu"
+      <HardwareConfigurationDescription />
+      <span
+        className="subheading_fgjqs4u"
+      >
+        Machine Configuration
+      </span>
+      <NestedSelect
+        label="Machine type"
+        nestedOptionsList={
+          Array [
+            Object {
+              "header": Object {
+                "text": "N1 Standard",
+                "value": "n1-",
+              },
+              "options": Array [
+                Object {
+                  "text": "2 vCPU, 7.5 GB RAM",
+                  "value": "n1-standard-2",
+                },
+                Object {
+                  "text": "4 vCPU, 15 GB RAM",
+                  "value": "n1-standard-4",
+                },
+              ],
+            },
+            Object {
+              "header": Object {
+                "text": "N2 Standard",
+                "value": "n2-",
+              },
+              "options": Array [
+                Object {
+                  "text": "4 vCPU, 15 GB RAM",
+                  "value": "n2-standard-4",
+                },
+              ],
+            },
+          ]
+        }
         onChange={[Function]}
+        value={
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          }
+        }
       />
+      <span
+        className="subheading_fgjqs4u"
+      >
+        GPU Configuration
+      </span>
+      <p
+        className="paragraph_f1ditx77"
+      >
+        Based on the zone, framework, and machine type of the instance,
+the available GPU types and the minimum number of GPUs that can be selected may vary. 
+        <LearnMoreLink
+          href="https://cloud.google.com/compute/docs/gpus"
+        />
+      </p>
+      <div
+        className="checkboxContainer_fnw4z3z"
+      >
+        <CheckboxInput
+          checked={false}
+          disabled={false}
+          label="Attach GPUs"
+          name="attachGpu"
+          onChange={[Function]}
+        />
+      </div>
     </div>
+    <ActionBar
+      onPrimaryClick={[Function]}
+      onSecondaryClick={[MockFunction]}
+      primaryDisabled={true}
+      primaryLabel="Next"
+      secondaryLabel="Cancel"
+    />
   </div>
-  <ActionBar
-    onPrimaryClick={[Function]}
-    onSecondaryClick={[MockFunction]}
-    primaryDisabled={true}
-    primaryLabel="Next"
-    secondaryLabel="Cancel"
-  />
 </div>
 `;

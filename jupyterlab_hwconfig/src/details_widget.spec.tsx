@@ -18,36 +18,27 @@ jest.mock('@jupyterlab/apputils');
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { VmDetails } from './details_widget';
-import {
-  DETAILS_RESPONSE,
-  MACHINE_TYPES_RESPONSE,
-  ACCELERATOR_TYPES_RESPONSE,
-} from './test_helpers';
+import { DETAILS_RESPONSE } from './test_helpers';
 import { STYLES } from './data/styles';
+import { VmDetails } from './details_widget';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
-import { ServerWrapper } from './components/server_wrapper';
-import { DetailsService } from './service/details_service';
+import { HardwareService } from './service/hardware_service';
 import { NotebooksService } from './service/notebooks_service';
 import { PriceService } from './service/price_service';
 
 describe('VmDetails', () => {
-  const mockGetUtilizationData = jest.fn();
-  const mockGetMachineTypes = jest.fn();
-  const mockGetAcceleratorTypes = jest.fn();
-  const mockServerWrapper = ({
-    getUtilizationData: mockGetUtilizationData,
-  } as unknown) as ServerWrapper;
-  const mockDetailsService = ({
-    getMachineTypes: mockGetMachineTypes,
-    getAcceleratorTypes: mockGetAcceleratorTypes,
-  } as unknown) as DetailsService;
+  const mockGetDetails = jest.fn();
+  const mockHardwareService = ({
+    getVmDetails: mockGetDetails,
+  } as unknown) as HardwareService;
   const mockNotebookService = {} as NotebooksService;
   const mockPriceService = {} as PriceService;
+  const detailsResponsePromise = Promise.resolve(JSON.parse(DETAILS_RESPONSE));
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
+    mockGetDetails.mockReturnValue(detailsResponsePromise);
   });
 
   afterEach(() => {
@@ -55,42 +46,28 @@ describe('VmDetails', () => {
   });
 
   it('Renders with details', async () => {
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const details = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(details);
-    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
-    mockGetMachineTypes.mockReturnValue(machineTypes);
-    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
-    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
-
     const vmDetails = shallow(
       <VmDetails
-        detailsServer={mockServerWrapper}
-        detailsService={mockDetailsService}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
     expect(vmDetails).toMatchSnapshot('Retrieving');
-
-    await details;
-    await Promise.all([machineTypes, acceleratorTypes]);
+    await detailsResponsePromise;
 
     expect(vmDetails).toMatchSnapshot('Details');
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
-    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetDetails).toHaveBeenCalledTimes(1);
   });
 
   it('Renders with get details error', async () => {
-    mockGetUtilizationData.mockImplementation(() => {
+    mockGetDetails.mockImplementation(() => {
       throw new Error();
     });
 
     const vmDetails = shallow(
       <VmDetails
-        detailsServer={mockServerWrapper}
-        detailsService={mockDetailsService}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
@@ -110,25 +87,14 @@ describe('VmDetails', () => {
   });
 
   it('Opens dialog when icon is clicked', async () => {
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const details = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(details);
-    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
-    mockGetMachineTypes.mockReturnValue(machineTypes);
-    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
-    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
-
     const vmDetails = shallow(
       <VmDetails
-        detailsServer={mockServerWrapper}
-        detailsService={mockDetailsService}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
-
-    await details;
-    await Promise.all([machineTypes, acceleratorTypes]);
+    await detailsResponsePromise;
 
     vmDetails.find('[title="Show all details"]').simulate('click');
     vmDetails.update();
@@ -138,29 +104,16 @@ describe('VmDetails', () => {
   });
 
   it('Cycles through attributes when clicked', async () => {
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const details = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(details);
-    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
-    mockGetMachineTypes.mockReturnValue(machineTypes);
-    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
-    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
-
     const vmDetails = shallow(
       <VmDetails
-        detailsServer={mockServerWrapper}
-        detailsService={mockDetailsService}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
+    await detailsResponsePromise;
 
-    await details;
-    await Promise.all([machineTypes, acceleratorTypes]);
-
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
-    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetDetails).toHaveBeenCalledTimes(1);
 
     let attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.length).toBe(2);
@@ -191,29 +144,16 @@ describe('VmDetails', () => {
   });
 
   it('Auto-refreshes when resource utilization are displayed', async () => {
-    const detailsResponse = JSON.parse(DETAILS_RESPONSE);
-    const details = Promise.resolve({ ...detailsResponse });
-    mockGetUtilizationData.mockReturnValue(details);
-    const machineTypes = Promise.resolve(MACHINE_TYPES_RESPONSE);
-    mockGetMachineTypes.mockReturnValue(machineTypes);
-    const acceleratorTypes = Promise.resolve(ACCELERATOR_TYPES_RESPONSE);
-    mockGetAcceleratorTypes.mockReturnValue(acceleratorTypes);
-
     const vmDetails = shallow(
       <VmDetails
-        detailsServer={mockServerWrapper}
-        detailsService={mockDetailsService}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
       />
     );
+    await detailsResponsePromise;
 
-    await details;
-    await Promise.all([machineTypes, acceleratorTypes]);
-
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(1);
-    expect(mockGetMachineTypes).toHaveBeenCalledTimes(1);
-    expect(mockGetAcceleratorTypes).toHaveBeenCalledTimes(1);
+    expect(mockGetDetails).toHaveBeenCalledTimes(1);
 
     // Click four times to move to CPU usage
     for (let i = 0; i < 4; i++) {
@@ -228,14 +168,14 @@ describe('VmDetails', () => {
     expect(attributes.last().text()).toBe('Memory: 16.0%');
 
     jest.advanceTimersToNextTimer();
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(2);
+    expect(mockGetDetails).toHaveBeenCalledTimes(2);
 
     attributes.first().simulate('click');
     attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.first().text()).toBe('Memory: 16.0% | ');
     expect(attributes.last().text()).toBe('GPU: Tesla K80 - 100.0%');
     jest.advanceTimersToNextTimer();
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(3);
+    expect(mockGetDetails).toHaveBeenCalledTimes(3);
 
     // Click twice and timer should not refresh data again
     attributes.first().simulate('click');
@@ -244,6 +184,6 @@ describe('VmDetails', () => {
     expect(attributes.first().text()).toBe('pytorch | ');
     expect(attributes.last().text()).toBe('test-project');
     jest.advanceTimersToNextTimer();
-    expect(mockGetUtilizationData).toHaveBeenCalledTimes(3);
+    expect(mockGetDetails).toHaveBeenCalledTimes(3);
   });
 });

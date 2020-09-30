@@ -24,14 +24,19 @@ import {
 } from './hardware_configuration_dialog';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import { HardwareScalingStatus } from './hardware_scaling_status';
-import { ServerWrapper } from './server_wrapper';
 import {
   NO_ACCELERATOR_TYPE,
   NO_ACCELERATOR_COUNT,
 } from '../data/accelerator_types';
 import { NotebooksService } from '../service/notebooks_service';
 import { PriceService } from '../service/price_service';
-import { DETAILS } from '../test_helpers';
+import {
+  DETAILS,
+  MACHINE_TYPES_RESPONSE,
+  ACCELERATOR_TYPES,
+  flush,
+} from '../test_helpers';
+import { HardwareService } from '../service/hardware_service';
 
 const CONFIGURATION = {
   machineType: {
@@ -46,12 +51,19 @@ const CONFIGURATION = {
 describe('HardwareScalingForm', () => {
   const mockOnClose = jest.fn();
   const mockOnCompletion = jest.fn();
-  const mockDetailsServer = {} as ServerWrapper;
+  const mockGetMachineTypes = jest.fn();
+  const mockGetAcceleratorTypes = jest.fn();
+  const mockHardwareService = ({
+    getMachineTypes: mockGetMachineTypes,
+    getAcceleratorTypes: mockGetAcceleratorTypes,
+  } as unknown) as HardwareService;
   const mockNotebookService = {} as NotebooksService;
   const mockPriceService = {} as PriceService;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    mockGetMachineTypes.mockResolvedValue(MACHINE_TYPES_RESPONSE);
+    mockGetAcceleratorTypes.mockResolvedValue(ACCELERATOR_TYPES);
   });
 
   it('Opens on details view', async () => {
@@ -60,7 +72,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -70,6 +82,8 @@ describe('HardwareScalingForm', () => {
 
     expect(hardwareConfigurationDialog.state('view')).toEqual(View.DETAILS);
     expect(hardwareConfigurationDialog).toMatchSnapshot('Details View');
+    expect(mockGetAcceleratorTypes).not.toHaveBeenCalled();
+    expect(mockGetMachineTypes).not.toHaveBeenCalled();
   });
 
   it('Shows form view after details view', async () => {
@@ -78,7 +92,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -87,8 +101,12 @@ describe('HardwareScalingForm', () => {
     );
 
     hardwareConfigurationDialog.find(DetailsDialogBody).prop('onUpdate')();
+    await flush();
+
     expect(hardwareConfigurationDialog.state('view')).toEqual(View.FORM);
     expect(hardwareConfigurationDialog).toMatchSnapshot('Form View');
+    expect(mockGetAcceleratorTypes).toHaveBeenCalled();
+    expect(mockGetMachineTypes).toHaveBeenCalled();
   });
 
   it('Shows confirmation view after form view', async () => {
@@ -97,7 +115,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -124,7 +142,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -147,7 +165,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -165,7 +183,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -189,7 +207,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -211,7 +229,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}
@@ -235,7 +253,7 @@ describe('HardwareScalingForm', () => {
         open={true}
         receivedError={false}
         details={DETAILS}
-        detailsServer={mockDetailsServer}
+        hardwareService={mockHardwareService}
         notebookService={mockNotebookService}
         priceService={mockPriceService}
         onClose={mockOnClose}

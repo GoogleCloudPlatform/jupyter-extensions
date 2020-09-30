@@ -55,7 +55,7 @@ export function handleError(err: any) {
 }
 
 /**
- * Wraps around the GCP AI Platform Notebooks API to manage notebook resources in Google Cloud.
+ * Wraps around the GCP AI Platform Notebooks API to manage notebook resources. *
  * https://cloud.google.com/ai-platform/notebooks/docs/reference/rest
  * Must set authToken before making requests
  */
@@ -64,6 +64,7 @@ export class NotebooksService {
   private instanceNamePromise?: Promise<string>;
   private locationIdPromise?: Promise<string>;
   private metadataPromise?: Promise<InstanceMetadata>;
+  private authTokenWasSet = false;
 
   constructor(
     private _transportService: ClientTransportService,
@@ -122,8 +123,13 @@ export class NotebooksService {
     this._transportService = transportService;
   }
 
-  setAuthToken(authToken: string) {
+  hasAuthToken() {
+    return this.authTokenWasSet;
+  }
+
+  setAuthToken(authToken: string, shouldRemember = false) {
     this._transportService.accessToken = authToken;
+    this.authTokenWasSet = shouldRemember;
   }
 
   /** Polls the provided Operation at 1s intervals until it has completed. */

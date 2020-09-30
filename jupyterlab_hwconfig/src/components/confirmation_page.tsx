@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { Badge, Message } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-import { Message } from 'gcp_jupyterlab_shared';
-import { STYLES } from '../data/styles';
-import { HardwareConfiguration } from '../data/data';
 import { getGpuTypeText, NO_ACCELERATOR_TYPE } from '../data/accelerator_types';
+import { HardwareConfiguration } from '../data/data';
+import { STYLES } from '../data/styles';
 import { ActionBar } from './action_bar';
+
 import {
   HardwareConfigurationDescription,
   TITLE,
@@ -60,22 +60,26 @@ export function ConfirmationPage(props: Props) {
   const { formData, currentConfiguration, onDialogClose, onSubmit } = props;
 
   return (
-    <div className={STYLES.containerPadding}>
-      <div className={STYLES.containerSize}>
-        <span className={STYLES.heading}>{TITLE}</span>
-        <HardwareConfigurationDescription />
-        {displayConfiguration(currentConfiguration, 'Old Configuration')}
-        {displayConfiguration(formData, 'New Configuration')}
-        <div className={STYLES.infoMessage}>
-          <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
+    <div>
+      <header className={STYLES.dialogHeader}>
+        {TITLE} <Badge value="Alpha" />
+      </header>
+      <div className={STYLES.containerPadding}>
+        <div className={STYLES.containerSize}>
+          <HardwareConfigurationDescription />
+          {displayConfiguration(currentConfiguration, 'Old Configuration')}
+          {displayConfiguration(formData, 'New Configuration')}
+          <div className={STYLES.infoMessage}>
+            <Message asError={false} asActivity={false} text={INFO_MESSAGE} />
+          </div>
         </div>
+        <ActionBar
+          primaryLabel="Submit"
+          onPrimaryClick={() => onSubmit()}
+          secondaryLabel="Cancel"
+          onSecondaryClick={onDialogClose}
+        />
       </div>
-      <ActionBar
-        primaryLabel="Submit"
-        onPrimaryClick={() => onSubmit()}
-        secondaryLabel="Cancel"
-        onSecondaryClick={onDialogClose}
-      />
     </div>
   );
 }

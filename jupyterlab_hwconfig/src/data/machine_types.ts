@@ -15,7 +15,7 @@
  */
 
 import { Option } from './data';
-import { GapiMachineType } from '../service/details_service';
+import { GapiMachineType } from '../service/hardware_service';
 
 /*
  * Machine type returned when fetching from gcloud compute command-line tool

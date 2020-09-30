@@ -7,18 +7,6 @@ exports[`HardwareScalingForm Opens on details view: Details View 1`] = `
   <DetailsDialogBody
     details={
       Object {
-        "acceleratorTypes": Array [
-          Object {
-            "description": "Nvidia Tesla K80",
-            "maximumCardsPerInstance": 4,
-            "name": "NVIDIA_TESLA_K80",
-          },
-          Object {
-            "description": "Nvidia Tesla T4",
-            "maximumCardsPerInstance": 8,
-            "name": "NVIDIA_TESLA_T4",
-          },
-        ],
         "gpu": Object {
           "count": "0",
           "cuda_version": "10.1",
@@ -44,36 +32,6 @@ exports[`HardwareScalingForm Opens on details view: Details View 1`] = `
           "name": "pytorch",
           "zone": "projects/123456/zones/us-west1-b",
         },
-        "machineTypes": Array [
-          Object {
-            "base": Object {
-              "text": "N1 Standard",
-              "value": "n1-",
-            },
-            "configurations": Array [
-              Object {
-                "text": "2 vCPU, 7.5 GB RAM",
-                "value": "n1-standard-2",
-              },
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n1-standard-4",
-              },
-            ],
-          },
-          Object {
-            "base": Object {
-              "text": "N2 Standard",
-              "value": "n2-",
-            },
-            "configurations": Array [
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n2-standard-4",
-              },
-            ],
-          },
-        ],
         "project": Object {
           "numericProjectId": 123456,
           "projectId": "test-project",
@@ -129,20 +87,22 @@ exports[`HardwareScalingForm Shows form view after details view: Form View 1`] =
   open={true}
 >
   <HardwareScalingForm
+    acceleratorTypes={
+      Array [
+        Object {
+          "description": "Nvidia Tesla K80",
+          "maximumCardsPerInstance": 4,
+          "name": "NVIDIA_TESLA_K80",
+        },
+        Object {
+          "description": "Nvidia Tesla T4",
+          "maximumCardsPerInstance": 8,
+          "name": "NVIDIA_TESLA_T4",
+        },
+      ]
+    }
     details={
       Object {
-        "acceleratorTypes": Array [
-          Object {
-            "description": "Nvidia Tesla K80",
-            "maximumCardsPerInstance": 4,
-            "name": "NVIDIA_TESLA_K80",
-          },
-          Object {
-            "description": "Nvidia Tesla T4",
-            "maximumCardsPerInstance": 8,
-            "name": "NVIDIA_TESLA_T4",
-          },
-        ],
         "gpu": Object {
           "count": "0",
           "cuda_version": "10.1",
@@ -168,36 +128,6 @@ exports[`HardwareScalingForm Shows form view after details view: Form View 1`] =
           "name": "pytorch",
           "zone": "projects/123456/zones/us-west1-b",
         },
-        "machineTypes": Array [
-          Object {
-            "base": Object {
-              "text": "N1 Standard",
-              "value": "n1-",
-            },
-            "configurations": Array [
-              Object {
-                "text": "2 vCPU, 7.5 GB RAM",
-                "value": "n1-standard-2",
-              },
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n1-standard-4",
-              },
-            ],
-          },
-          Object {
-            "base": Object {
-              "text": "N2 Standard",
-              "value": "n2-",
-            },
-            "configurations": Array [
-              Object {
-                "text": "4 vCPU, 15 GB RAM",
-                "value": "n2-standard-4",
-              },
-            ],
-          },
-        ],
         "project": Object {
           "numericProjectId": 123456,
           "projectId": "test-project",
@@ -207,6 +137,50 @@ exports[`HardwareScalingForm Shows form view after details view: Form View 1`] =
           "memory": 16,
         },
       }
+    }
+    machineTypes={
+      Array [
+        Object {
+          "base": Object {
+            "text": "N1 standard",
+            "value": "n1-standard-",
+          },
+          "configurations": Array [
+            Object {
+              "text": "96 vCPUs, 360 GB RAM",
+              "value": "n1-standard-96",
+            },
+          ],
+        },
+        Object {
+          "base": Object {
+            "text": "N1 ultramem",
+            "value": "n1-ultramem-",
+          },
+          "configurations": Array [
+            Object {
+              "text": "40 vCPUs, 961 GB RAM",
+              "value": "n1-ultramem-40",
+            },
+            Object {
+              "text": "160 vCPUs, 3844 GB RAM",
+              "value": "n1-ultramem-160",
+            },
+          ],
+        },
+        Object {
+          "base": Object {
+            "text": "Compute-optimized",
+            "value": "c2-",
+          },
+          "configurations": Array [
+            Object {
+              "text": "Compute Optimized: 16 vCPUs, 64 GB RAM",
+              "value": "c2-standard-16",
+            },
+          ],
+        },
+      ]
     }
     onDialogClose={[MockFunction]}
     onSubmit={[Function]}
@@ -221,7 +195,6 @@ exports[`HardwareScalingForm Shows status view after confirmation view: Status V
 >
   <HardwareScalingStatus
     authTokenRetrieval={[Function]}
-    detailsServer={Object {}}
     hardwareConfiguration={
       Object {
         "attachGpu": false,
@@ -233,37 +206,11 @@ exports[`HardwareScalingForm Shows status view after confirmation view: Status V
         },
       }
     }
-    machineTypes={
-      Array [
-        Object {
-          "base": Object {
-            "text": "N1 Standard",
-            "value": "n1-",
-          },
-          "configurations": Array [
-            Object {
-              "text": "2 vCPU, 7.5 GB RAM",
-              "value": "n1-standard-2",
-            },
-            Object {
-              "text": "4 vCPU, 15 GB RAM",
-              "value": "n1-standard-4",
-            },
-          ],
-        },
-        Object {
-          "base": Object {
-            "text": "N2 Standard",
-            "value": "n2-",
-          },
-          "configurations": Array [
-            Object {
-              "text": "4 vCPU, 15 GB RAM",
-              "value": "n2-standard-4",
-            },
-          ],
-        },
-      ]
+    hardwareService={
+      Object {
+        "getAcceleratorTypes": [MockFunction],
+        "getMachineTypes": [MockFunction],
+      }
     }
     notebookService={Object {}}
     onCompletion={[MockFunction]}

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import { Badge } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { ServerWrapper } from './server_wrapper';
-import { AreaChartWrapper } from './chart_wrapper';
 import { Utilization } from '../data/data';
+import { STYLES } from '../data/styles';
+import { AreaChartWrapper } from './chart_wrapper';
+import { HardwareService } from '../service/hardware_service';
 
 const AREA_CHART_BLUE = {
   stroke: '#15B2D3',
@@ -53,7 +55,7 @@ interface GpuUtilization {
 }
 
 interface Props {
-  detailsServer: ServerWrapper;
+  hardwareService: HardwareService;
 }
 
 interface State {
@@ -63,14 +65,14 @@ interface State {
   showGpu: boolean;
 }
 
-const STYLES = stylesheet({
+const LOCAL_STYLES = stylesheet({
   chartTitleSmall: {
     fontSize: '15px',
     marginLeft: '20px',
     color: 'var(--jp-ui-font-color1)',
   },
   utilizationChartsContainer: {
-    padding: '10px 20px 20px 0px',
+    padding: '0 20px 20px 0',
     backgroundColor: 'var(--jp-layout-color1)',
   },
   flexspan: {
@@ -111,15 +113,18 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
   render() {
     const { data, receivedError, showGpu, gpuData } = this.state;
     return (
-      <div className={STYLES.utilizationChartsContainer}>
+      <div className={LOCAL_STYLES.utilizationChartsContainer}>
         {receivedError ? (
           'Unable to retrieve GCE VM details, please check your server logs'
         ) : (
-          <span className={STYLES.flexspan}>
+          <div className={LOCAL_STYLES.flexspan}>
             <span>
+              <header className={STYLES.dialogHeader}>
+                Resource Utilization <Badge value="Alpha" />
+              </header>
               <AreaChartWrapper
                 title="CPU Usage"
-                titleClass={STYLES.chartTitleSmall}
+                titleClass={LOCAL_STYLES.chartTitleSmall}
                 dataKey="cpu"
                 data={data}
                 chartColor={AREA_CHART_ORANGE}
@@ -127,7 +132,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
               />
               <AreaChartWrapper
                 title="Memory Usage"
-                titleClass={STYLES.chartTitleSmall}
+                titleClass={LOCAL_STYLES.chartTitleSmall}
                 dataKey="memory"
                 data={data}
                 chartColor={AREA_CHART_BLUE}
@@ -138,7 +143,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
               <span>
                 <AreaChartWrapper
                   title="GPU Usage"
-                  titleClass={STYLES.chartTitleSmall}
+                  titleClass={LOCAL_STYLES.chartTitleSmall}
                   dataKey="gpu"
                   data={gpuData}
                   chartColor={AREA_CHART_ORANGE}
@@ -146,7 +151,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
                 />
                 <AreaChartWrapper
                   title="GPU Memory Usage"
-                  titleClass={STYLES.chartTitleSmall}
+                  titleClass={LOCAL_STYLES.chartTitleSmall}
                   dataKey="memory"
                   data={gpuData}
                   chartColor={AREA_CHART_BLUE}
@@ -154,7 +159,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
                 />
               </span>
             )}
-          </span>
+          </div>
         )}
       </div>
     );
@@ -162,7 +167,7 @@ export class ResourceUtilizationCharts extends React.Component<Props, State> {
 
   private async pollUtilizationData() {
     try {
-      const details = await this.props.detailsServer.getUtilizationData();
+      const details = await this.props.hardwareService.getVmDetails();
       const data = this.state.data.slice(1);
       data.push(details.utilization);
       if (details.gpu.name) {
