@@ -170,20 +170,10 @@ def directory_exist(path, storage_client):
   # List blobs in the bucket with the blob_path prefix
   blobs = prefixed_blobs(bucket_name, blob_path, storage_client)
 
-  if not re.match(".*/$", path):
-    blobs_matching = [
-        b for b in blobs
-        # TODO(cbwilkes): protect against empty names
-        if re.match("^%s/.*" % blob_path, b.name)
-    ]
-  else:
-    blobs_matching = [
-        b for b in blobs
-        # TODO(cbwilkes): protect against empty names
-        if re.match("^%s.*" % blob_path, b.name)
-    ]
-
-  return len(blobs_matching) != 0
+  blob_pattern = re.compile("^%s.*" % blob_path) if re.match(
+      ".*/$", path) else re.compile("^%s/.*" % blob_path)
+  blobs_matching = [b for b in blobs if blob_pattern.match(b.name)]
+  return len(blobs_matching)
 
 
 def matching_directory_contents(path, storage_client):
