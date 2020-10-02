@@ -1,20 +1,3 @@
-// @ts-nocheck
-const slotSize = 0;
-
-jest.mock('../../../utils/QueryResultsManager.ts', () => {
-  return function() {
-    return {
-      getSlotSize: () => {
-        return slotSize;
-      },
-      getSlot: () => {
-        return [];
-      },
-      resetSlot: () => undefined,
-    };
-  };
-});
-
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -24,6 +7,14 @@ import {
   styleSheet,
   QueryStates,
 } from './query_text_editor';
+
+import MockQueryResultsManager from '../../../utils/MockQueryResultsManager';
+
+jest.mock('../../../utils/QueryResultsManager.ts', () => {
+  return function() {
+    return new MockQueryResultsManager(0);
+  };
+});
 
 describe('Query editor tab', () => {
   it('regular state', () => {
@@ -98,7 +89,7 @@ describe('Query editor tab', () => {
       onKeyUp: jest.fn(),
       layout: jest.fn(),
     };
-    instance.handleEditorDidMount(undefined, editor);
+    (instance as QueryTextEditor).handleEditorDidMount(undefined, editor);
     wrapper.find('.' + styleSheet.queryButton).simulate('click');
 
     expect(wrapper.find('.' + styleSheet.queryButton).exists()).toBeTruthy();
