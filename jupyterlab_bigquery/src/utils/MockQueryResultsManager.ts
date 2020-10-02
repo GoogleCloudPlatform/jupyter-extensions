@@ -9,7 +9,6 @@ class MockQueryResultsManager {
   getSlot() {
     return [];
   }
-
   resetSlot() {
     return undefined;
   }
