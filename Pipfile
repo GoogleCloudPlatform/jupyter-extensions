@@ -7,7 +7,7 @@ name = "pypi"
 python_version = "3.7"
 
 [packages]
-jupyterlab = "==1.2.15"
+jupyterlab = "==1.2.16"
 pandas = "*"
 ipywidgets = "*"
 traitlets = "*"

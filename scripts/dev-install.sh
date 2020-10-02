@@ -21,4 +21,6 @@ npm pack
 pip install -e .
 cp -v jupyter-config/jupyter_notebook_config.d/${extension}.json \
   `pipenv --venv`/etc/jupyter/jupyter_notebook_config.d/
-jupyter labextension install . --no-build
+if [[ ${1} != '--nolab-install' ]] ; then
+  jupyter labextension install . --no-build
+fi

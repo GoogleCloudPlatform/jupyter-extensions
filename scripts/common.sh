@@ -25,3 +25,14 @@ PYTHON_PACKAGES=(
   jupyterlab_gitsync
   jupyterlab_ucaip
 )
+
+LAB_EXTENSION_PACKAGES=(
+  jupyterlab_bigquery
+  jupyterlab_caip_optimizer
+  jupyterlab_comments
+  jupyterlab_hwconfig
+  jupyterlab_gcpscheduler
+  jupyterlab_gcsfilebrowser
+  jupyterlab_gitsync
+  jupyterlab_ucaip
+)

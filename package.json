@@ -9,7 +9,7 @@
     "devserver": "nodemon -e \".py\" -x \"jupyter lab --watch --no-browser\"",
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "link": "lerna run link --stream",
-    "pack": "lerna exec npm pack --parallel",
+    "pack": "lerna exec npm pack",
     "lint": "lerna run lint --parallel",
     "test": "lerna run test",
     "watch": "lerna run watch --parallel"

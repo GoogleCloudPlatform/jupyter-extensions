@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_ucaip",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "uCAIP extension for JupyterLab",
   "keywords": [
     "jupyter",
@@ -51,10 +51,10 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "csstips": "^1.2.0",
-    "gcp_jupyterlab_shared": "^1.0.5",
+    "gcp_jupyterlab_shared": "^1.0.11",
     "humanize-duration": "^3.23.1",
     "jest-canvas-mock": "^2.2.0",
-    "material-table": "^1.62.0",
+    "material-table": "1.68.0",
     "react-portal": "^4.2.1",
     "react-syntax-highlighter": "^13.0.0",
     "recharts": "^1.8.5",
