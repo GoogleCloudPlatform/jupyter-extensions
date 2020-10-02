@@ -48,7 +48,7 @@ interface QueryTextEditorState {
   renderMonacoEditor: boolean;
 }
 
-interface QueryTextEditorProps {
+export interface QueryTextEditorProps {
   updateQueryResult: any;
   resetQueryResult: any;
   deleteQueryEntry: any;
