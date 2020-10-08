@@ -2,13 +2,13 @@
   "packages": [
     "shared/",
     "jupyterlab_bigquery/",
-    "jupyterlab_caip_optimizer/",
     "jupyterlab_comments/",
     "jupyterlab_hwconfig/",
     "jupyterlab_gcpscheduler/",
     "jupyterlab_gcsfilebrowser/",
     "jupyterlab_gitsync/",
-    "jupyterlab_ucaip/"
+    "jupyterlab_ucaip/",
+    "jupyterlab_vizier/"
   ],
   "version": "independent"
 }

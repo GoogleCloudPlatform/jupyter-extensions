@@ -17,7 +17,7 @@ PYTHON_PACKAGES=(
   shared
   jupyter-gcs-contents-manager
   jupyterlab_bigquery
-  jupyterlab_caip_optimizer
+  jupyterlab_vizier
   jupyterlab_comments
   jupyterlab_hwconfig
   jupyterlab_gcpscheduler
@@ -28,7 +28,7 @@ PYTHON_PACKAGES=(
 
 LAB_EXTENSION_PACKAGES=(
   jupyterlab_bigquery
-  jupyterlab_caip_optimizer
+  jupyterlab_vizier
   jupyterlab_comments
   jupyterlab_hwconfig
   jupyterlab_gcpscheduler
