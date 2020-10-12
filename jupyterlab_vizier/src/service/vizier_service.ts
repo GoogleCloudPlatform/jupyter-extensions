@@ -59,7 +59,11 @@ export class VizierService {
   constructor(private _transportService: TransportService) {}
 
   private getRegionFromZone(zone: string): string {
-    return zone.split('-', 2).join('-');
+    return zone
+      .split('/')
+      .pop()
+      .split('-', 2)
+      .join('-');
   }
 
   /**
