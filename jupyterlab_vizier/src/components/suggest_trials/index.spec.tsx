@@ -641,9 +641,9 @@ describe('Suggest Trials Page', () => {
         userEvent.click(screen.getByTestId('createTrialButton'));
 
         // TODO: Removed to allow tests to pass
-        // await waitForElementToBeRemoved(() =>
-        //   screen.queryByTestId('createTrialDialog')
-        // );
+        await waitForElementToBeRemoved(() =>
+          screen.queryByTestId('createTrialDialog')
+        );
 
         expect(createTrial).toHaveBeenCalled();
         const createTrialBody = JSON.parse(createTrial.mock.calls[0][0].body);

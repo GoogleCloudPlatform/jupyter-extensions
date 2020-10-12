@@ -8,7 +8,6 @@ import { store } from './store/store';
 import { MainAreaWidget } from './components/main_area_widget';
 import { SidebarWidget } from './components/sidebar_widget';
 import { fetchStudies } from './store/studies';
-import { fetchMetadata } from './store/metadata';
 import { createSnack } from './store/snackbar';
 import { SnackbarWidget } from './components/snackbar_widget';
 import { unwrapResult } from '@reduxjs/toolkit';
@@ -23,10 +22,9 @@ async function activate(app: JupyterFrontEnd) {
   app.shell.add(sidebarWidget, 'left', { rank: 1000 });
   app.shell.add(new SnackbarWidget(store), 'header');
 
-  // Fetch Metadata for project id, region and then load studies
+  // Load studies
   await store
-    .dispatch(fetchMetadata())
-    .then(() => store.dispatch(fetchStudies()))
+    .dispatch(fetchStudies())
     .then(unwrapResult)
     .catch(error => store.dispatch(createSnack(error, 'error', 10000)));
 }
