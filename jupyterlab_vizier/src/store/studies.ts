@@ -25,16 +25,9 @@ export const fetchStudies = createAsyncThunk<
   'studies/fetch',
   wrapThunk(
     async (_, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      const studyList = await vizier.listStudy(metadata);
+      const studyList = await vizier.listStudy();
       const studyListWithDetails: Study[] = await Promise.all(
-        studyList.map(paritalStudy =>
-          vizier.getStudy(paritalStudy.name, metadata)
-        )
+        studyList.map(paritalStudy => vizier.getStudy(paritalStudy.name))
       );
       return studyListWithDetails;
     },
@@ -52,12 +45,7 @@ export const createStudy = createAsyncThunk<
     state: RootState;
   }
 >('studies/create', async (study: Study, thunkAPI) => {
-  const metadata = thunkAPI.getState().metadata.data;
-  if (!metadata) {
-    console.error('No Metadata found.');
-    throw new TypeError('No metadata');
-  }
-  return vizier.createStudy(study, metadata);
+  return vizier.createStudy(study);
 });
 
 export const deleteStudy = createAsyncThunk<
@@ -70,12 +58,7 @@ export const deleteStudy = createAsyncThunk<
   'studies/delete',
   wrapThunk(
     async (rawStudyName, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      await vizier.deleteStudy(rawStudyName, metadata);
+      await vizier.deleteStudy(rawStudyName);
     },
     {
       success: dispatch => dispatch(createSnack('Deleted study.', 'success')),
@@ -95,12 +78,7 @@ export const fetchTrials = createAsyncThunk<
   'studies/fetchTrials',
   wrapThunk(
     async (rawStudyName, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      return await vizier.listTrials(rawStudyName, metadata);
+      return await vizier.listTrials(rawStudyName);
     },
     {
       error: dispatch =>
@@ -123,17 +101,7 @@ export const addMeasurementTrial = createAsyncThunk<
   'studies/completeTrial',
   wrapThunk(
     async ({ trialName, studyName, measurement }, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      return await vizier.addMeasurement(
-        measurement,
-        trialName,
-        studyName,
-        metadata
-      );
+      return await vizier.addMeasurement(measurement, trialName, studyName);
     },
     {
       success: dispatch =>
@@ -162,17 +130,7 @@ export const completeTrial = createAsyncThunk<
   'studies/completeTrial',
   wrapThunk(
     async ({ trialName, studyName, details }, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      return await vizier.completeTrial(
-        trialName,
-        studyName,
-        details,
-        metadata
-      );
+      return await vizier.completeTrial(trialName, studyName, details);
     },
     {
       success: dispatch => dispatch(createSnack('Trial Completed!', 'success')),
@@ -192,12 +150,7 @@ export const deleteTrial = createAsyncThunk<
   'studies/deleteTrial',
   wrapThunk(
     async ({ trialName, studyName }, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      await vizier.deleteTrial(trialName, studyName, metadata);
+      await vizier.deleteTrial(trialName, studyName);
     },
     {
       error: dispatch =>
@@ -214,12 +167,7 @@ export const createTrial = createAsyncThunk<
   'studies/createTrial',
   wrapThunk(
     async ({ trial, studyName }, thunkAPI) => {
-      const metadata = thunkAPI.getState().metadata.data;
-      if (!metadata) {
-        console.error('No Metadata found.');
-        throw new TypeError('No metadata');
-      }
-      return await vizier.createTrial(trial, studyName, metadata);
+      return await vizier.createTrial(trial, studyName);
     },
     {
       error: dispatch =>
@@ -399,18 +347,11 @@ export const requestAndGetSuggestedTrial = ({
   trys?: number;
   interval?: number;
 }) => async (dispatch: AppDispatch, getState: () => RootState) => {
-  const metadata = getState().metadata.data;
-  if (!metadata) {
-    console.error('No Metadata found.');
-    throw new TypeError('No metadata');
-  }
-
   dispatch(createSnack('Loading suggested trials.', 'info', trys * interval));
 
   const longRunningOperation = await vizier.suggestTrials(
     suggestionCount,
-    studyName,
-    metadata
+    studyName
   );
 
   let suggestedTrials: Trial[] | null = null;
@@ -419,8 +360,7 @@ export const requestAndGetSuggestedTrial = ({
   do {
     count++;
     const operationResponse = await vizier.getOperation<SuggestTrialsResponse>(
-      longRunningOperation.name,
-      metadata
+      longRunningOperation.name
     );
     if (
       operationResponse.done &&

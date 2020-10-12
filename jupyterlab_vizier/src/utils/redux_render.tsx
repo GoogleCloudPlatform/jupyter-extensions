@@ -3,19 +3,15 @@ import { render as rtlRender } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import { viewSlice } from '../store/view';
-import { metadataSlice } from '../store/metadata';
 import { snackbarSlice } from '../store/snackbar';
 import { studiesSlice } from '../store/studies';
 import {
-  fakeProjectId,
-  fakeRegion,
   fakeStudyTree,
   fakeStudyResponseActive,
 } from '../service/test_constants';
 
 export const reducer = {
   view: viewSlice.reducer,
-  metadata: metadataSlice.reducer,
   snackbar: snackbarSlice.reducer,
   studies: studiesSlice.reducer,
 };
@@ -24,9 +20,6 @@ export const initialState = {
   view: {
     data: { view: 'dashboard' },
     isVisible: false,
-  },
-  metadata: {
-    data: { projectId: fakeProjectId, region: fakeRegion },
   },
   snackbar: {
     open: false,

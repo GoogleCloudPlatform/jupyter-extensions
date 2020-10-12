@@ -25,10 +25,29 @@ Enzyme.configure({
   adapter: new Adapter(),
 });
 
+/* eslint-disable @typescript-eslint/camelcase */
+const mockGetMetadata = jest.fn();
+jest.mock('gcp_jupyterlab_shared', () => {
+  const orig = jest.requireActual('gcp_jupyterlab_shared');
+
+  return {
+    __esModule: true,
+    ...orig,
+    getMetadata: mockGetMetadata,
+  };
+});
+
 // TODO: remove when jupyterlab updates react version to 16.9.0
 // Removes invalid react-dom version warning from 'react-testing-library'
 const originalError = global.console.error;
 beforeAll(() => {
+  const TEST_PROJECT = 'project-id';
+  const TEST_ZONE = 'us-region-1c';
+  mockGetMetadata.mockResolvedValue({
+    project: TEST_PROJECT,
+    zone: TEST_ZONE,
+  });
+
   global.console.error = jest.fn((...args) => {
     if (
       typeof args[0] === 'string' &&

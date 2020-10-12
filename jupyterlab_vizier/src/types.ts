@@ -250,11 +250,6 @@ export interface MetadataFull {
   zone: string;
 }
 
-export interface MetadataRequired {
-  projectId: string;
-  region: string;
-}
-
 export type OperationMetadata<BODY extends {}> = BODY & {
   '@type': string;
 };
