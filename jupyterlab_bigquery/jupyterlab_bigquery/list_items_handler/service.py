@@ -5,6 +5,7 @@ import re
 from google.cloud import bigquery
 from google.cloud.datacatalog import DataCatalogClient, types
 from google.api_core.client_info import ClientInfo
+from google.api_core.gapic_v1.client_info import ClientInfo as DataCatalogClientInfo
 from jupyterlab_bigquery.version import VERSION
 
 SCOPE = ("https://www.googleapis.com/auth/cloud-platform",)
@@ -21,7 +22,7 @@ class BigQueryService:
       client=bigquery.Client(client_info=ClientInfo(
           user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
               VERSION))),
-      datacatalog_client=DataCatalogClient(client_info=ClientInfo(
+      datacatalog_client=DataCatalogClient(client_info=DataCatalogClientInfo(
           user_agent='jupyterlab_gcpextension/jupyterlab_bigquery-{}'.format(
               VERSION)))):
     self._client = client
