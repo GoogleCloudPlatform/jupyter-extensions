@@ -5,8 +5,6 @@ import {
   fakeCleanOperationName,
 } from '../service/test_constants';
 
-const REGION = 'us-central1';
-
 // TODO: refactor vizier to use common set of url functions
 export function createStudyUrl(
   {
@@ -20,7 +18,7 @@ export function createStudyUrl(
     cleanStudyName: cleanFakeStudyName,
   }
 ) {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies?study_id=${cleanStudyName}`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies?study_id=${cleanStudyName}`;
 }
 
 export function getTrialsUrl(
@@ -35,7 +33,7 @@ export function getTrialsUrl(
     cleanStudyName: cleanFakeStudyName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${cleanStudyName}/trials`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${cleanStudyName}/trials`;
 }
 
 export function addMeasurementTrialUrl(
@@ -53,7 +51,7 @@ export function addMeasurementTrialUrl(
     cleanTrialName: cleanFakeTrialName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${cleanStudyName}/trials/${cleanTrialName}:addMeasurement`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${cleanStudyName}/trials/${cleanTrialName}:addMeasurement`;
 }
 
 export function completeTrialUrl(
@@ -71,7 +69,7 @@ export function completeTrialUrl(
     cleanTrialName: cleanFakeTrialName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${cleanStudyName}/trials/${cleanTrialName}:complete`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${cleanStudyName}/trials/${cleanTrialName}:complete`;
 }
 
 export function suggestTrialUrl(
@@ -86,7 +84,7 @@ export function suggestTrialUrl(
     cleanStudyName: cleanFakeStudyName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${cleanStudyName}/trials:suggest`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${cleanStudyName}/trials:suggest`;
 }
 
 export function operationGetUrl(
@@ -101,7 +99,7 @@ export function operationGetUrl(
     cleanOperationName: fakeCleanOperationName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/operations/${cleanOperationName}`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/operations/${cleanOperationName}`;
 }
 
 export function deleteTrialUrl(
@@ -119,7 +117,7 @@ export function deleteTrialUrl(
     cleanTrialName: cleanFakeTrialName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${cleanStudyName}/trials/${cleanTrialName}`;
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${cleanStudyName}/trials/${cleanTrialName}`;
 }
 
 export function createTrialUrl(
@@ -134,7 +132,7 @@ export function createTrialUrl(
     cleanStudyName: cleanFakeStudyName,
   }
 ): string {
-  return `https://${REGION}-ml.googleapis.com/v1/projects/${projectId}/locations/${REGION}/studies/${encodeURI(
+  return `https://us-central1-ml.googleapis.com/v1/projects/${projectId}/locations/us-central1/studies/${encodeURI(
     cleanStudyName
   )}/trials`;
 }

@@ -54,8 +54,6 @@ export function prettifyTrial(rawTrialName: string): string {
  * Class to interact with Vizier
  */
 export class VizierService {
-  // Only available in this region regardless of instance zone
-  private readonly REGION = 'us-central1';
   private metadataPromise?: Promise<InstanceMetadata>;
 
   constructor(private _transportService: TransportService) {}
@@ -78,11 +76,9 @@ export class VizierService {
     try {
       const { project } = await this._getMetadata();
       const body = JSON.stringify(study);
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies?study_id=${encodeURI(study.name)}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies?study_id=${encodeURI(study.name)}`,
         method: 'POST',
         body,
       });
@@ -101,11 +97,11 @@ export class VizierService {
   async listStudy(): Promise<Study[]> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<{
         studies: Study[];
       }>({
-        path: `${ENDPOINT}/projects/${project}/locations/${this.REGION}/studies`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies`,
         method: 'GET',
       });
       return response.result.studies;
@@ -118,11 +114,9 @@ export class VizierService {
   async deleteStudy(rawStudyName: string): Promise<boolean> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit<undefined>({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'DELETE',
       });
       return true;
@@ -135,11 +129,9 @@ export class VizierService {
   async getStudy(rawStudyName: string): Promise<Study> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'GET',
       });
       return response.result;
@@ -161,13 +153,11 @@ export class VizierService {
   async listTrials(studyName: string): Promise<Trial[]> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<{
         trials?: Trial[];
       }>({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials`,
         method: 'GET',
       });
       if (Array.isArray(response.result.trials)) {
@@ -234,13 +224,11 @@ export class VizierService {
   ): Promise<SuggestTrialOperation> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<
         SuggestTrialOperation
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials:suggest`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials:suggest`,
         method: 'POST',
         body: { suggestionCount, clientId: 'vizier-extension' },
       });
@@ -274,11 +262,9 @@ export class VizierService {
   ): Promise<Trial> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Trial>({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
           prettifyTrial(trialName)
         )}:complete`,
         method: 'POST',
@@ -336,11 +322,9 @@ export class VizierService {
   async deleteTrial(trialName: string, studyName: string): Promise<void> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
           prettifyTrial(trialName)
         )}`,
         method: 'DELETE',
@@ -367,13 +351,11 @@ export class VizierService {
   ): Promise<Operation<BODY, METADATA>> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<
         Operation<BODY, METADATA>
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/operations/${prettifyOperationId(operationId)}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(operationId)}`,
         method: 'GET',
       });
       return response.result;
@@ -392,11 +374,9 @@ export class VizierService {
   async cancelOperation(operationId: string): Promise<void> {
     try {
       const { project } = await this._getMetadata();
-      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/${
-          this.REGION
-        }/operations/${prettifyOperationId(operationId)}:cancel`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(operationId)}:cancel`,
         method: 'POST',
       });
     } catch (err) {
