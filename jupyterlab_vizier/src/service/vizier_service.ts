@@ -54,17 +54,11 @@ export function prettifyTrial(rawTrialName: string): string {
  * Class to interact with Vizier
  */
 export class VizierService {
+  // Only available in this region regardless of instance zone
+  private readonly REGION = 'us-central1';
   private metadataPromise?: Promise<InstanceMetadata>;
 
   constructor(private _transportService: TransportService) {}
-
-  private getRegionFromZone(zone: string): string {
-    return zone
-      .split('/')
-      .pop()
-      .split('-', 2)
-      .join('-');
-  }
 
   /**
    * Retrieves the VM Metadata from the server
@@ -82,14 +76,13 @@ export class VizierService {
 
   async createStudy(study: Study): Promise<Study> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
+      const { project } = await this._getMetadata();
       const body = JSON.stringify(study);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies?study_id=${encodeURI(
-          study.name
-        )}`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies?study_id=${encodeURI(study.name)}`,
         method: 'POST',
         body,
       });
@@ -107,13 +100,12 @@ export class VizierService {
 
   async listStudy(): Promise<Study[]> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<{
         studies: Study[];
       }>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies`,
+        path: `${ENDPOINT}/projects/${project}/locations/${this.REGION}/studies`,
         method: 'GET',
       });
       return response.result.studies;
@@ -125,13 +117,12 @@ export class VizierService {
 
   async deleteStudy(rawStudyName: string): Promise<boolean> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       await this._transportService.submit<undefined>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(rawStudyName)
-        )}`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'DELETE',
       });
       return true;
@@ -143,13 +134,12 @@ export class VizierService {
 
   async getStudy(rawStudyName: string): Promise<Study> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(rawStudyName)
-        )}`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
         method: 'GET',
       });
       return response.result;
@@ -166,19 +156,18 @@ export class VizierService {
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/list
    * @param suggestionCount The number of wanted suggested trials.
    * @param studyName Raw study name.
-   * @param metadata The region and project id associated with the study.
+   * @param metadata The project id associated with the study.
    */
   async listTrials(studyName: string): Promise<Trial[]> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<{
         trials?: Trial[];
       }>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(studyName)
-        )}/trials`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials`,
         method: 'GET',
       });
       if (Array.isArray(response.result.trials)) {
@@ -202,7 +191,7 @@ export class VizierService {
    * @param measurement The measurement to add.
    * @param trialName Raw trial name.
    * @param studyName Raw study name.
-   * @param metadata The region and project id associated with the trial.
+   * @param metadata The project id associated with the trial.
    */
   async addMeasurement(
     measurement: Measurement,
@@ -210,12 +199,10 @@ export class VizierService {
     studyName: string
   ): Promise<Trial> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
+      const { project } = await this._getMetadata();
       const response = await this._transportService.submit<Trial>({
         path: addMeasurementTrialUrl({
           projectId: project,
-          region: region,
           cleanStudyName: prettifyStudyName(studyName),
           cleanTrialName: prettifyTrial(trialName),
         }),
@@ -238,7 +225,7 @@ export class VizierService {
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/suggest
    * @param suggestionCount The number of wanted suggested trials.
    * @param studyName Raw study name.
-   * @param metadata The region and project id associated with the study.
+   * @param metadata The project id associated with the study.
    * @returns A long-running operation associated with the generation of trial suggestions.
    */
   async suggestTrials(
@@ -246,15 +233,14 @@ export class VizierService {
     studyName: string
   ): Promise<SuggestTrialOperation> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<
         SuggestTrialOperation
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(studyName)
-        )}/trials:suggest`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials:suggest`,
         method: 'POST',
         body: { suggestionCount, clientId: 'vizier-extension' },
       });
@@ -275,7 +261,7 @@ export class VizierService {
    * @param trialName Raw trial name.
    * @param studyName Raw study name.
    * @param Details The completion details.
-   * @param metadata The region and project id associated with the trial.
+   * @param metadata The project id associated with the trial.
    */
   async completeTrial(
     trialName: string,
@@ -287,13 +273,14 @@ export class VizierService {
     }
   ): Promise<Trial> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Trial>({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(studyName)
-        )}/trials/${encodeURI(prettifyTrial(trialName))}:complete`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+          prettifyTrial(trialName)
+        )}:complete`,
         method: 'POST',
         body: {
           finalMeasurement: details.finalMeasurement,
@@ -315,16 +302,14 @@ export class VizierService {
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/create
    * @param trialName The trial details.
    * @param studyName Raw study name.
-   * @param metadata The region and project id associated with the trial.
+   * @param metadata The project id associated with the trial.
    */
   async createTrial(trial: Trial, studyName: string): Promise<Trial> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
+      const { project } = await this._getMetadata();
       const response = await this._transportService.submit<Trial>({
         path: createTrialUrl({
           projectId: project,
-          region: region,
           cleanStudyName: prettifyStudyName(studyName),
         }),
         method: 'POST',
@@ -346,17 +331,18 @@ export class VizierService {
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.studies.trials/delete
    * @param trialName Raw trial name.
    * @param studyName Raw study name.
-   * @param metadata The region and project id associated with the trial.
+   * @param metadata The project id associated with the trial.
    */
   async deleteTrial(trialName: string, studyName: string): Promise<void> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/studies/${encodeURI(
-          prettifyStudyName(studyName)
-        )}/trials/${encodeURI(prettifyTrial(trialName))}`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
+          prettifyTrial(trialName)
+        )}`,
         method: 'DELETE',
       });
     } catch (err) {
@@ -374,21 +360,20 @@ export class VizierService {
    * Clients can use this method to poll the operation result at intervals as recommended by the API service.
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.operations/get
    * @param operationId The full length opeartion id.
-   * @param metadata The region and project id associated with the operation.
+   * @param metadata The project id associated with the operation.
    */
   async getOperation<BODY = {}, METADATA = {}>(
     operationId: string
   ): Promise<Operation<BODY, METADATA>> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<
         Operation<BODY, METADATA>
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/operations/${prettifyOperationId(
-          operationId
-        )}`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/operations/${prettifyOperationId(operationId)}`,
         method: 'GET',
       });
       return response.result;
@@ -402,17 +387,16 @@ export class VizierService {
    * Starts asynchronous cancellation on a long-running operation.
    * https://cloud.google.com/ai-platform/optimizer/docs/reference/rest/v1/projects.locations.operations/cancel
    * @param operationId The full length opeartion id.
-   * @param metadata The region and project id associated with the operation.
+   * @param metadata The project id associated with the operation.
    */
   async cancelOperation(operationId: string): Promise<void> {
     try {
-      const { project, zone } = await this._getMetadata();
-      const region = this.getRegionFromZone(zone);
-      const ENDPOINT = `https://${region}-ml.googleapis.com/v1`;
+      const { project } = await this._getMetadata();
+      const ENDPOINT = `https://${this.REGION}-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/${region}/operations/${prettifyOperationId(
-          operationId
-        )}:cancel`,
+        path: `${ENDPOINT}/projects/${project}/locations/${
+          this.REGION
+        }/operations/${prettifyOperationId(operationId)}:cancel`,
         method: 'POST',
       });
     } catch (err) {

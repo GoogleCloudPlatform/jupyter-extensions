@@ -10,7 +10,6 @@ import {
   cleanFakeTrialName,
   fakeStudyNameTree,
   fakeProjectId,
-  fakeRegion,
   cleanFakeStudyNameTree,
 } from '../../service/test_constants';
 import { SuggestTrials } from '.';
@@ -202,7 +201,6 @@ describe('Suggest Trials Page', () => {
           proxyUrl(
             deleteTrialUrl({
               projectId: 'project-id',
-              region: 'us-region',
               cleanStudyName: 'study-default',
               cleanTrialName: 'trial-default',
             })
@@ -589,7 +587,6 @@ describe('Suggest Trials Page', () => {
             proxyUrl(
               createTrialUrl({
                 projectId: fakeProjectId,
-                region: fakeRegion,
                 cleanStudyName: cleanFakeStudyNameTree,
               })
             ),

@@ -48,8 +48,7 @@ describe('VizierService', () => {
   let vizierService: VizierService;
 
   const TEST_PROJECT = 'test-project';
-  const TEST_ZONE = 'test-region-1b';
-  const TEST_REGION = 'test-region';
+  const TEST_REGION = 'us-central1';
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -57,7 +56,6 @@ describe('VizierService', () => {
 
     mockGetMetadata.mockResolvedValue({
       project: TEST_PROJECT,
-      zone: TEST_ZONE,
     });
     mockSubmit = jest.fn();
     vizierService = new VizierService({
