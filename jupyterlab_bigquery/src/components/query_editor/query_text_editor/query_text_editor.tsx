@@ -158,7 +158,7 @@ export const styleSheet = stylesheet({
     borderBottom: '1px solid var(--jp-border-color2)',
   },
   icon: {
-    color: 'var(--jp-layout-color3)',
+    color: 'var(--jp-layout-color4)',
   },
 });
 

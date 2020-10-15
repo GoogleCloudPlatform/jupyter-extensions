@@ -508,6 +508,7 @@ class ListItemsPanel extends React.Component<Props, State> {
               <a
                 style={{ color: gColor('BLUE'), textDecoration: 'underline' }}
                 href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
+                target="_blank"
               >
                 Google Data Catalog API
               </a>{' '}
