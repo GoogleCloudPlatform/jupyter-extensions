@@ -13,7 +13,6 @@ import {
 } from '../types';
 
 export const fakeProjectId = 'project-id';
-export const fakeRegion = 'us-region';
 
 export const fakeStudyName =
   'projects/project-id/locations/us-region/studies/study-default';

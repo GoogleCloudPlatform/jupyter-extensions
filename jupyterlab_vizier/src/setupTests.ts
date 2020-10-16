@@ -42,10 +42,8 @@ jest.mock('gcp_jupyterlab_shared', () => {
 const originalError = global.console.error;
 beforeAll(() => {
   const TEST_PROJECT = 'project-id';
-  const TEST_ZONE = 'us-region-1c';
   mockGetMetadata.mockResolvedValue({
     project: TEST_PROJECT,
-    zone: TEST_ZONE,
   });
 
   global.console.error = jest.fn((...args) => {
