@@ -3,7 +3,7 @@
 `jupyterlab_gcpscheduler` - Provides a mechanism to run Notebooks on Google
 Cloud Platform infrastructure, either immediately or on a recurring schedule.
 
-End-user documentation can be found at https://drive.google.com/file/d/1djM8fXBERSKkQ-avxM6Lv-kbfkjNucN_/view
+End-user documentation can be found in the [User Guide](https://storage.googleapis.com/deeplearning-platform-ui-public/jupyterlab_gcpscheduler_user_guide.pdf).
 
 ## Development
 
