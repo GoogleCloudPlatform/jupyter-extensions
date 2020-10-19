@@ -67,7 +67,7 @@ const STATUS_STYLES = stylesheet({
   bottomText: {
     marginTop: '50px',
     fontSize: '12px',
-    color: 'var(--jp-ui-font-color2)',
+    color: 'var(--jp-ui-font-color1)',
   },
 });
 
@@ -337,7 +337,8 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
             <BorderLinearProgress variant="determinate" value={progressValue} />
             <p className={STYLES.paragraph}>{statusInfo[status]}</p>
             <p className={STATUS_STYLES.bottomText}>
-              Don't close the browser tab before the update process is finished
+              The update process will take 5-10 minutes. Don't leave the page
+              before it is finished.
             </p>
           </div>
         )}
