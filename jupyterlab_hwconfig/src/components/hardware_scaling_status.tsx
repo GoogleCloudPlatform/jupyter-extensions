@@ -121,9 +121,11 @@ interface State {
   error: ConfigurationError;
 }
 
-export class HardwareScalingStatus extends React.Component<Props, State> {
-  private readonly NUM_RETRIES = 20;
+// Constants to determine how many polls are done for the server to restart (4m)
+const RETRIES = 60; // 60 * 5 = 5m
+const WAIT_INTERVAL = 5000; // 5s
 
+export class HardwareScalingStatus extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -179,15 +181,15 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   private async waitForServer() {
-    for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
+    for (let tries = 0; tries < RETRIES; tries++) {
       try {
         await this.props.hardwareService.getVmDetails();
         break;
       } catch (err) {
-        if (tries === this.NUM_RETRIES - 1) {
+        if (tries === RETRIES - 1) {
           this.showError(ErrorType.REFRESH, err);
         }
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL));
       }
     }
   }
