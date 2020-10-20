@@ -47,20 +47,27 @@ function SimpleTable(details: DetailsResponse) {
     <TableContainer className={tableClasses.container} component={Paper}>
       <Table className={tableClasses.table} aria-label="simple table">
         <TableBody>
-          {MAPPED_ATTRIBUTES.map(am => (
-            <TableRow key={am.label}>
-              <TableCell
-                className={tableClasses.textColor}
-                component="th"
-                scope="row"
-              >
-                {am.label}
-              </TableCell>
-              <TableCell className={tableClasses.textColor} align="right">
-                {am.mapper(details)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {MAPPED_ATTRIBUTES.map(am => {
+            const { label, mapper } = am;
+            let value = mapper(details);
+            if (label.endsWith('Utilization')) {
+              value = value.split(': ').pop();
+            }
+            return (
+              <TableRow key={label}>
+                <TableCell
+                  className={tableClasses.textColor}
+                  component="th"
+                  scope="row"
+                >
+                  {am.label}
+                </TableCell>
+                <TableCell className={tableClasses.textColor} align="right">
+                  {value}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -101,7 +108,7 @@ export function DetailsDialogBody(props: Props) {
           SimpleTable(details)
         )}
         <ActionBar
-          primaryLabel="Update"
+          primaryLabel="Modify hardware"
           secondaryLabel="Close"
           onPrimaryClick={onUpdate}
           onSecondaryClick={onDialogClose}

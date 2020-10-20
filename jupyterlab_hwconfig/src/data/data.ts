@@ -216,6 +216,15 @@ export const MAPPED_ATTRIBUTES: AttributeMapper[] = [
     mapper: (details: DetailsResponse) =>
       `${details.instance.machineType.description} (${details.instance.machineType.name})`,
   },
+  {
+    label: 'GPU Type',
+    mapper: (details: DetailsResponse) => {
+      if (!details.gpu.name) {
+        return 'No GPUs';
+      }
+      return `${details.gpu.name} x ${details.gpu.count}`;
+    },
+  },
 ];
 
 export const REFRESHABLE_MAPPED_ATTRIBUTES = [
@@ -235,7 +244,7 @@ export const REFRESHABLE_MAPPED_ATTRIBUTES = [
       if (!details.gpu.name) {
         return 'No GPUs';
       }
-      return `GPU: ${details.gpu.name} - ${details.gpu.gpu.toFixed(1)}%`;
+      return `GPU: ${details.gpu.gpu.toFixed(1)}%`;
     },
   },
 ];

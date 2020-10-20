@@ -22,6 +22,7 @@ import { Accelerator } from './data/accelerator_types';
 
 export const DETAILS_RESPONSE = `{
   "gpu": {
+    "count": "1",
     "cuda_version": "10.1",
     "driver_version": "418.87.01",
     "gpu": 100,

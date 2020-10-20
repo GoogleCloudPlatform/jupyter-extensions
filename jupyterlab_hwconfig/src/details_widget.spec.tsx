@@ -130,6 +130,13 @@ describe('VmDetails', () => {
     expect(attributes.first().text()).toBe('PyTorch:1.4 | ');
     expect(attributes.last().text()).toBe('4 vCPU, 15 GB RAM (n1-standard-4)');
 
+    attributes.first().simulate('click');
+    attributes = vmDetails.find(`span.${STYLES.attribute}`);
+    expect(attributes.first().text()).toBe(
+      '4 vCPU, 15 GB RAM (n1-standard-4) | '
+    );
+    expect(attributes.last().text()).toBe('Tesla K80 x 1');
+
     // Simulate two clicks
     attributes.last().simulate('click');
     attributes.last().simulate('click');
@@ -140,7 +147,7 @@ describe('VmDetails', () => {
     attributes.first().simulate('click');
     attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.first().text()).toBe('Memory: 16.0% | ');
-    expect(attributes.last().text()).toBe('GPU: Tesla K80 - 100.0%');
+    expect(attributes.last().text()).toBe('GPU: 100.0%');
   });
 
   it('Auto-refreshes when resource utilization are displayed', async () => {
@@ -155,8 +162,8 @@ describe('VmDetails', () => {
 
     expect(mockGetDetails).toHaveBeenCalledTimes(1);
 
-    // Click four times to move to CPU usage
-    for (let i = 0; i < 4; i++) {
+    // Click five times to move to CPU usage
+    for (let i = 0; i < 5; i++) {
       vmDetails
         .find(`span.${STYLES.attribute}`)
         .first()
@@ -173,7 +180,7 @@ describe('VmDetails', () => {
     attributes.first().simulate('click');
     attributes = vmDetails.find(`span.${STYLES.attribute}`);
     expect(attributes.first().text()).toBe('Memory: 16.0% | ');
-    expect(attributes.last().text()).toBe('GPU: Tesla K80 - 100.0%');
+    expect(attributes.last().text()).toBe('GPU: 100.0%');
     jest.advanceTimersToNextTimer();
     expect(mockGetDetails).toHaveBeenCalledTimes(3);
 

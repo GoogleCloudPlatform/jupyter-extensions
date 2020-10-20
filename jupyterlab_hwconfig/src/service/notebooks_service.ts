@@ -43,7 +43,7 @@ export interface Instance {
 
 type Operation = gapi.client.servicemanagement.Operation;
 
-export const NOTEBOOKS_API_PATH = 'https://notebooks.googleapis.com/v1beta1';
+export const NOTEBOOKS_API_PATH = 'https://notebooks.googleapis.com/v1';
 
 export function handleError(err: any) {
   // Check for Google API Error structure
