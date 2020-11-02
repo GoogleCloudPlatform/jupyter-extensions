@@ -1,17 +1,15 @@
-// import { ServerConnection } from '@jupyterlab/services';
-// import { URLExt } from '@jupyterlab/coreutils';
 import { requestAPI } from './api_request';
 
 export interface DataTree {
-  projects: {};
-  projectIds: [];
+  projects: { [key: string]: Project };
+  projectIds: string[];
 }
 
 export interface Project {
   id: string;
   name: string;
-  datasets: {};
-  datasetIds: [];
+  datasets?: {};
+  datasetIds?: [];
   error?: string;
 }
 

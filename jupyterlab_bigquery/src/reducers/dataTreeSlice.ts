@@ -6,13 +6,24 @@ import {
 } from '../components/list_items_panel/service/list_items';
 
 export interface DataTreeState {
-  data: { projects: {}; projectIds: string[] };
+  data: DataTree;
 }
+
+/**
+ * BigQuery Public Data project
+ * https://cloud.google.com/bigquery/public-data
+ */
+export const PUBLIC_DATA_PROJECT: Project = {
+  id: 'bigquery-public-data',
+  name: 'bigquery-public-data',
+};
 
 const initialState: DataTreeState = {
   data: {
-    projects: {},
-    projectIds: [],
+    projects: {
+      [PUBLIC_DATA_PROJECT.id]: PUBLIC_DATA_PROJECT,
+    },
+    projectIds: [PUBLIC_DATA_PROJECT.id],
   },
 };
 

@@ -32,6 +32,7 @@ import {
   updateProject,
   updateDataset,
   removeProject,
+  PUBLIC_DATA_PROJECT,
 } from '../../reducers/dataTreeSlice';
 import { SnackbarState, openSnackbar } from '../../reducers/snackbarSlice';
 import {
@@ -556,6 +557,8 @@ class ListItemsPanel extends React.Component<Props, State> {
       await this.props.listProjectsService
         .listProjects('')
         .then((data: DataTree) => {
+          data.projects[PUBLIC_DATA_PROJECT.id] = PUBLIC_DATA_PROJECT;
+          data.projectIds.unshift(PUBLIC_DATA_PROJECT.id);
           this.props.updateDataTree(data);
           this.setState({ hasLoaded: true });
         });
