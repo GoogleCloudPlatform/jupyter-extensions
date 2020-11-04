@@ -23,8 +23,8 @@ import { STYLES } from '../data/styles';
 import { HardwareConfiguration } from '../data/data';
 import { MachineTypeConfiguration } from '../data/machine_types';
 import { ActionBar } from './action_bar';
+import { HardwareService } from '../service/hardware_service';
 import { NotebooksService, Instance } from '../service/notebooks_service';
-import { ServerWrapper } from './server_wrapper';
 import { ErrorPage } from './error_page';
 import { displayInstance } from './instance_details_message';
 
@@ -67,7 +67,7 @@ const STATUS_STYLES = stylesheet({
   bottomText: {
     marginTop: '50px',
     fontSize: '12px',
-    color: 'var(--jp-ui-font-color2)',
+    color: 'var(--jp-ui-font-color1)',
   },
 });
 
@@ -106,13 +106,13 @@ export interface ConfigurationError {
 }
 
 interface Props {
+  authTokenRetrieval: () => Promise<string>;
   hardwareConfiguration: HardwareConfiguration;
+  hardwareService: HardwareService;
   notebookService: NotebooksService;
+  machineTypes: MachineTypeConfiguration[];
   onDialogClose: () => void;
   onCompletion: () => void;
-  detailsServer: ServerWrapper;
-  authTokenRetrieval: () => Promise<string>;
-  machineTypes: MachineTypeConfiguration[];
 }
 
 interface State {
@@ -121,9 +121,11 @@ interface State {
   error: ConfigurationError;
 }
 
-export class HardwareScalingStatus extends React.Component<Props, State> {
-  private readonly NUM_RETRIES = 20;
+// Constants to determine how many polls are done for the server to restart (4m)
+const RETRIES = 60; // 60 * 5 = 5m
+const WAIT_INTERVAL = 5000; // 5s
 
+export class HardwareScalingStatus extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -179,35 +181,38 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
   }
 
   private async waitForServer() {
-    for (let tries = 0; tries < this.NUM_RETRIES; tries++) {
+    for (let tries = 0; tries < RETRIES; tries++) {
       try {
-        await this.props.detailsServer.getUtilizationData();
+        await this.props.hardwareService.getVmDetails();
         break;
       } catch (err) {
-        if (tries === this.NUM_RETRIES - 1) {
+        if (tries === RETRIES - 1) {
           this.showError(ErrorType.REFRESH, err);
         }
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL));
       }
     }
   }
 
   async componentDidMount() {
     const { notebookService, authTokenRetrieval } = this.props;
-    try {
-      const token = await authTokenRetrieval();
-      this.setState({
-        status: Status['Stopping notebook instance'],
-      });
-      notebookService.setAuthToken(token);
-    } catch (err) {
-      this.setState({ status: Status.Error });
-      console.log(err);
+    if (!notebookService.hasAuthToken()) {
+      try {
+        const token = await authTokenRetrieval();
+        notebookService.setAuthToken(token);
+      } catch (err) {
+        this.setState({ status: Status.Error });
+        console.error(err);
+        return;
+      }
     }
+    this.setState({
+      status: Status['Stopping notebook instance'],
+    });
     window.addEventListener('beforeunload', this.preventPageClose);
   }
 
-  async componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(_prevProps, prevState) {
     const { status, error, instanceDetails } = this.state;
     const { hardwareConfiguration, notebookService, onCompletion } = this.props;
     const { machineType, attachGpu, gpuType, gpuCount } = hardwareConfiguration;
@@ -334,7 +339,8 @@ export class HardwareScalingStatus extends React.Component<Props, State> {
             <BorderLinearProgress variant="determinate" value={progressValue} />
             <p className={STYLES.paragraph}>{statusInfo[status]}</p>
             <p className={STATUS_STYLES.bottomText}>
-              Don't close the browser tab before the update process is finished
+              The update process will take 5-10 minutes. Don't leave the page
+              before it is finished.
             </p>
           </div>
         )}

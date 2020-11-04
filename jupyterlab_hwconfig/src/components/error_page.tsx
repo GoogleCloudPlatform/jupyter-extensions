@@ -45,7 +45,7 @@ export function ErrorPage(props: Props) {
         <span
           className={STYLES.heading}
         >{`Failed to ${errorType} Your Machine`}</span>
-        <div className={STYLES.paragraph}>{errorValue}</div>
+        <div className={STYLES.paragraph}>{String(errorValue)}</div>
         {instanceDetails &&
           displayInstance(
             instanceDetails,

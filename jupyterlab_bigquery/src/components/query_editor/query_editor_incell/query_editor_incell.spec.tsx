@@ -1,18 +1,3 @@
-let slotSize = 0;
-
-jest.mock('../../../utils/QueryResultsManager.ts', () => {
-  return function() {
-    return {
-      getSlotSize: () => {
-        return slotSize;
-      },
-      getSlot: () => {
-        return [];
-      },
-    };
-  };
-});
-
 import { shallow } from 'enzyme';
 import React from 'react';
 import {
@@ -21,6 +6,15 @@ import {
 } from './query_editor_incell';
 import QueryTextEditor from '../query_text_editor/query_text_editor';
 import QueryResults from '../query_text_editor/query_editor_results';
+import MockQueryResultsManager from '../../../utils/MockQueryResultsManager';
+
+const mockQueryResultsManager = new MockQueryResultsManager(0);
+
+jest.mock('../../../utils/QueryResultsManager.ts', () => {
+  return function() {
+    return mockQueryResultsManager;
+  };
+});
 
 describe('Query editor tab', () => {
   const fakeIpyView = {
@@ -43,7 +37,7 @@ describe('Query editor tab', () => {
     expect(wrapper.find(QueryResults).exists()).toBeFalsy();
   });
   it('some query', () => {
-    slotSize = 1;
+    mockQueryResultsManager.slotSize = 1;
     const queryId = 'query-id';
 
     const props = ({

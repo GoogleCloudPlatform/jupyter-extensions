@@ -19,16 +19,21 @@ import { Dialog } from '@material-ui/core';
 import { HardwareScalingForm } from './hardware_scaling_form';
 import { HardwareScalingStatus } from './hardware_scaling_status';
 import { ConfirmationPage } from './confirmation_page';
-import { ServerWrapper } from './server_wrapper';
 import { DetailsDialogBody } from './details_dialog_body';
 import {
   HardwareConfiguration,
-  Details,
+  DetailsResponse,
   detailsToHardwareConfiguration,
 } from '../data/data';
 import { authTokenRetrieval } from '../service/auth_token_retrieval';
+import { HardwareService } from '../service/hardware_service';
 import { NotebooksService } from '../service/notebooks_service';
 import { PriceService } from '../service/price_service';
+import { Accelerator } from '../data/accelerator_types';
+import {
+  MachineTypeConfiguration,
+  getMachineTypeConfigurations,
+} from '../data/machine_types';
 
 export enum View {
   DETAILS,
@@ -40,17 +45,19 @@ export enum View {
 interface Props {
   open: boolean;
   receivedError: boolean;
-  detailsServer: ServerWrapper;
+  hardwareService: HardwareService;
   notebookService: NotebooksService;
   priceService: PriceService;
   onClose: () => void;
   onCompletion: () => void;
-  details?: Details;
+  details?: DetailsResponse;
 }
 
 interface State {
   view: View;
   hardwareConfiguration: HardwareConfiguration;
+  acceleratorTypes?: Accelerator[];
+  machineTypes?: MachineTypeConfiguration[];
 }
 
 export class HardwareConfigurationDialog extends React.Component<Props, State> {
@@ -63,22 +70,25 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
   }
 
   render() {
-    const { open } = this.props;
-
-    return <Dialog open={open}>{this.getDisplay()}</Dialog>;
+    return <Dialog open={this.props.open}>{this.getDisplay()}</Dialog>;
   }
 
   private getDisplay() {
     const {
       details,
       receivedError,
-      detailsServer,
+      hardwareService,
       notebookService,
       priceService,
       onClose,
       onCompletion,
     } = this.props;
-    const { hardwareConfiguration, view } = this.state;
+    const {
+      acceleratorTypes,
+      hardwareConfiguration,
+      machineTypes,
+      view,
+    } = this.state;
 
     switch (view) {
       case View.DETAILS:
@@ -87,18 +97,16 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
             details={details}
             receivedError={receivedError}
             onDialogClose={onClose}
-            onUpdate={() => {
-              this.setState({
-                view: View.FORM,
-              });
-            }}
+            onUpdate={() => this.onDisplayForm()}
           />
         );
 
       case View.FORM:
         return (
           <HardwareScalingForm
+            acceleratorTypes={acceleratorTypes}
             details={details}
+            machineTypes={machineTypes}
             priceService={priceService}
             onDialogClose={onClose}
             onSubmit={(config: HardwareConfiguration) => {
@@ -127,15 +135,38 @@ export class HardwareConfigurationDialog extends React.Component<Props, State> {
       case View.STATUS:
         return (
           <HardwareScalingStatus
-            machineTypes={details.machineTypes}
-            hardwareConfiguration={hardwareConfiguration}
             authTokenRetrieval={authTokenRetrieval}
-            detailsServer={detailsServer}
+            machineTypes={machineTypes}
+            hardwareConfiguration={hardwareConfiguration}
+            hardwareService={hardwareService}
             notebookService={notebookService}
             onDialogClose={onClose}
             onCompletion={onCompletion}
           />
         );
     }
+  }
+
+  private async onDisplayForm() {
+    const { hardwareService } = this.props;
+    let { acceleratorTypes, machineTypes } = this.state;
+    if (!(acceleratorTypes?.length && machineTypes?.length)) {
+      const [
+        machineTypesResponse,
+        acceleratorTypesResponse,
+      ] = await Promise.all([
+        hardwareService.getMachineTypes(),
+        hardwareService.getAcceleratorTypes(),
+      ]);
+
+      machineTypes = getMachineTypeConfigurations(machineTypesResponse);
+      acceleratorTypes = acceleratorTypesResponse;
+    }
+
+    this.setState({
+      machineTypes,
+      acceleratorTypes,
+      view: View.FORM,
+    });
   }
 }

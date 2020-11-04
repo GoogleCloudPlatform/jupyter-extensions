@@ -1,19 +1,24 @@
-// Ensure styles are loaded by webpack
-import '../style/index.css';
+import { IStateDB } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { Launcher } from '@jupyterlab/launcher';
+import { IStatusBar } from '@jupyterlab/statusbar';
+import { IIconRegistry } from '@jupyterlab/ui-components';
+import { map, toArray } from '@phosphor/algorithm';
+import { CommandRegistry } from '@phosphor/commands';
+import { PanelLayout, Widget } from '@phosphor/widgets';
+import { GCSDrive } from './contents';
+import { GCSFileBrowser } from './jupyterlab_filebrowser/browser';
+import { GCSFileBrowserModel } from './jupyterlab_filebrowser/model';
+import { IGCSFileBrowserFactory } from './jupyterlab_filebrowser/tokens';
+import { FileUploadStatus } from './jupyterlab_filebrowser/uploadstatus';
+import { PanelHeader } from './panel_header';
 
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
-
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IGCSFileBrowserFactory } from './jupyterlab_filebrowser/tokens';
-import { GCSDrive } from './contents';
-
-import { IStatusBar } from '@jupyterlab/statusbar';
-
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import {
   Clipboard,
@@ -22,53 +27,20 @@ import {
   WidgetTracker,
 } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
-
-import { CommandRegistry } from '@phosphor/commands';
-
-import { Launcher } from '@jupyterlab/launcher';
-
-import { GCSFileBrowser } from './jupyterlab_filebrowser/browser';
-import { GCSFileBrowserModel } from './jupyterlab_filebrowser/model';
-
-import { FileUploadStatus } from './jupyterlab_filebrowser/uploadstatus';
-
-import { IIconRegistry } from '@jupyterlab/ui-components';
-
-import { map, toArray } from '@phosphor/algorithm';
-import { Widget, PanelLayout } from '@phosphor/widgets';
-import { h, VirtualDOM } from '@phosphor/virtualdom';
-import { stylesheet } from 'typestyle';
+// Ensure styles are loaded by webpack
+import '../style/index.css';
 
 const NAMESPACE = 'gcsfilebrowser';
 const GCS_URI_PREFIX = 'gs://';
-
-const localStyles = stylesheet({
-  header: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
-    margin: 0,
-    padding: '8px 12px',
-    textTransform: 'uppercase',
-    backgroundColor: 'white',
-  },
-});
 
 class GCSBrowserWidget extends Widget {
   constructor(browser: GCSFileBrowser) {
     super();
     this.addClass('jp-GCSBrowser');
     this.layout = new PanelLayout();
-    const header = new Widget({
-      node: VirtualDOM.realize(
-        h.div({ className: localStyles.header }, 'Google Cloud Storage')
-      ),
-    });
-
-    (this.layout as PanelLayout).addWidget(header);
-    (this.layout as PanelLayout).addWidget(browser);
+    const panelLayout = this.layout as PanelLayout;
+    panelLayout.addWidget(new PanelHeader());
+    panelLayout.addWidget(browser);
   }
 }
 

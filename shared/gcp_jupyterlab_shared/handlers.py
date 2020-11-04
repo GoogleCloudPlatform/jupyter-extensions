@@ -23,7 +23,7 @@ from notebook.base.handlers import APIHandler, app_log
 from tornado import web
 from tornado.httpclient import AsyncHTTPClient, HTTPClientError, HTTPRequest
 
-from . import VERSION
+from .version import VERSION
 
 METADATA_SERVER = os.environ.get(
     'METADATA_SERVER',
@@ -218,9 +218,8 @@ class RuntimeEnvHandler(APIHandler):
       with open(env_version) as f:
         version = f.read().rstrip()
     except KeyError:
-      app_log.warning(
-          'Environment variable {} is not set'.format(FRAMEWORK_ENV_VAR))
+      app_log.warning('Environment variable %s is not set', FRAMEWORK_ENV_VAR)
     except OSError:
-      app_log.warning('Unable to read framework version from {}'.format(
-          os.environ[FRAMEWORK_ENV_VAR]))
+      app_log.warning('Unable to read framework version from %s',
+                      os.environ[FRAMEWORK_ENV_VAR])
     self.finish(version)

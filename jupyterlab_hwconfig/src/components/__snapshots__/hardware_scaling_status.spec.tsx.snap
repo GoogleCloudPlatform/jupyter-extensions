@@ -8,13 +8,29 @@ exports[`HardwareScalingStatus Renders with auth error: Auth Error 1`] = `
     Array [
       Object {
         "base": Object {
-          "text": "Efficient Instance",
-          "value": "e2-",
+          "text": "N1 Standard",
+          "value": "n1-",
         },
         "configurations": Array [
           Object {
-            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
-            "value": "e2-highmem-8",
+            "text": "2 vCPU, 7.5 GB RAM",
+            "value": "n1-standard-2",
+          },
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          },
+        ],
+      },
+      Object {
+        "base": Object {
+          "text": "N2 Standard",
+          "value": "n2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n2-standard-4",
           },
         ],
       },
@@ -38,7 +54,7 @@ exports[`HardwareScalingStatus Renders with operation error: Operation error 1`]
         "coreCount": "1",
         "type": "NVIDIA_TESLA_K80",
       },
-      "machineType": "https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/e2-highmem-8",
+      "machineType": "https://www.googleapis.com/compute/v1/projects/jupyterlab-interns-sandbox/zones/us-west1-b/machineTypes/n2-standard-4",
       "name": "Test",
     }
   }
@@ -46,13 +62,29 @@ exports[`HardwareScalingStatus Renders with operation error: Operation error 1`]
     Array [
       Object {
         "base": Object {
-          "text": "Efficient Instance",
-          "value": "e2-",
+          "text": "N1 Standard",
+          "value": "n1-",
         },
         "configurations": Array [
           Object {
-            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
-            "value": "e2-highmem-8",
+            "text": "2 vCPU, 7.5 GB RAM",
+            "value": "n1-standard-2",
+          },
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          },
+        ],
+      },
+      Object {
+        "base": Object {
+          "text": "N2 Standard",
+          "value": "n2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n2-standard-4",
           },
         ],
       },
@@ -74,13 +106,29 @@ exports[`HardwareScalingStatus Renders with restart error: Restart error 1`] = `
     Array [
       Object {
         "base": Object {
-          "text": "Efficient Instance",
-          "value": "e2-",
+          "text": "N1 Standard",
+          "value": "n1-",
         },
         "configurations": Array [
           Object {
-            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
-            "value": "e2-highmem-8",
+            "text": "2 vCPU, 7.5 GB RAM",
+            "value": "n1-standard-2",
+          },
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          },
+        ],
+      },
+      Object {
+        "base": Object {
+          "text": "N2 Standard",
+          "value": "n2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n2-standard-4",
           },
         ],
       },
@@ -103,13 +151,29 @@ exports[`HardwareScalingStatus Renders with stop error: Stop instance error 1`] 
     Array [
       Object {
         "base": Object {
-          "text": "Efficient Instance",
-          "value": "e2-",
+          "text": "N1 Standard",
+          "value": "n1-",
         },
         "configurations": Array [
           Object {
-            "text": "Efficient Instance, 8 vCPUs, 64 GB RAM",
-            "value": "e2-highmem-8",
+            "text": "2 vCPU, 7.5 GB RAM",
+            "value": "n1-standard-2",
+          },
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n1-standard-4",
+          },
+        ],
+      },
+      Object {
+        "base": Object {
+          "text": "N2 Standard",
+          "value": "n2-",
+        },
+        "configurations": Array [
+          Object {
+            "text": "4 vCPU, 15 GB RAM",
+            "value": "n2-standard-4",
           },
         ],
       },
@@ -144,9 +208,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Authorizing 1`] = `
       Please complete the OAuth 2.0 authorization steps in the popup
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>
@@ -182,7 +246,7 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Complete 1`] = `
         className="paragraph_f1ditx77"
       >
         Machine type: 
-        Efficient Instance, 8 vCPUs, 64 GB RAM
+        4 vCPU, 15 GB RAM
       </div>
       <div
         className="paragraph_f1ditx77"
@@ -223,9 +287,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Refreshing session 1
       Refreshing your JupyterLab session to reflect your new configuration.
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>
@@ -256,9 +320,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Restarting notebook 
       Restarting your newly configured notebook instance.
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>
@@ -289,9 +353,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Stopping notebook in
       Shutting down your notebook instance for reshaping.
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>
@@ -322,9 +386,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating GPU configu
       Reshaping GPU configuration to match your selection.
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>
@@ -355,9 +419,9 @@ exports[`HardwareScalingStatus Runs through reshaping flow: Updating machine con
       Reshaping machine configuration to match your selection.
     </p>
     <p
-      className="bottomText_f1vi2ddg"
+      className="bottomText_flg6oqf"
     >
-      Don't close the browser tab before the update process is finished
+      The update process will take 5-10 minutes. Don't leave the page before it is finished.
     </p>
   </div>
 </div>

@@ -32,6 +32,7 @@ import {
   updateProject,
   updateDataset,
   removeProject,
+  PUBLIC_DATA_PROJECT,
 } from '../../reducers/dataTreeSlice';
 import { SnackbarState, openSnackbar } from '../../reducers/snackbarSlice';
 import {
@@ -40,7 +41,7 @@ import {
 } from '../list_items_panel/service/search_items';
 import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
-import { DialogComponent, BASE_FONT } from 'gcp_jupyterlab_shared';
+import { DialogComponent, BASE_FONT, Badge } from 'gcp_jupyterlab_shared';
 import CustomSnackbar from '../shared/snackbar';
 
 interface Props {
@@ -256,7 +257,7 @@ class ListItemsPanel extends React.Component<Props, State> {
       console.warn('Error searching', err.message);
       this.handleOpenSearchDialog();
       this.props.openSnackbar({
-        message: `Error: Searching not allowed in project ${project}. 
+        message: `Error: Searching not allowed in project ${project}.
         Enable the Data Catalog API in this project to continue.`,
       });
     }
@@ -386,7 +387,9 @@ class ListItemsPanel extends React.Component<Props, State> {
           />
         </Portal>
         <header className={localStyles.header}>
-          <div className={localStyles.headerTitle}>BigQuery extension</div>
+          <div className={localStyles.headerTitle}>
+            BigQuery <Badge value="Alpha" />
+          </div>
           <div className={localStyles.buttonContainer}>
             <Tooltip title="Open SQL editor">
               <Button
@@ -506,6 +509,7 @@ class ListItemsPanel extends React.Component<Props, State> {
               <a
                 style={{ color: gColor('BLUE'), textDecoration: 'underline' }}
                 href="https://console.developers.google.com/apis/api/datacatalog.googleapis.com/overview"
+                target="_blank"
               >
                 Google Data Catalog API
               </a>{' '}
@@ -553,6 +557,8 @@ class ListItemsPanel extends React.Component<Props, State> {
       await this.props.listProjectsService
         .listProjects('')
         .then((data: DataTree) => {
+          data.projects[PUBLIC_DATA_PROJECT.id] = PUBLIC_DATA_PROJECT;
+          data.projectIds.unshift(PUBLIC_DATA_PROJECT.id);
           this.props.updateDataTree(data);
           this.setState({ hasLoaded: true });
         });

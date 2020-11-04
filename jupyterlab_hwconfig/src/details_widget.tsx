@@ -19,22 +19,18 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { classes } from 'typestyle';
 import { STYLES } from './data/styles';
 import {
-  Details,
+  DetailsResponse,
   MAPPED_ATTRIBUTES,
   REFRESHABLE_MAPPED_ATTRIBUTES,
 } from './data/data';
-import { getMachineTypeConfigurations } from './data/machine_types';
 import { HardwareConfigurationDialog } from './components/hardware_configuration_dialog';
-import { ResourceUtilizationCharts } from './components/resource_utilization_charts';
-import { ServerWrapper } from './components/server_wrapper';
-import { WidgetPopup } from './components/widget_popup';
+import { ResourceChartPopper } from './components/resource_chart_popper';
 import { NotebooksService } from './service/notebooks_service';
-import { DetailsService } from './service/details_service';
+import { HardwareService } from './service/hardware_service';
 import { PriceService } from './service/price_service';
 
 interface Props {
-  detailsServer: ServerWrapper;
-  detailsService: DetailsService;
+  hardwareService: HardwareService;
   notebookService: NotebooksService;
   priceService: PriceService;
   initializationError?: boolean;
@@ -45,7 +41,7 @@ interface State {
   shouldRefresh: boolean;
   dialogDisplayed: boolean;
   displayedAttributes: [number, number];
-  details?: Details;
+  details?: DetailsResponse;
 }
 
 const ICON_CLASS = 'jp-VmStatusIcon';
@@ -64,14 +60,15 @@ export class VmDetails extends React.Component<Props, State> {
     };
     this.refreshInterval = window.setInterval(() => {
       if (this.state.shouldRefresh) {
-        this.updateUtilizationData();
+        this.initializeDetailsFromServer();
       }
     }, 1500);
   }
 
   componentDidMount() {
-    const { initializationError } = this.props;
-    !initializationError && this.initializeDetailsFromServer();
+    if (!this.props.initializationError) {
+      this.initializeDetailsFromServer();
+    }
   }
 
   componentWillUnmount() {
@@ -80,7 +77,7 @@ export class VmDetails extends React.Component<Props, State> {
 
   render() {
     const { details, dialogDisplayed, receivedError } = this.state;
-    const { detailsServer, notebookService, priceService } = this.props;
+    const { notebookService, hardwareService, priceService } = this.props;
     const noDetailsMessage = receivedError
       ? 'Error retrieving VM Details'
       : 'Retrieving VM Details...';
@@ -92,9 +89,7 @@ export class VmDetails extends React.Component<Props, State> {
           title="Show all details"
           onClick={() => this.setState({ dialogDisplayed: true })}
         ></span>
-        <WidgetPopup>
-          <ResourceUtilizationCharts detailsServer={detailsServer} />
-        </WidgetPopup>
+        <ResourceChartPopper hardwareService={hardwareService} />
         <span className={STYLES.interactiveHover}>
           {details ? this.getDisplayedDetails(details) : noDetailsMessage}
         </span>
@@ -102,8 +97,8 @@ export class VmDetails extends React.Component<Props, State> {
           <HardwareConfigurationDialog
             open={dialogDisplayed}
             details={details}
-            detailsServer={detailsServer}
             receivedError={receivedError}
+            hardwareService={hardwareService}
             notebookService={notebookService}
             priceService={priceService}
             onClose={() => this.setState({ dialogDisplayed: false })}
@@ -115,35 +110,10 @@ export class VmDetails extends React.Component<Props, State> {
   }
 
   private async initializeDetailsFromServer() {
-    const { detailsServer, detailsService } = this.props;
+    const { hardwareService } = this.props;
     try {
-      const details = (await detailsServer.getUtilizationData()) as Details;
-      const [machineTypes, acceleratorTypes] = await Promise.all([
-        detailsService.getMachineTypes(),
-        detailsService.getAcceleratorTypes(),
-      ]);
-
-      details.machineTypes = getMachineTypeConfigurations(machineTypes);
-      details.acceleratorTypes = acceleratorTypes;
-
+      const details = await hardwareService.getVmDetails();
       this.setState({ details });
-    } catch (e) {
-      console.warn('Unable to retrieve GCE VM details');
-      this.setState({ receivedError: true });
-    }
-  }
-
-  private async updateUtilizationData() {
-    const { detailsServer } = this.props;
-    try {
-      const details = (await detailsServer.getUtilizationData()) as Details;
-
-      this.setState({
-        details: {
-          ...this.state.details,
-          utilization: details.utilization,
-        },
-      });
     } catch (e) {
       console.warn('Unable to retrieve GCE VM details');
       this.setState({ receivedError: true });
@@ -174,7 +144,7 @@ export class VmDetails extends React.Component<Props, State> {
     });
   }
 
-  private getDisplayedDetails(details: Details): JSX.Element {
+  private getDisplayedDetails(details: DetailsResponse): JSX.Element {
     const { displayedAttributes } = this.state;
     return (
       <React.Fragment>
@@ -197,9 +167,8 @@ export class VmDetails extends React.Component<Props, State> {
 /** Top-level widget exposed to JupyterLab for showing VM details. */
 export class VmDetailsWidget extends ReactWidget {
   constructor(
-    private detailsServer: ServerWrapper,
     private notebookService: NotebooksService,
-    private detailsService: DetailsService,
+    private hardwareService: HardwareService,
     private priceService: PriceService,
     private initializationError: boolean
   ) {
@@ -209,8 +178,7 @@ export class VmDetailsWidget extends ReactWidget {
   render() {
     return (
       <VmDetails
-        detailsServer={this.detailsServer}
-        detailsService={this.detailsService}
+        hardwareService={this.hardwareService}
         notebookService={this.notebookService}
         priceService={this.priceService}
         initializationError={this.initializationError}

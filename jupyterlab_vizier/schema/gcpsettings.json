@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "jupyter.lab.setting-icon-class": "jp-vizier-icon",
+  "jupyter.lab.setting-icon-label": "Vizier",
+  "title": "Vizier",
+  "description": "Google Cloud Platform AI Vizier Extension",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "title": "Google Cloud Platform AI Vizier Extension",
+      "description": "Google Cloud Platform AI Vizier Jupyter Extension"
+    }
+  }
+}

@@ -28,8 +28,8 @@ npm run build-python
 ARCHIVE="$(basename $(ls dist/*tar.gz))"
 echo "Copying and installing ${ARCHIVE} on instance ${INSTANCE_NAME}"
 
-gcloud compute scp --zone ${ZONE} "dist/${ARCHIVE?}" "${INSTANCE_NAME?}:"
+gcloud compute scp --zone ${ZONE} "dist/${ARCHIVE?}" "${INSTANCE_NAME?}:/tmp"
 gcloud compute ssh --zone ${ZONE} "${INSTANCE_NAME?}" -- \
-       "sudo su -p -l root -c \"/opt/conda/bin/pip install ${ARCHIVE}\" && \
+       "sudo su -p -l root -c \"/opt/conda/bin/pip install /tmp/${ARCHIVE}\" && \
         sudo su -p -l root -c '/opt/conda/bin/jupyter lab build' && \
         sudo service jupyter restart"

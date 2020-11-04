@@ -25,6 +25,7 @@ import {
 /** The monthly price catalog for region and sku */
 type Catalog = Map<string, Map<string, number>>;
 
+/** Service to provide price calculations for hardware configurations. */
 export class PriceService {
   private catalog: Catalog;
 

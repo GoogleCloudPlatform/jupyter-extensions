@@ -16,10 +16,13 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import { Details } from './data/data';
+import { DetailsResponse } from './data/data';
+import { MachineTypeConfiguration } from './data/machine_types';
+import { Accelerator } from './data/accelerator_types';
 
 export const DETAILS_RESPONSE = `{
   "gpu": {
+    "count": "1",
     "cuda_version": "10.1",
     "driver_version": "418.87.01",
     "gpu": 100,
@@ -291,7 +294,7 @@ export const ACCELERATOR_TYPES_RESPONSE = [
   },
 ];
 
-export const DETAILS: Details = {
+export const DETAILS: DetailsResponse = {
   gpu: {
     cuda_version: '10.1',
     driver_version: '418.87.01',
@@ -326,32 +329,34 @@ export const DETAILS: Details = {
     cpu: 50,
     memory: 16,
   },
-  machineTypes: [
-    {
-      base: { value: 'n1-', text: 'N1 Standard' },
-      configurations: [
-        { value: 'n1-standard-2', text: '2 vCPU, 7.5 GB RAM' },
-        { value: 'n1-standard-4', text: '4 vCPU, 15 GB RAM' },
-      ],
-    },
-    {
-      base: { value: 'n2-', text: 'N2 Standard' },
-      configurations: [{ value: 'n2-standard-4', text: '4 vCPU, 15 GB RAM' }],
-    },
-  ],
-  acceleratorTypes: [
-    {
-      name: 'NVIDIA_TESLA_K80',
-      description: 'Nvidia Tesla K80',
-      maximumCardsPerInstance: 4,
-    },
-    {
-      name: 'NVIDIA_TESLA_T4',
-      description: 'Nvidia Tesla T4',
-      maximumCardsPerInstance: 8,
-    },
-  ],
 };
+
+export const MACHINE_TYPES: MachineTypeConfiguration[] = [
+  {
+    base: { value: 'n1-', text: 'N1 Standard' },
+    configurations: [
+      { value: 'n1-standard-2', text: '2 vCPU, 7.5 GB RAM' },
+      { value: 'n1-standard-4', text: '4 vCPU, 15 GB RAM' },
+    ],
+  },
+  {
+    base: { value: 'n2-', text: 'N2 Standard' },
+    configurations: [{ value: 'n2-standard-4', text: '4 vCPU, 15 GB RAM' }],
+  },
+];
+
+export const ACCELERATOR_TYPES: Accelerator[] = [
+  {
+    name: 'NVIDIA_TESLA_K80',
+    description: 'Nvidia Tesla K80',
+    maximumCardsPerInstance: 4,
+  },
+  {
+    name: 'NVIDIA_TESLA_T4',
+    description: 'Nvidia Tesla T4',
+    maximumCardsPerInstance: 8,
+  },
+];
 
 /** Returns a Promise that resolves a JSON response akin to the fetch API */
 export function asFetchResponse(result: any, ok = true): Promise<Response> {
@@ -359,4 +364,9 @@ export function asFetchResponse(result: any, ok = true): Promise<Response> {
     ok,
     json: () => Promise.resolve(result),
   } as Response);
+}
+
+/** Waits on a promise to flush any other asynchronous tasks */
+export async function flush(): Promise<void> {
+  return await new Promise(r => setTimeout(r));
 }

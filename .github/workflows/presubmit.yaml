@@ -18,14 +18,16 @@ jobs:
         with:
           python-version: '3.7'
       - name: Install Pipenv
-        run: pip install pipenv
+        run: pip install pipenv && pipenv install -d
       - name: Build TypeScript
         run: npm ci &&
           npm run bootstrap &&
           npm run build
+      - name: Build JupyterLab
+        run: source $(pipenv --venv)/bin/activate &&
+          scripts/build_jupyterlab.sh
       - name: Build Python
-        run: pipenv install -d &&
-          source $(pipenv --venv)/bin/activate &&
+        run: source $(pipenv --venv)/bin/activate &&
           scripts/build_python_packages.sh
       - name: Run Tests
         run: source $(pipenv --venv)/bin/activate &&

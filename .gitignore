@@ -92,3 +92,7 @@ __pycache__
 
 # macOS Folder Settings
 *.DS_Store
+
+# package-lock.json files from extensions
+shared/package-lock.json
+jupyterlab_*/package-lock.json

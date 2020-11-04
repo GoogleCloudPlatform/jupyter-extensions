@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import * as React from 'react';
-import { stylesheet, classes } from 'typestyle';
+import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import { Badge } from 'gcp_jupyterlab_shared';
+import * as React from 'react';
+import { DetailsResponse, MAPPED_ATTRIBUTES } from '../data/data';
 import { STYLES } from '../data/styles';
-import { MAPPED_ATTRIBUTES, Details } from '../data/data';
 import { ActionBar } from './action_bar';
 
 const useStyles = makeStyles({
@@ -41,27 +40,34 @@ const useStyles = makeStyles({
   },
 });
 
-function SimpleTable(details: Details) {
+function SimpleTable(details: DetailsResponse) {
   const tableClasses = useStyles();
 
   return (
     <TableContainer className={tableClasses.container} component={Paper}>
       <Table className={tableClasses.table} aria-label="simple table">
         <TableBody>
-          {MAPPED_ATTRIBUTES.map(am => (
-            <TableRow key={am.label}>
-              <TableCell
-                className={tableClasses.textColor}
-                component="th"
-                scope="row"
-              >
-                {am.label}
-              </TableCell>
-              <TableCell className={tableClasses.textColor} align="right">
-                {am.mapper(details)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {MAPPED_ATTRIBUTES.map(am => {
+            const { label, mapper } = am;
+            let value = mapper(details);
+            if (label.endsWith('Utilization')) {
+              value = value.split(': ').pop();
+            }
+            return (
+              <TableRow key={label}>
+                <TableCell
+                  className={tableClasses.textColor}
+                  component="th"
+                  scope="row"
+                >
+                  {am.label}
+                </TableCell>
+                <TableCell className={tableClasses.textColor} align="right">
+                  {value}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -69,17 +75,11 @@ function SimpleTable(details: Details) {
 }
 
 interface Props {
-  details: Details;
+  details: DetailsResponse;
   receivedError: boolean;
   onDialogClose: () => void;
   onUpdate: () => void;
 }
-
-const DIALOG_STYLES = stylesheet({
-  headingPadding: {
-    paddingBottom: '15px',
-  },
-});
 
 function isLoadingDetails(details: boolean, receivedError: boolean): boolean {
   return !(details || receivedError);
@@ -89,32 +89,34 @@ function isLoadingDetails(details: boolean, receivedError: boolean): boolean {
 export function DetailsDialogBody(props: Props) {
   const { details, receivedError, onDialogClose, onUpdate } = props;
   return (
-    <dl className={STYLES.containerPadding}>
-      <p className={classes(STYLES.heading, DIALOG_STYLES.headingPadding)}>
-        Notebook VM Details
-      </p>
-      {isLoadingDetails(Boolean(details), receivedError) ? (
-        <div className={STYLES.containerSize}>
-          <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
-        </div>
-      ) : receivedError ? (
-        <div className={STYLES.containerSize}>
-          <p className={STYLES.paragraph}>
-            Unable to retrieve GCE VM details, please check your server logs
-          </p>
-        </div>
-      ) : (
-        SimpleTable(details)
-      )}
-      <ActionBar
-        primaryLabel="Update"
-        secondaryLabel="Close"
-        onPrimaryClick={onUpdate}
-        onSecondaryClick={onDialogClose}
-        primaryDisabled={
-          receivedError || isLoadingDetails(Boolean(details), receivedError)
-        }
-      />
-    </dl>
+    <div>
+      <header className={STYLES.dialogHeader}>
+        Notebook VM Details <Badge value="Alpha" />
+      </header>
+      <dl className={STYLES.containerPadding}>
+        {isLoadingDetails(Boolean(details), receivedError) ? (
+          <div className={STYLES.containerSize}>
+            <p className={STYLES.paragraph}>Retrieving GCE VM details...</p>
+          </div>
+        ) : receivedError ? (
+          <div className={STYLES.containerSize}>
+            <p className={STYLES.paragraph}>
+              Unable to retrieve GCE VM details, please check your server logs
+            </p>
+          </div>
+        ) : (
+          SimpleTable(details)
+        )}
+        <ActionBar
+          primaryLabel="Modify hardware"
+          secondaryLabel="Close"
+          onPrimaryClick={onUpdate}
+          onSecondaryClick={onDialogClose}
+          primaryDisabled={
+            receivedError || isLoadingDetails(Boolean(details), receivedError)
+          }
+        />
+      </dl>
+    </div>
   );
 }

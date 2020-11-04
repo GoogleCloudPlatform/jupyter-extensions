@@ -17,7 +17,10 @@ server. Do this in another terminal window since it will create an interactive
 SSH session. Replace the instance variable in the URL below with the name of an instance
 that has the configurations you want. It can be found under the notebooks tab in GCP AI Platform.
 
-`gcloud compute ssh jupyter@${INSTANCE} --ssh-flag "-L 8889:metadata.google.internal:80"`
+```
+gcloud compute ssh ${INSTANCE} --zone ${ZONE} \
+  --ssh-flag "-L 8889:metadata.google.internal:80"
+```
 
 Set the METADATA_SERVER environment variable to tell the server to use
 the forwarded address

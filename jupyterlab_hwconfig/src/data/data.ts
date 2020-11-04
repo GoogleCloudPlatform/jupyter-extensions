@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import { MachineType, MachineTypeConfiguration } from './machine_types';
-import {
-  Accelerator,
-  nvidiaNameToEnum,
-  NO_ACCELERATOR_COUNT,
-} from './accelerator_types';
+import { MachineType } from './machine_types';
+import { nvidiaNameToEnum, NO_ACCELERATOR_COUNT } from './accelerator_types';
 
 export interface Option {
   text: string;
@@ -61,13 +57,12 @@ interface Gpu {
   temperature: number;
 }
 
-export interface Details {
+/** Details response information from server extension. */
+export interface DetailsResponse {
   instance: Instance;
   project: Project;
-  utilization: Utilization;
   gpu: Gpu;
-  acceleratorTypes: Accelerator[];
-  machineTypes: MachineTypeConfiguration[];
+  utilization: Utilization;
 }
 
 export interface HardwareConfiguration {
@@ -93,7 +88,7 @@ export function isEqualHardwareConfiguration(
 }
 
 export function detailsToHardwareConfiguration(
-  details: Details
+  details: DetailsResponse
 ): HardwareConfiguration {
   const { instance, gpu } = details;
 
@@ -199,41 +194,57 @@ export function extractLast(str: string) {
 
 interface AttributeMapper {
   label: string;
-  mapper: (details: Details) => string;
+  mapper: (details: DetailsResponse) => string;
 }
 
 // Displayable virtual machine detail attributes
 export const MAPPED_ATTRIBUTES: AttributeMapper[] = [
-  { label: 'VM Name', mapper: (details: Details) => details.instance.name },
-  { label: 'Project', mapper: (details: Details) => details.project.projectId },
+  {
+    label: 'VM Name',
+    mapper: (details: DetailsResponse) => details.instance.name,
+  },
+  {
+    label: 'Project',
+    mapper: (details: DetailsResponse) => details.project.projectId,
+  },
   {
     label: 'Framework',
-    mapper: (details: Details) => details.instance.attributes.framework,
+    mapper: (details: DetailsResponse) => details.instance.attributes.framework,
   },
   {
     label: 'Machine Type',
-    mapper: (details: Details) =>
+    mapper: (details: DetailsResponse) =>
       `${details.instance.machineType.description} (${details.instance.machineType.name})`,
+  },
+  {
+    label: 'GPU Type',
+    mapper: (details: DetailsResponse) => {
+      if (!details.gpu.name) {
+        return 'No GPUs';
+      }
+      return `${details.gpu.name} x ${details.gpu.count}`;
+    },
   },
 ];
 
 export const REFRESHABLE_MAPPED_ATTRIBUTES = [
   {
     label: 'CPU Utilization',
-    mapper: (details: Details) => `CPU: ${details.utilization.cpu.toFixed(1)}%`,
+    mapper: (details: DetailsResponse) =>
+      `CPU: ${details.utilization.cpu.toFixed(1)}%`,
   },
   {
     label: 'Memory Utilization',
-    mapper: (details: Details) =>
+    mapper: (details: DetailsResponse) =>
       `Memory: ${details.utilization.memory.toFixed(1)}%`,
   },
   {
     label: 'GPU Utilization',
-    mapper: (details: Details) => {
+    mapper: (details: DetailsResponse) => {
       if (!details.gpu.name) {
         return 'No GPUs';
       }
-      return `GPU: ${details.gpu.name} - ${details.gpu.gpu.toFixed(1)}%`;
+      return `GPU: ${details.gpu.gpu.toFixed(1)}%`;
     },
   },
 ];

@@ -51,7 +51,7 @@ const SecondaryButton = withStyles(() =>
 const PrimaryButton = withStyles(() =>
   createStyles({
     root: {
-      textTransform: 'capitalize',
+      textTransform: 'none',
       fontFamily: 'var(--jp-ui-font-family)',
       backgroundColor: COLORS.blue,
       '&:hover': {
