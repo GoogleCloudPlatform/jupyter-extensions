@@ -200,7 +200,7 @@ function workerFunc(e, batchSize) {
 
     this.postMessage({ batch, finish: false });
   }
-  this.postMessage({ batch: undefined, finish: true });
+  this.postMessage({ batch: [], finish: true });
 }
 
 class QueryTextEditor extends React.Component<
@@ -633,7 +633,7 @@ class QueryTextEditor extends React.Component<
     return (
       <IconButton
         size="small"
-        onClick={_ => {
+        onClick={() => {
           const query = this.editor.getValue();
           copy(query.trim());
           this.props.openSnackbar({
