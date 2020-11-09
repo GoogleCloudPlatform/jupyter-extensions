@@ -21,6 +21,12 @@ import { SubmittedJob } from './submitted_job';
 import { TEST_PROJECT } from '../test_helpers';
 import { RunNotebookRequest } from '../service/gcp';
 
+class MockDate extends Date {
+  constructor() {
+    super('2020-11-11T15:00:00');
+  }
+}
+
 describe('SubmittedJob', () => {
   const projectId = TEST_PROJECT;
   const gcsBucket = `gs://${TEST_PROJECT}`;
@@ -47,6 +53,7 @@ describe('SubmittedJob', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    global.Date = MockDate as any;
   });
 
   it('Renders for immediate job', async () => {

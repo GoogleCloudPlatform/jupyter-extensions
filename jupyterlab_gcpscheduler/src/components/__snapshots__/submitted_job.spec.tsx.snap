@@ -193,7 +193,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     className="row_f17j33oz messageCaption_f1vvzhbx"
   >
     <span>
-      Runs will start on November 9, 2020, 3:00 PM EST
+      Runs will start on November 11, 2020, 3:00 PM UTC
     </span>
   </div>
   <WithStyles(ForwardRef(TableContainer))>
@@ -330,7 +330,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Schedule
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            Every day at 3:00 PM EST
+            Every day at 3:00 PM UTC
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))

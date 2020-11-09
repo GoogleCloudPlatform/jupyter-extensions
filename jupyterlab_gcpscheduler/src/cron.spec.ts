@@ -33,7 +33,7 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toContain('August 1, 2021, 12:05 AM EDT');
+    expect(nextRunDate).toContain('August 1, 2021, 12:05 AM');
     expect(humanReadableCron).toContain('Every day of August at 12:05 AM');
   });
 
@@ -190,5 +190,37 @@ describe('Cron functions', () => {
     expect(humanReadableCron).toContain(
       'On Tuesday, Thursday and Saturday at 2:00 PM'
     );
+  });
+
+  it('Invalid short cron string', async () => {
+    const cronString = '* * * *';
+    const nextRunDate = getNextRunAfterDate(cronString, MOCK_DATE);
+    const humanReadableCron = getHumanReadableCron(cronString);
+    expect(nextRunDate).toBeFalsy();
+    expect(humanReadableCron).toEqual('');
+  });
+
+  it('Invalid cron string range', async () => {
+    const cronString = '* * 1-99 * *';
+    const nextRunDate = getNextRunAfterDate(cronString, MOCK_DATE);
+    const humanReadableCron = getHumanReadableCron(cronString);
+    expect(nextRunDate).toBeFalsy();
+    expect(humanReadableCron).toEqual('');
+  });
+
+  it('Invalid cron string value', async () => {
+    const cronString = '* * * * CHI';
+    const nextRunDate = getNextRunAfterDate(cronString, MOCK_DATE);
+    const humanReadableCron = getHumanReadableCron(cronString);
+    expect(nextRunDate).toBeFalsy();
+    expect(humanReadableCron).toEqual('');
+  });
+
+  it('Invalid cron string numeric value', async () => {
+    const cronString = '* * 4,5,33 * *';
+    const nextRunDate = getNextRunAfterDate(cronString, MOCK_DATE);
+    const humanReadableCron = getHumanReadableCron(cronString);
+    expect(nextRunDate).toBeFalsy();
+    expect(humanReadableCron).toEqual('');
   });
 });

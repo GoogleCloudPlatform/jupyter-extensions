@@ -124,6 +124,9 @@ function parseValue(
     return MONTH_NAME_TO_VALUE[value];
   }
   const parsedValue = Number(value);
+  if (isNaN(parsedValue)) {
+    throw 'Invalid value in cron part';
+  }
   if (parsedValue < allowedMin || parsedValue > allowedMax) {
     throw 'Value not in range';
   }
