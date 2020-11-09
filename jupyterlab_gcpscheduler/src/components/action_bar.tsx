@@ -30,10 +30,6 @@ interface Props {
   onDialogClose: OnDialogClose;
 }
 
-interface State {
-  displayMessage: string;
-}
-
 export const STYLES = stylesheet({
   actionBar: {
     $nest: {
@@ -56,42 +52,25 @@ export const STYLES = stylesheet({
 });
 
 /** Funtional Component for defining an action bar with buttons. */
-export class ActionBar extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { displayMessage: props.displayMessage };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.displayMessage !== this.props.displayMessage) {
-      this.setState({
-        displayMessage: this.props.displayMessage,
-      });
-    }
-  }
-
-  render() {
-    const props = this.props;
-    const displayMessage = this.state.displayMessage;
-    return (
-      <Grid container spacing={1} className={STYLES.actionBarContainer}>
-        {displayMessage && (
-          <Grid item sm={8}>
-            <span className={STYLES.actionBarDisplayMessage}>
-              {displayMessage}
-            </span>
-          </Grid>
-        )}
-        <Grid item sm={displayMessage ? 4 : 12}>
-          <div className={STYLES.actionBar}>
-            {props.closeOnRight && props.children}
-            <Button onClick={props.onDialogClose}>
-              {props.closeLabel || 'Close'}
-            </Button>
-            {!props.closeOnRight && props.children}
-          </div>
+export function ActionBar(props: Props) {
+  return (
+    <Grid container spacing={1} className={STYLES.actionBarContainer}>
+      {props.displayMessage && (
+        <Grid item sm={8}>
+          <span className={STYLES.actionBarDisplayMessage}>
+            {props.displayMessage}
+          </span>
         </Grid>
+      )}
+      <Grid item sm={props.displayMessage ? 4 : 12}>
+        <div className={STYLES.actionBar}>
+          {props.closeOnRight && props.children}
+          <Button onClick={props.onDialogClose}>
+            {props.closeLabel || 'Close'}
+          </Button>
+          {!props.closeOnRight && props.children}
+        </div>
       </Grid>
-    );
-  }
+    </Grid>
+  );
 }
