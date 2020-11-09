@@ -33,8 +33,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('August 1, 2021, 12:05 AM EDT');
-    expect(humanReadableCron).toBe('Every day of August at 12:05 AM EST');
+    expect(nextRunDate).toContain('August 1, 2021, 12:05 AM EDT');
+    expect(humanReadableCron).toContain('Every day of August at 12:05 AM');
   });
 
   it('Get next run date for specific time on specific day of month', async () => {
@@ -43,8 +43,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('December 1, 2020, 2:15 PM EST');
-    expect(humanReadableCron).toBe('On the 1st of every month at 2:15 PM EST');
+    expect(nextRunDate).toContain('December 1, 2020, 2:15 PM');
+    expect(humanReadableCron).toContain('On the 1st of every month at 2:15 PM');
   });
   it('Get next run date for specific time on range of weekdays', async () => {
     const cronString = '0 22 * * 1-5';
@@ -52,9 +52,9 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 11, 2020, 10:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'On Monday, Tuesday, Wednesday, Thursday and Friday at 10:00 PM EST'
+    expect(nextRunDate).toContain('November 11, 2020, 10:00 PM');
+    expect(humanReadableCron).toContain(
+      'On Monday, Tuesday, Wednesday, Thursday and Friday at 10:00 PM'
     );
   });
 
@@ -64,8 +64,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 11, 2020, 12:23 PM EST');
-    expect(humanReadableCron).toBe(
+    expect(nextRunDate).toContain('November 11, 2020, 12:23 PM');
+    expect(humanReadableCron).toContain(
       'At minute 23 past hour 0, 2, 4, 6, 8, 10, 12, 14, 16, 18 and 20'
     );
   });
@@ -76,8 +76,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 15, 2020, 4:05 AM EST');
-    expect(humanReadableCron).toBe('On Sunday at 4:05 AM EST');
+    expect(nextRunDate).toContain('November 15, 2020, 4:05 AM');
+    expect(humanReadableCron).toContain('On Sunday at 4:05 AM');
   });
 
   it('Get next run date for specific minute of multiple hours on specific day of interval of months', async () => {
@@ -86,8 +86,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('January 1, 2021, 12:00 AM EST');
-    expect(humanReadableCron).toBe(
+    expect(nextRunDate).toContain('January 1, 2021, 12:00 AM');
+    expect(humanReadableCron).toContain(
       'On the 1st of every 2nd month at minute 0 past every 12th hour'
     );
   });
@@ -98,9 +98,9 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 16, 2020, 4:00 AM EST');
-    expect(humanReadableCron).toBe(
-      'On the 16th, 17th, 18th, 19th and 20th of every month at 4:00 AM EST'
+    expect(nextRunDate).toContain('November 16, 2020, 4:00 AM');
+    expect(humanReadableCron).toContain(
+      'On the 16th, 17th, 18th, 19th and 20th of every month at 4:00 AM'
     );
   });
 
@@ -110,9 +110,9 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 15, 2020, 12:00 AM EST');
-    expect(humanReadableCron).toBe(
-      'On the 1st and 15th of every month and on Wednesday at 12:00 AM EST'
+    expect(nextRunDate).toContain('November 15, 2020, 12:00 AM');
+    expect(humanReadableCron).toContain(
+      'On the 1st and 15th of every month and on Wednesday at 12:00 AM'
     );
   });
 
@@ -122,8 +122,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 11, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe('Every day at 2:00 PM EST');
+    expect(nextRunDate).toContain('November 11, 2020, 2:00 PM');
+    expect(humanReadableCron).toContain('Every day at 2:00 PM');
   });
 
   it('Every x day at time', async () => {
@@ -132,8 +132,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 13, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe('Every 3 days at 2:00 PM EST');
+    expect(nextRunDate).toContain('November 13, 2020, 2:00 PM');
+    expect(humanReadableCron).toContain('Every 3 days at 2:00 PM');
   });
 
   it('Every hour at minute', async () => {
@@ -142,8 +142,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 11, 2020, 12:00 PM EST');
-    expect(humanReadableCron).toBe('At minute 0 past every hour');
+    expect(nextRunDate).toContain('November 11, 2020, 12:00 PM');
+    expect(humanReadableCron).toContain('At minute 0 past every hour');
   });
 
   it('Every x hour at minutes', async () => {
@@ -152,8 +152,8 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 11, 2020, 12:00 PM EST');
-    expect(humanReadableCron).toBe('At minute 0 past every 4th hour');
+    expect(nextRunDate).toContain('November 11, 2020, 12:00 PM');
+    expect(humanReadableCron).toContain('At minute 0 past every 4th hour');
   });
 
   it('Every month at time and day', async () => {
@@ -162,8 +162,10 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 14, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe('On the 14th of every month at 2:00 PM EST');
+    expect(nextRunDate).toContain('November 14, 2020, 2:00 PM');
+    expect(humanReadableCron).toContain(
+      'On the 14th of every month at 2:00 PM'
+    );
   });
 
   it('Every x months at time and day', async () => {
@@ -172,9 +174,9 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 14, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'On the 14th of every 5th month at 2:00 PM EST'
+    expect(nextRunDate).toContain('November 14, 2020, 2:00 PM');
+    expect(humanReadableCron).toContain(
+      'On the 14th of every 5th month at 2:00 PM'
     );
   });
 
@@ -184,9 +186,9 @@ describe('Cron functions', () => {
       getNextRunAfterDate(cronString, MOCK_DATE)
     );
     const humanReadableCron = getHumanReadableCron(cronString);
-    expect(nextRunDate).toBe('November 12, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'On Tuesday, Thursday and Saturday at 2:00 PM EST'
+    expect(nextRunDate).toContain('November 12, 2020, 2:00 PM');
+    expect(humanReadableCron).toContain(
+      'On Tuesday, Thursday and Saturday at 2:00 PM'
     );
   });
 });
