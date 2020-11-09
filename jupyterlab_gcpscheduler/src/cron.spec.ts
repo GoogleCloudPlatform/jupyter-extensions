@@ -174,7 +174,7 @@ describe('Cron functions', () => {
     const humanReadableCron = getHumanReadableCron(cronString);
     expect(nextRunDate).toBe('November 14, 2020, 2:00 PM EST');
     expect(humanReadableCron).toBe(
-      '"On the 14th of every 5th month at 2:00 PM EST'
+      'On the 14th of every 5th month at 2:00 PM EST'
     );
   });
 
