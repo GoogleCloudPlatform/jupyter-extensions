@@ -133,9 +133,7 @@ describe('Cron functions', () => {
     );
     const humanReadableCron = getHumanReadableCron(cronString);
     expect(nextRunDate).toBe('November 13, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'Every 3 days at 2:00 PM EST'
-    );
+    expect(humanReadableCron).toBe('Every 3 days at 2:00 PM EST');
   });
 
   it('Every hour at minute', async () => {
@@ -145,9 +143,7 @@ describe('Cron functions', () => {
     );
     const humanReadableCron = getHumanReadableCron(cronString);
     expect(nextRunDate).toBe('November 11, 2020, 12:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'At minute 0 past every hour'
-    );
+    expect(humanReadableCron).toBe('At minute 0 past every hour');
   });
 
   it('Every x hour at minutes', async () => {
@@ -157,9 +153,7 @@ describe('Cron functions', () => {
     );
     const humanReadableCron = getHumanReadableCron(cronString);
     expect(nextRunDate).toBe('November 11, 2020, 12:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'At minute 0 past every 4th hour'
-    );
+    expect(humanReadableCron).toBe('At minute 0 past every 4th hour');
   });
 
   it('Every month at time and day', async () => {
@@ -169,9 +163,7 @@ describe('Cron functions', () => {
     );
     const humanReadableCron = getHumanReadableCron(cronString);
     expect(nextRunDate).toBe('November 14, 2020, 2:00 PM EST');
-    expect(humanReadableCron).toBe(
-      'On the 14th of every month at 2:00 PM EST'
-    );
+    expect(humanReadableCron).toBe('On the 14th of every month at 2:00 PM EST');
   });
 
   it('Every x months at time and day', async () => {

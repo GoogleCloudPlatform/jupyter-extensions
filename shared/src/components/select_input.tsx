@@ -82,7 +82,7 @@ export function SelectInput(props: Props) {
         InputProps={{
           style: INPUT_TEXT_STYLE,
         }}
-        InputLabelProps={{ shrink: true, style: {...FORM_LABEL_STYLE} }}
+        InputLabelProps={{ shrink: true, style: { ...FORM_LABEL_STYLE } }}
         SelectProps={{
           IconComponent: iconComponent,
           displayEmpty: true,
@@ -101,11 +101,11 @@ export function SelectInput(props: Props) {
           ))}
       </TextField>
       {formHelperText && (
-          <FormHelperText style={ALIGN_HINT}>
-            {formHelperText}
-            {formHelperLink && <LearnMoreLink href={formHelperLink} />}
-          </FormHelperText>
-        )}
+        <FormHelperText style={ALIGN_HINT}>
+          {formHelperText}
+          {formHelperLink && <LearnMoreLink href={formHelperLink} />}
+        </FormHelperText>
+      )}
     </div>
   );
 }

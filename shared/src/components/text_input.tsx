@@ -51,7 +51,7 @@ export function TextInput(props: TextInputProps) {
       InputProps={{
         style: INPUT_TEXT_STYLE,
       }}
-      InputLabelProps={{ style: {...FORM_LABEL_STYLE }}}
+      InputLabelProps={{ style: { ...FORM_LABEL_STYLE } }}
     ></TextField>
   );
 }
