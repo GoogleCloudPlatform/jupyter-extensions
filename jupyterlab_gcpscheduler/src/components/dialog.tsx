@@ -31,14 +31,13 @@ import {
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
-import { SCHEDULER_LINK, BUCKET_NAME_SUFFIX } from '../data';
+import { SCHEDULER_LINK } from '../data';
 import { GcpService } from '../service/gcp';
 import {
   GetPermissionsResponse,
   ProjectStateService,
   ProjectState,
 } from '../service/project_state';
-import { Initializer } from './initialization/initializer';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './action_bar';
 
@@ -87,7 +86,6 @@ interface Props {
 }
 
 interface State {
-  canSchedule: boolean;
   dialogClosedByUser: boolean;
   gcpSettings?: GcpSettings;
   permissions?: GetPermissionsResponse;
@@ -131,11 +129,9 @@ export class SchedulerDialog extends React.Component<Props, State> {
 
     this.state = {
       dialogClosedByUser: false,
-      canSchedule: false,
     };
     this._settingsChanged = this._settingsChanged.bind(this);
     this._onDialogClose = this._onDialogClose.bind(this);
-    this._onInitialized = this._onInitialized.bind(this);
   }
 
   /** Establishes the binding for Settings Signal and invokes the handler. */
@@ -202,13 +198,8 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   private _getDialogContent(): JSX.Element {
-    const {
-      canSchedule,
-      gcpSettings,
-      permissions,
-      jobSubmittedMessage,
-    } = this.state;
-    const { gcpService, projectStateService, request } = this.props;
+    const { gcpSettings, permissions, jobSubmittedMessage } = this.state;
+    const { gcpService, request } = this.props;
     const hasNotebook = !!(request && request.notebook);
     if (jobSubmittedMessage) {
       return (
@@ -237,15 +228,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
           <ActionBar onDialogClose={this._onDialogClose} />
         </div>
       );
-    } else if (!canSchedule) {
-      return (
-        <Initializer
-          projectStateService={projectStateService}
-          onDialogClose={this._onDialogClose}
-          onInitialized={this._onInitialized}
-        />
-      );
-    } else if (canSchedule && hasNotebook) {
+    } else {
       return permissions ? (
         <SchedulerForm
           gcpService={gcpService}
@@ -269,7 +252,6 @@ export class SchedulerDialog extends React.Component<Props, State> {
   // Casts to GcpSettings shape from JSONObject
   private _settingsChanged(newSettings: ISettingRegistry.ISettings) {
     const settings = (newSettings.composite as unknown) as GcpSettings;
-    const canSchedule = !!(settings.projectId && settings.gcsBucket);
     if (settings.projectId) {
       console.info(`Using ${settings.projectId} for GCP API calls`);
       this.props.projectStateService.projectId = settings.projectId;
@@ -283,26 +265,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
       console.info('Using machine authentication for GCP API calls');
       this.props.gcpService.transportService = new ServerProxyTransportService();
     }
-
-    this.setState({ gcpSettings: settings, canSchedule });
-  }
-
-  // Callback when Initializer has a valid project state
-  private _onInitialized(projectState: ProjectState) {
-    const { settings } = this.props;
-    const gcpSettings = (settings.composite as unknown) as GcpSettings;
-    if (gcpSettings.projectId !== projectState.projectId) {
-      settings.set('projectId', projectState.projectId);
-    }
-    if (!gcpSettings.gcsBucket && projectState.hasGcsBucket) {
-      settings.set(
-        'gcsBucket',
-        `gs://${projectState.projectId}${BUCKET_NAME_SUFFIX}`
-      );
-    }
-    if (!gcpSettings.schedulerRegion && projectState.canSubmitScheduledJobs) {
-      settings.set('schedulerRegion', projectState.schedulerRegion);
-    }
+    this.setState({ gcpSettings: settings });
   }
 
   private _onDialogClose() {

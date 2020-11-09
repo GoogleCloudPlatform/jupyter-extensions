@@ -22,17 +22,17 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
   <main
     className="main_f2ra5xi"
   >
-    <Initializer
-      onDialogClose={[Function]}
-      onInitialized={[Function]}
-      projectStateService={
-        Object {
-          "getPermissions": [MockFunction],
-          "getProjectState": [MockFunction],
-          "projectId": undefined,
-        }
-      }
-    />
+    <div
+      className="column_fghohlb"
+    >
+      <Message
+        asActivity={true}
+        text="Checking IAM Permissions"
+      />
+      <ActionBar
+        onDialogClose={[Function]}
+      />
+    </div>
   </main>
 </WithStyles(ForwardRef(Dialog))>
 `;
@@ -96,27 +96,17 @@ exports[`SchedulerDialog Renders with Initializer: Initializer 1`] = `
   <main
     className="main_f2ra5xi"
   >
-    <Initializer
-      onDialogClose={[Function]}
-      onInitialized={[Function]}
-      projectStateService={
-        Object {
-          "getPermissions": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": Promise {},
-              },
-            ],
-          },
-          "getProjectState": [MockFunction],
-          "projectId": undefined,
-        }
-      }
-    />
+    <div
+      className="column_fghohlb"
+    >
+      <Message
+        asActivity={true}
+        text="Checking IAM Permissions"
+      />
+      <ActionBar
+        onDialogClose={[Function]}
+      />
+    </div>
   </main>
 </WithStyles(ForwardRef(Dialog))>
 `;

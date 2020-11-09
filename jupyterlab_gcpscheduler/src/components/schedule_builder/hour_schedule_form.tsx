@@ -78,13 +78,15 @@ export class HourScheduleBuilder extends React.Component<
     return (
       <div>
         <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>Repeat every</span>
+          <span className={css.flexQuarter}>
+            <b>Repeat every</b>
+          </span>
           <div className={css.flex1}>
             <TextInput
               name="frequency"
               type="number"
               min="1"
-              max="24"
+              max="23"
               value={this.state.frequency}
               hasError={!this.state.frequency}
               onChange={e => this.setState({ frequency: e.target.value })}
@@ -111,7 +113,9 @@ export class HourScheduleBuilder extends React.Component<
           value={this.state.frequency}
         />
         <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>Repeat (minute)</span>
+          <span className={css.flexQuarter}>
+            <b>Repeat (minute)</b>
+          </span>
           <div className={css.flex3}>
             <TextInput
               name="specifiedMinute"

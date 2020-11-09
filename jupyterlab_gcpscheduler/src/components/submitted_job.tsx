@@ -20,12 +20,17 @@ import { COLORS, css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { Button } from '@material-ui/core';
 import { classes, stylesheet } from 'typestyle';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableRow from '@material-ui/core/TableRow';
+import { getNextRunDate, getHumanReadableCron } from '../cron';
 
 import {
   findOptionByValue,
   REGIONS,
   SCALE_TIERS,
-  GCS_LINK,
   SCHEDULER_LINK,
   MASTER_TYPES,
   CUSTOM,
@@ -49,26 +54,22 @@ interface GcsInformation {
 }
 
 const localStyles = stylesheet({
-  dl: {
-    fontSize: '13px',
-    $nest: {
-      '& > div': {
-        marginBottom: '8px',
-      },
-      '& dt': {
-        display: 'inline',
-        fontWeight: 500,
-      },
-      '& dd': {
-        display: 'inline',
-        marginLeft: '4px',
-      },
-    },
+  table: {
+    paddingLeft: '15px',
+    paddingRight: '15px',
+  },
+  tableHeader: {
+    paddingRight: '10px !important',
   },
   message: {
     alignItems: 'center',
     fontSize: '15px',
     fontWeight: 500,
+  },
+  messageCaption: {
+    fontSize: '12px',
+    marginBottom: '20px',
+    marginLeft: '37px',
   },
 });
 
@@ -98,7 +99,6 @@ export class SubmittedJob extends React.Component<Props, {}> {
       request.acceleratorType
     );
     const gcsInformation = this.getGcsInformation(request.inputNotebookGcsPath);
-    const gcsLink = `${GCS_LINK}/${gcsInformation.link}?${projectParam}`;
     const isRecurring = !!schedule;
     const jobLink = `${SCHEDULER_LINK}?${projectParam}`;
     return (
@@ -107,66 +107,117 @@ export class SubmittedJob extends React.Component<Props, {}> {
           <GreenCheck />
           <span>Notebook run successfully scheduled!</span>
         </div>
-        <dl className={localStyles.dl}>
-          <div>
-            <dt>Notebook:</dt>
-            <dd>
-              <LearnMoreLink text={gcsInformation.basename} href={gcsLink} />
-            </dd>
-          </div>
-          <div>
-            <dt>Run name:</dt>
-            <dd>{request.jobId}</dd>
-          </div>
-          <div>
-            <dt>Region:</dt>
-            <dd>{region.text}</dd>
-          </div>
-          <div>
-            <dt>Scale tier:</dt>
-            <dd>
-              {scaleTier.value} - {scaleTier.text}
-            </dd>
-          </div>
-          {scaleTier.value === CUSTOM && (
-            <React.Fragment>
-              <div>
-                <dt>Master type:</dt>
-                <dd>{masterType.text}</dd>
-              </div>
-              <div>
-                <dt>Accelerator type:</dt>
-                <dd>{acceleratorType.text}</dd>
-              </div>
-              <div>
-                <dt>Accelerator count:</dt>
-                <dd>{request.acceleratorCount}</dd>
-              </div>
-            </React.Fragment>
-          )}
-          <div>
-            <dt>Container:</dt>
-            <dd>{request.imageUri}</dd>
-          </div>
-          <div>
-            <dt>Type:</dt>
-            <dd>{isRecurring ? 'Recurring run' : 'Single run'}</dd>
-          </div>
-          {isRecurring && (
-            <div>
-              <dt>Schedule:</dt>
-              <dd>{schedule}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Job:</dt>
-            <dd>
-              <LearnMoreLink text="View in Cloud Console" href={jobLink} />
-            </dd>
-          </div>
-        </dl>
-        <ActionBar closeLabel="Done" onDialogClose={onDialogClose}>
-          <Button onClick={onFormReset}>Submit another job</Button>
+        <div className={classes(css.row, localStyles.messageCaption)}>
+          {!isRecurring && <span>Run has been started</span>}
+          {isRecurring && <span>{getNextRunDate(schedule)}</span>}
+        </div>
+        <TableContainer>
+          <Table
+            padding="none"
+            aria-label="simple table"
+            className={localStyles.table}
+          >
+            <TableBody>
+              <TableRow key="notebookLink">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Notebook
+                </TableCell>
+                <TableCell>{gcsInformation.basename}</TableCell>
+              </TableRow>
+              <TableRow key="runName">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Run name
+                </TableCell>
+                <TableCell>{request.jobId}</TableCell>
+              </TableRow>
+              <TableRow key="region">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Region
+                </TableCell>
+                <TableCell>{region.text}</TableCell>
+              </TableRow>
+              <TableRow key="scaleTier">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Scale tier
+                </TableCell>
+                <TableCell>{scaleTier.value}</TableCell>
+              </TableRow>
+              {scaleTier.value === CUSTOM && (
+                <React.Fragment>
+                  <TableRow key="masterType">
+                    <TableCell
+                      className={localStyles.tableHeader}
+                      variant="head"
+                    >
+                      Master type
+                    </TableCell>
+                    <TableCell>{masterType.text}</TableCell>
+                  </TableRow>
+                  <TableRow key="acceleratorType">
+                    <TableCell
+                      className={localStyles.tableHeader}
+                      variant="head"
+                    >
+                      Accelerator type
+                    </TableCell>
+                    <TableCell>{acceleratorType.text}</TableCell>
+                  </TableRow>
+                  {request.acceleratorCount && (
+                    <TableRow key="acceleratorCount">
+                      <TableCell
+                        className={localStyles.tableHeader}
+                        variant="head"
+                      >
+                        Accelerator count
+                      </TableCell>
+                      <TableCell>{request.acceleratorCount}</TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              )}
+              <TableRow key="container">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Container
+                </TableCell>
+                <TableCell>{request.imageUri}</TableCell>
+              </TableRow>
+              <TableRow key="type">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Type
+                </TableCell>
+                <TableCell>
+                  {isRecurring ? 'Recurring run' : 'Single run'}
+                </TableCell>
+              </TableRow>
+              {isRecurring && (
+                <TableRow key="schedule">
+                  <TableCell className={localStyles.tableHeader} variant="head">
+                    Schedule
+                  </TableCell>
+                  <TableCell>{getHumanReadableCron(schedule)}</TableCell>
+                </TableRow>
+              )}
+              <TableRow key="status">
+                <TableCell className={localStyles.tableHeader} variant="head">
+                  Status
+                </TableCell>
+                <TableCell>
+                  {' '}
+                  <LearnMoreLink
+                    text="View in Google Cloud console"
+                    href={jobLink}
+                  />
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <ActionBar
+          closeLabel="Done"
+          closeOnRight={true}
+          onDialogClose={onDialogClose}
+        >
+          <Button onClick={onFormReset}>Submit another run</Button>
         </ActionBar>
       </div>
     );

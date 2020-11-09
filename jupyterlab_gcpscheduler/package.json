@@ -31,9 +31,9 @@
     "lint": "npm run lint-warnings -- --quiet",
     "pretest": "npm run lint",
     "prepack": "npm run clean && npm run build",
-    "test": "jest --coverage",
+    "test": "TZ=UTC jest --coverage",
     "test-python": "../scripts/run_python_tests.sh coverage",
-    "test-watch": "jest --watch",
+    "test-watch": "TZ=UTC jest --watch",
     "watch": "tsc -b -w"
   },
   "dependencies": {

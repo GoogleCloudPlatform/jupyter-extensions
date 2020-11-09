@@ -78,7 +78,9 @@ export class VizierService {
       const body = JSON.stringify(study);
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies?study_id=${encodeURI(study.name)}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies?study_id=${encodeURI(
+          study.name
+        )}`,
         method: 'POST',
         body,
       });
@@ -116,7 +118,9 @@ export class VizierService {
       const { project } = await this._getMetadata();
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit<undefined>({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(rawStudyName)
+        )}`,
         method: 'DELETE',
       });
       return true;
@@ -131,7 +135,9 @@ export class VizierService {
       const { project } = await this._getMetadata();
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Study>({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(rawStudyName))}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(rawStudyName)
+        )}`,
         method: 'GET',
       });
       return response.result;
@@ -157,7 +163,9 @@ export class VizierService {
       const response = await this._transportService.submit<{
         trials?: Trial[];
       }>({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(studyName)
+        )}/trials`,
         method: 'GET',
       });
       if (Array.isArray(response.result.trials)) {
@@ -228,7 +236,9 @@ export class VizierService {
       const response = await this._transportService.submit<
         SuggestTrialOperation
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials:suggest`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(studyName)
+        )}/trials:suggest`,
         method: 'POST',
         body: { suggestionCount, clientId: 'vizier-extension' },
       });
@@ -264,9 +274,9 @@ export class VizierService {
       const { project } = await this._getMetadata();
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       const response = await this._transportService.submit<Trial>({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
-          prettifyTrial(trialName)
-        )}:complete`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(studyName)
+        )}/trials/${encodeURI(prettifyTrial(trialName))}:complete`,
         method: 'POST',
         body: {
           finalMeasurement: details.finalMeasurement,
@@ -324,9 +334,9 @@ export class VizierService {
       const { project } = await this._getMetadata();
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(prettifyStudyName(studyName))}/trials/${encodeURI(
-          prettifyTrial(trialName)
-        )}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/studies/${encodeURI(
+          prettifyStudyName(studyName)
+        )}/trials/${encodeURI(prettifyTrial(trialName))}`,
         method: 'DELETE',
       });
     } catch (err) {
@@ -355,7 +365,9 @@ export class VizierService {
       const response = await this._transportService.submit<
         Operation<BODY, METADATA>
       >({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(operationId)}`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(
+          operationId
+        )}`,
         method: 'GET',
       });
       return response.result;
@@ -376,7 +388,9 @@ export class VizierService {
       const { project } = await this._getMetadata();
       const ENDPOINT = `https://us-central1-ml.googleapis.com/v1`;
       await this._transportService.submit({
-        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(operationId)}:cancel`,
+        path: `${ENDPOINT}/projects/${project}/locations/us-central1/operations/${prettifyOperationId(
+          operationId
+        )}:cancel`,
         method: 'POST',
       });
     } catch (err) {

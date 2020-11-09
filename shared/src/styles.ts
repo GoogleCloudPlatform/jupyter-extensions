@@ -31,6 +31,7 @@ const ROBOTO_FONT = '"Roboto", "Helvetica Neue", sans-serif';
 /** Theme colors. */
 export const COLORS = {
   base: 'var(--jp-ui-font-color1, #3c4043)',
+  caption: 'var(--jp-content-font-color2, #616161)',
   blue: '#1a73e8',
   border: 'var(--jp-border-color0, #bdc1c6)',
   green: 'var(--jp-success-color1, #1e8e3e)',
@@ -38,7 +39,7 @@ export const COLORS = {
   link: 'var(--jp-content-link-color, #3367d6)',
   red: 'var(--jp-error-color1, #d93025)',
   white: 'var(--jp-layout-color1, white)',
-  inverse: 'var(--jp-ui-inverse-layout-color4, #555555)',
+  inverse: 'var(--jp-ui-inverse-font-color2, #555555)',
 };
 
 /** Base extension font style */
@@ -51,7 +52,20 @@ export const BASE_FONT: types.CSSProperties = {
 export const INPUT_TEXT_STYLE = {
   fontFamily: BASE_FONT.fontFamily as string,
   fontSize: BASE_FONT.fontSize as number,
-  color: 'var(--jp-ui-font-color1)',
+  color: COLORS.base,
+};
+
+export const ALIGN_HINT = {
+  marginLeft: 5,
+  marginBottom: 15,
+  marginTop: -2,
+  color: COLORS.caption,
+};
+
+export const FORM_LABEL_STYLE = {
+  color: COLORS.base,
+  alpha: 0.85,
+  fontWeight: 500,
 };
 
 /** Global styles that are useful across components */
@@ -60,6 +74,11 @@ export const css = stylesheet({
   row: csstips.horizontal,
   bold: {
     fontWeight: 500,
+  },
+  heading: {
+    fontWeight: 500,
+    marginTop: 15,
+    marginBottom: 15,
   },
   button: {
     color: COLORS.base,

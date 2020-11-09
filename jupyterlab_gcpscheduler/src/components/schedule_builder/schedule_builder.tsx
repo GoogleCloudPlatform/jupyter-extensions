@@ -38,7 +38,7 @@ export interface SchedulerBuilderProps {
 interface FormProps {
   schedule: string;
   onScheduleChange: OnScheduleChange;
-  useAdvancedSchedule: boolean;
+  useUnixCronFormat: boolean;
 }
 
 interface FormState {
@@ -63,7 +63,7 @@ export class ScheduleBuilder extends React.Component<FormProps, FormState> {
       onChangeFrequencyType: this.onChangeFrequencyType,
       onScheduleChange: onScheduleChange,
     };
-    return this.props.useAdvancedSchedule ? (
+    return this.props.useUnixCronFormat ? (
       <CronScheduleBuilder
         schedule={this.props.schedule}
         onScheduleChange={onScheduleChange}

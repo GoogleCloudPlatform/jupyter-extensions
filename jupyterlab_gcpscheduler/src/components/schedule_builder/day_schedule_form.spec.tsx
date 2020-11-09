@@ -143,10 +143,10 @@ describe('DayScheduleBuilder', () => {
     expect(mockProps.onScheduleChange).toBeCalledTimes(2);
     expect(
       dayScheduleBuilder
-        .find('CheckValidation[fieldName="Repeat (time)"]')
+        .find('CheckValidation[fieldName="Repeat at"]')
         .dive()
         .find('FieldError')
         .prop('message')
-    ).toBe('Repeat (time) is required.');
+    ).toBe('Repeat at is required.');
   });
 });

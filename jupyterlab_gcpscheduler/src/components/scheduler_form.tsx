@@ -20,13 +20,13 @@ import { FormikBag, FormikProps, withFormik } from 'formik';
 import {
   css,
   FieldError,
-  LearnMoreLink,
   Message,
   SelectInput,
   SubmitButton,
   TextInput,
   ToggleSwitch,
 } from 'gcp_jupyterlab_shared';
+import { getNextRunDate } from '../cron';
 import * as React from 'react';
 
 import { GcpService, RunNotebookRequest } from '../service/gcp';
@@ -86,7 +86,7 @@ interface SchedulerFormValues {
 }
 
 interface ScheduleBuilderState {
-  useAdvancedScheduler?: boolean;
+  useUnixCronFormat?: boolean;
 }
 
 type SchedulerFormProps = Props & FormikProps<SchedulerFormValues>;
@@ -130,7 +130,7 @@ export class InnerSchedulerForm extends React.Component<
     this.acceleratorTypeOptions = getAcceleratorTypes(
       this.props.values.masterType
     );
-    this.state = { useAdvancedScheduler: false };
+    this.state = { useUnixCronFormat: false };
     this._onScaleTierChanged = this._onScaleTierChanged.bind(this);
     this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
     this._onMasterTypeChanged = this._onMasterTypeChanged.bind(this);
@@ -181,7 +181,7 @@ export class InnerSchedulerForm extends React.Component<
     return (
       <form>
         <SchedulerDescription />
-        <p className={css.bold}>Notebook: {this.props.notebookName}</p>
+        <p className={css.heading}>Notebook: {this.props.notebookName}</p>
         <TextInput
           label="Run name"
           name="jobId"
@@ -202,12 +202,10 @@ export class InnerSchedulerForm extends React.Component<
           name="scaleTier"
           value={values.scaleTier}
           options={SCALE_TIERS}
+          formHelperText="A scale tier is a predefined cluster specification."
+          formHelperLink={SCALE_TIER_LINK}
           onChange={this._onScaleTierChanged}
         />
-        <p className={css.noTopMargin}>
-          A scale tier is a predefined cluster specification.
-          <LearnMoreLink href={SCALE_TIER_LINK} />
-        </p>
         {values.scaleTier === CUSTOM && (
           <SelectInput
             label="Machine type"
@@ -260,7 +258,21 @@ export class InnerSchedulerForm extends React.Component<
           <ScheduleBuilder
             schedule={values.schedule}
             onScheduleChange={this.updateCronSchedule}
-            useAdvancedSchedule={this.state.useAdvancedScheduler}
+            useUnixCronFormat={this.state.useUnixCronFormat}
+          />
+        )}
+        {values.scheduleType === RECURRING && (
+          <ToggleSwitch
+            name="useUnixCronFormat"
+            checked={this.state.useUnixCronFormat}
+            label={
+              this.state.useUnixCronFormat
+                ? 'Use user-friendly scheduler'
+                : 'Use unix-cron format'
+            }
+            onChange={e =>
+              this.setState({ useUnixCronFormat: e.target.checked })
+            }
           />
         )}
         {status && !status.lastSubmitted && (
@@ -276,38 +288,23 @@ export class InnerSchedulerForm extends React.Component<
             text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
           />
         )}
-        <div className={css.row}>
-          <div className={css.flex1}>
-            {values.scheduleType === RECURRING && (
-              <ToggleSwitch
-                name="useAdvancedScheduler"
-                checked={this.state.useAdvancedScheduler}
-                label={
-                  this.state.useAdvancedScheduler
-                    ? 'Use user-friendly scheduler'
-                    : 'Use advanced scheduler'
-                }
-                onChange={e =>
-                  this.setState({ useAdvancedScheduler: e.target.checked })
-                }
-              />
-            )}
-          </div>
-          <div>
-            <ActionBar
-              onDialogClose={this.props.onDialogClose}
-              closeLabel="Cancel"
-            >
-              {this.missingPermissions.length === 0 && (
-                <SubmitButton
-                  actionPending={isSubmitting}
-                  onClick={submitForm}
-                  text="Submit"
-                />
-              )}
-            </ActionBar>
-          </div>
-        </div>
+        <ActionBar
+          onDialogClose={this.props.onDialogClose}
+          closeLabel="Cancel"
+          displayMessage={
+            values.scheduleType === RECURRING
+              ? getNextRunDate(values.schedule)
+              : 'Run will start immediately after being submitted'
+          }
+        >
+          {this.missingPermissions.length === 0 && (
+            <SubmitButton
+              actionPending={isSubmitting}
+              onClick={submitForm}
+              text="Submit"
+            />
+          )}
+        </ActionBar>
       </form>
     );
   }

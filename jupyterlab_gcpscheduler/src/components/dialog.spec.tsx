@@ -25,16 +25,14 @@ import { Button } from '@material-ui/core';
 import { GcpService } from '../service/gcp';
 import { LaunchSchedulerRequest, SchedulerDialog, GcpSettings } from './dialog';
 import { INotebookModel } from '@jupyterlab/notebook';
-import { TEST_PROJECT, getProjectState } from '../test_helpers';
+import { TEST_PROJECT } from '../test_helpers';
 import {
   ClientTransportService,
   ServerProxyTransportService,
   TransportService,
 } from 'gcp_jupyterlab_shared';
-import { ProjectStateService, ProjectState } from '../service/project_state';
+import { ProjectStateService } from '../service/project_state';
 import { ActionBar } from './action_bar';
-import { Initializer } from './initialization/initializer';
-import { BUCKET_NAME_SUFFIX } from '../data';
 
 describe('SchedulerDialog', () => {
   const getPermissionsPromise = Promise.resolve({
@@ -216,40 +214,6 @@ describe('SchedulerDialog', () => {
       .find(Button)
       .simulate('click');
     expect(dialog.state('dialogClosedByUser')).toBe(true);
-  });
-
-  it('Updates settings from Initializer', async () => {
-    const settings = getSettings({});
-    const projectState: ProjectState = {
-      ...getProjectState(),
-      canSubmitScheduledJobs: true,
-      hasGcsBucket: true,
-      schedulerRegion: 'us-central1',
-    };
-    launchSchedulerRequest.notebookName = 'Foo.ipynb';
-    launchSchedulerRequest.notebook = fakeNotebook.model;
-
-    const dialog = shallow(
-      <SchedulerDialog
-        projectStateService={mockProjectStateService}
-        gcpService={mockGcpService}
-        request={launchSchedulerRequest}
-        settings={settings}
-      />
-    );
-    dialog.find(Initializer).prop('onInitialized')(projectState);
-    expect(mockSettingsSet).toHaveBeenCalledWith(
-      'projectId',
-      projectState.projectId
-    );
-    expect(mockSettingsSet).toHaveBeenCalledWith(
-      'gcsBucket',
-      `gs://${projectState.projectId}${BUCKET_NAME_SUFFIX}`
-    );
-    expect(mockSettingsSet).toHaveBeenCalledWith(
-      'schedulerRegion',
-      projectState.schedulerRegion
-    );
   });
 
   it('Clears settings when Reset is clicked', async () => {

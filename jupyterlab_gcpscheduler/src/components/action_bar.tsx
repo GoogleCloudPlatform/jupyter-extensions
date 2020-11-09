@@ -16,37 +16,61 @@
 
 import * as csstips from 'csstips';
 import * as React from 'react';
-import { style } from 'typestyle';
+import { stylesheet } from 'typestyle';
 
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { OnDialogClose } from './dialog';
+import { COLORS } from 'gcp_jupyterlab_shared';
 
 interface Props {
   children?: React.ReactNode;
   closeLabel?: string;
+  displayMessage?: string;
+  closeOnRight?: boolean;
   onDialogClose: OnDialogClose;
 }
 
-const actionBar = style({
-  paddingTop: '16px',
-  paddingRight: '2px',
-  $nest: {
-    '&>*': {
-      marginLeft: '16px',
+export const STYLES = stylesheet({
+  actionBar: {
+    $nest: {
+      '&>*': {
+        marginLeft: '16px',
+      },
     },
+    ...csstips.horizontal,
+    ...csstips.endJustified,
   },
-  ...csstips.horizontal,
-  ...csstips.endJustified,
+  actionBarContainer: {
+    paddingTop: '16px',
+  },
+  actionBarDisplayMessage: {
+    paddingTop: '9px',
+    ...csstips.horizontal,
+    color: COLORS.caption,
+    fontSize: '12px',
+  },
 });
 
 /** Funtional Component for defining an action bar with buttons. */
 export function ActionBar(props: Props) {
   return (
-    <div className={actionBar}>
-      <Button onClick={props.onDialogClose}>
-        {props.closeLabel || 'Close'}
-      </Button>
-      {props.children}
-    </div>
+    <Grid container spacing={1} className={STYLES.actionBarContainer}>
+      {props.displayMessage && (
+        <Grid item sm={8}>
+          <span className={STYLES.actionBarDisplayMessage}>
+            {props.displayMessage}
+          </span>
+        </Grid>
+      )}
+      <Grid item sm={props.displayMessage ? 4 : 12}>
+        <div className={STYLES.actionBar}>
+          {props.closeOnRight && props.children}
+          <Button onClick={props.onDialogClose}>
+            {props.closeLabel || 'Close'}
+          </Button>
+          {!props.closeOnRight && props.children}
+        </div>
+      </Grid>
+    </Grid>
   );
 }
