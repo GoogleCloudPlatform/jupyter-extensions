@@ -25,7 +25,7 @@ describe('ScheduleBuilder', () => {
   const mockProps = {
     schedule: '',
     onScheduleChange: jest.fn(),
-    useAdvancedSchedule: false,
+    useUnixCronFormat: false,
   };
 
   beforeEach(() => {
@@ -68,19 +68,19 @@ describe('ScheduleBuilder', () => {
     expect(scheduleBuilder.find('WeekScheduleBuilder')).toHaveLength(1);
   });
 
-  it('Uses CronScheduleBuilder on useAdvancedSchedule change', async () => {
+  it('Uses CronScheduleBuilder on useUnixCronFormat change', async () => {
     const scheduleBuilder = shallow(<ScheduleBuilder {...mockProps} />);
     expect(scheduleBuilder.find('CronScheduleBuilder')).toHaveLength(0);
-    scheduleBuilder.setProps({ useAdvancedSchedule: true });
+    scheduleBuilder.setProps({ useUnixCronFormat: true });
     expect(scheduleBuilder.find('CronScheduleBuilder')).toHaveLength(1);
   });
 
-  it('Toggles CronScheduleBuilder on useAdvancedSchedule toggle', async () => {
+  it('Toggles CronScheduleBuilder on useUnixCronFormat toggle', async () => {
     const scheduleBuilder = shallow(<ScheduleBuilder {...mockProps} />);
     expect(scheduleBuilder.find('CronScheduleBuilder')).toHaveLength(0);
-    scheduleBuilder.setProps({ useAdvancedSchedule: true });
+    scheduleBuilder.setProps({ useUnixCronFormat: true });
     expect(scheduleBuilder.find('CronScheduleBuilder')).toHaveLength(1);
-    scheduleBuilder.setProps({ useAdvancedSchedule: false });
+    scheduleBuilder.setProps({ useUnixCronFormat: false });
     expect(scheduleBuilder.find('CronScheduleBuilder')).toHaveLength(0);
   });
 

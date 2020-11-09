@@ -152,7 +152,9 @@ export class WeekScheduleBuilder extends React.Component<
     return (
       <div>
         <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>Repeat every</span>
+          <span className={css.flexQuarter}>
+            <b>Repeat every</b>
+          </span>
           <div className={css.flex2}>
             <SelectInput
               name="frequencyType"
@@ -167,7 +169,9 @@ export class WeekScheduleBuilder extends React.Component<
           </div>
         </div>
         <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>Repeat (time)</span>
+          <span className={css.flexQuarter}>
+            <b>Repeat at</b>
+          </span>
           <div className={css.flex3}>
             <TextInput
               name="specifiedTime"
@@ -179,7 +183,7 @@ export class WeekScheduleBuilder extends React.Component<
           </div>
         </div>
         <CheckValidation
-          fieldName={'Repeat (time)'}
+          fieldName={'Repeat at'}
           required={true}
           value={this.state.specifiedTime}
         />

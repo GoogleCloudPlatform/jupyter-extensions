@@ -192,10 +192,10 @@ describe('MonthScheduleBuilder', () => {
     expect(mockProps.onScheduleChange).toBeCalledTimes(2);
     expect(
       monthScheduleBuilder
-        .find('CheckValidation[fieldName="Repeat (time)"]')
+        .find('CheckValidation[fieldName="Repeat at"]')
         .dive()
         .find('FieldError')
         .prop('message')
-    ).toBe('Repeat (time) is required.');
+    ).toBe('Repeat at is required.');
   });
 });

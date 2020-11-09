@@ -150,7 +150,7 @@ describe('WeekScheduleBuilder', () => {
     expect(mockProps.onScheduleChange).lastCalledWith('');
     expect(mockProps.onScheduleChange).toBeCalledTimes(2);
     expect(weekScheduleBuilder.find('FieldError').prop('message')).toBe(
-      'Repeat (time) is required.'
+      'Repeat at is required.'
     );
   });
 });

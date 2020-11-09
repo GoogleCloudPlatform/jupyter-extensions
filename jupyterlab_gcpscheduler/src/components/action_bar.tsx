@@ -18,18 +18,23 @@ import * as csstips from 'csstips';
 import * as React from 'react';
 import { style } from 'typestyle';
 
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { OnDialogClose } from './dialog';
+import { COLORS } from 'gcp_jupyterlab_shared';
 
 interface Props {
   children?: React.ReactNode;
   closeLabel?: string;
+  displayMessage?: string;
+  closeOnRight?: boolean;
   onDialogClose: OnDialogClose;
 }
 
+interface State {
+  displayMessage: string;
+}
+
 const actionBar = style({
-  paddingTop: '16px',
-  paddingRight: '2px',
   $nest: {
     '&>*': {
       marginLeft: '16px',
@@ -39,14 +44,52 @@ const actionBar = style({
   ...csstips.endJustified,
 });
 
+const actionBarContainer = style({
+  paddingTop: '16px',
+});
+
+const actionBarDisplayMessage = style({
+  paddingTop: '9px',
+  ...csstips.horizontal,
+  color: COLORS.caption,
+  fontSize: '12px',
+});
+
 /** Funtional Component for defining an action bar with buttons. */
-export function ActionBar(props: Props) {
-  return (
-    <div className={actionBar}>
-      <Button onClick={props.onDialogClose}>
-        {props.closeLabel || 'Close'}
-      </Button>
-      {props.children}
-    </div>
-  );
+export class ActionBar extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { displayMessage: props.displayMessage };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.displayMessage !== this.props.displayMessage) {
+      this.setState({
+        displayMessage: this.props.displayMessage,
+      });
+    }
+  }
+
+  render() {
+    const props = this.props;
+    const displayMessage = this.state.displayMessage;
+    return (
+      <Grid container spacing={1} className={actionBarContainer}>
+        {displayMessage && (
+          <Grid item sm={8}>
+            <span className={actionBarDisplayMessage}>{displayMessage}</span>
+          </Grid>
+        )}
+        <Grid item sm={displayMessage ? 4 : 12}>
+          <div className={actionBar}>
+            {props.closeOnRight && props.children}
+            <Button onClick={props.onDialogClose}>
+              {props.closeLabel || 'Close'}
+            </Button>
+            {!props.closeOnRight && props.children}
+          </div>
+        </Grid>
+      </Grid>
+    );
+  }
 }

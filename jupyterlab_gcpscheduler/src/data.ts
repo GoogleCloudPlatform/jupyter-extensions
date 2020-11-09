@@ -23,13 +23,8 @@ export const CUSTOM = 'CUSTOM';
 export const SINGLE = 'single';
 /** Indicates a recurring scheduled Notebook run */
 export const RECURRING = 'recurring';
-/** Suffix to add to projectId for GCS bucket storing notebook sources. */
-export const BUCKET_NAME_SUFFIX = '-scheduled-notebooks';
 /** Region where Cloud Function will be deployed. */
 export const CLOUD_FUNCTION_REGION = 'us-central1';
-/** Location where the Cloud Function zip archive is stored */
-export const CLOUD_FUNCTION_ARCHIVE =
-  'gs://deeplearning-platform-ui-public/gcp_scheduled_notebook_helper.zip';
 /** Name of the Cloud Function that handles notebook scheduling */
 export const CLOUD_FUNCTION_NAME = 'submitScheduledNotebook';
 /** Indicates a hourly frequency type */

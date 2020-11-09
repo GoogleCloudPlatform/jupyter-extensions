@@ -12,106 +12,166 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
       Notebook run successfully scheduled!
     </span>
   </div>
-  <dl
-    className="dl_f1xmw2no"
+  <div
+    className="row_f17j33oz messageCaption_f1vvzhbx"
   >
-    <div>
-      <dt>
-        Notebook:
-      </dt>
-      <dd>
-        <LearnMoreLink
-          href="https://console.cloud.google.com/storage/browser/test-project/test_job_1234?project=test-project"
-          text="test_job_1234.ipynb"
-        />
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Run name:
-      </dt>
-      <dd>
-        test_job_1234
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Region:
-      </dt>
-      <dd>
-        us-east1 (South Carolina)
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Scale tier:
-      </dt>
-      <dd>
-        CUSTOM
-         - 
-        Custom machine type configuration
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Master type:
-      </dt>
-      <dd>
-        4 CPUs, 15 GB RAM
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Accelerator type:
-      </dt>
-      <dd>
-        NVIDIA Tesla K80
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Accelerator count:
-      </dt>
-      <dd>
-        1
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Container:
-      </dt>
-      <dd>
-        gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Type:
-      </dt>
-      <dd>
-        Single run
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Job:
-      </dt>
-      <dd>
-        <LearnMoreLink
-          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
-          text="View in Cloud Console"
-        />
-      </dd>
-    </div>
-  </dl>
+    <span>
+      Run has been started
+    </span>
+  </div>
+  <WithStyles(ForwardRef(TableContainer))>
+    <WithStyles(ForwardRef(Table))
+      aria-label="simple table"
+      className="table_fjl1obp"
+      padding="none"
+    >
+      <WithStyles(ForwardRef(TableBody))>
+        <WithStyles(ForwardRef(TableRow))
+          key="notebookLink"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Notebook
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            test_job_1234.ipynb
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="runName"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Run name
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            test_job_1234
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="region"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Region
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            us-east1 (South Carolina)
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="scaleTier"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Scale tier
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            CUSTOM
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="masterType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Master type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            4 CPUs, 15 GB RAM
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            NVIDIA Tesla K80
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorCount"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator count
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            1
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="container"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Container
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="type"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Single run
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="status"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Status
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+             
+            <LearnMoreLink
+              href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+              text="View in Google Cloud console"
+            />
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+      </WithStyles(ForwardRef(TableBody))>
+    </WithStyles(ForwardRef(Table))>
+  </WithStyles(ForwardRef(TableContainer))>
   <ActionBar
     closeLabel="Done"
+    closeOnRight={true}
     onDialogClose={[MockFunction]}
   >
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Submit another job
+      Submit another run
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>
@@ -129,114 +189,179 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
       Notebook run successfully scheduled!
     </span>
   </div>
-  <dl
-    className="dl_f1xmw2no"
+  <div
+    className="row_f17j33oz messageCaption_f1vvzhbx"
   >
-    <div>
-      <dt>
-        Notebook:
-      </dt>
-      <dd>
-        <LearnMoreLink
-          href="https://console.cloud.google.com/storage/browser/test-project/test_job_1234?project=test-project"
-          text="test_job_1234.ipynb"
-        />
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Run name:
-      </dt>
-      <dd>
-        test_job_1234
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Region:
-      </dt>
-      <dd>
-        us-east1 (South Carolina)
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Scale tier:
-      </dt>
-      <dd>
-        CUSTOM
-         - 
-        Custom machine type configuration
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Master type:
-      </dt>
-      <dd>
-        4 CPUs, 15 GB RAM
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Accelerator type:
-      </dt>
-      <dd>
-        NVIDIA Tesla K80
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Accelerator count:
-      </dt>
-      <dd>
-        1
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Container:
-      </dt>
-      <dd>
-        gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Type:
-      </dt>
-      <dd>
-        Recurring run
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Schedule:
-      </dt>
-      <dd>
-        0 15 * * *
-      </dd>
-    </div>
-    <div>
-      <dt>
-        Job:
-      </dt>
-      <dd>
-        <LearnMoreLink
-          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
-          text="View in Cloud Console"
-        />
-      </dd>
-    </div>
-  </dl>
+    <span>
+      Runs will start on November 9, 2020, 3:00 PM EST
+    </span>
+  </div>
+  <WithStyles(ForwardRef(TableContainer))>
+    <WithStyles(ForwardRef(Table))
+      aria-label="simple table"
+      className="table_fjl1obp"
+      padding="none"
+    >
+      <WithStyles(ForwardRef(TableBody))>
+        <WithStyles(ForwardRef(TableRow))
+          key="notebookLink"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Notebook
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            test_job_1234.ipynb
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="runName"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Run name
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            test_job_1234
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="region"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Region
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            us-east1 (South Carolina)
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="scaleTier"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Scale tier
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            CUSTOM
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="masterType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Master type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            4 CPUs, 15 GB RAM
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            NVIDIA Tesla K80
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorCount"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator count
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            1
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="container"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Container
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="type"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Recurring run
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="schedule"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Schedule
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Every day at 3:00 PM EST
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="status"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Status
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+             
+            <LearnMoreLink
+              href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+              text="View in Google Cloud console"
+            />
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+      </WithStyles(ForwardRef(TableBody))>
+    </WithStyles(ForwardRef(Table))>
+  </WithStyles(ForwardRef(TableContainer))>
   <ActionBar
     closeLabel="Done"
+    closeOnRight={true}
     onDialogClose={[MockFunction]}
   >
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Submit another job
+      Submit another run
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>

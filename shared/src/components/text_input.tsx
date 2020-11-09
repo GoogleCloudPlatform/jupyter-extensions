@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { INPUT_TEXT_STYLE } from '../styles';
+import { INPUT_TEXT_STYLE, FORM_LABEL_STYLE } from '../styles';
 import TextField from '@material-ui/core/TextField';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -51,6 +51,7 @@ export function TextInput(props: TextInputProps) {
       InputProps={{
         style: INPUT_TEXT_STYLE,
       }}
+      InputLabelProps={{ style: {...FORM_LABEL_STYLE }}}
     ></TextField>
   );
 }
