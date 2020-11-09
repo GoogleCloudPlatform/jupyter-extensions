@@ -16,7 +16,7 @@
 
 import * as csstips from 'csstips';
 import * as React from 'react';
-import { style } from 'typestyle';
+import { stylesheet } from 'typestyle';
 
 import { Button, Grid } from '@material-ui/core';
 import { OnDialogClose } from './dialog';
@@ -34,25 +34,25 @@ interface State {
   displayMessage: string;
 }
 
-const actionBar = style({
-  $nest: {
-    '&>*': {
-      marginLeft: '16px',
+export const STYLES = stylesheet({
+  actionBar: {
+    $nest: {
+      '&>*': {
+        marginLeft: '16px',
+      },
     },
+    ...csstips.horizontal,
+    ...csstips.endJustified,
   },
-  ...csstips.horizontal,
-  ...csstips.endJustified,
-});
-
-const actionBarContainer = style({
-  paddingTop: '16px',
-});
-
-const actionBarDisplayMessage = style({
-  paddingTop: '9px',
-  ...csstips.horizontal,
-  color: COLORS.caption,
-  fontSize: '12px',
+  actionBarContainer: {
+    paddingTop: '16px',
+  },
+  actionBarDisplayMessage: {
+    paddingTop: '9px',
+    ...csstips.horizontal,
+    color: COLORS.caption,
+    fontSize: '12px',
+  },
 });
 
 /** Funtional Component for defining an action bar with buttons. */
@@ -74,14 +74,16 @@ export class ActionBar extends React.Component<Props, State> {
     const props = this.props;
     const displayMessage = this.state.displayMessage;
     return (
-      <Grid container spacing={1} className={actionBarContainer}>
+      <Grid container spacing={1} className={STYLES.actionBarContainer}>
         {displayMessage && (
           <Grid item sm={8}>
-            <span className={actionBarDisplayMessage}>{displayMessage}</span>
+            <span className={STYLES.actionBarDisplayMessage}>
+              {displayMessage}
+            </span>
           </Grid>
         )}
         <Grid item sm={displayMessage ? 4 : 12}>
-          <div className={actionBar}>
+          <div className={STYLES.actionBar}>
             {props.closeOnRight && props.children}
             <Button onClick={props.onDialogClose}>
               {props.closeLabel || 'Close'}
