@@ -33,7 +33,7 @@ interface Props {
 
 interface State {
   isLoading: boolean;
-  jobs: ListAiPlatformJobsResponse;
+  jobsResponse: ListAiPlatformJobsResponse;
   projectId?: string;
   error?: string;
 }
@@ -86,7 +86,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     super(props);
     this.state = {
       isLoading: false,
-      jobs: { jobs: [] },
+      jobsResponse: { jobs: [] },
     };
   }
 
@@ -109,7 +109,8 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { error, jobs, isLoading, projectId } = this.state;
+    const { error, jobsResponse, isLoading, projectId } = this.state;
+    const jobs = jobsResponse.jobs || [];
     const gcpService = this.props.gcpService;
     let content: JSX.Element;
     if (isLoading) {
@@ -119,7 +120,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     } else {
       content = (
         <ul className={localStyles.list}>
-          {jobs.jobs.map(j => (
+          {jobs.map(j => (
             <JobListItem
               gcpService={gcpService}
               key={j.jobId}
@@ -149,8 +150,8 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   private async _getJobs() {
     try {
       this.setState({ isLoading: true, error: undefined });
-      const jobs = await this.props.gcpService.listNotebookJobs();
-      this.setState({ isLoading: false, jobs });
+      const jobsResponse = await this.props.gcpService.listNotebookJobs();
+      this.setState({ isLoading: false, jobsResponse });
     } catch (err) {
       this.setState({
         isLoading: false,
@@ -167,7 +168,7 @@ export class GcpScheduledJobsWidget extends ReactWidget {
 
   constructor(private readonly gcpService: GcpService) {
     super();
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-ScheduledJobsIcon';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-SchedulerIcon';
     this.title.caption = TITLE_TEXT;
   }
 
