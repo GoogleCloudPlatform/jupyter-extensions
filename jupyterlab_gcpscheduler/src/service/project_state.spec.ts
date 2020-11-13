@@ -72,6 +72,7 @@ describe('ProjectStateService', () => {
               { serviceName: 'storage-api.googleapis.com' },
               { serviceName: 'cloudscheduler.googleapis.com' },
               { serviceName: 'ml.googleapis.com' },
+              { serviceName: 'cloudbuild.googleapis.com' },
               { serviceName: 'cloudfunctions.googleapis.com' },
             ],
           });
@@ -203,6 +204,7 @@ describe('ProjectStateService', () => {
             services: [
               { serviceName: 'storage-api.googleapis.com' },
               { serviceName: 'cloudscheduler.googleapis.com' },
+              { serviceName: 'cloudbuild.googleapis.com' },
               { serviceName: 'ml.googleapis.com' },
             ],
           });

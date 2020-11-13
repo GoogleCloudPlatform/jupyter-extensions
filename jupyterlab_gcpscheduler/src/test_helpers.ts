@@ -61,6 +61,15 @@ export function getProjectState(): ProjectState {
       {
         enabled: false,
         service: {
+          name: 'Cloud Build API',
+          endpoint: 'cloudbuild.googleapis.com',
+          documentation: 'https://cloud.google.com/cloud-build/',
+          isOptional: true,
+        },
+      },
+      {
+        enabled: false,
+        service: {
           name: 'Cloud Functions API',
           endpoint: 'cloudfunctions.googleapis.com',
           documentation: 'https://cloud.google.com/functions/',
