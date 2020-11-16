@@ -50,6 +50,15 @@ exports[`Initializer Fails to create resource 1`] = `
           Object {
             "enabled": true,
             "service": Object {
+              "documentation": "https://cloud.google.com/cloud-build/",
+              "endpoint": "cloudbuild.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Build API",
+            },
+          },
+          Object {
+            "enabled": true,
+            "service": Object {
               "documentation": "https://cloud.google.com/functions/",
               "endpoint": "cloudfunctions.googleapis.com",
               "isOptional": true,
@@ -99,6 +108,15 @@ exports[`Initializer Fails to create resource 1`] = `
                 "endpoint": "cloudscheduler.googleapis.com",
                 "isOptional": true,
                 "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": true,
+              "service": Object {
+                "documentation": "https://cloud.google.com/cloud-build/",
+                "endpoint": "cloudbuild.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Build API",
               },
             },
             Object {
@@ -184,6 +202,15 @@ exports[`Initializer Fails to enable services 1`] = `
           Object {
             "enabled": false,
             "service": Object {
+              "documentation": "https://cloud.google.com/cloud-build/",
+              "endpoint": "cloudbuild.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Build API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
               "documentation": "https://cloud.google.com/functions/",
               "endpoint": "cloudfunctions.googleapis.com",
               "isOptional": true,
@@ -232,6 +259,15 @@ exports[`Initializer Fails to enable services 1`] = `
                 "endpoint": "cloudscheduler.googleapis.com",
                 "isOptional": true,
                 "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/cloud-build/",
+                "endpoint": "cloudbuild.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Build API",
               },
             },
             Object {
@@ -400,6 +436,15 @@ exports[`Initializer Renders with initialization content 1`] = `
           Object {
             "enabled": false,
             "service": Object {
+              "documentation": "https://cloud.google.com/cloud-build/",
+              "endpoint": "cloudbuild.googleapis.com",
+              "isOptional": true,
+              "name": "Cloud Build API",
+            },
+          },
+          Object {
+            "enabled": false,
+            "service": Object {
               "documentation": "https://cloud.google.com/functions/",
               "endpoint": "cloudfunctions.googleapis.com",
               "isOptional": true,
@@ -448,6 +493,15 @@ exports[`Initializer Renders with initialization content 1`] = `
                 "endpoint": "cloudscheduler.googleapis.com",
                 "isOptional": true,
                 "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/cloud-build/",
+                "endpoint": "cloudbuild.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Build API",
               },
             },
             Object {
@@ -562,6 +616,15 @@ exports[`Initializer Renders with initialization content for immediate runs only
                 "endpoint": "cloudscheduler.googleapis.com",
                 "isOptional": true,
                 "name": "Cloud Scheduler API",
+              },
+            },
+            Object {
+              "enabled": false,
+              "service": Object {
+                "documentation": "https://cloud.google.com/cloud-build/",
+                "endpoint": "cloudbuild.googleapis.com",
+                "isOptional": true,
+                "name": "Cloud Build API",
               },
             },
             Object {

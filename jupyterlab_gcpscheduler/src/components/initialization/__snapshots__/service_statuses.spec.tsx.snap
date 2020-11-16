@@ -44,6 +44,16 @@ exports[`ServiceStatuses Renders with all disabled 1`] = `
     </div>
     <div
       className="serviceStatusItem_f7gbs7g"
+      key="cloudbuild.googleapis.com"
+    >
+      <WithStyles(CloseIcon) />
+      <LearnMoreLink
+        href="https://cloud.google.com/cloud-build/"
+        text="Cloud Build API"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
       key="cloudfunctions.googleapis.com"
     >
       <WithStyles(CloseIcon) />
@@ -100,6 +110,16 @@ exports[`ServiceStatuses Renders with all enabled 1`] = `
     </div>
     <div
       className="serviceStatusItem_f7gbs7g"
+      key="cloudbuild.googleapis.com"
+    >
+      <WithStyles(CheckIcon) />
+      <LearnMoreLink
+        href="https://cloud.google.com/cloud-build/"
+        text="Cloud Build API"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
       key="cloudfunctions.googleapis.com"
     >
       <WithStyles(CheckIcon) />
@@ -152,6 +172,16 @@ exports[`ServiceStatuses Renders with error 1`] = `
       <LearnMoreLink
         href="https://cloud.google.com/scheduler"
         text="Cloud Scheduler API"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
+      key="cloudbuild.googleapis.com"
+    >
+      <WithStyles(CloseIcon) />
+      <LearnMoreLink
+        href="https://cloud.google.com/cloud-build/"
+        text="Cloud Build API"
       />
     </div>
     <div
@@ -213,6 +243,16 @@ exports[`ServiceStatuses Renders with pending activation 1`] = `
       <LearnMoreLink
         href="https://cloud.google.com/scheduler"
         text="Cloud Scheduler API"
+      />
+    </div>
+    <div
+      className="serviceStatusItem_f7gbs7g"
+      key="cloudbuild.googleapis.com"
+    >
+      <WithStyles(CloseIcon) />
+      <LearnMoreLink
+        href="https://cloud.google.com/cloud-build/"
+        text="Cloud Build API"
       />
     </div>
     <div

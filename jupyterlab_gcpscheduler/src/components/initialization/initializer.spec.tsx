@@ -182,6 +182,7 @@ describe('Initializer', () => {
       'storage-api.googleapis.com',
       'ml.googleapis.com',
       'cloudscheduler.googleapis.com',
+      'cloudbuild.googleapis.com',
       'cloudfunctions.googleapis.com',
     ]);
     expect(mockCreateBucket).toHaveBeenCalled();
@@ -225,6 +226,7 @@ describe('Initializer', () => {
       'storage-api.googleapis.com',
       'ml.googleapis.com',
       'cloudscheduler.googleapis.com',
+      'cloudbuild.googleapis.com',
       'cloudfunctions.googleapis.com',
     ]);
     expect(mockCreateBucket).not.toHaveBeenCalled();
@@ -270,6 +272,7 @@ describe('Initializer', () => {
       'storage-api.googleapis.com',
       'ml.googleapis.com',
       'cloudscheduler.googleapis.com',
+      'cloudbuild.googleapis.com',
       'cloudfunctions.googleapis.com',
     ]);
     expect(mockCreateBucket).toHaveBeenCalled();

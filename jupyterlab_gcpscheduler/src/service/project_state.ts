@@ -100,8 +100,8 @@ const RESOURCE_MANAGER = 'https://cloudresourcemanager.googleapis.com/v1';
 const BUCKET_CREATE_PERMISSION = 'storage.buckets.create';
 const OBJECT_CREATE_PERMISSION = 'storage.objects.create';
 
-// Static list of required GCP services
-const REQUIRED_SERVICES: ReadonlyArray<Service> = [
+// Static list of GCP services used by the extension
+const SERVICES: ReadonlyArray<Service> = [
   {
     name: 'Cloud Storage API',
     endpoint: 'storage-api.googleapis.com',
@@ -118,6 +118,12 @@ const REQUIRED_SERVICES: ReadonlyArray<Service> = [
     name: 'Cloud Scheduler API',
     endpoint: 'cloudscheduler.googleapis.com',
     documentation: 'https://cloud.google.com/scheduler',
+    isOptional: true,
+  },
+  {
+    name: 'Cloud Build API',
+    endpoint: 'cloudbuild.googleapis.com',
+    documentation: 'https://cloud.google.com/cloud-build/',
     isOptional: true,
   },
   {
@@ -372,7 +378,7 @@ export class ProjectStateService {
       const enabledServices = new Set(
         response.result.services.map(m => m.serviceName)
       );
-      return REQUIRED_SERVICES.map(service => ({
+      return SERVICES.map(service => ({
         service,
         enabled: enabledServices.has(service.endpoint),
       }));
