@@ -290,6 +290,18 @@ export function customDateFormat(date: Date, time = false) {
     day: 'numeric',
   });
 }
+
+export function customShortDateFormat(date: Date) {
+  const options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h12',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
+  return date.toLocaleDateString('en-US', options);
+}
 //Helper functions end
 
 export function getNextRunAfterDate(

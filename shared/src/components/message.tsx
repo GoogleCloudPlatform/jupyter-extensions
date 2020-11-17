@@ -19,7 +19,7 @@ import { classes, stylesheet } from 'typestyle';
 
 import { css } from '../styles';
 import { Progress } from './progress';
-import { RedError, BlueInfo } from './status_icons';
+import { RedError, BlueInfo } from './icons';
 
 interface Props {
   children?: React.ReactNode;

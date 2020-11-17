@@ -13,69 +13,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { withStyles } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import * as csstips from 'csstips';
 import {
   css,
-  IconButtonMenu,
-  SmallMenuItem,
+  LearnMoreLink,
   GrayPending,
-  GreenCheck,
+  GreenCheckCircle,
   RedClose,
+  MenuIcon,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
-
+import { customShortDateFormat, getHumanReadableCron } from '../cron';
+import {ShareDialog} from './share_dialog';
 import { AI_PLATFORM_LINK } from '../data';
 import { AiPlatformJob, GcpService } from '../service/gcp';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import { Grid } from '@material-ui/core';
+
+// Description-key used to identify Cloud Scheduler jobs for Notebook Runs
+const SCHEDULED_NOTEBOOK_JOB = 'jupyterlab_scheduled_notebook';
+// const IMMEDIATE_NOTEBOOK_JOB = 'jupyterlab_immediate_notebook';
+const JOB_TYPE = 'job_type';
+// const SCHEDULER_JOB_NAME = 'scheduler_job_name';
 
 interface Props {
   job: AiPlatformJob;
+  schedule: boolean;
   projectId: string;
   gcpService: GcpService;
 }
 
 const localStyles = stylesheet({
-  item: {
-    alignItems: 'center',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    listStyle: 'none',
-    height: '40px',
-    paddingRight: '8px',
-    $nest: {
-      '&:hover': {
-        backgroundColor: 'var(--jp-layout-color2)',
-      },
-    },
-    ...csstips.horizontal,
-  },
-  details: {
-    paddingLeft: '4px',
-    ...csstips.flex,
-  },
-  jobLink: {
-    textDecoration: 'none',
-  },
-  jobTime: {
-    color: 'var(--jp-content-font-color2)',
-    fontSize: '9px',
-    textAlign: 'right',
-    ...csstips.flex,
-  },
   menuLink: {
     display: 'block',
     height: '100%',
     width: '100%',
   },
-});
-
-const MenuIcon = withStyles({
-  root: {
-    fontSize: '20px',
+  job: {
+    paddingTop: '15px',
+    paddingBottom: '15px',
+    paddingRight: '20px',
+    paddingLeft: '15px',
+    width: '100%',
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
-})(MoreVert);
+  jobCaption: {
+    fontSize: '12px',
+    paddingTop: '5px',
+    color: 'var(--jp-content-font-color2)',
+  },
+  align: {
+    marginTop: '-15px !important',
+  },
+  spacing: {
+    marginTop: '5px',
+  },
+});
 
 const VIEWER_LINK_BASE = 'https://notebooks.cloud.google.com/view';
 const DOWNLOAD_LINK_BASE = 'https://storage.cloud.google.com';
@@ -83,7 +78,7 @@ const SUCCEEDED = 'SUCCEEDED';
 
 function getIconForJobState(state: string): JSX.Element {
   if (state === 'SUCCEEDED') {
-    return <GreenCheck />;
+    return <GreenCheckCircle />;
   } else if (state === 'FAILED') {
     return <RedClose />;
   }
@@ -92,8 +87,17 @@ function getIconForJobState(state: string): JSX.Element {
 
 /** Notebook job list item */
 export function JobListItem(props: Props) {
-  const { gcpService, job, projectId } = props;
+  const { gcpService, job, projectId, schedule } = props;
   const endTime = new Date(job.endTime || job.createTime);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const gcsFile =
     job.trainingInput &&
@@ -112,64 +116,95 @@ export function JobListItem(props: Props) {
   const jobLink = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
   const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
   const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
+  const jobType =
+    job['labels'] && job['labels'][JOB_TYPE] === SCHEDULED_NOTEBOOK_JOB
+      ? 'Scheduled run'
+      : 'Single run';
+  const cronSchedule = '* * * * *';
   return (
-    <li className={localStyles.item}>
-      <div title={`Status: ${job.state}`}>{getIconForJobState(job.state)}</div>
-      <div className={localStyles.details}>
-        <div>
-          <a
-            className={classes(css.link, localStyles.jobLink)}
+    <Grid className={localStyles.job} container spacing={0}>
+      <Grid item xs={1}>
+        {' '}
+        {getIconForJobState(job.state)}
+      </Grid>
+      <Grid item xs={job.state === SUCCEEDED ? 10 : 11}>
+        <div className={css.bold}>
+          <LearnMoreLink
+            secondary={true}
+            noUnderline={true}
+            text={name}
             href={jobLink}
-            target="_blank"
-            title="View AI Platform Job"
-          >
-            {name}
-          </a>
+          />
         </div>
         <div>
-          <span className={localStyles.jobTime}>
-            {endTime.toLocaleString()}
-          </span>
+          {!schedule && (
+            <div className={localStyles.jobCaption}>
+              <span>
+                {customShortDateFormat(endTime)} - {jobType}
+              </span>
+            </div>
+          )}
+          {schedule && (
+            <React.Fragment>
+              <div className={localStyles.jobCaption}>
+                <span>Frequency: {getHumanReadableCron(cronSchedule)}</span>
+              </div>
+              <div className={localStyles.jobCaption}>
+                <span>Latest run: {customShortDateFormat(endTime)}</span>
+              </div>
+            </React.Fragment>
+          )}
+          <div className={classes(css.bold, localStyles.spacing)}>
+            <LearnMoreLink
+              noUnderline={true}
+              href={viewerLink}
+              text="VIEW RESULT"
+            />
+          </div>
         </div>
-      </div>
-      <div>
-        {job.state === SUCCEEDED && (
-          <IconButtonMenu
-            icon={<MenuIcon />}
-            menuItems={menuCloseHandler => [
-              <SmallMenuItem key="viewNotebook">
-                <a
-                  className={localStyles.menuLink}
-                  href={viewerLink}
-                  target="_blank"
-                  title="View notebook output in HTML format"
-                  onClick={menuCloseHandler}
-                >
-                  View
-                </a>
-              </SmallMenuItem>,
-              <SmallMenuItem
-                id="import"
-                key="importNotebook"
-                onClick={() => gcpService.importNotebook(gcsFile)}
+      </Grid>
+      {job.state === SUCCEEDED && (
+        <Grid item xs={1}>
+          {''}
+          <IconButton className={localStyles.align} onClick={handleClick}>
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="run-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem key="viewNotebook" dense={true}>
+              <ShareDialog
+                schedule={schedule}
+                learnMoreLink=""
+                cloudBucket=""
+                shareLink={viewerLink}
+              />
+            </MenuItem>
+            <MenuItem
+              id="import"
+              key="importNotebook"
+              dense={true}
+              onClick={() => gcpService.importNotebook(gcsFile)}
+            >
+              Open source notebook
+            </MenuItem>
+            <MenuItem key="getNotebookPath" dense={true} onClick={handleClose}>
+              <a
+                className={localStyles.menuLink}
+                href={downloadLink}
+                target="_blank"
+                title="Download the notebook output from Google Cloud Storage"
               >
-                Import
-              </SmallMenuItem>,
-              <SmallMenuItem key="getNotebookPath" onClick={menuCloseHandler}>
-                <a
-                  className={localStyles.menuLink}
-                  href={downloadLink}
-                  target="_blank"
-                  title="Download the notebook output from Google Cloud Storage"
-                  onClick={menuCloseHandler}
-                >
-                  Download
-                </a>
-              </SmallMenuItem>,
-            ]}
-          />
-        )}
-      </div>
-    </li>
+                Download source notebook
+              </a>
+            </MenuItem>
+          </Menu>{' '}
+        </Grid>
+      )}
+    </Grid>
   );
 }

@@ -70,6 +70,53 @@ export interface RunNotebookRequest {
 /** List of Jobs returned from AI Platform. */
 export type ListAiPlatformJobsResponse = gapi.client.ml.GoogleCloudMlV1__ListJobsResponse;
 
+/** Enum to represent the type of the JobRow */
+export enum JobRowType {
+  SCHEDULED = 'SCHEDULED',
+  IMMEDIATE = 'IMMEDIATE'
+}
+
+export type JobState =
+    'STATE_UNSPECIFIED'|'ENABLED'|'PAUSED'|'DISABLED'|'UPDATE_FAILED';
+
+/** UI interface used to represent a Scheduled Notebook Job */
+export interface ScheduleNotebookJob {
+  id?: string;
+  jobType: JobRowType;
+  name: string;
+  schedule: string;
+  timeZone?: string;
+  createdTime: string;
+  aiPlatformJobId: string;
+  containerImage: string;
+  region: string;
+  scaleTier: string;
+  machineType?: string;
+  acceleratorType?: string;
+  acceleratorCount?: string;
+  notebook: string;
+  serviceAccountEmail?: string;
+  state?: JobState;
+  status?: string;
+  nextScheduledTime?: string;
+  lastAttemptTime: string;
+}
+
+interface ListLocationsResponse {
+  locations?: Array<Location>;
+  nextPageToken?: string;
+}
+
+interface Location {
+  name?: string;
+  locationId?: string;
+  displayName?: string;
+  labels?: ApiClientObjectMap<string>;
+  metadata?: ApiClientObjectMap<any>;
+}
+
+interface ApiClientObjectMap<T> { [key: string]: T; }
+
 /** AI Platform Job. */
 export type AiPlatformJob = gapi.client.ml.GoogleCloudMlV1__Job;
 
@@ -295,6 +342,50 @@ export class GcpService {
 
     const lastDotIndex = runtimeEnv.lastIndexOf('.');
     return `${imageUriPrefix}${runtimeEnv.substr(0, lastDotIndex)}`;
+  }
+
+  /**
+   * Gets list of AiPlatformSchedules
+   * @param cloudFunctionUrl
+   * @param request
+   */
+  async listSchedules(pageToken?:string): Promise<ListAiPlatformJobsResponse> {
+    try{
+      const filter = `labels.job_type=${SCHEDULED_JOB_INDICATOR}`;
+      const projectId = await this.projectId;
+      const location = await this._getSchedulerLocation();
+      const params: { [k: string]: string } = { filter };
+      if (pageToken) {
+        params['pageToken'] = pageToken;
+      }
+      const response = await this._transportService.submit<
+        ListAiPlatformJobsResponse
+      >({
+        path: `${AI_PLATFORM}/projects/${projectId}/locations/${location}/jobs`,
+        params,
+      });
+      return response.result;
+    } catch (err) {
+      console.error('Unable to list AI Platform Notebook schedules');
+      handleApiError(err);
+    }
+  }
+
+  private async _getSchedulerLocation(): Promise<string> {
+    try {
+      const projectId = await this.projectId;
+      const params: { [k: string]: string } = {};
+      const response = await this._transportService.submit<
+      ListLocationsResponse
+      >({
+        path: `${AI_PLATFORM}/projects/${projectId}/locations`,
+        params,
+      });
+      return response.result.locations![0].name!;
+    } catch (err) {
+      console.error('Unable to get scheduler location');
+      handleApiError(err);
+    }
   }
 
   private async _getRuntimeEnv(): Promise<string> {

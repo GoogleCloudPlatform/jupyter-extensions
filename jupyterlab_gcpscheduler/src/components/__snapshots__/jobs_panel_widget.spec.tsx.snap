@@ -118,7 +118,7 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
     <JobListItem
       gcpService={
         Object {
-          "listNotebookJobs": [MockFunction] {
+          "listNotebookRuns": [MockFunction] {
             "calls": Array [
               Array [],
             ],
@@ -166,7 +166,7 @@ exports[`GcpScheduledJobsPanel Shows jobs 1`] = `
     <JobListItem
       gcpService={
         Object {
-          "listNotebookJobs": [MockFunction] {
+          "listNotebookRuns": [MockFunction] {
             "calls": Array [
               Array [],
             ],

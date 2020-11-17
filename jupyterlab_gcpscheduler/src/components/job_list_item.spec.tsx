@@ -45,6 +45,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
+        schedule={false}
         job={getAiPlatformJob()}
       />
     );
@@ -66,6 +67,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
+        schedule={false}
         job={getAiPlatformJob()}
       />
     );
@@ -79,6 +81,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
+        schedule={false}
         job={getAiPlatformJob()}
       />
     );
@@ -92,6 +95,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
+        schedule={false}
         job={getAiPlatformJob()}
       />
     );

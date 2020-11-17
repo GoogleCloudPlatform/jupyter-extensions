@@ -16,13 +16,13 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
-import { Refresh } from '@material-ui/icons';
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, Message, Badge } from 'gcp_jupyterlab_shared';
+import { BASE_FONT, COLORS, Message, Badge, RefreshIcon } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import { GcpService, ListAiPlatformJobsResponse } from '../service/gcp';
 import { JobListItem } from './job_list_item';
 
@@ -33,9 +33,11 @@ interface Props {
 
 interface State {
   isLoading: boolean;
-  jobs: ListAiPlatformJobsResponse;
+  runs: ListAiPlatformJobsResponse;
+  schedules: ListAiPlatformJobsResponse;
   projectId?: string;
   error?: string;
+  tab: number;
 }
 
 const localStyles = stylesheet({
@@ -44,15 +46,14 @@ const localStyles = stylesheet({
     ...csstips.horizontal,
   },
   header: {
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
+    fontWeight: 500,
+    fontSize: 'var(--jp-ui-font-size2, 11px)',
     margin: 0,
     padding: '8px 12px',
-    textTransform: 'uppercase',
     ...csstips.flex,
   },
   panel: {
+    minWidth: '300px',
     backgroundColor: COLORS.white,
     color: COLORS.base,
     height: '100%',
@@ -65,28 +66,28 @@ const localStyles = stylesheet({
     padding: 0,
     ...csstips.flex,
   },
+  tab: {
+    overflowY: 'scroll',
+  }
 });
 
-const TITLE_TEXT = 'AI Platform Notebook Jobs';
-const SlimIconButton = withStyles({
+const StyledTab = withStyles({
   root: {
-    borderRadius: 0,
-    padding: '4px',
+    textTransform: 'none',
   },
-})(IconButton);
-const RefreshIcon = withStyles({
-  root: {
-    fontSize: '16px',
-  },
-})(Refresh);
+})(Tab);
 
-/** Panel component for displaying AI Platform jobs */
+const TITLE_TEXT = 'Notebook Scheduler';
+
+/** Panel component for displaying AI Platform runs */
 export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       isLoading: false,
-      jobs: { jobs: [] },
+      runs: { jobs: [] },
+      schedules: {jobs: []},
+      tab: 0,
     };
   }
 
@@ -104,26 +105,46 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.props.isVisible &&
       !(prevProps.isVisible || this.state.isLoading)
     ) {
-      this._getJobs();
+      this._getRunsAndSchedules();
     }
   }
 
   render() {
-    const { error, jobs, isLoading, projectId } = this.state;
+    const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+      this.setState({ tab: newValue });
+    };
+    const { error, runs, schedules, isLoading, projectId } = this.state;
     const gcpService = this.props.gcpService;
-    let content: JSX.Element;
+    let runsContent: JSX.Element;
+    let schedulesContent: JSX.Element;
     if (isLoading) {
-      content = <LinearProgress />;
+      runsContent = <LinearProgress />;
+      schedulesContent = <LinearProgress />;
     } else if (error) {
-      content = <Message text={error} asError={true} />;
+      runsContent = <Message text={error} asError={true} />;
+      schedulesContent = <Message text={error} asError={true} />;
     } else {
-      content = (
+      runsContent = (
         <ul className={localStyles.list}>
-          {jobs.jobs.map(j => (
+          {runs.jobs.map(j => (
             <JobListItem
               gcpService={gcpService}
               key={j.jobId}
               job={j}
+              schedule={false}
+              projectId={projectId}
+            />
+          ))}
+        </ul>
+      );
+      schedulesContent = (
+        <ul className={localStyles.list}>
+          {schedules.jobs.map(j => (
+            <JobListItem
+              gcpService={gcpService}
+              key={j.jobId}
+              job={j}
+              schedule={true}
               projectId={projectId}
             />
           ))}
@@ -137,20 +158,34 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           <header className={localStyles.header}>
             {TITLE_TEXT} <Badge value="alpha" />
           </header>
-          <SlimIconButton title="Refresh Jobs" onClick={() => this._getJobs()}>
+          <IconButton title="Refresh Jobs" onClick={() => this._getRunsAndSchedules()}>
             <RefreshIcon />
-          </SlimIconButton>
+          </IconButton>
         </div>
-        {content}
+        <Tabs
+          value={this.state.tab}
+          indicatorColor="primary"
+          onChange={handleChange}
+        >
+          <StyledTab label="Runs" />
+          <StyledTab label="Schedules" />
+        </Tabs>
+        <div className={localStyles.tab} role="tabpanel" hidden={this.state.tab !== 0}>
+          {runsContent}
+        </div>
+        <div className={localStyles.tab} role="tabpanel" hidden={this.state.tab !== 1}>
+          {schedulesContent}
+        </div>
       </div>
     );
   }
 
-  private async _getJobs() {
+  private async _getRunsAndSchedules() {
     try {
       this.setState({ isLoading: true, error: undefined });
-      const jobs = await this.props.gcpService.listNotebookJobs();
-      this.setState({ isLoading: false, jobs });
+      const runs = await this.props.gcpService.listNotebookJobs();
+      // const schedules = await this.props.gcpService.listSchedules();
+      this.setState({ isLoading: false, runs, schedules: runs});
     } catch (err) {
       this.setState({
         isLoading: false,
@@ -162,7 +197,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
 
 /** Widget to be registered in the left-side panel. */
 export class GcpScheduledJobsWidget extends ReactWidget {
-  id = 'gcpscheduledjobs';
+  id = 'gcpscheduledruns';
   private visibleSignal = new Signal<GcpScheduledJobsWidget, boolean>(this);
 
   constructor(private readonly gcpService: GcpService) {

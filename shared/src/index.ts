@@ -27,7 +27,7 @@ export * from './components/list_resources_table';
 export * from './components/message';
 export * from './components/progress';
 export * from './components/select_input';
-export * from './components/status_icons';
+export * from './components/icons';
 export * from './components/submit_button';
 export * from './components/text_input';
 export * from './components/toggle_switch_input';
