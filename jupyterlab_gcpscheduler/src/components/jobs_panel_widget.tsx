@@ -18,7 +18,13 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, Message, Badge, RefreshIcon } from 'gcp_jupyterlab_shared';
+import {
+  BASE_FONT,
+  COLORS,
+  Message,
+  Badge,
+  RefreshIcon,
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import Tabs from '@material-ui/core/Tabs';
@@ -68,7 +74,7 @@ const localStyles = stylesheet({
   },
   tab: {
     overflowY: 'scroll',
-  }
+  },
 });
 
 const StyledTab = withStyles({
@@ -86,7 +92,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     this.state = {
       isLoading: false,
       runs: { jobs: [] },
-      schedules: {jobs: []},
+      schedules: { jobs: [] },
       tab: 0,
     };
   }
@@ -158,7 +164,10 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           <header className={localStyles.header}>
             {TITLE_TEXT} <Badge value="alpha" />
           </header>
-          <IconButton title="Refresh Jobs" onClick={() => this._getRunsAndSchedules()}>
+          <IconButton
+            title="Refresh Jobs"
+            onClick={() => this._getRunsAndSchedules()}
+          >
             <RefreshIcon />
           </IconButton>
         </div>
@@ -170,10 +179,18 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           <StyledTab label="Runs" />
           <StyledTab label="Schedules" />
         </Tabs>
-        <div className={localStyles.tab} role="tabpanel" hidden={this.state.tab !== 0}>
+        <div
+          className={localStyles.tab}
+          role="tabpanel"
+          hidden={this.state.tab !== 0}
+        >
           {runsContent}
         </div>
-        <div className={localStyles.tab} role="tabpanel" hidden={this.state.tab !== 1}>
+        <div
+          className={localStyles.tab}
+          role="tabpanel"
+          hidden={this.state.tab !== 1}
+        >
           {schedulesContent}
         </div>
       </div>
@@ -185,7 +202,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.setState({ isLoading: true, error: undefined });
       const runs = await this.props.gcpService.listNotebookJobs();
       // const schedules = await this.props.gcpService.listSchedules();
-      this.setState({ isLoading: false, runs, schedules: runs});
+      this.setState({ isLoading: false, runs, schedules: runs });
     } catch (err) {
       this.setState({
         isLoading: false,

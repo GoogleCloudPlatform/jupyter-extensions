@@ -73,11 +73,15 @@ export type ListAiPlatformJobsResponse = gapi.client.ml.GoogleCloudMlV1__ListJob
 /** Enum to represent the type of the JobRow */
 export enum JobRowType {
   SCHEDULED = 'SCHEDULED',
-  IMMEDIATE = 'IMMEDIATE'
+  IMMEDIATE = 'IMMEDIATE',
 }
 
 export type JobState =
-    'STATE_UNSPECIFIED'|'ENABLED'|'PAUSED'|'DISABLED'|'UPDATE_FAILED';
+  | 'STATE_UNSPECIFIED'
+  | 'ENABLED'
+  | 'PAUSED'
+  | 'DISABLED'
+  | 'UPDATE_FAILED';
 
 /** UI interface used to represent a Scheduled Notebook Job */
 export interface ScheduleNotebookJob {
@@ -115,7 +119,9 @@ interface Location {
   metadata?: ApiClientObjectMap<any>;
 }
 
-interface ApiClientObjectMap<T> { [key: string]: T; }
+interface ApiClientObjectMap<T> {
+  [key: string]: T;
+}
 
 /** AI Platform Job. */
 export type AiPlatformJob = gapi.client.ml.GoogleCloudMlV1__Job;
@@ -349,8 +355,8 @@ export class GcpService {
    * @param cloudFunctionUrl
    * @param request
    */
-  async listSchedules(pageToken?:string): Promise<ListAiPlatformJobsResponse> {
-    try{
+  async listSchedules(pageToken?: string): Promise<ListAiPlatformJobsResponse> {
+    try {
       const filter = `labels.job_type=${SCHEDULED_JOB_INDICATOR}`;
       const projectId = await this.projectId;
       const location = await this._getSchedulerLocation();
@@ -376,7 +382,7 @@ export class GcpService {
       const projectId = await this.projectId;
       const params: { [k: string]: string } = {};
       const response = await this._transportService.submit<
-      ListLocationsResponse
+        ListLocationsResponse
       >({
         path: `${AI_PLATFORM}/projects/${projectId}/locations`,
         params,

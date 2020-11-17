@@ -24,7 +24,7 @@ import {
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 import { customShortDateFormat, getHumanReadableCron } from '../cron';
-import {ShareDialog} from './share_dialog';
+import { ShareDialog } from './share_dialog';
 import { AI_PLATFORM_LINK } from '../data';
 import { AiPlatformJob, GcpService } from '../service/gcp';
 import Menu from '@material-ui/core/Menu';
