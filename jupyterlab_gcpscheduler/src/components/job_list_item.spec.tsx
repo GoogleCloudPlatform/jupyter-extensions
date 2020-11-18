@@ -20,7 +20,7 @@ import * as React from 'react';
 import { JobListItem } from './job_list_item';
 import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
 import { GcpService } from '../service/gcp';
-import { IconButtonMenu } from 'gcp_jupyterlab_shared';
+import Menu from '@material-ui/core/Menu';
 
 const toLocaleString = Date.prototype.toLocaleString;
 
@@ -40,7 +40,7 @@ describe('JobListItem', () => {
     Date.prototype.toLocaleString = toLocaleString;
   });
 
-  it('Calls GcpService on Import', () => {
+  it('Calls GcpService on open', () => {
     const jobListItem = shallow(
       <JobListItem
         gcpService={mockGcpService}
@@ -51,9 +51,9 @@ describe('JobListItem', () => {
     );
 
     jobListItem
-      .find(IconButtonMenu)
+      .find(Menu)
       .dive()
-      .findWhere(w => w.text() === 'Import')
+      .findWhere(w => w.text() === 'Open source notebook')
       .first()
       .simulate('click');
 
