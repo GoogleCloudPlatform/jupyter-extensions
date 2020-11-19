@@ -167,7 +167,7 @@ export class JobListItem extends React.Component<Props, State> {
               <LearnMoreLink
                 noUnderline={true}
                 href={viewerLink}
-                text="VIEW RESULT"
+                text={schedule? "VIEW LATEST RUN RESULT": "VIEW RESULT"}
               />
             </div>
           </div>
@@ -185,14 +185,15 @@ export class JobListItem extends React.Component<Props, State> {
               open={Boolean(this.state.anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem key="shareNotebook" dense={true}>
-                <ShareDialog
-                  schedule={schedule}
-                  learnMoreLink=""
-                  cloudBucket=""
-                  shareLink={viewerLink}
-                />
-              </MenuItem>
+              {!schedule && (
+                <MenuItem key="shareNotebook" dense={true}>
+                  <ShareDialog
+                    learnMoreLink=""
+                    cloudBucket=""
+                    shareLink={viewerLink}
+                  />
+                </MenuItem>
+              )}
               <MenuItem
                 id="open"
                 key="openNotebook"

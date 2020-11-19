@@ -25,7 +25,7 @@ import { COLORS } from 'gcp_jupyterlab_shared';
 interface Props {
   children?: React.ReactNode;
   closeLabel?: string;
-  displayMessage?: string;
+  displayMessage?: React.ReactNode;
   closeOnRight?: boolean;
   onDialogClose: OnDialogClose;
 }
@@ -44,7 +44,7 @@ export const STYLES = stylesheet({
     paddingTop: '16px',
   },
   actionBarDisplayMessage: {
-    paddingTop: '9px',
+    marginLeft: '5px',
     ...csstips.horizontal,
     color: COLORS.caption,
     fontSize: '12px',
@@ -56,13 +56,13 @@ export function ActionBar(props: Props) {
   return (
     <Grid container spacing={1} className={STYLES.actionBarContainer}>
       {props.displayMessage && (
-        <Grid item sm={8}>
+        <Grid item sm={12}>
           <span className={STYLES.actionBarDisplayMessage}>
             {props.displayMessage}
           </span>
         </Grid>
       )}
-      <Grid item sm={props.displayMessage ? 4 : 12}>
+      <Grid item sm={12}>
         <div className={STYLES.actionBar}>
           {props.closeOnRight && props.children}
           <Button onClick={props.onDialogClose}>

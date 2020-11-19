@@ -5,12 +5,11 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { stylesheet } from 'typestyle';
+import { classes, stylesheet } from 'typestyle';
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 
 interface Props {
-  schedule: boolean;
   learnMoreLink: string;
   cloudBucket: string;
   shareLink: string;
@@ -45,13 +44,13 @@ export class ShareDialog extends React.Component<Props, State> {
       this.setState({ openDialog: true });
     };
 
-    const handleCopyThenClose = () => {
+    const handleCopy = () => {
       navigator.clipboard.writeText(this.props.shareLink);
-      this.setState({ openDialog: false, openSnackbar: true });
+      this.setState({ openSnackbar: true });
     };
 
     const handleClose = () => {
-      this.setState({ openDialog: false });
+      this.setState({ openDialog: false, openSnackbar: false });
     };
 
     const handleSnackbarClose = () => {
@@ -61,7 +60,7 @@ export class ShareDialog extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <p onClick={handleClickOpen} className={localStyles.fullWidth}>
-          Share run
+          Share run result
         </p>
         <Dialog
           open={this.state.openDialog}
@@ -71,81 +70,49 @@ export class ShareDialog extends React.Component<Props, State> {
           maxWidth="sm"
           fullWidth={true}
         >
-          <DialogTitle id="share-dialog-title">
-            Share with people and groups
-          </DialogTitle>
+          <DialogTitle id="share-dialog-title">Share run result</DialogTitle>
           <DialogContent>
-            {this.props.schedule && (
-              <DialogContentText
-                className={localStyles.text}
-                id="share-dialog-description"
-              >
-                <b>
-                  Sharing this schedule with other users will automatically
-                  share the output of all the past and future runs triggered by
-                  this schedule with them through the Notebook Viewer.
-                </b>{' '}
-                Please go to the Cloud Storage console and grant them Read
-                permissions to the output notebook for this schedule.{' '}
-                <LearnMoreLink href={this.props.learnMoreLink}></LearnMoreLink>
-                <ol className={localStyles.inlineStart}>
-                  <li>
-                    Click{' '}
-                    <LearnMoreLink text="here" href={this.props.cloudBucket} />
-                    to view the output folder for this schedule.
-                  </li>
-                  <li>
-                    Go to the "PERMISSIONS" tab to view all the permission for
-                    the bucket.
-                  </li>
-                  <li>Click "ADD" to grant Read permission to other users.</li>
-                  <li>
-                    After permissions are granted in the Cloud Storage console,
-                    share the link to the output of any run triggered by this
-                    schedule.
-                  </li>
-                </ol>
-              </DialogContentText>
-            )}
-            {!this.props.schedule && (
-              <DialogContentText
-                className={localStyles.text}
-                id="share-dialog-description"
-              >
-                In order to share the output of this single run with other users
-                through the Notebook Viewer, please go to the Cloud Storage
-                console and grant them Read permissions to the output notebook
-                for this run.{' '}
-                <LearnMoreLink href={this.props.learnMoreLink}></LearnMoreLink>
-                <ol className={localStyles.inlineStart}>
-                  <li>
-                    Click{' '}
-                    <LearnMoreLink text="here" href={this.props.cloudBucket} />
-                    to view the bucket for this run.
-                  </li>
-                  <li>
-                    Go to the "PERMISSIONS" tab to view all the permission for
-                    the bucket.
-                  </li>
-                  <li>Click "ADD" to grant Read permission to other users.</li>
-                  <li>
-                    After permissions are granted in the Cloud Storage console,
-                    click "COPY LINK" below to share the link to the output in
-                    Notebook Viewer.
-                  </li>
-                </ol>
-              </DialogContentText>
-            )}
+            <DialogContentText
+              className={localStyles.text}
+              id="share-dialog-description"
+            >
+              To share this run result with people or groups, grant view
+              permissions to the Cloud Storage bucket containing all results. If
+              this has been done before, skip steps 2 through 4.
+            </DialogContentText>
+            <ol className={classes(localStyles.inlineStart, localStyles.text)}>
+              <li>Click the "COPY LINK" button below</li>
+              <li>
+                Go to the{' '}
+                <LearnMoreLink
+                  href={this.props.cloudBucket}
+                  text="results bucket"
+                />
+                .
+              </li>
+              <li>Click "Add"</li>
+              <li>
+                Enter one or more emails then select the "Storage Object Viewer"
+                role
+              </li>
+            </ol>
+            <DialogContentText
+              className={localStyles.text}
+              id="share-dialog-description"
+            >
+              You can now share the link you copied with the people or groups
+              granted view permission. Note: these people or groups are able to
+              view any run result within this Google Cloud project as long as
+              they own the links to those run results.
+            </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
-            {!this.props.schedule && (
-              <Button onClick={handleCopyThenClose} color="primary" autoFocus>
-                Copy Link
-              </Button>
-            )}
+            <Button onClick={handleCopy} color="primary" autoFocus>
+              Copy Link
+            </Button>
           </DialogActions>
         </Dialog>
         <Snackbar

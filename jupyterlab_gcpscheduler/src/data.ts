@@ -311,7 +311,7 @@ export const REGIONS: Option[] = [
 /** Single execution or recurring schedule */
 export const SCHEDULE_TYPES: Option[] = [
   { value: SINGLE, text: 'Single run' },
-  { value: RECURRING, text: 'Recurring run' },
+  { value: RECURRING, text: 'Schedule (scheduled runs)' },
 ];
 
 export const FREQUENCY_TYPES: Option[] = [

@@ -183,7 +183,7 @@ export class InnerSchedulerForm extends React.Component<
         <SchedulerDescription />
         <p className={css.heading}>Notebook: {this.props.notebookName}</p>
         <TextInput
-          label="Run name"
+          label="Job name"
           name="jobId"
           value={values.jobId}
           hasError={!!errors.jobId}
@@ -202,8 +202,9 @@ export class InnerSchedulerForm extends React.Component<
           name="scaleTier"
           value={values.scaleTier}
           options={SCALE_TIERS}
-          formHelperText="A scale tier is a predefined cluster specification."
+          formHelperText="A scale tier is a predefined set of machines allocated to your notebook run."
           formHelperLink={SCALE_TIER_LINK}
+          formHelperLinkText="Learn more about scale tiers"
           onChange={this._onScaleTierChanged}
         />
         {values.scaleTier === CUSTOM && (

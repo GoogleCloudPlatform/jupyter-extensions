@@ -170,7 +170,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
       <Dialog open={this._isOpen()}>
         <header className={localStyles.header}>
           <span className={localStyles.title}>
-            Schedule a notebook run <Badge value="alpha" />
+            Create a notebook job <Badge value="alpha" />
           </span>
           <IconButtonMenu
             menuItems={menuCloseHandler => [

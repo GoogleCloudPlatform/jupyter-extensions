@@ -53,6 +53,7 @@ interface Props {
   options?: Option[];
   formHelperText?: string;
   formHelperLink?: string;
+  formHelperLinkText?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -64,6 +65,7 @@ export function SelectInput(props: Props) {
     options,
     formHelperText,
     formHelperLink,
+    formHelperLinkText,
     onChange,
   } = props;
   return (
@@ -103,7 +105,7 @@ export function SelectInput(props: Props) {
       {formHelperText && (
         <FormHelperText style={ALIGN_HINT}>
           {formHelperText}
-          {formHelperLink && <LearnMoreLink href={formHelperLink} />}
+          {formHelperLink && <LearnMoreLink text={formHelperLinkText} href={formHelperLink} />}
         </FormHelperText>
       )}
     </div>
