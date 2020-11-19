@@ -187,10 +187,7 @@ export class JobListItem extends React.Component<Props, State> {
             >
               {!schedule && (
                 <MenuItem key="shareNotebook" dense={true}>
-                  <ShareDialog
-                    cloudBucket=""
-                    shareLink={viewerLink}
-                  />
+                  <ShareDialog cloudBucket="" shareLink={viewerLink} />
                 </MenuItem>
               )}
               <MenuItem

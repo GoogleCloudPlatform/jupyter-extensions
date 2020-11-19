@@ -71,8 +71,6 @@ exports[`JobListItem Renders for failed job 1`] = `
       >
         <ShareDialog
           cloudBucket=""
-          learnMoreLink=""
-          schedule={false}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
@@ -175,8 +173,6 @@ exports[`JobListItem Renders for running job 1`] = `
       >
         <ShareDialog
           cloudBucket=""
-          learnMoreLink=""
-          schedule={false}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
@@ -279,8 +275,6 @@ exports[`JobListItem Renders for successful job 1`] = `
       >
         <ShareDialog
           cloudBucket=""
-          learnMoreLink=""
-          schedule={false}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>

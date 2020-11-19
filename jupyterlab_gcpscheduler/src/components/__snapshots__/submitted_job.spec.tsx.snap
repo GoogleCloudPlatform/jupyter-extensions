@@ -9,7 +9,8 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
   >
     <WithStyles(CheckCircleIcon) />
     <span>
-      Notebook run successfully scheduled!
+      Single run
+       successfully created!
     </span>
   </div>
   <div
@@ -40,19 +41,6 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
-          key="runName"
-        >
-          <WithStyles(ForwardRef(TableCell))
-            className="tableHeader_f1oymmz1"
-            variant="head"
-          >
-            Run name
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
-            test_job_1234
-          </WithStyles(ForwardRef(TableCell))>
-        </WithStyles(ForwardRef(TableRow))>
-        <WithStyles(ForwardRef(TableRow))
           key="region"
         >
           <WithStyles(ForwardRef(TableCell))
@@ -75,7 +63,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
             Scale tier
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            CUSTOM
+            Custom machine type configuration
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -127,7 +115,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
             Container
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+            TensorFlow Enterprise 1.15 (GPU)
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -143,29 +131,22 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
             Single run
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
-        <WithStyles(ForwardRef(TableRow))
-          key="status"
-        >
-          <WithStyles(ForwardRef(TableCell))
-            className="tableHeader_f1oymmz1"
-            variant="head"
-          >
-            Status
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
-             
-            <LearnMoreLink
-              href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
-              text="View in Google Cloud console"
-            />
-          </WithStyles(ForwardRef(TableCell))>
-        </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
     </WithStyles(ForwardRef(Table))>
   </WithStyles(ForwardRef(TableContainer))>
   <ActionBar
     closeLabel="Done"
     closeOnRight={true}
+    displayMessage={
+      <React.Fragment>
+        Check the run status in the Scheduler extension or in
+         
+        <LearnMoreLink
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          text="Google Cloud console"
+        />
+      </React.Fragment>
+    }
     onDialogClose={[MockFunction]}
   >
     <WithStyles(ForwardRef(Button))
@@ -186,7 +167,8 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
   >
     <WithStyles(CheckCircleIcon) />
     <span>
-      Notebook run successfully scheduled!
+      Schedule
+       successfully created!
     </span>
   </div>
   <div
@@ -217,19 +199,6 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
-          key="runName"
-        >
-          <WithStyles(ForwardRef(TableCell))
-            className="tableHeader_f1oymmz1"
-            variant="head"
-          >
-            Run name
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
-            test_job_1234
-          </WithStyles(ForwardRef(TableCell))>
-        </WithStyles(ForwardRef(TableRow))>
-        <WithStyles(ForwardRef(TableRow))
           key="region"
         >
           <WithStyles(ForwardRef(TableCell))
@@ -252,7 +221,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Scale tier
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            CUSTOM
+            Custom machine type configuration
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -304,7 +273,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Container
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest
+            TensorFlow Enterprise 1.15 (GPU)
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -317,7 +286,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Type
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            Recurring run
+            Schedule (scheduled runs)
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -333,29 +302,22 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Every day at 3:00 PM UTC
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
-        <WithStyles(ForwardRef(TableRow))
-          key="status"
-        >
-          <WithStyles(ForwardRef(TableCell))
-            className="tableHeader_f1oymmz1"
-            variant="head"
-          >
-            Status
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
-             
-            <LearnMoreLink
-              href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
-              text="View in Google Cloud console"
-            />
-          </WithStyles(ForwardRef(TableCell))>
-        </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
     </WithStyles(ForwardRef(Table))>
   </WithStyles(ForwardRef(TableContainer))>
   <ActionBar
     closeLabel="Done"
     closeOnRight={true}
+    displayMessage={
+      <React.Fragment>
+        Check the run status in the Scheduler extension or in
+         
+        <LearnMoreLink
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          text="Google Cloud console"
+        />
+      </React.Fragment>
+    }
     onDialogClose={[MockFunction]}
   >
     <WithStyles(ForwardRef(Button))
