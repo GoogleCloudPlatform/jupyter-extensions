@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { JobListItem } from './job_list_item';
-import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
+import { TEST_PROJECT, getRun } from '../test_helpers';
 import { GcpService } from '../service/gcp';
 import Menu from '@material-ui/core/Menu';
 
@@ -45,8 +45,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        schedule={false}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
 
@@ -67,36 +66,33 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        schedule={false}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('Renders for failed job', () => {
-    const job = getAiPlatformJob();
+    const job = getRun();
     job.state = 'FAILED';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        schedule={false}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('Renders for running job', () => {
-    const job = getAiPlatformJob();
+    const job = getRun();
     job.state = 'RUNNING';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        schedule={false}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
     expect(component).toMatchSnapshot();

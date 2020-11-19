@@ -335,3 +335,7 @@ export const SCHEDULER_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/sched
 
 /** Notebook jobs directory that notebooks will be imported to. */
 export const IMPORT_DIRECTORY = 'imported_notebook_jobs/';
+
+export const VIEWER_LINK_BASE = 'https://notebooks.cloud.google.com/view';
+
+export const DOWNLOAD_LINK_BASE = 'https://storage.cloud.google.com';

@@ -17,8 +17,9 @@
 /** Utility functions and helpers for tests. */
 import { ProjectState } from './service/project_state';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { AiPlatformJob } from './service/gcp';
+import { AiPlatformJob, Run, Schedule } from './service/gcp';
 import { mount } from 'enzyme';
+import { AI_PLATFORM_LINK, DOWNLOAD_LINK_BASE, VIEWER_LINK_BASE } from './data';
 export const TEST_PROJECT = 'test-project';
 
 /** Returns a blank project state. */
@@ -135,6 +136,58 @@ export function simulateCheckBoxChange(
     persist: () => {},
     target: { name, checked },
   });
+}
+
+export function getRun(): Run {
+  const gcsFile = `${TEST_PROJECT}/notebook_job1/job1.ipynb`;
+  const [bucket, jobName, ...object] = gcsFile.split('/');
+  const name = jobName.replace('_', ' ');
+  const encodedObjectPath = [jobName, ...object]
+    .map(p => encodeURIComponent(p))
+    .join('/');
+  const link = `${AI_PLATFORM_LINK}/notebook_job1_abcxyz?project=${TEST_PROJECT}`;
+  const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
+  const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
+  const bucketLink = 'bucket';
+  return {
+    id: 'notebook_job1_abcxyz',
+    name,
+    createTime: '2020-05-01T19:00:07Z',
+    endTime: '2020-05-01T19:09:42Z',
+    gcsFile,
+    type: 'Single run',
+    state: 'SUCCEEDED',
+    link,
+    viewerLink,
+    downloadLink,
+    bucketLink,
+    timeZone: 'UTC',
+  };
+}
+
+export function getSchedule(): Schedule {
+  const gcsFile = `${TEST_PROJECT}/notebook_job1/job1.ipynb`;
+  const [bucket, jobName, ...object] = gcsFile.split('/');
+  const name = jobName.replace('_', ' ');
+  const encodedObjectPath = [jobName, ...object]
+    .map(p => encodeURIComponent(p))
+    .join('/');
+  const link = `${AI_PLATFORM_LINK}/notebook_job1_abcxyz?project=${TEST_PROJECT}`;
+  const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
+  const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
+  return {
+    id: 'notebook_job1_abcxyz',
+    name,
+    createTime: '2020-05-01T19:00:07Z',
+    endTime: '2020-05-01T19:09:42Z',
+    gcsFile,
+    state: 'SUCCEEDED',
+    link,
+    viewerLink,
+    downloadLink,
+    timeZone: 'UTC',
+    schedule: '30 9 */2 * *',
+  };
 }
 
 /** Returns an AI Platform Job object */

@@ -371,7 +371,7 @@ describe('GcpService', () => {
     it('Lists notebook jobs', async () => {
       mockSubmit.mockReturnValue(asApiResponse({}));
 
-      await gcpService.listNotebookJobs();
+      await gcpService.listRuns();
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
         params: {
@@ -392,7 +392,7 @@ describe('GcpService', () => {
 
       expect.assertions(2);
       try {
-        await gcpService.listNotebookJobs('abc123');
+        await gcpService.listRuns(10, 'abc123');
       } catch (err) {
         expect(err).toEqual('BAD_REQUEST: Unable to retrieve notebook jobs');
       }

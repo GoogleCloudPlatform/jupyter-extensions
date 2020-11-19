@@ -12,6 +12,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 interface Props {
   cloudBucket: string;
   shareLink: string;
+  handleClose?: () => void;
 }
 
 interface State {
@@ -50,6 +51,9 @@ export class ShareDialog extends React.Component<Props, State> {
 
     const handleClose = () => {
       this.setState({ openDialog: false, openSnackbar: false });
+      if (this.props.handleClose) {
+        this.props.handleClose();
+      }
     };
 
     const handleSnackbarClose = () => {

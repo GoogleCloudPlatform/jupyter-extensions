@@ -29,8 +29,10 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { GcpService, ListAiPlatformJobsResponse } from '../service/gcp';
+import { GcpService, Runs, Schedules } from '../service/gcp';
 import { JobListItem } from './job_list_item';
+import TablePagination from '@material-ui/core/TablePagination';
+const DEFAULT_PAGE_SIZE = 10;
 
 interface Props {
   isVisible: boolean;
@@ -39,11 +41,13 @@ interface Props {
 
 interface State {
   isLoading: boolean;
-  runs: ListAiPlatformJobsResponse;
-  schedules: ListAiPlatformJobsResponse;
+  runs: Runs;
+  schedules: Schedules;
   projectId?: string;
   error?: string;
   tab: number;
+  page: number;
+  rowsPerPage: number;
 }
 
 const localStyles = stylesheet({
@@ -91,9 +95,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     super(props);
     this.state = {
       isLoading: false,
-      runs: { jobs: [] },
-      schedules: { jobs: [] },
+      runs: { runs: [], pageToken: '' },
+      schedules: { schedules: [], pageToken: '' },
       tab: 0,
+      page: 0,
+      rowsPerPage: DEFAULT_PAGE_SIZE,
     };
   }
 
@@ -111,14 +117,43 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.props.isVisible &&
       !(prevProps.isVisible || this.state.isLoading)
     ) {
-      this._getRunsAndSchedules();
+      this._getRunsAndSchedules(this.state.rowsPerPage);
     }
   }
 
   render() {
-    const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-      this.setState({ tab: newValue });
+    const handleChangeTab = (
+      event: React.ChangeEvent<{}>,
+      newValue: number
+    ) => {
+      this._getRunsAndSchedules(this.state.rowsPerPage);
+      this.setState({ tab: newValue, page: 0 });
     };
+    const handleChangePage = (
+      event: React.MouseEvent<HTMLButtonElement> | null,
+      newPage: number
+    ) => {
+      this._getRunsAndSchedules(
+        this.state.rowsPerPage,
+        this.state.tab === 0
+          ? this.state.runs.pageToken
+          : this.state.schedules.pageToken
+      );
+      this.setState({ page: newPage });
+    };
+
+    const handleChangeRowsPerPage = (
+      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      const newRowsPerPage = parseInt(event.target.value, DEFAULT_PAGE_SIZE);
+      this._getRunsAndSchedules(newRowsPerPage);
+      this.setState({ rowsPerPage: newRowsPerPage, page: 0 });
+    };
+
+    const labelDisplayRowsMesssage = ({ from, to, count }) => {
+      return `${from}-${to} of ${count !== -1 ? String(count) : 'many'}`;
+    };
+
     const { error, runs, schedules, isLoading, projectId } = this.state;
     const gcpService = this.props.gcpService;
     let runsContent: JSX.Element;
@@ -132,12 +167,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     } else {
       runsContent = (
         <ul className={localStyles.list}>
-          {runs.jobs.map(j => (
+          {runs.runs.map(j => (
             <JobListItem
               gcpService={gcpService}
-              key={j.jobId}
+              key={j.id}
               job={j}
-              schedule={false}
               projectId={projectId}
             />
           ))}
@@ -145,12 +179,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       );
       schedulesContent = (
         <ul className={localStyles.list}>
-          {schedules.jobs.map(j => (
+          {schedules.schedules.map(j => (
             <JobListItem
               gcpService={gcpService}
-              key={j.jobId}
+              key={j.id}
               job={j}
-              schedule={true}
               projectId={projectId}
             />
           ))}
@@ -166,7 +199,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           </header>
           <IconButton
             title="Refresh Jobs"
-            onClick={() => this._getRunsAndSchedules()}
+            onClick={() => this._getRunsAndSchedules(this.state.rowsPerPage)}
           >
             <RefreshIcon />
           </IconButton>
@@ -174,7 +207,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         <Tabs
           value={this.state.tab}
           indicatorColor="primary"
-          onChange={handleChange}
+          onChange={handleChangeTab}
         >
           <StyledTab label="Runs" />
           <StyledTab label="Schedules" />
@@ -193,16 +226,43 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         >
           {schedulesContent}
         </div>
+        <footer>
+          <TablePagination
+            count={-1}
+            page={this.state.page}
+            onChangePage={handleChangePage}
+            rowsPerPage={this.state.rowsPerPage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+            labelDisplayedRows={labelDisplayRowsMesssage}
+            labelRowsPerPage="Items per page:"
+          />
+        </footer>
       </div>
     );
   }
 
-  private async _getRunsAndSchedules() {
+  private async _getRunsAndSchedules(pageSize: number, pageToken?: string) {
     try {
       this.setState({ isLoading: true, error: undefined });
-      const runs = await this.props.gcpService.listNotebookJobs();
-      // const schedules = await this.props.gcpService.listSchedules();
-      this.setState({ isLoading: false, runs, schedules: runs });
+      if (!pageToken) {
+        const runs = await this.props.gcpService.listRuns(pageSize);
+        const schedules = await this.props.gcpService.listSchedules(pageSize);
+        this.setState({
+          isLoading: false,
+          runs,
+          schedules,
+        });
+      } else if (pageToken && this.state.tab === 0) {
+        const runs = await this.props.gcpService.listRuns(pageSize, pageToken!);
+        this.setState({ isLoading: false, runs });
+        this.setState({ isLoading: false, runs });
+      } else if (pageToken && this.state.tab === 1) {
+        const schedules = await this.props.gcpService.listSchedules(
+          pageSize,
+          pageToken!
+        );
+        this.setState({ isLoading: false, schedules });
+      }
     } catch (err) {
       this.setState({
         isLoading: false,
