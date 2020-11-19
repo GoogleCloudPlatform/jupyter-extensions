@@ -63,7 +63,6 @@ const localStyles = stylesheet({
     ...csstips.flex,
   },
   panel: {
-    minWidth: '300px',
     backgroundColor: COLORS.white,
     color: COLORS.base,
     height: '100%',
@@ -79,6 +78,10 @@ const localStyles = stylesheet({
   tab: {
     overflowY: 'scroll',
   },
+  pagination: {
+    fontSize: '12px',
+    borderTop: '2px solid #eeeeee',
+  },
 });
 
 const StyledTab = withStyles({
@@ -86,6 +89,24 @@ const StyledTab = withStyles({
     textTransform: 'none',
   },
 })(Tab);
+
+const StyledTablePagination = withStyles({
+  root: {
+    fontSize: '12px',
+  },
+  input: {
+    fontSize: '12px !important',
+  },
+  caption: {
+    fontSize: '12px',
+  },
+  selectRoot: {
+    marginRight: '8px',
+  }, 
+  actions: {
+    marginLeft: '0px',
+  },
+})(TablePagination);
 
 const TITLE_TEXT = 'Notebook Scheduler';
 
@@ -207,6 +228,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         <Tabs
           value={this.state.tab}
           indicatorColor="primary"
+          variant="fullWidth"
           onChange={handleChangeTab}
         >
           <StyledTab label="Runs" />
@@ -226,8 +248,8 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         >
           {schedulesContent}
         </div>
-        <footer>
-          <TablePagination
+        <footer className={localStyles.pagination}>
+          <StyledTablePagination
             count={-1}
             page={this.state.page}
             onChangePage={handleChangePage}
@@ -235,6 +257,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
             onChangeRowsPerPage={handleChangeRowsPerPage}
             labelDisplayedRows={labelDisplayRowsMesssage}
             labelRowsPerPage="Items per page:"
+            SelectProps={{variant:"outlined",}}
           />
         </footer>
       </div>

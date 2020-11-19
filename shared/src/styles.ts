@@ -39,7 +39,7 @@ export const COLORS = {
   link: 'var(--jp-content-link-color, #3367d6)',
   red: 'var(--jp-error-color1, #d93025)',
   white: 'var(--jp-layout-color1, white)',
-  inverse: 'var(--jp-ui-inverse-font-color2, #555555)',
+  inverse: 'var( --jp-ui-font-color3, #555555)',
   secondary: 'var(--jp-layout-color2, #eeeeee)',
 };
 

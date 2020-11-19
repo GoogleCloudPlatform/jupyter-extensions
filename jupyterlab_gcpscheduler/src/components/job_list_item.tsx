@@ -100,7 +100,7 @@ export class JobListItem extends React.Component<Props, State> {
     };
 
     return (
-      <Grid className={localStyles.job} container spacing={0}>
+      <Grid className={localStyles.job} container spacing={1}>
         <Grid item xs={1}>
           {' '}
           {getIconForJobState(job.state)}
