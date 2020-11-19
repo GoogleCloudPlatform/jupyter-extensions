@@ -105,7 +105,9 @@ export function SelectInput(props: Props) {
       {formHelperText && (
         <FormHelperText style={ALIGN_HINT}>
           {formHelperText}
-          {formHelperLink && <LearnMoreLink text={formHelperLinkText} href={formHelperLink} />}
+          {formHelperLink && (
+            <LearnMoreLink text={formHelperLinkText} href={formHelperLink} />
+          )}
         </FormHelperText>
       )}
     </div>

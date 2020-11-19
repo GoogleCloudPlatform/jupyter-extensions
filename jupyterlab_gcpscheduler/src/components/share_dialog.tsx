@@ -10,7 +10,6 @@ import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 
 interface Props {
-  learnMoreLink: string;
   cloudBucket: string;
   shareLink: string;
 }

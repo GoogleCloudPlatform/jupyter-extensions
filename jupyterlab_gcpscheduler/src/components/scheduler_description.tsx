@@ -17,8 +17,10 @@
 import * as React from 'react';
 import { css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 
-const RUNNING_NOTEBOOK_PRICES_LINK = 'https://cloud.google.com/ai-platform/training/pricing';
-const CLOUD_STORAGE_PRICES_LINK = 'https://cloud.google.com/ai-platform/training/pricing';
+const RUNNING_NOTEBOOK_PRICES_LINK =
+  'https://cloud.google.com/ai-platform/training/pricing';
+const CLOUD_STORAGE_PRICES_LINK =
+  'https://cloud.google.com/ai-platform/training/pricing';
 
 /** Functional Component for the Scheduler Documentation */
 // tslint:disable-next-line:enforce-name-casing
@@ -27,8 +29,14 @@ export function SchedulerDescription() {
     <p className={css.noTopMargin}>
       Run this notebook immediately or make it a scheduled job. Results will be
       stored in a Cloud Storage bucket and can be shared with others. Charges
-      apply for <LearnMoreLink href={RUNNING_NOTEBOOK_PRICES_LINK} text="running this notebook" /> and{' '}
-      <LearnMoreLink text="storing results" href={CLOUD_STORAGE_PRICES_LINK} /> in Cloud Storage.
+      apply for{' '}
+      <LearnMoreLink
+        href={RUNNING_NOTEBOOK_PRICES_LINK}
+        text="running this notebook"
+      />{' '}
+      and{' '}
+      <LearnMoreLink text="storing results" href={CLOUD_STORAGE_PRICES_LINK} />{' '}
+      in Cloud Storage.
     </p>
   );
 }

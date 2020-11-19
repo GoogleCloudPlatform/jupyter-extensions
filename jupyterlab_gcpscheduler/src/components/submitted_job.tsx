@@ -205,10 +205,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
           displayMessage={
             <React.Fragment>
               Check the run status in the Scheduler extension or in{' '}
-              <LearnMoreLink
-                text="Google Cloud console"
-                href={jobLink}
-              />
+              <LearnMoreLink text="Google Cloud console" href={jobLink} />
             </React.Fragment>
           }
         >

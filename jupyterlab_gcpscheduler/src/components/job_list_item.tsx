@@ -167,7 +167,7 @@ export class JobListItem extends React.Component<Props, State> {
               <LearnMoreLink
                 noUnderline={true}
                 href={viewerLink}
-                text={schedule? "VIEW LATEST RUN RESULT": "VIEW RESULT"}
+                text={schedule ? 'VIEW LATEST RUN RESULT' : 'VIEW RESULT'}
               />
             </div>
           </div>
@@ -188,7 +188,6 @@ export class JobListItem extends React.Component<Props, State> {
               {!schedule && (
                 <MenuItem key="shareNotebook" dense={true}>
                   <ShareDialog
-                    learnMoreLink=""
                     cloudBucket=""
                     shareLink={viewerLink}
                   />
