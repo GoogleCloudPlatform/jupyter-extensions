@@ -386,7 +386,8 @@ describe('GcpService', () => {
         pageToken: 'xyz',
         runs: [
           {
-            bucketLink: 'test-project',
+            bucketLink:
+              'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
             createTime: '2020-05-01T19:00:07Z',
             downloadLink:
               'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
@@ -402,7 +403,8 @@ describe('GcpService', () => {
               'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
           },
           {
-            bucketLink: 'test-project',
+            bucketLink:
+              'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
             createTime: '2020-05-01T19:00:07Z',
             downloadLink:
               'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
@@ -512,7 +514,7 @@ describe('GcpService', () => {
               'https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project',
             name: 'notebook_job1',
             state: 'SUCCEEDED',
-            schedule: 'notebook_job1',
+            schedule: '30 12 */2 * *',
             viewerLink:
               'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
           },
@@ -525,7 +527,7 @@ describe('GcpService', () => {
             id: 'jobId2',
             link:
               'https://console.cloud.google.com/ai-platform/jobs/jobId2?project=test-project',
-            schedule: 'notebook_job1',
+            schedule: '30 12 */2 * *',
             name: 'notebook_job1',
             state: 'SUCCEEDED',
             viewerLink:
