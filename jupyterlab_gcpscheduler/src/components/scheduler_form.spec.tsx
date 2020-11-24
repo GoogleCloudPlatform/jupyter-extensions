@@ -31,7 +31,8 @@ import {
   ACCELERATOR_TYPES,
   ACCELERATOR_TYPES_REDUCED,
 } from '../data';
-import { GcpService, RunNotebookRequest } from '../service/gcp';
+import { GcpService } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
 import { SchedulerForm, InnerSchedulerForm } from './scheduler_form';
 import { SubmittedJob } from './submitted_job';
@@ -364,6 +365,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -399,6 +401,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -428,6 +431,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -475,6 +479,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -522,6 +527,7 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -545,6 +551,7 @@ describe('SchedulerForm', () => {
     );
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       jobId: 'test_scheduled_job',
+      gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
@@ -613,6 +620,7 @@ describe('SchedulerForm', () => {
     mockSettingsGet
       .mockReturnValueOnce({ composite: 'us-central1' })
       .mockReturnValueOnce({ composite: 'CUSTOM' })
+      .mockReturnValueOnce({ composite: 'gs://test-project' })
       .mockReturnValueOnce({ composite: 'n1-standard-4' })
       .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
       .mockReturnValueOnce({ composite: '1' })
@@ -624,9 +632,9 @@ describe('SchedulerForm', () => {
       ...mockProps,
       gcpSettings: {
         projectId: TEST_PROJECT,
-        gcsBucket: gcsBucket,
         schedulerRegion: 'us-central1',
         scaleTier: 'CUSTOM',
+        gcsBucket: 'gs://test-project',
         masterType: 'n1-standard-4',
         acceleratorType: 'NVIDIA_TESLA_K80',
         acceleratorCount: '1',
@@ -693,6 +701,7 @@ describe('SchedulerForm', () => {
       masterType: '',
       outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
       scaleTier: 'BASIC',
+      gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: '',
       acceleratorCount: '',
@@ -735,7 +744,7 @@ describe('SchedulerForm', () => {
       ...mockProps,
       gcpSettings: {
         projectId: TEST_PROJECT,
-        gcsBucket: gcsBucket,
+        gcsBucket: 'gs://test-project',
         schedulerRegion: 'us-central1',
         scaleTier: 'CUSTOM',
         masterType: 'n1-standard-4',
@@ -797,6 +806,7 @@ describe('SchedulerForm', () => {
       masterType: 'n1-standard-4',
       outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
       scaleTier: 'CUSTOM',
+      gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: 'NVIDIA_TESLA_K80',
       acceleratorCount: '1',
@@ -847,6 +857,7 @@ describe('SchedulerForm', () => {
     mockSettingsGet
       .mockReturnValueOnce({ composite: 'us-east1' })
       .mockReturnValueOnce({ composite: 'CUSTOM' })
+      .mockReturnValueOnce({ composite: 'gs://test-project' })
       .mockReturnValueOnce({ composite: 'n1-standard-16' })
       .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
       .mockReturnValueOnce({ composite: '1' })
@@ -947,6 +958,7 @@ describe('SchedulerForm', () => {
       masterType: 'n1-standard-16',
       outputNotebookGcsPath: `${gcsBucket}/test_scheduled_job/test_scheduled_job.ipynb`,
       scaleTier: 'CUSTOM',
+      gcsBucket: 'gs://test-project',
       region: 'us-east1',
       acceleratorType: 'NVIDIA_TESLA_K80',
       acceleratorCount: '1',
@@ -1049,6 +1061,7 @@ describe('SchedulerForm', () => {
       masterType: '',
       outputNotebookGcsPath: `${gcsBucket}/test_failed_job_submission/test_failed_job_submission.ipynb`,
       scaleTier: 'BASIC',
+      gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: '',
       acceleratorCount: '',

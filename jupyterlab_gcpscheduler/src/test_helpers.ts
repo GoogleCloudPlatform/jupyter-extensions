@@ -17,7 +17,7 @@
 /** Utility functions and helpers for tests. */
 import { ProjectState } from './service/project_state';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { AiPlatformJob, Run, Schedule } from './service/gcp';
+import { AiPlatformJob, Run, Schedule } from './interfaces';
 import { mount } from 'enzyme';
 import { AI_PLATFORM_LINK, DOWNLOAD_LINK_BASE, VIEWER_LINK_BASE } from './data';
 export const TEST_PROJECT = 'test-project';

@@ -19,8 +19,7 @@ import { css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 
 const RUNNING_NOTEBOOK_PRICES_LINK =
   'https://cloud.google.com/ai-platform/training/pricing';
-const CLOUD_STORAGE_PRICES_LINK =
-  'https://cloud.google.com/ai-platform/training/pricing';
+const CLOUD_STORAGE_PRICES_LINK = 'https://cloud.google.com/storage/pricing';
 
 /** Functional Component for the Scheduler Documentation */
 // tslint:disable-next-line:enforce-name-casing

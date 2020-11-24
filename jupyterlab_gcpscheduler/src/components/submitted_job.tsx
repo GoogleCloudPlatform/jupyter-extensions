@@ -37,7 +37,7 @@ import {
   ACCELERATOR_TYPES,
   CONTAINER_IMAGES,
 } from '../data';
-import { RunNotebookRequest } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 import { OnDialogClose } from './dialog';
 import { ActionBar } from './action_bar';
 

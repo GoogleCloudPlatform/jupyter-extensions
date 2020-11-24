@@ -28,8 +28,9 @@ import {
 } from 'gcp_jupyterlab_shared';
 import { getNextRunDate } from '../cron';
 import * as React from 'react';
-
-import { GcpService, RunNotebookRequest } from '../service/gcp';
+import { CloudBucketSelector } from './cloud_bucket';
+import { GcpService } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
 import { GcpSettings, OnDialogClose } from './dialog';
 import { ScheduleBuilder } from './schedule_builder/schedule_builder';
@@ -80,6 +81,7 @@ interface SchedulerFormValues {
   masterType?: string;
   imageUri: string;
   scheduleType: string;
+  gcsBucket: string;
   schedule?: string;
   acceleratorType?: string;
   acceleratorCount?: string;
@@ -137,10 +139,15 @@ export class InnerSchedulerForm extends React.Component<
     this._onAcceleratorTypeChange = this._onAcceleratorTypeChange.bind(this);
     this._onFormReset = this._onFormReset.bind(this);
     this.updateCronSchedule = this.updateCronSchedule.bind(this);
+    this.updateGcsBucket = this.updateGcsBucket.bind(this);
   }
 
   updateCronSchedule(newSchedule: string) {
     this.props.setFieldValue('schedule', newSchedule, false);
+  }
+
+  updateGcsBucket(gcsBucketName: string) {
+    this.props.setFieldValue('gcsBucket', gcsBucketName, false);
   }
 
   componentDidMount() {
@@ -196,6 +203,11 @@ export class InnerSchedulerForm extends React.Component<
           value={values.region}
           options={REGIONS}
           onChange={handleChange}
+        />
+        <CloudBucketSelector
+          gcsBucket={values.gcsBucket.slice(5)}
+          onGcsBucketChange={this.updateGcsBucket}
+          gcpService={this.props.gcpService}
         />
         <SelectInput
           label="Scale tier"
@@ -364,6 +376,10 @@ export class InnerSchedulerForm extends React.Component<
   private _onFormReset() {
     this.props.setStatus(undefined);
     this.props.setFieldValue('jobId', getJobId(this.props.notebookName));
+    this.props.setFieldValue(
+      'gcsBucket',
+      this.props.gcpSettings.gcsBucket || ''
+    );
   }
 
   private getSubmittedJobElement(status: Status) {
@@ -390,6 +406,9 @@ function updateSettingsFromRequest(
   }
   if (settings.get('scaleTier').composite !== request.scaleTier) {
     promises.push(settings.set('scaleTier', request.scaleTier));
+  }
+  if (settings.get('gcsBucket').composite !== request.gcsBucket) {
+    promises.push(settings.set('gcsBucket', request.gcsBucket));
   }
   if (settings.get('masterType').composite !== request.masterType) {
     promises.push(settings.set('masterType', request.masterType));
@@ -433,7 +452,10 @@ async function submit(
   } = formikBag.props;
   const { setStatus, setSubmitting } = formikBag;
 
-  const gcsFolder = `${gcpSettings.gcsBucket}/${jobId}`;
+  const gcsBucket = values.gcsBucket.includes('gs://')
+    ? values.gcsBucket
+    : 'gs://' + values.gcsBucket;
+  const gcsFolder = `${gcsBucket}/${jobId}`;
   const inputNotebookGcsPath = `${gcsFolder}/${notebookName}`;
   const outputNotebookGcsPath = `${gcsFolder}/${jobId}.ipynb`;
   const request: RunNotebookRequest = {
@@ -443,6 +465,7 @@ async function submit(
     masterType,
     outputNotebookGcsPath,
     scaleTier,
+    gcsBucket,
     region,
     acceleratorType,
     acceleratorCount,
@@ -503,6 +526,7 @@ function mapPropsToValues(props: Props) {
     acceleratorCount: props.gcpSettings.acceleratorCount || '',
     scheduleType: SINGLE,
     schedule: '',
+    gcsBucket: props.gcpSettings.gcsBucket || '',
   };
 }
 

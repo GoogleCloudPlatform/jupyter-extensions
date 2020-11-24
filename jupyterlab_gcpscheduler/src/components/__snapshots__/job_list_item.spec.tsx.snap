@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JobListItem Renders for failed job 1`] = `
+exports[`JobListItem Renders for failed run 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
-  spacing={0}
+  spacing={1}
 >
   <WithStyles(ForwardRef(Grid))
     item={true}
@@ -34,7 +34,7 @@ exports[`JobListItem Renders for failed job 1`] = `
         <span>
           May 1, 2020, 7:09 PM
            - 
-          Scheduled run
+          Single run
         </span>
       </div>
       <div
@@ -70,7 +70,8 @@ exports[`JobListItem Renders for failed job 1`] = `
         key="shareNotebook"
       >
         <ShareDialog
-          cloudBucket=""
+          cloudBucket="bucket"
+          handleClose={[Function]}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
@@ -102,11 +103,112 @@ exports[`JobListItem Renders for failed job 1`] = `
 </WithStyles(ForwardRef(Grid))>
 `;
 
-exports[`JobListItem Renders for running job 1`] = `
+exports[`JobListItem Renders for failed schedule 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
-  spacing={0}
+  spacing={1}
+>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+     
+    <WithStyles(CheckCircleIcon) />
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={10}
+  >
+    <div
+      className="bold_f1wf24vo"
+    >
+      <LearnMoreLink
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        noUnderline={true}
+        secondary={true}
+        text="notebook job1"
+      />
+    </div>
+    <div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Frequency:
+           
+          Every 2 days at 9:30 AM UTC
+        </span>
+      </div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Latest run: 
+          May 1, 2020, 7:09 PM
+        </span>
+      </div>
+      <div
+        className="bold_f1wf24vo spacing_f1w4o4fu"
+      >
+        <LearnMoreLink
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          noUnderline={true}
+          text="VIEW LATEST RUN RESULT"
+        />
+      </div>
+    </div>
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+    <WithStyles(ForwardRef(IconButton))
+      className="align_fxwamzl"
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="run-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="open"
+        key="openNotebook"
+        onClick={[Function]}
+      >
+        Open source notebook
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="downloadSourceNotebook"
+        onClick={[Function]}
+      >
+        <a
+          className="menuLink_fzzbfyt"
+          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          target="_blank"
+          title="Download the notebook output from Google Cloud Storage"
+        >
+          Download source notebook
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
+     
+  </WithStyles(ForwardRef(Grid))>
+</WithStyles(ForwardRef(Grid))>
+`;
+
+exports[`JobListItem Renders for running run 1`] = `
+<WithStyles(ForwardRef(Grid))
+  className="job_fxk0enj"
+  container={true}
+  spacing={1}
 >
   <WithStyles(ForwardRef(Grid))
     item={true}
@@ -136,7 +238,7 @@ exports[`JobListItem Renders for running job 1`] = `
         <span>
           May 1, 2020, 7:09 PM
            - 
-          Scheduled run
+          Single run
         </span>
       </div>
       <div
@@ -172,7 +274,8 @@ exports[`JobListItem Renders for running job 1`] = `
         key="shareNotebook"
       >
         <ShareDialog
-          cloudBucket=""
+          cloudBucket="bucket"
+          handleClose={[Function]}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
@@ -204,11 +307,112 @@ exports[`JobListItem Renders for running job 1`] = `
 </WithStyles(ForwardRef(Grid))>
 `;
 
-exports[`JobListItem Renders for successful job 1`] = `
+exports[`JobListItem Renders for running schedule 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
-  spacing={0}
+  spacing={1}
+>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+     
+    <WithStyles(CheckCircleIcon) />
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={10}
+  >
+    <div
+      className="bold_f1wf24vo"
+    >
+      <LearnMoreLink
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        noUnderline={true}
+        secondary={true}
+        text="notebook job1"
+      />
+    </div>
+    <div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Frequency:
+           
+          Every 2 days at 9:30 AM UTC
+        </span>
+      </div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Latest run: 
+          May 1, 2020, 7:09 PM
+        </span>
+      </div>
+      <div
+        className="bold_f1wf24vo spacing_f1w4o4fu"
+      >
+        <LearnMoreLink
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          noUnderline={true}
+          text="VIEW LATEST RUN RESULT"
+        />
+      </div>
+    </div>
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+    <WithStyles(ForwardRef(IconButton))
+      className="align_fxwamzl"
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="run-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="open"
+        key="openNotebook"
+        onClick={[Function]}
+      >
+        Open source notebook
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="downloadSourceNotebook"
+        onClick={[Function]}
+      >
+        <a
+          className="menuLink_fzzbfyt"
+          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          target="_blank"
+          title="Download the notebook output from Google Cloud Storage"
+        >
+          Download source notebook
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
+     
+  </WithStyles(ForwardRef(Grid))>
+</WithStyles(ForwardRef(Grid))>
+`;
+
+exports[`JobListItem Renders for successful run 1`] = `
+<WithStyles(ForwardRef(Grid))
+  className="job_fxk0enj"
+  container={true}
+  spacing={1}
 >
   <WithStyles(ForwardRef(Grid))
     item={true}
@@ -238,7 +442,7 @@ exports[`JobListItem Renders for successful job 1`] = `
         <span>
           May 1, 2020, 7:09 PM
            - 
-          Scheduled run
+          Single run
         </span>
       </div>
       <div
@@ -274,10 +478,112 @@ exports[`JobListItem Renders for successful job 1`] = `
         key="shareNotebook"
       >
         <ShareDialog
-          cloudBucket=""
+          cloudBucket="bucket"
+          handleClose={[Function]}
           shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="open"
+        key="openNotebook"
+        onClick={[Function]}
+      >
+        Open source notebook
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="downloadSourceNotebook"
+        onClick={[Function]}
+      >
+        <a
+          className="menuLink_fzzbfyt"
+          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          target="_blank"
+          title="Download the notebook output from Google Cloud Storage"
+        >
+          Download source notebook
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
+     
+  </WithStyles(ForwardRef(Grid))>
+</WithStyles(ForwardRef(Grid))>
+`;
+
+exports[`JobListItem Renders for successful schedule 1`] = `
+<WithStyles(ForwardRef(Grid))
+  className="job_fxk0enj"
+  container={true}
+  spacing={1}
+>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+     
+    <WithStyles(CheckCircleIcon) />
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={10}
+  >
+    <div
+      className="bold_f1wf24vo"
+    >
+      <LearnMoreLink
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        noUnderline={true}
+        secondary={true}
+        text="notebook job1"
+      />
+    </div>
+    <div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Frequency:
+           
+          Every 2 days at 9:30 AM UTC
+        </span>
+      </div>
+      <div
+        className="jobCaption_fbrfhdq"
+      >
+        <span>
+          Latest run: 
+          May 1, 2020, 7:09 PM
+        </span>
+      </div>
+      <div
+        className="bold_f1wf24vo spacing_f1w4o4fu"
+      >
+        <LearnMoreLink
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          noUnderline={true}
+          text="VIEW LATEST RUN RESULT"
+        />
+      </div>
+    </div>
+  </WithStyles(ForwardRef(Grid))>
+  <WithStyles(ForwardRef(Grid))
+    item={true}
+    xs={1}
+  >
+    <WithStyles(ForwardRef(IconButton))
+      className="align_fxwamzl"
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="run-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
       <WithStyles(ForwardRef(MenuItem))
         dense={true}
         id="open"

@@ -74,43 +74,6 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
 </WithStyles(ForwardRef(Dialog))>
 `;
 
-exports[`SchedulerDialog Renders with Initializer: Initializer 1`] = `
-<WithStyles(ForwardRef(Dialog))
-  open={true}
->
-  <header
-    className="header_fst2s1z"
-  >
-    <span
-      className="title_fiw0lep"
-    >
-      Create a notebook job 
-      <Badge
-        value="alpha"
-      />
-    </span>
-    <IconButtonMenu
-      menuItems={[Function]}
-    />
-  </header>
-  <main
-    className="main_f2ra5xi"
-  >
-    <div
-      className="column_fghohlb"
-    >
-      <Message
-        asActivity={true}
-        text="Checking IAM Permissions"
-      />
-      <ActionBar
-        onDialogClose={[Function]}
-      />
-    </div>
-  </main>
-</WithStyles(ForwardRef(Dialog))>
-`;
-
 exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}

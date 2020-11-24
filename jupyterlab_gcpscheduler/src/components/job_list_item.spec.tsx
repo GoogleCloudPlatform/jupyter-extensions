@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { JobListItem } from './job_list_item';
-import { TEST_PROJECT, getRun } from '../test_helpers';
+import { TEST_PROJECT, getRun, getSchedule } from '../test_helpers';
 import { GcpService } from '../service/gcp';
 import Menu from '@material-ui/core/Menu';
 
@@ -61,7 +61,7 @@ describe('JobListItem', () => {
     );
   });
 
-  it('Renders for successful job', () => {
+  it('Renders for successful run', () => {
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
@@ -72,7 +72,7 @@ describe('JobListItem', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for failed job', () => {
+  it('Renders for failed run', () => {
     const job = getRun();
     job.state = 'FAILED';
     const component = shallow(
@@ -85,7 +85,7 @@ describe('JobListItem', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for running job', () => {
+  it('Renders for running run', () => {
     const job = getRun();
     job.state = 'RUNNING';
     const component = shallow(
@@ -93,6 +93,43 @@ describe('JobListItem', () => {
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
         job={getRun()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for successful schedule', () => {
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for failed schedule', () => {
+    const job = getRun();
+    job.state = 'FAILED';
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for running schedule', () => {
+    const job = getRun();
+    job.state = 'RUNNING';
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
       />
     );
     expect(component).toMatchSnapshot();

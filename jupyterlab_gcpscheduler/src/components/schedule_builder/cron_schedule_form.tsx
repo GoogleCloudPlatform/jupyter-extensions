@@ -19,9 +19,10 @@ import {
   FieldError,
   LearnMoreLink,
   TextInput,
+  ALIGN_HINT,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-
+import FormHelperText from '@material-ui/core/FormHelperText';
 import { OnScheduleChange } from './schedule_builder';
 
 const SCHEDULE_LINK =
@@ -43,12 +44,12 @@ export function CronScheduleBuilder(props: SubFormProps) {
         onChange={e => props.onScheduleChange(e.target.value)}
       />
       {!props.schedule && <FieldError message="Frequency is required" />}
-      <p className={css.noTopMargin}>
+      <FormHelperText className={css.noTopMargin} style={ALIGN_HINT}>
         Schedule is specified using unix-cron format. You can define a schedule
         so that your job runs multiple times a day, or runs on specific days and
         months.
         <LearnMoreLink href={SCHEDULE_LINK} />
-      </p>
+      </FormHelperText>
     </div>
   );
 }

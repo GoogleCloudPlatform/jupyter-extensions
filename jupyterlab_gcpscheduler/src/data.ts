@@ -339,3 +339,6 @@ export const IMPORT_DIRECTORY = 'imported_notebook_jobs/';
 export const VIEWER_LINK_BASE = 'https://notebooks.cloud.google.com/view';
 
 export const DOWNLOAD_LINK_BASE = 'https://storage.cloud.google.com';
+
+export const BUCKET_LINK_BASE =
+  'https://console.cloud.google.com/storage/browser';

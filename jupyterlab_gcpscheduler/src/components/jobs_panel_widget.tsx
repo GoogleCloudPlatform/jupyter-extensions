@@ -29,7 +29,8 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { GcpService, Runs, Schedules } from '../service/gcp';
+import { Runs, Schedules } from '../interfaces';
+import { GcpService } from '../service/gcp';
 import { JobListItem } from './job_list_item';
 import TablePagination from '@material-ui/core/TablePagination';
 const DEFAULT_PAGE_SIZE = 10;
@@ -102,7 +103,7 @@ const StyledTablePagination = withStyles({
   },
   selectRoot: {
     marginRight: '8px',
-  }, 
+  },
   actions: {
     marginLeft: '0px',
   },
@@ -257,7 +258,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
             onChangeRowsPerPage={handleChangeRowsPerPage}
             labelDisplayedRows={labelDisplayRowsMesssage}
             labelRowsPerPage="Items per page:"
-            SelectProps={{variant:"outlined",}}
+            SelectProps={{ variant: 'outlined' }}
           />
         </footer>
       </div>
@@ -271,21 +272,20 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         const runs = await this.props.gcpService.listRuns(pageSize);
         const schedules = await this.props.gcpService.listSchedules(pageSize);
         this.setState({
-          isLoading: false,
           runs,
           schedules,
         });
-      } else if (pageToken && this.state.tab === 0) {
+      } else if (this.state.tab === 0) {
         const runs = await this.props.gcpService.listRuns(pageSize, pageToken!);
-        this.setState({ isLoading: false, runs });
-        this.setState({ isLoading: false, runs });
-      } else if (pageToken && this.state.tab === 1) {
+        this.setState({ runs });
+      } else if (this.state.tab === 1) {
         const schedules = await this.props.gcpService.listSchedules(
           pageSize,
           pageToken!
         );
-        this.setState({ isLoading: false, schedules });
+        this.setState({ schedules });
       }
+      this.setState({ isLoading: false });
     } catch (err) {
       this.setState({
         isLoading: false,

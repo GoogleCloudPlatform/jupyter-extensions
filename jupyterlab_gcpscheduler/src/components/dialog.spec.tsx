@@ -171,25 +171,6 @@ describe('SchedulerDialog', () => {
     expect(dialog).toMatchSnapshot('SchedulerForm');
   });
 
-  it('Renders with Initializer', async () => {
-    const settings = getSettings({
-      projectId: TEST_PROJECT,
-    });
-    launchSchedulerRequest.notebookName = 'Foo.ipynb';
-    launchSchedulerRequest.notebook = fakeNotebook.model;
-
-    const dialog = shallow(
-      <SchedulerDialog
-        projectStateService={mockProjectStateService}
-        gcpService={mockGcpService}
-        request={launchSchedulerRequest}
-        settings={settings}
-      />
-    );
-    expect(mockSetProjectId).toHaveBeenCalledWith(TEST_PROJECT);
-    expect(dialog).toMatchSnapshot('Initializer');
-  });
-
   it('Closes dialog when clicked', async () => {
     const settings = getSettings({
       projectId: TEST_PROJECT,
