@@ -10,7 +10,7 @@ from multiprocessing import Pool
 
 from google.cloud import bigquery
 from google.cloud.bigquery.enums import SqlTypeNames, StandardSqlDataTypes
-from google.cloud.bigquery_v2.gapic.enums import Model
+from google.cloud.bigquery_v2 import Model
 from google.protobuf.wrappers_pb2 import BoolValue, DoubleValue
 from google.api_core.client_info import ClientInfo
 from jupyterlab_bigquery.version import VERSION

@@ -319,7 +319,9 @@ class QueryTextEditor extends React.Component<
               this.jsonWorker.onmessage = message => {
                 const { batch, finish } = message.data;
 
-                this.queryManager.updateSlot(this.queryId, batch);
+                if (batch) {
+                  this.queryManager.updateSlot(this.queryId, batch);
+                }
 
                 if (finish) {
                   resolve();
