@@ -297,6 +297,9 @@ export class InnerSchedulerForm extends React.Component<
             text={status.message}
           />
         )}
+        {errors && errors.gcsBucket && (
+          <Message asActivity={false} asError={true} text={errors.gcsBucket} />
+        )}
         {this.missingPermissions.length > 0 && (
           <Message
             asError={true}
@@ -537,7 +540,7 @@ function validate(values: SchedulerFormValues) {
   }
 
   if (!gcsBucket) {
-    error.gcsBucket = 'A cloud storage bucket is required';
+    error.gcsBucket = 'A cloud storage bucket is required to store results';
   }
 
   return error;
