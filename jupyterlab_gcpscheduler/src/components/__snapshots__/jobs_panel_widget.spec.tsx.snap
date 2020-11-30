@@ -131,24 +131,6 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
       text="No project: Unable to determine GCP project"
     />
   </div>
-  <footer
-    className="pagination_f1qcvoow"
-  >
-    <WithStyles(WithStyles(ForwardRef(TablePagination)))
-      SelectProps={
-        Object {
-          "variant": "outlined",
-        }
-      }
-      count={-1}
-      labelDisplayedRows={[Function]}
-      labelRowsPerPage="Items per page:"
-      onChangePage={[Function]}
-      onChangeRowsPerPage={[Function]}
-      page={0}
-      rowsPerPage={10}
-    />
-  </footer>
 </div>
 `;
 
@@ -195,7 +177,7 @@ exports[`GcpScheduledJobsPanel Shows error if runs cannot be retrieved 1`] = `
   >
     <Message
       asError={true}
-      text="Cannot retrieve runs: Unable to retrieve Jobs"
+      text="Cannot retrieve runs: Unable to retrieve runs"
     />
   </div>
   <div
@@ -203,29 +185,10 @@ exports[`GcpScheduledJobsPanel Shows error if runs cannot be retrieved 1`] = `
     hidden={true}
     role="tabpanel"
   >
-    <Message
-      asError={true}
-      text="Cannot retrieve runs: Unable to retrieve Jobs"
+    <ul
+      className="list_fqi18ru"
     />
   </div>
-  <footer
-    className="pagination_f1qcvoow"
-  >
-    <WithStyles(WithStyles(ForwardRef(TablePagination)))
-      SelectProps={
-        Object {
-          "variant": "outlined",
-        }
-      }
-      count={-1}
-      labelDisplayedRows={[Function]}
-      labelRowsPerPage="Items per page:"
-      onChangePage={[Function]}
-      onChangeRowsPerPage={[Function]}
-      page={0}
-      rowsPerPage={10}
-    />
-  </footer>
 </div>
 `;
 
@@ -255,7 +218,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
   <WithStyles(ForwardRef(Tabs))
     indicatorColor="primary"
     onChange={[Function]}
-    value={0}
+    value={1}
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
@@ -267,36 +230,21 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
   </WithStyles(ForwardRef(Tabs))>
   <div
     className="tab_f1g1h5kq"
-    hidden={false}
+    hidden={true}
     role="tabpanel"
   >
     <WithStyles(ForwardRef(LinearProgress)) />
   </div>
   <div
     className="tab_f1g1h5kq"
-    hidden={true}
+    hidden={false}
     role="tabpanel"
   >
-    <WithStyles(ForwardRef(LinearProgress)) />
-  </div>
-  <footer
-    className="pagination_f1qcvoow"
-  >
-    <WithStyles(WithStyles(ForwardRef(TablePagination)))
-      SelectProps={
-        Object {
-          "variant": "outlined",
-        }
-      }
-      count={-1}
-      labelDisplayedRows={[Function]}
-      labelRowsPerPage="Items per page:"
-      onChangePage={[Function]}
-      onChangeRowsPerPage={[Function]}
-      page={0}
-      rowsPerPage={10}
+    <Message
+      asError={true}
+      text="Cannot retrieve schedules: Unable to retrieve schedules"
     />
-  </footer>
+  </div>
 </div>
 `;
 
@@ -348,7 +296,9 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     hidden={true}
     role="tabpanel"
   >
-    <WithStyles(ForwardRef(LinearProgress)) />
+    <ul
+      className="list_fqi18ru"
+    />
   </div>
   <footer
     className="pagination_f1qcvoow"
@@ -422,6 +372,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -431,19 +382,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
                 },
               ],
             },
-            "listSchedules": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
+            "listSchedules": [MockFunction],
             "projectId": Promise {},
           }
         }
@@ -472,6 +411,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -481,19 +421,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
                 },
               ],
             },
-            "listSchedules": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
+            "listSchedules": [MockFunction],
             "projectId": Promise {},
           }
         }
@@ -524,106 +452,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
   >
     <ul
       className="list_fqi18ru"
-    >
-      <JobListItem
-        gcpService={
-          Object {
-            "listRuns": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "listSchedules": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "projectId": Promise {},
-          }
-        }
-        job={
-          Object {
-            "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_job1_abcxyz",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
-            "schedule": "30 9 */2 * *",
-            "state": "SUCCEEDED",
-            "timeZone": "UTC",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
-          }
-        }
-        key="notebook_job1_abcxyz"
-      />
-      <JobListItem
-        gcpService={
-          Object {
-            "listRuns": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "listSchedules": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "projectId": Promise {},
-          }
-        }
-        job={
-          Object {
-            "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_run2_fghijk",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
-            "schedule": "30 9 */2 * *",
-            "state": "SUCCEEDED",
-            "timeZone": "UTC",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
-          }
-        }
-        key="notebook_run2_fghijk"
-      />
-    </ul>
+    />
   </div>
   <footer
     className="pagination_f1qcvoow"
@@ -672,7 +501,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
   <WithStyles(ForwardRef(Tabs))
     indicatorColor="primary"
     onChange={[Function]}
-    value={0}
+    value={1}
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
@@ -684,7 +513,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
   </WithStyles(ForwardRef(Tabs))>
   <div
     className="tab_f1g1h5kq"
-    hidden={false}
+    hidden={true}
     role="tabpanel"
   >
     <ul
@@ -697,6 +526,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -710,6 +540,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -747,6 +578,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -760,6 +592,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -794,7 +627,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
   </div>
   <div
     className="tab_f1g1h5kq"
-    hidden={true}
+    hidden={false}
     role="tabpanel"
   >
     <ul
@@ -807,6 +640,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -820,6 +654,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -856,6 +691,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [
@@ -869,6 +705,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
               "calls": Array [
                 Array [
                   10,
+                  undefined,
                 ],
               ],
               "results": Array [

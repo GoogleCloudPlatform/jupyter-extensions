@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete, {
@@ -32,7 +31,6 @@ interface BucketOption extends Bucket {
 interface State {
   value: BucketOption | null;
   isLoading: boolean;
-  projectId?: string;
   validBucketOptions: BucketOption[];
   invalidBucketOptions: BucketOption[];
   error?: string;
@@ -63,16 +61,109 @@ export class CloudBucketSelector extends React.Component<Props, State> {
       invalidBucketOptions: [],
       openSnackbar: false,
     };
+    this.handleSnackbarClose = this.handleSnackbarClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleFilterOptions = this.handleFilterOptions.bind(this);
+    this.handleGetOptionLabel = this.handleGetOptionLabel.bind(this);
   }
 
   async componentDidMount() {
-    try {
-      const projectId = await this.props.gcpService.projectId;
-      this.setState({ projectId });
-      this._getBuckets(this.props.gcsBucket);
-    } catch (err) {
-      this.setState({ error: `${err}: Unable to determine GCP project` });
+    this._getBuckets(this.props.gcsBucket);
+  }
+
+  handleSnackbarClose() {
+    this.setState({ openSnackbar: false });
+  }
+
+  handleChange(event, newValue: BucketOption | string, reason: string) {
+    if (reason === 'create-option' || reason === 'select-option') {
+      this.setValue(newValue);
+    } else if (reason === 'remove-option' || reason === 'clear') {
+      this.setValue(null);
     }
+  }
+
+  handleFilterOptions(options: BucketOption[], params) {
+    const filtered = filter(options, params);
+    // Suggest the creation of a new value
+    if (params.inputValue !== '') {
+      filtered.push({
+        inputValue: params.inputValue,
+        name: `Create and select "${params.inputValue}"`,
+        accessLevel: 'uniform',
+      });
+    }
+    return filtered;
+  }
+
+  handleGetOptionLabel(option: string | BucketOption) {
+    // Value selected with enter, right from the input
+    if (typeof option === 'string') {
+      return option;
+    }
+    // Add "xxx" option created dynamically
+    if ((option as BucketOption).inputValue) {
+      return (option as BucketOption).inputValue;
+    }
+    // Regular option
+    return (option as BucketOption).name;
+  }
+
+  render() {
+    return (
+      <StyledAutoComplete
+        value={this.state.value}
+        onChange={this.handleChange}
+        filterOptions={this.handleFilterOptions}
+        selectOnFocus
+        clearOnBlur
+        handleHomeEndKeys
+        id="cloud-bucket-with-create-option"
+        options={this.state.validBucketOptions}
+        getOptionLabel={this.handleGetOptionLabel}
+        noOptionsText={NO_BUCKET_SELECTION}
+        renderOption={option => (option as BucketOption).name}
+        freeSolo
+        size="small"
+        loading={this.state.isLoading}
+        renderInput={params => (
+          <React.Fragment>
+            <TextField
+              {...params}
+              variant="outlined"
+              margin="dense"
+              placeholder={NO_BUCKET_SELECTION}
+              label="Cloud Storage bucket"
+              fullWidth={true}
+              InputLabelProps={{ shrink: true, style: FORM_LABEL_STYLE }}
+              error={this.state.error !== undefined}
+            />
+            {!this.state.error && (
+              <FormHelperText style={ALIGN_HINT}>
+                Select an existing bucket or create a new one to store results
+              </FormHelperText>
+            )}
+            <FieldError message={this.state.error} />
+            <Snackbar
+              open={this.state.openSnackbar}
+              onClose={this.handleSnackbarClose}
+              autoHideDuration={6000}
+              message="Created bucket successfully"
+              action={
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={this.handleSnackbarClose}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              }
+            />
+          </React.Fragment>
+        )}
+      />
+    );
   }
 
   private async _getBuckets(selectedBucketName?: string) {
@@ -96,7 +187,7 @@ export class CloudBucketSelector extends React.Component<Props, State> {
     } catch (err) {
       this.setState({
         isLoading: false,
-        error: `${err}: Unable to retrieve Buckets`,
+        error: `Unable to retrieve Buckets: ${err}`,
       });
     }
   }
@@ -129,6 +220,7 @@ export class CloudBucketSelector extends React.Component<Props, State> {
         value: null,
         error: 'A bucket is required to store results',
       });
+      this.props.onGcsBucketChange(null);
       return;
     } else if (typeof newValue === 'string') {
       const bucketOptionFromNewValue = this.state.validBucketOptions.find(
@@ -143,101 +235,13 @@ export class CloudBucketSelector extends React.Component<Props, State> {
       }
       this.props.onGcsBucketChange(newValue);
     } else {
-      const newBucketName = (newValue as BucketOption)!.name;
-      this.setState({ value: newValue });
-      if (newValue.inputValue) {
+      const newBucketName = newValue.inputValue;
+      if (newBucketName) {
         this.createAndSelectBucket(newBucketName);
+      } else {
+        this.setState({ value: newValue });
       }
-      this.props.onGcsBucketChange(newBucketName);
+      this.props.onGcsBucketChange(newBucketName || newValue.name);
     }
-  }
-
-  render() {
-    const handleSnackbarClose = () => {
-      this.setState({ openSnackbar: false });
-    };
-
-    return (
-      <StyledAutoComplete
-        value={this.state.value}
-        onChange={(event, newValue: BucketOption | string, reason: string) => {
-          if (reason === 'create-option' || reason === 'select-option') {
-            this.setValue(newValue);
-          } else if (reason === 'remove-option' || reason === 'clear') {
-            this.setValue(null);
-          }
-        }}
-        filterOptions={(options: BucketOption[], params) => {
-          const filtered = filter(options, params);
-          // Suggest the creation of a new value
-          if (params.inputValue !== '') {
-            filtered.push({
-              inputValue: params.inputValue,
-              name: `Create and select "${params.inputValue}"`,
-              accessLevel: 'uniform',
-            });
-          }
-          return filtered;
-        }}
-        selectOnFocus
-        clearOnBlur
-        handleHomeEndKeys
-        id="cloud-bucket-with-create-option"
-        options={this.state.validBucketOptions}
-        getOptionLabel={option => {
-          // Value selected with enter, right from the input
-          if (typeof option === 'string') {
-            return option;
-          }
-          // Add "xxx" option created dynamically
-          if ((option as BucketOption).inputValue) {
-            return (option as BucketOption).inputValue;
-          }
-          // Regular option
-          return (option as BucketOption).name;
-        }}
-        noOptionsText={NO_BUCKET_SELECTION}
-        renderOption={option => (option as BucketOption).name}
-        freeSolo
-        size="small"
-        loading={this.state.isLoading}
-        renderInput={params => (
-          <React.Fragment>
-            <TextField
-              {...params}
-              variant="outlined"
-              margin="dense"
-              placeholder={NO_BUCKET_SELECTION}
-              label="Cloud Storage bucket"
-              fullWidth={true}
-              InputLabelProps={{ shrink: true, style: FORM_LABEL_STYLE }}
-              error={this.state.error !== undefined}
-            />
-            {!this.state.error && (
-              <FormHelperText style={ALIGN_HINT}>
-                Select an existing bucket or create a new one to store results
-              </FormHelperText>
-            )}
-            <FieldError message={this.state.error} />
-            <Snackbar
-              open={this.state.openSnackbar}
-              onClose={handleSnackbarClose}
-              autoHideDuration={6000}
-              message="Created bucket successfully"
-              action={
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={handleSnackbarClose}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              }
-            />
-          </React.Fragment>
-        )}
-      />
-    );
   }
 }

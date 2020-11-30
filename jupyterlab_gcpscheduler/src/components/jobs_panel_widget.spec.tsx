@@ -121,9 +121,12 @@ describe('GcpScheduledJobsPanel', () => {
     );
     component.setProps({ isVisible: true });
     await resolvedRuns;
+
+    (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await rejectedPromise.catch(() => null);
 
     await expect(component).toMatchSnapshot();
+    expect(component.state('tab')).toEqual(1);
     expect(mockListRuns).toHaveBeenCalled();
     expect(mockListSchedules).toHaveBeenCalled();
   });
@@ -147,11 +150,10 @@ describe('GcpScheduledJobsPanel', () => {
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedProject;
 
     expect(component).toMatchSnapshot();
     expect(mockListRuns).toHaveBeenCalled();
-    expect(mockListSchedules).toHaveBeenCalled();
+    expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
   it('Shows runs', async () => {
@@ -173,11 +175,11 @@ describe('GcpScheduledJobsPanel', () => {
     );
     component.setProps({ isVisible: true });
     await resolvedRuns;
-    await resolvedSchedules;
+    // await resolvedSchedules;
 
     expect(component).toMatchSnapshot();
     expect(mockListRuns).toHaveBeenCalled();
-    expect(mockListSchedules).toHaveBeenCalled();
+    expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
   it('Shows schedules', async () => {
@@ -198,14 +200,13 @@ describe('GcpScheduledJobsPanel', () => {
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    component
-      .find('WithStyles(WithStyles(ForwardRef(Tab)))')
-      .at(1)
-      .simulate('click');
     await resolvedRuns;
+
+    (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await resolvedSchedules;
 
     expect(component).toMatchSnapshot();
+    expect(component.state('tab')).toEqual(1);
     expect(mockListRuns).toHaveBeenCalled();
     expect(mockListSchedules).toHaveBeenCalled();
   });

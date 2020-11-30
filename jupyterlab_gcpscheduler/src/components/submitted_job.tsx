@@ -203,10 +203,10 @@ export class SubmittedJob extends React.Component<Props, {}> {
           closeOnRight={true}
           onDialogClose={onDialogClose}
           displayMessage={
-            <React.Fragment>
+            <span>
               Check the run status in the Scheduler extension or in{' '}
               <LearnMoreLink text="Google Cloud console" href={jobLink} />
-            </React.Fragment>
+            </span>
           }
         >
           <Button onClick={onFormReset}>Submit another run</Button>

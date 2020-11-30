@@ -443,7 +443,7 @@ export class GcpService {
       .map(p => encodeURIComponent(p))
       .join('/');
     const link = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
-    const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
+    const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}?project=${projectId}`;
     const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
     return {
       id: job.jobId,
@@ -479,6 +479,7 @@ export class GcpService {
   private createSchedule(job: AiPlatformJob, projectId: string): Schedule {
     return {
       ...this.createJob(job, projectId),
+      //TODO: after new job definition is added replace with actual value
       schedule: '30 12 */2 * *',
     };
   }

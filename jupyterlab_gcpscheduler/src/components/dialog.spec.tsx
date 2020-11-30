@@ -40,7 +40,6 @@ describe('SchedulerDialog', () => {
     toExecute: [],
     toSchedule: [],
   });
-  const mockGetProjectState = jest.fn();
   const mockSetProjectId = jest.fn();
   const mockSetTransportService = jest.fn();
   const mockSettingsChangedConnect = jest.fn();
@@ -50,7 +49,6 @@ describe('SchedulerDialog', () => {
     set projectId(projectId: string) {
       mockSetProjectId(projectId);
     },
-    getProjectState: mockGetProjectState,
     getPermissions: mockGetPermissions,
   } as unknown) as ProjectStateService;
   const mockGcpService = {

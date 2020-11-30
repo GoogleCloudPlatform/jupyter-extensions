@@ -37,37 +37,41 @@ export class ShareDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { openDialog: false, openSnackbar: false };
+    this.handleClickOpen = this.handleClickOpen.bind(this);
+    this.handleCopy = this.handleCopy.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleSnackbarClose = this.handleSnackbarClose.bind(this);
+  }
+
+  handleClickOpen() {
+    this.setState({ openDialog: true });
+  }
+
+  handleCopy() {
+    navigator.clipboard.writeText(this.props.shareLink);
+    this.setState({ openSnackbar: true });
+  }
+
+  handleClose() {
+    this.setState({ openDialog: false, openSnackbar: false });
+    if (this.props.handleClose) {
+      this.props.handleClose();
+    }
+  }
+
+  handleSnackbarClose() {
+    this.setState({ openSnackbar: false });
   }
 
   render() {
-    const handleClickOpen = () => {
-      this.setState({ openDialog: true });
-    };
-
-    const handleCopy = () => {
-      navigator.clipboard.writeText(this.props.shareLink);
-      this.setState({ openSnackbar: true });
-    };
-
-    const handleClose = () => {
-      this.setState({ openDialog: false, openSnackbar: false });
-      if (this.props.handleClose) {
-        this.props.handleClose();
-      }
-    };
-
-    const handleSnackbarClose = () => {
-      this.setState({ openSnackbar: false });
-    };
-
     return (
       <React.Fragment>
-        <p onClick={handleClickOpen} className={localStyles.fullWidth}>
+        <p onClick={this.handleClickOpen} className={localStyles.fullWidth}>
           Share run result
         </p>
         <Dialog
           open={this.state.openDialog}
-          onClose={handleClose}
+          onClose={this.handleClose}
           aria-labelledby="share-dialog-title"
           aria-describedby="share-dialog-description"
           maxWidth="sm"
@@ -110,17 +114,17 @@ export class ShareDialog extends React.Component<Props, State> {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={this.handleClose} color="primary">
               Cancel
             </Button>
-            <Button onClick={handleCopy} color="primary" autoFocus>
+            <Button onClick={this.handleCopy} color="primary" autoFocus>
               Copy Link
             </Button>
           </DialogActions>
         </Dialog>
         <Snackbar
           open={this.state.openSnackbar}
-          onClose={handleSnackbarClose}
+          onClose={this.handleSnackbarClose}
           message="Copied to clipboard"
         />
       </React.Fragment>

@@ -138,14 +138,14 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     closeLabel="Done"
     closeOnRight={true}
     displayMessage={
-      <React.Fragment>
+      <span>
         Check the run status in the Scheduler extension or in
          
         <LearnMoreLink
           href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
           text="Google Cloud console"
         />
-      </React.Fragment>
+      </span>
     }
     onDialogClose={[MockFunction]}
   >
@@ -309,14 +309,14 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     closeLabel="Done"
     closeOnRight={true}
     displayMessage={
-      <React.Fragment>
+      <span>
         Check the run status in the Scheduler extension or in
          
         <LearnMoreLink
           href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
           text="Google Cloud console"
         />
-      </React.Fragment>
+      </span>
     }
     onDialogClose={[MockFunction]}
   >

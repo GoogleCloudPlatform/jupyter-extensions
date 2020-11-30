@@ -41,19 +41,6 @@ export interface ServiceStatus {
   enabled: boolean;
 }
 
-/** Project initialization state. */
-export interface ProjectState {
-  allServicesEnabled: boolean;
-  requiredServicesEnabled: boolean;
-  hasGcsBucket: boolean;
-  hasCloudFunction: boolean;
-  projectId: string;
-  schedulerRegion: string;
-  serviceStatuses: ServiceStatus[];
-  canSubmitImmediateJobs: boolean;
-  canSubmitScheduledJobs: boolean;
-}
-
 /* Provides list of missing permissions required to perform the action */
 export interface GetPermissionsResponse {
   toInitialize: string[];

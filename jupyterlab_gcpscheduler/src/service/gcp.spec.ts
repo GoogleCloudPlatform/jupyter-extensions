@@ -20,7 +20,14 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
 import { GcpService } from './gcp';
 import { RunNotebookRequest } from '../interfaces';
-import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
+import {
+  TEST_PROJECT,
+  getAiPlatformJob,
+  getAiPlatformJobConvertedIntoRun,
+  getAiPlatformJobConvertedIntoSchedule,
+  getCloudStorageApiBucket,
+  getBucket,
+} from '../test_helpers';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from './project_state';
 import { Contents } from '@jupyterlab/services';
@@ -373,10 +380,7 @@ describe('GcpService', () => {
     it('Lists notebook runs', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [
-            getAiPlatformJob(),
-            { ...getAiPlatformJob(), jobId: 'jobId2' },
-          ],
+          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
           nextPageToken: 'xyz',
         })
       );
@@ -385,40 +389,8 @@ describe('GcpService', () => {
       expect(runs).toEqual({
         pageToken: 'xyz',
         runs: [
-          {
-            bucketLink:
-              'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
-            createTime: '2020-05-01T19:00:07Z',
-            downloadLink:
-              'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
-            endTime: '2020-05-01T19:09:42Z',
-            gcsFile: 'test-project/notebook_job1/job1.ipynb',
-            id: 'notebook_job1_abcxyz',
-            link:
-              'https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project',
-            name: 'notebook_job1',
-            state: 'SUCCEEDED',
-            type: 'Single run',
-            viewerLink:
-              'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
-          },
-          {
-            bucketLink:
-              'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
-            createTime: '2020-05-01T19:00:07Z',
-            downloadLink:
-              'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
-            endTime: '2020-05-01T19:09:42Z',
-            gcsFile: 'test-project/notebook_job1/job1.ipynb',
-            id: 'jobId2',
-            link:
-              'https://console.cloud.google.com/ai-platform/jobs/jobId2?project=test-project',
-            name: 'notebook_job1',
-            state: 'SUCCEEDED',
-            type: 'Single run',
-            viewerLink:
-              'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
-          },
+          getAiPlatformJobConvertedIntoRun(),
+          getAiPlatformJobConvertedIntoRun('jobId2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
@@ -491,10 +463,7 @@ describe('GcpService', () => {
     it('Lists notebook schedules', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [
-            getAiPlatformJob(),
-            { ...getAiPlatformJob(), jobId: 'jobId2' },
-          ],
+          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
           nextPageToken: 'xyz',
         })
       );
@@ -503,36 +472,8 @@ describe('GcpService', () => {
       expect(schedules).toEqual({
         pageToken: 'xyz',
         schedules: [
-          {
-            createTime: '2020-05-01T19:00:07Z',
-            downloadLink:
-              'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
-            endTime: '2020-05-01T19:09:42Z',
-            gcsFile: 'test-project/notebook_job1/job1.ipynb',
-            id: 'notebook_job1_abcxyz',
-            link:
-              'https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project',
-            name: 'notebook_job1',
-            state: 'SUCCEEDED',
-            schedule: '30 12 */2 * *',
-            viewerLink:
-              'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
-          },
-          {
-            createTime: '2020-05-01T19:00:07Z',
-            downloadLink:
-              'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
-            endTime: '2020-05-01T19:09:42Z',
-            gcsFile: 'test-project/notebook_job1/job1.ipynb',
-            id: 'jobId2',
-            link:
-              'https://console.cloud.google.com/ai-platform/jobs/jobId2?project=test-project',
-            schedule: '30 12 */2 * *',
-            name: 'notebook_job1',
-            state: 'SUCCEEDED',
-            viewerLink:
-              'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb',
-          },
+          getAiPlatformJobConvertedIntoSchedule(),
+          getAiPlatformJobConvertedIntoSchedule('jobId2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
@@ -604,22 +545,8 @@ describe('GcpService', () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
           items: [
-            {
-              id: 'new-bucket-name1',
-              iamConfiguration: {
-                uniformBucketLevelAccess: {
-                  enabled: false,
-                },
-              },
-            },
-            {
-              id: 'new-bucket-name2',
-              iamConfiguration: {
-                uniformBucketLevelAccess: {
-                  enabled: true,
-                },
-              },
-            },
+            getCloudStorageApiBucket('new-bucket-name1', false),
+            getCloudStorageApiBucket('new-bucket-name2'),
           ],
         })
       );
@@ -627,14 +554,8 @@ describe('GcpService', () => {
       const listBucketsResponse = await gcpService.listBuckets();
       expect(listBucketsResponse).toEqual({
         buckets: [
-          {
-            name: 'new-bucket-name1',
-            accessLevel: 'fine',
-          },
-          {
-            name: 'new-bucket-name2',
-            accessLevel: 'uniform',
-          },
+          getBucket('new-bucket-name1', false),
+          getBucket('new-bucket-name2'),
         ],
       });
 
@@ -711,24 +632,14 @@ describe('GcpService', () => {
 
     it('Creates cloud storage bucket', async () => {
       mockSubmit.mockReturnValue(
-        asApiResponse({
-          id: 'new-bucket-name',
-          iamConfiguration: {
-            uniformBucketLevelAccess: {
-              enabled: true,
-            },
-          },
-        })
+        asApiResponse(getCloudStorageApiBucket('new-bucket-name'))
       );
 
       const bucketResponse = await gcpService.createUniformAccessBucket(
         'new-bucket-name'
       );
 
-      expect(bucketResponse).toEqual({
-        name: 'new-bucket-name',
-        accessLevel: 'uniform',
-      });
+      expect(bucketResponse).toEqual(getBucket('new-bucket-name'));
 
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://storage.googleapis.com/storage/v1/b',

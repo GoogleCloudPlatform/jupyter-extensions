@@ -15,64 +15,11 @@
  */
 
 /** Utility functions and helpers for tests. */
-import { ProjectState } from './service/project_state';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { AiPlatformJob, Run, Schedule } from './interfaces';
 import { mount } from 'enzyme';
 import { AI_PLATFORM_LINK, DOWNLOAD_LINK_BASE, VIEWER_LINK_BASE } from './data';
 export const TEST_PROJECT = 'test-project';
-
-/** Returns a blank project state. */
-export function getProjectState(): ProjectState {
-  return {
-    allServicesEnabled: false,
-    requiredServicesEnabled: false,
-    hasCloudFunction: false,
-    hasGcsBucket: false,
-    projectId: TEST_PROJECT,
-    schedulerRegion: '',
-    serviceStatuses: [
-      {
-        enabled: false,
-        service: {
-          name: 'Cloud Storage API',
-          endpoint: 'storage-api.googleapis.com',
-          documentation: 'https://cloud.google.com/storage/',
-          isOptional: false,
-        },
-      },
-      {
-        enabled: false,
-        service: {
-          name: 'AI Platform Training API',
-          endpoint: 'ml.googleapis.com',
-          documentation: 'https://cloud.google.com/ai-platform/',
-          isOptional: false,
-        },
-      },
-      {
-        enabled: false,
-        service: {
-          name: 'Cloud Scheduler API',
-          endpoint: 'cloudscheduler.googleapis.com',
-          documentation: 'https://cloud.google.com/scheduler',
-          isOptional: true,
-        },
-      },
-      {
-        enabled: false,
-        service: {
-          name: 'Cloud Functions API',
-          endpoint: 'cloudfunctions.googleapis.com',
-          documentation: 'https://cloud.google.com/functions/',
-          isOptional: true,
-        },
-      },
-    ],
-    canSubmitImmediateJobs: false,
-    canSubmitScheduledJobs: false,
-  };
-}
 
 /** Returns immediate promise that can be awaited */
 export function immediatePromise(): Promise<void> {
@@ -191,9 +138,9 @@ export function getSchedule(): Schedule {
 }
 
 /** Returns an AI Platform Job object */
-export function getAiPlatformJob(): AiPlatformJob {
+export function getAiPlatformJob(name = 'notebook_job1_abcxyz'): AiPlatformJob {
   return {
-    jobId: 'notebook_job1_abcxyz',
+    jobId: name,
     trainingInput: {
       args: [
         'nbexecutor',
@@ -219,4 +166,68 @@ export function getAiPlatformJob(): AiPlatformJob {
       /* eslint-enable @typescript-eslint/camelcase */
     },
   } as AiPlatformJob;
+}
+
+export function getAiPlatformJobConvertedIntoRun(
+  name = 'notebook_job1_abcxyz'
+) {
+  return {
+    bucketLink:
+      'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
+    createTime: '2020-05-01T19:00:07Z',
+    downloadLink:
+      'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
+    endTime: '2020-05-01T19:09:42Z',
+    gcsFile: 'test-project/notebook_job1/job1.ipynb',
+    id: name,
+    link:
+      'https://console.cloud.google.com/ai-platform/jobs/' +
+      name +
+      '?project=test-project',
+    name: 'notebook_job1',
+    state: 'SUCCEEDED',
+    type: 'Single run',
+    viewerLink:
+      'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb?project=test-project',
+  };
+}
+
+export function getAiPlatformJobConvertedIntoSchedule(
+  name = 'notebook_job1_abcxyz'
+) {
+  return {
+    createTime: '2020-05-01T19:00:07Z',
+    downloadLink:
+      'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
+    endTime: '2020-05-01T19:09:42Z',
+    gcsFile: 'test-project/notebook_job1/job1.ipynb',
+    id: name,
+    link:
+      'https://console.cloud.google.com/ai-platform/jobs/' +
+      name +
+      '?project=test-project',
+    name: 'notebook_job1',
+    state: 'SUCCEEDED',
+    schedule: '30 12 */2 * *',
+    viewerLink:
+      'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb?project=test-project',
+  };
+}
+
+export function getCloudStorageApiBucket(name: string, uniform = true) {
+  return {
+    id: name,
+    iamConfiguration: {
+      uniformBucketLevelAccess: {
+        enabled: uniform,
+      },
+    },
+  };
+}
+
+export function getBucket(name: string, uniform = true) {
+  return {
+    name,
+    accessLevel: uniform ? 'uniform' : 'fine',
+  };
 }

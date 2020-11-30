@@ -85,21 +85,22 @@ export class JobListItem extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { anchorEl: null };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+  }
+
+  handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    this.setState({ anchorEl: event.currentTarget });
+  }
+
+  handleClose() {
+    this.setState({ anchorEl: null });
   }
 
   render() {
     const { gcpService, job } = this.props;
     const schedule = 'schedule' in job;
     const endTime = new Date(job.endTime || job.createTime);
-
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      this.setState({ anchorEl: event.currentTarget });
-    };
-
-    const handleClose = () => {
-      this.setState({ anchorEl: null });
-    };
-
     return (
       <Grid className={localStyles.job} container spacing={1}>
         <Grid item xs={1}>
@@ -148,7 +149,10 @@ export class JobListItem extends React.Component<Props, State> {
         {job.state === SUCCEEDED && (
           <Grid item xs={1}>
             {''}
-            <IconButton className={localStyles.align} onClick={handleClick}>
+            <IconButton
+              className={localStyles.align}
+              onClick={this.handleClick}
+            >
               <MenuIcon />
             </IconButton>
             <Menu
@@ -156,14 +160,14 @@ export class JobListItem extends React.Component<Props, State> {
               anchorEl={this.state.anchorEl}
               keepMounted
               open={Boolean(this.state.anchorEl)}
-              onClose={handleClose}
+              onClose={this.handleClose}
             >
               {!schedule && (
                 <MenuItem key="shareNotebook" dense={true}>
                   <ShareDialog
                     cloudBucket={(job as Run).bucketLink}
                     shareLink={job.viewerLink}
-                    handleClose={handleClose}
+                    handleClose={this.handleClose}
                   />
                 </MenuItem>
               )}
@@ -178,7 +182,7 @@ export class JobListItem extends React.Component<Props, State> {
               <MenuItem
                 key="downloadSourceNotebook"
                 dense={true}
-                onClick={handleClose}
+                onClick={this.handleClose}
               >
                 <a
                   className={localStyles.menuLink}

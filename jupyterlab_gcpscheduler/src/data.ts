@@ -251,10 +251,6 @@ export const REGIONS: Option[] = [
     text: 'us-west3 (Salt Lake City)',
   },
   {
-    value: 'asia-east1',
-    text: 'asia-east1 (Taiwan)',
-  },
-  {
     value: 'europe-north1',
     text: 'europe-north1 (Finland)',
   },

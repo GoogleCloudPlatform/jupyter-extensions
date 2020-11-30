@@ -36,7 +36,6 @@ import { GcpService } from '../service/gcp';
 import {
   GetPermissionsResponse,
   ProjectStateService,
-  ProjectState,
 } from '../service/project_state';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './action_bar';
@@ -60,9 +59,6 @@ export interface JobSubmittedMessage {
 
 /** Definition for a function that closes the SchedulerDialog. */
 export type OnDialogClose = () => void;
-
-/** Callback function that accepts an initialized ProjectState */
-export type OnInitialized = (projectState: ProjectState) => void;
 
 /** Extension settings. */
 export interface GcpSettings {
@@ -88,6 +84,7 @@ interface Props {
 interface State {
   dialogClosedByUser: boolean;
   gcpSettings?: GcpSettings;
+  metadataProjectId?: string;
   permissions?: GetPermissionsResponse;
   jobSubmittedMessage?: JobSubmittedMessage;
 }
@@ -135,9 +132,15 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   /** Establishes the binding for Settings Signal and invokes the handler. */
-  componentDidMount() {
+  async componentDidMount() {
     this.props.settings.changed.connect(this._settingsChanged);
     this._settingsChanged(this.props.settings);
+    try {
+      const metadataProjectId = await this.props.gcpService.projectId;
+      this.setState({ metadataProjectId });
+    } catch (err) {
+      this.setState({ metadataProjectId: null });
+    }
   }
 
   componentWillUnmount() {
@@ -164,10 +167,9 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   render() {
-    const { gcpSettings } = this.state;
-    const projectId = gcpSettings ? gcpSettings.projectId : '';
+    const projectId = this.getProjectId();
     return (
-      <Dialog open={this._isOpen()}>
+      <Dialog open={this._isOpen()} scroll="body">
         <header className={localStyles.header}>
           <span className={localStyles.title}>
             Create a notebook job <Badge value="alpha" />
@@ -197,9 +199,19 @@ export class SchedulerDialog extends React.Component<Props, State> {
     );
   }
 
+  private getProjectId() {
+    const { gcpSettings, metadataProjectId } = this.state;
+    return metadataProjectId
+      ? metadataProjectId
+      : gcpSettings
+      ? gcpSettings.projectId
+      : '';
+  }
+
   private _getDialogContent(): JSX.Element {
     const { gcpSettings, permissions, jobSubmittedMessage } = this.state;
     const { gcpService, request } = this.props;
+    const projectId = this.getProjectId();
     const hasNotebook = !!(request && request.notebook);
     if (jobSubmittedMessage) {
       return (
@@ -238,6 +250,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
           permissions={permissions}
           onDialogClose={this._onDialogClose}
           settings={this.props.settings}
+          projectId={projectId}
         />
       ) : (
         <div className={css.column}>

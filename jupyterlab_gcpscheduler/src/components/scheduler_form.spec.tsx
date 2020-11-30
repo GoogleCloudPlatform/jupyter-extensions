@@ -16,7 +16,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { Message, ToggleSwitch } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
@@ -27,14 +27,13 @@ import {
   DAY,
   WEEK,
   MONTH,
-  SCHEDULE_TYPES,
   ACCELERATOR_TYPES,
   ACCELERATOR_TYPES_REDUCED,
 } from '../data';
 import { GcpService } from '../service/gcp';
 import { RunNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
-import { SchedulerForm, InnerSchedulerForm } from './scheduler_form';
+import { SchedulerForm } from './scheduler_form';
 import { SubmittedJob } from './submitted_job';
 
 import {
@@ -44,15 +43,6 @@ import {
   simulateCheckBoxChange,
   simulateFieldChange,
 } from '../test_helpers';
-import { GcpSettings } from './dialog';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function shallowInnerSchedulerForm(props: any) {
-  return shallow(<SchedulerForm {...props} />)
-    .dive()
-    .find(InnerSchedulerForm)
-    .dive();
-}
 
 describe('SchedulerForm', () => {
   const notebookName = 'Test Notebook.ipynb';
@@ -98,6 +88,7 @@ describe('SchedulerForm', () => {
     onDialogClose: mockDialogClose,
     settings: mockSettings,
     permissions,
+    projectId: TEST_PROJECT,
   };
 
   beforeEach(() => {
@@ -596,18 +587,6 @@ describe('SchedulerForm', () => {
         />
       )
     ).toBe(true);
-  });
-
-  it('Should only allow single runs if there is no scheduler region', async () => {
-    const gcpSettings: GcpSettings = {
-      ...mockProps.gcpSettings,
-      schedulerRegion: '',
-    };
-    const props = { ...mockProps, gcpSettings };
-    const schedulerForm = shallowInnerSchedulerForm(props);
-    expect(
-      schedulerForm.find('SelectInput[name="scheduleType"]').prop('options')
-    ).toEqual([SCHEDULE_TYPES[0]]);
   });
 
   it('Updates settings accordingly when new values are empty', async () => {
