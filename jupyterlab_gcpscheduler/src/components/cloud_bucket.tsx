@@ -101,12 +101,13 @@ export class CloudBucketSelector extends React.Component<Props, State> {
     if (typeof option === 'string') {
       return option;
     }
+    const bucketOption = option as BucketOption;
     // Add "xxx" option created dynamically
-    if ((option as BucketOption).inputValue) {
-      return (option as BucketOption).inputValue;
+    if (bucketOption.inputValue) {
+      return bucketOption.inputValue;
     }
     // Regular option
-    return (option as BucketOption).name;
+    return bucketOption.name;
   }
 
   render() {
@@ -171,18 +172,23 @@ export class CloudBucketSelector extends React.Component<Props, State> {
     try {
       this.setState({ isLoading: true, error: undefined });
       const buckets = await this.props.gcpService.listBuckets();
-      const validBucketOptions = buckets.buckets.filter(
-        bucket => bucket.accessLevel === 'uniform'
-      );
-      const value =
-        validBucketOptions.find(bucket => selectedBucketName === bucket.name) ||
-        null;
+      const validBucketOptions = [];
+      const invalidBucketOptions = [];
+      let value = null;
+      for (const bucket of buckets.buckets) {
+        if (bucket.accessLevel !== 'uniform') {
+          invalidBucketOptions.push(bucket);
+          continue;
+        }
+        validBucketOptions.push(bucket);
+        if (bucket.name === selectedBucketName) {
+          value = bucket;
+        }
+      }
       this.setState({
         isLoading: false,
         validBucketOptions,
-        invalidBucketOptions: buckets.buckets.filter(
-          bucket => bucket.accessLevel !== 'uniform'
-        ),
+        invalidBucketOptions,
         value,
       });
       this.props.onGcsBucketChange(value ? value.name : null);

@@ -154,10 +154,14 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (
       this.props.isVisible &&
-      !(prevProps.isVisible || this.state.runsTab.isLoading)
+      !(
+        prevProps.isVisible ||
+        (this.state.tab === 0 && this.state.runsTab.isLoading) ||
+        (this.state.tab === 1 && this.state.schedulesTab.isLoading)
+      )
     ) {
-      this._getRuns(this.state.rowsPerPage);
-      this.setState({ tab: 0, page: 0 });
+      this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage);
+      this.setState({ page: 0 });
     }
   }
 
