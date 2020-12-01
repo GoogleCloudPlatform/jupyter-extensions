@@ -88,7 +88,6 @@ describe('SchedulerForm', () => {
     onDialogClose: mockDialogClose,
     settings: mockSettings,
     permissions,
-    projectId: TEST_PROJECT,
   };
 
   beforeEach(() => {
