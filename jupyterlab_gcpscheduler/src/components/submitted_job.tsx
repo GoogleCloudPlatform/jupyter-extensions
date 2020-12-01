@@ -35,8 +35,9 @@ import {
   MASTER_TYPES,
   CUSTOM,
   ACCELERATOR_TYPES,
+  CONTAINER_IMAGES,
 } from '../data';
-import { RunNotebookRequest } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 import { OnDialogClose } from './dialog';
 import { ActionBar } from './action_bar';
 
@@ -98,6 +99,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
       ACCELERATOR_TYPES,
       request.acceleratorType
     );
+    const container = findOptionByValue(CONTAINER_IMAGES, request.imageUri);
     const gcsInformation = this.getGcsInformation(request.inputNotebookGcsPath);
     const isRecurring = !!schedule;
     const jobLink = `${SCHEDULER_LINK}?${projectParam}`;
@@ -105,7 +107,9 @@ export class SubmittedJob extends React.Component<Props, {}> {
       <div className={css.column}>
         <div className={classes(css.row, localStyles.message)}>
           <GreenCheck />
-          <span>Notebook run successfully scheduled!</span>
+          <span>
+            {isRecurring ? 'Schedule' : 'Single run'} successfully created!
+          </span>
         </div>
         <div className={classes(css.row, localStyles.messageCaption)}>
           {!isRecurring && <span>Run has been started</span>}
@@ -124,12 +128,6 @@ export class SubmittedJob extends React.Component<Props, {}> {
                 </TableCell>
                 <TableCell>{gcsInformation.basename}</TableCell>
               </TableRow>
-              <TableRow key="runName">
-                <TableCell className={localStyles.tableHeader} variant="head">
-                  Run name
-                </TableCell>
-                <TableCell>{request.jobId}</TableCell>
-              </TableRow>
               <TableRow key="region">
                 <TableCell className={localStyles.tableHeader} variant="head">
                   Region
@@ -140,7 +138,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
                 <TableCell className={localStyles.tableHeader} variant="head">
                   Scale tier
                 </TableCell>
-                <TableCell>{scaleTier.value}</TableCell>
+                <TableCell>{scaleTier.text}</TableCell>
               </TableRow>
               {scaleTier.value === CUSTOM && (
                 <React.Fragment>
@@ -179,14 +177,14 @@ export class SubmittedJob extends React.Component<Props, {}> {
                 <TableCell className={localStyles.tableHeader} variant="head">
                   Container
                 </TableCell>
-                <TableCell>{request.imageUri}</TableCell>
+                <TableCell>{container.text}</TableCell>
               </TableRow>
               <TableRow key="type">
                 <TableCell className={localStyles.tableHeader} variant="head">
                   Type
                 </TableCell>
                 <TableCell>
-                  {isRecurring ? 'Recurring run' : 'Single run'}
+                  {isRecurring ? 'Schedule (scheduled runs)' : 'Single run'}
                 </TableCell>
               </TableRow>
               {isRecurring && (
@@ -197,18 +195,6 @@ export class SubmittedJob extends React.Component<Props, {}> {
                   <TableCell>{getHumanReadableCron(schedule)}</TableCell>
                 </TableRow>
               )}
-              <TableRow key="status">
-                <TableCell className={localStyles.tableHeader} variant="head">
-                  Status
-                </TableCell>
-                <TableCell>
-                  {' '}
-                  <LearnMoreLink
-                    text="View in Google Cloud console"
-                    href={jobLink}
-                  />
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
@@ -216,6 +202,12 @@ export class SubmittedJob extends React.Component<Props, {}> {
           closeLabel="Done"
           closeOnRight={true}
           onDialogClose={onDialogClose}
+          displayMessage={
+            <span>
+              Check the run status in the Scheduler extension or in{' '}
+              <LearnMoreLink text="Google Cloud console" href={jobLink} />
+            </span>
+          }
         >
           <Button onClick={onFormReset}>Submit another run</Button>
         </ActionBar>

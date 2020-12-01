@@ -13,77 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { withStyles } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
-import * as csstips from 'csstips';
 import {
   css,
-  IconButtonMenu,
-  SmallMenuItem,
+  LearnMoreLink,
   GrayPending,
-  GreenCheck,
+  GreenCheckCircle,
   RedClose,
+  MenuIcon,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
-
-import { AI_PLATFORM_LINK } from '../data';
-import { AiPlatformJob, GcpService } from '../service/gcp';
+import { customShortDateFormat, getHumanReadableCron } from '../cron';
+import { ShareDialog } from './share_dialog';
+import { Run, Schedule } from '../interfaces';
+import { GcpService } from '../service/gcp';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import { Grid } from '@material-ui/core';
 
 interface Props {
-  job: AiPlatformJob;
+  job: Run | Schedule;
   projectId: string;
   gcpService: GcpService;
 }
 
+interface State {
+  anchorEl: null | HTMLElement;
+}
+
 const localStyles = stylesheet({
-  item: {
-    alignItems: 'center',
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    listStyle: 'none',
-    height: '40px',
-    paddingRight: '8px',
-    $nest: {
-      '&:hover': {
-        backgroundColor: 'var(--jp-layout-color2)',
-      },
-    },
-    ...csstips.horizontal,
-  },
-  details: {
-    paddingLeft: '4px',
-    ...csstips.flex,
-  },
-  jobLink: {
-    textDecoration: 'none',
-  },
-  jobTime: {
-    color: 'var(--jp-content-font-color2)',
-    fontSize: '9px',
-    textAlign: 'right',
-    ...csstips.flex,
-  },
   menuLink: {
     display: 'block',
     height: '100%',
     width: '100%',
   },
+  job: {
+    paddingTop: '15px',
+    paddingBottom: '15px',
+    paddingRight: '20px',
+    paddingLeft: '15px',
+    width: '100%',
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  },
+  jobCaption: {
+    fontSize: '12px',
+    paddingTop: '5px',
+    color: 'var(--jp-content-font-color2)',
+  },
+  align: {
+    marginTop: '-15px !important',
+  },
+  spacing: {
+    marginTop: '5px',
+  },
 });
 
-const MenuIcon = withStyles({
-  root: {
-    fontSize: '20px',
-  },
-})(MoreVert);
-
-const VIEWER_LINK_BASE = 'https://notebooks.cloud.google.com/view';
-const DOWNLOAD_LINK_BASE = 'https://storage.cloud.google.com';
 const SUCCEEDED = 'SUCCEEDED';
 
 function getIconForJobState(state: string): JSX.Element {
   if (state === 'SUCCEEDED') {
-    return <GreenCheck />;
+    return <GreenCheckCircle />;
   } else if (state === 'FAILED') {
     return <RedClose />;
   }
@@ -91,85 +81,122 @@ function getIconForJobState(state: string): JSX.Element {
 }
 
 /** Notebook job list item */
-export function JobListItem(props: Props) {
-  const { gcpService, job, projectId } = props;
-  const endTime = new Date(job.endTime || job.createTime);
+export class JobListItem extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { anchorEl: null };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+  }
 
-  const gcsFile =
-    job.trainingInput &&
-    job.trainingInput.args &&
-    job.trainingInput.args[4].slice(5);
+  handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    this.setState({ anchorEl: event.currentTarget });
+  }
 
-  /*
-    Extract the bucket and jobName from the GCS URI. The actual AI Platform job
-    ID may have an additional timestamp if it was submitted as a recurring run
-  */
-  const [bucket, jobName, ...object] = gcsFile.split('/');
-  const name = jobName.replace('_', ' ');
-  const encodedObjectPath = [jobName, ...object]
-    .map(p => encodeURIComponent(p))
-    .join('/');
-  const jobLink = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
-  const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
-  const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
-  return (
-    <li className={localStyles.item}>
-      <div title={`Status: ${job.state}`}>{getIconForJobState(job.state)}</div>
-      <div className={localStyles.details}>
-        <div>
-          <a
-            className={classes(css.link, localStyles.jobLink)}
-            href={jobLink}
-            target="_blank"
-            title="View AI Platform Job"
-          >
-            {name}
-          </a>
-        </div>
-        <div>
-          <span className={localStyles.jobTime}>
-            {endTime.toLocaleString()}
-          </span>
-        </div>
-      </div>
-      <div>
+  handleClose() {
+    this.setState({ anchorEl: null });
+  }
+
+  render() {
+    const { gcpService, job } = this.props;
+    const schedule = 'schedule' in job;
+    const endTime = new Date(job.endTime || job.createTime);
+    return (
+      <Grid className={localStyles.job} container spacing={1}>
+        <Grid item xs={1}>
+          {' '}
+          {getIconForJobState(job.state)}
+        </Grid>
+        <Grid item xs={job.state === SUCCEEDED ? 10 : 11}>
+          <div className={css.bold}>
+            <LearnMoreLink
+              secondary={true}
+              noUnderline={true}
+              text={job.name}
+              href={job.link}
+            />
+          </div>
+          <div>
+            {!schedule && (
+              <div className={localStyles.jobCaption}>
+                <span>
+                  {customShortDateFormat(endTime)} - {(job as Run).type}
+                </span>
+              </div>
+            )}
+            {schedule && (
+              <React.Fragment>
+                <div className={localStyles.jobCaption}>
+                  <span>
+                    Frequency:{' '}
+                    {getHumanReadableCron((job as Schedule).schedule)}
+                  </span>
+                </div>
+                <div className={localStyles.jobCaption}>
+                  <span>Latest run: {customShortDateFormat(endTime)}</span>
+                </div>
+              </React.Fragment>
+            )}
+            <div className={classes(css.bold, localStyles.spacing)}>
+              <LearnMoreLink
+                noUnderline={true}
+                href={job.viewerLink}
+                text={schedule ? 'VIEW LATEST RUN RESULT' : 'VIEW RESULT'}
+              />
+            </div>
+          </div>
+        </Grid>
         {job.state === SUCCEEDED && (
-          <IconButtonMenu
-            icon={<MenuIcon />}
-            menuItems={menuCloseHandler => [
-              <SmallMenuItem key="viewNotebook">
-                <a
-                  className={localStyles.menuLink}
-                  href={viewerLink}
-                  target="_blank"
-                  title="View notebook output in HTML format"
-                  onClick={menuCloseHandler}
-                >
-                  View
-                </a>
-              </SmallMenuItem>,
-              <SmallMenuItem
-                id="import"
-                key="importNotebook"
-                onClick={() => gcpService.importNotebook(gcsFile)}
+          <Grid item xs={1}>
+            {''}
+            <IconButton
+              className={localStyles.align}
+              onClick={this.handleClick}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="run-menu"
+              anchorEl={this.state.anchorEl}
+              keepMounted
+              open={Boolean(this.state.anchorEl)}
+              onClose={this.handleClose}
+            >
+              {!schedule && (
+                <MenuItem key="shareNotebook" dense={true}>
+                  <ShareDialog
+                    cloudBucket={(job as Run).bucketLink}
+                    shareLink={job.viewerLink}
+                    handleClose={this.handleClose}
+                  />
+                </MenuItem>
+              )}
+              <MenuItem
+                id="open"
+                key="openNotebook"
+                dense={true}
+                onClick={() => gcpService.importNotebook(job.gcsFile)}
               >
-                Import
-              </SmallMenuItem>,
-              <SmallMenuItem key="getNotebookPath" onClick={menuCloseHandler}>
+                Open source notebook
+              </MenuItem>
+              <MenuItem
+                key="downloadSourceNotebook"
+                dense={true}
+                onClick={this.handleClose}
+              >
                 <a
                   className={localStyles.menuLink}
-                  href={downloadLink}
+                  href={job.downloadLink}
                   target="_blank"
                   title="Download the notebook output from Google Cloud Storage"
-                  onClick={menuCloseHandler}
                 >
-                  Download
+                  Download source notebook
                 </a>
-              </SmallMenuItem>,
-            ]}
-          />
+              </MenuItem>
+            </Menu>{' '}
+          </Grid>
         )}
-      </div>
-    </li>
-  );
+      </Grid>
+    );
+  }
 }

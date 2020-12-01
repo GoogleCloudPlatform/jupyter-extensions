@@ -18,8 +18,16 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
-import { GcpService, RunNotebookRequest } from './gcp';
-import { TEST_PROJECT } from '../test_helpers';
+import { GcpService } from './gcp';
+import { RunNotebookRequest } from '../interfaces';
+import {
+  TEST_PROJECT,
+  getAiPlatformJob,
+  getAiPlatformJobConvertedIntoRun,
+  getAiPlatformJobConvertedIntoSchedule,
+  getCloudStorageApiBucket,
+  getBucket,
+} from '../test_helpers';
 import { asApiResponse } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from './project_state';
 import { Contents } from '@jupyterlab/services';
@@ -216,6 +224,7 @@ describe('GcpService', () => {
       outputNotebookGcsPath: 'gs://test-bucket/test_nb-out.ipynb',
       region: 'us-east1',
       scaleTier: 'STANDARD_1',
+      gcsBucket: 'gcsBucket',
       acceleratorType: '',
       acceleratorCount: '',
     };
@@ -368,10 +377,22 @@ describe('GcpService', () => {
       });
     });
 
-    it('Lists notebook jobs', async () => {
-      mockSubmit.mockReturnValue(asApiResponse({}));
+    it('Lists notebook runs', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
+          nextPageToken: 'xyz',
+        })
+      );
 
-      await gcpService.listNotebookJobs();
+      const runs = await gcpService.listRuns();
+      expect(runs).toEqual({
+        pageToken: 'xyz',
+        runs: [
+          getAiPlatformJobConvertedIntoRun(),
+          getAiPlatformJobConvertedIntoRun('jobId2'),
+        ],
+      });
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
         params: {
@@ -381,28 +402,320 @@ describe('GcpService', () => {
       });
     });
 
-    it('Throws error when listing notebook jobs', async () => {
+    it('Lists notebook runs empty jobs response', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          jobs: [],
+        })
+      );
+
+      const runs = await gcpService.listRuns();
+      expect(runs).toEqual({ runs: [], pageToken: undefined });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter:
+            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
+        },
+      });
+    });
+
+    it('Lists notebook runs empty response', async () => {
+      mockSubmit.mockReturnValue(asApiResponse({}));
+
+      const runs = await gcpService.listRuns();
+      expect(runs).toEqual({ runs: [], pageToken: undefined });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter:
+            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
+        },
+      });
+    });
+
+    it('Throws error when listing notebook runs', async () => {
       const error = {
         error: {
           status: 'BAD_REQUEST',
-          message: 'Unable to retrieve notebook jobs',
+          message: 'Unable to retrieve notebook runs',
         },
       };
       mockSubmit.mockRejectedValue(asApiResponse(error));
 
       expect.assertions(2);
       try {
-        await gcpService.listNotebookJobs('abc123');
+        await gcpService.listRuns(10, 'abc123');
       } catch (err) {
-        expect(err).toEqual('BAD_REQUEST: Unable to retrieve notebook jobs');
+        expect(err).toEqual('BAD_REQUEST: Unable to retrieve notebook runs');
       }
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
         params: {
           filter:
             'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
+          pageSize: '10',
           pageToken: 'abc123',
         },
+      });
+    });
+
+    it('Lists notebook schedules', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
+          nextPageToken: 'xyz',
+        })
+      );
+
+      const schedules = await gcpService.listSchedules();
+      expect(schedules).toEqual({
+        pageToken: 'xyz',
+        schedules: [
+          getAiPlatformJobConvertedIntoSchedule(),
+          getAiPlatformJobConvertedIntoSchedule('jobId2'),
+        ],
+      });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
+        },
+      });
+    });
+
+    it('Lists notebook schedules empty jobs response', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          jobs: [],
+        })
+      );
+
+      const schedules = await gcpService.listSchedules();
+      expect(schedules).toEqual({ schedules: [], pageToken: undefined });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
+        },
+      });
+    });
+
+    it('Lists notebook schedules empty response', async () => {
+      mockSubmit.mockReturnValue(asApiResponse({}));
+
+      const schedules = await gcpService.listSchedules();
+      expect(schedules).toEqual({ schedules: [], pageToken: undefined });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
+        },
+      });
+    });
+
+    it('Throws error when listing notebook schedules', async () => {
+      const error = {
+        error: {
+          status: 'BAD_REQUEST',
+          message: 'Unable to retrieve notebook schedules',
+        },
+      };
+      mockSubmit.mockRejectedValue(asApiResponse(error));
+
+      expect.assertions(2);
+      try {
+        await gcpService.listSchedules(10, 'abc123');
+      } catch (err) {
+        expect(err).toEqual(
+          'BAD_REQUEST: Unable to retrieve notebook schedules'
+        );
+      }
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        params: {
+          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
+          pageSize: '10',
+          pageToken: 'abc123',
+        },
+      });
+    });
+
+    it('Lists cloud storage buckets', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          items: [
+            getCloudStorageApiBucket('new-bucket-name1', false),
+            getCloudStorageApiBucket('new-bucket-name2'),
+          ],
+        })
+      );
+
+      const listBucketsResponse = await gcpService.listBuckets();
+      expect(listBucketsResponse).toEqual({
+        buckets: [
+          getBucket('new-bucket-name1', false),
+          getBucket('new-bucket-name2'),
+        ],
+      });
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+          projection: 'noACL',
+        },
+      });
+    });
+
+    it('Lists cloud storage buckets empty items response', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({
+          items: [],
+        })
+      );
+
+      const listBucketsResponse = await gcpService.listBuckets();
+      expect(listBucketsResponse).toEqual({
+        buckets: [],
+      });
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+          projection: 'noACL',
+        },
+      });
+    });
+
+    it('Lists cloud storage buckets empty response', async () => {
+      mockSubmit.mockReturnValue(asApiResponse({}));
+
+      const listBucketsResponse = await gcpService.listBuckets();
+      expect(listBucketsResponse).toEqual({
+        buckets: [],
+      });
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+          projection: 'noACL',
+        },
+      });
+    });
+
+    it('Throws error when listing cloud storage buckets', async () => {
+      const error = {
+        error: {
+          status: 'BAD_REQUEST',
+          message: 'Unable to retrieve buckets',
+        },
+      };
+      mockSubmit.mockRejectedValue(asApiResponse(error));
+
+      expect.assertions(2);
+      try {
+        await gcpService.listBuckets();
+      } catch (err) {
+        expect(err).toEqual('BAD_REQUEST: Unable to retrieve buckets');
+      }
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+          projection: 'noACL',
+        },
+      });
+    });
+
+    it('Creates cloud storage bucket', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse(getCloudStorageApiBucket('new-bucket-name'))
+      );
+
+      const bucketResponse = await gcpService.createUniformAccessBucket(
+        'new-bucket-name'
+      );
+
+      expect(bucketResponse).toEqual(getBucket('new-bucket-name'));
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+        },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'new-bucket-name',
+          iamConfiguration: {
+            uniformBucketLevelAccess: {
+              enabled: true,
+            },
+          },
+        }),
+      });
+    });
+
+    it('Creates cloud storage bucket empty response', async () => {
+      mockSubmit.mockReturnValue(asApiResponse({}));
+
+      try {
+        await gcpService.createUniformAccessBucket('new-bucket-name');
+      } catch (err) {
+        expect(err).toEqual('Unable to create bucket');
+      }
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+        },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'new-bucket-name',
+          iamConfiguration: {
+            uniformBucketLevelAccess: {
+              enabled: true,
+            },
+          },
+        }),
+      });
+    });
+
+    it('Throws error when creating uniform access bucket', async () => {
+      const error = {
+        error: {
+          status: 'BAD_REQUEST',
+          message: 'Unable to create bucket',
+        },
+      };
+      mockSubmit.mockRejectedValue(asApiResponse(error));
+
+      expect.assertions(2);
+      try {
+        await gcpService.createUniformAccessBucket('new-bucket-name');
+      } catch (err) {
+        expect(err).toEqual('BAD_REQUEST: Unable to create bucket');
+      }
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: 'https://storage.googleapis.com/storage/v1/b',
+        params: {
+          project: 'test-project',
+        },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'new-bucket-name',
+          iamConfiguration: {
+            uniformBucketLevelAccess: {
+              enabled: true,
+            },
+          },
+        }),
       });
     });
   });

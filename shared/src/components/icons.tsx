@@ -15,8 +15,16 @@
  */
 
 import { withStyles } from '@material-ui/core';
-import { Check, Close, Refresh, Info } from '@material-ui/icons';
-
+import {
+  Check,
+  CheckCircle,
+  Close,
+  CancelRounded,
+  Refresh,
+  Info,
+  Launch,
+  MoreVert,
+} from '@material-ui/icons';
 import { COLORS } from '../styles';
 
 /** Green check icon */
@@ -27,6 +35,14 @@ export const GreenCheck = withStyles({
   },
 })(Check);
 
+/** Green check circle icon */
+export const GreenCheckCircle = withStyles({
+  root: {
+    color: COLORS.green,
+    fontSize: '16px',
+  },
+})(CheckCircle);
+
 /** Red 'X' icon */
 export const RedClose = withStyles({
   root: {
@@ -34,6 +50,14 @@ export const RedClose = withStyles({
     fontSize: '16px',
   },
 })(Close);
+
+/** Red 'X' Circle icon */
+export const RedCloseCircle = withStyles({
+  root: {
+    color: COLORS.red,
+    fontSize: '16px',
+  },
+})(CancelRounded);
 
 /** Gray pending icon */
 export const GrayPending = withStyles({
@@ -58,3 +82,24 @@ export const RedError = withStyles({
     fontSize: '16px',
   },
 })(Info);
+
+// tslint:disable-next-line:enforce-name-casing
+/** External link Launch icon */
+export const SmallLaunchIcon = withStyles({
+  root: {
+    fontSize: '16px',
+    paddingLeft: '2px',
+  },
+})(Launch);
+
+export const RefreshIcon = withStyles({
+  root: {
+    fontSize: '16px',
+  },
+})(Refresh);
+
+export const MenuIcon = withStyles({
+  root: {
+    fontSize: '20px',
+  },
+})(MoreVert);

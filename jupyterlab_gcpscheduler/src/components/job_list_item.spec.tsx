@@ -18,9 +18,9 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { JobListItem } from './job_list_item';
-import { TEST_PROJECT, getAiPlatformJob } from '../test_helpers';
+import { TEST_PROJECT, getRun, getSchedule } from '../test_helpers';
 import { GcpService } from '../service/gcp';
-import { IconButtonMenu } from 'gcp_jupyterlab_shared';
+import Menu from '@material-ui/core/Menu';
 
 const toLocaleString = Date.prototype.toLocaleString;
 
@@ -40,19 +40,19 @@ describe('JobListItem', () => {
     Date.prototype.toLocaleString = toLocaleString;
   });
 
-  it('Calls GcpService on Import', () => {
+  it('Calls GcpService on open', () => {
     const jobListItem = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
 
     jobListItem
-      .find(IconButtonMenu)
+      .find(Menu)
       .dive()
-      .findWhere(w => w.text() === 'Import')
+      .findWhere(w => w.text() === 'Open source notebook')
       .first()
       .simulate('click');
 
@@ -61,38 +61,75 @@ describe('JobListItem', () => {
     );
   });
 
-  it('Renders for successful job', () => {
+  it('Renders for successful run', () => {
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for failed job', () => {
-    const job = getAiPlatformJob();
+  it('Renders for failed run', () => {
+    const job = getRun();
     job.state = 'FAILED';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getAiPlatformJob()}
+        job={getRun()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for running job', () => {
-    const job = getAiPlatformJob();
+  it('Renders for running run', () => {
+    const job = getRun();
     job.state = 'RUNNING';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getAiPlatformJob()}
+        job={getRun()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for successful schedule', () => {
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for failed schedule', () => {
+    const job = getRun();
+    job.state = 'FAILED';
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Renders for running schedule', () => {
+    const job = getRun();
+    job.state = 'RUNNING';
+    const component = shallow(
+      <JobListItem
+        gcpService={mockGcpService}
+        projectId={TEST_PROJECT}
+        job={getSchedule()}
       />
     );
     expect(component).toMatchSnapshot();

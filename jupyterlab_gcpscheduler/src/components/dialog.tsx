@@ -36,7 +36,6 @@ import { GcpService } from '../service/gcp';
 import {
   GetPermissionsResponse,
   ProjectStateService,
-  ProjectState,
 } from '../service/project_state';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './action_bar';
@@ -60,9 +59,6 @@ export interface JobSubmittedMessage {
 
 /** Definition for a function that closes the SchedulerDialog. */
 export type OnDialogClose = () => void;
-
-/** Callback function that accepts an initialized ProjectState */
-export type OnInitialized = (projectState: ProjectState) => void;
 
 /** Extension settings. */
 export interface GcpSettings {
@@ -164,13 +160,12 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   render() {
-    const { gcpSettings } = this.state;
-    const projectId = gcpSettings ? gcpSettings.projectId : '';
+    const projectId = this.getProjectId();
     return (
-      <Dialog open={this._isOpen()}>
+      <Dialog open={this._isOpen()} scroll="body">
         <header className={localStyles.header}>
           <span className={localStyles.title}>
-            Schedule a notebook run <Badge value="alpha" />
+            Create a notebook job <Badge value="alpha" />
           </span>
           <IconButtonMenu
             menuItems={menuCloseHandler => [
@@ -195,6 +190,11 @@ export class SchedulerDialog extends React.Component<Props, State> {
         <main className={localStyles.main}>{this._getDialogContent()}</main>
       </Dialog>
     );
+  }
+
+  private getProjectId() {
+    const { gcpSettings } = this.state;
+    return gcpSettings ? gcpSettings.projectId : '';
   }
 
   private _getDialogContent(): JSX.Element {
@@ -250,11 +250,16 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   // Casts to GcpSettings shape from JSONObject
-  private _settingsChanged(newSettings: ISettingRegistry.ISettings) {
+  private async _settingsChanged(newSettings: ISettingRegistry.ISettings) {
     const settings = (newSettings.composite as unknown) as GcpSettings;
     if (settings.projectId) {
       console.info(`Using ${settings.projectId} for GCP API calls`);
       this.props.projectStateService.projectId = settings.projectId;
+    } else {
+      const projectId = await this.props.gcpService.projectId;
+      this.props.projectStateService.projectId = projectId;
+      settings.projectId = projectId;
+      newSettings.set('projectId', projectId);
     }
     if (settings.oAuthClientId) {
       console.info('Using end-user authentication for GCP API calls');

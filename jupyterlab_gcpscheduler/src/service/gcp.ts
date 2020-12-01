@@ -16,11 +16,14 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
-
 import {
   CLOUD_FUNCTION_NAME,
   CLOUD_FUNCTION_REGION,
   IMPORT_DIRECTORY,
+  AI_PLATFORM_LINK,
+  DOWNLOAD_LINK_BASE,
+  VIEWER_LINK_BASE,
+  BUCKET_LINK_BASE,
 } from '../data';
 import { ProjectStateService } from './project_state';
 import {
@@ -29,56 +32,34 @@ import {
   GET,
   POST,
 } from 'gcp_jupyterlab_shared';
+import {
+  StorageObject,
+  CloudSchedulerJob,
+  RunNotebookRequest,
+  AiPlatformJob,
+  Buckets,
+  Runs,
+  Schedules,
+  ListAiPlatformJobsResponse,
+  CloudStorageApiBucket,
+  CloudStorageApiBuckets,
+  Bucket,
+  Job,
+  Run,
+  Schedule,
+} from '../interfaces';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Notebook } from '@jupyterlab/notebook';
 
 const SERVICE_ACCOUNT_DOMAIN = 'appspot.gserviceaccount.com';
 const IMMEDIATE_JOB_INDICATOR = 'jupyterlab_immediate_notebook';
 const SCHEDULED_JOB_INDICATOR = 'jupyterlab_scheduled_notebook';
-
-/**
- * Cloud Scheduler Job
- * https://cloud.google.com/scheduler/docs/reference/rest/v1/projects.locations.jobs#Job
- */
-export interface CloudSchedulerJob {
-  name: string;
-  description: string;
-  schedule: string;
-  timeZone: string;
-  httpTarget: {
-    body: string;
-    headers: { [name: string]: string };
-    httpMethod: string;
-    uri: string;
-    oidcToken: { serviceAccountEmail: string };
-  };
-}
-
-/** Message type describing an AI Platform training Job */
-export interface RunNotebookRequest {
-  imageUri: string;
-  inputNotebookGcsPath: string;
-  jobId: string;
-  masterType: string;
-  outputNotebookGcsPath: string;
-  scaleTier: string;
-  region: string;
-  acceleratorType: string;
-  acceleratorCount: string;
-}
-
-/** List of Jobs returned from AI Platform. */
-export type ListAiPlatformJobsResponse = gapi.client.ml.GoogleCloudMlV1__ListJobsResponse;
-
-/** AI Platform Job. */
-export type AiPlatformJob = gapi.client.ml.GoogleCloudMlV1__Job;
-
-type StorageObject = gapi.client.storage.Object;
-
+const JOB_TYPE = 'job_type';
 const AI_PLATFORM = 'https://ml.googleapis.com/v1';
 const CLOUD_SCHEDULER = 'https://cloudscheduler.googleapis.com/v1';
-const STORAGE_DOWNLOAD = 'https://storage.googleapis.com/storage/v1';
+const STORAGE = 'https://storage.googleapis.com/storage/v1';
 const STORAGE_UPLOAD = 'https://storage.googleapis.com/upload/storage/v1';
+
 /**
  * Class to interact with GCP services.
  */
@@ -171,7 +152,7 @@ export class GcpService {
     try {
       const { bucket, object } = this._getGcsPathParts(gcsPath);
       const response = await this._transportService.submit<string>({
-        path: `${STORAGE_DOWNLOAD}/b/${bucket}/o/${encodeURIComponent(object)}`,
+        path: `${STORAGE}/b/${bucket}/o/${encodeURIComponent(object)}`,
         params: {
           alt: 'media',
         },
@@ -258,19 +239,20 @@ export class GcpService {
   }
 
   /**
-   * Gets list of AiPlatformJobs
+   * Gets list of AiPlatformRuns
    * @param cloudFunctionUrl
    * @param request
    */
-  async listNotebookJobs(
-    pageToken?: string
-  ): Promise<ListAiPlatformJobsResponse> {
+  async listRuns(pageSize?: number, pageToken?: string): Promise<Runs> {
     try {
       const filter = [SCHEDULED_JOB_INDICATOR, IMMEDIATE_JOB_INDICATOR]
         .map(v => `labels.job_type=${v}`)
         .join(' OR ');
       const projectId = await this.projectId;
       const params: { [k: string]: string } = { filter };
+      if (pageSize) {
+        params['pageSize'] = String(pageSize);
+      }
       if (pageToken) {
         params['pageToken'] = pageToken;
       }
@@ -280,7 +262,12 @@ export class GcpService {
         path: `${AI_PLATFORM}/projects/${projectId}/jobs`,
         params,
       });
-      return response.result;
+      return {
+        runs: (response.result.jobs || []).map(job =>
+          this.createRun(job, projectId)
+        ),
+        pageToken: response.result.nextPageToken,
+      };
     } catch (err) {
       console.error('Unable to list AI Platform Notebook jobs');
       handleApiError(err);
@@ -295,6 +282,95 @@ export class GcpService {
 
     const lastDotIndex = runtimeEnv.lastIndexOf('.');
     return `${imageUriPrefix}${runtimeEnv.substr(0, lastDotIndex)}`;
+  }
+
+  /**
+   * Gets list of AiPlatformSchedules
+   * @param cloudFunctionUrl
+   * @param request
+   */
+  async listSchedules(
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<Schedules> {
+    try {
+      const filter = `labels.job_type=${SCHEDULED_JOB_INDICATOR}`;
+      const projectId = await this.projectId;
+      const params: { [k: string]: string } = { filter };
+      if (pageSize) {
+        params['pageSize'] = String(pageSize);
+      }
+      if (pageToken) {
+        params['pageToken'] = pageToken;
+      }
+      const response = await this._transportService.submit<
+        ListAiPlatformJobsResponse
+      >({
+        path: `${AI_PLATFORM}/projects/${projectId}/jobs`,
+        params,
+      });
+      return {
+        schedules: (response.result.jobs || []).map(job =>
+          this.createSchedule(job, projectId)
+        ),
+        pageToken: response.result.nextPageToken,
+      };
+    } catch (err) {
+      console.error('Unable to list AI Platform Notebook schedules');
+      handleApiError(err);
+    }
+  }
+
+  async createUniformAccessBucket(name: string): Promise<Bucket> {
+    try {
+      const params: { [k: string]: string } = {};
+      params['project'] = await this.projectId;
+      const response = await this._transportService.submit<
+        CloudStorageApiBucket
+      >({
+        path: `${STORAGE}/b`,
+        params,
+        method: POST,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          iamConfiguration: {
+            uniformBucketLevelAccess: {
+              enabled: true,
+            },
+          },
+        }),
+      });
+      if (!response.result.id) {
+        throw 'Unable to create bucket';
+      }
+      return this.createBucket(response.result);
+    } catch (err) {
+      console.error('Unable to list Cloud Storage CloudStorageApiBuckets');
+      handleApiError(err);
+    }
+  }
+
+  async listBuckets(): Promise<Buckets> {
+    try {
+      const params: { [k: string]: string } = {};
+      params['project'] = await this.projectId;
+      params['projection'] = 'noACL';
+      const response = await this._transportService.submit<
+        CloudStorageApiBuckets
+      >({
+        path: `${STORAGE}/b`,
+        params,
+      });
+      return {
+        buckets: (response.result.items || []).map(item =>
+          this.createBucket(item)
+        ),
+      };
+    } catch (err) {
+      console.error('Unable to list Cloud Storage CloudStorageApiBuckets');
+      handleApiError(err);
+    }
   }
 
   private async _getRuntimeEnv(): Promise<string> {
@@ -354,6 +430,66 @@ export class GcpService {
     return {
       bucket: pathParts[0],
       object: pathParts.slice(1).join('/'),
+    };
+  }
+
+  private createJob(job: AiPlatformJob, projectId: string): Job {
+    const gcsFile =
+      job.trainingInput &&
+      job.trainingInput.args &&
+      job.trainingInput.args[4].slice(5);
+    const [bucket, name, ...object] = gcsFile.split('/');
+    const encodedObjectPath = [name, ...object]
+      .map(p => encodeURIComponent(p))
+      .join('/');
+    const link = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
+    const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}?project=${projectId}`;
+    const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
+    return {
+      id: job.jobId,
+      name,
+      createTime: job.createTime,
+      endTime: job.endTime,
+      gcsFile,
+      state: job.state,
+      link,
+      viewerLink,
+      downloadLink,
+    };
+  }
+
+  private createRun(job: AiPlatformJob, projectId: string): Run {
+    const gcsFile =
+      job.trainingInput &&
+      job.trainingInput.args &&
+      job.trainingInput.args[4].slice(5);
+    const bucket = gcsFile.split('/')[0];
+    const bucketLink = `${BUCKET_LINK_BASE}/${bucket};tab=permissions`;
+    const type =
+      job['labels'] && job['labels'][JOB_TYPE] === SCHEDULED_JOB_INDICATOR
+        ? 'Single run'
+        : 'Scheduled run';
+    return {
+      ...this.createJob(job, projectId),
+      type,
+      bucketLink,
+    };
+  }
+
+  private createSchedule(job: AiPlatformJob, projectId: string): Schedule {
+    return {
+      ...this.createJob(job, projectId),
+      //TODO: after new job definition is added replace with actual value
+      schedule: '30 12 */2 * *',
+    };
+  }
+
+  private createBucket(bucket: CloudStorageApiBucket): Bucket {
+    return {
+      name: bucket.id,
+      accessLevel: bucket.iamConfiguration?.uniformBucketLevelAccess?.enabled
+        ? 'uniform'
+        : 'fine',
     };
   }
 }

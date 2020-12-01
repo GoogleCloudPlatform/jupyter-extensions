@@ -251,10 +251,6 @@ export const REGIONS: Option[] = [
     text: 'us-west3 (Salt Lake City)',
   },
   {
-    value: 'asia-east1',
-    text: 'asia-east1 (Taiwan)',
-  },
-  {
     value: 'europe-north1',
     text: 'europe-north1 (Finland)',
   },
@@ -311,7 +307,7 @@ export const REGIONS: Option[] = [
 /** Single execution or recurring schedule */
 export const SCHEDULE_TYPES: Option[] = [
   { value: SINGLE, text: 'Single run' },
-  { value: RECURRING, text: 'Recurring run' },
+  { value: RECURRING, text: 'Schedule (scheduled runs)' },
 ];
 
 export const FREQUENCY_TYPES: Option[] = [
@@ -335,3 +331,10 @@ export const SCHEDULER_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/sched
 
 /** Notebook jobs directory that notebooks will be imported to. */
 export const IMPORT_DIRECTORY = 'imported_notebook_jobs/';
+
+export const VIEWER_LINK_BASE = 'https://notebooks.cloud.google.com/view';
+
+export const DOWNLOAD_LINK_BASE = 'https://storage.cloud.google.com';
+
+export const BUCKET_LINK_BASE =
+  'https://console.cloud.google.com/storage/browser';

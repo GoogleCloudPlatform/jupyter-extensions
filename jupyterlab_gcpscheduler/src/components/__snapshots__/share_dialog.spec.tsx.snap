@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShareDialog Renders closed 1`] = `
+<Fragment>
+  <p
+    className="fullWidth_f96or0t"
+    onClick={[Function]}
+  >
+    Share run result
+  </p>
+  <WithStyles(ForwardRef(Dialog))
+    aria-describedby="share-dialog-description"
+    aria-labelledby="share-dialog-title"
+    fullWidth={true}
+    maxWidth="sm"
+    onClose={[Function]}
+    open={false}
+  >
+    <WithStyles(ForwardRef(DialogTitle))
+      id="share-dialog-title"
+    >
+      Share run result
+    </WithStyles(ForwardRef(DialogTitle))>
+    <WithStyles(ForwardRef(DialogContent))>
+      <WithStyles(ForwardRef(DialogContentText))
+        className="text_f1v1xbpa"
+        id="share-dialog-description"
+      >
+        To share this run result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+      </WithStyles(ForwardRef(DialogContentText))>
+      <ol
+        className="inlineStart_f1nodyj text_f1v1xbpa"
+      >
+        <li>
+          Click the "COPY LINK" button below
+        </li>
+        <li>
+          Go to the
+           
+          <LearnMoreLink
+            href="http://storage.bucket"
+            text="results bucket"
+          />
+          .
+        </li>
+        <li>
+          Click "Add"
+        </li>
+        <li>
+          Enter one or more emails then select the "Storage Object Viewer" role
+        </li>
+      </ol>
+      <WithStyles(ForwardRef(DialogContentText))
+        className="text_f1v1xbpa"
+        id="share-dialog-description"
+      >
+        You can now share the link you copied with the people or groups granted view permission. Note: these people or groups are able to view any run result within this Google Cloud project as long as they own the links to those run results.
+      </WithStyles(ForwardRef(DialogContentText))>
+    </WithStyles(ForwardRef(DialogContent))>
+    <WithStyles(ForwardRef(DialogActions))>
+      <WithStyles(ForwardRef(Button))
+        color="primary"
+        onClick={[Function]}
+      >
+        Cancel
+      </WithStyles(ForwardRef(Button))>
+      <WithStyles(ForwardRef(Button))
+        autoFocus={true}
+        color="primary"
+        onClick={[Function]}
+      >
+        Copy Link
+      </WithStyles(ForwardRef(Button))>
+    </WithStyles(ForwardRef(DialogActions))>
+  </WithStyles(ForwardRef(Dialog))>
+  <WithStyles(ForwardRef(Snackbar))
+    message="Copied to clipboard"
+    onClose={[Function]}
+    open={false}
+  />
+</Fragment>
+`;
+
+exports[`ShareDialog Renders open 1`] = `
+<Fragment>
+  <p
+    className="fullWidth_f96or0t"
+    onClick={[Function]}
+  >
+    Share run result
+  </p>
+  <WithStyles(ForwardRef(Dialog))
+    aria-describedby="share-dialog-description"
+    aria-labelledby="share-dialog-title"
+    fullWidth={true}
+    maxWidth="sm"
+    onClose={[Function]}
+    open={true}
+  >
+    <WithStyles(ForwardRef(DialogTitle))
+      id="share-dialog-title"
+    >
+      Share run result
+    </WithStyles(ForwardRef(DialogTitle))>
+    <WithStyles(ForwardRef(DialogContent))>
+      <WithStyles(ForwardRef(DialogContentText))
+        className="text_f1v1xbpa"
+        id="share-dialog-description"
+      >
+        To share this run result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+      </WithStyles(ForwardRef(DialogContentText))>
+      <ol
+        className="inlineStart_f1nodyj text_f1v1xbpa"
+      >
+        <li>
+          Click the "COPY LINK" button below
+        </li>
+        <li>
+          Go to the
+           
+          <LearnMoreLink
+            href="http://storage.bucket"
+            text="results bucket"
+          />
+          .
+        </li>
+        <li>
+          Click "Add"
+        </li>
+        <li>
+          Enter one or more emails then select the "Storage Object Viewer" role
+        </li>
+      </ol>
+      <WithStyles(ForwardRef(DialogContentText))
+        className="text_f1v1xbpa"
+        id="share-dialog-description"
+      >
+        You can now share the link you copied with the people or groups granted view permission. Note: these people or groups are able to view any run result within this Google Cloud project as long as they own the links to those run results.
+      </WithStyles(ForwardRef(DialogContentText))>
+    </WithStyles(ForwardRef(DialogContent))>
+    <WithStyles(ForwardRef(DialogActions))>
+      <WithStyles(ForwardRef(Button))
+        color="primary"
+        onClick={[Function]}
+      >
+        Cancel
+      </WithStyles(ForwardRef(Button))>
+      <WithStyles(ForwardRef(Button))
+        autoFocus={true}
+        color="primary"
+        onClick={[Function]}
+      >
+        Copy Link
+      </WithStyles(ForwardRef(Button))>
+    </WithStyles(ForwardRef(DialogActions))>
+  </WithStyles(ForwardRef(Dialog))>
+  <WithStyles(ForwardRef(Snackbar))
+    message="Copied to clipboard"
+    onClose={[Function]}
+    open={false}
+  />
+</Fragment>
+`;

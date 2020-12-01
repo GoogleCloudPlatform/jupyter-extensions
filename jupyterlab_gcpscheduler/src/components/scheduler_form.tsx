@@ -28,8 +28,9 @@ import {
 } from 'gcp_jupyterlab_shared';
 import { getNextRunDate } from '../cron';
 import * as React from 'react';
-
-import { GcpService, RunNotebookRequest } from '../service/gcp';
+import { CloudBucketSelector } from './cloud_bucket';
+import { GcpService } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
 import { GcpSettings, OnDialogClose } from './dialog';
 import { ScheduleBuilder } from './schedule_builder/schedule_builder';
@@ -80,6 +81,7 @@ interface SchedulerFormValues {
   masterType?: string;
   imageUri: string;
   scheduleType: string;
+  gcsBucket: string;
   schedule?: string;
   acceleratorType?: string;
   acceleratorCount?: string;
@@ -137,10 +139,15 @@ export class InnerSchedulerForm extends React.Component<
     this._onAcceleratorTypeChange = this._onAcceleratorTypeChange.bind(this);
     this._onFormReset = this._onFormReset.bind(this);
     this.updateCronSchedule = this.updateCronSchedule.bind(this);
+    this.updateGcsBucket = this.updateGcsBucket.bind(this);
   }
 
   updateCronSchedule(newSchedule: string) {
     this.props.setFieldValue('schedule', newSchedule, false);
+  }
+
+  updateGcsBucket(gcsBucketName: string) {
+    this.props.setFieldValue('gcsBucket', gcsBucketName, false);
   }
 
   componentDidMount() {
@@ -174,16 +181,15 @@ export class InnerSchedulerForm extends React.Component<
     if (status && !!status.lastSubmitted) {
       return this.getSubmittedJobElement(status);
     }
-    const scheduleTypes = SCHEDULE_TYPES.filter(
-      t => !!this.props.gcpSettings.schedulerRegion || t.value === SINGLE
-    );
 
     return (
       <form>
         <SchedulerDescription />
         <p className={css.heading}>Notebook: {this.props.notebookName}</p>
         <TextInput
-          label="Run name"
+          label={
+            values.scheduleType === RECURRING ? 'Schedule name' : 'Run name'
+          }
           name="jobId"
           value={values.jobId}
           hasError={!!errors.jobId}
@@ -197,13 +203,21 @@ export class InnerSchedulerForm extends React.Component<
           options={REGIONS}
           onChange={handleChange}
         />
+        <CloudBucketSelector
+          gcsBucket={
+            values.gcsBucket ? values.gcsBucket.slice(5) : values.gcsBucket
+          }
+          onGcsBucketChange={this.updateGcsBucket}
+          gcpService={this.props.gcpService}
+        />
         <SelectInput
           label="Scale tier"
           name="scaleTier"
           value={values.scaleTier}
           options={SCALE_TIERS}
-          formHelperText="A scale tier is a predefined cluster specification."
+          formHelperText="A scale tier is a predefined set of machines allocated to your notebook run."
           formHelperLink={SCALE_TIER_LINK}
+          formHelperLinkText="Learn more about scale tiers"
           onChange={this._onScaleTierChanged}
         />
         {values.scaleTier === CUSTOM && (
@@ -250,7 +264,7 @@ export class InnerSchedulerForm extends React.Component<
           label="Type"
           name="scheduleType"
           value={values.scheduleType}
-          options={scheduleTypes}
+          options={SCHEDULE_TYPES}
           onChange={this._onScheduleTypeChange}
         />
 
@@ -281,6 +295,9 @@ export class InnerSchedulerForm extends React.Component<
             asError={status.asError}
             text={status.message}
           />
+        )}
+        {errors && errors.gcsBucket && (
+          <Message asActivity={false} asError={true} text={errors.gcsBucket} />
         )}
         {this.missingPermissions.length > 0 && (
           <Message
@@ -363,6 +380,10 @@ export class InnerSchedulerForm extends React.Component<
   private _onFormReset() {
     this.props.setStatus(undefined);
     this.props.setFieldValue('jobId', getJobId(this.props.notebookName));
+    this.props.setFieldValue(
+      'gcsBucket',
+      this.props.gcpSettings.gcsBucket || ''
+    );
   }
 
   private getSubmittedJobElement(status: Status) {
@@ -389,6 +410,9 @@ function updateSettingsFromRequest(
   }
   if (settings.get('scaleTier').composite !== request.scaleTier) {
     promises.push(settings.set('scaleTier', request.scaleTier));
+  }
+  if (settings.get('gcsBucket').composite !== request.gcsBucket) {
+    promises.push(settings.set('gcsBucket', request.gcsBucket));
   }
   if (settings.get('masterType').composite !== request.masterType) {
     promises.push(settings.set('masterType', request.masterType));
@@ -423,16 +447,13 @@ async function submit(
     acceleratorType,
     acceleratorCount,
   } = values;
-  const {
-    gcpService,
-    gcpSettings,
-    notebook,
-    notebookName,
-    settings,
-  } = formikBag.props;
+  const { gcpService, notebook, notebookName, settings } = formikBag.props;
   const { setStatus, setSubmitting } = formikBag;
 
-  const gcsFolder = `${gcpSettings.gcsBucket}/${jobId}`;
+  const gcsBucket = values.gcsBucket.includes('gs://')
+    ? values.gcsBucket
+    : 'gs://' + values.gcsBucket;
+  const gcsFolder = `${gcsBucket}/${jobId}`;
   const inputNotebookGcsPath = `${gcsFolder}/${notebookName}`;
   const outputNotebookGcsPath = `${gcsFolder}/${jobId}.ipynb`;
   const request: RunNotebookRequest = {
@@ -442,6 +463,7 @@ async function submit(
     masterType,
     outputNotebookGcsPath,
     scaleTier,
+    gcsBucket,
     region,
     acceleratorType,
     acceleratorCount,
@@ -469,11 +491,7 @@ async function submit(
     if (scheduleType === RECURRING && schedule) {
       status.message = 'Submitting Job to Cloud Scheduler';
       setStatus(status);
-      await gcpService.scheduleNotebook(
-        request,
-        gcpSettings.schedulerRegion,
-        schedule
-      );
+      await gcpService.scheduleNotebook(request, region, schedule);
       status.lastSubmitted = { request, schedule };
     } else {
       status.message = 'Submitting Job to AI Platform';
@@ -502,11 +520,12 @@ function mapPropsToValues(props: Props) {
     acceleratorCount: props.gcpSettings.acceleratorCount || '',
     scheduleType: SINGLE,
     schedule: '',
+    gcsBucket: props.gcpSettings.gcsBucket || '',
   };
 }
 
 function validate(values: SchedulerFormValues) {
-  const { jobId, scheduleType, schedule } = values;
+  const { jobId, scheduleType, schedule, gcsBucket } = values;
   const error: Error = {};
 
   if (!jobId) {
@@ -517,6 +536,10 @@ function validate(values: SchedulerFormValues) {
 
   if (scheduleType === RECURRING && !schedule) {
     error.schedule = 'Frequency is required';
+  }
+
+  if (!gcsBucket) {
+    error.gcsBucket = 'A cloud storage bucket is required to store results';
   }
 
   return error;

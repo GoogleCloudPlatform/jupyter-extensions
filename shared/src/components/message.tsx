@@ -17,9 +17,9 @@
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 
-import { css } from '../styles';
+import { css, COLORS } from '../styles';
 import { Progress } from './progress';
-import { RedError, BlueInfo } from './status_icons';
+import { RedError, BlueInfo } from './icons';
 
 interface Props {
   children?: React.ReactNode;
@@ -34,8 +34,8 @@ const localStyles = stylesheet({
     color: 'var(--md-red-700, #d32f2f)',
   },
   info: {
-    backgroundColor: 'var(--md-blue-50, #bbdefb)',
-    color: 'var(--md-blue-700, #1976d2)',
+    backgroundColor: COLORS.secondary,
+    color: COLORS.base,
   },
   message: {
     alignItems: 'center',

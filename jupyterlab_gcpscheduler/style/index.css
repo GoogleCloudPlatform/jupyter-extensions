@@ -17,9 +17,5 @@
 .jp-SchedulerIcon {
   background-image: url('./images/icon.png');
   background-size: contain;
-}
-
-.jp-ScheduledJobsIcon {
-  background-image: url('./images/list_icon.png');
-  background-size: contain;
+  opacity: 0.6;
 }

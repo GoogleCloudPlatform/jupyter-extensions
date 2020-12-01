@@ -19,7 +19,7 @@ import { shallow } from 'enzyme';
 import { Button } from '@material-ui/core';
 import { SubmittedJob } from './submitted_job';
 import { TEST_PROJECT } from '../test_helpers';
-import { RunNotebookRequest } from '../service/gcp';
+import { RunNotebookRequest } from '../interfaces';
 
 class MockDate extends Date {
   constructor() {
@@ -39,6 +39,7 @@ describe('SubmittedJob', () => {
     masterType: 'n1-standard-4',
     outputNotebookGcsPath: `${gcsBucket}/test_job/test_job.ipynb`,
     scaleTier: 'CUSTOM',
+    gcsBucket: 'gcsBucket',
     region: 'us-east1',
     acceleratorType: 'NVIDIA_TESLA_K80',
     acceleratorCount: '1',

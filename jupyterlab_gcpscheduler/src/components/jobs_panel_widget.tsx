@@ -16,15 +16,24 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IconButton, LinearProgress, withStyles } from '@material-ui/core';
-import { Refresh } from '@material-ui/icons';
 import { Signal } from '@phosphor/signaling';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, Message, Badge } from 'gcp_jupyterlab_shared';
+import {
+  BASE_FONT,
+  COLORS,
+  Message,
+  Badge,
+  RefreshIcon,
+} from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-
-import { GcpService, ListAiPlatformJobsResponse } from '../service/gcp';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { Runs, Schedules } from '../interfaces';
+import { GcpService } from '../service/gcp';
 import { JobListItem } from './job_list_item';
+import TablePagination from '@material-ui/core/TablePagination';
+const DEFAULT_PAGE_SIZE = 10;
 
 interface Props {
   isVisible: boolean;
@@ -32,10 +41,21 @@ interface Props {
 }
 
 interface State {
-  isLoading: boolean;
-  jobs: ListAiPlatformJobsResponse;
-  projectId?: string;
+  runsTab: {
+    isLoading: boolean;
+    response: Runs;
+    error?: string;
+  };
+  schedulesTab: {
+    isLoading: boolean;
+    response: Schedules;
+    error?: string;
+  };
   error?: string;
+  projectId?: string;
+  tab: number;
+  page: number;
+  rowsPerPage: number;
 }
 
 const localStyles = stylesheet({
@@ -44,12 +64,10 @@ const localStyles = stylesheet({
     ...csstips.horizontal,
   },
   header: {
-    fontWeight: 600,
-    fontSize: 'var(--jp-ui-font-size0, 11px)',
-    letterSpacing: '1px',
+    fontWeight: 500,
+    fontSize: 'var(--jp-ui-font-size2, 11px)',
     margin: 0,
     padding: '8px 12px',
-    textTransform: 'uppercase',
     ...csstips.flex,
   },
   panel: {
@@ -65,29 +83,63 @@ const localStyles = stylesheet({
     padding: 0,
     ...csstips.flex,
   },
+  tab: {
+    overflowY: 'scroll',
+  },
+  pagination: {
+    fontSize: '12px',
+    borderTop: '2px solid #eeeeee',
+  },
 });
 
-const TITLE_TEXT = 'AI Platform Notebook Jobs';
-const SlimIconButton = withStyles({
+const StyledTab = withStyles({
   root: {
-    borderRadius: 0,
-    padding: '4px',
+    textTransform: 'none',
   },
-})(IconButton);
-const RefreshIcon = withStyles({
-  root: {
-    fontSize: '16px',
-  },
-})(Refresh);
+})(Tab);
 
-/** Panel component for displaying AI Platform jobs */
+const StyledTablePagination = withStyles({
+  root: {
+    fontSize: '12px',
+  },
+  input: {
+    fontSize: '12px !important',
+  },
+  caption: {
+    fontSize: '12px',
+  },
+  selectRoot: {
+    marginRight: '8px',
+  },
+  actions: {
+    marginLeft: '0px',
+  },
+})(TablePagination);
+
+const TITLE_TEXT = 'Notebook Scheduler';
+
+/** Panel component for displaying AI Platform runs */
 export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      isLoading: false,
-      jobs: { jobs: [] },
+      runsTab: {
+        isLoading: false,
+        response: { runs: [], pageToken: '' },
+      },
+      schedulesTab: {
+        isLoading: false,
+        response: { schedules: [], pageToken: '' },
+      },
+      tab: 0,
+      page: 0,
+      rowsPerPage: DEFAULT_PAGE_SIZE,
     };
+    this.handleChangeTab = this.handleChangeTab.bind(this);
+    this.handleChangePage = this.handleChangePage.bind(this);
+    this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+    this.handleRefresh = this.handleRefresh.bind(this);
+    this.labelDisplayRowsMesssage = this.labelDisplayRowsMesssage.bind(this);
   }
 
   async componentDidMount() {
@@ -102,27 +154,62 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (
       this.props.isVisible &&
-      !(prevProps.isVisible || this.state.isLoading)
+      !(
+        prevProps.isVisible ||
+        (this.state.tab === 0 && this.state.runsTab.isLoading) ||
+        (this.state.tab === 1 && this.state.schedulesTab.isLoading)
+      )
     ) {
-      this._getJobs();
+      this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage);
+      this.setState({ page: 0 });
     }
   }
 
+  handleChangeTab(event: React.ChangeEvent<{}>, newValue: number) {
+    this._getRunsOrSchedules(newValue, this.state.rowsPerPage);
+    this.setState({ tab: newValue, page: 0 });
+  }
+
+  handleChangePage(
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) {
+    this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage, true);
+    this.setState({ page: newPage });
+  }
+
+  handleChangeRowsPerPage(
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const newRowsPerPage = parseInt(event.target.value, DEFAULT_PAGE_SIZE);
+    this._getRunsOrSchedules(this.state.tab, newRowsPerPage);
+    this.setState({ rowsPerPage: newRowsPerPage, page: 0 });
+  }
+
+  handleRefresh() {
+    this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage);
+  }
+
+  labelDisplayRowsMesssage({ from, to, count }) {
+    return `${from}-${to} of ${count !== -1 ? String(count) : 'many'}`;
+  }
+
   render() {
-    const { error, jobs, isLoading, projectId } = this.state;
+    const { error, runsTab, schedulesTab, projectId } = this.state;
     const gcpService = this.props.gcpService;
-    let content: JSX.Element;
-    if (isLoading) {
-      content = <LinearProgress />;
-    } else if (error) {
-      content = <Message text={error} asError={true} />;
+    let runsContent: JSX.Element;
+    let schedulesContent: JSX.Element;
+    if (runsTab.isLoading) {
+      runsContent = <LinearProgress />;
+    } else if (runsTab.error || error) {
+      runsContent = <Message text={runsTab.error || error} asError={true} />;
     } else {
-      content = (
+      runsContent = (
         <ul className={localStyles.list}>
-          {jobs.jobs.map(j => (
+          {runsTab.response.runs.map(j => (
             <JobListItem
               gcpService={gcpService}
-              key={j.jobId}
+              key={j.id}
               job={j}
               projectId={projectId}
             />
@@ -130,31 +217,167 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         </ul>
       );
     }
-
+    if (schedulesTab.isLoading) {
+      schedulesContent = <LinearProgress />;
+    } else if (schedulesTab.error || error) {
+      schedulesContent = (
+        <Message text={schedulesTab.error || error} asError={true} />
+      );
+    } else {
+      schedulesContent = (
+        <ul className={localStyles.list}>
+          {schedulesTab.response.schedules.map(j => (
+            <JobListItem
+              gcpService={gcpService}
+              key={j.id}
+              job={j}
+              projectId={projectId}
+            />
+          ))}
+        </ul>
+      );
+    }
     return (
       <div className={localStyles.panel}>
         <div className={localStyles.headerContainer}>
           <header className={localStyles.header}>
             {TITLE_TEXT} <Badge value="alpha" />
           </header>
-          <SlimIconButton title="Refresh Jobs" onClick={() => this._getJobs()}>
+          <IconButton title="Refresh Jobs" onClick={this.handleRefresh}>
             <RefreshIcon />
-          </SlimIconButton>
+          </IconButton>
         </div>
-        {content}
+        <Tabs
+          value={this.state.tab}
+          indicatorColor="primary"
+          variant="fullWidth"
+          onChange={this.handleChangeTab}
+        >
+          <StyledTab label="Runs" />
+          <StyledTab label="Schedules" />
+        </Tabs>
+        <div
+          className={localStyles.tab}
+          role="tabpanel"
+          hidden={this.state.tab !== 0}
+        >
+          {runsContent}
+        </div>
+        <div
+          className={localStyles.tab}
+          role="tabpanel"
+          hidden={this.state.tab !== 1}
+        >
+          {schedulesContent}
+        </div>
+        {this.shouldShowFooter() && (
+          <footer className={localStyles.pagination}>
+            <StyledTablePagination
+              count={-1}
+              page={this.state.page}
+              onChangePage={this.handleChangePage}
+              rowsPerPage={this.state.rowsPerPage}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              labelDisplayedRows={this.labelDisplayRowsMesssage}
+              labelRowsPerPage="Items per page:"
+              SelectProps={{ variant: 'outlined' }}
+            />
+          </footer>
+        )}
       </div>
     );
   }
 
-  private async _getJobs() {
+  private shouldShowFooter() {
+    if (
+      this.state.tab === 0 &&
+      (this.state.runsTab.error || this.state.error)
+    ) {
+      return false;
+    }
+    if (
+      this.state.tab === 1 &&
+      (this.state.schedulesTab.error || this.state.error)
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  private _getRunsOrSchedules(
+    tab: number,
+    pageSize: number,
+    getPageToken = false
+  ) {
+    let pageToken = undefined;
+    if (getPageToken) {
+      pageToken =
+        this.state.tab === 0
+          ? this.state.runsTab.response.pageToken
+          : this.state.schedulesTab.response.pageToken;
+    }
+    if (tab === 0) {
+      this._getRuns(pageSize, pageToken);
+    } else {
+      this._getSchedules(pageSize, pageToken);
+    }
+  }
+
+  private async _getSchedules(pageSize: number, pageToken?: string) {
+    const emptyResponse = { schedules: [], pageToken: undefined };
     try {
-      this.setState({ isLoading: true, error: undefined });
-      const jobs = await this.props.gcpService.listNotebookJobs();
-      this.setState({ isLoading: false, jobs });
+      this.setState({
+        schedulesTab: {
+          isLoading: true,
+          error: undefined,
+          response: emptyResponse,
+        },
+      });
+      const schedules = await this.props.gcpService.listSchedules(
+        pageSize,
+        pageToken
+      );
+      this.setState({
+        schedulesTab: {
+          isLoading: false,
+          response: schedules,
+        },
+      });
     } catch (err) {
       this.setState({
-        isLoading: false,
-        error: `${err}: Unable to retrieve Jobs`,
+        schedulesTab: {
+          isLoading: false,
+          error: `${err}: Unable to retrieve schedules`,
+          response: emptyResponse,
+        },
+      });
+    }
+  }
+
+  private async _getRuns(pageSize: number, pageToken?: string) {
+    const emptyResponse = { runs: [], pageToken: undefined };
+    try {
+      this.setState({
+        runsTab: {
+          isLoading: true,
+          error: undefined,
+          response: emptyResponse,
+        },
+      });
+      const runs = await this.props.gcpService.listRuns(pageSize, pageToken);
+      this.setState({
+        runsTab: {
+          isLoading: false,
+          response: runs,
+        },
+      });
+    } catch (err) {
+      this.setState({
+        runsTab: {
+          isLoading: false,
+          error: `${err}: Unable to retrieve runs`,
+          response: emptyResponse,
+        },
       });
     }
   }
@@ -162,12 +385,12 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
 
 /** Widget to be registered in the left-side panel. */
 export class GcpScheduledJobsWidget extends ReactWidget {
-  id = 'gcpscheduledjobs';
+  id = 'gcpscheduledruns';
   private visibleSignal = new Signal<GcpScheduledJobsWidget, boolean>(this);
 
   constructor(private readonly gcpService: GcpService) {
     super();
-    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-ScheduledJobsIcon';
+    this.title.iconClass = 'jp-Icon jp-Icon-20 jp-SchedulerIcon';
     this.title.caption = TITLE_TEXT;
   }
 

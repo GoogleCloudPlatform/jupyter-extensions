@@ -40,7 +40,6 @@ describe('SchedulerDialog', () => {
     toExecute: [],
     toSchedule: [],
   });
-  const mockGetProjectState = jest.fn();
   const mockSetProjectId = jest.fn();
   const mockSetTransportService = jest.fn();
   const mockSettingsChangedConnect = jest.fn();
@@ -50,7 +49,6 @@ describe('SchedulerDialog', () => {
     set projectId(projectId: string) {
       mockSetProjectId(projectId);
     },
-    getProjectState: mockGetProjectState,
     getPermissions: mockGetPermissions,
   } as unknown) as ProjectStateService;
   const mockGcpService = {
@@ -169,25 +167,6 @@ describe('SchedulerDialog', () => {
     expect(settings.changed.connect).toHaveBeenCalled();
     expect(mockSetProjectId).toHaveBeenCalledWith(TEST_PROJECT);
     expect(dialog).toMatchSnapshot('SchedulerForm');
-  });
-
-  it('Renders with Initializer', async () => {
-    const settings = getSettings({
-      projectId: TEST_PROJECT,
-    });
-    launchSchedulerRequest.notebookName = 'Foo.ipynb';
-    launchSchedulerRequest.notebook = fakeNotebook.model;
-
-    const dialog = shallow(
-      <SchedulerDialog
-        projectStateService={mockProjectStateService}
-        gcpService={mockGcpService}
-        request={launchSchedulerRequest}
-        settings={settings}
-      />
-    );
-    expect(mockSetProjectId).toHaveBeenCalledWith(TEST_PROJECT);
-    expect(dialog).toMatchSnapshot('Initializer');
   });
 
   it('Closes dialog when clicked', async () => {
