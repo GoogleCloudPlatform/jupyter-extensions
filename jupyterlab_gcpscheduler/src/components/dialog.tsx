@@ -256,14 +256,10 @@ export class SchedulerDialog extends React.Component<Props, State> {
       console.info(`Using ${settings.projectId} for GCP API calls`);
       this.props.projectStateService.projectId = settings.projectId;
     } else {
-      let projectId = undefined;
-      try {
-        projectId = await this.props.gcpService.projectId;
-      } catch (err) {
-        console.info(`${err} occurred when trying to get projectId`);
-      }
+      const projectId = await this.props.gcpService.projectId;
       this.props.projectStateService.projectId = projectId;
       settings.projectId = projectId;
+      newSettings.set('projectId', projectId);
     }
     if (settings.oAuthClientId) {
       console.info('Using end-user authentication for GCP API calls');
