@@ -335,7 +335,6 @@ E=m
           "toSchedule": Array [],
         }
       }
-      projectId="test-project"
       settings={
         Object {
           "changed": Object {

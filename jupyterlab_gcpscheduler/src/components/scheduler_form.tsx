@@ -72,7 +72,6 @@ interface Props {
   permissions: GetPermissionsResponse;
   onDialogClose: OnDialogClose;
   settings: ISettingRegistry.ISettings;
-  projectId: string;
 }
 
 interface SchedulerFormValues {
@@ -388,11 +387,11 @@ export class InnerSchedulerForm extends React.Component<
   }
 
   private getSubmittedJobElement(status: Status) {
-    const { projectId, onDialogClose } = this.props;
+    const { gcpSettings, onDialogClose } = this.props;
     return (
       <SubmittedJob
         request={status.lastSubmitted!.request}
-        projectId={projectId}
+        projectId={gcpSettings.projectId}
         schedule={status.lastSubmitted!.schedule}
         onDialogClose={onDialogClose}
         onFormReset={this._onFormReset}
