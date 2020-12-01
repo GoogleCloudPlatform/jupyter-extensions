@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CloudBucketSelector Renders 1`] = `
+<WithStyles(WithStyles(ForwardRef(Autocomplete)))
+  clearOnBlur={true}
+  filterOptions={[Function]}
+  freeSolo={true}
+  getOptionLabel={[Function]}
+  handleHomeEndKeys={true}
+  id="cloud-bucket-with-create-option"
+  loading={false}
+  noOptionsText="Not selected"
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket1",
+      },
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket2",
+      },
+    ]
+  }
+  renderInput={[Function]}
+  renderOption={[Function]}
+  selectOnFocus={true}
+  size="small"
+  value={null}
+/>
+`;
+
+exports[`CloudBucketSelector Renders and tries to create existing fine grain 1`] = `
+<WithStyles(WithStyles(ForwardRef(Autocomplete)))
+  clearOnBlur={true}
+  filterOptions={[Function]}
+  freeSolo={true}
+  getOptionLabel={[Function]}
+  handleHomeEndKeys={true}
+  id="cloud-bucket-with-create-option"
+  loading={false}
+  noOptionsText="Not selected"
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket1",
+      },
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket2",
+      },
+    ]
+  }
+  renderInput={[Function]}
+  renderOption={[Function]}
+  selectOnFocus={true}
+  size="small"
+  value={null}
+/>
+`;
+
+exports[`CloudBucketSelector Renders loading 1`] = `
+<WithStyles(WithStyles(ForwardRef(Autocomplete)))
+  clearOnBlur={true}
+  filterOptions={[Function]}
+  freeSolo={true}
+  getOptionLabel={[Function]}
+  handleHomeEndKeys={true}
+  id="cloud-bucket-with-create-option"
+  loading={true}
+  noOptionsText="Not selected"
+  onChange={[Function]}
+  options={Array []}
+  renderInput={[Function]}
+  renderOption={[Function]}
+  selectOnFocus={true}
+  size="small"
+  value={null}
+/>
+`;
+
+exports[`CloudBucketSelector Renders with preselected value 1`] = `
+<WithStyles(WithStyles(ForwardRef(Autocomplete)))
+  clearOnBlur={true}
+  filterOptions={[Function]}
+  freeSolo={true}
+  getOptionLabel={[Function]}
+  handleHomeEndKeys={true}
+  id="cloud-bucket-with-create-option"
+  loading={false}
+  noOptionsText="Not selected"
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket1",
+      },
+      Object {
+        "accessLevel": "uniform",
+        "name": "bucket2",
+      },
+    ]
+  }
+  renderInput={[Function]}
+  renderOption={[Function]}
+  selectOnFocus={true}
+  size="small"
+  value={
+    Object {
+      "accessLevel": "uniform",
+      "name": "bucket2",
+    }
+  }
+/>
+`;

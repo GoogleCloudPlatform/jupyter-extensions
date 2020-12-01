@@ -20,11 +20,11 @@ const NO_BUCKET_SELECTION = 'Not selected';
 
 interface Props {
   gcpService: GcpService;
-  gcsBucket: string;
+  gcsBucket?: string;
   onGcsBucketChange: (newBucketName: string) => void;
 }
 
-interface BucketOption extends Bucket {
+export interface BucketOption extends Bucket {
   inputValue?: string;
 }
 
@@ -130,6 +130,7 @@ export class CloudBucketSelector extends React.Component<Props, State> {
           <React.Fragment>
             <TextField
               {...params}
+              name="gcsBucket"
               variant="outlined"
               margin="dense"
               placeholder={NO_BUCKET_SELECTION}
@@ -173,22 +174,24 @@ export class CloudBucketSelector extends React.Component<Props, State> {
       const validBucketOptions = buckets.buckets.filter(
         bucket => bucket.accessLevel === 'uniform'
       );
+      const value =
+        validBucketOptions.find(bucket => selectedBucketName === bucket.name) ||
+        null;
       this.setState({
         isLoading: false,
         validBucketOptions,
         invalidBucketOptions: buckets.buckets.filter(
           bucket => bucket.accessLevel !== 'uniform'
         ),
-        value:
-          validBucketOptions.find(
-            bucket => selectedBucketName === bucket.name
-          ) || null,
+        value,
       });
+      this.props.onGcsBucketChange(value ? value.name : null);
     } catch (err) {
       this.setState({
         isLoading: false,
         error: `Unable to retrieve Buckets: ${err}`,
       });
+      this.props.onGcsBucketChange(null);
     }
   }
 
@@ -199,6 +202,7 @@ export class CloudBucketSelector extends React.Component<Props, State> {
       );
       if (!fineGrain) {
         await this.props.gcpService.createUniformAccessBucket(bucketName);
+        this.props.onGcsBucketChange(bucketName);
         this._getBuckets(bucketName);
         this.setState({ openSnackbar: true });
         return;
@@ -208,8 +212,10 @@ export class CloudBucketSelector extends React.Component<Props, State> {
         error:
           'A bucket with incompatible access controls already exists with that name',
       });
+      this.props.onGcsBucketChange(null);
     } catch (err) {
       this.setState({ value: null, error: `${err}` });
+      this.props.onGcsBucketChange(null);
     }
   }
 
@@ -223,25 +229,23 @@ export class CloudBucketSelector extends React.Component<Props, State> {
       this.props.onGcsBucketChange(null);
       return;
     } else if (typeof newValue === 'string') {
-      const bucketOptionFromNewValue = this.state.validBucketOptions.find(
+      const existingBucket = this.state.validBucketOptions.find(
         bucket => bucket.name === newValue
       );
-      if (bucketOptionFromNewValue) {
-        this.setState({
-          value: bucketOptionFromNewValue,
-        });
-      } else {
+      if (!existingBucket) {
         this.createAndSelectBucket(newValue);
+      } else {
+        this.setState({ value: existingBucket });
+        this.props.onGcsBucketChange(newValue);
       }
-      this.props.onGcsBucketChange(newValue);
     } else {
       const newBucketName = newValue.inputValue;
       if (newBucketName) {
         this.createAndSelectBucket(newBucketName);
       } else {
         this.setState({ value: newValue });
+        this.props.onGcsBucketChange(newValue.name);
       }
-      this.props.onGcsBucketChange(newBucketName || newValue.name);
     }
   }
 }

@@ -33,7 +33,7 @@ import {
 import { GcpService } from '../service/gcp';
 import { RunNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
-import { SchedulerForm } from './scheduler_form';
+import { SchedulerForm, InnerSchedulerForm } from './scheduler_form';
 import { SubmittedJob } from './submitted_job';
 
 import {
@@ -269,6 +269,18 @@ describe('SchedulerForm', () => {
     schedulerForm.find('SubmitButton button').simulate('click');
     await immediatePromise();
     expect(schedulerForm.html()).toContain('Run name is required');
+  });
+
+  it('Should show error message if bucket is empty', async () => {
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+    (schedulerForm
+      .find('InnerSchedulerForm')
+      .instance() as InnerSchedulerForm).updateGcsBucket(null);
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    expect(schedulerForm.html()).toContain(
+      'A cloud storage bucket is required to store results'
+    );
   });
 
   it('Should prepopulate imageUri if it match options in form', async () => {
