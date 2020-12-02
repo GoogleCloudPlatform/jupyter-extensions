@@ -28,13 +28,13 @@ import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
 
 interface SubFormState {
   specifiedTime: string;
-  mondayRun: boolean;
-  tuesdayRun: boolean;
-  wednesdayRun: boolean;
-  thursdayRun: boolean;
-  fridayRun: boolean;
-  saturdayRun: boolean;
-  sundayRun: boolean;
+  mondayExecution: boolean;
+  tuesdayExecution: boolean;
+  wednesdayExecution: boolean;
+  thursdayExecution: boolean;
+  fridayExecution: boolean;
+  saturdayExecution: boolean;
+  sundayExecution: boolean;
 }
 
 export class WeekScheduleBuilder extends React.Component<
@@ -45,13 +45,13 @@ export class WeekScheduleBuilder extends React.Component<
     super(props);
     this.state = {
       specifiedTime: '09:00',
-      mondayRun: false,
-      tuesdayRun: false,
-      wednesdayRun: false,
-      thursdayRun: false,
-      fridayRun: false,
-      saturdayRun: false,
-      sundayRun: false,
+      mondayExecution: false,
+      tuesdayExecution: false,
+      wednesdayExecution: false,
+      thursdayExecution: false,
+      fridayExecution: false,
+      saturdayExecution: false,
+      sundayExecution: false,
     };
     this._listOfDays = this._listOfDays.bind(this);
     this._createCronString = this._createCronString.bind(this);
@@ -69,13 +69,13 @@ export class WeekScheduleBuilder extends React.Component<
     if (prevProps.frequencyType === this.props.frequencyType) {
       if (
         prevState.specifiedTime !== this.state.specifiedTime ||
-        prevState.mondayRun !== this.state.mondayRun ||
-        prevState.tuesdayRun !== this.state.tuesdayRun ||
-        prevState.wednesdayRun !== this.state.wednesdayRun ||
-        prevState.thursdayRun !== this.state.thursdayRun ||
-        prevState.fridayRun !== this.state.fridayRun ||
-        prevState.sundayRun !== this.state.sundayRun ||
-        prevState.saturdayRun !== this.state.saturdayRun
+        prevState.mondayExecution !== this.state.mondayExecution ||
+        prevState.tuesdayExecution !== this.state.tuesdayExecution ||
+        prevState.wednesdayExecution !== this.state.wednesdayExecution ||
+        prevState.thursdayExecution !== this.state.thursdayExecution ||
+        prevState.fridayExecution !== this.state.fridayExecution ||
+        prevState.sundayExecution !== this.state.sundayExecution ||
+        prevState.saturdayExecution !== this.state.saturdayExecution
       ) {
         this.props.onScheduleChange(this._createCronString());
       }
@@ -84,13 +84,13 @@ export class WeekScheduleBuilder extends React.Component<
 
   _listOfDays() {
     return [
-      this.state.sundayRun,
-      this.state.mondayRun,
-      this.state.tuesdayRun,
-      this.state.wednesdayRun,
-      this.state.thursdayRun,
-      this.state.fridayRun,
-      this.state.saturdayRun,
+      this.state.sundayExecution,
+      this.state.mondayExecution,
+      this.state.tuesdayExecution,
+      this.state.wednesdayExecution,
+      this.state.thursdayExecution,
+      this.state.fridayExecution,
+      this.state.saturdayExecution,
     ];
   }
 

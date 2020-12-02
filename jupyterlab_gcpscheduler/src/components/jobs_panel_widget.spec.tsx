@@ -23,7 +23,7 @@ import {
   GcpScheduledJobsPanel,
 } from './jobs_panel_widget';
 import { GcpService } from '../service/gcp';
-import { TEST_PROJECT, getRun, getSchedule } from '../test_helpers';
+import { TEST_PROJECT, getExecution, getSchedule } from '../test_helpers';
 
 describe('GcpScheduledJobsWidget', () => {
   const fakeGcpService = {} as GcpService;
@@ -49,13 +49,13 @@ describe('GcpScheduledJobsWidget', () => {
 
 describe('GcpScheduledJobsPanel', () => {
   const mockProjectId = jest.fn();
-  const mockListRuns = jest.fn();
+  const mockListExecutions = jest.fn();
   const mockListSchedules = jest.fn();
   const mockGcpService = ({
     get projectId() {
       return mockProjectId();
     },
-    listRuns: mockListRuns,
+    listExecutions: mockListExecutions,
     listSchedules: mockListSchedules,
   } as unknown) as GcpService;
 
@@ -68,7 +68,7 @@ describe('GcpScheduledJobsPanel', () => {
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     expect(component).toMatchSnapshot();
-    expect(mockListRuns).not.toHaveBeenCalled();
+    expect(mockListExecutions).not.toHaveBeenCalled();
     expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
@@ -81,20 +81,20 @@ describe('GcpScheduledJobsPanel', () => {
     await rejectedProjectId.catch(() => null);
 
     expect(component).toMatchSnapshot();
-    expect(mockListRuns).not.toHaveBeenCalled();
+    expect(mockListExecutions).not.toHaveBeenCalled();
     expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
-  it('Shows error if runs cannot be retrieved', async () => {
-    const rejectedPromise = Promise.reject('Cannot retrieve runs');
+  it('Shows error if executions cannot be retrieved', async () => {
+    const rejectedPromise = Promise.reject('Cannot retrieve executions');
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(rejectedPromise);
+    mockListExecutions.mockReturnValue(rejectedPromise);
     mockListSchedules.mockResolvedValue(resolvedSchedules);
 
     const component = shallow(
@@ -103,47 +103,53 @@ describe('GcpScheduledJobsPanel', () => {
     component.setProps({ isVisible: true });
     await rejectedPromise.catch(() => null);
     await expect(component).toMatchSnapshot();
-    expect(mockListRuns).toHaveBeenCalled();
+    expect(mockListExecutions).toHaveBeenCalled();
     expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
   it('Shows error if schedules cannot be retrieved', async () => {
     const rejectedPromise = Promise.reject('Cannot retrieve schedules');
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockResolvedValue(resolvedRuns);
+    mockListExecutions.mockResolvedValue(resolvedExecutions);
     mockListSchedules.mockReturnValue(rejectedPromise);
 
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
 
     (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await rejectedPromise.catch(() => null);
 
     await expect(component).toMatchSnapshot();
     expect(component.state('tab')).toEqual(1);
-    expect(mockListRuns).toHaveBeenCalled();
+    expect(mockListExecutions).toHaveBeenCalled();
     expect(mockListSchedules).toHaveBeenCalled();
   });
 
   it('Shows loading indicator', async () => {
     const resolvedProject = Promise.resolve(TEST_PROJECT);
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
     });
     mockProjectId.mockReturnValue(resolvedProject);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     mockListSchedules.mockReturnValue(resolvedSchedules);
 
     const component = shallow(
@@ -152,129 +158,150 @@ describe('GcpScheduledJobsPanel', () => {
     component.setProps({ isVisible: true });
 
     expect(component).toMatchSnapshot();
-    expect(mockListRuns).toHaveBeenCalled();
+    expect(mockListExecutions).toHaveBeenCalled();
     expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
-  it('Shows runs', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+  it('Shows executions', async () => {
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     mockListSchedules.mockReturnValue(resolvedSchedules);
 
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
     // await resolvedSchedules;
 
     expect(component).toMatchSnapshot();
-    expect(mockListRuns).toHaveBeenCalled();
+    expect(mockListExecutions).toHaveBeenCalled();
     expect(mockListSchedules).not.toHaveBeenCalled();
   });
 
   it('Shows schedules', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     mockListSchedules.mockReturnValue(resolvedSchedules);
 
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
 
     (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await resolvedSchedules;
 
     expect(component).toMatchSnapshot();
     expect(component.state('tab')).toEqual(1);
-    expect(mockListRuns).toHaveBeenCalled();
+    expect(mockListExecutions).toHaveBeenCalled();
     expect(mockListSchedules).toHaveBeenCalled();
   });
 
-  it('Refreshes runs', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+  it('Refreshes executions', async () => {
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
 
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
 
-    component.find({ title: 'Refresh Jobs' }).simulate('click');
-    expect(mockListRuns).toHaveBeenCalledTimes(2);
+    component.find({ title: 'Refresh' }).simulate('click');
+    expect(mockListExecutions).toHaveBeenCalledTimes(2);
   });
 
-  it('Runs pagination works', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+  it('Executions pagination works', async () => {
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
       pageToken: 'abc',
     });
-    const nextPageResolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const nextPageResolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
       pageToken: 'def',
     });
-    const lastPageResolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const lastPageResolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
       pageToken: 'ghi',
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns
-      .mockReturnValueOnce(resolvedRuns)
-      .mockReturnValueOnce(nextPageResolvedRuns)
-      .mockReturnValueOnce(lastPageResolvedRuns);
+    mockListExecutions
+      .mockReturnValueOnce(resolvedExecutions)
+      .mockReturnValueOnce(nextPageResolvedExecutions)
+      .mockReturnValueOnce(lastPageResolvedExecutions);
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
     expect(component.state('page')).toEqual(0);
     (component.instance() as GcpScheduledJobsPanel).handleChangePage(null, 1);
     expect(component.state('page')).toEqual(1);
-    await nextPageResolvedRuns;
-    expect(mockListRuns).toHaveBeenCalledWith(10, 'abc');
+    await nextPageResolvedExecutions;
+    expect(mockListExecutions).toHaveBeenCalledWith(10, 'abc');
     (component.instance() as GcpScheduledJobsPanel).handleChangePage(null, 2);
     expect(component.state('page')).toEqual(2);
-    await lastPageResolvedRuns;
-    expect(mockListRuns).toHaveBeenCalledWith(10, 'def');
-    expect(mockListRuns).toHaveBeenCalledTimes(3);
+    await lastPageResolvedExecutions;
+    expect(mockListExecutions).toHaveBeenCalledWith(10, 'def');
+    expect(mockListExecutions).toHaveBeenCalledTimes(3);
   });
 
-  it('Runs page size change', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+  it('Executions page size change', async () => {
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
       pageToken: 'abc',
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
     expect(component.state('rowsPerPage')).toEqual(10);
     (component.instance() as GcpScheduledJobsPanel).handleChangeRowsPerPage({
       target: {
@@ -282,36 +309,39 @@ describe('GcpScheduledJobsPanel', () => {
       },
     } as React.ChangeEvent<HTMLInputElement>);
     expect(component.state('rowsPerPage')).toEqual(100);
-    expect(mockListRuns).toHaveBeenCalledTimes(2);
+    expect(mockListExecutions).toHaveBeenCalledTimes(2);
   });
 
   it('Schedules pagination works', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
       pageToken: 'abc',
     });
     const nextPageResolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
       pageToken: 'def',
     });
     const lastPageResolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
       pageToken: 'ghi',
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     mockListSchedules
       .mockReturnValueOnce(resolvedSchedules)
       .mockReturnValueOnce(nextPageResolvedSchedules)
@@ -320,7 +350,7 @@ describe('GcpScheduledJobsPanel', () => {
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
 
     (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await resolvedSchedules;
@@ -339,24 +369,27 @@ describe('GcpScheduledJobsPanel', () => {
   });
 
   it('Schedules page size change', async () => {
-    const resolvedRuns = Promise.resolve({
-      runs: [getRun(), { ...getRun(), id: 'notebook_run2_fghijk' }],
+    const resolvedExecutions = Promise.resolve({
+      executions: [
+        getExecution(),
+        { ...getExecution(), id: 'notebook_execution2_fghijk' },
+      ],
     });
     const resolvedSchedules = Promise.resolve({
       schedules: [
         getSchedule(),
-        { ...getSchedule(), id: 'notebook_run2_fghijk' },
+        { ...getSchedule(), id: 'notebook_execution2_fghijk' },
       ],
       pageToken: 'abc',
     });
     mockProjectId.mockResolvedValue(TEST_PROJECT);
-    mockListRuns.mockReturnValue(resolvedRuns);
+    mockListExecutions.mockReturnValue(resolvedExecutions);
     mockListSchedules.mockReturnValue(resolvedSchedules);
     const component = shallow(
       <GcpScheduledJobsPanel gcpService={mockGcpService} isVisible={false} />
     );
     component.setProps({ isVisible: true });
-    await resolvedRuns;
+    await resolvedExecutions;
 
     (component.instance() as GcpScheduledJobsPanel).handleChangeTab(null, 1);
     await resolvedSchedules;

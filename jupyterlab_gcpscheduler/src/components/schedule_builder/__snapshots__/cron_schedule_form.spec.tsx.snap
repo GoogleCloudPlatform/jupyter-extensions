@@ -23,7 +23,7 @@ exports[`CronScheduleBuilder Renders without error 1`] = `
       }
     }
   >
-    Schedule is specified using unix-cron format. You can define a schedule so that your job runs multiple times a day, or runs on specific days and months.
+    Schedule is specified using unix-cron format. You can define a schedule so that your execution runs multiple times a day, or runs on specific days and months.
     <LearnMoreLink
       href="https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules"
     />

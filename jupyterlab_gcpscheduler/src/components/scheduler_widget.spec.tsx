@@ -33,6 +33,7 @@ describe('GcpSchedulerWidget', () => {
       disconnect: jest.fn(),
     },
     composite: {},
+    set: jest.fn(),
   } as unknown) as ISettingRegistry.ISettings;
 
   it('Updates model value when context is set', async () => {

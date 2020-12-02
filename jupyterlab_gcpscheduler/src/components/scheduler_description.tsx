@@ -26,8 +26,8 @@ const CLOUD_STORAGE_PRICES_LINK = 'https://cloud.google.com/storage/pricing';
 export function SchedulerDescription() {
   return (
     <p className={css.noTopMargin}>
-      Run this notebook immediately or make it a scheduled job. Results will be
-      stored in a Cloud Storage bucket and can be shared with others. Charges
+      Execute this notebook once or make it a recurring schedule. Results will
+      be stored in a Cloud Storage bucket and can be shared with others. Charges
       apply for{' '}
       <LearnMoreLink
         href={RUNNING_NOTEBOOK_PRICES_LINK}

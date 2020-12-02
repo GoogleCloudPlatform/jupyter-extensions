@@ -52,20 +52,24 @@ export interface LaunchSchedulerRequest {
   notebook: INotebookModel;
 }
 
-export interface JobSubmittedMessage {
+export interface SubmittedMessage {
   message: string;
   link: string;
 }
 
 /** Definition for a function that closes the SchedulerDialog. */
 export type OnDialogClose = () => void;
+/** Definition for a function that changes the schedule type. */
+export type OnScheduleTypeChange = (creatingExecution: boolean) => void;
+/** Definition for a function that changes the displayed element. */
+export type OnShowFormChange = (showCreateForm: boolean) => void;
 
 /** Extension settings. */
 export interface GcpSettings {
   projectId: string;
   gcsBucket: string;
   schedulerRegion: string;
-  jobRegion?: string;
+  region?: string;
   scaleTier?: string;
   masterType?: string;
   acceleratorType?: string;
@@ -85,7 +89,9 @@ interface State {
   dialogClosedByUser: boolean;
   gcpSettings?: GcpSettings;
   permissions?: GetPermissionsResponse;
-  jobSubmittedMessage?: JobSubmittedMessage;
+  submittedMessage?: SubmittedMessage;
+  creatingExecution: boolean;
+  showCreateForm: boolean;
 }
 
 const localStyles = stylesheet({
@@ -125,9 +131,13 @@ export class SchedulerDialog extends React.Component<Props, State> {
 
     this.state = {
       dialogClosedByUser: false,
+      creatingExecution: true,
+      showCreateForm: true,
     };
     this._settingsChanged = this._settingsChanged.bind(this);
     this._onDialogClose = this._onDialogClose.bind(this);
+    this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
+    this._onShowFormChange = this._onShowFormChange.bind(this);
   }
 
   /** Establishes the binding for Settings Signal and invokes the handler. */
@@ -163,30 +173,34 @@ export class SchedulerDialog extends React.Component<Props, State> {
     const projectId = this.getProjectId();
     return (
       <Dialog open={this._isOpen()} scroll="body">
-        <header className={localStyles.header}>
-          <span className={localStyles.title}>
-            Create a notebook job <Badge value="alpha" />
-          </span>
-          <IconButtonMenu
-            menuItems={menuCloseHandler => [
-              <SmallMenuItem key="viewAllJobs">
-                <a
-                  href={`${SCHEDULER_LINK}?project=${projectId}`}
-                  target="_blank"
-                  onClick={menuCloseHandler}
+        {this.state.showCreateForm && (
+          <header className={localStyles.header}>
+            <span className={localStyles.title}>
+              Create a notebook{' '}
+              {this.state.creatingExecution ? 'execution' : 'schedule'}{' '}
+              <Badge value="alpha" />
+            </span>
+            <IconButtonMenu
+              menuItems={menuCloseHandler => [
+                <SmallMenuItem key="viewAllExecutions">
+                  <a
+                    href={`${SCHEDULER_LINK}?project=${projectId}`}
+                    target="_blank"
+                    onClick={menuCloseHandler}
+                  >
+                    View all scheduled executions
+                  </a>
+                </SmallMenuItem>,
+                <SmallMenuItem
+                  key="reset"
+                  onClick={() => this._onResetSettings(menuCloseHandler)}
                 >
-                  View all scheduled jobs
-                </a>
-              </SmallMenuItem>,
-              <SmallMenuItem
-                key="reset"
-                onClick={() => this._onResetSettings(menuCloseHandler)}
-              >
-                Reset configuration
-              </SmallMenuItem>,
-            ]}
-          ></IconButtonMenu>
-        </header>
+                  Reset configuration
+                </SmallMenuItem>,
+              ]}
+            ></IconButtonMenu>
+          </header>
+        )}
         <main className={localStyles.main}>{this._getDialogContent()}</main>
       </Dialog>
     );
@@ -198,20 +212,20 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   private _getDialogContent(): JSX.Element {
-    const { gcpSettings, permissions, jobSubmittedMessage } = this.state;
+    const { gcpSettings, permissions, submittedMessage } = this.state;
     const { gcpService, request } = this.props;
     const hasNotebook = !!(request && request.notebook);
-    if (jobSubmittedMessage) {
+    if (submittedMessage) {
       return (
         <div className={css.column}>
-          <Message text={jobSubmittedMessage.message} />
+          <Message text={submittedMessage.message} />
           <ActionBar onDialogClose={this._onDialogClose}>
             <a
-              href={jobSubmittedMessage.link}
+              href={submittedMessage.link}
               target="_blank"
               className={css.button}
             >
-              View Job
+              View Execution
             </a>
           </ActionBar>
         </div>
@@ -238,6 +252,8 @@ export class SchedulerDialog extends React.Component<Props, State> {
           permissions={permissions}
           onDialogClose={this._onDialogClose}
           settings={this.props.settings}
+          onScheduleTypeChange={this._onScheduleTypeChange}
+          onShowFormChange={this._onShowFormChange}
         />
       ) : (
         <div className={css.column}>
@@ -273,8 +289,20 @@ export class SchedulerDialog extends React.Component<Props, State> {
     this.setState({ gcpSettings: settings });
   }
 
+  private _onScheduleTypeChange(creatingExecution: boolean) {
+    this.setState({ creatingExecution });
+  }
+
+  private _onShowFormChange(showCreateForm: boolean) {
+    this.setState({ showCreateForm });
+  }
+
   private _onDialogClose() {
-    this.setState({ dialogClosedByUser: true });
+    this.setState({
+      dialogClosedByUser: true,
+      showCreateForm: true,
+      creatingExecution: true,
+    });
   }
 
   private _onResetSettings(closeHandler: MenuCloseHandler) {

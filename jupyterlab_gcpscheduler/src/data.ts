@@ -19,9 +19,9 @@ const GCR_PREFIX = 'gcr.io/deeplearning-platform-release';
 
 /** Custom ScaleTier allows selection of AI Platform Machine type */
 export const CUSTOM = 'CUSTOM';
-/** Indicates a single Notebook run */
+/** Indicates a single Notebook execution */
 export const SINGLE = 'single';
-/** Indicates a recurring scheduled Notebook run */
+/** Indicates a recurring scheduled Notebook execution */
 export const RECURRING = 'recurring';
 /** Region where Cloud Function will be deployed. */
 export const CLOUD_FUNCTION_REGION = 'us-central1';
@@ -53,13 +53,13 @@ export function findOptionByValue<T extends Option>(
 }
 
 export const DAYS_OF_WEEK: Option[] = [
-  { value: 'sundayRun', text: 'Sun' },
-  { value: 'mondayRun', text: 'Mon' },
-  { value: 'tuesdayRun', text: 'Tue' },
-  { value: 'wednesdayRun', text: 'Wed' },
-  { value: 'thursdayRun', text: 'Thur' },
-  { value: 'fridayRun', text: 'Fri' },
-  { value: 'saturdayRun', text: 'Sat' },
+  { value: 'sundayExecution', text: 'Sun' },
+  { value: 'mondayExecution', text: 'Mon' },
+  { value: 'tuesdayExecution', text: 'Tue' },
+  { value: 'wednesdayExecution', text: 'Wed' },
+  { value: 'thursdayExecution', text: 'Thur' },
+  { value: 'fridayExecution', text: 'Fri' },
+  { value: 'saturdayExecution', text: 'Sat' },
 ];
 
 export const MONTH_FREQUENCIES: Option[] = [
@@ -78,7 +78,7 @@ export function removeFromList<T>(list: T[], value: T) {
 }
 
 /**
- * Container images that can be used to schedule jobs on AI Platform.
+ * Container images that can be used to schedule executions on AI Platform.
  * https://cloud.google.com/ai-platform/training/docs/containers-overview
  */
 export const CONTAINER_IMAGES: Option[] = [
@@ -306,8 +306,8 @@ export const REGIONS: Option[] = [
 
 /** Single execution or recurring schedule */
 export const SCHEDULE_TYPES: Option[] = [
-  { value: SINGLE, text: 'Single run' },
-  { value: RECURRING, text: 'Schedule (scheduled runs)' },
+  { value: SINGLE, text: 'Execution' },
+  { value: RECURRING, text: 'Schedule (recurring executions)' },
 ];
 
 export const FREQUENCY_TYPES: Option[] = [
@@ -320,13 +320,13 @@ export const FREQUENCY_TYPES: Option[] = [
 /** Link to Cloud Console */
 export const CLOUD_CONSOLE = 'https://console.cloud.google.com';
 
-/** Link to AI Platform Jobs */
+/** Link to AI Platform Executions */
 export const AI_PLATFORM_LINK = `${CLOUD_CONSOLE}/ai-platform/jobs`;
 
 /** Link to GCS Storage Browser */
 export const GCS_LINK = `${CLOUD_CONSOLE}/storage/browser`;
 
-/** Link to Scheduled Runs page */
+/** Link to Scheduled Executions page */
 export const SCHEDULER_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/scheduled-runs`;
 
 /** Notebook jobs directory that notebooks will be imported to. */

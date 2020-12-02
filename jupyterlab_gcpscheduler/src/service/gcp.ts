@@ -35,17 +35,17 @@ import {
 import {
   StorageObject,
   CloudSchedulerJob,
-  RunNotebookRequest,
+  ExecuteNotebookRequest,
   AiPlatformJob,
   Buckets,
-  Runs,
+  Executions,
   Schedules,
   ListAiPlatformJobsResponse,
   CloudStorageApiBucket,
   CloudStorageApiBuckets,
   Bucket,
   Job,
-  Run,
+  Execution,
   Schedule,
 } from '../interfaces';
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -175,7 +175,7 @@ export class GcpService {
    * @param schedule
    */
   async scheduleNotebook(
-    request: RunNotebookRequest,
+    request: ExecuteNotebookRequest,
     regionName: string,
     schedule: string
   ): Promise<CloudSchedulerJob> {
@@ -190,7 +190,7 @@ export class GcpService {
       const projectId = await this.projectId;
       const locationPrefix = `projects/${projectId}/locations/${regionName}/jobs`;
       const requestBody: CloudSchedulerJob = {
-        name: `${locationPrefix}/${request.jobId}`,
+        name: `${locationPrefix}/${request.name}`,
         description: SCHEDULED_JOB_INDICATOR,
         schedule,
         timeZone,
@@ -223,7 +223,9 @@ export class GcpService {
    * @param cloudFunctionUrl
    * @param request
    */
-  async runNotebook(request: RunNotebookRequest): Promise<AiPlatformJob> {
+  async executeNotebook(
+    request: ExecuteNotebookRequest
+  ): Promise<AiPlatformJob> {
     try {
       const projectId = await this.projectId;
       const response = await this._transportService.submit<AiPlatformJob>({
@@ -239,11 +241,14 @@ export class GcpService {
   }
 
   /**
-   * Gets list of AiPlatformRuns
+   * Gets list of AiPlatform Executions
    * @param cloudFunctionUrl
    * @param request
    */
-  async listRuns(pageSize?: number, pageToken?: string): Promise<Runs> {
+  async listExecutions(
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<Executions> {
     try {
       const filter = [SCHEDULED_JOB_INDICATOR, IMMEDIATE_JOB_INDICATOR]
         .map(v => `labels.job_type=${v}`)
@@ -263,8 +268,8 @@ export class GcpService {
         params,
       });
       return {
-        runs: (response.result.jobs || []).map(job =>
-          this.createRun(job, projectId)
+        executions: (response.result.jobs || []).map(job =>
+          this.createExecution(job, projectId)
         ),
         pageToken: response.result.nextPageToken,
       };
@@ -388,11 +393,11 @@ export class GcpService {
   }
 
   private _buildAiPlatformJobRequest(
-    request: RunNotebookRequest,
+    request: ExecuteNotebookRequest,
     isScheduled = false
   ): AiPlatformJob {
     return {
-      jobId: request.jobId,
+      jobId: request.name,
       labels: {
         job_type: isScheduled
           ? SCHEDULED_JOB_INDICATOR
@@ -458,7 +463,7 @@ export class GcpService {
     };
   }
 
-  private createRun(job: AiPlatformJob, projectId: string): Run {
+  private createExecution(job: AiPlatformJob, projectId: string): Execution {
     const gcsFile =
       job.trainingInput &&
       job.trainingInput.args &&
@@ -467,8 +472,8 @@ export class GcpService {
     const bucketLink = `${BUCKET_LINK_BASE}/${bucket};tab=permissions`;
     const type =
       job['labels'] && job['labels'][JOB_TYPE] === SCHEDULED_JOB_INDICATOR
-        ? 'Single run'
-        : 'Scheduled run';
+        ? 'Execution'
+        : 'Scheduled Execution';
     return {
       ...this.createJob(job, projectId),
       type,

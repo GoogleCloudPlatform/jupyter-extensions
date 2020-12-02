@@ -18,7 +18,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { JobListItem } from './job_list_item';
-import { TEST_PROJECT, getRun, getSchedule } from '../test_helpers';
+import { TEST_PROJECT, getExecution, getSchedule } from '../test_helpers';
 import { GcpService } from '../service/gcp';
 import Menu from '@material-ui/core/Menu';
 
@@ -45,7 +45,7 @@ describe('JobListItem', () => {
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getRun()}
+        job={getExecution()}
       />
     );
 
@@ -57,42 +57,42 @@ describe('JobListItem', () => {
       .simulate('click');
 
     expect(mockGcpService.importNotebook).toHaveBeenCalledWith(
-      'test-project/notebook_job1/job1.ipynb'
+      'test-project/notebook_abcd/abcd.ipynb'
     );
   });
 
-  it('Renders for successful run', () => {
+  it('Renders for successful execution', () => {
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getRun()}
+        job={getExecution()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for failed run', () => {
-    const job = getRun();
+  it('Renders for failed execution', () => {
+    const job = getExecution();
     job.state = 'FAILED';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getRun()}
+        job={getExecution()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('Renders for running run', () => {
-    const job = getRun();
+  it('Renders for running execution', () => {
+    const job = getExecution();
     job.state = 'RUNNING';
     const component = shallow(
       <JobListItem
         gcpService={mockGcpService}
         projectId={TEST_PROJECT}
-        job={getRun()}
+        job={getExecution()}
       />
     );
     expect(component).toMatchSnapshot();
@@ -110,7 +110,7 @@ describe('JobListItem', () => {
   });
 
   it('Renders for failed schedule', () => {
-    const job = getRun();
+    const job = getExecution();
     job.state = 'FAILED';
     const component = shallow(
       <JobListItem
@@ -123,7 +123,7 @@ describe('JobListItem', () => {
   });
 
   it('Renders for running schedule', () => {
-    const job = getRun();
+    const job = getExecution();
     job.state = 'RUNNING';
     const component = shallow(
       <JobListItem

@@ -16,7 +16,7 @@
 
 /** Utility functions and helpers for tests. */
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { AiPlatformJob, Run, Schedule } from './interfaces';
+import { AiPlatformJob, Execution, Schedule } from './interfaces';
 import { mount } from 'enzyme';
 import { AI_PLATFORM_LINK, DOWNLOAD_LINK_BASE, VIEWER_LINK_BASE } from './data';
 export const TEST_PROJECT = 'test-project';
@@ -85,24 +85,24 @@ export function simulateCheckBoxChange(
   });
 }
 
-export function getRun(): Run {
-  const gcsFile = `${TEST_PROJECT}/notebook_job1/job1.ipynb`;
-  const [bucket, jobName, ...object] = gcsFile.split('/');
-  const name = jobName.replace('_', ' ');
-  const encodedObjectPath = [jobName, ...object]
+export function getExecution(): Execution {
+  const gcsFile = `${TEST_PROJECT}/notebook_abcd/abcd.ipynb`;
+  const [bucket, executionName, ...object] = gcsFile.split('/');
+  const name = executionName.replace('_', ' ');
+  const encodedObjectPath = [executionName, ...object]
     .map(p => encodeURIComponent(p))
     .join('/');
-  const link = `${AI_PLATFORM_LINK}/notebook_job1_abcxyz?project=${TEST_PROJECT}`;
+  const link = `${AI_PLATFORM_LINK}/notebook_abcd_abcxyz?project=${TEST_PROJECT}`;
   const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
   const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
   const bucketLink = 'bucket';
   return {
-    id: 'notebook_job1_abcxyz',
+    id: 'notebook_abcd_abcxyz',
     name,
     createTime: '2020-05-01T19:00:07Z',
     endTime: '2020-05-01T19:09:42Z',
     gcsFile,
-    type: 'Single run',
+    type: 'Execution',
     state: 'SUCCEEDED',
     link,
     viewerLink,
@@ -113,17 +113,17 @@ export function getRun(): Run {
 }
 
 export function getSchedule(): Schedule {
-  const gcsFile = `${TEST_PROJECT}/notebook_job1/job1.ipynb`;
-  const [bucket, jobName, ...object] = gcsFile.split('/');
-  const name = jobName.replace('_', ' ');
-  const encodedObjectPath = [jobName, ...object]
+  const gcsFile = `${TEST_PROJECT}/notebook_abcd/abcd.ipynb`;
+  const [bucket, executionName, ...object] = gcsFile.split('/');
+  const name = executionName.replace('_', ' ');
+  const encodedObjectPath = [executionName, ...object]
     .map(p => encodeURIComponent(p))
     .join('/');
-  const link = `${AI_PLATFORM_LINK}/notebook_job1_abcxyz?project=${TEST_PROJECT}`;
+  const link = `${AI_PLATFORM_LINK}/notebook_abcd_abcxyz?project=${TEST_PROJECT}`;
   const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
   const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
   return {
-    id: 'notebook_job1_abcxyz',
+    id: 'notebook_abcd_abcxyz',
     name,
     createTime: '2020-05-01T19:00:07Z',
     endTime: '2020-05-01T19:09:42Z',
@@ -138,16 +138,16 @@ export function getSchedule(): Schedule {
 }
 
 /** Returns an AI Platform Job object */
-export function getAiPlatformJob(name = 'notebook_job1_abcxyz'): AiPlatformJob {
+export function getAiPlatformJob(name = 'notebook_abcd_abcxyz'): AiPlatformJob {
   return {
     jobId: name,
     trainingInput: {
       args: [
         'nbexecutor',
         '--input-notebook',
-        `gs://${TEST_PROJECT}/notebook_job1/nb.ipynb`,
+        `gs://${TEST_PROJECT}/notebook_abcd/nb.ipynb`,
         '--output-notebook',
-        `gs://${TEST_PROJECT}/notebook_job1/job1.ipynb`,
+        `gs://${TEST_PROJECT}/notebook_abcd/abcd.ipynb`,
       ],
       region: 'us-central1',
       masterConfig: {
@@ -162,55 +162,55 @@ export function getAiPlatformJob(name = 'notebook_job1_abcxyz'): AiPlatformJob {
     labels: {
       /* eslint-disable @typescript-eslint/camelcase */
       job_type: 'jupyterlab_scheduled_notebook',
-      scheduler_job_name: 'notebook_job1',
+      scheduler_job_name: 'notebook_abcd',
       /* eslint-enable @typescript-eslint/camelcase */
     },
   } as AiPlatformJob;
 }
 
-export function getAiPlatformJobConvertedIntoRun(
-  name = 'notebook_job1_abcxyz'
+export function getAiPlatformJobConvertedIntoExecution(
+  name = 'notebook_abcd_abcxyz'
 ) {
   return {
     bucketLink:
       'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
     createTime: '2020-05-01T19:00:07Z',
     downloadLink:
-      'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
+      'https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb',
     endTime: '2020-05-01T19:09:42Z',
-    gcsFile: 'test-project/notebook_job1/job1.ipynb',
+    gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
       'https://console.cloud.google.com/ai-platform/jobs/' +
       name +
       '?project=test-project',
-    name: 'notebook_job1',
+    name: 'notebook_abcd',
     state: 'SUCCEEDED',
-    type: 'Single run',
+    type: 'Execution',
     viewerLink:
-      'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb?project=test-project',
+      'https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb?project=test-project',
   };
 }
 
 export function getAiPlatformJobConvertedIntoSchedule(
-  name = 'notebook_job1_abcxyz'
+  name = 'notebook_abcd_abcxyz'
 ) {
   return {
     createTime: '2020-05-01T19:00:07Z',
     downloadLink:
-      'https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb',
+      'https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb',
     endTime: '2020-05-01T19:09:42Z',
-    gcsFile: 'test-project/notebook_job1/job1.ipynb',
+    gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
       'https://console.cloud.google.com/ai-platform/jobs/' +
       name +
       '?project=test-project',
-    name: 'notebook_job1',
+    name: 'notebook_abcd',
     state: 'SUCCEEDED',
     schedule: '30 12 */2 * *',
     viewerLink:
-      'https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb?project=test-project',
+      'https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb?project=test-project',
   };
 }
 

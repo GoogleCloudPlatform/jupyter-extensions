@@ -61,8 +61,8 @@ describe('WeekScheduleBuilder', () => {
     const weekScheduleBuilder = mount(<WeekScheduleBuilder {...mockProps} />);
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="mondayRun"]',
-      'mondayRun',
+      'input[name="mondayExecution"]',
+      'mondayExecution',
       true
     );
     expect(mockProps.onScheduleChange).lastCalledWith('00 09 * * 1');
@@ -84,28 +84,28 @@ describe('WeekScheduleBuilder', () => {
     );
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="mondayRun"]',
-      'mondayRun',
+      'input[name="mondayExecution"]',
+      'mondayExecution',
       true
     );
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="thursdayRun"]',
-      'thursdayRun',
+      'input[name="thursdayExecution"]',
+      'thursdayExecution',
       true
     );
     expect(mockProps.onScheduleChange).lastCalledWith('00 09 * * 1,4');
     expect(weekScheduleBuilder.find('FieldError')).toHaveLength(0);
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="mondayRun"]',
-      'mondayRun',
+      'input[name="mondayExecution"]',
+      'mondayExecution',
       false
     );
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="thursdayRun"]',
-      'thursdayRun',
+      'input[name="thursdayExecution"]',
+      'thursdayExecution',
       false
     );
     expect(mockProps.onScheduleChange).lastCalledWith('');
@@ -125,8 +125,8 @@ describe('WeekScheduleBuilder', () => {
     );
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="mondayRun"]',
-      'mondayRun',
+      'input[name="mondayExecution"]',
+      'mondayExecution',
       true
     );
     expect(mockProps.onScheduleChange).lastCalledWith('00 14 * * 1');
@@ -143,8 +143,8 @@ describe('WeekScheduleBuilder', () => {
     );
     simulateCheckBoxChange(
       weekScheduleBuilder,
-      'input[name="mondayRun"]',
-      'mondayRun',
+      'input[name="mondayExecution"]',
+      'mondayExecution',
       true
     );
     expect(mockProps.onScheduleChange).lastCalledWith('');

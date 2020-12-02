@@ -6,7 +6,7 @@ exports[`ShareDialog Renders closed 1`] = `
     className="fullWidth_f96or0t"
     onClick={[Function]}
   >
-    Share run result
+    Share execution result
   </p>
   <WithStyles(ForwardRef(Dialog))
     aria-describedby="share-dialog-description"
@@ -19,14 +19,14 @@ exports[`ShareDialog Renders closed 1`] = `
     <WithStyles(ForwardRef(DialogTitle))
       id="share-dialog-title"
     >
-      Share run result
+      Share execution results in this project
     </WithStyles(ForwardRef(DialogTitle))>
     <WithStyles(ForwardRef(DialogContent))>
       <WithStyles(ForwardRef(DialogContentText))
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        To share this run result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
       </WithStyles(ForwardRef(DialogContentText))>
       <ol
         className="inlineStart_f1nodyj text_f1v1xbpa"
@@ -54,7 +54,7 @@ exports[`ShareDialog Renders closed 1`] = `
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        You can now share the link you copied with the people or groups granted view permission. Note: these people or groups are able to view any run result within this Google Cloud project as long as they own the links to those run results.
+        You can now share any execution result link, including the one you copied, with the people or groups granted view permissions.
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
     <WithStyles(ForwardRef(DialogActions))>
@@ -87,7 +87,7 @@ exports[`ShareDialog Renders open 1`] = `
     className="fullWidth_f96or0t"
     onClick={[Function]}
   >
-    Share run result
+    Share execution result
   </p>
   <WithStyles(ForwardRef(Dialog))
     aria-describedby="share-dialog-description"
@@ -100,14 +100,14 @@ exports[`ShareDialog Renders open 1`] = `
     <WithStyles(ForwardRef(DialogTitle))
       id="share-dialog-title"
     >
-      Share run result
+      Share execution results in this project
     </WithStyles(ForwardRef(DialogTitle))>
     <WithStyles(ForwardRef(DialogContent))>
       <WithStyles(ForwardRef(DialogContentText))
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        To share this run result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
       </WithStyles(ForwardRef(DialogContentText))>
       <ol
         className="inlineStart_f1nodyj text_f1v1xbpa"
@@ -135,7 +135,7 @@ exports[`ShareDialog Renders open 1`] = `
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        You can now share the link you copied with the people or groups granted view permission. Note: these people or groups are able to view any run result within this Google Cloud project as long as they own the links to those run results.
+        You can now share any execution result link, including the one you copied, with the people or groups granted view permissions.
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
     <WithStyles(ForwardRef(DialogActions))>

@@ -19,11 +19,11 @@ import { ServerConnection } from '@jupyterlab/services';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
 import { GcpService } from './gcp';
-import { RunNotebookRequest } from '../interfaces';
+import { ExecuteNotebookRequest } from '../interfaces';
 import {
   TEST_PROJECT,
   getAiPlatformJob,
-  getAiPlatformJobConvertedIntoRun,
+  getAiPlatformJobConvertedIntoExecution,
   getAiPlatformJobConvertedIntoSchedule,
   getCloudStorageApiBucket,
   getBucket,
@@ -216,8 +216,8 @@ describe('GcpService', () => {
   });
 
   describe('Notebooks', () => {
-    const runNotebookRequest: RunNotebookRequest = {
-      jobId: 'test_notebook_job',
+    const ExecuteNotebookRequest: ExecuteNotebookRequest = {
+      name: 'test_notebook_execution',
       imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
       inputNotebookGcsPath: 'gs://test-bucket/test_nb.ipynb',
       masterType: '',
@@ -230,7 +230,7 @@ describe('GcpService', () => {
     };
 
     const aiPlatformJobBody: gapi.client.ml.GoogleCloudMlV1__Job = {
-      jobId: 'test_notebook_job',
+      jobId: 'test_notebook_execution',
       labels: { job_type: 'jupyterlab_immediate_notebook' },
       trainingInput: {
         args: [
@@ -256,13 +256,15 @@ describe('GcpService', () => {
     it('Submits Notebook Job to AI Platform', async () => {
       const now = new Date().toLocaleString();
       const returnedJob = {
-        jobId: 'test_notebook_job',
+        jobId: 'test_notebook_execution',
         createTime: now,
       };
       mockSubmit.mockReturnValue(asApiResponse(returnedJob));
 
-      const job = await gcpService.runNotebook(runNotebookRequest);
-      expect(job).toEqual(returnedJob);
+      const execution = await gcpService.executeNotebook(
+        ExecuteNotebookRequest
+      );
+      expect(execution).toEqual(returnedJob);
       expect(mockSubmit).toHaveBeenCalledWith({
         method: 'POST',
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
@@ -281,7 +283,7 @@ describe('GcpService', () => {
 
       expect.assertions(2);
       try {
-        await gcpService.runNotebook(runNotebookRequest);
+        await gcpService.executeNotebook(ExecuteNotebookRequest);
       } catch (err) {
         expect(err).toEqual('UNAVAILABLE: Could not create AI Platform Job');
       }
@@ -294,7 +296,7 @@ describe('GcpService', () => {
 
     it('Submits Schedule Notebook Job to Cloud Scheduler', async () => {
       const returnedJob = {
-        name: 'test_scheduled_notebook_job',
+        name: 'test_scheduled_notebook_execution',
       };
       mockSubmit.mockReturnValue(asApiResponse(returnedJob));
 
@@ -304,7 +306,7 @@ describe('GcpService', () => {
       const schedule = '0 1 * * 5';
 
       const job = await gcpService.scheduleNotebook(
-        runNotebookRequest,
+        ExecuteNotebookRequest,
         CLOUD_FUNCTION_REGION,
         schedule
       );
@@ -320,7 +322,7 @@ describe('GcpService', () => {
             oidcToken: { serviceAccountEmail },
             uri: expectedCloudFunctionUrl,
           },
-          name: `projects/test-project/locations/us-central1/jobs/${runNotebookRequest.jobId}`,
+          name: `projects/test-project/locations/us-central1/jobs/${ExecuteNotebookRequest.name}`,
           schedule,
           timeZone: expect.any(String),
         },
@@ -347,7 +349,7 @@ describe('GcpService', () => {
       expect.assertions(2);
       try {
         await gcpService.scheduleNotebook(
-          runNotebookRequest,
+          ExecuteNotebookRequest,
           'us-east1',
           schedule
         );
@@ -367,7 +369,7 @@ describe('GcpService', () => {
             oidcToken: { serviceAccountEmail },
             uri: expectedCloudFunctionUrl,
           },
-          name: `projects/test-project/locations/us-east1/jobs/${runNotebookRequest.jobId}`,
+          name: `projects/test-project/locations/us-east1/jobs/${ExecuteNotebookRequest.name}`,
           schedule,
           timeZone: expect.any(String),
         },
@@ -377,20 +379,20 @@ describe('GcpService', () => {
       });
     });
 
-    it('Lists notebook runs', async () => {
+    it('Lists notebook executions', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
+          jobs: [getAiPlatformJob(), getAiPlatformJob('execution2')],
           nextPageToken: 'xyz',
         })
       );
 
-      const runs = await gcpService.listRuns();
-      expect(runs).toEqual({
+      const executions = await gcpService.listExecutions();
+      expect(executions).toEqual({
         pageToken: 'xyz',
-        runs: [
-          getAiPlatformJobConvertedIntoRun(),
-          getAiPlatformJobConvertedIntoRun('jobId2'),
+        executions: [
+          getAiPlatformJobConvertedIntoExecution(),
+          getAiPlatformJobConvertedIntoExecution('execution2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
@@ -402,15 +404,15 @@ describe('GcpService', () => {
       });
     });
 
-    it('Lists notebook runs empty jobs response', async () => {
+    it('Lists notebook executions empty jobs response', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
           jobs: [],
         })
       );
 
-      const runs = await gcpService.listRuns();
-      expect(runs).toEqual({ runs: [], pageToken: undefined });
+      const executions = await gcpService.listExecutions();
+      expect(executions).toEqual({ executions: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
         params: {
@@ -420,11 +422,11 @@ describe('GcpService', () => {
       });
     });
 
-    it('Lists notebook runs empty response', async () => {
+    it('Lists notebook executions empty response', async () => {
       mockSubmit.mockReturnValue(asApiResponse({}));
 
-      const runs = await gcpService.listRuns();
-      expect(runs).toEqual({ runs: [], pageToken: undefined });
+      const executions = await gcpService.listExecutions();
+      expect(executions).toEqual({ executions: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
         params: {
@@ -434,20 +436,22 @@ describe('GcpService', () => {
       });
     });
 
-    it('Throws error when listing notebook runs', async () => {
+    it('Throws error when listing notebook executions', async () => {
       const error = {
         error: {
           status: 'BAD_REQUEST',
-          message: 'Unable to retrieve notebook runs',
+          message: 'Unable to retrieve notebook executions',
         },
       };
       mockSubmit.mockRejectedValue(asApiResponse(error));
 
       expect.assertions(2);
       try {
-        await gcpService.listRuns(10, 'abc123');
+        await gcpService.listExecutions(10, 'abc123');
       } catch (err) {
-        expect(err).toEqual('BAD_REQUEST: Unable to retrieve notebook runs');
+        expect(err).toEqual(
+          'BAD_REQUEST: Unable to retrieve notebook executions'
+        );
       }
       expect(mockSubmit).toHaveBeenCalledWith({
         path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
@@ -463,7 +467,7 @@ describe('GcpService', () => {
     it('Lists notebook schedules', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [getAiPlatformJob(), getAiPlatformJob('jobId2')],
+          jobs: [getAiPlatformJob(), getAiPlatformJob('schedule2')],
           nextPageToken: 'xyz',
         })
       );
@@ -473,7 +477,7 @@ describe('GcpService', () => {
         pageToken: 'xyz',
         schedules: [
           getAiPlatformJobConvertedIntoSchedule(),
-          getAiPlatformJobConvertedIntoSchedule('jobId2'),
+          getAiPlatformJobConvertedIntoSchedule('schedule2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
