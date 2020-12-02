@@ -25,7 +25,7 @@ import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
 import { customShortDateFormat, getHumanReadableCron } from '../cron';
 import { ShareDialog } from './share_dialog';
-import { Run, Schedule } from '../interfaces';
+import { Execution, Schedule } from '../interfaces';
 import { GcpService } from '../service/gcp';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -33,7 +33,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { Grid } from '@material-ui/core';
 
 interface Props {
-  job: Run | Schedule;
+  job: Execution | Schedule;
   projectId: string;
   gcpService: GcpService;
 }
@@ -119,9 +119,7 @@ export class JobListItem extends React.Component<Props, State> {
           <div>
             {!schedule && (
               <div className={localStyles.jobCaption}>
-                <span>
-                  {customShortDateFormat(endTime)} - {(job as Run).type}
-                </span>
+                <span>{customShortDateFormat(endTime)}</span>
               </div>
             )}
             {schedule && (
@@ -133,7 +131,9 @@ export class JobListItem extends React.Component<Props, State> {
                   </span>
                 </div>
                 <div className={localStyles.jobCaption}>
-                  <span>Latest run: {customShortDateFormat(endTime)}</span>
+                  <span>
+                    Latest execution: {customShortDateFormat(endTime)}
+                  </span>
                 </div>
               </React.Fragment>
             )}
@@ -141,7 +141,7 @@ export class JobListItem extends React.Component<Props, State> {
               <LearnMoreLink
                 noUnderline={true}
                 href={job.viewerLink}
-                text={schedule ? 'VIEW LATEST RUN RESULT' : 'VIEW RESULT'}
+                text={schedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
               />
             </div>
           </div>
@@ -156,7 +156,7 @@ export class JobListItem extends React.Component<Props, State> {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="run-menu"
+              id="execution-menu"
               anchorEl={this.state.anchorEl}
               keepMounted
               open={Boolean(this.state.anchorEl)}
@@ -165,7 +165,7 @@ export class JobListItem extends React.Component<Props, State> {
               {!schedule && (
                 <MenuItem key="shareNotebook" dense={true}>
                   <ShareDialog
-                    cloudBucket={(job as Run).bucketLink}
+                    cloudBucket={(job as Execution).bucketLink}
                     shareLink={job.viewerLink}
                     handleClose={this.handleClose}
                   />

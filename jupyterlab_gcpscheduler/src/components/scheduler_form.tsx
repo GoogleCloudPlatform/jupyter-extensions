@@ -26,13 +26,18 @@ import {
   TextInput,
   ToggleSwitch,
 } from 'gcp_jupyterlab_shared';
-import { getNextRunDate } from '../cron';
+import { getNextExecutionDate } from '../cron';
 import * as React from 'react';
 import { CloudBucketSelector } from './cloud_bucket';
 import { GcpService } from '../service/gcp';
-import { RunNotebookRequest } from '../interfaces';
+import { ExecuteNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
-import { GcpSettings, OnDialogClose } from './dialog';
+import {
+  GcpSettings,
+  OnDialogClose,
+  OnScheduleTypeChange,
+  OnShowFormChange,
+} from './dialog';
 import { ScheduleBuilder } from './schedule_builder/schedule_builder';
 import { ActionBar } from './action_bar';
 import { SchedulerDescription } from './scheduler_description';
@@ -59,7 +64,7 @@ interface Status {
   asError?: boolean;
   message: string;
   lastSubmitted?: {
-    request: RunNotebookRequest;
+    request: ExecuteNotebookRequest;
     schedule?: string;
   };
 }
@@ -72,10 +77,12 @@ interface Props {
   permissions: GetPermissionsResponse;
   onDialogClose: OnDialogClose;
   settings: ISettingRegistry.ISettings;
+  onScheduleTypeChange: OnScheduleTypeChange;
+  onShowFormChange: OnShowFormChange;
 }
 
 interface SchedulerFormValues {
-  jobId: string;
+  name: string;
   region: string;
   scaleTier: string;
   masterType?: string;
@@ -97,22 +104,22 @@ const SCALE_TIER_LINK =
   'https://cloud.google.com/ai-platform/training/docs/machine-types#scale_tiers';
 const IAM_MESSAGE = 'The following IAM permissions are missing';
 
-// Build a unique jobId from the opened Notebook and current timestamp
-function getJobId(notebookName: string) {
+// Build a unique name from the opened Notebook and current timestamp
+function getName(notebookName: string) {
   const sliceStart =
     notebookName.lastIndexOf('/') === -1
       ? 0
       : notebookName.lastIndexOf('/') + 1;
-  let jobId = notebookName
+  let name = notebookName
     .slice(sliceStart, notebookName.lastIndexOf('.'))
     .toLowerCase()
     .replace(/[^a-zA-Z0-9_]/g, '_');
-  const firstCharCode = jobId.charCodeAt(0);
+  const firstCharCode = name.charCodeAt(0);
   // Add letter if first character is not a letter
   if (firstCharCode < 97 || firstCharCode > 122) {
-    jobId = `a${jobId}`;
+    name = `a${name}`;
   }
-  return `${jobId}__${Date.now()}`;
+  return `${name}__${Date.now()}`;
 }
 
 /**
@@ -188,14 +195,16 @@ export class InnerSchedulerForm extends React.Component<
         <p className={css.heading}>Notebook: {this.props.notebookName}</p>
         <TextInput
           label={
-            values.scheduleType === RECURRING ? 'Schedule name' : 'Run name'
+            values.scheduleType === RECURRING
+              ? 'Schedule name'
+              : 'Execution name'
           }
-          name="jobId"
-          value={values.jobId}
-          hasError={!!errors.jobId}
+          name="name"
+          value={values.name}
+          hasError={!!errors.name}
           onChange={handleChange}
         />
-        <FieldError message={errors.jobId} />
+        <FieldError message={errors.name} />
         <SelectInput
           label="Region"
           name="region"
@@ -215,7 +224,7 @@ export class InnerSchedulerForm extends React.Component<
           name="scaleTier"
           value={values.scaleTier}
           options={SCALE_TIERS}
-          formHelperText="A scale tier is a predefined set of machines allocated to your notebook run."
+          formHelperText="A scale tier is a predefined set of machines allocated to your notebook execution."
           formHelperLink={SCALE_TIER_LINK}
           formHelperLinkText="Learn more about scale tiers"
           onChange={this._onScaleTierChanged}
@@ -310,8 +319,8 @@ export class InnerSchedulerForm extends React.Component<
           closeLabel="Cancel"
           displayMessage={
             values.scheduleType === RECURRING
-              ? getNextRunDate(values.schedule)
-              : 'Run will start immediately after being submitted'
+              ? getNextExecutionDate(values.schedule)
+              : 'Execution will start immediately after being submitted'
           }
         >
           {this.missingPermissions.length === 0 && (
@@ -359,7 +368,7 @@ export class InnerSchedulerForm extends React.Component<
   }
 
   private _onScheduleTypeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { handleChange, setFieldValue } = this.props;
+    const { handleChange, setFieldValue, onScheduleTypeChange } = this.props;
     const value = e.target.value;
     this.missingPermissions =
       value === RECURRING
@@ -367,6 +376,7 @@ export class InnerSchedulerForm extends React.Component<
         : this.props.permissions.toExecute;
     setFieldValue('scheduleType', value);
     handleChange(e);
+    onScheduleTypeChange(value !== RECURRING);
   }
 
   private _onAcceleratorTypeChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -379,11 +389,12 @@ export class InnerSchedulerForm extends React.Component<
 
   private _onFormReset() {
     this.props.setStatus(undefined);
-    this.props.setFieldValue('jobId', getJobId(this.props.notebookName));
+    this.props.setFieldValue('name', getName(this.props.notebookName));
     this.props.setFieldValue(
       'gcsBucket',
       this.props.gcpSettings.gcsBucket || ''
     );
+    this.props.onShowFormChange(true);
   }
 
   private getSubmittedJobElement(status: Status) {
@@ -401,12 +412,12 @@ export class InnerSchedulerForm extends React.Component<
 } // end InnerSchedulerForm
 
 function updateSettingsFromRequest(
-  request: RunNotebookRequest,
+  request: ExecuteNotebookRequest,
   settings: ISettingRegistry.ISettings
 ) {
   const promises: Promise<void>[] = [];
-  if (settings.get('jobRegion').composite !== request.region) {
-    promises.push(settings.set('jobRegion', request.region));
+  if (settings.get('region').composite !== request.region) {
+    promises.push(settings.set('region', request.region));
   }
   if (settings.get('scaleTier').composite !== request.scaleTier) {
     promises.push(settings.set('scaleTier', request.scaleTier));
@@ -437,7 +448,7 @@ async function submit(
   formikBag: FormikBag<Props, SchedulerFormValues>
 ) {
   const {
-    jobId,
+    name,
     imageUri,
     masterType,
     scaleTier,
@@ -447,17 +458,23 @@ async function submit(
     acceleratorType,
     acceleratorCount,
   } = values;
-  const { gcpService, notebook, notebookName, settings } = formikBag.props;
+  const {
+    gcpService,
+    notebook,
+    notebookName,
+    settings,
+    onShowFormChange,
+  } = formikBag.props;
   const { setStatus, setSubmitting } = formikBag;
 
   const gcsBucket = values.gcsBucket.includes('gs://')
     ? values.gcsBucket
     : 'gs://' + values.gcsBucket;
-  const gcsFolder = `${gcsBucket}/${jobId}`;
+  const gcsFolder = `${gcsBucket}/${name}`;
   const inputNotebookGcsPath = `${gcsFolder}/${notebookName}`;
-  const outputNotebookGcsPath = `${gcsFolder}/${jobId}.ipynb`;
-  const request: RunNotebookRequest = {
-    jobId,
+  const outputNotebookGcsPath = `${gcsFolder}/${name}.ipynb`;
+  const request: ExecuteNotebookRequest = {
+    name,
     imageUri,
     inputNotebookGcsPath,
     masterType,
@@ -489,31 +506,32 @@ async function submit(
 
   try {
     if (scheduleType === RECURRING && schedule) {
-      status.message = 'Submitting Job to Cloud Scheduler';
+      status.message = 'Submitting schedule';
       setStatus(status);
       await gcpService.scheduleNotebook(request, region, schedule);
       status.lastSubmitted = { request, schedule };
     } else {
-      status.message = 'Submitting Job to AI Platform';
+      status.message = 'Submitting execution';
       setStatus(status);
-      await gcpService.runNotebook(request);
+      await gcpService.executeNotebook(request);
       status.lastSubmitted = { request };
     }
     updateSettingsFromRequest(request, settings);
   } catch (err) {
     status.asError = true;
-    status.message = `${err}: Unable to submit job`;
+    status.message = `${err}: Unable to submit execution`;
   }
   setStatus(status);
   setSubmitting(false);
+  onShowFormChange(!(status && !!status.lastSubmitted));
 }
 
 function mapPropsToValues(props: Props) {
   return {
-    jobId: getJobId(props.notebookName),
+    name: getName(props.notebookName),
     imageUri:
       props.gcpSettings.containerImage || String(CONTAINER_IMAGES[0].value),
-    region: props.gcpSettings.jobRegion || String(REGIONS[0].value),
+    region: props.gcpSettings.region || String(REGIONS[0].value),
     scaleTier: props.gcpSettings.scaleTier || String(SCALE_TIERS[0].value),
     masterType: props.gcpSettings.masterType || '',
     acceleratorType: props.gcpSettings.acceleratorType || '',
@@ -525,13 +543,14 @@ function mapPropsToValues(props: Props) {
 }
 
 function validate(values: SchedulerFormValues) {
-  const { jobId, scheduleType, schedule, gcsBucket } = values;
+  const { name, scheduleType, schedule, gcsBucket } = values;
   const error: Error = {};
 
-  if (!jobId) {
-    error.jobId = 'Run name is required';
-  } else if (!jobId.match(/^[a-zA-Z0-9_]*$/g)) {
-    error.jobId = 'Run name can only contain letters, numbers, or underscores.';
+  if (!name) {
+    error.name = 'Execution name is required';
+  } else if (!name.match(/^[a-zA-Z0-9_]*$/g)) {
+    error.name =
+      'Execution name can only contain letters, numbers, or underscores.';
   }
 
   if (scheduleType === RECURRING && !schedule) {

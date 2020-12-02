@@ -19,7 +19,7 @@ import { shallow } from 'enzyme';
 import { Button } from '@material-ui/core';
 import { SubmittedJob } from './submitted_job';
 import { TEST_PROJECT } from '../test_helpers';
-import { RunNotebookRequest } from '../interfaces';
+import { ExecuteNotebookRequest } from '../interfaces';
 
 class MockDate extends Date {
   constructor() {
@@ -32,12 +32,12 @@ describe('SubmittedJob', () => {
   const gcsBucket = `gs://${TEST_PROJECT}`;
   const mockOnFormReset = jest.fn();
   const mockDialogClose = jest.fn();
-  const request: RunNotebookRequest = {
-    jobId: 'test_job_1234',
+  const request: ExecuteNotebookRequest = {
+    name: 'test_execution_1234',
     imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest',
-    inputNotebookGcsPath: `${gcsBucket}/test_job_1234/test_job_1234.ipynb`,
+    inputNotebookGcsPath: `${gcsBucket}/test_execution_1234/test_execution_1234.ipynb`,
     masterType: 'n1-standard-4',
-    outputNotebookGcsPath: `${gcsBucket}/test_job/test_job.ipynb`,
+    outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
     scaleTier: 'CUSTOM',
     gcsBucket: 'gcsBucket',
     region: 'us-east1',

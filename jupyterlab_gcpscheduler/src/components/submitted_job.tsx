@@ -25,7 +25,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
-import { getNextRunDate, getHumanReadableCron } from '../cron';
+import { getNextExecutionDate, getHumanReadableCron } from '../cron';
 
 import {
   findOptionByValue,
@@ -37,14 +37,14 @@ import {
   ACCELERATOR_TYPES,
   CONTAINER_IMAGES,
 } from '../data';
-import { RunNotebookRequest } from '../interfaces';
+import { ExecuteNotebookRequest } from '../interfaces';
 import { OnDialogClose } from './dialog';
 import { ActionBar } from './action_bar';
 
 interface Props {
   onFormReset: () => void;
   onDialogClose: OnDialogClose;
-  request: RunNotebookRequest;
+  request: ExecuteNotebookRequest;
   projectId: string;
   schedule?: string;
 }
@@ -108,12 +108,12 @@ export class SubmittedJob extends React.Component<Props, {}> {
         <div className={classes(css.row, localStyles.message)}>
           <GreenCheck />
           <span>
-            {isRecurring ? 'Schedule' : 'Single run'} successfully created!
+            {isRecurring ? 'Schedule' : 'Execution'} successfully created!
           </span>
         </div>
         <div className={classes(css.row, localStyles.messageCaption)}>
-          {!isRecurring && <span>Run has been started</span>}
-          {isRecurring && <span>{getNextRunDate(schedule)}</span>}
+          {!isRecurring && <span>Execution has been started</span>}
+          {isRecurring && <span>{getNextExecutionDate(schedule)}</span>}
         </div>
         <TableContainer>
           <Table
@@ -184,7 +184,9 @@ export class SubmittedJob extends React.Component<Props, {}> {
                   Type
                 </TableCell>
                 <TableCell>
-                  {isRecurring ? 'Schedule (scheduled runs)' : 'Single run'}
+                  {isRecurring
+                    ? 'Schedule (recurring executions)'
+                    : 'Execution'}
                 </TableCell>
               </TableRow>
               {isRecurring && (
@@ -204,12 +206,17 @@ export class SubmittedJob extends React.Component<Props, {}> {
           onDialogClose={onDialogClose}
           displayMessage={
             <span>
-              Check the run status in the Scheduler extension or in{' '}
+              View the {isRecurring ? 'schedule' : 'execution'} in the Executor
+              extension or in{' '}
               <LearnMoreLink text="Google Cloud console" href={jobLink} />
             </span>
           }
         >
-          <Button onClick={onFormReset}>Submit another run</Button>
+          <Button onClick={onFormReset}>
+            {isRecurring
+              ? 'Create another schedule'
+              : 'Create another exectution'}
+          </Button>
         </ActionBar>
       </div>
     );

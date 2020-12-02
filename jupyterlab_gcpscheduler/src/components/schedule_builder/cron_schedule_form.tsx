@@ -46,8 +46,8 @@ export function CronScheduleBuilder(props: SubFormProps) {
       {!props.schedule && <FieldError message="Frequency is required" />}
       <FormHelperText className={css.noTopMargin} style={ALIGN_HINT}>
         Schedule is specified using unix-cron format. You can define a schedule
-        so that your job runs multiple times a day, or runs on specific days and
-        months.
+        so that your execution runs multiple times a day, or runs on specific
+        days and months.
         <LearnMoreLink href={SCHEDULE_LINK} />
       </FormHelperText>
     </div>

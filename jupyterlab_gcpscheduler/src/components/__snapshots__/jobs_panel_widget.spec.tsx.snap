@@ -10,7 +10,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -18,7 +18,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -30,7 +30,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -75,6 +75,64 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
 </div>
 `;
 
+exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`] = `
+<div
+  className="panel_f16v76lc"
+>
+  <div
+    className="headerContainer_f17cdueg"
+  >
+    <header
+      className="header_f1vfuf16"
+    >
+      Notebook Executor
+       
+      <Badge
+        value="alpha"
+      />
+    </header>
+    <WithStyles(ForwardRef(IconButton))
+      onClick={[Function]}
+      title="Refresh"
+    >
+      <WithStyles(RefreshIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+  </div>
+  <WithStyles(ForwardRef(Tabs))
+    indicatorColor="primary"
+    onChange={[Function]}
+    value={0}
+    variant="fullWidth"
+  >
+    <WithStyles(WithStyles(ForwardRef(Tab)))
+      label="Executions"
+    />
+    <WithStyles(WithStyles(ForwardRef(Tab)))
+      label="Schedules"
+    />
+  </WithStyles(ForwardRef(Tabs))>
+  <div
+    className="tab_f1g1h5kq"
+    hidden={false}
+    role="tabpanel"
+  >
+    <Message
+      asError={true}
+      text="Cannot retrieve executions: Unable to retrieve executions"
+    />
+  </div>
+  <div
+    className="tab_f1g1h5kq"
+    hidden={true}
+    role="tabpanel"
+  >
+    <ul
+      className="list_fqi18ru"
+    />
+  </div>
+</div>
+`;
+
 exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] = `
 <div
   className="panel_f16v76lc"
@@ -85,7 +143,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -93,7 +151,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -105,7 +163,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -129,64 +187,6 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     <Message
       asError={true}
       text="No project: Unable to determine GCP project"
-    />
-  </div>
-</div>
-`;
-
-exports[`GcpScheduledJobsPanel Shows error if runs cannot be retrieved 1`] = `
-<div
-  className="panel_f16v76lc"
->
-  <div
-    className="headerContainer_f17cdueg"
-  >
-    <header
-      className="header_f1vfuf16"
-    >
-      Notebook Scheduler
-       
-      <Badge
-        value="alpha"
-      />
-    </header>
-    <WithStyles(ForwardRef(IconButton))
-      onClick={[Function]}
-      title="Refresh Jobs"
-    >
-      <WithStyles(RefreshIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-  </div>
-  <WithStyles(ForwardRef(Tabs))
-    indicatorColor="primary"
-    onChange={[Function]}
-    value={0}
-    variant="fullWidth"
-  >
-    <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
-    />
-    <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Schedules"
-    />
-  </WithStyles(ForwardRef(Tabs))>
-  <div
-    className="tab_f1g1h5kq"
-    hidden={false}
-    role="tabpanel"
-  >
-    <Message
-      asError={true}
-      text="Cannot retrieve runs: Unable to retrieve runs"
-    />
-  </div>
-  <div
-    className="tab_f1g1h5kq"
-    hidden={true}
-    role="tabpanel"
-  >
-    <ul
-      className="list_fqi18ru"
     />
   </div>
 </div>
@@ -202,7 +202,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -210,7 +210,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -222,7 +222,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -248,7 +248,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
 </div>
 `;
 
-exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
+exports[`GcpScheduledJobsPanel Shows executions 1`] = `
 <div
   className="panel_f16v76lc"
 >
@@ -258,7 +258,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -266,7 +266,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -278,7 +278,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -289,7 +289,88 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     hidden={false}
     role="tabpanel"
   >
-    <WithStyles(ForwardRef(LinearProgress)) />
+    <ul
+      className="list_fqi18ru"
+    >
+      <JobListItem
+        gcpService={
+          Object {
+            "listExecutions": [MockFunction] {
+              "calls": Array [
+                Array [
+                  10,
+                  undefined,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            },
+            "listSchedules": [MockFunction],
+            "projectId": Promise {},
+          }
+        }
+        job={
+          Object {
+            "bucketLink": "bucket",
+            "createTime": "2020-05-01T19:00:07Z",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
+            "endTime": "2020-05-01T19:09:42Z",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_abcd_abcxyz",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
+            "state": "SUCCEEDED",
+            "timeZone": "UTC",
+            "type": "Execution",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
+          }
+        }
+        key="notebook_abcd_abcxyz"
+      />
+      <JobListItem
+        gcpService={
+          Object {
+            "listExecutions": [MockFunction] {
+              "calls": Array [
+                Array [
+                  10,
+                  undefined,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            },
+            "listSchedules": [MockFunction],
+            "projectId": Promise {},
+          }
+        }
+        job={
+          Object {
+            "bucketLink": "bucket",
+            "createTime": "2020-05-01T19:00:07Z",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
+            "endTime": "2020-05-01T19:09:42Z",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_execution2_fghijk",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
+            "state": "SUCCEEDED",
+            "timeZone": "UTC",
+            "type": "Execution",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
+          }
+        }
+        key="notebook_execution2_fghijk"
+      />
+    </ul>
   </div>
   <div
     className="tab_f1g1h5kq"
@@ -321,7 +402,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
 </div>
 `;
 
-exports[`GcpScheduledJobsPanel Shows runs 1`] = `
+exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
 <div
   className="panel_f16v76lc"
 >
@@ -331,7 +412,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -339,7 +420,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -351,7 +432,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -362,88 +443,7 @@ exports[`GcpScheduledJobsPanel Shows runs 1`] = `
     hidden={false}
     role="tabpanel"
   >
-    <ul
-      className="list_fqi18ru"
-    >
-      <JobListItem
-        gcpService={
-          Object {
-            "listRuns": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                  undefined,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "listSchedules": [MockFunction],
-            "projectId": Promise {},
-          }
-        }
-        job={
-          Object {
-            "bucketLink": "bucket",
-            "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_job1_abcxyz",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
-            "state": "SUCCEEDED",
-            "timeZone": "UTC",
-            "type": "Single run",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
-          }
-        }
-        key="notebook_job1_abcxyz"
-      />
-      <JobListItem
-        gcpService={
-          Object {
-            "listRuns": [MockFunction] {
-              "calls": Array [
-                Array [
-                  10,
-                  undefined,
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-              ],
-            },
-            "listSchedules": [MockFunction],
-            "projectId": Promise {},
-          }
-        }
-        job={
-          Object {
-            "bucketLink": "bucket",
-            "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_run2_fghijk",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
-            "state": "SUCCEEDED",
-            "timeZone": "UTC",
-            "type": "Single run",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
-          }
-        }
-        key="notebook_run2_fghijk"
-      />
-    </ul>
+    <WithStyles(ForwardRef(LinearProgress)) />
   </div>
   <div
     className="tab_f1g1h5kq"
@@ -485,7 +485,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
     <header
       className="header_f1vfuf16"
     >
-      Notebook Scheduler
+      Notebook Executor
        
       <Badge
         value="alpha"
@@ -493,7 +493,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
     </header>
     <WithStyles(ForwardRef(IconButton))
       onClick={[Function]}
-      title="Refresh Jobs"
+      title="Refresh"
     >
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
@@ -505,7 +505,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
     variant="fullWidth"
   >
     <WithStyles(WithStyles(ForwardRef(Tab)))
-      label="Runs"
+      label="Executions"
     />
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
@@ -522,7 +522,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
       <JobListItem
         gcpService={
           Object {
-            "listRuns": [MockFunction] {
+            "listExecutions": [MockFunction] {
               "calls": Array [
                 Array [
                   10,
@@ -557,24 +557,24 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
           Object {
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
             "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_job1_abcxyz",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_abcd_abcxyz",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
-            "type": "Single run",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
+            "type": "Execution",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
-        key="notebook_job1_abcxyz"
+        key="notebook_abcd_abcxyz"
       />
       <JobListItem
         gcpService={
           Object {
-            "listRuns": [MockFunction] {
+            "listExecutions": [MockFunction] {
               "calls": Array [
                 Array [
                   10,
@@ -609,19 +609,19 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
           Object {
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
             "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_run2_fghijk",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_execution2_fghijk",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
-            "type": "Single run",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
+            "type": "Execution",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
-        key="notebook_run2_fghijk"
+        key="notebook_execution2_fghijk"
       />
     </ul>
   </div>
@@ -636,7 +636,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
       <JobListItem
         gcpService={
           Object {
-            "listRuns": [MockFunction] {
+            "listExecutions": [MockFunction] {
               "calls": Array [
                 Array [
                   10,
@@ -670,24 +670,24 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
         job={
           Object {
             "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
             "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_job1_abcxyz",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_abcd_abcxyz",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
             "schedule": "30 9 */2 * *",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
-        key="notebook_job1_abcxyz"
+        key="notebook_abcd_abcxyz"
       />
       <JobListItem
         gcpService={
           Object {
-            "listRuns": [MockFunction] {
+            "listExecutions": [MockFunction] {
               "calls": Array [
                 Array [
                   10,
@@ -721,19 +721,19 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
         job={
           Object {
             "createTime": "2020-05-01T19:00:07Z",
-            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb",
+            "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
             "endTime": "2020-05-01T19:09:42Z",
-            "gcsFile": "test-project/notebook_job1/job1.ipynb",
-            "id": "notebook_run2_fghijk",
-            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project",
-            "name": "notebook job1",
+            "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "id": "notebook_execution2_fghijk",
+            "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
+            "name": "notebook abcd",
             "schedule": "30 9 */2 * *",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
-            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb",
+            "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
-        key="notebook_run2_fghijk"
+        key="notebook_execution2_fghijk"
       />
     </ul>
   </div>

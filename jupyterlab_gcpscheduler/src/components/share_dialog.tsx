@@ -67,7 +67,7 @@ export class ShareDialog extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <p onClick={this.handleClickOpen} className={localStyles.fullWidth}>
-          Share run result
+          Share execution result
         </p>
         <Dialog
           open={this.state.openDialog}
@@ -77,13 +77,15 @@ export class ShareDialog extends React.Component<Props, State> {
           maxWidth="sm"
           fullWidth={true}
         >
-          <DialogTitle id="share-dialog-title">Share run result</DialogTitle>
+          <DialogTitle id="share-dialog-title">
+            Share execution results in this project
+          </DialogTitle>
           <DialogContent>
             <DialogContentText
               className={localStyles.text}
               id="share-dialog-description"
             >
-              To share this run result with people or groups, grant view
+              To share this execution result with people or groups, grant view
               permissions to the Cloud Storage bucket containing all results. If
               this has been done before, skip steps 2 through 4.
             </DialogContentText>
@@ -107,10 +109,8 @@ export class ShareDialog extends React.Component<Props, State> {
               className={localStyles.text}
               id="share-dialog-description"
             >
-              You can now share the link you copied with the people or groups
-              granted view permission. Note: these people or groups are able to
-              view any run result within this Google Cloud project as long as
-              they own the links to those run results.
+              You can now share any execution result link, including the one you
+              copied, with the people or groups granted view permissions.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

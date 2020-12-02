@@ -9,7 +9,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
   >
     <WithStyles(CheckCircleIcon) />
     <span>
-      Single run
+      Execution
        successfully created!
     </span>
   </div>
@@ -17,7 +17,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     className="row_f17j33oz messageCaption_f1vvzhbx"
   >
     <span>
-      Run has been started
+      Execution has been started
     </span>
   </div>
   <WithStyles(ForwardRef(TableContainer))>
@@ -37,7 +37,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
             Notebook
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            test_job_1234.ipynb
+            test_execution_1234.ipynb
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -128,7 +128,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
             Type
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            Single run
+            Execution
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
@@ -139,7 +139,9 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     closeOnRight={true}
     displayMessage={
       <span>
-        Check the run status in the Scheduler extension or in
+        View the 
+        execution
+         in the Executor extension or in
          
         <LearnMoreLink
           href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
@@ -152,7 +154,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Submit another run
+      Create another exectution
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>
@@ -175,7 +177,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     className="row_f17j33oz messageCaption_f1vvzhbx"
   >
     <span>
-      Runs will start on November 11, 2020, 3:00 PM UTC
+      Executions will start on November 11, 2020, 3:00 PM UTC
     </span>
   </div>
   <WithStyles(ForwardRef(TableContainer))>
@@ -195,7 +197,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Notebook
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            test_job_1234.ipynb
+            test_execution_1234.ipynb
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -286,7 +288,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
             Type
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
-            Schedule (scheduled runs)
+            Schedule (recurring executions)
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
@@ -310,7 +312,9 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     closeOnRight={true}
     displayMessage={
       <span>
-        Check the run status in the Scheduler extension or in
+        View the 
+        schedule
+         in the Executor extension or in
          
         <LearnMoreLink
           href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
@@ -323,7 +327,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Submit another run
+      Create another schedule
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>

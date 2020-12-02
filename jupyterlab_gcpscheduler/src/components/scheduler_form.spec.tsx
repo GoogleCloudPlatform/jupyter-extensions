@@ -31,7 +31,7 @@ import {
   ACCELERATOR_TYPES_REDUCED,
 } from '../data';
 import { GcpService } from '../service/gcp';
-import { RunNotebookRequest } from '../interfaces';
+import { ExecuteNotebookRequest } from '../interfaces';
 import { GetPermissionsResponse } from '../service/project_state';
 import { SchedulerForm, InnerSchedulerForm } from './scheduler_form';
 import { SubmittedJob } from './submitted_job';
@@ -50,16 +50,18 @@ describe('SchedulerForm', () => {
   const gcsBucket = `gs://${TEST_PROJECT}`;
 
   const mockUploadNotebook = jest.fn();
-  const mockRunNotebook = jest.fn();
+  const mockExecuteNotebook = jest.fn();
   const mockScheduleNotebook = jest.fn();
   const mockNotebookContents = jest.fn();
   const mockDialogClose = jest.fn();
+  const mockScheduleTypeChange = jest.fn();
+  const mockShowFormChange = jest.fn();
   const mockGetImageUri = jest.fn();
   const mockSettingsGet = jest.fn();
   const mockSettingsSet = jest.fn();
   const mockGcpService = ({
     uploadNotebook: mockUploadNotebook,
-    runNotebook: mockRunNotebook,
+    executeNotebook: mockExecuteNotebook,
     scheduleNotebook: mockScheduleNotebook,
     getImageUri: mockGetImageUri,
   } as unknown) as GcpService;
@@ -88,6 +90,8 @@ describe('SchedulerForm', () => {
     onDialogClose: mockDialogClose,
     settings: mockSettings,
     permissions,
+    onScheduleTypeChange: mockScheduleTypeChange,
+    onShowFormChange: mockShowFormChange,
   };
 
   beforeEach(() => {
@@ -239,35 +243,35 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('input[name="frequency"]')).toHaveLength(0);
   });
 
-  it('Should populate Run name with Notebook name and timestamp', async () => {
+  it('Should populate Execution name with Notebook name and timestamp', async () => {
     const fakeTimestamp = 1570406400000;
     jest.spyOn(Date, 'now').mockReturnValue(fakeTimestamp);
 
     let schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    expect(schedulerForm.find('TextInput[name="jobId"]').prop('value')).toBe(
+    expect(schedulerForm.find('TextInput[name="name"]').prop('value')).toBe(
       `test_notebook__${fakeTimestamp}`
     );
 
     mockProps.notebookName = `path/to/folder/with/${mockProps.notebookName}`;
     schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    expect(schedulerForm.find('TextInput[name="jobId"]').prop('value')).toBe(
+    expect(schedulerForm.find('TextInput[name="name"]').prop('value')).toBe(
       `test_notebook__${fakeTimestamp}`
     );
 
     mockProps.notebookName =
       '/path/to/folder/(1) A Strange Notebook Name.ipynb';
     schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    expect(schedulerForm.find('TextInput[name="jobId"]').prop('value')).toBe(
+    expect(schedulerForm.find('TextInput[name="name"]').prop('value')).toBe(
       `a_1__a_strange_notebook_name__${fakeTimestamp}`
     );
   });
 
-  it('Should show error message if run name is empty', async () => {
+  it('Should show error message if execution name is empty', async () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    simulateFieldChange(schedulerForm, 'input[name="jobId"]', 'jobId', '');
+    simulateFieldChange(schedulerForm, 'input[name="name"]', 'name', '');
     schedulerForm.find('SubmitButton button').simulate('click');
     await immediatePromise();
-    expect(schedulerForm.html()).toContain('Run name is required');
+    expect(schedulerForm.html()).toContain('Execution name is required');
   });
 
   it('Should show error message if bucket is empty', async () => {
@@ -296,19 +300,19 @@ describe('SchedulerForm', () => {
     );
   });
 
-  it(`Should show error message if run name contains character other than letter
+  it(`Should show error message if execution name contains character other than letter
       , number, and underscore`, async () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
-    simulateFieldChange(schedulerForm, 'input[name="jobId"]', 'jobId', '!');
+    simulateFieldChange(schedulerForm, 'input[name="name"]', 'name', '!');
     await immediatePromise();
     expect(schedulerForm.html()).toContain(
-      'Run name can only contain letters, numbers, or underscores.'
+      'Execution name can only contain letters, numbers, or underscores.'
     );
 
-    simulateFieldChange(schedulerForm, 'input[name="jobId"]', 'jobId', '  ');
+    simulateFieldChange(schedulerForm, 'input[name="name"]', 'name', '  ');
     await immediatePromise();
     expect(schedulerForm.html()).toContain(
-      'Run name can only contain letters, numbers, or underscores.'
+      'Execution name can only contain letters, numbers, or underscores.'
     );
   });
 
@@ -316,9 +320,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -347,9 +351,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -366,7 +370,7 @@ describe('SchedulerForm', () => {
     );
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -383,9 +387,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -402,7 +406,7 @@ describe('SchedulerForm', () => {
     );
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -419,9 +423,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -432,7 +436,7 @@ describe('SchedulerForm', () => {
 
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -449,9 +453,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -468,19 +472,19 @@ describe('SchedulerForm', () => {
     );
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="sundayRun"]',
-      'sundayRun',
+      'input[name="sundayExecution"]',
+      'sundayExecution',
       true
     );
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="fridayRun"]',
-      'fridayRun',
+      'input[name="fridayExecution"]',
+      'fridayExecution',
       true
     );
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -497,9 +501,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -516,19 +520,19 @@ describe('SchedulerForm', () => {
     );
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="wednesdayRun"]',
-      'wednesdayRun',
+      'input[name="wednesdayExecution"]',
+      'wednesdayExecution',
       true
     );
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="saturdayRun"]',
-      'saturdayRun',
+      'input[name="saturdayExecution"]',
+      'saturdayExecution',
       true
     );
     await immediatePromise();
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -541,18 +545,18 @@ describe('SchedulerForm', () => {
     });
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="wednesdayRun"]',
-      'wednesdayRun',
+      'input[name="wednesdayExecution"]',
+      'wednesdayExecution',
       false
     );
     simulateCheckBoxChange(
       schedulerForm,
-      'input[name="saturdayRun"]',
-      'saturdayRun',
+      'input[name="saturdayExecution"]',
+      'saturdayExecution',
       false
     );
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
-      jobId: 'test_scheduled_job',
+      name: 'test_schedule',
       gcsBucket: 'gs://test-project',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       region: 'us-central1',
@@ -602,11 +606,13 @@ describe('SchedulerForm', () => {
 
   it('Updates settings accordingly when new values are empty', async () => {
     const uploadNotebookPromise = triggeredResolver();
-    const runNotebookPromise = triggeredResolver({ jobId: 'aiplatform_job_1' });
+    const executeNotebookPromise = triggeredResolver({
+      name: 'aiplatform_execution_1',
+    });
 
     mockNotebookContents.mockReturnValue(notebookContents);
     mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
-    mockRunNotebook.mockReturnValue(runNotebookPromise.promise);
+    mockExecuteNotebook.mockReturnValue(executeNotebookPromise.promise);
     mockSettingsGet
       .mockReturnValueOnce({ composite: 'us-central1' })
       .mockReturnValueOnce({ composite: 'CUSTOM' })
@@ -634,9 +640,9 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_immediate_job'
+      'input[name="name"]',
+      'name',
+      'test_execution'
     );
 
     simulateFieldChange(
@@ -656,7 +662,7 @@ describe('SchedulerForm', () => {
           asActivity={true}
           asError={false}
           text={
-            'Uploading Test Notebook.ipynb to gs://test-project/test_immediate_job/Test Notebook.ipynb'
+            'Uploading Test Notebook.ipynb to gs://test-project/test_execution/Test Notebook.ipynb'
           }
         />
       )
@@ -670,33 +676,35 @@ describe('SchedulerForm', () => {
         <Message
           asError={false}
           asActivity={true}
-          text={'Submitting Job to AI Platform'}
+          text={'Submitting execution'}
         />
       )
     ).toBe(true);
 
-    runNotebookPromise.resolve();
-    await runNotebookPromise.promise;
+    executeNotebookPromise.resolve();
+    await executeNotebookPromise.promise;
     schedulerForm.update();
 
-    const gcsPath = `${gcsBucket}/test_immediate_job/${notebookName}`;
+    const gcsPath = `${gcsBucket}/test_execution/${notebookName}`;
     expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
       notebookContents,
       gcsPath
     );
-    const aiPlatformRequest: RunNotebookRequest = {
-      jobId: 'test_immediate_job',
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_execution',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
-      outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
+      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
       scaleTier: 'BASIC',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: '',
       acceleratorCount: '',
     };
-    expect(mockGcpService.runNotebook).toHaveBeenCalledWith(aiPlatformRequest);
+    expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest
+    );
     expect(mockSettings.set).toHaveBeenCalledWith(
       'scaleTier',
       aiPlatformRequest.scaleTier
@@ -724,11 +732,13 @@ describe('SchedulerForm', () => {
 
   it('Submits an immediate job to AI Platform', async () => {
     const uploadNotebookPromise = triggeredResolver();
-    const runNotebookPromise = triggeredResolver({ jobId: 'aiplatform_job_1' });
+    const executeNotebookPromise = triggeredResolver({
+      name: 'aiplatform_execution_1',
+    });
 
     mockNotebookContents.mockReturnValue(notebookContents);
     mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
-    mockRunNotebook.mockReturnValue(runNotebookPromise.promise);
+    mockExecuteNotebook.mockReturnValue(executeNotebookPromise.promise);
 
     const props = {
       ...mockProps,
@@ -746,9 +756,9 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_immediate_job'
+      'input[name="name"]',
+      'name',
+      'test_execution'
     );
 
     // Submit the form and wait for an immediate promise to flush other promises
@@ -761,7 +771,7 @@ describe('SchedulerForm', () => {
           asActivity={true}
           asError={false}
           text={
-            'Uploading Test Notebook.ipynb to gs://test-project/test_immediate_job/Test Notebook.ipynb'
+            'Uploading Test Notebook.ipynb to gs://test-project/test_execution/Test Notebook.ipynb'
           }
         />
       )
@@ -775,35 +785,37 @@ describe('SchedulerForm', () => {
         <Message
           asError={false}
           asActivity={true}
-          text={'Submitting Job to AI Platform'}
+          text={'Submitting execution'}
         />
       )
     ).toBe(true);
 
-    runNotebookPromise.resolve();
-    await runNotebookPromise.promise;
+    executeNotebookPromise.resolve();
+    await executeNotebookPromise.promise;
     schedulerForm.update();
 
-    const gcsPath = `${gcsBucket}/test_immediate_job/${notebookName}`;
+    const gcsPath = `${gcsBucket}/test_execution/${notebookName}`;
     expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
       notebookContents,
       gcsPath
     );
-    const aiPlatformRequest: RunNotebookRequest = {
-      jobId: 'test_immediate_job',
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_execution',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: 'n1-standard-4',
-      outputNotebookGcsPath: `${gcsBucket}/test_immediate_job/test_immediate_job.ipynb`,
+      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
       scaleTier: 'CUSTOM',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: 'NVIDIA_TESLA_K80',
       acceleratorCount: '1',
     };
-    expect(mockGcpService.runNotebook).toHaveBeenCalledWith(aiPlatformRequest);
+    expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest
+    );
     expect(mockSettings.set).toHaveBeenCalledWith(
-      'jobRegion',
+      'region',
       aiPlatformRequest.region
     );
     expect(mockSettings.set).toHaveBeenCalledWith(
@@ -838,7 +850,7 @@ describe('SchedulerForm', () => {
   it('Submits a scheduled job to Cloud Scheduler', async () => {
     const uploadNotebookPromise = triggeredResolver();
     const scheduleNotebookPromise = triggeredResolver({
-      name: 'cloudscheduler_job_1',
+      name: 'scheduler_execution',
     });
 
     mockNotebookContents.mockReturnValue(notebookContents);
@@ -858,9 +870,9 @@ describe('SchedulerForm', () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_scheduled_job'
+      'input[name="name"]',
+      'name',
+      'test_schedule'
     );
     simulateFieldChange(
       schedulerForm,
@@ -927,7 +939,7 @@ describe('SchedulerForm', () => {
         <Message
           asError={false}
           asActivity={true}
-          text={'Submitting Job to Cloud Scheduler'}
+          text={'Submitting schedule'}
         />
       )
     ).toBe(true);
@@ -936,17 +948,17 @@ describe('SchedulerForm', () => {
     await scheduleNotebookPromise.promise;
     schedulerForm.update();
 
-    const gcsPath = `${gcsBucket}/test_scheduled_job/${notebookName}`;
+    const gcsPath = `${gcsBucket}/test_schedule/${notebookName}`;
     expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
       notebookContents,
       gcsPath
     );
-    const aiPlatformRequest: RunNotebookRequest = {
-      jobId: 'test_scheduled_job',
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_schedule',
       imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: 'n1-standard-16',
-      outputNotebookGcsPath: `${gcsBucket}/test_scheduled_job/test_scheduled_job.ipynb`,
+      outputNotebookGcsPath: `${gcsBucket}/test_schedule/test_schedule.ipynb`,
       scaleTier: 'CUSTOM',
       gcsBucket: 'gs://test-project',
       region: 'us-east1',
@@ -982,8 +994,8 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
+      'input[name="name"]',
+      'name',
       'test_failed_upload'
     );
 
@@ -1006,14 +1018,14 @@ describe('SchedulerForm', () => {
       notebookContents,
       gcsPath
     );
-    expect(mockGcpService.runNotebook).not.toHaveBeenCalled();
+    expect(mockGcpService.executeNotebook).not.toHaveBeenCalled();
     expect(schedulerForm.find(SubmittedJob).exists()).toBe(false);
   });
 
-  it('Fails to submit job', async () => {
+  it('Fails to submit execution', async () => {
     mockNotebookContents.mockReturnValue(notebookContents);
     mockUploadNotebook.mockResolvedValue(true);
-    mockRunNotebook.mockRejectedValue(
+    mockExecuteNotebook.mockRejectedValue(
       'PERMISSION_DENIED: User does not have necessary permissions'
     );
 
@@ -1021,9 +1033,9 @@ describe('SchedulerForm', () => {
 
     simulateFieldChange(
       schedulerForm,
-      'input[name="jobId"]',
-      'jobId',
-      'test_failed_job_submission'
+      'input[name="name"]',
+      'name',
+      'test_failed_execution'
     );
 
     // Submit the form and wait for an immediate promise to flush other promises
@@ -1031,9 +1043,9 @@ describe('SchedulerForm', () => {
     await immediatePromise();
     schedulerForm.update();
 
-    const gcsPath = `${gcsBucket}/test_failed_job_submission/${notebookName}`;
+    const gcsPath = `${gcsBucket}/test_failed_execution/${notebookName}`;
     const errorText =
-      'PERMISSION_DENIED: User does not have necessary permissions: Unable to submit job';
+      'PERMISSION_DENIED: User does not have necessary permissions: Unable to submit execution';
     expect(
       schedulerForm.contains(
         <Message asActivity={false} asError={true} text={errorText} />
@@ -1044,19 +1056,21 @@ describe('SchedulerForm', () => {
       notebookContents,
       gcsPath
     );
-    const aiPlatformRequest: RunNotebookRequest = {
-      jobId: 'test_failed_job_submission',
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_failed_execution',
       imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
-      outputNotebookGcsPath: `${gcsBucket}/test_failed_job_submission/test_failed_job_submission.ipynb`,
+      outputNotebookGcsPath: `${gcsBucket}/test_failed_execution/test_failed_execution.ipynb`,
       scaleTier: 'BASIC',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
       acceleratorType: '',
       acceleratorCount: '',
     };
-    expect(mockGcpService.runNotebook).toHaveBeenCalledWith(aiPlatformRequest);
+    expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest
+    );
     expect(schedulerForm.find(SubmittedJob).exists()).toBe(false);
   });
 });

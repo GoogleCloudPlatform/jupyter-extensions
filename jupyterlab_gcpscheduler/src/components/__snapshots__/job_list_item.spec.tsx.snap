@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JobListItem Renders for failed run 1`] = `
+exports[`JobListItem Renders for failed execution 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
@@ -21,10 +21,10 @@ exports[`JobListItem Renders for failed run 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -33,15 +33,13 @@ exports[`JobListItem Renders for failed run 1`] = `
       >
         <span>
           May 1, 2020, 7:09 PM
-           - 
-          Single run
         </span>
       </div>
       <div
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
         />
@@ -60,7 +58,7 @@ exports[`JobListItem Renders for failed run 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -72,7 +70,7 @@ exports[`JobListItem Renders for failed run 1`] = `
         <ShareDialog
           cloudBucket="bucket"
           handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
       <WithStyles(ForwardRef(MenuItem))
@@ -90,7 +88,7 @@ exports[`JobListItem Renders for failed run 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >
@@ -124,10 +122,10 @@ exports[`JobListItem Renders for failed schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -144,7 +142,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Latest run: 
+          Latest execution: 
           May 1, 2020, 7:09 PM
         </span>
       </div>
@@ -152,9 +150,9 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
-          text="VIEW LATEST RUN RESULT"
+          text="VIEW LATEST EXECUTION RESULT"
         />
       </div>
     </div>
@@ -171,7 +169,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -191,7 +189,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >
@@ -204,7 +202,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
 </WithStyles(ForwardRef(Grid))>
 `;
 
-exports[`JobListItem Renders for running run 1`] = `
+exports[`JobListItem Renders for running execution 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
@@ -225,10 +223,10 @@ exports[`JobListItem Renders for running run 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -237,15 +235,13 @@ exports[`JobListItem Renders for running run 1`] = `
       >
         <span>
           May 1, 2020, 7:09 PM
-           - 
-          Single run
         </span>
       </div>
       <div
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
         />
@@ -264,7 +260,7 @@ exports[`JobListItem Renders for running run 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -276,7 +272,7 @@ exports[`JobListItem Renders for running run 1`] = `
         <ShareDialog
           cloudBucket="bucket"
           handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
       <WithStyles(ForwardRef(MenuItem))
@@ -294,7 +290,7 @@ exports[`JobListItem Renders for running run 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >
@@ -328,10 +324,10 @@ exports[`JobListItem Renders for running schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -348,7 +344,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Latest run: 
+          Latest execution: 
           May 1, 2020, 7:09 PM
         </span>
       </div>
@@ -356,9 +352,9 @@ exports[`JobListItem Renders for running schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
-          text="VIEW LATEST RUN RESULT"
+          text="VIEW LATEST EXECUTION RESULT"
         />
       </div>
     </div>
@@ -375,7 +371,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -395,7 +391,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >
@@ -408,7 +404,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
 </WithStyles(ForwardRef(Grid))>
 `;
 
-exports[`JobListItem Renders for successful run 1`] = `
+exports[`JobListItem Renders for successful execution 1`] = `
 <WithStyles(ForwardRef(Grid))
   className="job_fxk0enj"
   container={true}
@@ -429,10 +425,10 @@ exports[`JobListItem Renders for successful run 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -441,15 +437,13 @@ exports[`JobListItem Renders for successful run 1`] = `
       >
         <span>
           May 1, 2020, 7:09 PM
-           - 
-          Single run
         </span>
       </div>
       <div
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
         />
@@ -468,7 +462,7 @@ exports[`JobListItem Renders for successful run 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -480,7 +474,7 @@ exports[`JobListItem Renders for successful run 1`] = `
         <ShareDialog
           cloudBucket="bucket"
           handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
         />
       </WithStyles(ForwardRef(MenuItem))>
       <WithStyles(ForwardRef(MenuItem))
@@ -498,7 +492,7 @@ exports[`JobListItem Renders for successful run 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >
@@ -532,10 +526,10 @@ exports[`JobListItem Renders for successful schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_job1_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
-        text="notebook job1"
+        text="notebook abcd"
       />
     </div>
     <div>
@@ -552,7 +546,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Latest run: 
+          Latest execution: 
           May 1, 2020, 7:09 PM
         </span>
       </div>
@@ -560,9 +554,9 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
-          href="https://notebooks.cloud.google.com/view/test-project/notebook_job1/job1.ipynb"
+          href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
-          text="VIEW LATEST RUN RESULT"
+          text="VIEW LATEST EXECUTION RESULT"
         />
       </div>
     </div>
@@ -579,7 +573,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
     </WithStyles(ForwardRef(IconButton))>
     <WithStyles(ForwardRef(Menu))
       anchorEl={null}
-      id="run-menu"
+      id="execution-menu"
       keepMounted={true}
       onClose={[Function]}
       open={false}
@@ -599,7 +593,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
       >
         <a
           className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_job1/job1.ipynb"
+          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
           target="_blank"
           title="Download the notebook output from Google Cloud Storage"
         >

@@ -29,7 +29,7 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { Runs, Schedules } from '../interfaces';
+import { Executions, Schedules } from '../interfaces';
 import { GcpService } from '../service/gcp';
 import { JobListItem } from './job_list_item';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -41,9 +41,9 @@ interface Props {
 }
 
 interface State {
-  runsTab: {
+  executionsTab: {
     isLoading: boolean;
-    response: Runs;
+    response: Executions;
     error?: string;
   };
   schedulesTab: {
@@ -116,16 +116,16 @@ const StyledTablePagination = withStyles({
   },
 })(TablePagination);
 
-const TITLE_TEXT = 'Notebook Scheduler';
+const TITLE_TEXT = 'Notebook Executor';
 
-/** Panel component for displaying AI Platform runs */
+/** Panel component for displaying AI Platform executions */
 export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      runsTab: {
+      executionsTab: {
         isLoading: false,
-        response: { runs: [], pageToken: '' },
+        response: { executions: [], pageToken: '' },
       },
       schedulesTab: {
         isLoading: false,
@@ -156,17 +156,17 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.props.isVisible &&
       !(
         prevProps.isVisible ||
-        (this.state.tab === 0 && this.state.runsTab.isLoading) ||
+        (this.state.tab === 0 && this.state.executionsTab.isLoading) ||
         (this.state.tab === 1 && this.state.schedulesTab.isLoading)
       )
     ) {
-      this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage);
+      this._getExecutionsOrSchedules(this.state.tab, this.state.rowsPerPage);
       this.setState({ page: 0 });
     }
   }
 
   handleChangeTab(event: React.ChangeEvent<{}>, newValue: number) {
-    this._getRunsOrSchedules(newValue, this.state.rowsPerPage);
+    this._getExecutionsOrSchedules(newValue, this.state.rowsPerPage);
     this.setState({ tab: newValue, page: 0 });
   }
 
@@ -174,7 +174,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) {
-    this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage, true);
+    this._getExecutionsOrSchedules(
+      this.state.tab,
+      this.state.rowsPerPage,
+      true
+    );
     this.setState({ page: newPage });
   }
 
@@ -182,12 +186,12 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
     const newRowsPerPage = parseInt(event.target.value, DEFAULT_PAGE_SIZE);
-    this._getRunsOrSchedules(this.state.tab, newRowsPerPage);
+    this._getExecutionsOrSchedules(this.state.tab, newRowsPerPage);
     this.setState({ rowsPerPage: newRowsPerPage, page: 0 });
   }
 
   handleRefresh() {
-    this._getRunsOrSchedules(this.state.tab, this.state.rowsPerPage);
+    this._getExecutionsOrSchedules(this.state.tab, this.state.rowsPerPage);
   }
 
   labelDisplayRowsMesssage({ from, to, count }) {
@@ -195,18 +199,20 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   }
 
   render() {
-    const { error, runsTab, schedulesTab, projectId } = this.state;
+    const { error, executionsTab, schedulesTab, projectId } = this.state;
     const gcpService = this.props.gcpService;
-    let runsContent: JSX.Element;
+    let executionsContent: JSX.Element;
     let schedulesContent: JSX.Element;
-    if (runsTab.isLoading) {
-      runsContent = <LinearProgress />;
-    } else if (runsTab.error || error) {
-      runsContent = <Message text={runsTab.error || error} asError={true} />;
+    if (executionsTab.isLoading) {
+      executionsContent = <LinearProgress />;
+    } else if (executionsTab.error || error) {
+      executionsContent = (
+        <Message text={executionsTab.error || error} asError={true} />
+      );
     } else {
-      runsContent = (
+      executionsContent = (
         <ul className={localStyles.list}>
-          {runsTab.response.runs.map(j => (
+          {executionsTab.response.executions.map(j => (
             <JobListItem
               gcpService={gcpService}
               key={j.id}
@@ -243,7 +249,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           <header className={localStyles.header}>
             {TITLE_TEXT} <Badge value="alpha" />
           </header>
-          <IconButton title="Refresh Jobs" onClick={this.handleRefresh}>
+          <IconButton title="Refresh" onClick={this.handleRefresh}>
             <RefreshIcon />
           </IconButton>
         </div>
@@ -253,7 +259,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           variant="fullWidth"
           onChange={this.handleChangeTab}
         >
-          <StyledTab label="Runs" />
+          <StyledTab label="Executions" />
           <StyledTab label="Schedules" />
         </Tabs>
         <div
@@ -261,7 +267,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
           role="tabpanel"
           hidden={this.state.tab !== 0}
         >
-          {runsContent}
+          {executionsContent}
         </div>
         <div
           className={localStyles.tab}
@@ -291,7 +297,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   private shouldShowFooter() {
     if (
       this.state.tab === 0 &&
-      (this.state.runsTab.error || this.state.error)
+      (this.state.executionsTab.error || this.state.error)
     ) {
       return false;
     }
@@ -304,7 +310,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     return true;
   }
 
-  private _getRunsOrSchedules(
+  private _getExecutionsOrSchedules(
     tab: number,
     pageSize: number,
     getPageToken = false
@@ -313,11 +319,11 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     if (getPageToken) {
       pageToken =
         this.state.tab === 0
-          ? this.state.runsTab.response.pageToken
+          ? this.state.executionsTab.response.pageToken
           : this.state.schedulesTab.response.pageToken;
     }
     if (tab === 0) {
-      this._getRuns(pageSize, pageToken);
+      this._getExecutions(pageSize, pageToken);
     } else {
       this._getSchedules(pageSize, pageToken);
     }
@@ -354,28 +360,31 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     }
   }
 
-  private async _getRuns(pageSize: number, pageToken?: string) {
-    const emptyResponse = { runs: [], pageToken: undefined };
+  private async _getExecutions(pageSize: number, pageToken?: string) {
+    const emptyResponse = { executions: [], pageToken: undefined };
     try {
       this.setState({
-        runsTab: {
+        executionsTab: {
           isLoading: true,
           error: undefined,
           response: emptyResponse,
         },
       });
-      const runs = await this.props.gcpService.listRuns(pageSize, pageToken);
+      const executions = await this.props.gcpService.listExecutions(
+        pageSize,
+        pageToken
+      );
       this.setState({
-        runsTab: {
+        executionsTab: {
           isLoading: false,
-          response: runs,
+          response: executions,
         },
       });
     } catch (err) {
       this.setState({
-        runsTab: {
+        executionsTab: {
           isLoading: false,
-          error: `${err}: Unable to retrieve runs`,
+          error: `${err}: Unable to retrieve executions`,
           response: emptyResponse,
         },
       });
@@ -385,7 +394,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
 
 /** Widget to be registered in the left-side panel. */
 export class GcpScheduledJobsWidget extends ReactWidget {
-  id = 'gcpscheduledruns';
+  id = 'gcpscheduledexecutions';
   private visibleSignal = new Signal<GcpScheduledJobsWidget, boolean>(this);
 
   constructor(private readonly gcpService: GcpService) {

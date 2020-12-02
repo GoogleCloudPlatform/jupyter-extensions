@@ -17,10 +17,10 @@ export interface CloudSchedulerJob {
 }
 
 /** Message type describing an AI Platform training Job */
-export interface RunNotebookRequest {
+export interface ExecuteNotebookRequest {
   imageUri: string;
   inputNotebookGcsPath: string;
-  jobId: string;
+  name: string;
   masterType: string;
   outputNotebookGcsPath: string;
   gcsBucket: string;
@@ -47,8 +47,8 @@ export type JobState =
   | 'DISABLED'
   | 'UPDATE_FAILED';
 
-export interface Runs {
-  runs: Run[];
+export interface Executions {
+  executions: Execution[];
   pageToken: string;
 }
 
@@ -99,7 +99,7 @@ export interface Job {
 }
 
 /** UI interface used to represent a Scheduled Notebook Job */
-export interface Run extends Job {
+export interface Execution extends Job {
   type: string;
   bucketLink?: string;
 }

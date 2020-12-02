@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const DAY_OF_WEEK_NAME_TO_VALUE = {
-  SUN: 0,
-  MON: 1,
-  TUE: 2,
-  WED: 3,
-  THU: 4,
-  FRI: 5,
-  SAT: 6,
-};
-const MONTH_NAME_TO_VALUE = {
-  JAN: 1,
-  FEB: 2,
-  MAR: 3,
-  APR: 4,
-  MAY: 5,
-  JUN: 6,
-  JUL: 7,
-  AUG: 8,
-  SEP: 9,
-  OCT: 10,
-  NOV: 11,
-  DEC: 12,
-};
-const DAY_OF_WEEK_VALUE_TO_NAME = [
+const DAY_OF_WEEK_NAME_TO_VALUE: ReadonlyMap<string, number> = new Map<
+  string,
+  number
+>([
+  ['SUN', 0],
+  ['MON', 1],
+  ['TUE', 2],
+  ['WED', 3],
+  ['THU', 4],
+  ['FRI', 5],
+  ['SAT', 6],
+]);
+const MONTH_NAME_TO_VALUE: ReadonlyMap<string, number> = new Map<
+  string,
+  number
+>([
+  ['JAN', 1],
+  ['FEB', 2],
+  ['MAR', 3],
+  ['APR', 4],
+  ['MAY', 5],
+  ['JUN', 6],
+  ['JUL', 7],
+  ['AUG', 8],
+  ['SEP', 9],
+  ['OCT', 10],
+  ['NOV', 11],
+  ['DEC', 12],
+]);
+const DAY_OF_WEEK_VALUE_TO_NAME: ReadonlyArray<string> = [
   'Sunday',
   'Monday',
   'Tuesday',
@@ -46,7 +51,7 @@ const DAY_OF_WEEK_VALUE_TO_NAME = [
   'Friday',
   'Saturday',
 ];
-const MONTH_VALUE_TO_NAME = [
+const MONTH_VALUE_TO_NAME: ReadonlyArray<string> = [
   'January',
   'February',
   'March',
@@ -60,7 +65,7 @@ const MONTH_VALUE_TO_NAME = [
   'November',
   'December',
 ];
-const NUMBER_OF_DAYS_PER_MONTH = [
+const NUMBER_OF_DAYS_PER_MONTH: number[] = [
   31,
   28,
   31,
@@ -82,11 +87,11 @@ interface CronPartValues {
 }
 
 interface Cron {
-  minute: CronPartValues | undefined;
-  hour: CronPartValues | undefined;
-  date: CronPartValues | undefined;
-  month: CronPartValues | undefined;
-  week: CronPartValues | undefined;
+  minute: CronPartValues;
+  hour: CronPartValues;
+  date: CronPartValues;
+  month: CronPartValues;
+  week: CronPartValues;
 }
 
 interface NextDate {
@@ -99,17 +104,12 @@ interface NextDate {
 }
 
 //   Helper functions
-function getDaysInMonth(monthIndex: number, year: number) {
+function getDaysInMonth(month: number, year: number) {
   // if leap year and february
-  if (
-    year % 4 === 0 &&
-    year % 100 === 0 &&
-    year % 400 === 0 &&
-    monthIndex === 2
-  ) {
+  if (year % 4 === 0 && year % 100 === 0 && year % 400 === 0 && month === 2) {
     return 29;
   }
-  return NUMBER_OF_DAYS_PER_MONTH[monthIndex - 1];
+  return NUMBER_OF_DAYS_PER_MONTH[month - 1];
 }
 
 function parseValue(
@@ -117,18 +117,18 @@ function parseValue(
   allowedMin: number,
   allowedMax: number
 ): number {
-  if (DAY_OF_WEEK_NAME_TO_VALUE[value] !== undefined) {
-    return DAY_OF_WEEK_NAME_TO_VALUE[value];
+  if (DAY_OF_WEEK_NAME_TO_VALUE.get(value) !== undefined) {
+    return DAY_OF_WEEK_NAME_TO_VALUE.get(value) as number;
   }
-  if (MONTH_NAME_TO_VALUE[value] !== undefined) {
-    return MONTH_NAME_TO_VALUE[value];
+  if (MONTH_NAME_TO_VALUE.get(value) !== undefined) {
+    return MONTH_NAME_TO_VALUE.get(value) as number;
   }
   const parsedValue = Number(value);
   if (isNaN(parsedValue)) {
-    throw 'Invalid value in cron part';
+    throw new Error('Invalid value in cron part');
   }
   if (parsedValue < allowedMin || parsedValue > allowedMax) {
-    throw 'Value not in range';
+    throw new Error('Value not in allowed range for cron string');
   }
   return parsedValue;
 }
@@ -158,29 +158,29 @@ function isAP(list: number[]): number | undefined {
 function andJoin(list: number[] | string[]) {
   const lastElement = list.pop();
   return list.length > 0
-    ? list.join(', ') + ' and ' + lastElement
+    ? `${list.join(', ')} and ${lastElement}`
     : lastElement;
 }
 
 function addOrdinal(value: number) {
   if (value % 10 === 1 && value % 100 !== 11) {
-    return value + 'st';
+    return `${value}st`;
   }
   if (value % 10 === 2 && value % 100 !== 12) {
-    return value + 'nd';
+    return `${value}nd`;
   }
   if (value % 10 === 3 && value % 100 !== 13) {
-    return value + 'rd';
+    return `${value}rd`;
   }
-  return value + 'th';
+  return `${value}th`;
 }
 
 function getTextWithInterval(part: CronPartValues, partName: string) {
   return part.allowsAll
-    ? 'every ' + partName
+    ? `every ${partName}`
     : part.interval
-    ? 'every ' + addOrdinal(part.interval) + ' ' + partName
-    : partName + ' ' + andJoin(part.values);
+    ? `every ${addOrdinal(part.interval)} ${partName}`
+    : `${partName} ${andJoin(part.values)}`;
 }
 
 function getValuesForSubexpression(
@@ -189,9 +189,10 @@ function getValuesForSubexpression(
   allowedMax: number,
   allValuesLength: number
 ): CronPartValues {
-  const subexprParts = subexpr.split(',');
+  const subexprParts = subexpr.trim().split(',');
   const output = new Set();
   for (let part of subexprParts) {
+    if (part === '') continue;
     let interval = undefined;
     let candidates = [];
     if (part.includes('/')) {
@@ -208,18 +209,20 @@ function getValuesForSubexpression(
         upperLimit = undefined;
       if (part.includes('-')) {
         const limits = part.split('-');
-        lowerLimit = parseValue(limits[0], allowedMin, allowedMax) as number;
-        upperLimit = parseValue(limits[1], allowedMin, allowedMax) as number;
+        lowerLimit = parseValue(limits[0], allowedMin, allowedMax);
+        upperLimit = parseValue(limits[1], allowedMin, allowedMax);
       } else {
-        lowerLimit = parseValue(part, allowedMin, allowedMax) as number;
+        lowerLimit = parseValue(part, allowedMin, allowedMax);
         upperLimit = allowedMax;
       }
       if (upperLimit < lowerLimit) {
-        throw 'Range not properly constructed';
+        throw new Error('Range not properly constructed in cron string');
       }
       candidates = createRange(lowerLimit, upperLimit, interval || 1);
     }
-    candidates.forEach(item => output.add(item));
+    candidates.forEach(item => {
+      output.add(item);
+    });
   }
   const values = (Array.from(output) as number[]).sort((n1, n2) => n1 - n2);
   let possibleInterval = isAP(values);
@@ -253,32 +256,40 @@ function isDateEligible(cron: Cron, date: Date) {
   }
 }
 
-function getCron(cronString: string): Cron | undefined {
+function getCron(cronString: string): Cron {
   const cronArray = cronString
     .toUpperCase()
     .trim()
     .split(' ');
-  try {
-    return cronArray.length === 5
-      ? {
-          week: getValuesForSubexpression(cronArray[4], 0, 6, 7),
-          month: getValuesForSubexpression(cronArray[3], 1, 12, 12),
-          date: getValuesForSubexpression(cronArray[2], 1, 31, 31),
-          hour: getValuesForSubexpression(cronArray[1], 0, 23, 24),
-          minute: getValuesForSubexpression(cronArray[0], 0, 59, 60),
-        }
-      : undefined;
-  } catch (e) {
-    return undefined;
+  if (cronArray.length !== 5) {
+    throw new Error('Cron string must have five parts');
   }
+  return {
+    week: getValuesForSubexpression(cronArray[4], 0, 6, 7),
+    month: getValuesForSubexpression(cronArray[3], 1, 12, 12),
+    date: getValuesForSubexpression(cronArray[2], 1, 31, 31),
+    hour: getValuesForSubexpression(cronArray[1], 0, 23, 24),
+    minute: getValuesForSubexpression(cronArray[0], 0, 59, 60),
+  };
 }
 
-export function customDateFormat(date: Date, time = false) {
+/**
+ * Return date string that follows notebooks' custom date format
+ */
+export function customDateFormat(
+  date: Date | undefined,
+  timeZone?: string,
+  time = false
+) {
+  if (!date) {
+    return '';
+  }
   const options = {
     hour: 'numeric',
     minute: 'numeric',
     hourCycle: 'h12',
     timeZoneName: 'short',
+    timeZone,
   };
   if (time) {
     return date.toLocaleTimeString('en-US', options);
@@ -304,16 +315,16 @@ export function customShortDateFormat(date: Date) {
 }
 //Helper functions end
 
-export function getNextRunAfterDate(
+/**
+ * Tries to find the next execution date after a given date for a given cron string
+ */
+export function getNextExecutionAfterDate(
   cronString: string,
   date: Date
 ): Date | undefined {
   const cron = getCron(cronString);
-  if (!cron) {
-    return undefined;
-  }
   const nextDate: NextDate = { valueSet: false };
-  // check if it can be run again on provided date
+  // check if it can be execution again on provided date
   if (isDateEligible(cron, date)) {
     if (
       cron.hour.values.includes(date.getHours()) &&
@@ -342,12 +353,13 @@ export function getNextRunAfterDate(
       nextDate.year = date.getFullYear();
     }
   }
-  // can't be run on provided date, try any day after
+  // can't be execution on provided date, try any day after
   if (!nextDate.valueSet) {
-    //earliest time in the day
+    // earliest time in the day
     nextDate.minute = cron.minute.values[0];
     nextDate.hour = cron.hour.values[0];
-    // try to stay in current month and current year, allow check for up to for years away for leap year cases
+    // try to stay in current month and current year, allow check for up to for
+    // years away for leap year cases
     for (
       let yearIter = date.getFullYear();
       yearIter <= date.getFullYear() + 4 && !nextDate.valueSet;
@@ -381,27 +393,46 @@ export function getNextRunAfterDate(
       }
     }
   }
-  return new Date(
-    nextDate.year,
-    nextDate.month - 1,
-    nextDate.date,
-    nextDate.hour,
-    nextDate.minute
-  );
+  if (nextDate.valueSet) {
+    return new Date(
+      nextDate.year!,
+      nextDate.month! - 1,
+      nextDate.date!,
+      nextDate.hour!,
+      nextDate.minute!
+    );
+  } else {
+    // Should not occur if cron string is valid
+    throw new Error('Could not find valid date');
+  }
 }
 
-export function getNextRunDate(cronString: string) {
-  const nextRunDate = getNextRunAfterDate(cronString, new Date());
-  return nextRunDate
-    ? 'Runs will start on ' + customDateFormat(nextRunDate)
-    : '';
-}
-
-export function getHumanReadableCron(cronString: string) {
-  const cron = getCron(cronString);
-  if (!cron) {
+/**
+ * Tries to find the next execution date after current date and time and returns
+ * string for executions
+ */
+export function getNextExecutionDate(cronString: string) {
+  try {
+    return `Executions will start on ${customDateFormat(
+      getNextExecutionAfterDate(cronString, new Date())
+    )}`;
+  } catch (err) {
     return '';
   }
+}
+
+/**
+ * Tries to create a human readable version of the given cron string if possible
+ * if timeZone is not provided, the system's timeZone will be used
+ */
+export function getHumanReadableCron(cronString: string, timeZone?: string) {
+  let cron = undefined;
+  try {
+    cron = getCron(cronString);
+  } catch (err) {
+    return cronString;
+  }
+
   let cronText = '';
   if (
     cron.date.allowsAll &&
@@ -413,9 +444,8 @@ export function getHumanReadableCron(cronString: string) {
   }
   if (!cron.date.allowsAll) {
     cronText += cron.date.interval
-      ? ' every ' + cron.date.interval + ' days'
-      : ' on the ' +
-        andJoin(cron.date.values.map(ele => addOrdinal(ele))) +
+      ? ` every ${cron.date.interval} days`
+      : ` on the ${andJoin(cron.date.values.map(ele => addOrdinal(ele)))}` +
         (cron.month.allowsAll ? ' of every month' : '');
   }
   if (!cron.month.allowsAll) {
@@ -426,16 +456,16 @@ export function getHumanReadableCron(cronString: string) {
       ele => MONTH_VALUE_TO_NAME[ele - 1]
     );
     cronText += cron.month.interval
-      ? ' every ' + addOrdinal(cron.month.interval) + ' month'
-      : ' ' + andJoin(newValues);
+      ? ` every ${addOrdinal(cron.month.interval)} month`
+      : ` ${andJoin(newValues)}`;
   }
   if (!cron.week.allowsAll) {
     if (!cron.date.allowsAll) {
       cronText += ' and';
     }
-    cronText +=
-      ' on ' +
-      andJoin(cron.week.values.map(ele => DAY_OF_WEEK_VALUE_TO_NAME[ele]));
+    cronText += ` on ${andJoin(
+      cron.week.values.map(ele => DAY_OF_WEEK_VALUE_TO_NAME[ele])
+    )}`;
   }
 
   if (cron.minute.allowsAll && cron.hour.allowsAll) {
@@ -444,9 +474,9 @@ export function getHumanReadableCron(cronString: string) {
     const date = new Date();
     date.setHours(cron.hour.values[0]);
     date.setMinutes(cron.minute.values[0]);
-    cronText += ' at ' + customDateFormat(date, true);
+    cronText += ` at ${customDateFormat(date, timeZone, true)}`;
   } else {
-    cronText += ' at ' + getTextWithInterval(cron.minute, 'minute');
+    cronText += ` at ${getTextWithInterval(cron.minute, 'minute')}`;
     cronText += cron.minute.allowsAll ? ' of ' : ' past ';
     cronText += getTextWithInterval(cron.hour, 'hour');
   }

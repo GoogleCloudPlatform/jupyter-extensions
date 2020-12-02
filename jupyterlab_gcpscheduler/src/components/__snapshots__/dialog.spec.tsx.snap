@@ -11,7 +11,10 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
     <span
       className="title_fiw0lep"
     >
-      Create a notebook job 
+      Create a notebook
+       
+      execution
+       
       <Badge
         value="alpha"
       />
@@ -49,7 +52,10 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
     <span
       className="title_fiw0lep"
     >
-      Create a notebook job 
+      Create a notebook
+       
+      execution
+       
       <Badge
         value="alpha"
       />
@@ -87,7 +93,10 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
     <span
       className="title_fiw0lep"
     >
-      Create a notebook job 
+      Create a notebook
+       
+      execution
+       
       <Badge
         value="alpha"
       />
@@ -125,7 +134,10 @@ exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
     <span
       className="title_fiw0lep"
     >
-      Create a notebook job 
+      Create a notebook
+       
+      execution
+       
       <Badge
         value="alpha"
       />
@@ -328,6 +340,8 @@ E=m
       }
       notebookName="Foo.ipynb"
       onDialogClose={[Function]}
+      onScheduleTypeChange={[Function]}
+      onShowFormChange={[Function]}
       permissions={
         Object {
           "toExecute": Array [],
