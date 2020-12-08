@@ -2,7 +2,7 @@ name: Presubmit
 on:
   pull_request:
     branches:
-      - master
+      - "*"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,11 +12,11 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v1
         with:
-          node-version: '10'
+          node-version: "10"
       - name: Install Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: "3.7"
       - name: Install Pipenv
         run: pip install pipenv && pipenv install -d
       - name: Build TypeScript
