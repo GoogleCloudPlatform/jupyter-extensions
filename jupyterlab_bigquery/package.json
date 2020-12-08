@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_bigquery",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "BigQuery Extension",
   "keywords": [
     "jupyter",
