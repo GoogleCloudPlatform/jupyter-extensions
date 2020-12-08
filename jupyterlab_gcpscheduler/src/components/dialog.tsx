@@ -24,15 +24,14 @@ import {
   css,
   MenuCloseHandler,
   MenuIcon,
+  IconButtonMenu,
   Message,
   Badge,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
-import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
 import { EXECUTIONS_LINK, SCHEDULES_LINK } from '../data';
 import { GcpService } from '../service/gcp';
 import {
@@ -93,7 +92,6 @@ interface State {
   submittedMessage?: SubmittedMessage;
   creatingExecution: boolean;
   showCreateForm: boolean;
-  anchorEl: null | HTMLElement;
 }
 
 const localStyles = stylesheet({
@@ -135,14 +133,11 @@ export class SchedulerDialog extends React.Component<Props, State> {
       dialogClosedByUser: false,
       creatingExecution: true,
       showCreateForm: true,
-      anchorEl: null,
     };
     this._settingsChanged = this._settingsChanged.bind(this);
     this._onDialogClose = this._onDialogClose.bind(this);
     this._onScheduleTypeChange = this._onScheduleTypeChange.bind(this);
     this._onShowFormChange = this._onShowFormChange.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleClose = this.handleClose.bind(this);
   }
 
   /** Establishes the binding for Settings Signal and invokes the handler. */
@@ -174,14 +169,6 @@ export class SchedulerDialog extends React.Component<Props, State> {
     }
   }
 
-  handleClick(event: React.MouseEvent<HTMLButtonElement>) {
-    this.setState({ anchorEl: event.currentTarget });
-  }
-
-  handleClose() {
-    this.setState({ anchorEl: null });
-  }
-
   render() {
     const projectId = this.getProjectId();
     return (
@@ -193,38 +180,32 @@ export class SchedulerDialog extends React.Component<Props, State> {
               {this.state.creatingExecution ? 'execution' : 'schedule'}{' '}
               <Badge value="alpha" />
             </span>
-            <IconButton onClick={this.handleClick}>
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="create-menu"
-              anchorEl={this.state.anchorEl}
-              keepMounted
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.handleClose}
-            >
-              <MenuItem id="viewAll" key="viewAll" dense={true}>
-                <a
-                  href={
-                    this.state.creatingExecution
-                      ? `${EXECUTIONS_LINK}?project=${projectId}`
-                      : `${SCHEDULES_LINK}?project=${projectId}`
-                  }
-                  target="_blank"
-                  onClick={this.handleClose}
+            <IconButtonMenu
+              icon={<MenuIcon />}
+              menuItems={menuCloseHandler => [
+                <MenuItem id="viewAll" key="viewAll" dense={true}>
+                  <a
+                    href={
+                      this.state.creatingExecution
+                        ? `${EXECUTIONS_LINK}?project=${projectId}`
+                        : `${SCHEDULES_LINK}?project=${projectId}`
+                    }
+                    target="_blank"
+                    onClick={menuCloseHandler}
+                  >
+                    View all{' '}
+                    {this.state.creatingExecution ? 'executions' : 'schedules'}{' '}
+                  </a>
+                </MenuItem>,
+                <MenuItem
+                  key="reset"
+                  dense={true}
+                  onClick={() => this._onResetSettings(menuCloseHandler)}
                 >
-                  View all{' '}
-                  {this.state.creatingExecution ? 'executions' : 'schedules'}{' '}
-                </a>
-              </MenuItem>
-              <MenuItem
-                key="reset"
-                dense={true}
-                onClick={() => this._onResetSettings(this.handleClose)}
-              >
-                Reset configuration
-              </MenuItem>
-            </Menu>
+                  Reset configuration
+                </MenuItem>,
+              ]}
+            ></IconButtonMenu>
           </header>
         )}
         <main className={localStyles.main}>{this._getDialogContent()}</main>

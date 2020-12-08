@@ -20,6 +20,7 @@ import {
   GreenCheckCircle,
   RedClose,
   MenuIcon,
+  IconButtonMenu,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
@@ -27,19 +28,13 @@ import { customShortDateFormat, getHumanReadableCron } from '../cron';
 import { ShareDialog } from './share_dialog';
 import { Execution, Schedule } from '../interfaces';
 import { GcpService } from '../service/gcp';
-import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
 import { Grid } from '@material-ui/core';
 
 interface Props {
   job: Execution | Schedule;
   projectId: string;
   gcpService: GcpService;
-}
-
-interface State {
-  anchorEl: null | HTMLElement;
 }
 
 const localStyles = stylesheet({
@@ -81,122 +76,94 @@ function getIconForJobState(state: string): JSX.Element {
 }
 
 /** Notebook job list item */
-export class JobListItem extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { anchorEl: null };
-    this.handleClick = this.handleClick.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-  }
-
-  handleClick(event: React.MouseEvent<HTMLButtonElement>) {
-    this.setState({ anchorEl: event.currentTarget });
-  }
-
-  handleClose() {
-    this.setState({ anchorEl: null });
-  }
-
-  render() {
-    const { gcpService, job } = this.props;
-    const schedule = 'schedule' in job;
-    const endTime = new Date(job.endTime || job.createTime);
-    return (
-      <Grid className={localStyles.job} container spacing={1}>
-        <Grid item xs={1}>
-          {' '}
-          {getIconForJobState(job.state)}
-        </Grid>
-        <Grid item xs={job.state === SUCCEEDED ? 10 : 11}>
-          <div className={css.bold}>
+export function JobListItem(props: Props) {
+  const { gcpService, job } = props;
+  const schedule = 'schedule' in job;
+  const endTime = new Date(job.endTime || job.createTime);
+  return (
+    <Grid className={localStyles.job} container spacing={1}>
+      <Grid item xs={1}>
+        {' '}
+        {getIconForJobState(job.state)}
+      </Grid>
+      <Grid item xs={job.state === SUCCEEDED ? 10 : 11}>
+        <div className={css.bold}>
+          <LearnMoreLink
+            secondary={true}
+            noUnderline={true}
+            text={job.name}
+            href={job.link}
+          />
+        </div>
+        <div>
+          {!schedule && (
+            <div className={localStyles.jobCaption}>
+              <span>{customShortDateFormat(endTime)}</span>
+            </div>
+          )}
+          {schedule && (
+            <React.Fragment>
+              <div className={localStyles.jobCaption}>
+                <span>
+                  Frequency: {getHumanReadableCron((job as Schedule).schedule)}
+                </span>
+              </div>
+              <div className={localStyles.jobCaption}>
+                <span>Latest execution: {customShortDateFormat(endTime)}</span>
+              </div>
+            </React.Fragment>
+          )}
+          <div className={classes(css.bold, localStyles.spacing)}>
             <LearnMoreLink
-              secondary={true}
               noUnderline={true}
-              text={job.name}
-              href={job.link}
+              href={job.viewerLink}
+              text={schedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
             />
           </div>
-          <div>
-            {!schedule && (
-              <div className={localStyles.jobCaption}>
-                <span>{customShortDateFormat(endTime)}</span>
-              </div>
-            )}
-            {schedule && (
-              <React.Fragment>
-                <div className={localStyles.jobCaption}>
-                  <span>
-                    Frequency:{' '}
-                    {getHumanReadableCron((job as Schedule).schedule)}
-                  </span>
-                </div>
-                <div className={localStyles.jobCaption}>
-                  <span>
-                    Latest execution: {customShortDateFormat(endTime)}
-                  </span>
-                </div>
-              </React.Fragment>
-            )}
-            <div className={classes(css.bold, localStyles.spacing)}>
-              <LearnMoreLink
-                noUnderline={true}
-                href={job.viewerLink}
-                text={schedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
-              />
-            </div>
+        </div>
+      </Grid>
+      {job.state === SUCCEEDED && (
+        <Grid item xs={1}>
+          <div className={localStyles.align}>
+            <IconButtonMenu
+              icon={<MenuIcon />}
+              menuItems={menuCloseHandler => [
+                !schedule ? (
+                  <MenuItem key="shareNotebook" dense={true}>
+                    <ShareDialog
+                      cloudBucket={(job as Execution).bucketLink}
+                      shareLink={job.viewerLink}
+                      handleClose={menuCloseHandler}
+                    />
+                  </MenuItem>
+                ) : null,
+                <MenuItem
+                  id="open"
+                  key="openNotebook"
+                  dense={true}
+                  onClick={() => gcpService.importNotebook(job.gcsFile)}
+                >
+                  Open source notebook
+                </MenuItem>,
+                <MenuItem
+                  key="downloadSourceNotebook"
+                  dense={true}
+                  onClick={menuCloseHandler}
+                >
+                  <a
+                    className={localStyles.menuLink}
+                    href={job.downloadLink}
+                    target="_blank"
+                    title="Download the notebook output from Google Cloud Storage"
+                  >
+                    Download source notebook
+                  </a>
+                </MenuItem>,
+              ]}
+            ></IconButtonMenu>
           </div>
         </Grid>
-        {job.state === SUCCEEDED && (
-          <Grid item xs={1}>
-            {''}
-            <IconButton
-              className={localStyles.align}
-              onClick={this.handleClick}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="execution-menu"
-              anchorEl={this.state.anchorEl}
-              keepMounted
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.handleClose}
-            >
-              {!schedule && (
-                <MenuItem key="shareNotebook" dense={true}>
-                  <ShareDialog
-                    cloudBucket={(job as Execution).bucketLink}
-                    shareLink={job.viewerLink}
-                    handleClose={this.handleClose}
-                  />
-                </MenuItem>
-              )}
-              <MenuItem
-                id="open"
-                key="openNotebook"
-                dense={true}
-                onClick={() => gcpService.importNotebook(job.gcsFile)}
-              >
-                Open source notebook
-              </MenuItem>
-              <MenuItem
-                key="downloadSourceNotebook"
-                dense={true}
-                onClick={this.handleClose}
-              >
-                <a
-                  className={localStyles.menuLink}
-                  href={job.downloadLink}
-                  target="_blank"
-                  title="Download the notebook output from Google Cloud Storage"
-                >
-                  Download source notebook
-                </a>
-              </MenuItem>
-            </Menu>{' '}
-          </Grid>
-        )}
-      </Grid>
-    );
-  }
+      )}
+    </Grid>
+  );
 }

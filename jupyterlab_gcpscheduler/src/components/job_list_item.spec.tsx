@@ -16,11 +16,10 @@
 
 import { shallow } from 'enzyme';
 import * as React from 'react';
-
+import { IconButtonMenu } from 'gcp_jupyterlab_shared';
 import { JobListItem } from './job_list_item';
 import { TEST_PROJECT, getExecution, getSchedule } from '../test_helpers';
 import { GcpService } from '../service/gcp';
-import Menu from '@material-ui/core/Menu';
 
 const toLocaleString = Date.prototype.toLocaleString;
 
@@ -50,7 +49,7 @@ describe('JobListItem', () => {
     );
 
     jobListItem
-      .find(Menu)
+      .find(IconButtonMenu)
       .dive()
       .findWhere(w => w.text() === 'Open source notebook')
       .first()

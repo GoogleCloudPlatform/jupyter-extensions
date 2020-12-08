@@ -18,7 +18,6 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { Dialog } from '@material-ui/core';
 import { shallow } from 'enzyme';
-import Menu from '@material-ui/core/Menu';
 import * as React from 'react';
 
 import { Button } from '@material-ui/core';
@@ -30,6 +29,7 @@ import {
   ClientTransportService,
   ServerProxyTransportService,
   TransportService,
+  IconButtonMenu,
 } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from '../service/project_state';
 import { ActionBar } from './action_bar';
@@ -214,7 +214,7 @@ describe('SchedulerDialog', () => {
     );
 
     dialog
-      .find(Menu)
+      .find(IconButtonMenu)
       .dive()
       .findWhere(w => w.text() === 'Reset configuration')
       .first()
