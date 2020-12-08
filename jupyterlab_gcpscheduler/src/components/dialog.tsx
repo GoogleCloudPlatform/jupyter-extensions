@@ -22,16 +22,17 @@ import {
   BASE_FONT,
   COLORS,
   css,
-  IconButtonMenu,
   MenuCloseHandler,
-  SmallMenuItem,
+  MenuIcon,
+  IconButtonMenu,
   Message,
   Badge,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 
-import { SCHEDULER_LINK } from '../data';
+import MenuItem from '@material-ui/core/MenuItem';
+import { EXECUTIONS_LINK, SCHEDULES_LINK } from '../data';
 import { GcpService } from '../service/gcp';
 import {
   GetPermissionsResponse,
@@ -39,7 +40,6 @@ import {
 } from '../service/project_state';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './action_bar';
-
 import {
   ClientTransportService,
   ServerProxyTransportService,
@@ -74,7 +74,7 @@ export interface GcpSettings {
   masterType?: string;
   acceleratorType?: string;
   acceleratorCount?: string;
-  containerImage?: string;
+  environmentImage?: string;
   oAuthClientId?: string;
 }
 
@@ -181,22 +181,29 @@ export class SchedulerDialog extends React.Component<Props, State> {
               <Badge value="alpha" />
             </span>
             <IconButtonMenu
+              icon={<MenuIcon />}
               menuItems={menuCloseHandler => [
-                <SmallMenuItem key="viewAllExecutions">
+                <MenuItem id="viewAll" key="viewAll" dense={true}>
                   <a
-                    href={`${SCHEDULER_LINK}?project=${projectId}`}
+                    href={
+                      this.state.creatingExecution
+                        ? `${EXECUTIONS_LINK}?project=${projectId}`
+                        : `${SCHEDULES_LINK}?project=${projectId}`
+                    }
                     target="_blank"
                     onClick={menuCloseHandler}
                   >
-                    View all scheduled executions
+                    View all{' '}
+                    {this.state.creatingExecution ? 'executions' : 'schedules'}{' '}
                   </a>
-                </SmallMenuItem>,
-                <SmallMenuItem
+                </MenuItem>,
+                <MenuItem
                   key="reset"
+                  dense={true}
                   onClick={() => this._onResetSettings(menuCloseHandler)}
                 >
                   Reset configuration
-                </SmallMenuItem>,
+                </MenuItem>,
               ]}
             ></IconButtonMenu>
           </header>

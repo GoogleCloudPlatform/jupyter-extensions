@@ -81,10 +81,12 @@ const localStyles = stylesheet({
     margin: 0,
     overflowY: 'scroll',
     padding: 0,
+    height: '100%',
+    overflowX: 'hidden',
     ...csstips.flex,
   },
   tab: {
-    overflowY: 'scroll',
+    overflow: 'hidden',
   },
   pagination: {
     fontSize: '12px',

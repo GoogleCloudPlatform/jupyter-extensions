@@ -52,6 +52,14 @@ describe('SubmittedJob', () => {
     schedule: '',
   };
 
+  const mockPropsWithCustomContainer = {
+    onDialogClose: mockDialogClose,
+    onFormReset: mockOnFormReset,
+    request: { ...request, imageUri: 'gcr.io/test' },
+    projectId,
+    schedule: '',
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     global.Date = MockDate as any;
@@ -59,6 +67,11 @@ describe('SubmittedJob', () => {
 
   it('Renders for immediate job', async () => {
     const creator = shallow(<SubmittedJob {...mockProps} />);
+    expect(creator).toMatchSnapshot();
+  });
+
+  it('Renders for immediate job with custom container', async () => {
+    const creator = shallow(<SubmittedJob {...mockPropsWithCustomContainer} />);
     expect(creator).toMatchSnapshot();
   });
 

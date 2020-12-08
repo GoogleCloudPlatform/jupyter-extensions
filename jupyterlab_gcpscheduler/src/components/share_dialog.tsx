@@ -109,8 +109,9 @@ export class ShareDialog extends React.Component<Props, State> {
               className={localStyles.text}
               id="share-dialog-description"
             >
-              You can now share any execution result link, including the one you
-              copied, with the people or groups granted view permissions.
+              You can now share links to all execution results stored in this
+              bucket, including the one you copied, with the people or groups
+              granted the view permission.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

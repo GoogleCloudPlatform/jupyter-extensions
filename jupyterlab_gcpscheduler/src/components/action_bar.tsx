@@ -28,6 +28,7 @@ interface Props {
   displayMessage?: React.ReactNode;
   closeOnRight?: boolean;
   onDialogClose: OnDialogClose;
+  error?: React.ReactNode;
 }
 
 export const STYLES = stylesheet({
@@ -60,6 +61,11 @@ export function ActionBar(props: Props) {
           <span className={STYLES.actionBarDisplayMessage}>
             {props.displayMessage}
           </span>
+        </Grid>
+      )}
+      {props.error && (
+        <Grid item sm={12}>
+          {props.error}
         </Grid>
       )}
       <Grid item sm={12}>

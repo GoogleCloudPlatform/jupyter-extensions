@@ -106,13 +106,13 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
-          key="container"
+          key="environment"
         >
           <WithStyles(ForwardRef(TableCell))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
-            Container
+            Environment
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
             TensorFlow Enterprise 1.15 (GPU)
@@ -144,7 +144,180 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
          in the Executor extension or in
          
         <LearnMoreLink
-          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project=test-project"
+          text="Google Cloud console"
+        />
+      </span>
+    }
+    onDialogClose={[MockFunction]}
+  >
+    <WithStyles(ForwardRef(Button))
+      onClick={[MockFunction]}
+    >
+      Create another exectution
+    </WithStyles(ForwardRef(Button))>
+  </ActionBar>
+</div>
+`;
+
+exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
+<div
+  className="column_fghohlb"
+>
+  <div
+    className="row_f17j33oz message_ftgw0r2"
+  >
+    <WithStyles(CheckCircleIcon) />
+    <span>
+      Execution
+       successfully created!
+    </span>
+  </div>
+  <div
+    className="row_f17j33oz messageCaption_f1vvzhbx"
+  >
+    <span>
+      Execution has been started
+    </span>
+  </div>
+  <WithStyles(ForwardRef(TableContainer))>
+    <WithStyles(ForwardRef(Table))
+      aria-label="simple table"
+      className="table_fjl1obp"
+      padding="none"
+    >
+      <WithStyles(ForwardRef(TableBody))>
+        <WithStyles(ForwardRef(TableRow))
+          key="notebookLink"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Notebook
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            test_execution_1234.ipynb
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="region"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Region
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            us-east1 (South Carolina)
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="scaleTier"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Scale tier
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Custom machine type configuration
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="masterType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Master type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            4 CPUs, 15 GB RAM
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorType"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            NVIDIA Tesla K80
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="acceleratorCount"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Accelerator count
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            1
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="environment"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Environment
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Custom container
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="customContainerImageUri"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Container image
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            gcr.io/test
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+        <WithStyles(ForwardRef(TableRow))
+          key="type"
+        >
+          <WithStyles(ForwardRef(TableCell))
+            className="tableHeader_f1oymmz1"
+            variant="head"
+          >
+            Type
+          </WithStyles(ForwardRef(TableCell))>
+          <WithStyles(ForwardRef(TableCell))>
+            Execution
+          </WithStyles(ForwardRef(TableCell))>
+        </WithStyles(ForwardRef(TableRow))>
+      </WithStyles(ForwardRef(TableBody))>
+    </WithStyles(ForwardRef(Table))>
+  </WithStyles(ForwardRef(TableContainer))>
+  <ActionBar
+    closeLabel="Done"
+    closeOnRight={true}
+    displayMessage={
+      <span>
+        View the 
+        execution
+         in the Executor extension or in
+         
+        <LearnMoreLink
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project=test-project"
           text="Google Cloud console"
         />
       </span>
@@ -266,13 +439,13 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
           </WithStyles(ForwardRef(TableCell))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
-          key="container"
+          key="environment"
         >
           <WithStyles(ForwardRef(TableCell))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
-            Container
+            Environment
           </WithStyles(ForwardRef(TableCell))>
           <WithStyles(ForwardRef(TableCell))>
             TensorFlow Enterprise 1.15 (GPU)
@@ -317,7 +490,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
          in the Executor extension or in
          
         <LearnMoreLink
-          href="https://console.cloud.google.com/ai-platform/notebooks/list/scheduled-runs?project=test-project"
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/schedules?project=test-project"
           text="Google Cloud console"
         />
       </span>

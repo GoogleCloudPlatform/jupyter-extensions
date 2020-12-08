@@ -41,6 +41,7 @@ export const COLORS = {
   white: 'var(--jp-layout-color1, white)',
   inverse: 'var(--jp-ui-font-color3, #555555)',
   secondary: 'var(--jp-layout-color2, #eeeeee)',
+  error: 'var(--jp-error-color3, #ffcdd2)',
 };
 
 /** Base extension font style */

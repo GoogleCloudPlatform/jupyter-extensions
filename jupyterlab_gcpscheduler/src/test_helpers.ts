@@ -18,7 +18,12 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { AiPlatformJob, Execution, Schedule } from './interfaces';
 import { mount } from 'enzyme';
-import { AI_PLATFORM_LINK, DOWNLOAD_LINK_BASE, VIEWER_LINK_BASE } from './data';
+import {
+  AI_PLATFORM_LINK,
+  DOWNLOAD_LINK_BASE,
+  SCHEDULES_DETAILS_LINK,
+  VIEWER_LINK_BASE,
+} from './data';
 export const TEST_PROJECT = 'test-project';
 
 /** Returns immediate promise that can be awaited */
@@ -119,7 +124,7 @@ export function getSchedule(): Schedule {
   const encodedObjectPath = [executionName, ...object]
     .map(p => encodeURIComponent(p))
     .join('/');
-  const link = `${AI_PLATFORM_LINK}/notebook_abcd_abcxyz?project=${TEST_PROJECT}`;
+  const link = `${SCHEDULES_DETAILS_LINK}/notebook_abcd_abcxyz?project=${TEST_PROJECT}`;
   const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}`;
   const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
   return {
@@ -203,7 +208,7 @@ export function getAiPlatformJobConvertedIntoSchedule(
     gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
-      'https://console.cloud.google.com/ai-platform/jobs/' +
+      'https://console.cloud.google.com/ai-platform/notebooks/schedule-details/' +
       name +
       '?project=test-project',
     name: 'notebook_abcd',

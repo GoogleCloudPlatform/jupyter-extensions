@@ -24,6 +24,7 @@ import {
   DOWNLOAD_LINK_BASE,
   VIEWER_LINK_BASE,
   BUCKET_LINK_BASE,
+  SCHEDULES_DETAILS_LINK,
 } from '../data';
 import { ProjectStateService } from './project_state';
 import {
@@ -280,13 +281,8 @@ export class GcpService {
   }
 
   async getImageUri(): Promise<string> {
-    // TODO need to check if image exist
-    const imageUriPrefix = 'gcr.io/deeplearning-platform-release/';
     const runtimeEnv = await this._getRuntimeEnv();
-    if (!runtimeEnv) return '';
-
-    const lastDotIndex = runtimeEnv.lastIndexOf('.');
-    return `${imageUriPrefix}${runtimeEnv.substr(0, lastDotIndex)}`;
+    return !runtimeEnv || runtimeEnv === 'unknown' ? '' : runtimeEnv;
   }
 
   /**
@@ -447,7 +443,6 @@ export class GcpService {
     const encodedObjectPath = [name, ...object]
       .map(p => encodeURIComponent(p))
       .join('/');
-    const link = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
     const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}?project=${projectId}`;
     const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
     return {
@@ -457,7 +452,7 @@ export class GcpService {
       endTime: job.endTime,
       gcsFile,
       state: job.state,
-      link,
+      link: '',
       viewerLink,
       downloadLink,
     };
@@ -468,6 +463,7 @@ export class GcpService {
       job.trainingInput &&
       job.trainingInput.args &&
       job.trainingInput.args[4].slice(5);
+    const link = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
     const bucket = gcsFile.split('/')[0];
     const bucketLink = `${BUCKET_LINK_BASE}/${bucket};tab=permissions`;
     const type =
@@ -476,14 +472,17 @@ export class GcpService {
         : 'Scheduled Execution';
     return {
       ...this.createJob(job, projectId),
+      link,
       type,
       bucketLink,
     };
   }
 
   private createSchedule(job: AiPlatformJob, projectId: string): Schedule {
+    const link = `${SCHEDULES_DETAILS_LINK}/${job.jobId}?project=${projectId}`;
     return {
       ...this.createJob(job, projectId),
+      link,
       //TODO: after new job definition is added replace with actual value
       schedule: '30 12 */2 * *',
     };

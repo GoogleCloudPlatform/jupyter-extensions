@@ -21,7 +21,8 @@ import { Message, ToggleSwitch } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 
 import {
-  CONTAINER_IMAGES,
+  CUSTOM_CONTAINER,
+  ENVIRONMENT_IMAGES,
   CUSTOM,
   RECURRING,
   DAY,
@@ -300,6 +301,35 @@ describe('SchedulerForm', () => {
     );
   });
 
+  it('Should prepopulate imageUri if it does not match options in form', async () => {
+    mockGetImageUri.mockResolvedValue(
+      'gcr.io/deeplearning-platform-release/tf-gpu.1-23:latest'
+    );
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    await immediatePromise();
+    schedulerForm.update();
+
+    expect(schedulerForm.find('input[name="imageUri"]').props().value).toBe(
+      CUSTOM_CONTAINER.value
+    );
+    expect(
+      schedulerForm.find('input[name="customContainerImageUri"]').props().value
+    ).toBe('gcr.io/deeplearning-platform-release/tf-gpu.1-23:latest');
+  });
+
+  it('Should prepopulate imageUri if it is empty', async () => {
+    mockGetImageUri.mockResolvedValue('');
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    await immediatePromise();
+    schedulerForm.update();
+
+    expect(schedulerForm.find('input[name="imageUri"]').props().value).toBe(
+      'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest'
+    );
+  });
+
   it(`Should show error message if execution name contains character other than letter
       , number, and underscore`, async () => {
     const schedulerForm = mount(<SchedulerForm {...mockProps} />);
@@ -372,7 +402,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       masterType: '',
@@ -408,7 +438,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       acceleratorCount: '',
@@ -438,7 +468,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       acceleratorCount: '',
@@ -486,7 +516,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       acceleratorCount: '',
@@ -534,7 +564,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       acceleratorCount: '',
@@ -558,7 +588,7 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('InnerSchedulerForm').props().values).toEqual({
       name: 'test_schedule',
       gcsBucket: 'gs://test-project',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       region: 'us-central1',
       scaleTier: 'BASIC',
       acceleratorCount: '',
@@ -604,6 +634,32 @@ describe('SchedulerForm', () => {
     ).toBe(true);
   });
 
+  it('Should show error message if missing custom container', async () => {
+    const props = { ...mockProps };
+    const schedulerForm = mount(<SchedulerForm {...props} />);
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="imageUri"]',
+      'imageUri',
+      String(CUSTOM_CONTAINER.value)
+    );
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="customContainerImageUri"]',
+      'customContainerImageUri',
+      ''
+    );
+
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    schedulerForm.update();
+
+    expect(schedulerForm.html()).toContain(
+      'A docker container image must be provided for a custom container'
+    );
+  });
+
   it('Updates settings accordingly when new values are empty', async () => {
     const uploadNotebookPromise = triggeredResolver();
     const executeNotebookPromise = triggeredResolver({
@@ -621,7 +677,7 @@ describe('SchedulerForm', () => {
       .mockReturnValueOnce({ composite: 'NVIDIA_TESLA_K80' })
       .mockReturnValueOnce({ composite: '1' })
       .mockReturnValueOnce({
-        composite: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+        composite: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       });
 
     const props = {
@@ -692,7 +748,7 @@ describe('SchedulerForm', () => {
     );
     const aiPlatformRequest: ExecuteNotebookRequest = {
       name: 'test_execution',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
       outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
@@ -801,7 +857,7 @@ describe('SchedulerForm', () => {
     );
     const aiPlatformRequest: ExecuteNotebookRequest = {
       name: 'test_execution',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: 'n1-standard-4',
       outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
@@ -835,7 +891,7 @@ describe('SchedulerForm', () => {
       aiPlatformRequest.acceleratorCount
     );
     expect(mockSettings.set).toHaveBeenCalledWith(
-      'containerImage',
+      'environmentImage',
       aiPlatformRequest.imageUri
     );
     expect(schedulerForm.find('form').exists()).toBe(false);
@@ -908,7 +964,7 @@ describe('SchedulerForm', () => {
       schedulerForm,
       'input[name="imageUri"]',
       'imageUri',
-      String(CONTAINER_IMAGES[2].value)
+      String(ENVIRONMENT_IMAGES[2].value)
     );
     simulateFieldChange(
       schedulerForm,
@@ -986,6 +1042,79 @@ describe('SchedulerForm', () => {
     expect(schedulerForm.find('form').exists()).toBe(true);
   });
 
+  it('Submits an immediate job with custom container to AI Platform', async () => {
+    const uploadNotebookPromise = triggeredResolver();
+    const executeNotebookPromise = triggeredResolver({
+      name: 'aiplatform_execution_1',
+    });
+
+    mockNotebookContents.mockReturnValue(notebookContents);
+    mockUploadNotebook.mockReturnValue(uploadNotebookPromise.promise);
+    mockExecuteNotebook.mockReturnValue(executeNotebookPromise.promise);
+
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="name"]',
+      'name',
+      'test_execution'
+    );
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="imageUri"]',
+      'imageUri',
+      String(CUSTOM_CONTAINER.value)
+    );
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="customContainerImageUri"]',
+      'customContainerImageUri',
+      'gcr.io/test'
+    );
+
+    // Submit the form and wait for an immediate promise to flush other promises
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    schedulerForm.update();
+
+    uploadNotebookPromise.resolve();
+    await uploadNotebookPromise.promise;
+    schedulerForm.update();
+    expect(
+      schedulerForm.contains(
+        <Message
+          asError={false}
+          asActivity={true}
+          text={'Submitting execution'}
+        />
+      )
+    ).toBe(true);
+
+    executeNotebookPromise.resolve();
+    await executeNotebookPromise.promise;
+    schedulerForm.update();
+
+    const gcsPath = `${gcsBucket}/test_execution/${notebookName}`;
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_execution',
+      imageUri: 'gcr.io/test',
+      inputNotebookGcsPath: gcsPath,
+      masterType: '',
+      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
+      scaleTier: 'BASIC',
+      gcsBucket: 'gs://test-project',
+      region: 'us-central1',
+      acceleratorType: '',
+      acceleratorCount: '',
+    };
+
+    expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest
+    );
+  });
+
   it('Fails to upload Notebook to GCS', async () => {
     mockNotebookContents.mockReturnValue(notebookContents);
     mockUploadNotebook.mockRejectedValue('UNAVAILABLE: GCS is unavailable');
@@ -1058,7 +1187,7 @@ describe('SchedulerForm', () => {
     );
     const aiPlatformRequest: ExecuteNotebookRequest = {
       name: 'test_failed_execution',
-      imageUri: 'gcr.io/deeplearning-platform-release/base-cpu:latest',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
       outputNotebookGcsPath: `${gcsBucket}/test_failed_execution/test_failed_execution.ipynb`,

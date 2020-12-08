@@ -20,6 +20,7 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
       />
     </span>
     <IconButtonMenu
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </header>
@@ -61,6 +62,7 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
       />
     </span>
     <IconButtonMenu
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </header>
@@ -102,6 +104,7 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
       />
     </span>
     <IconButtonMenu
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </header>
@@ -143,6 +146,7 @@ exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
       />
     </span>
     <IconButtonMenu
+      icon={<WithStyles(MoreVertIcon) />}
       menuItems={[Function]}
     />
   </header>

@@ -50,53 +50,14 @@ exports[`JobListItem Renders for failed execution 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="shareNotebook"
-      >
-        <ShareDialog
-          cloudBucket="bucket"
-          handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
-        />
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
@@ -122,7 +83,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"
@@ -133,8 +94,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Frequency:
-           
+          Frequency: 
           Every 2 days at 9:30 AM UTC
         </span>
       </div>
@@ -161,43 +121,14 @@ exports[`JobListItem Renders for failed schedule 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
@@ -252,53 +183,14 @@ exports[`JobListItem Renders for running execution 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="shareNotebook"
-      >
-        <ShareDialog
-          cloudBucket="bucket"
-          handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
-        />
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
@@ -324,7 +216,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"
@@ -335,8 +227,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Frequency:
-           
+          Frequency: 
           Every 2 days at 9:30 AM UTC
         </span>
       </div>
@@ -363,43 +254,14 @@ exports[`JobListItem Renders for running schedule 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
@@ -454,53 +316,14 @@ exports[`JobListItem Renders for successful execution 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="shareNotebook"
-      >
-        <ShareDialog
-          cloudBucket="bucket"
-          handleClose={[Function]}
-          shareLink="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
-        />
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
@@ -526,7 +349,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"
@@ -537,8 +360,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         className="jobCaption_fbrfhdq"
       >
         <span>
-          Frequency:
-           
+          Frequency: 
           Every 2 days at 9:30 AM UTC
         </span>
       </div>
@@ -565,43 +387,14 @@ exports[`JobListItem Renders for successful schedule 1`] = `
     item={true}
     xs={1}
   >
-    <WithStyles(ForwardRef(IconButton))
+    <div
       className="align_fxwamzl"
-      onClick={[Function]}
     >
-      <WithStyles(MoreVertIcon) />
-    </WithStyles(ForwardRef(IconButton))>
-    <WithStyles(ForwardRef(Menu))
-      anchorEl={null}
-      id="execution-menu"
-      keepMounted={true}
-      onClose={[Function]}
-      open={false}
-    >
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        id="open"
-        key="openNotebook"
-        onClick={[Function]}
-      >
-        Open source notebook
-      </WithStyles(ForwardRef(MenuItem))>
-      <WithStyles(ForwardRef(MenuItem))
-        dense={true}
-        key="downloadSourceNotebook"
-        onClick={[Function]}
-      >
-        <a
-          className="menuLink_fzzbfyt"
-          href="https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb"
-          target="_blank"
-          title="Download the notebook output from Google Cloud Storage"
-        >
-          Download source notebook
-        </a>
-      </WithStyles(ForwardRef(MenuItem))>
-    </WithStyles(ForwardRef(Menu))>
-     
+      <IconButtonMenu
+        icon={<WithStyles(MoreVertIcon) />}
+        menuItems={[Function]}
+      />
+    </div>
   </WithStyles(ForwardRef(Grid))>
 </WithStyles(ForwardRef(Grid))>
 `;
