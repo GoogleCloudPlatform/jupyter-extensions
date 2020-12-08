@@ -1,17 +1,32 @@
-import * as React from 'react';
-import { stylesheet } from 'typestyle';
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http=//www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { Icon } from '@material-ui/core';
 import { Error } from '@material-ui/icons';
-
-import { formatDate, formatBytes, formatTime } from '../../utils/formatters';
-import { StripedRows } from '../shared/striped_rows';
-import ReadOnlyEditor from '../shared/read_only_editor';
-import InfoCard from '../shared/info_card';
-import { Job } from './service/query_history';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import * as React from 'react';
+import { stylesheet } from 'typestyle';
+import { ICONS } from '../../constants';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { formatBytes, formatDate, formatTime } from '../../utils/formatters';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import InfoCard from '../shared/info_card';
+import ReadOnlyEditor from '../shared/read_only_editor';
+import { StripedRows } from '../shared/striped_rows';
 import { gColor } from '../shared/styles';
+import { Job } from './service/query_history';
 
 const localStyles = stylesheet({
   detailsTopArea: {
@@ -92,7 +107,7 @@ export const QueryDetails = (props: { job: Job }) => {
               alignContent: 'center',
             }}
           >
-            <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
+            <div className={`jp-Icon jp-Icon-20 ${ICONS.editor}`} />
           </Icon>
           Open query in editor
         </button>

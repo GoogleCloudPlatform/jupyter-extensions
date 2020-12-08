@@ -106,14 +106,14 @@ class QueryResults extends Component<QueryResultsProps, QueryResultsState> {
       `from google.cloud.bigquery import Client, QueryJobConfig\n` +
       `client = Client()\n\n`;
     if (ifEmpty) {
-      code += `query = '${query.trim()}'\n` + `job = client.query(query)\n`;
+      code += `query = """${query.trim()}"""\n` + `job = client.query(query)\n`;
     } else {
       const flagsJson = JSON.stringify(processedFlags, null, 2);
 
       code +=
         `flags=${flagsJson}\n` +
         `job_config = bigquery.QueryJobConfig(**flags)\n` +
-        `query = '${query.trim()}'\n` +
+        `query = """${query.trim()}"""\n` +
         `job = client.query(query, job_config=job_config)\n`;
     }
     code += `df = job.to_dataframe()`;

@@ -6,10 +6,11 @@ from google.cloud.bigquery.dbapi import _helpers
 from IPython.core import magic_arguments
 from traitlets import Unicode, Any
 from ipywidgets import DOMWidget
-from jupyterlab_bigquery.version import VERSION
 
 module_name = 'bigquery_query_incell_editor'
-module_version = VERSION
+# IfChange
+module_version = '0.1.1'
+# ThenChange(jupyterlab_bigquery/src/index.ts)
 
 UNSUPPORTED_ARGS = [
     'destination_var', 'max_results', 'dry_run', 'use_bqstorage_api',
