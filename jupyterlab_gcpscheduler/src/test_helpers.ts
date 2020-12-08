@@ -208,7 +208,7 @@ export function getAiPlatformJobConvertedIntoSchedule(
     gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
-      'https://console.cloud.google.com/ai-platform/notebooks/schedule-details' +
+      'https://console.cloud.google.com/ai-platform/notebooks/schedule-details/' +
       name +
       '?project=test-project',
     name: 'notebook_abcd',

@@ -185,7 +185,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
   render() {
     const projectId = this.getProjectId();
     return (
-      <Dialog open={this._isOpen()}>
+      <Dialog open={this._isOpen()} scroll="body">
         {this.state.showCreateForm && (
           <header className={localStyles.header}>
             <span className={localStyles.title}>

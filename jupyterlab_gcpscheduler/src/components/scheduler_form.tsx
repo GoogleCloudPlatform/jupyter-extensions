@@ -127,9 +127,11 @@ function getName(notebookName: string) {
 
 const localStyles = stylesheet({
   scroll: {
-    maxHeight: '50vh',
+    maxHeight: '52vh',
     overflowY: 'scroll',
     overflowX: 'hidden',
+    borderTop: '0px solid #777',
+    borderBottom: '0px solid #777',
   },
 });
 
@@ -177,8 +179,11 @@ export class InnerSchedulerForm extends React.Component<
   }
 
   private prepopulateImageUri() {
-    this.props.gcpService.getImageUri().then((imageUri: string) => {
-      if (imageUri) {
+    this.props.gcpService.getImageUri().then((retrievedImageUri: string) => {
+      if (retrievedImageUri || this.props.values.imageUri) {
+        const imageUri = retrievedImageUri
+          ? retrievedImageUri
+          : this.props.values.imageUri;
         const lastColonIndex = imageUri.lastIndexOf(':');
         const matchImageUri =
           lastColonIndex !== -1 ? imageUri.substr(0, lastColonIndex) : imageUri;
@@ -191,6 +196,8 @@ export class InnerSchedulerForm extends React.Component<
           this.updateImageUri(String(CUSTOM_CONTAINER.value));
           this.props.setFieldValue('customContainerImageUri', imageUri, false);
         }
+      } else {
+        this.updateImageUri(String(ENVIRONMENT_IMAGES[1].value));
       }
     });
   }

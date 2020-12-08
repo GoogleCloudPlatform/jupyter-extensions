@@ -3,6 +3,7 @@
 exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={false}
+  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -76,6 +77,7 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
 exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
+  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -149,6 +151,7 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
 exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
+  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -222,6 +225,7 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
 exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
+  scroll="body"
 >
   <header
     className="header_fst2s1z"

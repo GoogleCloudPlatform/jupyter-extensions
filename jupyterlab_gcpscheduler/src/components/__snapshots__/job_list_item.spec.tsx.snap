@@ -122,7 +122,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"
@@ -324,7 +324,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"
@@ -526,7 +526,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
       className="bold_f1wf24vo"
     >
       <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
         noUnderline={true}
         secondary={true}
         text="notebook abcd"

@@ -361,7 +361,7 @@ export const GCS_LINK = `${CLOUD_CONSOLE}/storage/browser`;
 export const SCHEDULES_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/schedules`;
 
 /** Link to Schedule Details page */
-export const SCHEDULES_DETAILS_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/schedules-details`;
+export const SCHEDULES_DETAILS_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/schedule-details`;
 
 /** Link to Executions page */
 export const EXECUTIONS_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/executions`;

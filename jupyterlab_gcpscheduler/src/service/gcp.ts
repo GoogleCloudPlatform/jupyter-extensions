@@ -282,7 +282,7 @@ export class GcpService {
 
   async getImageUri(): Promise<string> {
     const runtimeEnv = await this._getRuntimeEnv();
-    return !runtimeEnv ? '' : runtimeEnv;
+    return !runtimeEnv || runtimeEnv === 'unknown' ? '' : runtimeEnv;
   }
 
   /**
