@@ -30,7 +30,7 @@ interface Props {
 
 const localStyles = stylesheet({
   error: {
-    backgroundColor: 'var(--md-red-50, #ffebee)',
+    backgroundColor: COLORS.error,
     color: COLORS.base,
   },
   info: {

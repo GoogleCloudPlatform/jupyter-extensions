@@ -132,10 +132,6 @@ export const ENVIRONMENT_IMAGES: Option[] = [
     text: 'Python 2 and 3',
   },
   { value: `${GCR_PREFIX}/beam-notebooks:latest`, text: 'Apache Beam' },
-  {
-    value: 'gcr.io/cloud-dataproc/dataproc-spawner:prod',
-    text: 'Dataproc Hub',
-  },
   //TODO: Add when becomes available in repo
   //{ value: '', text: 'Swift' },
   { value: 'gcr.io/kaggle-gpu-images/python:latest', text: 'Kaggle (GPU)' },
