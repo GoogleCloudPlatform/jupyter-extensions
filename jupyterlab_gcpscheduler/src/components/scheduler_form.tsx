@@ -26,6 +26,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from 'gcp_jupyterlab_shared';
+import { stylesheet } from 'typestyle';
 import { getNextExecutionDate } from '../cron';
 import * as React from 'react';
 import { CloudBucketSelector } from './cloud_bucket';
@@ -44,7 +45,7 @@ import { SchedulerDescription } from './scheduler_description';
 import { SubmittedJob } from './submitted_job';
 
 import {
-  CONTAINER_IMAGES,
+  ENVIRONMENT_IMAGES,
   CUSTOM,
   MASTER_TYPES,
   REGIONS,
@@ -55,6 +56,7 @@ import {
   getAcceleratorTypes,
   ACCELERATOR_COUNTS_1_2_4_8,
   Option,
+  CUSTOM_CONTAINER,
 } from '../data';
 
 type Error = { [key: string]: string };
@@ -87,6 +89,7 @@ interface SchedulerFormValues {
   scaleTier: string;
   masterType?: string;
   imageUri: string;
+  customContainerImageUri?: string;
   scheduleType: string;
   gcsBucket: string;
   schedule?: string;
@@ -121,6 +124,14 @@ function getName(notebookName: string) {
   }
   return `${name}__${Date.now()}`;
 }
+
+const localStyles = stylesheet({
+  scroll: {
+    maxHeight: '50vh',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+  },
+});
 
 /**
  * Inner form used for Scheduling wrapped by Formik
@@ -161,17 +172,25 @@ export class InnerSchedulerForm extends React.Component<
     this.prepopulateImageUri();
   }
 
+  private updateImageUri(imageUri: string) {
+    this.props.setFieldValue('imageUri', imageUri, false);
+  }
+
   private prepopulateImageUri() {
     this.props.gcpService.getImageUri().then((imageUri: string) => {
       if (imageUri) {
-        const matched = CONTAINER_IMAGES.find(i => {
-          return String(i.value).indexOf(imageUri) === 0;
+        const lastColonIndex = imageUri.lastIndexOf(':');
+        const matchImageUri =
+          lastColonIndex !== -1 ? imageUri.substr(0, lastColonIndex) : imageUri;
+        const matched = ENVIRONMENT_IMAGES.find(i => {
+          return String(i.value).startsWith(matchImageUri);
         });
-        this.props.setFieldValue(
-          'imageUri',
-          matched ? matched.value : String(CONTAINER_IMAGES[0].value),
-          false
-        );
+        if (matched) {
+          this.updateImageUri(String(matched.value));
+        } else {
+          this.updateImageUri(String(CUSTOM_CONTAINER.value));
+          this.props.setFieldValue('customContainerImageUri', imageUri, false);
+        }
       }
     });
   }
@@ -193,127 +212,126 @@ export class InnerSchedulerForm extends React.Component<
       <form>
         <SchedulerDescription />
         <p className={css.heading}>Notebook: {this.props.notebookName}</p>
-        <TextInput
-          label={
-            values.scheduleType === RECURRING
-              ? 'Schedule name'
-              : 'Execution name'
-          }
-          name="name"
-          value={values.name}
-          hasError={!!errors.name}
-          onChange={handleChange}
-        />
-        <FieldError message={errors.name} />
-        <SelectInput
-          label="Region"
-          name="region"
-          value={values.region}
-          options={REGIONS}
-          onChange={handleChange}
-        />
-        <CloudBucketSelector
-          gcsBucket={
-            values.gcsBucket ? values.gcsBucket.slice(5) : values.gcsBucket
-          }
-          onGcsBucketChange={this.updateGcsBucket}
-          gcpService={this.props.gcpService}
-        />
-        <SelectInput
-          label="Scale tier"
-          name="scaleTier"
-          value={values.scaleTier}
-          options={SCALE_TIERS}
-          formHelperText="A scale tier is a predefined set of machines allocated to your notebook execution."
-          formHelperLink={SCALE_TIER_LINK}
-          formHelperLinkText="Learn more about scale tiers"
-          onChange={this._onScaleTierChanged}
-        />
-        {values.scaleTier === CUSTOM && (
-          <SelectInput
-            label="Machine type"
-            name="masterType"
-            value={values.masterType}
-            options={MASTER_TYPES}
-            onChange={this._onMasterTypeChanged}
-          />
-        )}
-        {values.scaleTier === CUSTOM && (
-          <div className={css.scheduleBuilderRow}>
-            <div className={css.flex1}>
-              <SelectInput
-                label="Accelerator type"
-                name="acceleratorType"
-                value={values.acceleratorType}
-                options={this.acceleratorTypeOptions}
-                onChange={this._onAcceleratorTypeChange}
-              />
-            </div>
-            <div className={css.flex1}>
-              {values.acceleratorType && (
-                <SelectInput
-                  label="Accelerator count"
-                  name="acceleratorCount"
-                  value={values.acceleratorCount}
-                  options={ACCELERATOR_COUNTS_1_2_4_8}
-                  onChange={handleChange}
-                />
-              )}
-            </div>
-          </div>
-        )}
-        <SelectInput
-          label="Container"
-          name="imageUri"
-          value={values.imageUri}
-          options={CONTAINER_IMAGES}
-          onChange={handleChange}
-        />
-        <SelectInput
-          label="Type"
-          name="scheduleType"
-          value={values.scheduleType}
-          options={SCHEDULE_TYPES}
-          onChange={this._onScheduleTypeChange}
-        />
-
-        {values.scheduleType === RECURRING && (
-          <ScheduleBuilder
-            schedule={values.schedule}
-            onScheduleChange={this.updateCronSchedule}
-            useUnixCronFormat={this.state.useUnixCronFormat}
-          />
-        )}
-        {values.scheduleType === RECURRING && (
-          <ToggleSwitch
-            name="useUnixCronFormat"
-            checked={this.state.useUnixCronFormat}
+        <div className={localStyles.scroll}>
+          <TextInput
             label={
-              this.state.useUnixCronFormat
-                ? 'Use user-friendly scheduler'
-                : 'Use unix-cron format'
+              values.scheduleType === RECURRING
+                ? 'Schedule name'
+                : 'Execution name'
             }
-            onChange={e =>
-              this.setState({ useUnixCronFormat: e.target.checked })
+            name="name"
+            value={values.name}
+            hasError={!!errors.name}
+            onChange={handleChange}
+          />
+          <FieldError message={errors.name} />
+          <SelectInput
+            label="Region"
+            name="region"
+            value={values.region}
+            options={REGIONS}
+            onChange={handleChange}
+          />
+          <CloudBucketSelector
+            gcsBucket={
+              values.gcsBucket ? values.gcsBucket.slice(5) : values.gcsBucket
             }
+            onGcsBucketChange={this.updateGcsBucket}
+            gcpService={this.props.gcpService}
           />
-        )}
-        {status && !status.lastSubmitted && (
-          <Message
-            asActivity={isSubmitting}
-            asError={status.asError}
-            text={status.message}
+          <SelectInput
+            label="Scale tier"
+            name="scaleTier"
+            value={values.scaleTier}
+            options={SCALE_TIERS}
+            formHelperText="A scale tier is a predefined set of machines allocated to your notebook execution."
+            formHelperLink={SCALE_TIER_LINK}
+            formHelperLinkText="Learn more about scale tiers"
+            onChange={this._onScaleTierChanged}
           />
-        )}
-        {errors && errors.gcsBucket && (
-          <Message asActivity={false} asError={true} text={errors.gcsBucket} />
-        )}
-        {this.missingPermissions.length > 0 && (
-          <Message
-            asError={true}
-            text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
+          {values.scaleTier === CUSTOM && (
+            <SelectInput
+              label="Machine type"
+              name="masterType"
+              value={values.masterType}
+              options={MASTER_TYPES}
+              onChange={this._onMasterTypeChanged}
+            />
+          )}
+          {values.scaleTier === CUSTOM && (
+            <div className={css.scheduleBuilderRow}>
+              <div className={css.flex1}>
+                <SelectInput
+                  label="Accelerator type"
+                  name="acceleratorType"
+                  value={values.acceleratorType}
+                  options={this.acceleratorTypeOptions}
+                  onChange={this._onAcceleratorTypeChange}
+                />
+              </div>
+              <div className={css.flex1}>
+                {values.acceleratorType && (
+                  <SelectInput
+                    label="Accelerator count"
+                    name="acceleratorCount"
+                    value={values.acceleratorCount}
+                    options={ACCELERATOR_COUNTS_1_2_4_8}
+                    onChange={handleChange}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          <SelectInput
+            label="Environment"
+            name="imageUri"
+            value={values.imageUri}
+            options={ENVIRONMENT_IMAGES}
+            onChange={handleChange}
           />
-        )}
+          {values.imageUri === CUSTOM_CONTAINER.value && (
+            <span>
+              <TextInput
+                label="Docker container image"
+                name="customContainerImageUri"
+                value={values.customContainerImageUri}
+                placeholder="Docker container image uri"
+                hasError={!!errors.customContainerImageUri}
+                onChange={handleChange}
+              />
+              <FieldError message={errors.customContainerImageUri} />
+            </span>
+          )}
+          <SelectInput
+            label="Type"
+            name="scheduleType"
+            value={values.scheduleType}
+            options={SCHEDULE_TYPES}
+            onChange={this._onScheduleTypeChange}
+          />
+
+          {values.scheduleType === RECURRING && (
+            <ScheduleBuilder
+              schedule={values.schedule}
+              onScheduleChange={this.updateCronSchedule}
+              useUnixCronFormat={this.state.useUnixCronFormat}
+            />
+          )}
+          {values.scheduleType === RECURRING && (
+            <ToggleSwitch
+              name="useUnixCronFormat"
+              checked={this.state.useUnixCronFormat}
+              label={
+                this.state.useUnixCronFormat
+                  ? 'Use user-friendly scheduler'
+                  : 'Use unix-cron format'
+              }
+              onChange={e =>
+                this.setState({ useUnixCronFormat: e.target.checked })
+              }
+            />
+          )}
+        </div>
         <ActionBar
           onDialogClose={this.props.onDialogClose}
           closeLabel="Cancel"
@@ -321,6 +339,30 @@ export class InnerSchedulerForm extends React.Component<
             values.scheduleType === RECURRING
               ? getNextExecutionDate(values.schedule)
               : 'Execution will start immediately after being submitted'
+          }
+          error={
+            <span>
+              {status && !status.lastSubmitted && (
+                <Message
+                  asActivity={isSubmitting}
+                  asError={status.asError}
+                  text={status.message}
+                />
+              )}
+              {errors && errors.gcsBucket && (
+                <Message
+                  asActivity={false}
+                  asError={true}
+                  text={errors.gcsBucket}
+                />
+              )}
+              {this.missingPermissions.length > 0 && (
+                <Message
+                  asError={true}
+                  text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
+                />
+              )}
+            </span>
           }
         >
           {this.missingPermissions.length === 0 && (
@@ -434,8 +476,8 @@ function updateSettingsFromRequest(
   if (settings.get('acceleratorCount').composite !== request.acceleratorCount) {
     promises.push(settings.set('acceleratorCount', request.acceleratorCount));
   }
-  if (settings.get('containerImage').composite !== request.imageUri) {
-    promises.push(settings.set('containerImage', request.imageUri));
+  if (settings.get('environmentImage').composite !== request.imageUri) {
+    promises.push(settings.set('environmentImage', request.imageUri));
   }
   Promise.all(promises).catch(err => {
     console.warn(`Unable to save ${promises.length} settings`, err);
@@ -450,6 +492,7 @@ async function submit(
   const {
     name,
     imageUri,
+    customContainerImageUri,
     masterType,
     scaleTier,
     scheduleType,
@@ -475,7 +518,10 @@ async function submit(
   const outputNotebookGcsPath = `${gcsFolder}/${name}.ipynb`;
   const request: ExecuteNotebookRequest = {
     name,
-    imageUri,
+    imageUri:
+      imageUri === String(CUSTOM_CONTAINER.value)
+        ? customContainerImageUri
+        : imageUri,
     inputNotebookGcsPath,
     masterType,
     outputNotebookGcsPath,
@@ -530,7 +576,7 @@ function mapPropsToValues(props: Props) {
   return {
     name: getName(props.notebookName),
     imageUri:
-      props.gcpSettings.containerImage || String(CONTAINER_IMAGES[0].value),
+      props.gcpSettings.environmentImage || String(ENVIRONMENT_IMAGES[1].value),
     region: props.gcpSettings.region || String(REGIONS[0].value),
     scaleTier: props.gcpSettings.scaleTier || String(SCALE_TIERS[0].value),
     masterType: props.gcpSettings.masterType || '',
@@ -543,7 +589,14 @@ function mapPropsToValues(props: Props) {
 }
 
 function validate(values: SchedulerFormValues) {
-  const { name, scheduleType, schedule, gcsBucket } = values;
+  const {
+    name,
+    scheduleType,
+    schedule,
+    gcsBucket,
+    imageUri,
+    customContainerImageUri,
+  } = values;
   const error: Error = {};
 
   if (!name) {
@@ -561,6 +614,12 @@ function validate(values: SchedulerFormValues) {
     error.gcsBucket = 'A cloud storage bucket is required to store results';
   }
 
+  if (imageUri === String(CUSTOM_CONTAINER.value)) {
+    if (!customContainerImageUri) {
+      error.customContainerImageUri =
+        'A docker container image must be provided for a custom container';
+    }
+  }
   return error;
 }
 

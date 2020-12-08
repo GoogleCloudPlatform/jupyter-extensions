@@ -31,11 +31,12 @@ import {
   findOptionByValue,
   REGIONS,
   SCALE_TIERS,
-  SCHEDULER_LINK,
+  SCHEDULES_LINK,
+  EXECUTIONS_LINK,
   MASTER_TYPES,
   CUSTOM,
   ACCELERATOR_TYPES,
-  CONTAINER_IMAGES,
+  ENVIRONMENT_IMAGES,
 } from '../data';
 import { ExecuteNotebookRequest } from '../interfaces';
 import { OnDialogClose } from './dialog';
@@ -99,10 +100,12 @@ export class SubmittedJob extends React.Component<Props, {}> {
       ACCELERATOR_TYPES,
       request.acceleratorType
     );
-    const container = findOptionByValue(CONTAINER_IMAGES, request.imageUri);
+    const environment = findOptionByValue(ENVIRONMENT_IMAGES, request.imageUri);
     const gcsInformation = this.getGcsInformation(request.inputNotebookGcsPath);
     const isRecurring = !!schedule;
-    const jobLink = `${SCHEDULER_LINK}?${projectParam}`;
+    const jobLink = isRecurring
+      ? `${SCHEDULES_LINK}?${projectParam}`
+      : `${EXECUTIONS_LINK}?${projectParam}`;
     return (
       <div className={css.column}>
         <div className={classes(css.row, localStyles.message)}>
@@ -173,12 +176,22 @@ export class SubmittedJob extends React.Component<Props, {}> {
                   )}
                 </React.Fragment>
               )}
-              <TableRow key="container">
+              <TableRow key="environment">
                 <TableCell className={localStyles.tableHeader} variant="head">
-                  Container
+                  Environment
                 </TableCell>
-                <TableCell>{container.text}</TableCell>
+                <TableCell>
+                  {environment ? environment.text : 'Custom container'}
+                </TableCell>
               </TableRow>
+              {!environment && (
+                <TableRow key="customContainerImageUri">
+                  <TableCell className={localStyles.tableHeader} variant="head">
+                    Container image
+                  </TableCell>
+                  <TableCell>{request.imageUri}</TableCell>
+                </TableRow>
+              )}
               <TableRow key="type">
                 <TableCell className={localStyles.tableHeader} variant="head">
                   Type

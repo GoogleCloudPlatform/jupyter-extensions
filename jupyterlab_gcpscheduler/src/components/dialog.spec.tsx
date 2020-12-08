@@ -18,7 +18,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { Dialog } from '@material-ui/core';
 import { shallow } from 'enzyme';
-import { IconButtonMenu } from 'gcp_jupyterlab_shared';
+import Menu from '@material-ui/core/Menu';
 import * as React from 'react';
 
 import { Button } from '@material-ui/core';
@@ -214,7 +214,7 @@ describe('SchedulerDialog', () => {
     );
 
     dialog
-      .find(IconButtonMenu)
+      .find(Menu)
       .dive()
       .findWhere(w => w.text() === 'Reset configuration')
       .first()

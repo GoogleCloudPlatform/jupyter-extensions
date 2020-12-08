@@ -3,7 +3,6 @@
 exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={false}
-  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -19,9 +18,42 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
         value="alpha"
       />
     </span>
-    <IconButtonMenu
-      menuItems={[Function]}
-    />
+    <WithStyles(ForwardRef(IconButton))
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="create-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="viewAll"
+        key="viewAll"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project="
+          onClick={[Function]}
+          target="_blank"
+        >
+          View all
+           
+          executions
+           
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="reset"
+        onClick={[Function]}
+      >
+        Reset configuration
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
   </header>
   <main
     className="main_f2ra5xi"
@@ -44,7 +76,6 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
 exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
-  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -60,9 +91,42 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
         value="alpha"
       />
     </span>
-    <IconButtonMenu
-      menuItems={[Function]}
-    />
+    <WithStyles(ForwardRef(IconButton))
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="create-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="viewAll"
+        key="viewAll"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project=test-project"
+          onClick={[Function]}
+          target="_blank"
+        >
+          View all
+           
+          executions
+           
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="reset"
+        onClick={[Function]}
+      >
+        Reset configuration
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
   </header>
   <main
     className="main_f2ra5xi"
@@ -85,7 +149,6 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
 exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
-  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -101,9 +164,42 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
         value="alpha"
       />
     </span>
-    <IconButtonMenu
-      menuItems={[Function]}
-    />
+    <WithStyles(ForwardRef(IconButton))
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="create-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="viewAll"
+        key="viewAll"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project=test-project"
+          onClick={[Function]}
+          target="_blank"
+        >
+          View all
+           
+          executions
+           
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="reset"
+        onClick={[Function]}
+      >
+        Reset configuration
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
   </header>
   <main
     className="main_f2ra5xi"
@@ -126,7 +222,6 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
 exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
 <WithStyles(ForwardRef(Dialog))
   open={true}
-  scroll="body"
 >
   <header
     className="header_fst2s1z"
@@ -142,9 +237,42 @@ exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
         value="alpha"
       />
     </span>
-    <IconButtonMenu
-      menuItems={[Function]}
-    />
+    <WithStyles(ForwardRef(IconButton))
+      onClick={[Function]}
+    >
+      <WithStyles(MoreVertIcon) />
+    </WithStyles(ForwardRef(IconButton))>
+    <WithStyles(ForwardRef(Menu))
+      anchorEl={null}
+      id="create-menu"
+      keepMounted={true}
+      onClose={[Function]}
+      open={false}
+    >
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        id="viewAll"
+        key="viewAll"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/list/executions?project=test-project"
+          onClick={[Function]}
+          target="_blank"
+        >
+          View all
+           
+          executions
+           
+        </a>
+      </WithStyles(ForwardRef(MenuItem))>
+      <WithStyles(ForwardRef(MenuItem))
+        dense={true}
+        key="reset"
+        onClick={[Function]}
+      >
+        Reset configuration
+      </WithStyles(ForwardRef(MenuItem))>
+    </WithStyles(ForwardRef(Menu))>
   </header>
   <main
     className="main_f2ra5xi"

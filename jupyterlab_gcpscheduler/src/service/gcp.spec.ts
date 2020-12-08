@@ -724,10 +724,11 @@ describe('GcpService', () => {
     });
   });
 
-  describe('Container Image', () => {
+  describe('Environment Image', () => {
     it('Gets image URI from JupyterLab server', async () => {
       mockMakeRequest.mockResolvedValue({
-        text: () => Promise.resolve('tf-cpu.1-14.m34'),
+        text: () =>
+          Promise.resolve('gcr.io/deeplearning-platform-release/tf-cpu.1-14'),
       });
 
       const imageUri = await gcpService.getImageUri();

@@ -22,6 +22,7 @@ import {
   CancelRounded,
   Refresh,
   Info,
+  Error,
   Launch,
   MoreVert,
 } from '@material-ui/icons';
@@ -81,7 +82,7 @@ export const RedError = withStyles({
     color: COLORS.red,
     fontSize: '16px',
   },
-})(Info);
+})(Error);
 
 // tslint:disable-next-line:enforce-name-casing
 /** External link Launch icon */

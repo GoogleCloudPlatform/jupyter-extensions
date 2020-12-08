@@ -30,7 +30,7 @@ METADATA_SERVER = os.environ.get(
     'http://metadata.google.internal') + '/computeMetadata/v1/?recursive=true'
 METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 SCOPE = ('https://www.googleapis.com/auth/cloud-platform',)
-FRAMEWORK_ENV_VAR = 'ENV_VERSION_FILE_PATH'
+ENV_URI_VAR = 'ENV_URI_FILE_PATH'
 
 
 async def get_metadata():
@@ -214,12 +214,12 @@ class RuntimeEnvHandler(APIHandler):
   def get(self):
     version = 'unknown'
     try:
-      env_version = os.environ[FRAMEWORK_ENV_VAR]
+      env_version = os.environ[ENV_URI_VAR]
       with open(env_version) as f:
         version = f.read().rstrip()
     except KeyError:
-      app_log.warning('Environment variable %s is not set', FRAMEWORK_ENV_VAR)
+      app_log.warning('Environment uri variable %s is not set', ENV_URI_VAR)
     except OSError:
-      app_log.warning('Unable to read framework version from %s',
-                      os.environ[FRAMEWORK_ENV_VAR])
+      app_log.warning('Unable to read environment uri from %s',
+                      os.environ[ENV_URI_VAR])
     self.finish(version)

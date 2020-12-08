@@ -77,12 +77,16 @@ export function removeFromList<T>(list: T[], value: T) {
   }
 }
 
+export const CUSTOM_CONTAINER: Option = {
+  value: 'customContainer',
+  text: 'Custom Container',
+};
+
 /**
- * Container images that can be used to schedule executions on AI Platform.
- * https://cloud.google.com/ai-platform/training/docs/containers-overview
+ * Environment images that can be used to schedule executions on AI Platform.
  */
-export const CONTAINER_IMAGES: Option[] = [
-  { value: `${GCR_PREFIX}/base-cpu:latest`, text: 'Python' },
+export const ENVIRONMENT_IMAGES: Option[] = [
+  CUSTOM_CONTAINER,
   {
     value: `${GCR_PREFIX}/tf-cpu.1-15:latest`,
     text: 'TensorFlow Enterprise 1.15 (CPU only)',
@@ -100,18 +104,45 @@ export const CONTAINER_IMAGES: Option[] = [
     text: 'TensorFlow 2.1 (GPU)',
   },
   {
+    value: `${GCR_PREFIX}/tf2-cpu.2-3:latest`,
+    text: 'TensorFlow 2.3 (CPU only)',
+  },
+  {
+    value: `${GCR_PREFIX}/tf2-gpu.2-3:latest`,
+    text: 'TensorFlow 2.3 (GPU)',
+  },
+  {
     value: `${GCR_PREFIX}/pytorch-cpu.1-4:latest`,
     text: 'PyTorch 1.4 (CPU only)',
   },
   {
-    value: `${GCR_PREFIX}/pytorch-gpu.1-4:latest`,
-    text: 'PyTorch 1.4 (GPU)',
+    value: `${GCR_PREFIX}/pytorch-gpu.1-6:latest`,
+    text: 'PyTorch 1.6 (GPU)',
+  },
+  {
+    value: `${GCR_PREFIX}/xgboost-cpu:latest`,
+    text: 'RAPIDS XGBoost',
   },
   {
     value: `${GCR_PREFIX}/r-cpu.3-6:latest`,
     text: 'R 3.6 (with r-essentials)',
   },
+  {
+    value: `${GCR_PREFIX}/base-cpu:latest`,
+    text: 'Python 2 and 3',
+  },
   { value: `${GCR_PREFIX}/beam-notebooks:latest`, text: 'Apache Beam' },
+  {
+    value: 'gcr.io/cloud-dataproc/dataproc-spawner:prod',
+    text: 'Dataproc Hub',
+  },
+  //TODO: Add when becomes available in repo
+  //{ value: '', text: 'Swift' },
+  { value: 'gcr.io/kaggle-gpu-images/python:latest', text: 'Kaggle (GPU)' },
+  { value: 'gcr.io/kaggle-images/python:latest', text: 'Kaggle (CPU)' },
+  { value: `${GCR_PREFIX}/base-cu110:latest`, text: 'CUDA Toolkit 11.0' },
+  { value: `${GCR_PREFIX}/base-cu101:latest`, text: 'CUDA Toolkit 10.1' },
+  { value: `${GCR_PREFIX}/base-cu100:latest`, text: 'CUDA Toolkit 10.0' },
 ];
 
 /**
@@ -326,8 +357,14 @@ export const AI_PLATFORM_LINK = `${CLOUD_CONSOLE}/ai-platform/jobs`;
 /** Link to GCS Storage Browser */
 export const GCS_LINK = `${CLOUD_CONSOLE}/storage/browser`;
 
-/** Link to Scheduled Executions page */
-export const SCHEDULER_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/scheduled-runs`;
+/** Link to Schedules page */
+export const SCHEDULES_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/schedules`;
+
+/** Link to Schedule Details page */
+export const SCHEDULES_DETAILS_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/schedules-details`;
+
+/** Link to Executions page */
+export const EXECUTIONS_LINK = `${CLOUD_CONSOLE}/ai-platform/notebooks/list/executions`;
 
 /** Notebook jobs directory that notebooks will be imported to. */
 export const IMPORT_DIRECTORY = 'imported_notebook_jobs/';

@@ -16,8 +16,8 @@
 
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
-
-import { css, COLORS } from '../styles';
+import { Grid } from '@material-ui/core';
+import { COLORS } from '../styles';
 import { Progress } from './progress';
 import { RedError, BlueInfo } from './icons';
 
@@ -31,42 +31,41 @@ interface Props {
 const localStyles = stylesheet({
   error: {
     backgroundColor: 'var(--md-red-50, #ffebee)',
-    color: 'var(--md-red-700, #d32f2f)',
+    color: COLORS.base,
   },
   info: {
     backgroundColor: COLORS.secondary,
     color: COLORS.base,
   },
   message: {
-    alignItems: 'center',
     borderRadius: '3px',
     padding: '7px',
-  },
-  text: {
-    paddingLeft: '5px',
   },
 });
 
 /** Shared message component. */
 export function Message(props: Props): JSX.Element {
   return (
-    <div
+    <Grid
+      container
+      spacing={1}
       className={classes(
-        css.row,
         localStyles.message,
         props.asError ? localStyles.error : localStyles.info
       )}
     >
-      {props.asActivity ? (
-        <Progress />
-      ) : props.asError ? (
-        <RedError />
-      ) : (
-        <BlueInfo />
-      )}
-      <span className={localStyles.text}>
+      <Grid item sm={1}>
+        {props.asActivity ? (
+          <Progress />
+        ) : props.asError ? (
+          <RedError />
+        ) : (
+          <BlueInfo />
+        )}
+      </Grid>
+      <Grid item sm={10}>
         {props.children ? props.children : props.text}
-      </span>
-    </div>
+      </Grid>
+    </Grid>
   );
 }
