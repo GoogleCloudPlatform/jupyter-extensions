@@ -1,14 +1,29 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http=//www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Icon } from '@material-ui/core';
+import { CheckCircle, Error } from '@material-ui/icons';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { Icon } from '@material-ui/core';
-import { Error, CheckCircle } from '@material-ui/icons';
-
-import { formatTime } from '../../utils/formatters';
-import { JobsObject } from './service/query_history';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { ICONS } from '../../constants';
 import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { formatTime } from '../../utils/formatters';
 import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
 import { gColor } from '../shared/styles';
+import { JobsObject } from './service/query_history';
 
 const localStyles = stylesheet({
   query: {
@@ -88,7 +103,7 @@ export const QueryBar = (props: { jobs: JobsObject; jobId: string }) => {
             alignContent: 'center',
           }}
         >
-          <div className={'jp-Icon jp-Icon-20 jp-OpenEditorIcon'} />
+          <div className={`jp-Icon jp-Icon-20 ${ICONS.editor}`} />
         </Icon>
       </button>
     </div>

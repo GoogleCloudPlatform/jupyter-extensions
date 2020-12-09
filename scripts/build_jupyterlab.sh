@@ -20,7 +20,7 @@ SCRIPTS_DIR=$(realpath $(dirname $0))
 RUN_PYTHON_TESTS=$SCRIPTS_DIR/run_python_tests.sh
 
 . $SCRIPTS_DIR/common.sh
-echo ${LAB_EXTENSION_PACKAGES[@]}
+echo ${RELEASED_LAB_EXTENSION_PACKAGES[@]}
 
 echo "============= Linking gcp_jupyterlab_shared ============="
 pushd shared
@@ -29,7 +29,7 @@ popd
 echo "============= Finished linking gcp_jupyterlab_shared ============="
 echo
 
-for p in ${LAB_EXTENSION_PACKAGES[@]} ; do
+for p in ${RELEASED_LAB_EXTENSION_PACKAGES[@]} ; do
   echo "============= Installing $p ============="
   pushd $p
   jupyter labextension install . --no-build
