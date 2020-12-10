@@ -108,6 +108,7 @@ class BigQueryService:
   def search_projects(self, search_key, project_id):
     scope = types.SearchCatalogRequest.Scope()
     scope.include_project_ids.append(project_id)
+    scope.include_gcp_public_datasets = True
     results = self._datacatalog_client.search_catalog(
         scope=scope,
         query='name:{} projectid:{}'.format(search_key, project_id))
