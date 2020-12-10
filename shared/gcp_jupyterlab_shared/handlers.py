@@ -14,6 +14,7 @@
 """Tornado request handler classes for extension."""
 import json
 import os
+import ssl
 from base64 import b64decode
 
 import google.auth
@@ -31,11 +32,14 @@ METADATA_SERVER = os.environ.get(
 METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 SCOPE = ('https://www.googleapis.com/auth/cloud-platform',)
 FRAMEWORK_ENV_VAR = 'ENV_VERSION_FILE_PATH'
-
+SSL_OPTIONS = {"ssl_version": ssl.PROTOCOL_TLSv1}
 
 async def get_metadata():
   """Retrieves JSON-formatted metadata from the local metadata server."""
-  request = HTTPRequest(METADATA_SERVER, headers=METADATA_HEADER)
+  request = HTTPRequest(
+    METADATA_SERVER,
+    headers=METADATA_HEADER,
+    ssl_options=SSL_OPTIONS)
   client = AsyncHTTPClient()
   metadata = {}
   try:
@@ -175,7 +179,14 @@ class ProxyHandler(BaseHandler):
 
     headers['Content-Type'] = 'application/json'
     user_agent = 'jupyterlab_gcpextension/{}'.format(VERSION)
-    request = HTTPRequest(url, method, headers, body, user_agent=user_agent)
+    request = HTTPRequest(
+      url,
+      method,
+      headers,
+      body,
+      user_agent=user_agent,
+      ssl_options=SSL_OPTIONS
+      )
     client = AsyncHTTPClient()
     try:
       app_log.info('Proxying GCP %s request to %s', method, url)
