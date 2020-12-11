@@ -16,15 +16,16 @@
 
 import * as React from 'react';
 import * as csstips from 'csstips';
-import { Launch } from '@material-ui/icons';
-import { withStyles } from '@material-ui/core';
+import { SmallLaunchIcon } from './icons';
 import { classes, stylesheet } from 'typestyle';
 
-import { css } from '../styles';
+import { css, COLORS } from '../styles';
 
 interface Props {
+  secondary?: boolean;
   href: string;
   text?: string;
+  noUnderline?: boolean;
 }
 
 const localStyles = stylesheet({
@@ -33,26 +34,27 @@ const localStyles = stylesheet({
     display: 'inline-flex',
     flexDirection: 'row',
     ...csstips.padding(0, '2px'),
+    wordBreak: 'break-all',
   },
-  icon: {
-    paddingLeft: '2px',
+  secondary: {
+    color: COLORS.base,
+  },
+  noUnderline: {
+    textDecoration: 'none',
   },
 });
-
-// tslint:disable-next-line:enforce-name-casing
-const SmallLaunchIcon = withStyles({
-  root: {
-    fontSize: '16px',
-    paddingLeft: '2px',
-  },
-})(Launch);
 
 /** Functional Component for an external link */
 // tslint:disable-next-line:enforce-name-casing
 export function LearnMoreLink(props: Props) {
   return (
     <a
-      className={classes(css.link, localStyles.link)}
+      className={classes(
+        css.link,
+        localStyles.link,
+        props.noUnderline ? localStyles.noUnderline : null,
+        props.secondary ? localStyles.secondary : null
+      )}
       href={props.href}
       target="_blank"
     >

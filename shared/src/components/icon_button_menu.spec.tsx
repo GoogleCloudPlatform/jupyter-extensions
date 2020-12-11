@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import { Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem } from '@material-ui/core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {
-  IconButtonMenu,
-  MenuCloseHandler,
-  SmallButton,
-} from './icon_button_menu';
+import { IconButtonMenu, MenuCloseHandler } from './icon_button_menu';
 import { Add } from '@material-ui/icons';
 
 describe('IconButtonMenu', () => {
@@ -56,7 +52,7 @@ describe('IconButtonMenu', () => {
     );
     expect(iconButtonMenu.find(Menu).prop('open')).toBe(false);
 
-    const openMenuButton = iconButtonMenu.find(SmallButton);
+    const openMenuButton = iconButtonMenu.find(IconButton).first();
     openMenuButton.simulate('click', {
       currentTarget: openMenuButton.getElement(),
     });

@@ -49,7 +49,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "gcp_jupyterlab_shared>=1.0.0",
+        "gcp_jupyterlab_shared~=1.0.0",
         "jupyterlab~=1.2.0",
     ],
 )

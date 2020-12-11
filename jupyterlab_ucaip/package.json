@@ -51,7 +51,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "csstips": "^1.2.0",
-    "gcp_jupyterlab_shared": "^1.0.11",
+    "gcp_jupyterlab_shared": "^1.1.0",
     "humanize-duration": "^3.23.1",
     "jest-canvas-mock": "^2.2.0",
     "material-table": "1.68.0",

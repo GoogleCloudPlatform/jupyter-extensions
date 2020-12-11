@@ -52,6 +52,6 @@ setup(
     install_requires=[
         "jupyterlab~=1.2.0",
         "psutil>=5.7.0",
-        "gcp_jupyterlab_shared>=1.0.8",
+        "gcp_jupyterlab_shared>=1.0.11",
     ],
 )

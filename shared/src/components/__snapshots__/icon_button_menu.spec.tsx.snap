@@ -2,12 +2,14 @@
 
 exports[`IconButtonMenu Renders menu items 1`] = `
 <span>
-  <WithStyles(WithStyles(ForwardRef(IconButton)))
+  <WithStyles(ForwardRef(IconButton))
     onClick={[Function]}
   >
     <MoreVertIcon />
-  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  </WithStyles(ForwardRef(IconButton))>
   <WithStyles(ForwardRef(Menu))
+    anchorEl={null}
+    keepMounted={true}
     onClose={[Function]}
     open={false}
   >
@@ -32,12 +34,14 @@ exports[`IconButtonMenu Renders menu items 1`] = `
 
 exports[`IconButtonMenu Renders with provided icon 1`] = `
 <span>
-  <WithStyles(WithStyles(ForwardRef(IconButton)))
+  <WithStyles(ForwardRef(IconButton))
     onClick={[Function]}
   >
     <AddIcon />
-  </WithStyles(WithStyles(ForwardRef(IconButton)))>
+  </WithStyles(ForwardRef(IconButton))>
   <WithStyles(ForwardRef(Menu))
+    anchorEl={null}
+    keepMounted={true}
     onClose={[Function]}
     open={false}
   >

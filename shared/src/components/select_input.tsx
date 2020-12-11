@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import * as React from 'react';
-import TextField from '@material-ui/core/TextField';
 import { stylesheet } from 'typestyle';
-import MenuItem from '@material-ui/core/MenuItem';
-import { INPUT_TEXT_STYLE } from '../styles';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { FormHelperText, MenuItem, TextField } from '@material-ui/core';
+import { ArrowDropDown } from '@material-ui/icons';
+import { INPUT_TEXT_STYLE, ALIGN_HINT, FORM_LABEL_STYLE } from '../styles';
+import { LearnMoreLink } from './learn_more_link';
 
 interface Option {
   text: string;
@@ -40,8 +40,8 @@ export const STYLES = stylesheet({
   },
 });
 
-const iconComponent = props => {
-  return <ArrowDropDownIcon className={STYLES.icon} />;
+const ArrowIcon = () => {
+  return <ArrowDropDown className={STYLES.icon} />;
 };
 
 interface Props {
@@ -49,11 +49,23 @@ interface Props {
   name?: string;
   value?: string;
   options?: Option[];
+  formHelperText?: string;
+  formHelperLink?: string;
+  formHelperLinkText?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function SelectInput(props: Props) {
-  const { label, name, value, options, onChange } = props;
+  const {
+    label,
+    name,
+    value,
+    options,
+    formHelperText,
+    formHelperLink,
+    formHelperLinkText,
+    onChange,
+  } = props;
   return (
     <div className={STYLES.select}>
       <TextField
@@ -70,9 +82,9 @@ export function SelectInput(props: Props) {
         InputProps={{
           style: INPUT_TEXT_STYLE,
         }}
-        InputLabelProps={{ shrink: true }}
+        InputLabelProps={{ shrink: true, style: { ...FORM_LABEL_STYLE } }}
         SelectProps={{
-          IconComponent: iconComponent,
+          IconComponent: ArrowIcon,
           displayEmpty: true,
         }}
         select
@@ -88,6 +100,14 @@ export function SelectInput(props: Props) {
             </MenuItem>
           ))}
       </TextField>
+      {formHelperText && (
+        <FormHelperText style={ALIGN_HINT}>
+          {formHelperText}
+          {formHelperLink && (
+            <LearnMoreLink text={formHelperLinkText} href={formHelperLink} />
+          )}
+        </FormHelperText>
+      )}
     </div>
   );
 }
