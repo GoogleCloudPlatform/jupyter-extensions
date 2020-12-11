@@ -32,7 +32,7 @@ METADATA_SERVER = os.environ.get(
 METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 SCOPE = ('https://www.googleapis.com/auth/cloud-platform',)
 FRAMEWORK_ENV_VAR = 'ENV_VERSION_FILE_PATH'
-SSL_OPTIONS = {"ssl_version": ssl.PROTOCOL_TLSv1}
+SSL_OPTIONS = {"ssl_version": ssl.PROTOCOL_TLS}
 
 async def get_metadata():
   """Retrieves JSON-formatted metadata from the local metadata server."""
