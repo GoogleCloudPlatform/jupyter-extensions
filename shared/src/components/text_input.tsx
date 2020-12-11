@@ -15,9 +15,9 @@
  */
 
 import * as React from 'react';
+import { TextField } from '@material-ui/core';
 import { classes } from 'typestyle';
-import { INPUT_TEXT_STYLE } from '../styles';
-import TextField from '@material-ui/core/TextField';
+import { INPUT_TEXT_STYLE, FORM_LABEL_STYLE } from '../styles';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disabled?: boolean;
@@ -51,6 +51,7 @@ export function TextInput(props: TextInputProps) {
       InputProps={{
         style: INPUT_TEXT_STYLE,
       }}
+      InputLabelProps={{ shrink: true, style: { ...FORM_LABEL_STYLE } }}
     ></TextField>
   );
 }

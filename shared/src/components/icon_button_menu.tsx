@@ -26,7 +26,7 @@ interface Props {
 }
 
 interface State {
-  buttonElement?: HTMLElement;
+  anchorEl: null | HTMLElement;
 }
 
 /** Button with no padding. */
@@ -44,22 +44,23 @@ export const SmallMenuItem = withStyles({
 export class IconButtonMenu extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { buttonElement: undefined };
+    this.state = { anchorEl: null };
     this._onMenuClose = this._onMenuClose.bind(this);
   }
 
   render() {
     const { icon, menuItems } = this.props;
-    const { buttonElement } = this.state;
+    const { anchorEl } = this.state;
     const iconElement = icon || <MoreVert />;
     return (
       <span>
-        <SmallButton onClick={e => this._onOpenMenu(e)}>
+        <IconButton onClick={e => this._onOpenMenu(e)}>
           {iconElement}
-        </SmallButton>
+        </IconButton>
         <Menu
-          anchorEl={buttonElement}
-          open={!!buttonElement}
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          keepMounted
           onClose={this._onMenuClose}
         >
           {menuItems(this._onMenuClose)}
@@ -68,11 +69,11 @@ export class IconButtonMenu extends React.Component<Props, State> {
     );
   }
 
-  private _onOpenMenu(event: React.MouseEvent<HTMLElement>) {
-    this.setState({ buttonElement: event.currentTarget });
+  private _onOpenMenu(event: React.MouseEvent<HTMLButtonElement>) {
+    this.setState({ anchorEl: event.currentTarget });
   }
 
   private _onMenuClose() {
-    this.setState({ buttonElement: undefined });
+    this.setState({ anchorEl: null });
   }
 }

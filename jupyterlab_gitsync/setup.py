@@ -51,6 +51,6 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "jupyterlab~=1.2.0",
-        "gcp_jupyterlab_shared>=1.0.0",
+        "gcp_jupyterlab_shared>=1.0.11",
     ],
 )
