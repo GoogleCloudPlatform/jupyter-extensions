@@ -21,6 +21,9 @@ import {
   RedClose,
   MenuIcon,
   IconButtonMenu,
+  UnknownCircle,
+  PausedCircle,
+  GrayDisabled,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
@@ -67,26 +70,36 @@ const localStyles = stylesheet({
 const SUCCEEDED = 'SUCCEEDED';
 
 function getIconForJobState(state: string): JSX.Element {
-  if (state === 'SUCCEEDED') {
+  if (state === 'SUCCEEDED' || state === 'ENABLED') {
     return <GreenCheckCircle />;
-  } else if (state === 'FAILED') {
+  } else if (state === 'FAILED' || state === 'UPDATE_FAILED') {
     return <RedClose />;
+  } else if (state === 'PAUSED') {
+    return <PausedCircle />;
+  } else if (state === 'STATE_UNSPECIFIED') {
+    return <UnknownCircle />;
+  } else if (state === 'CANCELLED' || state === 'DISABLED') {
+    return <GrayDisabled />;
   }
   return <GrayPending />;
+}
+
+function shouldShowJobMenu(state: string, isSchedule: boolean) {
+  if (isSchedule) return true;
+  return state === SUCCEEDED;
 }
 
 /** Notebook job list item */
 export function JobListItem(props: Props) {
   const { gcpService, job } = props;
-  const schedule = 'schedule' in job;
-  const endTime = new Date(job.endTime || job.createTime);
+  const isSchedule = 'schedule' in job;
   return (
     <Grid className={localStyles.job} container spacing={1}>
       <Grid item xs={1}>
         {' '}
         {getIconForJobState(job.state)}
       </Grid>
-      <Grid item xs={job.state === SUCCEEDED ? 10 : 11}>
+      <Grid item xs={shouldShowJobMenu(job.state, isSchedule) ? 10 : 11}>
         <div className={css.bold}>
           <LearnMoreLink
             secondary={true}
@@ -96,12 +109,14 @@ export function JobListItem(props: Props) {
           />
         </div>
         <div>
-          {!schedule && (
+          {!isSchedule && (
             <div className={localStyles.jobCaption}>
-              <span>{customShortDateFormat(endTime)}</span>
+              <span>
+                {customShortDateFormat(new Date(job.endTime || job.createTime))}
+              </span>
             </div>
           )}
-          {schedule && (
+          {isSchedule && (
             <React.Fragment>
               <div className={localStyles.jobCaption}>
                 <span>
@@ -109,26 +124,32 @@ export function JobListItem(props: Props) {
                 </span>
               </div>
               <div className={localStyles.jobCaption}>
-                <span>Latest execution: {customShortDateFormat(endTime)}</span>
+                <span>
+                  Latest execution:{' '}
+                  {job.endTime
+                    ? customShortDateFormat(new Date(job.endTime))
+                    : 'None'}
+                </span>
               </div>
             </React.Fragment>
           )}
           <div className={classes(css.bold, localStyles.spacing)}>
             <LearnMoreLink
               noUnderline={true}
-              href={job.viewerLink}
-              text={schedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
+              href={job.viewerLink
+              }
+              text={isSchedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
             />
           </div>
         </div>
       </Grid>
-      {job.state === SUCCEEDED && (
+      {shouldShowJobMenu(job.state, isSchedule) && (
         <Grid item xs={1}>
           <div className={localStyles.align}>
             <IconButtonMenu
               icon={<MenuIcon />}
               menuItems={menuCloseHandler => [
-                !schedule ? (
+                !isSchedule ? (
                   <MenuItem key="shareNotebook" dense={true}>
                     <ShareDialog
                       cloudBucket={(job as Execution).bucketLink}
@@ -141,7 +162,10 @@ export function JobListItem(props: Props) {
                   id="open"
                   key="openNotebook"
                   dense={true}
-                  onClick={() => gcpService.importNotebook(job.gcsFile)}
+                  onClick={() => {
+                    gcpService.importNotebook(job.gcsFile);
+                    menuCloseHandler();
+                  }}
                 >
                   Open source notebook
                 </MenuItem>,

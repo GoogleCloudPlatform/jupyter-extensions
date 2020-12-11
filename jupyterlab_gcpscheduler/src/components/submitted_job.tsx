@@ -228,7 +228,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
           <Button onClick={onFormReset}>
             {isRecurring
               ? 'Create another schedule'
-              : 'Create another exectution'}
+              : 'Create another execution'}
           </Button>
         </ActionBar>
       </div>

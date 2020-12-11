@@ -152,6 +152,10 @@ export const SCALE_TIERS: Option[] = [
     text: 'A single worker instance with an NVIDIA Tesla K80 GPU',
   },
   {
+    value: 'BASIC_TPU',
+    text: 'A single worker instance with an NVIDIA Tesla K80 TPU',
+  },
+  {
     value: 'STANDARD_1',
     text: '1 master instance, 4 workers, 3 parameter servers',
   },
@@ -198,6 +202,8 @@ export const ACCELERATOR_TYPES: Option[] = [
   { value: 'NVIDIA_TESLA_P100', text: 'NVIDIA Tesla P100' },
   { value: 'NVIDIA_TESLA_T4', text: 'NVIDIA Tesla T4' },
   { value: 'NVIDIA_TESLA_V100', text: 'NVIDIA Tesla V100' },
+  { value: 'TPU_V2', text: 'TPU V2' },
+  { value: 'TPU_V3', text: 'TPU V3' },
 ];
 
 /**

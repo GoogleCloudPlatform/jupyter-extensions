@@ -29,7 +29,7 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { Executions, Schedules } from '../interfaces';
+import { Executions, Schedules, Execution, Schedule } from '../interfaces';
 import { GcpService } from '../service/gcp';
 import { JobListItem } from './job_list_item';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -43,11 +43,13 @@ interface Props {
 interface State {
   executionsTab: {
     isLoading: boolean;
+    visibleRows: Execution[];
     response: Executions;
     error?: string;
   };
   schedulesTab: {
     isLoading: boolean;
+    visibleRows: Schedule[];
     response: Schedules;
     error?: string;
   };
@@ -127,10 +129,12 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     this.state = {
       executionsTab: {
         isLoading: false,
+        visibleRows: [],
         response: { executions: [], pageToken: '' },
       },
       schedulesTab: {
         isLoading: false,
+        visibleRows: [],
         response: { schedules: [], pageToken: '' },
       },
       tab: 0,
@@ -176,11 +180,20 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) {
-    this._getExecutionsOrSchedules(
-      this.state.tab,
-      this.state.rowsPerPage,
-      true
-    );
+    if (newPage > this.state.page) {
+      if (!this.enableNextPage()) return;
+      if (this.pageHasBeenSeen(newPage)) {
+        this._setVisibleRows(newPage);
+      } else {
+        this._getExecutionsOrSchedules(
+          this.state.tab,
+          this.state.rowsPerPage,
+          true
+        );
+      }
+    } else {
+      this._setVisibleRows(newPage);
+    }
     this.setState({ page: newPage });
   }
 
@@ -197,7 +210,19 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
   }
 
   labelDisplayRowsMesssage({ from, to, count }) {
-    return `${from}-${to} of ${count !== -1 ? String(count) : 'many'}`;
+    let totalCount: string | number = 'many';
+    if (this.state.tab === 0 && !this.state.executionsTab.response.pageToken) {
+      totalCount = this.state.executionsTab.response.executions.length;
+    } else if (
+      this.state.tab === 1 &&
+      !this.state.schedulesTab.response.pageToken
+    ) {
+      totalCount = this.state.schedulesTab.response.schedules.length;
+    }
+    if (totalCount === 0) return '0 of 0';
+    return `${from}-${
+      totalCount !== 'many' ? Math.min(to, totalCount as number) : to
+    } of ${count !== -1 ? String(count) : totalCount}`;
   }
 
   render() {
@@ -214,7 +239,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     } else {
       executionsContent = (
         <ul className={localStyles.list}>
-          {executionsTab.response.executions.map(j => (
+          {executionsTab.visibleRows.map(j => (
             <JobListItem
               gcpService={gcpService}
               key={j.id}
@@ -234,7 +259,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     } else {
       schedulesContent = (
         <ul className={localStyles.list}>
-          {schedulesTab.response.schedules.map(j => (
+          {schedulesTab.visibleRows.map(j => (
             <JobListItem
               gcpService={gcpService}
               key={j.id}
@@ -289,10 +314,29 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
               labelDisplayedRows={this.labelDisplayRowsMesssage}
               labelRowsPerPage="Items per page:"
               SelectProps={{ variant: 'outlined' }}
+              nextIconButtonProps={{ disabled: !this.enableNextPage() }}
             />
           </footer>
         )}
       </div>
+    );
+  }
+
+  private pageHasBeenSeen(newPage: number) {
+    let rowCount = 0;
+    if (this.state.tab === 0) {
+      rowCount = this.state.executionsTab.response.executions.length;
+    } else {
+      rowCount = this.state.schedulesTab.response.schedules.length;
+    }
+    return rowCount > newPage * this.state.rowsPerPage;
+  }
+
+  private enableNextPage() {
+    return (
+      (this.state.tab === 0 && this.state.executionsTab.response.pageToken) ||
+      (this.state.tab === 1 && this.state.schedulesTab.response.pageToken) ||
+      this.pageHasBeenSeen(this.state.page + 1)
     );
   }
 
@@ -336,17 +380,25 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     try {
       this.setState({
         schedulesTab: {
+          ...this.state.schedulesTab,
+          visibleRows: [],
           isLoading: true,
           error: undefined,
-          response: emptyResponse,
         },
       });
       const schedules = await this.props.gcpService.listSchedules(
         pageSize,
         pageToken
       );
+      const prevSchedules = pageToken
+        ? this.state.schedulesTab.response.schedules
+        : [];
+      prevSchedules.push(...schedules.schedules);
+      const visibleRows = [...schedules.schedules];
+      schedules.schedules = prevSchedules;
       this.setState({
         schedulesTab: {
+          visibleRows,
           isLoading: false,
           response: schedules,
         },
@@ -355,6 +407,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.setState({
         schedulesTab: {
           isLoading: false,
+          visibleRows: [],
           error: `${err}: Unable to retrieve schedules`,
           response: emptyResponse,
         },
@@ -367,17 +420,25 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
     try {
       this.setState({
         executionsTab: {
+          ...this.state.executionsTab,
+          visibleRows: [],
           isLoading: true,
           error: undefined,
-          response: emptyResponse,
         },
       });
       const executions = await this.props.gcpService.listExecutions(
         pageSize,
         pageToken
       );
+      const prevExecutions = pageToken
+        ? this.state.executionsTab.response.executions
+        : [];
+      prevExecutions.push(...executions.executions);
+      const visibleRows = [...executions.executions];
+      executions.executions = prevExecutions;
       this.setState({
         executionsTab: {
+          visibleRows,
           isLoading: false,
           response: executions,
         },
@@ -386,8 +447,39 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       this.setState({
         executionsTab: {
           isLoading: false,
+          visibleRows: [],
           error: `${err}: Unable to retrieve executions`,
           response: emptyResponse,
+        },
+      });
+    }
+  }
+
+  private _setVisibleRows(newPage: number) {
+    if (this.state.tab === 0) {
+      this.setState({
+        executionsTab: {
+          ...this.state.executionsTab,
+          visibleRows: this.state.executionsTab.response.executions.slice(
+            newPage * this.state.rowsPerPage,
+            Math.min(
+              (newPage + 1) * this.state.rowsPerPage,
+              this.state.executionsTab.response.executions.length
+            )
+          ),
+        },
+      });
+    } else {
+      this.setState({
+        schedulesTab: {
+          ...this.state.schedulesTab,
+          visibleRows: this.state.schedulesTab.response.schedules.slice(
+            newPage * this.state.rowsPerPage,
+            Math.min(
+              (newPage + 1) * this.state.rowsPerPage,
+              this.state.schedulesTab.response.schedules.length
+            )
+          ),
         },
       });
     }
