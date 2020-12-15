@@ -1,62 +1,3 @@
-/**
- * Cloud Scheduler Job
- * https://cloud.google.com/scheduler/docs/reference/rest/v1/projects.locations.jobs#Job
- */
-export interface CloudSchedulerJob {
-  name: string;
-  description: string;
-  schedule: string;
-  timeZone: string;
-  httpTarget: {
-    body: string;
-    headers: { [name: string]: string };
-    httpMethod: string;
-    uri: string;
-    oidcToken: { serviceAccountEmail: string };
-  };
-}
-
-/** Message type describing an AI Platform training Job */
-export interface ExecuteNotebookRequest {
-  imageUri: string;
-  inputNotebookGcsPath: string;
-  name: string;
-  masterType: string;
-  outputNotebookGcsPath: string;
-  gcsBucket: string;
-  scaleTier: string;
-  region: string;
-  acceleratorType: string;
-  acceleratorCount: string;
-}
-
-/** List of Jobs returned from AI Platform. */
-/* eslint-disable @typescript-eslint/camelcase */
-export type ListAiPlatformJobsResponse = gapi.client.ml.GoogleCloudMlV1__ListJobsResponse;
-
-/** Enum to represent the type of the JobRow */
-export enum JobRowType {
-  SCHEDULED = 'SCHEDULED',
-  IMMEDIATE = 'IMMEDIATE',
-}
-
-export type JobState =
-  | 'STATE_UNSPECIFIED'
-  | 'ENABLED'
-  | 'PAUSED'
-  | 'DISABLED'
-  | 'UPDATE_FAILED';
-
-export interface Executions {
-  executions: Execution[];
-  pageToken: string;
-}
-
-export interface Schedules {
-  schedules: Schedule[];
-  pageToken: string;
-}
-
 export interface Bucket {
   name: string;
   accessLevel?: 'uniform' | 'fine';
@@ -85,10 +26,146 @@ export interface CloudStorageApiBuckets {
   /** The continuation token, used to page through large result sets. Provide this value in a subsequent request to return the next page of results. */
   nextPageToken?: string;
 }
-export interface Job {
+
+/** Interfaces used by services to call and read Notebooks Executor API responses */
+
+interface ApiClientObjectMap<T> {
+  [key: string]: T;
+}
+
+interface Status {
+  code?: number;
+  message?: string;
+}
+
+export interface Operation {
+  name?: string;
+  metadata?: ApiClientObjectMap<any>;
+  done?: boolean;
+  error?: Status;
+  response?: ApiClientObjectMap<any>;
+}
+
+export interface CreateScheduleResponse {
+  error?: string;
+}
+
+export interface CreateExecutionResponse {
+  error?: string;
+}
+
+export interface ListSchedulesResponse {
+  schedules?: NotebooksApiSchedule[];
+  nextPageToken?: string;
+  unreachable?: string[];
+}
+
+export interface ListExecutionsResponse {
+  executions?: NotebooksApiExecution[];
+  nextPageToken?: string;
+  unreachable?: string[];
+}
+
+type NotebooksApiExecutionState =
+  | 'STATE_UNSPECIFIED'
+  | 'QUEUED'
+  | 'PREPARING'
+  | 'RUNNING'
+  | 'SUCCEEDED'
+  | 'FAILED'
+  | 'CANCELLING'
+  | 'CANCELLED'
+  | 'PAUSED';
+
+type NotebooksApiScheduleState =
+  | 'STATE_UNSPECIFIED'
+  | 'ENABLED'
+  | 'PAUSED'
+  | 'DISABLED'
+  | 'UPDATE_FAILED';
+
+type NotebooksApiExecutionTemplateScaleTier =
+  | 'SCALE_TIER_UNSPECIFIED'
+  | 'BASIC'
+  | 'STANDARD_1'
+  | 'PREMIUM_1'
+  | 'BASIC_GPU'
+  | 'BASIC_TPU'
+  | 'CUSTOM';
+
+type NotebooksApiSchedulerAcceleratorConfigType =
+  | 'SCHEDULER_ACCELERATOR_TYPE_UNSPECIFIED'
+  | 'NVIDIA_TESLA_K80'
+  | 'NVIDIA_TESLA_P100'
+  | 'NVIDIA_TESLA_V100'
+  | 'NVIDIA_TESLA_P4'
+  | 'NVIDIA_TESLA_T4'
+  | 'NVIDIA_TESLA_A100'
+  | 'TPU_V2'
+  | 'TPU_V3'
+  | 'TPU_V2_POD'
+  | 'TPU_V3_POD';
+
+export interface NotebooksApiExecution {
+  name?: string;
+  displayName?: string;
+  description?: string;
+  createTime?: string;
+  updateTime?: string;
+  state?: NotebooksApiExecutionState;
+  executionTemplate?: NotebooksApiExecutionTemplate;
+  outputNotebookFile?: string;
+}
+
+export interface NotebooksApiSchedule {
+  name?: string;
+  displayName?: string;
+  description?: string;
+  state?: NotebooksApiScheduleState;
+  cronSchedule?: string;
+  timeZone?: string;
+  createTime?: string;
+  updateTime?: string;
+  executionTemplate?: NotebooksApiExecutionTemplate;
+}
+
+export interface NotebooksApiExecutionTemplate {
+  scaleTier?: NotebooksApiExecutionTemplateScaleTier;
+  masterType?: string;
+  acceleratorConfig?: NotebooksApiSchedulerAcceleratorConfig;
+  labels?: ApiClientObjectMap<string>;
+  inputNotebookFile?: string;
+  containerImageUri?: string;
+  location?: string;
+  outputNotebookFolder?: string;
+  paramsYamlFile?: string;
+}
+
+export interface NotebooksApiSchedulerAcceleratorConfig {
+  type?: NotebooksApiSchedulerAcceleratorConfigType;
+  coreCount?: string;
+}
+
+/** Interfaces used by extension to display and create Executions/Schedules */
+
+/** Message type describing an AI Platform training Job */
+export interface ExecuteNotebookRequest {
+  imageUri: string;
+  inputNotebookGcsPath: string;
+  name: string;
+  masterType: string;
+  outputNotebookFolder: string;
+  gcsBucket: string;
+  scaleTier: string;
+  region: string;
+  acceleratorType: string;
+  acceleratorCount: string;
+}
+
+export interface ExecutionTemplate {
   id: string;
   name: string;
-  endTime?: string;
+  updateTime?: string;
   createTime?: string;
   gcsFile: string;
   state: string;
@@ -99,17 +176,22 @@ export interface Job {
 }
 
 /** UI interface used to represent a Scheduled Notebook Job */
-export interface Execution extends Job {
+export interface Execution extends ExecutionTemplate {
   type: string;
   bucketLink?: string;
 }
 
-export interface Schedule extends Job {
+export interface Schedule extends ExecutionTemplate {
   schedule: string;
+  hasExecutions: boolean;
 }
 
-/** AI Platform Job. */
-/* eslint-disable @typescript-eslint/camelcase */
-export type AiPlatformJob = gapi.client.ml.GoogleCloudMlV1__Job;
+export interface Executions {
+  executions: Execution[];
+  pageToken: string;
+}
 
-export type StorageObject = gapi.client.storage.Object;
+export interface Schedules {
+  schedules: Schedule[];
+  pageToken: string;
+}

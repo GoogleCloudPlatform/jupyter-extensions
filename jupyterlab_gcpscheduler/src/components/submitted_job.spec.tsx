@@ -37,7 +37,7 @@ describe('SubmittedJob', () => {
     imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest',
     inputNotebookGcsPath: `${gcsBucket}/test_execution_1234/test_execution_1234.ipynb`,
     masterType: 'n1-standard-4',
-    outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
+    outputNotebookFolder: `${gcsBucket}/test_execution/test_execution.ipynb`,
     scaleTier: 'CUSTOM',
     gcsBucket: 'gcsBucket',
     region: 'us-east1',

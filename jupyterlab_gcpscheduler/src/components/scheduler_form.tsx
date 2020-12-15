@@ -522,7 +522,7 @@ async function submit(
     : 'gs://' + values.gcsBucket;
   const gcsFolder = `${gcsBucket}/${name}`;
   const inputNotebookGcsPath = `${gcsFolder}/${notebookName}`;
-  const outputNotebookGcsPath = `${gcsFolder}/${name}.ipynb`;
+  const outputNotebookFolder = gcsFolder;
   const request: ExecuteNotebookRequest = {
     name,
     imageUri:
@@ -531,7 +531,7 @@ async function submit(
         : imageUri,
     inputNotebookGcsPath,
     masterType,
-    outputNotebookGcsPath,
+    outputNotebookFolder,
     scaleTier,
     gcsBucket,
     region,
@@ -561,18 +561,30 @@ async function submit(
     if (scheduleType === RECURRING && schedule) {
       status.message = 'Submitting schedule';
       setStatus(status);
-      await gcpService.scheduleNotebook(request, region, schedule);
-      status.lastSubmitted = { request, schedule };
+      const response = await gcpService.scheduleNotebook(request, schedule);
+      if (!response.error) {
+        status.lastSubmitted = { request, schedule };
+      } else {
+        status.asError = true;
+        status.message = `${response.error}: Unable to submit schedule`;
+      }
     } else {
       status.message = 'Submitting execution';
       setStatus(status);
-      await gcpService.executeNotebook(request);
-      status.lastSubmitted = { request };
+      const response = await gcpService.executeNotebook(request);
+      if (!response.error) {
+        status.lastSubmitted = { request };
+      } else {
+        status.asError = true;
+        status.message = `${response.error}: Unable to submit execution`;
+      }
     }
     updateSettingsFromRequest(request, settings);
   } catch (err) {
     status.asError = true;
-    status.message = `${err}: Unable to submit execution`;
+    status.message = `${err}: Unable to submit ${
+      scheduleType === RECURRING && schedule ? 'schedule' : 'execution'
+    }`;
   }
   setStatus(status);
   setSubmitting(false);

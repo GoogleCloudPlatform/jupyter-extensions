@@ -66,6 +66,11 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
       count={-1}
       labelDisplayedRows={[Function]}
       labelRowsPerPage="Items per page:"
+      nextIconButtonProps={
+        Object {
+          "disabled": true,
+        }
+      }
       onChangePage={[Function]}
       onChangeRowsPerPage={[Function]}
       page={0}
@@ -318,7 +323,6 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
             "id": "notebook_abcd_abcxyz",
             "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
@@ -326,6 +330,7 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
             "state": "SUCCEEDED",
             "timeZone": "UTC",
             "type": "Execution",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -357,7 +362,6 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
             "id": "notebook_execution2_fghijk",
             "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
@@ -365,6 +369,7 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
             "state": "SUCCEEDED",
             "timeZone": "UTC",
             "type": "Execution",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -393,6 +398,11 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
       count={-1}
       labelDisplayedRows={[Function]}
       labelRowsPerPage="Items per page:"
+      nextIconButtonProps={
+        Object {
+          "disabled": true,
+        }
+      }
       onChangePage={[Function]}
       onChangeRowsPerPage={[Function]}
       page={0}
@@ -466,6 +476,11 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
       count={-1}
       labelDisplayedRows={[Function]}
       labelRowsPerPage="Items per page:"
+      nextIconButtonProps={
+        Object {
+          "disabled": true,
+        }
+      }
       onChangePage={[Function]}
       onChangeRowsPerPage={[Function]}
       page={0}
@@ -558,7 +573,6 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
             "id": "notebook_abcd_abcxyz",
             "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
@@ -566,6 +580,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
             "state": "SUCCEEDED",
             "timeZone": "UTC",
             "type": "Execution",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -610,7 +625,6 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
             "bucketLink": "bucket",
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
             "id": "notebook_execution2_fghijk",
             "link": "https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project",
@@ -618,6 +632,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
             "state": "SUCCEEDED",
             "timeZone": "UTC",
             "type": "Execution",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -671,14 +686,15 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
           Object {
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "hasExecutions": true,
             "id": "notebook_abcd_abcxyz",
             "link": "https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project",
             "name": "notebook abcd",
             "schedule": "30 9 */2 * *",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -722,14 +738,15 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
           Object {
             "createTime": "2020-05-01T19:00:07Z",
             "downloadLink": "https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb",
-            "endTime": "2020-05-01T19:09:42Z",
             "gcsFile": "test-project/notebook_abcd/abcd.ipynb",
+            "hasExecutions": true,
             "id": "notebook_execution2_fghijk",
             "link": "https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project",
             "name": "notebook abcd",
             "schedule": "30 9 */2 * *",
             "state": "SUCCEEDED",
             "timeZone": "UTC",
+            "updateTime": "2020-05-01T19:09:42Z",
             "viewerLink": "https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb",
           }
         }
@@ -749,6 +766,11 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
       count={-1}
       labelDisplayedRows={[Function]}
       labelRowsPerPage="Items per page:"
+      nextIconButtonProps={
+        Object {
+          "disabled": true,
+        }
+      }
       onChangePage={[Function]}
       onChangeRowsPerPage={[Function]}
       page={0}

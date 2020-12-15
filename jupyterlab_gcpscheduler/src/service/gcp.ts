@@ -17,8 +17,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 import {
-  CLOUD_FUNCTION_NAME,
-  CLOUD_FUNCTION_REGION,
   IMPORT_DIRECTORY,
   AI_PLATFORM_LINK,
   DOWNLOAD_LINK_BASE,
@@ -34,32 +32,34 @@ import {
   POST,
 } from 'gcp_jupyterlab_shared';
 import {
-  StorageObject,
-  CloudSchedulerJob,
   ExecuteNotebookRequest,
-  AiPlatformJob,
   Buckets,
   Executions,
   Schedules,
-  ListAiPlatformJobsResponse,
   CloudStorageApiBucket,
   CloudStorageApiBuckets,
   Bucket,
-  Job,
   Execution,
   Schedule,
+  Operation,
+  CreateScheduleResponse,
+  CreateExecutionResponse,
+  ListSchedulesResponse,
+  ListExecutionsResponse,
+  NotebooksApiExecution,
+  NotebooksApiSchedule,
+  NotebooksApiExecutionTemplate,
+  NotebooksApiSchedulerAcceleratorConfig,
 } from '../interfaces';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Notebook } from '@jupyterlab/notebook';
 
-const SERVICE_ACCOUNT_DOMAIN = 'appspot.gserviceaccount.com';
-const IMMEDIATE_JOB_INDICATOR = 'jupyterlab_immediate_notebook';
-const SCHEDULED_JOB_INDICATOR = 'jupyterlab_scheduled_notebook';
-const JOB_TYPE = 'job_type';
-const AI_PLATFORM = 'https://ml.googleapis.com/v1';
-const CLOUD_SCHEDULER = 'https://cloudscheduler.googleapis.com/v1';
+export const NOTEBOOKS_API_BASE =
+  'https://autopush-notebooks.sandbox.googleapis.com/v1';
 const STORAGE = 'https://storage.googleapis.com/storage/v1';
 const STORAGE_UPLOAD = 'https://storage.googleapis.com/upload/storage/v1';
+const POLL_INTERVAL = 2000;
+const POLL_RETRIES = 5;
 
 /**
  * Class to interact with GCP services.
@@ -88,10 +88,12 @@ export class GcpService {
   async uploadNotebook(
     notebookContents: string,
     gcsPath: string
-  ): Promise<StorageObject> {
+  ): Promise<boolean> {
     try {
       const { bucket, object } = this._getGcsPathParts(gcsPath);
-      const response = await this._transportService.submit<StorageObject>({
+      const response = await this._transportService.submit<
+        CloudStorageApiBucket
+      >({
         path: `${STORAGE_UPLOAD}/b/${bucket}/o`,
         method: POST,
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +103,7 @@ export class GcpService {
           uploadType: 'media',
         },
       });
-      return response.result;
+      return response.result ? true : false;
     } catch (err) {
       console.error(`Unable to upload Notebook contents to ${gcsPath}`);
       handleApiError(err);
@@ -171,50 +173,40 @@ export class GcpService {
    * Submits a Notebook for recurring scheduled execution on AI Platform via a
    * new Cloud Scheduler job.
    * @param request
-   * @param regionName
-   * @param serviceAccountEmail
+   * @param zone
    * @param schedule
    */
   async scheduleNotebook(
     request: ExecuteNotebookRequest,
-    regionName: string,
     schedule: string
-  ): Promise<CloudSchedulerJob> {
-    let timeZone = 'America/New_York';
-    try {
-      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch (err) {
-      console.warn('Unable to determine timezone');
-    }
-
+  ): Promise<CreateScheduleResponse> {
     try {
       const projectId = await this.projectId;
-      const locationPrefix = `projects/${projectId}/locations/${regionName}/jobs`;
-      const requestBody: CloudSchedulerJob = {
-        name: `${locationPrefix}/${request.name}`,
-        description: SCHEDULED_JOB_INDICATOR,
-        schedule,
-        timeZone,
-        httpTarget: {
-          body: btoa(
-            JSON.stringify(this._buildAiPlatformJobRequest(request, true))
-          ),
-          headers: { 'Content-Type': 'application/json' },
-          httpMethod: POST,
-          oidcToken: {
-            serviceAccountEmail: `${projectId}@${SERVICE_ACCOUNT_DOMAIN}`,
-          },
-          uri: `https://${CLOUD_FUNCTION_REGION}-${projectId}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}`,
-        },
-      };
-      const response = await this._transportService.submit<CloudSchedulerJob>({
-        path: `${CLOUD_SCHEDULER}/${locationPrefix}`,
+      const requestPath = `projects/${projectId}/locations/${request.region}/schedules?schedule_id=${request.name}`;
+      const response = await this._transportService.submit<Operation>({
+        path: `${NOTEBOOKS_API_BASE}/${requestPath}`,
         method: POST,
-        body: requestBody,
+        body: this._buildCreateScheduleRequest(request, schedule),
       });
-      return response.result;
+      if (response.result.error) {
+        return {
+          error: `${response.result.error.code}: ${response.result.error.message}`,
+        };
+      }
+      if (!response.result.done) {
+        const operationName = response.result.name;
+        const pollOperationsResponse = await this._pollOperation(
+          `${NOTEBOOKS_API_BASE}/${operationName}`
+        );
+        if (pollOperationsResponse.error) {
+          return {
+            error: `${pollOperationsResponse.error.code}: ${pollOperationsResponse.error.message}`,
+          };
+        }
+      }
+      return {};
     } catch (err) {
-      console.error('Unable to create Cloud Scheduler job');
+      console.error('Unable to schedule Notebook');
       handleApiError(err);
     }
   }
@@ -226,17 +218,34 @@ export class GcpService {
    */
   async executeNotebook(
     request: ExecuteNotebookRequest
-  ): Promise<AiPlatformJob> {
+  ): Promise<CreateExecutionResponse> {
     try {
       const projectId = await this.projectId;
-      const response = await this._transportService.submit<AiPlatformJob>({
-        path: `${AI_PLATFORM}/projects/${projectId}/jobs`,
+      const requestPath = `projects/${projectId}/locations/${request.region}/executions?execution_id=${request.name}`;
+      const response = await this._transportService.submit<Operation>({
+        path: `${NOTEBOOKS_API_BASE}/${requestPath}`,
         method: POST,
-        body: this._buildAiPlatformJobRequest(request),
+        body: this._buildCreateExecutionRequest(request),
       });
-      return response.result;
+      if (response.result.error) {
+        return {
+          error: `${response.result.error.code}: ${response.result.error.message}`,
+        };
+      }
+      if (!response.result.done) {
+        const operationName = response.result.name;
+        const pollOperationsResponse = await this._pollOperation(
+          `${NOTEBOOKS_API_BASE}/${operationName}`
+        );
+        if (pollOperationsResponse.error) {
+          return {
+            error: `${pollOperationsResponse.error.code}: ${pollOperationsResponse.error.message}`,
+          };
+        }
+      }
+      return {};
     } catch (err) {
-      console.error('Unable to submit Notebook to AI Platform');
+      console.error('Unable to execute Notebook');
       handleApiError(err);
     }
   }
@@ -248,12 +257,10 @@ export class GcpService {
    */
   async listExecutions(
     pageSize?: number,
-    pageToken?: string
+    pageToken?: string,
+    filter = ''
   ): Promise<Executions> {
     try {
-      const filter = [SCHEDULED_JOB_INDICATOR, IMMEDIATE_JOB_INDICATOR]
-        .map(v => `labels.job_type=${v}`)
-        .join(' OR ');
       const projectId = await this.projectId;
       const params: { [k: string]: string } = { filter };
       if (pageSize) {
@@ -263,26 +270,50 @@ export class GcpService {
         params['pageToken'] = pageToken;
       }
       const response = await this._transportService.submit<
-        ListAiPlatformJobsResponse
+        ListExecutionsResponse
       >({
-        path: `${AI_PLATFORM}/projects/${projectId}/jobs`,
+        path: `${NOTEBOOKS_API_BASE}/projects/${projectId}/locations/-/executions`,
         params,
       });
+      if (
+        response.result &&
+        response.result.unreachable &&
+        !response.result.executions
+      ) {
+        throw {
+          result: {
+            error: {
+              status: 'Unreachable',
+              code: response.result.unreachable.join(', '),
+            },
+          },
+        };
+      }
       return {
-        executions: (response.result.jobs || []).map(job =>
-          this.createExecution(job, projectId)
+        // sort by update time
+        executions: (response.result.executions || []).map(execution =>
+          this.createExecution(execution, projectId)
         ),
         pageToken: response.result.nextPageToken,
       };
     } catch (err) {
-      console.error('Unable to list AI Platform Notebook jobs');
+      console.error('Unable to list AI Platform Notebook Executions');
       handleApiError(err);
     }
   }
 
-  async getImageUri(): Promise<string> {
-    const runtimeEnv = await this._getRuntimeEnv();
-    return !runtimeEnv || runtimeEnv === 'unknown' ? '' : runtimeEnv;
+  async getLatestExecutionForSchedule(
+    scheduleId: string
+  ): Promise<Execution | undefined> {
+    const latestExecutionResponse = await this.listExecutions(
+      1,
+      undefined,
+      `execution_template.labels.schedule_id=${scheduleId}`
+    );
+    if (latestExecutionResponse.executions.length !== 0) {
+      return latestExecutionResponse.executions[0];
+    }
+    return undefined;
   }
 
   /**
@@ -295,9 +326,8 @@ export class GcpService {
     pageToken?: string
   ): Promise<Schedules> {
     try {
-      const filter = `labels.job_type=${SCHEDULED_JOB_INDICATOR}`;
       const projectId = await this.projectId;
-      const params: { [k: string]: string } = { filter };
+      const params: { [k: string]: string } = {};
       if (pageSize) {
         params['pageSize'] = String(pageSize);
       }
@@ -305,21 +335,59 @@ export class GcpService {
         params['pageToken'] = pageToken;
       }
       const response = await this._transportService.submit<
-        ListAiPlatformJobsResponse
+        ListSchedulesResponse
       >({
-        path: `${AI_PLATFORM}/projects/${projectId}/jobs`,
+        path: `${NOTEBOOKS_API_BASE}/projects/${projectId}/locations/-/schedules`,
         params,
       });
+      const schedules = [];
+      if (
+        response.result &&
+        response.result.unreachable &&
+        !response.result.schedules
+      ) {
+        throw {
+          result: {
+            error: {
+              status: 'Unreachable',
+              code: response.result.unreachable.join(', '),
+            },
+          },
+        };
+      }
+      if (response.result && response.result.schedules) {
+        const promises: Promise<Execution>[] = [];
+        for (const notebooksApiSchedule of response.result.schedules) {
+          promises.push(
+            this.getLatestExecutionForSchedule(notebooksApiSchedule.displayName)
+          );
+        }
+        await Promise.all(promises).then(values => {
+          for (let i = 0; i < response.result.schedules.length; i += 1) {
+            schedules.push(
+              this.createSchedule(
+                response.result.schedules[i],
+                projectId,
+                values[i]
+              )
+            );
+          }
+        });
+      }
       return {
-        schedules: (response.result.jobs || []).map(job =>
-          this.createSchedule(job, projectId)
-        ),
+        //TODO: sort by update time
+        schedules,
         pageToken: response.result.nextPageToken,
       };
     } catch (err) {
-      console.error('Unable to list AI Platform Notebook schedules');
+      console.error('Unable to list AI Platform Notebook Schedules');
       handleApiError(err);
     }
+  }
+
+  async getImageUri(): Promise<string> {
+    const runtimeEnv = await this._getRuntimeEnv();
+    return !runtimeEnv || runtimeEnv === 'unknown' ? '' : runtimeEnv;
   }
 
   async createUniformAccessBucket(name: string): Promise<Bucket> {
@@ -374,6 +442,50 @@ export class GcpService {
     }
   }
 
+  /** Polls the provided Operation at 1s intervals until it has completed. */
+  private async _pollOperation(path: string): Promise<Operation> {
+    let attempt = 0;
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(async () => {
+        try {
+          const response = await this._transportService.submit<Operation>({
+            path,
+          });
+          const { result } = response;
+          if (!result.done) {
+            console.info(
+              `Operation ${path} is still running, polling again in ${POLL_INTERVAL /
+                1000}s`
+            );
+            return;
+          }
+
+          clearInterval(interval);
+          if (result.response) {
+            resolve(result);
+          } else {
+            console.error(`Error returned from Operation ${path}`);
+            // Build a response compatible with handleApiError
+            const errorResponse = {
+              result: {
+                error: result.error,
+              },
+            };
+            reject(errorResponse);
+          }
+        } catch (err) {
+          if (++attempt === POLL_RETRIES) {
+            console.error(
+              `Unable to retrieve Operation status from ${path} after ${attempt} attempts`
+            );
+            clearInterval(interval);
+            reject(err);
+          }
+        }
+      }, POLL_INTERVAL);
+    });
+  }
+
   private async _getRuntimeEnv(): Promise<string> {
     try {
       const response = await ServerConnection.makeRequest(
@@ -388,37 +500,78 @@ export class GcpService {
     }
   }
 
-  private _buildAiPlatformJobRequest(
-    request: ExecuteNotebookRequest,
-    isScheduled = false
-  ): AiPlatformJob {
+  private _buildCreateExecutionRequest(
+    request: ExecuteNotebookRequest
+  ): NotebooksApiExecution {
     return {
-      jobId: request.name,
-      labels: {
-        job_type: isScheduled
-          ? SCHEDULED_JOB_INDICATOR
-          : IMMEDIATE_JOB_INDICATOR,
-      },
-      trainingInput: {
-        args: [
-          'nbexecutor',
-          '--input-notebook',
-          request.inputNotebookGcsPath,
-          '--output-notebook',
-          request.outputNotebookGcsPath,
-        ],
-        masterConfig: {
-          imageUri: request.imageUri,
-          acceleratorConfig: {
-            count: request.acceleratorCount || undefined,
-            type: request.acceleratorType || undefined,
-          },
-        },
-        masterType: request.masterType || undefined,
-        region: request.region,
+      name: request.name,
+      displayName: request.name,
+      description: 'Execution for ' + request.name,
+      state: 'STATE_UNSPECIFIED',
+      executionTemplate: {
         scaleTier: request.scaleTier,
-      },
-    } as AiPlatformJob;
+        masterType: this.convertEmptyStringToUndefined(request.masterType),
+        acceleratorConfig:
+          request.scaleTier === 'CUSTOM'
+            ? ({
+                type: this.convertEmptyStringToUndefined(
+                  request.acceleratorType
+                ),
+                coreCount: this.convertEmptyStringToUndefined(
+                  request.acceleratorCount
+                ),
+              } as NotebooksApiSchedulerAcceleratorConfig)
+            : undefined,
+        inputNotebookFile: request.inputNotebookGcsPath,
+        outputNotebookFolder: request.outputNotebookFolder,
+        containerImageUri: request.imageUri,
+        location: request.region,
+      } as NotebooksApiExecutionTemplate,
+    };
+  }
+
+  private _buildCreateScheduleRequest(
+    request: ExecuteNotebookRequest,
+    cronSchedule: string
+  ): NotebooksApiSchedule {
+    let timeZone = 'America/New_York';
+    try {
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (err) {
+      console.warn('Unable to determine timezone');
+    }
+    return {
+      name: request.name,
+      displayName: request.name,
+      description: 'Schedule for ' + request.name,
+      cronSchedule,
+      timeZone,
+      state: 'STATE_UNSPECIFIED',
+      executionTemplate: {
+        scaleTier: request.scaleTier,
+        masterType: this.convertEmptyStringToUndefined(request.masterType),
+        acceleratorConfig:
+          request.scaleTier === 'CUSTOM'
+            ? ({
+                type: this.convertEmptyStringToUndefined(
+                  request.acceleratorType
+                ),
+                coreCount: this.convertEmptyStringToUndefined(
+                  request.acceleratorCount
+                ),
+              } as NotebooksApiSchedulerAcceleratorConfig)
+            : undefined,
+        inputNotebookFile: request.inputNotebookGcsPath,
+        outputNotebookFolder: request.outputNotebookFolder,
+        containerImageUri: request.imageUri,
+        location: request.region,
+      } as NotebooksApiExecutionTemplate,
+    };
+  }
+
+  private convertEmptyStringToUndefined(value: string) {
+    if (!value || value === '') return undefined;
+    return value;
   }
 
   private _getGcsPathParts(
@@ -434,57 +587,66 @@ export class GcpService {
     };
   }
 
-  private createJob(job: AiPlatformJob, projectId: string): Job {
+  private createExecution(
+    notebooksApiExecution: NotebooksApiExecution,
+    projectId: string
+  ): Execution {
     const gcsFile =
-      job.trainingInput &&
-      job.trainingInput.args &&
-      job.trainingInput.args[4].slice(5);
+      notebooksApiExecution.outputNotebookFile &&
+      notebooksApiExecution.outputNotebookFile.slice(5);
     const [bucket, name, ...object] = gcsFile.split('/');
     const encodedObjectPath = [name, ...object]
       .map(p => encodeURIComponent(p))
       .join('/');
     const viewerLink = `${VIEWER_LINK_BASE}/${bucket}/${encodedObjectPath}?project=${projectId}`;
     const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
-    return {
-      id: job.jobId,
-      name,
-      createTime: job.createTime,
-      endTime: job.endTime,
-      gcsFile,
-      state: job.state,
-      link: '',
-      viewerLink,
-      downloadLink,
-    };
-  }
-
-  private createExecution(job: AiPlatformJob, projectId: string): Execution {
-    const gcsFile =
-      job.trainingInput &&
-      job.trainingInput.args &&
-      job.trainingInput.args[4].slice(5);
-    const link = `${AI_PLATFORM_LINK}/${job.jobId}?project=${projectId}`;
-    const bucket = gcsFile.split('/')[0];
     const bucketLink = `${BUCKET_LINK_BASE}/${bucket};tab=permissions`;
     const type =
-      job['labels'] && job['labels'][JOB_TYPE] === SCHEDULED_JOB_INDICATOR
-        ? 'Execution'
-        : 'Scheduled Execution';
+      notebooksApiExecution.executionTemplate &&
+      notebooksApiExecution.executionTemplate.labels &&
+      notebooksApiExecution.executionTemplate.labels['schedule_id']
+        ? 'Scheduled Execution'
+        : 'Execution';
     return {
-      ...this.createJob(job, projectId),
-      link,
+      id: notebooksApiExecution.name,
+      name: notebooksApiExecution.displayName,
+      updateTime: notebooksApiExecution.updateTime,
+      createTime: notebooksApiExecution.createTime,
+      gcsFile,
+      state: notebooksApiExecution.state,
+      link: `${AI_PLATFORM_LINK}/${notebooksApiExecution.displayName}?project=${projectId}`,
+      viewerLink,
+      downloadLink,
       type,
       bucketLink,
     };
   }
 
-  private createSchedule(job: AiPlatformJob, projectId: string): Schedule {
-    const link = `${SCHEDULES_DETAILS_LINK}/${job.jobId}?project=${projectId}`;
+  private createSchedule(
+    notebooksApiSchedule: NotebooksApiSchedule,
+    projectId: string,
+    latestExecution?: Execution
+  ): Schedule {
+    // TODO: view latest execution
+    // TODO: need output file?
+    const gcsFile =
+      notebooksApiSchedule.executionTemplate &&
+      notebooksApiSchedule.executionTemplate.inputNotebookFile &&
+      notebooksApiSchedule.executionTemplate.inputNotebookFile.slice(5);
+    const link = `${SCHEDULES_DETAILS_LINK}/${notebooksApiSchedule.displayName}?project=${projectId}`;
+    const downloadLink = `${DOWNLOAD_LINK_BASE}/${gcsFile}`;
     return {
-      ...this.createJob(job, projectId),
+      id: notebooksApiSchedule.name,
+      name: notebooksApiSchedule.displayName,
+      updateTime: notebooksApiSchedule.updateTime,
+      createTime: notebooksApiSchedule.createTime,
+      gcsFile: latestExecution?.gcsFile || gcsFile,
+      state: notebooksApiSchedule.state,
       link,
-      //TODO: after new job definition is added replace with actual value
-      schedule: '30 12 */2 * *',
+      viewerLink: latestExecution?.viewerLink,
+      downloadLink: latestExecution?.downloadLink || downloadLink,
+      schedule: notebooksApiSchedule.cronSchedule,
+      hasExecutions: latestExecution !== undefined,
     };
   }
 

@@ -301,6 +301,20 @@ describe('SchedulerForm', () => {
     );
   });
 
+  it('Should prepopulate imageUri if it match options in form but not version', async () => {
+    mockGetImageUri.mockResolvedValue(
+      'gcr.io/deeplearning-platform-release/tf-gpu.1-15:m36'
+    );
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    await immediatePromise();
+    schedulerForm.update();
+
+    expect(schedulerForm.find('input[name="imageUri"]').props().value).toBe(
+      'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest'
+    );
+  });
+
   it('Should prepopulate imageUri if it does not match options in form', async () => {
     mockGetImageUri.mockResolvedValue(
       'gcr.io/deeplearning-platform-release/tf-gpu.1-23:latest'
@@ -751,7 +765,7 @@ describe('SchedulerForm', () => {
       imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
-      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
+      outputNotebookFolder: `${gcsBucket}/test_execution`,
       scaleTier: 'BASIC',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
@@ -860,7 +874,7 @@ describe('SchedulerForm', () => {
       imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: 'n1-standard-4',
-      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
+      outputNotebookFolder: `${gcsBucket}/test_execution`,
       scaleTier: 'CUSTOM',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
@@ -1014,7 +1028,7 @@ describe('SchedulerForm', () => {
       imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: 'n1-standard-16',
-      outputNotebookGcsPath: `${gcsBucket}/test_schedule/test_schedule.ipynb`,
+      outputNotebookFolder: `${gcsBucket}/test_schedule`,
       scaleTier: 'CUSTOM',
       gcsBucket: 'gs://test-project',
       region: 'us-east1',
@@ -1023,7 +1037,6 @@ describe('SchedulerForm', () => {
     };
     expect(mockGcpService.scheduleNotebook).toHaveBeenCalledWith(
       aiPlatformRequest,
-      'us-east1',
       '0 0 * * *'
     );
     expect(mockSettingsSet).not.toHaveBeenCalled();
@@ -1102,7 +1115,7 @@ describe('SchedulerForm', () => {
       imageUri: 'gcr.io/test',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
-      outputNotebookGcsPath: `${gcsBucket}/test_execution/test_execution.ipynb`,
+      outputNotebookFolder: `${gcsBucket}/test_execution`,
       scaleTier: 'BASIC',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
@@ -1190,7 +1203,7 @@ describe('SchedulerForm', () => {
       imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
       inputNotebookGcsPath: gcsPath,
       masterType: '',
-      outputNotebookGcsPath: `${gcsBucket}/test_failed_execution/test_failed_execution.ipynb`,
+      outputNotebookFolder: `${gcsBucket}/test_failed_execution`,
       scaleTier: 'BASIC',
       gcsBucket: 'gs://test-project',
       region: 'us-central1',
@@ -1199,6 +1212,124 @@ describe('SchedulerForm', () => {
     };
     expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
       aiPlatformRequest
+    );
+    expect(schedulerForm.find(SubmittedJob).exists()).toBe(false);
+  });
+
+  it('Fails to submit execution because operation failed', async () => {
+    mockNotebookContents.mockReturnValue(notebookContents);
+    mockUploadNotebook.mockResolvedValue(true);
+    mockExecuteNotebook.mockReturnValue({ error: '404: Not found' });
+
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="name"]',
+      'name',
+      'test_failed_execution_operation'
+    );
+
+    // Submit the form and wait for an immediate promise to flush other promises
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    schedulerForm.update();
+
+    const gcsPath = `${gcsBucket}/test_failed_execution_operation/${notebookName}`;
+    const errorText = '404: Not found: Unable to submit execution';
+    expect(
+      schedulerForm.contains(
+        <Message asActivity={false} asError={true} text={errorText} />
+      )
+    ).toBe(true);
+
+    expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
+      notebookContents,
+      gcsPath
+    );
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_failed_execution_operation',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
+      inputNotebookGcsPath: gcsPath,
+      masterType: '',
+      outputNotebookFolder: `${gcsBucket}/test_failed_execution_operation`,
+      scaleTier: 'BASIC',
+      gcsBucket: 'gs://test-project',
+      region: 'us-central1',
+      acceleratorType: '',
+      acceleratorCount: '',
+    };
+    expect(mockGcpService.executeNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest
+    );
+    expect(schedulerForm.find(SubmittedJob).exists()).toBe(false);
+  });
+
+  it('Fails to submit schedule because operation failed', async () => {
+    mockNotebookContents.mockReturnValue(notebookContents);
+    mockUploadNotebook.mockResolvedValue(true);
+    mockScheduleNotebook.mockReturnValue({ error: '404: Not found' });
+
+    const schedulerForm = mount(<SchedulerForm {...mockProps} />);
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="name"]',
+      'name',
+      'test_failed_schedule_operation'
+    );
+
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="scheduleType"]',
+      'scheduleType',
+      RECURRING
+    );
+    schedulerForm
+      .find(ToggleSwitch)
+      .find('input')
+      .simulate('change', {
+        target: { checked: true },
+      });
+    simulateFieldChange(
+      schedulerForm,
+      'input[name="schedule"]',
+      'schedule',
+      '0 0 * * *'
+    );
+
+    // Submit the form and wait for an immediate promise to flush other promises
+    schedulerForm.find('SubmitButton button').simulate('click');
+    await immediatePromise();
+    schedulerForm.update();
+
+    const gcsPath = `${gcsBucket}/test_failed_schedule_operation/${notebookName}`;
+    const errorText = '404: Not found: Unable to submit schedule';
+    expect(
+      schedulerForm.contains(
+        <Message asActivity={false} asError={true} text={errorText} />
+      )
+    ).toBe(true);
+
+    expect(mockGcpService.uploadNotebook).toHaveBeenCalledWith(
+      notebookContents,
+      gcsPath
+    );
+    const aiPlatformRequest: ExecuteNotebookRequest = {
+      name: 'test_failed_schedule_operation',
+      imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
+      inputNotebookGcsPath: gcsPath,
+      masterType: '',
+      outputNotebookFolder: `${gcsBucket}/test_failed_schedule_operation`,
+      scaleTier: 'BASIC',
+      gcsBucket: 'gs://test-project',
+      region: 'us-central1',
+      acceleratorType: '',
+      acceleratorCount: '',
+    };
+    expect(mockGcpService.scheduleNotebook).toHaveBeenCalledWith(
+      aiPlatformRequest,
+      '0 0 * * *'
     );
     expect(schedulerForm.find(SubmittedJob).exists()).toBe(false);
   });

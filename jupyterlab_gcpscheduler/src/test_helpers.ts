@@ -16,7 +16,12 @@
 
 /** Utility functions and helpers for tests. */
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { AiPlatformJob, Execution, Schedule } from './interfaces';
+import {
+  NotebooksApiExecution,
+  NotebooksApiSchedule,
+  Execution,
+  Schedule,
+} from './interfaces';
 import { mount } from 'enzyme';
 import {
   AI_PLATFORM_LINK,
@@ -105,7 +110,7 @@ export function getExecution(): Execution {
     id: 'notebook_abcd_abcxyz',
     name,
     createTime: '2020-05-01T19:00:07Z',
-    endTime: '2020-05-01T19:09:42Z',
+    updateTime: '2020-05-01T19:09:42Z',
     gcsFile,
     type: 'Execution',
     state: 'SUCCEEDED',
@@ -131,7 +136,7 @@ export function getSchedule(): Schedule {
     id: 'notebook_abcd_abcxyz',
     name,
     createTime: '2020-05-01T19:00:07Z',
-    endTime: '2020-05-01T19:09:42Z',
+    updateTime: '2020-05-01T19:09:42Z',
     gcsFile,
     state: 'SUCCEEDED',
     link,
@@ -139,57 +144,79 @@ export function getSchedule(): Schedule {
     downloadLink,
     timeZone: 'UTC',
     schedule: '30 9 */2 * *',
+    hasExecutions: true,
   };
 }
 
 /** Returns an AI Platform Job object */
-export function getAiPlatformJob(name = 'notebook_abcd_abcxyz'): AiPlatformJob {
+export function getNotebooksApiExecution(
+  name = 'notebook_abcd_abcxyz'
+): NotebooksApiExecution {
   return {
-    jobId: name,
-    trainingInput: {
-      args: [
-        'nbexecutor',
-        '--input-notebook',
-        `gs://${TEST_PROJECT}/notebook_abcd/nb.ipynb`,
-        '--output-notebook',
-        `gs://${TEST_PROJECT}/notebook_abcd/abcd.ipynb`,
-      ],
-      region: 'us-central1',
-      masterConfig: {
-        imageUri: 'gcr.io/deeplearning-platform-release/tf-cpu.1-15:latest',
-      },
-    },
+    name,
+    displayName: name,
     createTime: '2020-05-01T19:00:07Z',
-    startTime: '2020-05-01T19:04:08Z',
-    endTime: '2020-05-01T19:09:42Z',
+    updateTime: '2020-05-01T19:09:42Z',
     state: 'SUCCEEDED',
-    trainingOutput: { consumedMLUnits: 0.06 },
-    labels: {
-      /* eslint-disable @typescript-eslint/camelcase */
-      job_type: 'jupyterlab_scheduled_notebook',
-      scheduler_job_name: 'notebook_abcd',
-      /* eslint-enable @typescript-eslint/camelcase */
+    executionTemplate: {
+      scaleTier: 'BASIC',
+      masterType: 'n1-standard-4',
+      acceleratorConfig: {
+        type: 'NVIDIA_TESLA_K80',
+        coreCount: '1',
+      },
+      inputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
+      outputNotebookFolder: 'gs://test-project/notebook_abcd',
+      containerImageUri: 'gcr.io/test:latest',
+      location: 'us-west1-b',
     },
-  } as AiPlatformJob;
+    outputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
+  };
 }
 
-export function getAiPlatformJobConvertedIntoExecution(
+/** Returns an AI Platform Job object */
+export function getNotebooksApiSchedule(
   name = 'notebook_abcd_abcxyz'
-) {
+): NotebooksApiSchedule {
+  return {
+    name,
+    displayName: name,
+    createTime: '2020-05-01T19:00:07Z',
+    updateTime: '2020-05-01T19:09:42Z',
+    cronSchedule: '30 12 */2 * *',
+    state: 'ENABLED',
+    executionTemplate: {
+      scaleTier: 'BASIC',
+      masterType: 'n1-standard-4',
+      acceleratorConfig: {
+        type: 'NVIDIA_TESLA_K80',
+        coreCount: '1',
+      },
+      inputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
+      outputNotebookFolder: 'gs://test-project/notebook_abcd',
+      containerImageUri: 'gcr.io/test:latest',
+      location: 'us-west1-b',
+    },
+  };
+}
+
+export function getNotebooksApiExecutionConvertedIntoExecution(
+  name = 'notebook_abcd_abcxyz'
+): Execution {
   return {
     bucketLink:
       'https://console.cloud.google.com/storage/browser/test-project;tab=permissions',
     createTime: '2020-05-01T19:00:07Z',
     downloadLink:
       'https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb',
-    endTime: '2020-05-01T19:09:42Z',
+    updateTime: '2020-05-01T19:09:42Z',
     gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
       'https://console.cloud.google.com/ai-platform/jobs/' +
       name +
       '?project=test-project',
-    name: 'notebook_abcd',
+    name,
     state: 'SUCCEEDED',
     type: 'Execution',
     viewerLink:
@@ -197,25 +224,26 @@ export function getAiPlatformJobConvertedIntoExecution(
   };
 }
 
-export function getAiPlatformJobConvertedIntoSchedule(
+export function getNotebooksApiScheduleConvertedIntoSchedule(
   name = 'notebook_abcd_abcxyz'
-) {
+): Schedule {
   return {
     createTime: '2020-05-01T19:00:07Z',
     downloadLink:
       'https://storage.cloud.google.com/test-project/notebook_abcd/abcd.ipynb',
-    endTime: '2020-05-01T19:09:42Z',
+    updateTime: '2020-05-01T19:09:42Z',
     gcsFile: 'test-project/notebook_abcd/abcd.ipynb',
     id: name,
     link:
       'https://console.cloud.google.com/ai-platform/notebooks/schedule-details/' +
       name +
       '?project=test-project',
-    name: 'notebook_abcd',
-    state: 'SUCCEEDED',
+    name,
+    state: 'ENABLED',
     schedule: '30 12 */2 * *',
     viewerLink:
       'https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb?project=test-project',
+    hasExecutions: true,
   };
 }
 

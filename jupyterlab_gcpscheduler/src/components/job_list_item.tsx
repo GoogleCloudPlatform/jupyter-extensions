@@ -112,7 +112,9 @@ export function JobListItem(props: Props) {
           {!isSchedule && (
             <div className={localStyles.jobCaption}>
               <span>
-                {customShortDateFormat(new Date(job.endTime || job.createTime))}
+                {customShortDateFormat(
+                  new Date(job.updateTime || job.createTime)
+                )}
               </span>
             </div>
           )}
@@ -126,20 +128,24 @@ export function JobListItem(props: Props) {
               <div className={localStyles.jobCaption}>
                 <span>
                   Latest execution:{' '}
-                  {job.endTime
-                    ? customShortDateFormat(new Date(job.endTime))
+                  {(job as Schedule).hasExecutions
+                    ? customShortDateFormat(new Date(job.updateTime))
                     : 'None'}
                 </span>
               </div>
             </React.Fragment>
           )}
           <div className={classes(css.bold, localStyles.spacing)}>
-            <LearnMoreLink
-              noUnderline={true}
-              href={job.viewerLink
-              }
-              text={isSchedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
-            />
+            {((isSchedule && (job as Schedule).hasExecutions) ||
+              !isSchedule) && (
+              <LearnMoreLink
+                noUnderline={true}
+                href={job.viewerLink}
+                text={
+                  isSchedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'
+                }
+              />
+            )}
           </div>
         </div>
       </Grid>

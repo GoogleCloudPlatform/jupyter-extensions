@@ -154,7 +154,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Create another exectution
+      Create another execution
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>
@@ -327,7 +327,7 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
     <WithStyles(ForwardRef(Button))
       onClick={[MockFunction]}
     >
-      Create another exectution
+      Create another execution
     </WithStyles(ForwardRef(Button))>
   </ActionBar>
 </div>

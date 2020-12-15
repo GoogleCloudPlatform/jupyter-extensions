@@ -17,14 +17,15 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { ServerConnection } from '@jupyterlab/services';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { CLOUD_FUNCTION_REGION, IMPORT_DIRECTORY } from '../data';
-import { GcpService } from './gcp';
+import { IMPORT_DIRECTORY } from '../data';
+import { GcpService, NOTEBOOKS_API_BASE } from './gcp';
 import { ExecuteNotebookRequest } from '../interfaces';
 import {
   TEST_PROJECT,
-  getAiPlatformJob,
-  getAiPlatformJobConvertedIntoExecution,
-  getAiPlatformJobConvertedIntoSchedule,
+  getNotebooksApiExecution,
+  getNotebooksApiSchedule,
+  getNotebooksApiExecutionConvertedIntoExecution,
+  getNotebooksApiScheduleConvertedIntoSchedule,
   getCloudStorageApiBucket,
   getBucket,
 } from '../test_helpers';
@@ -81,7 +82,7 @@ describe('GcpService', () => {
         'gs://fake-bucket/notebook.json'
       );
 
-      expect(object).toEqual(fakeObject);
+      expect(object).toEqual(true);
       expect(mockSubmit).toHaveBeenCalledWith({
         headers: { 'Content-Type': 'application/json' },
         params: { name: 'notebook.json', uploadType: 'media' },
@@ -216,12 +217,12 @@ describe('GcpService', () => {
   });
 
   describe('Notebooks', () => {
-    const ExecuteNotebookRequest: ExecuteNotebookRequest = {
+    const executeNotebookRequest: ExecuteNotebookRequest = {
       name: 'test_notebook_execution',
       imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
       inputNotebookGcsPath: 'gs://test-bucket/test_nb.ipynb',
       masterType: '',
-      outputNotebookGcsPath: 'gs://test-bucket/test_nb-out.ipynb',
+      outputNotebookFolder: 'gs://test-bucket/test_nb-out.ipynb',
       region: 'us-east1',
       scaleTier: 'STANDARD_1',
       gcsBucket: 'gcsBucket',
@@ -229,46 +230,76 @@ describe('GcpService', () => {
       acceleratorCount: '',
     };
 
-    const aiPlatformJobBody: gapi.client.ml.GoogleCloudMlV1__Job = {
-      jobId: 'test_notebook_execution',
-      labels: { job_type: 'jupyterlab_immediate_notebook' },
-      trainingInput: {
-        args: [
-          'nbexecutor',
-          '--input-notebook',
-          'gs://test-bucket/test_nb.ipynb',
-          '--output-notebook',
-          'gs://test-bucket/test_nb-out.ipynb',
-        ],
-        masterConfig: {
-          imageUri: 'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
-          acceleratorConfig: {},
-        },
-        region: 'us-east1',
+    const executeNotebookRequestBody = {
+      executionTemplate: {
+        acceleratorConfig: undefined,
+        containerImageUri:
+          'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
+        inputNotebookFile: 'gs://test-bucket/test_nb.ipynb',
+        outputNotebookFolder: 'gs://test-bucket/test_nb-out.ipynb',
+        location: 'us-east1',
+        masterType: undefined,
         scaleTier: 'STANDARD_1',
       },
-    } as gapi.client.ml.GoogleCloudMlV1__Job;
-    const scheduledJobBody = {
-      ...aiPlatformJobBody,
-      labels: { job_type: 'jupyterlab_scheduled_notebook' },
-    } as gapi.client.ml.GoogleCloudMlV1__Job;
+      state: 'STATE_UNSPECIFIED',
+      name: 'test_notebook_execution',
+      displayName: 'test_notebook_execution',
+      description: 'Execution for test_notebook_execution',
+    };
 
-    it('Submits Notebook Job to AI Platform', async () => {
-      const now = new Date().toLocaleString();
+    const scheduleNotebookRequestBody = {
+      cronSchedule: '0 1 * * 5',
+      executionTemplate: {
+        acceleratorConfig: undefined,
+        containerImageUri:
+          'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
+        inputNotebookFile: 'gs://test-bucket/test_nb.ipynb',
+        outputNotebookFolder: 'gs://test-bucket/test_nb-out.ipynb',
+        location: 'us-east1',
+        masterType: undefined,
+        scaleTier: 'STANDARD_1',
+      },
+      state: 'STATE_UNSPECIFIED',
+      name: 'test_notebook_execution',
+      displayName: 'test_notebook_execution',
+      description: 'Schedule for test_notebook_execution',
+      timeZone: 'UTC',
+    };
+
+    it('Submits Notebook Execution to AI Platform', async () => {
       const returnedJob = {
-        jobId: 'test_notebook_execution',
-        createTime: now,
+        name: 'operation-name',
+        done: true,
       };
       mockSubmit.mockReturnValue(asApiResponse(returnedJob));
 
       const execution = await gcpService.executeNotebook(
-        ExecuteNotebookRequest
+        executeNotebookRequest
       );
-      expect(execution).toEqual(returnedJob);
+      expect(execution).toEqual({});
       expect(mockSubmit).toHaveBeenCalledWith({
         method: 'POST',
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        body: aiPlatformJobBody,
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/executions?execution_id=test_notebook_execution`,
+        body: executeNotebookRequestBody,
+      });
+    });
+
+    it('Submits Notebook Execution to AI Platform and gets an error response', async () => {
+      const returnedJob = {
+        name: 'operation-name',
+        error: { code: 800, message: 'This is an error' },
+        done: true,
+      };
+      mockSubmit.mockReturnValue(asApiResponse(returnedJob));
+
+      const execution = await gcpService.executeNotebook(
+        executeNotebookRequest
+      );
+      expect(execution).toEqual({ error: '800: This is an error' });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        method: 'POST',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/executions?execution_id=test_notebook_execution`,
+        body: executeNotebookRequestBody,
       });
     });
 
@@ -283,52 +314,57 @@ describe('GcpService', () => {
 
       expect.assertions(2);
       try {
-        await gcpService.executeNotebook(ExecuteNotebookRequest);
+        await gcpService.executeNotebook(executeNotebookRequest);
       } catch (err) {
         expect(err).toEqual('UNAVAILABLE: Could not create AI Platform Job');
       }
       expect(mockSubmit).toHaveBeenCalledWith({
         method: 'POST',
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        body: aiPlatformJobBody,
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/executions?execution_id=test_notebook_execution`,
+        body: executeNotebookRequestBody,
       });
     });
 
-    it('Submits Schedule Notebook Job to Cloud Scheduler', async () => {
+    it('Submits Schedule Notebook', async () => {
       const returnedJob = {
         name: 'test_scheduled_notebook_execution',
+        done: true,
       };
       mockSubmit.mockReturnValue(asApiResponse(returnedJob));
-
-      const expectedCloudFunctionUrl =
-        'https://us-central1-test-project.cloudfunctions.net/submitScheduledNotebook';
-      const serviceAccountEmail = 'test-project@appspot.gserviceaccount.com';
       const schedule = '0 1 * * 5';
 
-      const job = await gcpService.scheduleNotebook(
-        ExecuteNotebookRequest,
-        CLOUD_FUNCTION_REGION,
+      const scheduleNotebook = await gcpService.scheduleNotebook(
+        executeNotebookRequest,
         schedule
       );
 
-      expect(job).toEqual(returnedJob);
+      expect(scheduleNotebook).toEqual({});
       expect(mockSubmit).toHaveBeenCalledWith({
-        body: {
-          description: 'jupyterlab_scheduled_notebook',
-          httpTarget: {
-            body: btoa(JSON.stringify(scheduledJobBody)),
-            headers: { 'Content-Type': 'application/json' },
-            httpMethod: 'POST',
-            oidcToken: { serviceAccountEmail },
-            uri: expectedCloudFunctionUrl,
-          },
-          name: `projects/test-project/locations/us-central1/jobs/${ExecuteNotebookRequest.name}`,
-          schedule,
-          timeZone: expect.any(String),
-        },
+        body: scheduleNotebookRequestBody,
         method: 'POST',
-        path:
-          'https://cloudscheduler.googleapis.com/v1/projects/test-project/locations/us-central1/jobs',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/schedules?schedule_id=test_notebook_execution`,
+      });
+    });
+
+    it('Submits Notebook Schedule and gets an error response', async () => {
+      const returnedJob = {
+        name: 'operation-name',
+        error: { code: 800, message: 'This is an error' },
+        done: true,
+      };
+      mockSubmit.mockReturnValue(asApiResponse(returnedJob));
+      const schedule = '0 1 * * 5';
+
+      const scheduleNotebook = await gcpService.scheduleNotebook(
+        executeNotebookRequest,
+        schedule
+      );
+
+      expect(scheduleNotebook).toEqual({ error: '800: This is an error' });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        body: scheduleNotebookRequestBody,
+        method: 'POST',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/schedules?schedule_id=test_notebook_execution`,
       });
     });
 
@@ -340,19 +376,11 @@ describe('GcpService', () => {
         },
       };
       mockSubmit.mockRejectedValue(asApiResponse(error));
-
-      const expectedCloudFunctionUrl =
-        'https://us-central1-test-project.cloudfunctions.net/submitScheduledNotebook';
-      const serviceAccountEmail = 'test-project@appspot.gserviceaccount.com';
       const schedule = '0 1 * * 5';
 
       expect.assertions(2);
       try {
-        await gcpService.scheduleNotebook(
-          ExecuteNotebookRequest,
-          'us-east1',
-          schedule
-        );
+        await gcpService.scheduleNotebook(executeNotebookRequest, schedule);
       } catch (err) {
         expect(err).toEqual(
           'QUOTA_EXHAUSTED: Could not create Cloud Scheduler Job'
@@ -360,29 +388,19 @@ describe('GcpService', () => {
       }
 
       expect(mockSubmit).toHaveBeenCalledWith({
-        body: {
-          description: 'jupyterlab_scheduled_notebook',
-          httpTarget: {
-            body: btoa(JSON.stringify(scheduledJobBody)),
-            headers: { 'Content-Type': 'application/json' },
-            httpMethod: 'POST',
-            oidcToken: { serviceAccountEmail },
-            uri: expectedCloudFunctionUrl,
-          },
-          name: `projects/test-project/locations/us-east1/jobs/${ExecuteNotebookRequest.name}`,
-          schedule,
-          timeZone: expect.any(String),
-        },
+        body: scheduleNotebookRequestBody,
         method: 'POST',
-        path:
-          'https://cloudscheduler.googleapis.com/v1/projects/test-project/locations/us-east1/jobs',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/us-east1/schedules?schedule_id=test_notebook_execution`,
       });
     });
 
     it('Lists notebook executions', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [getAiPlatformJob(), getAiPlatformJob('execution2')],
+          executions: [
+            getNotebooksApiExecution(),
+            getNotebooksApiExecution('execution2'),
+          ],
           nextPageToken: 'xyz',
         })
       );
@@ -391,34 +409,28 @@ describe('GcpService', () => {
       expect(executions).toEqual({
         pageToken: 'xyz',
         executions: [
-          getAiPlatformJobConvertedIntoExecution(),
-          getAiPlatformJobConvertedIntoExecution('execution2'),
+          getNotebooksApiExecutionConvertedIntoExecution(),
+          getNotebooksApiExecutionConvertedIntoExecution('execution2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter:
-            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: { filter: '' },
       });
     });
 
-    it('Lists notebook executions empty jobs response', async () => {
+    it('Lists notebook executions empty executions response', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [],
+          executions: [],
         })
       );
 
       const executions = await gcpService.listExecutions();
       expect(executions).toEqual({ executions: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter:
-            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: { filter: '' },
       });
     });
 
@@ -428,11 +440,8 @@ describe('GcpService', () => {
       const executions = await gcpService.listExecutions();
       expect(executions).toEqual({ executions: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter:
-            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: { filter: '' },
       });
     });
 
@@ -454,10 +463,9 @@ describe('GcpService', () => {
         );
       }
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
         params: {
-          filter:
-            'labels.job_type=jupyterlab_scheduled_notebook OR labels.job_type=jupyterlab_immediate_notebook',
+          filter: '',
           pageSize: '10',
           pageToken: 'abc123',
         },
@@ -465,43 +473,55 @@ describe('GcpService', () => {
     });
 
     it('Lists notebook schedules', async () => {
-      mockSubmit.mockReturnValue(
-        asApiResponse({
-          jobs: [getAiPlatformJob(), getAiPlatformJob('schedule2')],
-          nextPageToken: 'xyz',
-        })
-      );
+      mockSubmit
+        .mockReturnValueOnce(
+          asApiResponse({
+            schedules: [
+              getNotebooksApiSchedule(),
+              getNotebooksApiSchedule('schedule2'),
+            ],
+            nextPageToken: 'xyz',
+          })
+        )
+        .mockReturnValueOnce(
+          asApiResponse({
+            executions: [getNotebooksApiExecution('execution1')],
+            nextPageToken: 'abc',
+          })
+        )
+        .mockReturnValueOnce(
+          asApiResponse({
+            executions: [getNotebooksApiExecution('execution2')],
+            nextPageToken: 'def',
+          })
+        );
 
       const schedules = await gcpService.listSchedules();
       expect(schedules).toEqual({
         pageToken: 'xyz',
         schedules: [
-          getAiPlatformJobConvertedIntoSchedule(),
-          getAiPlatformJobConvertedIntoSchedule('schedule2'),
+          getNotebooksApiScheduleConvertedIntoSchedule(),
+          getNotebooksApiScheduleConvertedIntoSchedule('schedule2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
+        params: {},
       });
     });
 
-    it('Lists notebook schedules empty jobs response', async () => {
+    it('Lists notebook schedules empty schedules response', async () => {
       mockSubmit.mockReturnValue(
         asApiResponse({
-          jobs: [],
+          schedules: [],
         })
       );
 
       const schedules = await gcpService.listSchedules();
       expect(schedules).toEqual({ schedules: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
+        params: {},
       });
     });
 
@@ -511,10 +531,8 @@ describe('GcpService', () => {
       const schedules = await gcpService.listSchedules();
       expect(schedules).toEqual({ schedules: [], pageToken: undefined });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
-        params: {
-          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
-        },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
+        params: {},
       });
     });
 
@@ -536,9 +554,8 @@ describe('GcpService', () => {
         );
       }
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: 'https://ml.googleapis.com/v1/projects/test-project/jobs',
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
         params: {
-          filter: 'labels.job_type=jupyterlab_scheduled_notebook',
           pageSize: '10',
           pageToken: 'abc123',
         },
