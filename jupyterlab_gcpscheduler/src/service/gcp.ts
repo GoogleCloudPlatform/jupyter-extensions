@@ -283,8 +283,8 @@ export class GcpService {
         throw {
           result: {
             error: {
-              status: 'Unreachable',
-              code: response.result.unreachable.join(', '),
+              status: 'UNREACHABLE',
+              message: response.result.unreachable.join(', '),
             },
           },
         };
@@ -349,8 +349,8 @@ export class GcpService {
         throw {
           result: {
             error: {
-              status: 'Unreachable',
-              code: response.result.unreachable.join(', '),
+              status: 'UNREACHABLE',
+              message: response.result.unreachable.join(', '),
             },
           },
         };
