@@ -305,13 +305,17 @@ export class GcpService {
   async getLatestExecutionForSchedule(
     scheduleId: string
   ): Promise<Execution | undefined> {
-    const latestExecutionResponse = await this.listExecutions(
-      1,
-      undefined,
-      `execution_template.labels.schedule_id=${scheduleId}`
-    );
-    if (latestExecutionResponse.executions.length !== 0) {
-      return latestExecutionResponse.executions[0];
+    try {
+      const latestExecutionResponse = await this.listExecutions(
+        1,
+        undefined,
+        `execution_template.labels.schedule_id=${scheduleId}`
+      );
+      if (latestExecutionResponse.executions.length !== 0) {
+        return latestExecutionResponse.executions[0];
+      }
+    } catch (err) {
+      console.log('Unable to find executions for schedule id ', scheduleId);
     }
     return undefined;
   }

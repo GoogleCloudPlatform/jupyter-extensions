@@ -89,6 +89,7 @@ const localStyles = stylesheet({
   },
   tab: {
     overflow: 'hidden',
+    height: '100%',
   },
   pagination: {
     fontSize: '12px',

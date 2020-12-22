@@ -29,9 +29,6 @@ interface State {
   anchorEl: null | HTMLElement;
 }
 
-/** Button with no padding. */
-export const SmallButton = withStyles({ root: { padding: 0 } })(IconButton);
-
 /** Menu item with smaller padding and fontSize */
 export const SmallMenuItem = withStyles({
   root: {

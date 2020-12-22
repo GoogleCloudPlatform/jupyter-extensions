@@ -445,6 +445,28 @@ describe('GcpService', () => {
       });
     });
 
+    it('Lists notebook executions unreachable response', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ unreachable: ['us-central1', 'us-west1'] })
+      );
+
+      expect.assertions(2);
+      try {
+        await gcpService.listExecutions(10, 'abc123');
+      } catch (err) {
+        expect(err).toEqual('UNREACHABLE: us-central1, us-west1');
+      }
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: {
+          filter: '',
+          pageSize: '10',
+          pageToken: 'abc123',
+        },
+      });
+    });
+
     it('Throws error when listing notebook executions', async () => {
       const error = {
         error: {
@@ -477,7 +499,7 @@ describe('GcpService', () => {
         .mockReturnValueOnce(
           asApiResponse({
             schedules: [
-              getNotebooksApiSchedule(),
+              getNotebooksApiSchedule('schedule1'),
               getNotebooksApiSchedule('schedule2'),
             ],
             nextPageToken: 'xyz',
@@ -500,13 +522,21 @@ describe('GcpService', () => {
       expect(schedules).toEqual({
         pageToken: 'xyz',
         schedules: [
-          getNotebooksApiScheduleConvertedIntoSchedule(),
+          getNotebooksApiScheduleConvertedIntoSchedule('schedule1'),
           getNotebooksApiScheduleConvertedIntoSchedule('schedule2'),
         ],
       });
       expect(mockSubmit).toHaveBeenCalledWith({
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
         params: {},
+      });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions?filter=executionTemplate.labels.schedule_id=schedule1`,
+        params: { pageSize: '1' },
+      });
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions?filter=executionTemplate.labels.schedule_id=schedule2`,
+        params: { pageSize: '1' },
       });
     });
 
@@ -533,6 +563,27 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
         params: {},
+      });
+    });
+
+    it('Lists notebook schedules unreachable response', async () => {
+      mockSubmit.mockReturnValue(
+        asApiResponse({ unreachable: ['us-central1', 'us-west1'] })
+      );
+
+      expect.assertions(2);
+      try {
+        await gcpService.listSchedules(10, 'abc123');
+      } catch (err) {
+        expect(err).toEqual('UNREACHABLE: us-central1, us-west1');
+      }
+
+      expect(mockSubmit).toHaveBeenCalledWith({
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/schedules`,
+        params: {
+          pageSize: '10',
+          pageToken: 'abc123',
+        },
       });
     });
 
