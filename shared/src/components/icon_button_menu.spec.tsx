@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { Menu, MenuItem,IconButton } from '@material-ui/core';
+import { Menu, MenuItem, IconButton } from '@material-ui/core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {
-  IconButtonMenu,
-  MenuCloseHandler,
-} from './icon_button_menu';
+import { IconButtonMenu, MenuCloseHandler } from './icon_button_menu';
 import { Add } from '@material-ui/icons';
 
 describe('IconButtonMenu', () => {

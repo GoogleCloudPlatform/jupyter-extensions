@@ -531,12 +531,18 @@ describe('GcpService', () => {
         params: {},
       });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions?filter=executionTemplate.labels.schedule_id=schedule1`,
-        params: { pageSize: '1' },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: {
+          pageSize: '1',
+          filter: 'execution_template.labels.schedule_id=schedule1',
+        },
       });
       expect(mockSubmit).toHaveBeenCalledWith({
-        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions?filter=executionTemplate.labels.schedule_id=schedule2`,
-        params: { pageSize: '1' },
+        path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
+        params: {
+          pageSize: '1',
+          filter: 'execution_template.labels.schedule_id=schedule2',
+        },
       });
     });
 
