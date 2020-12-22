@@ -191,7 +191,7 @@ export class BQTable extends React.Component<Props, State> {
     const fields = ['Row', ...this.props.fields];
 
     return (
-      <div>
+      <>
         <div className={localStyles.scrollable}>
           <Table
             size="small"
@@ -239,7 +239,7 @@ export class BQTable extends React.Component<Props, State> {
             component="div"
           />
         )}
-      </div>
+      </>
     );
   }
 }

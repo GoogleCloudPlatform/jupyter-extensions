@@ -1,13 +1,45 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http=//www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Clipboard } from '@jupyterlab/apputils';
+import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { CircularProgress, Icon } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
-import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
+import TreeView from '@material-ui/lab/TreeView';
 import * as csstips from 'csstips';
+import { ContextMenu } from 'gcp_jupyterlab_shared';
 import React from 'react';
 import { stylesheet } from 'typestyle';
-import { Clipboard } from '@jupyterlab/apputils';
-import { NotebookActions, INotebookTracker } from '@jupyterlab/notebook';
+import { ICONS } from '../../constants';
+import { generateQueryId } from '../../reducers/queryEditorTabSlice';
+import { getStarterQuery, QueryType } from '../../utils/starter_queries';
+import { WidgetManager } from '../../utils/widgetManager/widget_manager';
+import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
+import { ModelDetailsWidget } from '../details_panel/model_details_widget';
+import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
+import { ModelDetailsService } from '../details_panel/service/list_model_details';
+import { TableDetailsService } from '../details_panel/service/list_table_details';
+import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { TableDetailsWidget } from '../details_panel/table_details_widget';
+import { ViewDetailsWidget } from '../details_panel/view_details_widget';
+import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
+import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
+import { gColor } from '../shared/styles';
+import { Context } from './list_tree_panel';
 
 import {
   Project,
@@ -18,23 +50,6 @@ import {
   ListTablesService,
   ListModelsService,
 } from './service/list_items';
-import { Context } from './list_tree_panel';
-import { DatasetDetailsWidget } from '../details_panel/dataset_details_widget';
-import { DatasetDetailsService } from '../details_panel/service/list_dataset_details';
-import { TableDetailsWidget } from '../details_panel/table_details_widget';
-import { TableDetailsService } from '../details_panel/service/list_table_details';
-import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
-import { generateQueryId } from '../../reducers/queryEditorTabSlice';
-import { WidgetManager } from '../../utils/widgetManager/widget_manager';
-import { ViewDetailsWidget } from '../details_panel/view_details_widget';
-import { ViewDetailsService } from '../details_panel/service/list_view_details';
-import { ModelDetailsWidget } from '../details_panel/model_details_widget';
-import { ModelDetailsService } from '../details_panel/service/list_model_details';
-import { getStarterQuery, QueryType } from '../../utils/starter_queries';
-import { gColor } from '../shared/styles';
-import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
-
-import { ContextMenu } from 'gcp_jupyterlab_shared';
 
 const localStyles = stylesheet({
   item: {
@@ -479,7 +494,7 @@ export class DatasetResource extends Resource<DatasetProps> {
             >
               <div className={localStyles.datasetName}>
                 <Icon className={localStyles.resourceIcons}>
-                  <div className={'jp-Icon jp-Icon-20 jp-DatasetIcon'} />
+                  <div className={`jp-Icon jp-Icon-20 ${ICONS.dataset}`} />
                 </Icon>
                 <div className={localStyles.resourceName}>{dataset.name}</div>
               </div>

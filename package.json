@@ -6,7 +6,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
     "build": "lerna run build --stream --sort",
-    "devserver": "nodemon -e \".py\" -x \"jupyter lab --watch --no-browser\"",
+    "devserver": "nodemon -e \".py\" -x \"jupyter lab --watch --no-browser --LabApp.token='' --LabApp.password=''\"",
     "clean": "lerna clean --yes && lerna run clean --parallel",
     "link": "lerna run link --stream",
     "pack": "lerna exec npm pack",
