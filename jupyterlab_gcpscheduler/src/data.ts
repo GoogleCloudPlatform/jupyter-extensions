@@ -151,10 +151,11 @@ export const SCALE_TIERS: Option[] = [
     value: 'BASIC_GPU',
     text: 'A single worker instance with an NVIDIA Tesla K80 GPU',
   },
-  {
-    value: 'BASIC_TPU',
-    text: 'A single worker instance with an NVIDIA Tesla K80 TPU',
-  },
+  //TODO: Add back when b/176198984 is fixed
+  // {
+  //   value: 'BASIC_TPU',
+  //   text: 'A single worker instance with an NVIDIA Tesla K80 TPU',
+  // },
   {
     value: 'STANDARD_1',
     text: '1 master instance, 4 workers, 3 parameter servers',
