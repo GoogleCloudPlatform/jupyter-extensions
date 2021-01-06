@@ -428,6 +428,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         },
       });
       const executions = await this.props.gcpService.listExecutions(
+        '',
         pageSize,
         pageToken
       );

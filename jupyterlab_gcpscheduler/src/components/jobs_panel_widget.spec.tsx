@@ -279,11 +279,11 @@ describe('GcpScheduledJobsPanel', () => {
     (component.instance() as GcpScheduledJobsPanel).handleChangePage(null, 1);
     expect(component.state('page')).toEqual(1);
     await nextPageResolvedExecutions;
-    expect(mockListExecutions).toHaveBeenCalledWith(10, 'abc');
+    expect(mockListExecutions).toHaveBeenCalledWith('', 10, 'abc');
     (component.instance() as GcpScheduledJobsPanel).handleChangePage(null, 2);
     expect(component.state('page')).toEqual(2);
     await lastPageResolvedExecutions;
-    expect(mockListExecutions).toHaveBeenCalledWith(10, 'def');
+    expect(mockListExecutions).toHaveBeenCalledWith('', 10, 'def');
     expect(mockListExecutions).toHaveBeenCalledTimes(3);
   });
 

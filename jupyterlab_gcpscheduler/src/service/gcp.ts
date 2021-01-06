@@ -30,6 +30,7 @@ import {
   TransportService,
   GET,
   POST,
+  ApiResponse,
 } from 'gcp_jupyterlab_shared';
 import {
   ExecuteNotebookRequest,
@@ -188,23 +189,7 @@ export class GcpService {
         method: POST,
         body: this._buildCreateScheduleRequest(request, schedule),
       });
-      if (response.result.error) {
-        return {
-          error: `${response.result.error.code}: ${response.result.error.message}`,
-        };
-      }
-      if (!response.result.done) {
-        const operationName = response.result.name;
-        const pollOperationsResponse = await this._pollOperation(
-          `${NOTEBOOKS_API_BASE}/${operationName}`
-        );
-        if (pollOperationsResponse.error) {
-          return {
-            error: `${pollOperationsResponse.error.code}: ${pollOperationsResponse.error.message}`,
-          };
-        }
-      }
-      return {};
+      return await this._pollAndParseOperation(response);
     } catch (err) {
       console.error('Unable to schedule Notebook');
       handleApiError(err);
@@ -227,23 +212,7 @@ export class GcpService {
         method: POST,
         body: this._buildCreateExecutionRequest(request),
       });
-      if (response.result.error) {
-        return {
-          error: `${response.result.error.code}: ${response.result.error.message}`,
-        };
-      }
-      if (!response.result.done) {
-        const operationName = response.result.name;
-        const pollOperationsResponse = await this._pollOperation(
-          `${NOTEBOOKS_API_BASE}/${operationName}`
-        );
-        if (pollOperationsResponse.error) {
-          return {
-            error: `${pollOperationsResponse.error.code}: ${pollOperationsResponse.error.message}`,
-          };
-        }
-      }
-      return {};
+      return await this._pollAndParseOperation(response);
     } catch (err) {
       console.error('Unable to execute Notebook');
       handleApiError(err);
@@ -256,9 +225,9 @@ export class GcpService {
    * @param request
    */
   async listExecutions(
+    filter = '',
     pageSize?: number,
-    pageToken?: string,
-    filter = ''
+    pageToken?: string
   ): Promise<Executions> {
     try {
       const projectId = await this.projectId;
@@ -297,29 +266,10 @@ export class GcpService {
         pageToken: response.result.nextPageToken,
       };
     } catch (err) {
-      console.error('Unable to list AI Platform Notebook Executions');
+      console.error('Unable to list Notebook Executions');
       handleApiError(err);
     }
   }
-
-  async getLatestExecutionForSchedule(
-    scheduleId: string
-  ): Promise<Execution | undefined> {
-    try {
-      const latestExecutionResponse = await this.listExecutions(
-        1,
-        undefined,
-        `execution_template.labels.schedule_id=${scheduleId}`
-      );
-      if (latestExecutionResponse.executions.length !== 0) {
-        return latestExecutionResponse.executions[0];
-      }
-    } catch (err) {
-      console.log('Unable to find executions for schedule id ', scheduleId);
-    }
-    return undefined;
-  }
-
   /**
    * Gets list of AiPlatformSchedules
    * @param cloudFunctionUrl
@@ -384,7 +334,7 @@ export class GcpService {
         pageToken: response.result.nextPageToken,
       };
     } catch (err) {
-      console.error('Unable to list AI Platform Notebook Schedules');
+      console.error('Unable to list Notebook Schedules');
       handleApiError(err);
     }
   }
@@ -446,6 +396,46 @@ export class GcpService {
     }
   }
 
+  // This catches all errors to prevent a Promise.all from failing.
+  private async getLatestExecutionForSchedule(
+    scheduleId: string
+  ): Promise<Execution | undefined> {
+    try {
+      const latestExecutionResponse = await this.listExecutions(
+        `execution_template.labels.schedule_id:${scheduleId}`,
+        1,
+        undefined
+      );
+      if (latestExecutionResponse.executions.length !== 0) {
+        return latestExecutionResponse.executions[0];
+      }
+    } catch (err) {
+      console.log('Unable to find executions for schedule id ', scheduleId);
+    }
+    return undefined;
+  }
+
+  private async _pollAndParseOperation(response: ApiResponse<Operation>) {
+    if (response.result.error) {
+      return {
+        error: `${response.result.error.code}: ${response.result.error.message}`,
+      };
+    }
+    if (!response.result.done) {
+      const operationName = response.result.name;
+      const pollOperationsResponse = await this._pollOperation(
+        `${NOTEBOOKS_API_BASE}/${operationName}`
+      );
+      if (pollOperationsResponse.error) {
+        return {
+          error: `${pollOperationsResponse.error.code}: ${pollOperationsResponse.error.message}`,
+        };
+      }
+    }
+    return {};
+  }
+
+  //TODO: Refactor into a common library
   /** Polls the provided Operation at 1s intervals until it has completed. */
   private async _pollOperation(path: string): Promise<Operation> {
     let attempt = 0;

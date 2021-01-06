@@ -452,7 +452,7 @@ describe('GcpService', () => {
 
       expect.assertions(2);
       try {
-        await gcpService.listExecutions(10, 'abc123');
+        await gcpService.listExecutions('', 10, 'abc123');
       } catch (err) {
         expect(err).toEqual('UNREACHABLE: us-central1, us-west1');
       }
@@ -478,7 +478,7 @@ describe('GcpService', () => {
 
       expect.assertions(2);
       try {
-        await gcpService.listExecutions(10, 'abc123');
+        await gcpService.listExecutions('', 10, 'abc123');
       } catch (err) {
         expect(err).toEqual(
           'BAD_REQUEST: Unable to retrieve notebook executions'
@@ -534,14 +534,14 @@ describe('GcpService', () => {
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
         params: {
           pageSize: '1',
-          filter: 'execution_template.labels.schedule_id=schedule1',
+          filter: 'execution_template.labels.schedule_id:schedule1',
         },
       });
       expect(mockSubmit).toHaveBeenCalledWith({
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
         params: {
           pageSize: '1',
-          filter: 'execution_template.labels.schedule_id=schedule2',
+          filter: 'execution_template.labels.schedule_id:schedule2',
         },
       });
     });
