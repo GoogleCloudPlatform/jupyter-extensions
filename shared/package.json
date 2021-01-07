@@ -1,6 +1,6 @@
 {
   "name": "gcp_jupyterlab_shared",
-  "version": "1.0.14",
+  "version": "1.1.1",
   "description": "Shared libraries for JupyterLab extensions",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
