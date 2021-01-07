@@ -237,13 +237,9 @@ describe('GcpService', () => {
           'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
         inputNotebookFile: 'gs://test-bucket/test_nb.ipynb',
         outputNotebookFolder: 'gs://test-bucket/test_nb-out.ipynb',
-        location: 'us-east1',
         masterType: undefined,
         scaleTier: 'STANDARD_1',
       },
-      state: 'STATE_UNSPECIFIED',
-      name: 'test_notebook_execution',
-      displayName: 'test_notebook_execution',
       description: 'Execution for test_notebook_execution',
     };
 
@@ -255,13 +251,10 @@ describe('GcpService', () => {
           'gcr.io/deeplearning-platform-release/tf-gpu.1-14:m32',
         inputNotebookFile: 'gs://test-bucket/test_nb.ipynb',
         outputNotebookFolder: 'gs://test-bucket/test_nb-out.ipynb',
-        location: 'us-east1',
         masterType: undefined,
         scaleTier: 'STANDARD_1',
       },
       state: 'STATE_UNSPECIFIED',
-      name: 'test_notebook_execution',
-      displayName: 'test_notebook_execution',
       description: 'Schedule for test_notebook_execution',
       timeZone: 'UTC',
     };
