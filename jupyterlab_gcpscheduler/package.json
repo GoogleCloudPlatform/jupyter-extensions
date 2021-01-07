@@ -52,7 +52,7 @@
     "@phosphor/signaling": "^1.3.0",
     "csstips": "^1.2.0",
     "formik": "^1.5.8",
-    "gcp_jupyterlab_shared": "^1.0.1",
+    "gcp_jupyterlab_shared": "^1.1.0",
     "typestyle": "^2.1.0"
   },
   "devDependencies": {
