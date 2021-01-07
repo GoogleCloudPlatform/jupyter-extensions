@@ -2,7 +2,7 @@ name: Postpush
 on:
   push:
     branches:
-      - master, GoogleCloudPlatform-master
+      - "*"
 jobs:
   build:
     runs-on: ubuntu-latest
