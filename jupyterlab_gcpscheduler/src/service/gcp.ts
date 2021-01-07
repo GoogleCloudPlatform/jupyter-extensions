@@ -498,10 +498,7 @@ export class GcpService {
     request: ExecuteNotebookRequest
   ): NotebooksApiExecution {
     return {
-      name: request.name,
-      displayName: request.name,
       description: 'Execution for ' + request.name,
-      state: 'STATE_UNSPECIFIED',
       executionTemplate: {
         scaleTier: request.scaleTier,
         masterType: this.convertEmptyStringToUndefined(request.masterType),
@@ -519,7 +516,6 @@ export class GcpService {
         inputNotebookFile: request.inputNotebookGcsPath,
         outputNotebookFolder: request.outputNotebookFolder,
         containerImageUri: request.imageUri,
-        location: request.region,
       } as NotebooksApiExecutionTemplate,
     };
   }
@@ -535,8 +531,6 @@ export class GcpService {
       console.warn('Unable to determine timezone');
     }
     return {
-      name: request.name,
-      displayName: request.name,
       description: 'Schedule for ' + request.name,
       cronSchedule,
       timeZone,
@@ -558,7 +552,6 @@ export class GcpService {
         inputNotebookFile: request.inputNotebookGcsPath,
         outputNotebookFolder: request.outputNotebookFolder,
         containerImageUri: request.imageUri,
-        location: request.region,
       } as NotebooksApiExecutionTemplate,
     };
   }

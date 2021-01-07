@@ -136,7 +136,6 @@ export interface NotebooksApiExecutionTemplate {
   labels?: ApiClientObjectMap<string>;
   inputNotebookFile?: string;
   containerImageUri?: string;
-  location?: string;
   outputNotebookFolder?: string;
   paramsYamlFile?: string;
 }

@@ -168,7 +168,6 @@ export function getNotebooksApiExecution(
       inputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
       outputNotebookFolder: 'gs://test-project/notebook_abcd',
       containerImageUri: 'gcr.io/test:latest',
-      location: 'us-west1-b',
     },
     outputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
   };
@@ -195,7 +194,6 @@ export function getNotebooksApiSchedule(
       inputNotebookFile: 'gs://test-project/notebook_abcd/abcd.ipynb',
       outputNotebookFolder: 'gs://test-project/notebook_abcd',
       containerImageUri: 'gcr.io/test:latest',
-      location: 'us-west1-b',
     },
   };
 }
