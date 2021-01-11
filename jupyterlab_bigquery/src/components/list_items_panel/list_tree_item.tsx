@@ -21,7 +21,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeItem from '@material-ui/lab/TreeItem';
 import TreeView from '@material-ui/lab/TreeView';
 import * as csstips from 'csstips';
-import { ContextMenu } from 'gcp_jupyterlab_shared';
+import { ContextMenu, ServerProxyTransportService } from 'gcp_jupyterlab_shared';
 import React from 'react';
 import { stylesheet } from 'typestyle';
 import { ICONS } from '../../constants';
@@ -34,6 +34,7 @@ import { DatasetDetailsService } from '../details_panel/service/list_dataset_det
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { BigQueryService } from './service/bigquery_service';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
@@ -46,7 +47,6 @@ import {
   Dataset,
   Table,
   Model,
-  ListDatasetsService,
   ListTablesService,
   ListModelsService,
 } from './service/list_items';
@@ -550,7 +550,7 @@ export class ProjectResource extends Resource<ProjectProps> {
     };
   }
 
-  listDatasetsService = new ListDatasetsService();
+  listDatasetsService = new BigQueryService(new ServerProxyTransportService());
 
   handleOpenSnackbar = error => {
     this.props.openSnackbar({ message: error });
@@ -560,7 +560,7 @@ export class ProjectResource extends Resource<ProjectProps> {
     this.getDatasets(project, this.listDatasetsService);
   };
 
-  async getDatasets(project, listDatasetsService) {
+  async getDatasets(project: Project, listDatasetsService) {
     const newProject = {
       id: project.id,
       name: project.name,
