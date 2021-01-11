@@ -22,6 +22,8 @@ import ListItemsPanel from './list_tree_panel';
 import { Context } from './list_tree_panel';
 import { ListProjectsService } from './service/list_items';
 
+import { BigQueryService } from './service/bigquery_service';
+
 /** Widget to be registered in the left-side panel. */
 export default class ListItemsWidget extends ReduxReactWidget {
   id = 'listitems';
@@ -29,6 +31,7 @@ export default class ListItemsWidget extends ReduxReactWidget {
 
   constructor(
     private readonly listProjectsService: ListProjectsService,
+    private readonly bigQueryService: BigQueryService,
     private context: Context
   ) {
     super();
@@ -51,6 +54,7 @@ export default class ListItemsWidget extends ReduxReactWidget {
           <ListItemsPanel
             isVisible={isVisible}
             listProjectsService={this.listProjectsService}
+            bigQueryService={this.bigQueryService}
             context={this.context}
           />
         )}

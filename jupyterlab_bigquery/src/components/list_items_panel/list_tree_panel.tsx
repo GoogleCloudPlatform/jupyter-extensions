@@ -43,9 +43,11 @@ import { SearchBar } from './search_bar';
 import { gColor } from '../shared/styles';
 import { DialogComponent, BASE_FONT, Badge } from 'gcp_jupyterlab_shared';
 import CustomSnackbar from '../shared/snackbar';
+import { BigQueryService } from './service/bigquery_service';
 
 interface Props {
   listProjectsService: ListProjectsService;
+  bigQueryService: BigQueryService,
   isVisible: boolean;
   context: Context;
   updateDataTree: any;
@@ -469,6 +471,7 @@ class ListItemsPanel extends React.Component<Props, State> {
                         removeProject={removeProject}
                         collapseAll={collapseAll}
                         updateCollapseAll={this.updateCollapseAll}
+                        bigQueryService={this.props.bigQueryService}
                       />
                     </div>
                   ))

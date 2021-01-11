@@ -31,6 +31,11 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
+import {
+  ServerProxyTransportService
+} from 'gcp_jupyterlab_shared';
+import { BigQueryService } from './components/list_items_panel/service/bigquery_service';
+
 async function activate(
   app: JupyterFrontEnd,
   notebookTrack: INotebookTracker,
@@ -46,6 +51,7 @@ async function activate(
     notebookTrack: notebookTrack,
   };
   const listProjectsService = new ListProjectsService();
+  const bigQueryService = new BigQueryService(new ServerProxyTransportService());
   manager.launchWidget(
     ListItemsWidget,
     'left',
@@ -53,7 +59,7 @@ async function activate(
     (widget: ReduxReactWidget) => {
       widget.addClass(ICONS.bigQuery);
     },
-    [listProjectsService, context],
+    [listProjectsService, bigQueryService, context],
     { rank: 100 }
   );
 

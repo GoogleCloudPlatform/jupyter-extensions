@@ -21,10 +21,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeItem from '@material-ui/lab/TreeItem';
 import TreeView from '@material-ui/lab/TreeView';
 import * as csstips from 'csstips';
-import {
-  ContextMenu,
-  ServerProxyTransportService,
-} from 'gcp_jupyterlab_shared';
+import { ContextMenu } from 'gcp_jupyterlab_shared';
 import React from 'react';
 import { stylesheet } from 'typestyle';
 import { ICONS } from '../../constants';
@@ -128,6 +125,7 @@ export interface ProjectProps extends ResourceProps {
   removeProject: any;
   collapseAll?: boolean;
   updateCollapseAll?: any;
+  bigQueryService: BigQueryService;
 }
 
 interface ResourceState {
@@ -553,24 +551,22 @@ export class ProjectResource extends Resource<ProjectProps> {
     };
   }
 
-  listDatasetsService = new BigQueryService(new ServerProxyTransportService());
-
   handleOpenSnackbar = error => {
     this.props.openSnackbar({ message: error });
   };
 
   expandProject = project => {
-    this.getDatasets(project, this.listDatasetsService);
+    this.getDatasets(project, this.props.bigQueryService);
   };
 
-  async getDatasets(project: Project, listDatasetsService) {
+  async getDatasets(project: Project, bigQueryService: BigQueryService) {
     const newProject = {
       id: project.id,
       name: project.name,
     };
     try {
       this.setState({ loading: true });
-      await listDatasetsService.listDatasets(project).then((data: Project) => {
+      await bigQueryService.listDatasets(project).then((data: Project) => {
         if (data.datasetIds.length === 0) {
           newProject[
             'error'

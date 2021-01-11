@@ -1,7 +1,4 @@
-import {
-  TransportService,
-  GET,
-} from 'gcp_jupyterlab_shared';
+import { TransportService, GET } from 'gcp_jupyterlab_shared';
 import { Project } from './list_items';
 
 const BIGQUERY = 'https://content-bigquery.googleapis.com/bigquery/v2';
@@ -47,7 +44,7 @@ export class BigQueryService {
         const datasetIds = [];
         const datasets = {};
 
-        for(const dataset of (response.result as DatasetList).datasets) {
+        for (const dataset of (response.result as DatasetList).datasets) {
           const datasetReference: DatasetReference = dataset.datasetReference;
 
           const datasetId = `${datasetReference.projectId}.${datasetReference.datasetId}`;
@@ -57,7 +54,7 @@ export class BigQueryService {
             name: datasetReference.datasetId,
             projectId: datasetReference.projectId,
           };
-        };
+        }
 
         return {
           ...project,
