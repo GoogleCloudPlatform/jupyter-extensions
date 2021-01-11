@@ -21,7 +21,10 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import TreeItem from '@material-ui/lab/TreeItem';
 import TreeView from '@material-ui/lab/TreeView';
 import * as csstips from 'csstips';
-import { ContextMenu, ServerProxyTransportService } from 'gcp_jupyterlab_shared';
+import {
+  ContextMenu,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
 import React from 'react';
 import { stylesheet } from 'typestyle';
 import { ICONS } from '../../constants';
