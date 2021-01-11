@@ -9,7 +9,7 @@ export interface Project {
   id: string;
   name: string;
   datasets?: {};
-  datasetIds?: [];
+  datasetIds?: string[];
   error?: string;
 }
 

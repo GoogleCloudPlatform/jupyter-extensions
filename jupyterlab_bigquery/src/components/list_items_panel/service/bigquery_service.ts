@@ -1,5 +1,4 @@
 import {
-  ServerProxyTransportService,
   TransportService,
   GET,
 } from 'gcp_jupyterlab_shared';
@@ -35,9 +34,7 @@ export class BigQueryService {
   constructor(private _transportService: TransportService) {}
 
   async listDatasets(project: Project): Promise<Project> {
-    const _transportService = new ServerProxyTransportService();
-    this._transportService;
-    return _transportService
+    return this._transportService
       .submit({
         path: `${BIGQUERY}/projects/${project.id}/datasets`,
         method: GET,
@@ -50,7 +47,7 @@ export class BigQueryService {
         const datasetIds = [];
         const datasets = {};
 
-        (response.result as DatasetList).datasets.forEach(dataset => {
+        for(const dataset of (response.result as DatasetList).datasets) {
           const datasetReference: DatasetReference = dataset.datasetReference;
 
           const datasetId = `${datasetReference.projectId}.${datasetReference.datasetId}`;
@@ -60,11 +57,11 @@ export class BigQueryService {
             name: datasetReference.datasetId,
             projectId: datasetReference.projectId,
           };
-        });
+        };
 
         return {
           ...project,
-          datasetIds: datasetIds as [],
+          datasetIds: datasetIds,
           datasets: datasets,
         };
       });
