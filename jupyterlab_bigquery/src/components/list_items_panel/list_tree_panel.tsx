@@ -47,7 +47,7 @@ import { BigQueryService } from './service/bigquery_service';
 
 interface Props {
   listProjectsService: ListProjectsService;
-  bigQueryService: BigQueryService,
+  bigQueryService: BigQueryService;
   isVisible: boolean;
   context: Context;
   updateDataTree: any;

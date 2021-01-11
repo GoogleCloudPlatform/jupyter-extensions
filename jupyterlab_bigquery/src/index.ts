@@ -31,9 +31,7 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
-import {
-  ServerProxyTransportService
-} from 'gcp_jupyterlab_shared';
+import { ServerProxyTransportService } from 'gcp_jupyterlab_shared';
 import { BigQueryService } from './components/list_items_panel/service/bigquery_service';
 
 async function activate(
@@ -51,7 +49,9 @@ async function activate(
     notebookTrack: notebookTrack,
   };
   const listProjectsService = new ListProjectsService();
-  const bigQueryService = new BigQueryService(new ServerProxyTransportService());
+  const bigQueryService = new BigQueryService(
+    new ServerProxyTransportService()
+  );
   manager.launchWidget(
     ListItemsWidget,
     'left',
