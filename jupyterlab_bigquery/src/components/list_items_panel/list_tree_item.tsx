@@ -47,8 +47,6 @@ import {
   Dataset,
   Table,
   Model,
-  ListTablesService,
-  ListModelsService,
 } from './service/list_items';
 
 const localStyles = stylesheet({
@@ -116,6 +114,7 @@ export interface TableProps extends ResourceProps {
 export interface DatasetProps extends ResourceProps {
   dataset: Dataset;
   updateDataset?: any;
+  bigQueryService: BigQueryService;
 }
 
 export interface ProjectProps extends ResourceProps {
@@ -399,21 +398,16 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
   }
 
-  listTablesService = new ListTablesService();
-  listModelsService = new ListModelsService();
-
   expandDataset = dataset => {
     this.getDatasetChildren(
       dataset,
-      this.listTablesService,
-      this.listModelsService
+      this.props.bigQueryService
     );
   };
 
   private async getDatasetChildren(
     dataset,
-    listTablesService,
-    listModelsService
+    bigQueryService: BigQueryService
   ) {
     const newDataset = {
       id: dataset.id,
@@ -426,13 +420,15 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
     try {
       this.setState({ loading: true });
-      await listTablesService.listTables(dataset.id).then((data: Dataset) => {
-        newDataset.tables = data.tables;
-        newDataset.tableIds = data.tableIds;
+      await bigQueryService.listTables(dataset.projectId, dataset.name).then(
+        (data: Dataset) => {
+          newDataset.tables = data.tables;
+          newDataset.tableIds = data.tableIds;
       });
-      await listModelsService.listModels(dataset.id).then((data: Dataset) => {
-        newDataset.models = data.models;
-        newDataset.modelIds = data.modelIds;
+      await bigQueryService.listModels(dataset.projectId, dataset.name).then(
+        (data: Dataset) => {
+          newDataset.models = data.models;
+          newDataset.modelIds = data.modelIds;
       });
       this.props.updateDataset(newDataset);
     } catch (err) {
@@ -670,6 +666,7 @@ export class ProjectResource extends Resource<ProjectProps> {
                   dataset={project.datasets[datasetId]}
                   updateDataset={this.props.updateDataset}
                   openSnackbar={this.props.openSnackbar}
+                  bigQueryService={this.props.bigQueryService}
                 />
               </div>
             ))
