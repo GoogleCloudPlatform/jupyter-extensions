@@ -9,7 +9,7 @@ export interface Project {
   id: string;
   name: string;
   datasets?: {};
-  datasetIds?: [];
+  datasetIds?: string[];
   error?: string;
 }
 
@@ -58,26 +58,6 @@ export class ListProjectsService {
     return {
       projects: fetchedProjects,
       projectIds: data.projectIds,
-    };
-  }
-}
-
-export class ListDatasetsService {
-  async listDatasets(project: Project): Promise<Project> {
-    const body = { projectId: project.id };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    const data = await requestAPI<Project>('v1/listDatasets', requestInit);
-    const fetchedDatasets = {};
-    for (const dataset in data.datasets) {
-      fetchedDatasets[dataset] = data.datasets[dataset];
-    }
-    return {
-      ...project,
-      datasets: fetchedDatasets,
-      datasetIds: data.datasetIds,
     };
   }
 }

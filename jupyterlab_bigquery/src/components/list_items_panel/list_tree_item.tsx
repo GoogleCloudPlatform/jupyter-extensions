@@ -34,6 +34,7 @@ import { DatasetDetailsService } from '../details_panel/service/list_dataset_det
 import { ModelDetailsService } from '../details_panel/service/list_model_details';
 import { TableDetailsService } from '../details_panel/service/list_table_details';
 import { ViewDetailsService } from '../details_panel/service/list_view_details';
+import { BigQueryService } from './service/bigquery_service';
 import { TableDetailsWidget } from '../details_panel/table_details_widget';
 import { ViewDetailsWidget } from '../details_panel/view_details_widget';
 import { QueryEditorTabWidget } from '../query_editor/query_editor_tab/query_editor_tab_widget';
@@ -46,7 +47,6 @@ import {
   Dataset,
   Table,
   Model,
-  ListDatasetsService,
   ListTablesService,
   ListModelsService,
 } from './service/list_items';
@@ -125,6 +125,7 @@ export interface ProjectProps extends ResourceProps {
   removeProject: any;
   collapseAll?: boolean;
   updateCollapseAll?: any;
+  bigQueryService: BigQueryService;
 }
 
 interface ResourceState {
@@ -550,24 +551,22 @@ export class ProjectResource extends Resource<ProjectProps> {
     };
   }
 
-  listDatasetsService = new ListDatasetsService();
-
   handleOpenSnackbar = error => {
     this.props.openSnackbar({ message: error });
   };
 
   expandProject = project => {
-    this.getDatasets(project, this.listDatasetsService);
+    this.getDatasets(project, this.props.bigQueryService);
   };
 
-  async getDatasets(project, listDatasetsService) {
+  async getDatasets(project: Project, bigQueryService: BigQueryService) {
     const newProject = {
       id: project.id,
       name: project.name,
     };
     try {
       this.setState({ loading: true });
-      await listDatasetsService.listDatasets(project).then((data: Project) => {
+      await bigQueryService.listDatasets(project).then((data: Project) => {
         if (data.datasetIds.length === 0) {
           newProject[
             'error'
