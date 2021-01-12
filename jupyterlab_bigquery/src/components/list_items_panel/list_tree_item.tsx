@@ -42,12 +42,7 @@ import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
 import { gColor } from '../shared/styles';
 import { Context } from './list_tree_panel';
 
-import {
-  Project,
-  Dataset,
-  Table,
-  Model,
-} from './service/list_items';
+import { Project, Dataset, Table, Model } from './service/list_items';
 
 const localStyles = stylesheet({
   item: {
@@ -399,16 +394,10 @@ export class DatasetResource extends Resource<DatasetProps> {
   }
 
   expandDataset = dataset => {
-    this.getDatasetChildren(
-      dataset,
-      this.props.bigQueryService
-    );
+    this.getDatasetChildren(dataset, this.props.bigQueryService);
   };
 
-  private async getDatasetChildren(
-    dataset,
-    bigQueryService: BigQueryService
-  ) {
+  private async getDatasetChildren(dataset, bigQueryService: BigQueryService) {
     const newDataset = {
       id: dataset.id,
       name: dataset.name,
@@ -420,16 +409,18 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
     try {
       this.setState({ loading: true });
-      await bigQueryService.listTables(dataset.projectId, dataset.name).then(
-        (data: Dataset) => {
+      await bigQueryService
+        .listTables(dataset.projectId, dataset.name)
+        .then((data: Dataset) => {
           newDataset.tables = data.tables;
           newDataset.tableIds = data.tableIds;
-      });
-      await bigQueryService.listModels(dataset.projectId, dataset.name).then(
-        (data: Dataset) => {
+        });
+      await bigQueryService
+        .listModels(dataset.projectId, dataset.name)
+        .then((data: Dataset) => {
           newDataset.models = data.models;
           newDataset.modelIds = data.modelIds;
-      });
+        });
       this.props.updateDataset(newDataset);
     } catch (err) {
       console.warn('Error retrieving dataset children', err);

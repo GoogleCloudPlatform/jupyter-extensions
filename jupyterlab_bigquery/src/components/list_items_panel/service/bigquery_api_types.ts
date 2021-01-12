@@ -1,4 +1,3 @@
-
 export interface DatasetList {
   kind: string;
   etag: string;
@@ -50,7 +49,7 @@ export interface Table {
   lastModifiedTime: string;
   type: string;
   view: ViewDefinition;
-  externalDataConfiguration: ExternalDataConfiguration
+  externalDataConfiguration: ExternalDataConfiguration;
   location: string;
   streamingBuffer: Streamingbuffer;
   encryptionConfiguration: EncryptionConfiguration;
@@ -64,23 +63,17 @@ export interface TableReference {
 }
 
 export interface TableSchema {
-  fields: [
-    TableFieldSchema
-  ];
+  fields: [TableFieldSchema];
 }
 
 export interface TableFieldSchema {
   name: string;
   type: string;
   mode: string;
-  fields: [
-    TableFieldSchema
-  ];
+  fields: [TableFieldSchema];
   description: string;
   policyTags: {
-    names: [
-      string
-    ]
+    names: [string];
   };
 }
 
@@ -88,7 +81,7 @@ export interface TimePartitioning {
   type: string;
   expirationMs: string;
   field: string;
-  requirePartitionFilter: boolean
+  requirePartitionFilter: boolean;
 }
 
 export interface RangePartitioning {
@@ -97,20 +90,18 @@ export interface RangePartitioning {
     start: string;
     end: string;
     interval: string;
-  }
+  };
 }
 
 export interface Clustering {
-  fields: [
-    string
-  ]
+  fields: [string];
 }
 
 export interface ViewDefinition {
   query: string;
   userDefinedFunctionResources: [
     {
-      UserDefinedFunctionResource
+      UserDefinedFunctionResource;
     }
   ];
   useLegacySql: boolean;
@@ -122,9 +113,7 @@ export interface UserDefinedFunctionResource {
 }
 
 export interface ExternalDataConfiguration {
-  sourceUris: [
-    string
-  ];
+  sourceUris: [string];
   schema: TableSchema;
   sourceFormat: string;
   maxBadRecords: number;
@@ -136,9 +125,7 @@ export interface ExternalDataConfiguration {
   googleSheetsOptions: GoogleSheetsOptions;
   hivePartitioningOptions: HivePartitioningOptions;
   connectionId: string;
-  decimalTargetTypes: [
-    DecimalTargetType
-  ];
+  decimalTargetTypes: [DecimalTargetType];
 }
 
 export interface CsvOptions {
@@ -151,9 +138,7 @@ export interface CsvOptions {
 }
 
 export interface BigtableOptions {
-  columnFamilies: [
-    BigtableColumnFamily
-  ];
+  columnFamilies: [BigtableColumnFamily];
   ignoreUnspecifiedColumnFamilies: boolean;
   readRowkeyAsString: boolean;
 }
@@ -161,9 +146,7 @@ export interface BigtableColumnFamily {
   familyId: string;
   type: string;
   encoding: string;
-  columns: [
-    BigtableColumn
-  ];
+  columns: [BigtableColumn];
   onlyReadLatest: boolean;
 }
 
@@ -177,17 +160,14 @@ export interface BigtableColumn {
 }
 
 export interface GoogleSheetsOptions {
-
   skipLeadingRows: string;
-  range: string
+  range: string;
 }
 export interface HivePartitioningOptions {
   mode: string;
   sourceUriPrefix: string;
   requirePartitionFilter: boolean;
-  fields: [
-    string
-  ];
+  fields: [string];
 }
 
 export interface DecimalTargetType {
@@ -212,9 +192,7 @@ export interface SnapshotDefinition {
 }
 
 export interface ModelList {
-  models: [
-    Model
-  ];
+  models: [Model];
   nextPageToken: string;
 }
 
@@ -232,15 +210,9 @@ export interface Model {
   location: string;
   encryptionConfiguration: EncryptionConfiguration;
   modelType: ModelType;
-  trainingRuns: [
-    TrainingRun
-  ];
-  featureColumns: [
-    StandardSqlField
-  ];
-  labelColumns: [
-    StandardSqlField
-  ];
+  trainingRuns: [TrainingRun];
+  featureColumns: [StandardSqlField];
+  labelColumns: [StandardSqlField];
 }
 
 export interface ModelReference {
@@ -251,15 +223,15 @@ export interface ModelReference {
 
 export interface TrainingRun {
   trainingOptions: any; // TrainingOptions
-  startTime: string,
+  startTime: string;
   results: [
     any // IterationResult
-  ],
+  ];
   evaluationMetrics: any; // EvaluationMetrics
   dataSplitResult: any; // DataSplitResult
   globalExplanations: [
     any // GlobalExplanation
-  ]
+  ];
 }
 
 export interface StandardSqlField {
@@ -278,8 +250,5 @@ export interface StandardSqlDataType {
 }
 
 export interface StandardSqlStructType {
-  fields: [
-    StandardSqlField
-  ]
+  fields: [StandardSqlField];
 }
-

@@ -24,8 +24,10 @@ export class BigQueryService {
         const datasetIds = [];
         const datasets = {};
 
-        for (const dataset of (response.result as BigQueryApiTypes.DatasetList).datasets) {
-          const datasetReference: BigQueryApiTypes.DatasetReference = dataset.datasetReference;
+        for (const dataset of (response.result as BigQueryApiTypes.DatasetList)
+          .datasets) {
+          const datasetReference: BigQueryApiTypes.DatasetReference =
+            dataset.datasetReference;
 
           const datasetId = `${datasetReference.projectId}.${datasetReference.datasetId}`;
           datasetIds.push(datasetId);
@@ -55,14 +57,16 @@ export class BigQueryService {
         const tableIds = [];
         const tables = {};
 
-        for (const table of (response.result as BigQueryApiTypes.TableList).tables) {
-          const tableReference: BigQueryApiTypes.TableReference = table.tableReference;
+        for (const table of (response.result as BigQueryApiTypes.TableList)
+          .tables) {
+          const tableReference: BigQueryApiTypes.TableReference =
+            table.tableReference;
 
           const tableId = `${tableReference.projectId}.${tableReference.datasetId}.${tableReference.tableId}`;
           tableIds.push(tableId);
 
           let legacySql = null;
-          if('view' in table) {
+          if ('view' in table) {
             legacySql = table['view'].useLegacySql;
           }
 
@@ -78,7 +82,7 @@ export class BigQueryService {
         return {
           tables: tables,
           tableIds: tableIds,
-        }
+        };
       });
   }
 
@@ -93,8 +97,10 @@ export class BigQueryService {
         const modelIds = [];
         const models = {};
 
-        for (const model of (response.result as BigQueryApiTypes.ModelList).models) {
-          const modelReference: BigQueryApiTypes.ModelReference = model.modelReference;
+        for (const model of (response.result as BigQueryApiTypes.ModelList)
+          .models) {
+          const modelReference: BigQueryApiTypes.ModelReference =
+            model.modelReference;
 
           const modelId = `${modelReference.projectId}.${modelReference.datasetId}.${modelReference.modelId}`;
           modelIds.push(modelId);
@@ -109,8 +115,7 @@ export class BigQueryService {
         return {
           models: models,
           modelIds: modelIds,
-        }
+        };
       });
-
   }
 }

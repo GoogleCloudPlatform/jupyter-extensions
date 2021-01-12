@@ -12,7 +12,7 @@ import {
 } from './list_tree_item';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
-import { BigQueryService } from './service/bigquery_service'
+import { BigQueryService } from './service/bigquery_service';
 
 const localStyles = stylesheet({
   item: {
@@ -70,7 +70,8 @@ export function BuildSearchResult(result, context, bigQueryService) {
         <DatasetSearchResult
           context={context}
           dataset={result}
-          bigQueryService={bigQueryService} />
+          bigQueryService={bigQueryService}
+        />
       ) : result.type === 'model' ? (
         <ModelSearchResult context={context} model={result} />
       ) : result.type === 'table' ? (
