@@ -11,15 +11,14 @@ export class BigQueryService {
   constructor(private _transportService: TransportService) {}
 
   async listDatasets(project: Project): Promise<Project> {
-    const response = await this._transportService
-      .submit({
-        path: `${BIGQUERY}/projects/${project.id}/datasets`,
-        method: GET,
-        headers: { 'Content-Type': 'application/json' },
-        params: {
-          all: true,
-        },
-      });
+    const response = await this._transportService.submit({
+      path: `${BIGQUERY}/projects/${project.id}/datasets`,
+      method: GET,
+      headers: { 'Content-Type': 'application/json' },
+      params: {
+        all: true,
+      },
+    });
     const datasetListResult = response.result as BigQueryApiTypes.DatasetList;
 
     const datasetIds = [];
@@ -48,12 +47,11 @@ export class BigQueryService {
   }
 
   async listTables(projectId, datasetId): Promise<Partial<Dataset>> {
-    const response = await this._transportService
-      .submit({
-        path: `${BIGQUERY}/projects/${projectId}/datasets/${datasetId}/tables`,
-        method: GET,
-        headers: { 'Content-Type': 'application/json' },
-      })
+    const response = await this._transportService.submit({
+      path: `${BIGQUERY}/projects/${projectId}/datasets/${datasetId}/tables`,
+      method: GET,
+      headers: { 'Content-Type': 'application/json' },
+    });
     const tableListResult = response.result as BigQueryApiTypes.TableList;
     const tableIds = [];
     const tables = {};
@@ -88,12 +86,11 @@ export class BigQueryService {
   }
 
   async listModels(projectId, datasetId): Promise<Partial<Dataset>> {
-    const response = await this._transportService
-      .submit({
-        path: `${BIGQUERY}/projects/${projectId}/datasets/${datasetId}/models`,
-        method: GET,
-        headers: { 'Content-Type': 'application/json' },
-      })
+    const response = await this._transportService.submit({
+      path: `${BIGQUERY}/projects/${projectId}/datasets/${datasetId}/models`,
+      method: GET,
+      headers: { 'Content-Type': 'application/json' },
+    });
     const modelListResult = response.result as BigQueryApiTypes.ModelList;
     const modelIds = [];
     const models = {};

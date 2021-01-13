@@ -409,20 +409,26 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
     try {
       this.setState({ loading: true });
-      const tablesResult =
-        bigQueryService
+      const tablesResult = bigQueryService
         .listTables(dataset.projectId, dataset.name)
         .then((data: Dataset) => {
           newDataset.tables = data.tables;
           newDataset.tableIds = data.tableIds;
+        })
+        .catch(err => {
+          console.warn('Error retrieving dataset tables', err);
+          throw err;
         });
 
-      const modelsResult =
-        bigQueryService
+      const modelsResult = bigQueryService
         .listModels(dataset.projectId, dataset.name)
         .then((data: Dataset) => {
           newDataset.models = data.models;
           newDataset.modelIds = data.modelIds;
+        })
+        .catch(err => {
+          console.warn('Error retrieving dataset models', err);
+          throw err;
         });
 
       await tablesResult;
