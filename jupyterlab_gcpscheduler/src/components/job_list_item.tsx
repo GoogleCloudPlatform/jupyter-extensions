@@ -16,7 +16,6 @@
 import {
   css,
   LearnMoreLink,
-  GrayPending,
   GreenCheckCircle,
   RedClose,
   MenuIcon,
@@ -67,8 +66,6 @@ const localStyles = stylesheet({
   },
 });
 
-const SUCCEEDED = 'SUCCEEDED';
-
 function getIconForJobState(state: string): JSX.Element {
   if (state === 'SUCCEEDED' || state === 'ENABLED') {
     return <GreenCheckCircle />;
@@ -76,17 +73,10 @@ function getIconForJobState(state: string): JSX.Element {
     return <RedClose />;
   } else if (state === 'PAUSED') {
     return <PausedCircle />;
-  } else if (state === 'STATE_UNSPECIFIED') {
-    return <UnknownCircle />;
   } else if (state === 'CANCELLED' || state === 'DISABLED') {
     return <GrayDisabled />;
   }
-  return <GrayPending />;
-}
-
-function shouldShowJobMenu(state: string, isSchedule: boolean) {
-  if (isSchedule) return true;
-  return state === SUCCEEDED;
+  return <UnknownCircle />;
 }
 
 /** Notebook job list item */
@@ -99,7 +89,7 @@ export function JobListItem(props: Props) {
         {' '}
         {getIconForJobState(job.state)}
       </Grid>
-      <Grid item xs={shouldShowJobMenu(job.state, isSchedule) ? 10 : 11}>
+      <Grid item xs={10}>
         <div className={css.bold}>
           <LearnMoreLink
             secondary={true}
@@ -149,51 +139,49 @@ export function JobListItem(props: Props) {
           </div>
         </div>
       </Grid>
-      {shouldShowJobMenu(job.state, isSchedule) && (
-        <Grid item xs={1}>
-          <div className={localStyles.align}>
-            <IconButtonMenu
-              icon={<MenuIcon />}
-              menuItems={menuCloseHandler => [
-                !isSchedule ? (
-                  <MenuItem key="shareNotebook" dense={true}>
-                    <ShareDialog
-                      cloudBucket={(job as Execution).bucketLink}
-                      shareLink={job.viewerLink}
-                      handleClose={menuCloseHandler}
-                    />
-                  </MenuItem>
-                ) : null,
-                <MenuItem
-                  id="open"
-                  key="openNotebook"
-                  dense={true}
-                  onClick={() => {
-                    gcpService.importNotebook(job.gcsFile);
-                    menuCloseHandler();
-                  }}
+      <Grid item xs={1}>
+        <div className={localStyles.align}>
+          <IconButtonMenu
+            icon={<MenuIcon />}
+            menuItems={menuCloseHandler => [
+              !isSchedule ? (
+                <MenuItem key="shareNotebook" dense={true}>
+                  <ShareDialog
+                    cloudBucket={(job as Execution).bucketLink}
+                    shareLink={job.viewerLink}
+                    handleClose={menuCloseHandler}
+                  />
+                </MenuItem>
+              ) : null,
+              <MenuItem
+                id="open"
+                key="openNotebook"
+                dense={true}
+                onClick={() => {
+                  gcpService.importNotebook(job.gcsFile);
+                  menuCloseHandler();
+                }}
+              >
+                Open source notebook
+              </MenuItem>,
+              <MenuItem
+                key="downloadSourceNotebook"
+                dense={true}
+                onClick={menuCloseHandler}
+              >
+                <a
+                  className={localStyles.menuLink}
+                  href={job.downloadLink}
+                  target="_blank"
+                  title="Download the notebook output from Google Cloud Storage"
                 >
-                  Open source notebook
-                </MenuItem>,
-                <MenuItem
-                  key="downloadSourceNotebook"
-                  dense={true}
-                  onClick={menuCloseHandler}
-                >
-                  <a
-                    className={localStyles.menuLink}
-                    href={job.downloadLink}
-                    target="_blank"
-                    title="Download the notebook output from Google Cloud Storage"
-                  >
-                    Download source notebook
-                  </a>
-                </MenuItem>,
-              ]}
-            ></IconButtonMenu>
-          </div>
-        </Grid>
-      )}
+                  Download source notebook
+                </a>
+              </MenuItem>,
+            ]}
+          ></IconButtonMenu>
+        </div>
+      </Grid>
     </Grid>
   );
 }

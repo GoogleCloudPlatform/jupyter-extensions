@@ -181,14 +181,16 @@ export class InnerSchedulerForm extends React.Component<
   private prepopulateImageUri() {
     this.props.gcpService.getImageUri().then((retrievedImageUri: string) => {
       if (retrievedImageUri || this.props.values.imageUri) {
-        const imageUri = retrievedImageUri
+        let imageUri = retrievedImageUri
           ? retrievedImageUri
           : this.props.values.imageUri;
-        const lastColonIndex = imageUri.lastIndexOf(':');
-        const matchImageUri =
-          lastColonIndex !== -1 ? imageUri.substr(0, lastColonIndex) : imageUri;
-        const matched = ENVIRONMENT_IMAGES.find(i => {
-          return String(i.value).startsWith(matchImageUri);
+        if (imageUri === CUSTOM_CONTAINER.value) {
+          imageUri = this.props.values.customContainerImageUri;
+        }
+        const matched = ENVIRONMENT_IMAGES.slice(1).find(env => {
+          return !env.searchKeywords.find(
+            keyword => !String(imageUri).includes(keyword)
+          );
         });
         if (matched) {
           this.updateImageUri(String(matched.value));

@@ -43,6 +43,11 @@ export interface Option {
   disabled?: boolean;
 }
 
+/** Interface for an Framework option */
+export interface Framework extends Option {
+  searchKeywords: string[];
+}
+
 /** Returns an option whose value matches the given value. */
 export function findOptionByValue<T extends Option>(
   options: T[],
@@ -77,68 +82,104 @@ export function removeFromList<T>(list: T[], value: T) {
   }
 }
 
-export const CUSTOM_CONTAINER: Option = {
+export const CUSTOM_CONTAINER: Framework = {
   value: 'customContainer',
   text: 'Custom Container',
+  searchKeywords: [] as string[],
 };
 
 /**
  * Environment images that can be used to schedule executions on AI Platform.
  */
-export const ENVIRONMENT_IMAGES: Option[] = [
+export const ENVIRONMENT_IMAGES: Framework[] = [
   CUSTOM_CONTAINER,
   {
     value: `${GCR_PREFIX}/tf-cpu.1-15:latest`,
     text: 'TensorFlow Enterprise 1.15 (CPU only)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'cpu', '1-15'],
   },
   {
     value: `${GCR_PREFIX}/tf-gpu.1-15:latest`,
     text: 'TensorFlow Enterprise 1.15 (GPU)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'gpu', '1-15'],
   },
   {
     value: `${GCR_PREFIX}/tf2-cpu.2-1:latest`,
     text: 'TensorFlow 2.1 (CPU only)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'cpu', '2-1'],
   },
   {
     value: `${GCR_PREFIX}/tf2-gpu.2-1:latest`,
     text: 'TensorFlow 2.1 (GPU)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'gpu', '2-1'],
   },
   {
     value: `${GCR_PREFIX}/tf2-cpu.2-3:latest`,
     text: 'TensorFlow 2.3 (CPU only)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'cpu', '2-3'],
   },
   {
     value: `${GCR_PREFIX}/tf2-gpu.2-3:latest`,
     text: 'TensorFlow 2.3 (GPU)',
+    searchKeywords: [GCR_PREFIX, 'tf', 'gpu', '2-3'],
   },
   {
     value: `${GCR_PREFIX}/pytorch-cpu.1-4:latest`,
     text: 'PyTorch 1.4 (CPU only)',
+    searchKeywords: [GCR_PREFIX, 'pytorch', 'cpu', '1-4'],
   },
   {
     value: `${GCR_PREFIX}/pytorch-gpu.1-6:latest`,
     text: 'PyTorch 1.6 (GPU)',
+    searchKeywords: [GCR_PREFIX, 'pytorch', 'gpu', '1-6'],
   },
   {
     value: `${GCR_PREFIX}/xgboost-cpu:latest`,
     text: 'RAPIDS XGBoost',
+    searchKeywords: [GCR_PREFIX, 'xgboost', 'cpu'],
   },
   {
     value: `${GCR_PREFIX}/r-cpu.3-6:latest`,
     text: 'R 3.6 (with r-essentials)',
+    searchKeywords: [GCR_PREFIX, 'r', 'cpu', '3-6'],
   },
   {
     value: `${GCR_PREFIX}/base-cpu:latest`,
     text: 'Python 2 and 3',
+    searchKeywords: [GCR_PREFIX, 'base-cpu'],
   },
-  { value: `${GCR_PREFIX}/beam-notebooks:latest`, text: 'Apache Beam' },
+  {
+    value: `${GCR_PREFIX}/beam-notebooks:latest`,
+    text: 'Apache Beam',
+    searchKeywords: [GCR_PREFIX, 'beam-notebooks'],
+  },
   //TODO: Add when becomes available in repo
   //{ value: '', text: 'Swift' },
-  { value: 'gcr.io/kaggle-gpu-images/python:latest', text: 'Kaggle (GPU)' },
-  { value: 'gcr.io/kaggle-images/python:latest', text: 'Kaggle (CPU)' },
-  { value: `${GCR_PREFIX}/base-cu110:latest`, text: 'CUDA Toolkit 11.0' },
-  { value: `${GCR_PREFIX}/base-cu101:latest`, text: 'CUDA Toolkit 10.1' },
-  { value: `${GCR_PREFIX}/base-cu100:latest`, text: 'CUDA Toolkit 10.0' },
+  {
+    value: 'gcr.io/kaggle-gpu-images/python:latest',
+    text: 'Kaggle (GPU)',
+    searchKeywords: ['gcr.io', 'kaggle', 'gpu'],
+  },
+  {
+    value: 'gcr.io/kaggle-images/python:latest',
+    text: 'Kaggle (CPU)',
+    searchKeywords: ['gcr.io', 'kaggle-images'],
+  },
+  {
+    value: `${GCR_PREFIX}/base-cu110:latest`,
+    text: 'CUDA Toolkit 11.0',
+    searchKeywords: [GCR_PREFIX, 'base-cu110'],
+  },
+  {
+    value: `${GCR_PREFIX}/base-cu101:latest`,
+    text: 'CUDA Toolkit 10.1',
+    searchKeywords: [GCR_PREFIX, 'base-cu101'],
+  },
+  {
+    value: `${GCR_PREFIX}/base-cu100:latest`,
+    text: 'CUDA Toolkit 10.0',
+    searchKeywords: [GCR_PREFIX, 'base-cu100'],
+  },
 ];
 
 /**
