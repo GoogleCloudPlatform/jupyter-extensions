@@ -431,8 +431,7 @@ export class DatasetResource extends Resource<DatasetProps> {
           throw err;
         });
 
-      await tablesResult;
-      await modelsResult;
+      await Promise.all([tablesResult, modelsResult]);
       this.props.updateDataset(newDataset);
     } catch (err) {
       console.warn('Error retrieving dataset children', err);
