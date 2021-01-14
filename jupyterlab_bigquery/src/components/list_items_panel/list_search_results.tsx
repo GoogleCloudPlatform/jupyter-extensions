@@ -12,6 +12,7 @@ import {
 } from './list_tree_item';
 
 import { ContextMenu } from 'gcp_jupyterlab_shared';
+import { BigQueryService } from './service/bigquery_service';
 
 const localStyles = stylesheet({
   item: {
@@ -55,17 +56,22 @@ const localStyles = stylesheet({
 interface SearchProps {
   context: Context;
   searchResults: SearchResult[];
+  bigQueryService: BigQueryService;
 }
 
 interface State {
   expanded: boolean;
 }
 
-export function BuildSearchResult(result, context) {
+export function BuildSearchResult(result, context, bigQueryService) {
   return (
     <div>
       {result.type === 'dataset' ? (
-        <DatasetSearchResult context={context} dataset={result} />
+        <DatasetSearchResult
+          context={context}
+          dataset={result}
+          bigQueryService={bigQueryService}
+        />
       ) : result.type === 'model' ? (
         <ModelSearchResult context={context} model={result} />
       ) : result.type === 'table' ? (
@@ -210,7 +216,7 @@ export default class ListSearchResults extends React.Component<
     if (searchResults.length > 0) {
       return searchResults.map(result => (
         <div key={result.id} className={localStyles.root}>
-          {BuildSearchResult(result, context)}
+          {BuildSearchResult(result, context, this.props.bigQueryService)}
         </div>
       ));
     } else {

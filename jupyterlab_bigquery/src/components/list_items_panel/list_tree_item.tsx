@@ -42,14 +42,7 @@ import { COPIED_AUTOHIDE_DURATION } from '../shared/snackbar';
 import { gColor } from '../shared/styles';
 import { Context } from './list_tree_panel';
 
-import {
-  Project,
-  Dataset,
-  Table,
-  Model,
-  ListTablesService,
-  ListModelsService,
-} from './service/list_items';
+import { Project, Dataset, Table, Model } from './service/list_items';
 
 const localStyles = stylesheet({
   item: {
@@ -116,6 +109,7 @@ export interface TableProps extends ResourceProps {
 export interface DatasetProps extends ResourceProps {
   dataset: Dataset;
   updateDataset?: any;
+  bigQueryService: BigQueryService;
 }
 
 export interface ProjectProps extends ResourceProps {
@@ -399,22 +393,11 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
   }
 
-  listTablesService = new ListTablesService();
-  listModelsService = new ListModelsService();
-
   expandDataset = dataset => {
-    this.getDatasetChildren(
-      dataset,
-      this.listTablesService,
-      this.listModelsService
-    );
+    this.getDatasetChildren(dataset, this.props.bigQueryService);
   };
 
-  private async getDatasetChildren(
-    dataset,
-    listTablesService,
-    listModelsService
-  ) {
+  private async getDatasetChildren(dataset, bigQueryService: BigQueryService) {
     const newDataset = {
       id: dataset.id,
       name: dataset.name,
@@ -426,14 +409,29 @@ export class DatasetResource extends Resource<DatasetProps> {
     };
     try {
       this.setState({ loading: true });
-      await listTablesService.listTables(dataset.id).then((data: Dataset) => {
-        newDataset.tables = data.tables;
-        newDataset.tableIds = data.tableIds;
-      });
-      await listModelsService.listModels(dataset.id).then((data: Dataset) => {
-        newDataset.models = data.models;
-        newDataset.modelIds = data.modelIds;
-      });
+      const tablesResult = bigQueryService
+        .listTables(dataset.projectId, dataset.name)
+        .then((data: Dataset) => {
+          newDataset.tables = data.tables;
+          newDataset.tableIds = data.tableIds;
+        })
+        .catch(err => {
+          console.warn('Error retrieving dataset tables', err);
+          throw err;
+        });
+
+      const modelsResult = bigQueryService
+        .listModels(dataset.projectId, dataset.name)
+        .then((data: Dataset) => {
+          newDataset.models = data.models;
+          newDataset.modelIds = data.modelIds;
+        })
+        .catch(err => {
+          console.warn('Error retrieving dataset models', err);
+          throw err;
+        });
+
+      await Promise.all([tablesResult, modelsResult]);
       this.props.updateDataset(newDataset);
     } catch (err) {
       console.warn('Error retrieving dataset children', err);
@@ -670,6 +668,7 @@ export class ProjectResource extends Resource<ProjectProps> {
                   dataset={project.datasets[datasetId]}
                   updateDataset={this.props.updateDataset}
                   openSnackbar={this.props.openSnackbar}
+                  bigQueryService={this.props.bigQueryService}
                 />
               </div>
             ))

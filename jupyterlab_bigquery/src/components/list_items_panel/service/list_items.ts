@@ -17,9 +17,9 @@ export interface Dataset {
   id: string;
   name: string;
   tables: {};
-  tableIds: [];
+  tableIds: string[];
   models: {};
-  modelIds: [];
+  modelIds: string[];
   projectId: string;
   parent: string;
   type: string;
@@ -59,30 +59,6 @@ export class ListProjectsService {
       projects: fetchedProjects,
       projectIds: data.projectIds,
     };
-  }
-}
-
-export class ListTablesService {
-  async listTables(datasetId: string): Promise<Dataset> {
-    const body = { datasetId: datasetId };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    const data = await requestAPI<Dataset>('v1/listTables', requestInit);
-    return data;
-  }
-}
-
-export class ListModelsService {
-  async listModels(datasetId: string): Promise<Model[]> {
-    const body = { datasetId: datasetId };
-    const requestInit: RequestInit = {
-      body: JSON.stringify(body),
-      method: 'POST',
-    };
-    const data = await requestAPI<Model[]>('v1/listModels', requestInit);
-    return data;
   }
 }
 

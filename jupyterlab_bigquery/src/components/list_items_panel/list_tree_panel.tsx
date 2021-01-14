@@ -486,6 +486,7 @@ class ListItemsPanel extends React.Component<Props, State> {
                   <ListSearchResults
                     context={context}
                     searchResults={searchResults}
+                    bigQueryService={this.props.bigQueryService}
                   />
                 )}
               </div>
