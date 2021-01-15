@@ -18,21 +18,9 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { Dialog } from '@material-ui/core';
 import * as csstips from 'csstips';
-import {
-  BASE_FONT,
-  COLORS,
-  css,
-  MenuCloseHandler,
-  MenuIcon,
-  IconButtonMenu,
-  Message,
-  Badge,
-} from 'gcp_jupyterlab_shared';
+import { BASE_FONT, COLORS, css, Message, Badge } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-
-import MenuItem from '@material-ui/core/MenuItem';
-import { EXECUTIONS_LINK, SCHEDULES_LINK } from '../data';
 import { GcpService } from '../service/gcp';
 import {
   GetPermissionsResponse,
@@ -98,8 +86,8 @@ const localStyles = stylesheet({
   header: {
     ...BASE_FONT,
     fontWeight: 500,
-    fontSize: '15px',
-    margin: '16px 16px 0 16px',
+    fontSize: '18px',
+    margin: '24px 24px -8px 24px',
     ...csstips.horizontal,
     ...csstips.center,
   },
@@ -109,7 +97,7 @@ const localStyles = stylesheet({
   main: {
     backgroundColor: COLORS.white,
     color: COLORS.base,
-    padding: '16px',
+    padding: '24px',
     width: '480px',
     ...BASE_FONT,
     ...csstips.vertical,
@@ -170,52 +158,19 @@ export class SchedulerDialog extends React.Component<Props, State> {
   }
 
   render() {
-    const projectId = this.getProjectId();
     return (
       <Dialog open={this._isOpen()} scroll="body">
         {this.state.showCreateForm && (
           <header className={localStyles.header}>
             <span className={localStyles.title}>
-              Create a notebook{' '}
-              {this.state.creatingExecution ? 'execution' : 'schedule'}{' '}
+              Submit notebooks to Executor
               <Badge value="alpha" />
             </span>
-            <IconButtonMenu
-              icon={<MenuIcon />}
-              menuItems={menuCloseHandler => [
-                <MenuItem id="viewAll" key="viewAll" dense={true}>
-                  <a
-                    href={
-                      this.state.creatingExecution
-                        ? `${EXECUTIONS_LINK}?project=${projectId}`
-                        : `${SCHEDULES_LINK}?project=${projectId}`
-                    }
-                    target="_blank"
-                    onClick={menuCloseHandler}
-                  >
-                    View all{' '}
-                    {this.state.creatingExecution ? 'executions' : 'schedules'}{' '}
-                  </a>
-                </MenuItem>,
-                <MenuItem
-                  key="reset"
-                  dense={true}
-                  onClick={() => this._onResetSettings(menuCloseHandler)}
-                >
-                  Reset configuration
-                </MenuItem>,
-              ]}
-            ></IconButtonMenu>
           </header>
         )}
         <main className={localStyles.main}>{this._getDialogContent()}</main>
       </Dialog>
     );
-  }
-
-  private getProjectId() {
-    const { gcpSettings } = this.state;
-    return gcpSettings ? gcpSettings.projectId : '';
   }
 
   private _getDialogContent(): JSX.Element {
@@ -310,11 +265,6 @@ export class SchedulerDialog extends React.Component<Props, State> {
       showCreateForm: true,
       creatingExecution: true,
     });
-  }
-
-  private _onResetSettings(closeHandler: MenuCloseHandler) {
-    this.props.settings.save('{}');
-    closeHandler();
   }
 
   private _isOpen() {

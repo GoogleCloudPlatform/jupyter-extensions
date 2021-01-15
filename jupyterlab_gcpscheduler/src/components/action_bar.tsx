@@ -42,13 +42,17 @@ export const STYLES = stylesheet({
     ...csstips.endJustified,
   },
   actionBarContainer: {
-    paddingTop: '16px',
+    paddingTop: '8px',
   },
   actionBarDisplayMessage: {
     marginLeft: '5px',
     ...csstips.horizontal,
     color: COLORS.caption,
     fontSize: '12px',
+  },
+  errorSpacing: {
+    marginTop: '16px !important',
+    marginBottom: '16px !important',
   },
 });
 
@@ -64,7 +68,7 @@ export function ActionBar(props: Props) {
         </Grid>
       )}
       {props.error && (
-        <Grid item sm={12}>
+        <Grid item sm={12} className={STYLES.errorSpacing}>
           {props.error}
         </Grid>
       )}

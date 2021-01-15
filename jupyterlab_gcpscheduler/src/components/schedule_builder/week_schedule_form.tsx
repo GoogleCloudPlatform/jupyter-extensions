@@ -22,7 +22,8 @@ import {
   CheckValidation,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-
+import { classes, stylesheet } from 'typestyle';
+import { Grid } from '@material-ui/core';
 import { DAYS_OF_WEEK, FREQUENCY_TYPES } from '../../data';
 import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
 
@@ -36,6 +37,12 @@ interface SubFormState {
   saturdayExecution: boolean;
   sundayExecution: boolean;
 }
+
+const localStyles = stylesheet({
+  topAlign: {
+    marginTop: '16px',
+  },
+});
 
 export class WeekScheduleBuilder extends React.Component<
   SchedulerBuilderProps,
@@ -150,50 +157,63 @@ export class WeekScheduleBuilder extends React.Component<
 
   render() {
     return (
-      <div>
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
+      <Grid container spacing={1} className={css.gridSpacing}>
+        <Grid item xs={3} className={css.gridTopRowSpacing}>
+          <p className={css.scheduleLabel}>
             <b>Repeat every</b>
-          </span>
-          <div className={css.flex2}>
-            <SelectInput
-              name="frequencyType"
-              value={this.props.frequencyType}
-              options={FREQUENCY_TYPES}
-              onChange={e =>
-                this.props.onChangeFrequencyType(
-                  e.target.value as FrequencyType
-                )
-              }
-            />
-          </div>
-        </div>
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
+          </p>
+        </Grid>
+        <Grid item xs={9} className={css.gridTopRowSpacing}>
+          <SelectInput
+            name="frequencyType"
+            value={this.props.frequencyType}
+            options={FREQUENCY_TYPES}
+            onChange={e =>
+              this.props.onChangeFrequencyType(e.target.value as FrequencyType)
+            }
+          />
+        </Grid>
+        <Grid item xs={3} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>
             <b>Repeat at</b>
-          </span>
-          <div className={css.flex3}>
-            <TextInput
-              name="specifiedTime"
-              type="time"
-              value={this.state.specifiedTime}
-              hasError={!this.state.specifiedTime}
-              onChange={e => this.setState({ specifiedTime: e.target.value })}
-            />
+          </p>
+        </Grid>
+        <Grid item xs={9} className={css.gridSpacing}>
+          <TextInput
+            name="specifiedTime"
+            type="time"
+            value={this.state.specifiedTime}
+            hasError={!this.state.specifiedTime}
+            onChange={e => this.setState({ specifiedTime: e.target.value })}
+          />
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          <CheckValidation
+            fieldName={'Repeat at'}
+            required={true}
+            value={this.state.specifiedTime}
+          />
+        </Grid>
+        <Grid item xs={3} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>
+            <b>Repeat on</b>
+          </p>
+        </Grid>
+        <Grid item xs={9} className={css.gridSpacing}>
+          <div
+            className={classes(css.scheduleBuilderRow, localStyles.topAlign)}
+          >
+            {this._createCheckboxes()}
           </div>
-        </div>
-        <CheckValidation
-          fieldName={'Repeat at'}
-          required={true}
-          value={this.state.specifiedTime}
-        />
-        <div className={css.scheduleBuilderRow}>{this._createCheckboxes()}</div>
-        {!this._areAnyDaysSelected() && (
-          <div className={css.errorRow}>
-            <FieldError message="At least one day is required" />
-          </div>
-        )}
-      </div>
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          {!this._areAnyDaysSelected() && (
+            <div className={css.errorRow}>
+              <FieldError message="At least one day is required" />
+            </div>
+          )}
+        </Grid>
+      </Grid>
     );
   }
 }

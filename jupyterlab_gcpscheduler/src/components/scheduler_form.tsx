@@ -127,11 +127,11 @@ function getName(notebookName: string) {
 
 const localStyles = stylesheet({
   scroll: {
-    maxHeight: '52vh',
+    maxHeight: '56vh',
     overflowY: 'scroll',
     overflowX: 'hidden',
-    borderTop: '0px solid #777',
-    borderBottom: '0px solid #777',
+    borderTop: '1px solid #DADCE0',
+    borderBottom: '1px solid #DADCE0',
   },
 });
 
@@ -350,28 +350,24 @@ export class InnerSchedulerForm extends React.Component<
               : 'Execution will start immediately after being submitted'
           }
           error={
-            <span>
-              {status && !status.lastSubmitted && (
-                <Message
-                  asActivity={isSubmitting}
-                  asError={status.asError}
-                  text={status.message}
-                />
-              )}
-              {errors && errors.gcsBucket && (
-                <Message
-                  asActivity={false}
-                  asError={true}
-                  text={errors.gcsBucket}
-                />
-              )}
-              {this.missingPermissions.length > 0 && (
-                <Message
-                  asError={true}
-                  text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
-                />
-              )}
-            </span>
+            status && !status.lastSubmitted ? (
+              <Message
+                asActivity={isSubmitting}
+                asError={status.asError}
+                text={status.message}
+              />
+            ) : errors && errors.gcsBucket ? (
+              <Message
+                asActivity={false}
+                asError={true}
+                text={errors.gcsBucket}
+              />
+            ) : this.missingPermissions.length > 0 ? (
+              <Message
+                asError={true}
+                text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
+              />
+            ) : null
           }
         >
           {this.missingPermissions.length === 0 && (
@@ -620,11 +616,15 @@ function validate(values: SchedulerFormValues) {
   } = values;
   const error: Error = {};
 
+  let nameString = 'Execution';
+  if (scheduleType === RECURRING) {
+    nameString = 'Schedule';
+  }
+
   if (!name) {
-    error.name = 'Execution name is required';
+    error.name = `${nameString} name is required`;
   } else if (!name.match(/^[a-zA-Z0-9_]*$/g)) {
-    error.name =
-      'Execution name can only contain letters, numbers, or underscores.';
+    error.name = `${nameString} name can only contain letters, numbers, or underscores.`;
   }
 
   if (scheduleType === RECURRING && !schedule) {

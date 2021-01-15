@@ -62,12 +62,12 @@ interface State {
 
 const localStyles = stylesheet({
   headerContainer: {
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     ...csstips.horizontal,
+    padding: '16px',
   },
   header: {
     fontWeight: 500,
-    fontSize: 'var(--jp-ui-font-size2, 11px)',
+    fontSize: '16px',
     margin: 0,
     padding: '8px 12px',
     ...csstips.flex,
@@ -97,9 +97,20 @@ const localStyles = stylesheet({
   },
 });
 
+const StyledTabs = withStyles({
+  indicator: {
+    backgroundColor: 'rgba(0,0,0,0)',
+  },
+})(Tabs);
+
 const StyledTab = withStyles({
   root: {
     textTransform: 'none',
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    fontSize: '14px',
+  },
+  selected: {
+    borderBottom: '2px solid ' + COLORS.focus,
   },
 })(Tab);
 
@@ -281,7 +292,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
             <RefreshIcon />
           </IconButton>
         </div>
-        <Tabs
+        <StyledTabs
           value={this.state.tab}
           indicatorColor="primary"
           variant="fullWidth"
@@ -289,7 +300,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
         >
           <StyledTab label="Executions" />
           <StyledTab label="Schedules" />
-        </Tabs>
+        </StyledTabs>
         <div
           className={localStyles.tab}
           role="tabpanel"

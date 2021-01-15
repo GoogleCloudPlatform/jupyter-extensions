@@ -16,7 +16,7 @@
 
 import { withStyles } from '@material-ui/core';
 import { CheckCircle } from '@material-ui/icons';
-import { COLORS, css, LearnMoreLink } from 'gcp_jupyterlab_shared';
+import { COLORS, FONT_SIZE, css, LearnMoreLink } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { Button } from '@material-ui/core';
 import { classes, stylesheet } from 'typestyle';
@@ -65,11 +65,12 @@ const localStyles = stylesheet({
   },
   message: {
     alignItems: 'center',
-    fontSize: '15px',
+    fontSize: FONT_SIZE.heading,
     fontWeight: 500,
   },
   messageCaption: {
-    fontSize: '12px',
+    fontSize: FONT_SIZE.text,
+    paddingTop: '4px',
     marginBottom: '20px',
     marginLeft: '37px',
   },
@@ -82,6 +83,12 @@ const GreenCheck = withStyles({
     marginRight: '8px',
   },
 })(CheckCircle);
+
+const CustomTableCell = withStyles({
+  root: {
+    fontSize: FONT_SIZE.text,
+  },
+})(TableCell);
 
 export class SubmittedJob extends React.Component<Props, {}> {
   render() {
@@ -126,88 +133,113 @@ export class SubmittedJob extends React.Component<Props, {}> {
           >
             <TableBody>
               <TableRow key="notebookLink">
-                <TableCell className={localStyles.tableHeader} variant="head">
+                <CustomTableCell
+                  className={localStyles.tableHeader}
+                  variant="head"
+                >
                   Notebook
-                </TableCell>
-                <TableCell>{gcsInformation.basename}</TableCell>
+                </CustomTableCell>
+                <CustomTableCell>{gcsInformation.basename}</CustomTableCell>
               </TableRow>
               <TableRow key="region">
-                <TableCell className={localStyles.tableHeader} variant="head">
+                <CustomTableCell
+                  className={localStyles.tableHeader}
+                  variant="head"
+                >
                   Region
-                </TableCell>
-                <TableCell>{region.text}</TableCell>
+                </CustomTableCell>
+                <CustomTableCell>{region.text}</CustomTableCell>
               </TableRow>
               <TableRow key="scaleTier">
-                <TableCell className={localStyles.tableHeader} variant="head">
+                <CustomTableCell
+                  className={localStyles.tableHeader}
+                  variant="head"
+                >
                   Scale tier
-                </TableCell>
-                <TableCell>{scaleTier.text}</TableCell>
+                </CustomTableCell>
+                <CustomTableCell>{scaleTier.text}</CustomTableCell>
               </TableRow>
               {scaleTier.value === CUSTOM && (
                 <React.Fragment>
                   <TableRow key="masterType">
-                    <TableCell
+                    <CustomTableCell
                       className={localStyles.tableHeader}
                       variant="head"
                     >
                       Master type
-                    </TableCell>
-                    <TableCell>{masterType.text}</TableCell>
+                    </CustomTableCell>
+                    <CustomTableCell>{masterType.text}</CustomTableCell>
                   </TableRow>
                   <TableRow key="acceleratorType">
-                    <TableCell
+                    <CustomTableCell
                       className={localStyles.tableHeader}
                       variant="head"
                     >
                       Accelerator type
-                    </TableCell>
-                    <TableCell>{acceleratorType.text}</TableCell>
+                    </CustomTableCell>
+                    <CustomTableCell>{acceleratorType.text}</CustomTableCell>
                   </TableRow>
                   {request.acceleratorCount && (
                     <TableRow key="acceleratorCount">
-                      <TableCell
+                      <CustomTableCell
                         className={localStyles.tableHeader}
                         variant="head"
                       >
                         Accelerator count
-                      </TableCell>
-                      <TableCell>{request.acceleratorCount}</TableCell>
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {request.acceleratorCount}
+                      </CustomTableCell>
                     </TableRow>
                   )}
                 </React.Fragment>
               )}
               <TableRow key="environment">
-                <TableCell className={localStyles.tableHeader} variant="head">
+                <CustomTableCell
+                  className={localStyles.tableHeader}
+                  variant="head"
+                >
                   Environment
-                </TableCell>
-                <TableCell>
+                </CustomTableCell>
+                <CustomTableCell>
                   {environment ? environment.text : 'Custom container'}
-                </TableCell>
+                </CustomTableCell>
               </TableRow>
               {!environment && (
                 <TableRow key="customContainerImageUri">
-                  <TableCell className={localStyles.tableHeader} variant="head">
+                  <CustomTableCell
+                    className={localStyles.tableHeader}
+                    variant="head"
+                  >
                     Container image
-                  </TableCell>
-                  <TableCell>{request.imageUri}</TableCell>
+                  </CustomTableCell>
+                  <CustomTableCell>{request.imageUri}</CustomTableCell>
                 </TableRow>
               )}
               <TableRow key="type">
-                <TableCell className={localStyles.tableHeader} variant="head">
+                <CustomTableCell
+                  className={localStyles.tableHeader}
+                  variant="head"
+                >
                   Type
-                </TableCell>
-                <TableCell>
+                </CustomTableCell>
+                <CustomTableCell>
                   {isRecurring
                     ? 'Schedule (recurring executions)'
                     : 'Execution'}
-                </TableCell>
+                </CustomTableCell>
               </TableRow>
               {isRecurring && (
                 <TableRow key="schedule">
-                  <TableCell className={localStyles.tableHeader} variant="head">
+                  <CustomTableCell
+                    className={localStyles.tableHeader}
+                    variant="head"
+                  >
                     Schedule
-                  </TableCell>
-                  <TableCell>{getHumanReadableCron(schedule)}</TableCell>
+                  </CustomTableCell>
+                  <CustomTableCell>
+                    {getHumanReadableCron(schedule)}
+                  </CustomTableCell>
                 </TableRow>
               )}
             </TableBody>

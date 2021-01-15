@@ -26,10 +26,10 @@ exports[`ShareDialog Renders closed 1`] = `
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing this result. If this has been done before, skip steps 2 through 4.
       </WithStyles(ForwardRef(DialogContentText))>
       <ol
-        className="inlineStart_f1nodyj text_f1v1xbpa"
+        className="inlineStart_fm4i5kc text_f1v1xbpa"
       >
         <li>
           Click the "COPY LINK" button below
@@ -57,8 +57,11 @@ exports[`ShareDialog Renders closed 1`] = `
         You can now share links to all execution results stored in this bucket, including the one you copied, with the people or groups granted the view permission.
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
-    <WithStyles(ForwardRef(DialogActions))>
+    <WithStyles(ForwardRef(DialogActions))
+      className="actionButtons_f12nakbo"
+    >
       <WithStyles(ForwardRef(Button))
+        className="primaryButton_f18dymgn"
         color="primary"
         onClick={[Function]}
       >
@@ -66,6 +69,7 @@ exports[`ShareDialog Renders closed 1`] = `
       </WithStyles(ForwardRef(Button))>
       <WithStyles(ForwardRef(Button))
         autoFocus={true}
+        className="primaryButton_f18dymgn"
         color="primary"
         onClick={[Function]}
       >
@@ -107,10 +111,10 @@ exports[`ShareDialog Renders open 1`] = `
         className="text_f1v1xbpa"
         id="share-dialog-description"
       >
-        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing all results. If this has been done before, skip steps 2 through 4.
+        To share this execution result with people or groups, grant view permissions to the Cloud Storage bucket containing this result. If this has been done before, skip steps 2 through 4.
       </WithStyles(ForwardRef(DialogContentText))>
       <ol
-        className="inlineStart_f1nodyj text_f1v1xbpa"
+        className="inlineStart_fm4i5kc text_f1v1xbpa"
       >
         <li>
           Click the "COPY LINK" button below
@@ -138,8 +142,11 @@ exports[`ShareDialog Renders open 1`] = `
         You can now share links to all execution results stored in this bucket, including the one you copied, with the people or groups granted the view permission.
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
-    <WithStyles(ForwardRef(DialogActions))>
+    <WithStyles(ForwardRef(DialogActions))
+      className="actionButtons_f12nakbo"
+    >
       <WithStyles(ForwardRef(Button))
+        className="primaryButton_f18dymgn"
         color="primary"
         onClick={[Function]}
       >
@@ -147,6 +154,7 @@ exports[`ShareDialog Renders open 1`] = `
       </WithStyles(ForwardRef(Button))>
       <WithStyles(ForwardRef(Button))
         autoFocus={true}
+        className="primaryButton_f18dymgn"
         color="primary"
         onClick={[Function]}
       >

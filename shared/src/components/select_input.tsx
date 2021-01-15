@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import * as React from 'react';
-import TextField from '@material-ui/core/TextField';
 import { stylesheet } from 'typestyle';
 import MenuItem from '@material-ui/core/MenuItem';
 import { INPUT_TEXT_STYLE, ALIGN_HINT, FORM_LABEL_STYLE } from '../styles';
+import {CustomColorTextField} from './text_input';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { LearnMoreLink } from './learn_more_link';
@@ -28,11 +28,11 @@ interface Option {
   disabled?: boolean;
 }
 
-export const STYLES = stylesheet({
+export const SELECT_STYLES = stylesheet({
   select: {
     display: 'block',
-    marginTop: '5px',
-    marginBottom: '5px',
+    marginTop: '8px',
+    marginBottom: '16px',
   },
   icon: {
     right: '14px',
@@ -43,7 +43,7 @@ export const STYLES = stylesheet({
 });
 
 const iconComponent = props => {
-  return <ArrowDropDownIcon className={STYLES.icon} />;
+  return <ArrowDropDownIcon className={SELECT_STYLES.icon} />;
 };
 
 interface Props {
@@ -69,8 +69,8 @@ export function SelectInput(props: Props) {
     onChange,
   } = props;
   return (
-    <div className={STYLES.select}>
-      <TextField
+    <div className={SELECT_STYLES.select}>
+      <CustomColorTextField
         variant="outlined"
         margin="dense"
         fullWidth={true}
@@ -101,7 +101,7 @@ export function SelectInput(props: Props) {
               {option.text}
             </MenuItem>
           ))}
-      </TextField>
+      </CustomColorTextField>
       {formHelperText && (
         <FormHelperText style={ALIGN_HINT}>
           {formHelperText}

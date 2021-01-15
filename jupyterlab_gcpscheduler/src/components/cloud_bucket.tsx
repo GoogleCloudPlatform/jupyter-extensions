@@ -47,6 +47,10 @@ const StyledAutoComplete = withStyles({
   inputRoot: {
     ...INPUT_TEXT_STYLE,
   },
+  root: {
+    marginTop: '8px',
+    marginBottom: '16px',
+  },
 })(Autocomplete);
 
 const filter = createFilterOptions<BucketOption | null>();

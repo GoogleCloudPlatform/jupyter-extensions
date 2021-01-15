@@ -29,7 +29,15 @@ const localStyles = stylesheet({
     width: '100%',
   },
   inlineStart: {
-    paddingInlineStart: '15px',
+    paddingInlineStart: '16px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
+  },
+  actionButtons: {
+    margin: '12px 24px 24px 24px',
+  },
+  primaryButton: {
+    color: COLORS.focus + '!important',
   },
 });
 
@@ -86,7 +94,7 @@ export class ShareDialog extends React.Component<Props, State> {
               id="share-dialog-description"
             >
               To share this execution result with people or groups, grant view
-              permissions to the Cloud Storage bucket containing all results. If
+              permissions to the Cloud Storage bucket containing this result. If
               this has been done before, skip steps 2 through 4.
             </DialogContentText>
             <ol className={classes(localStyles.inlineStart, localStyles.text)}>
@@ -114,11 +122,20 @@ export class ShareDialog extends React.Component<Props, State> {
               granted the view permission.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleClose} color="primary">
+          <DialogActions className={localStyles.actionButtons}>
+            <Button
+              className={localStyles.primaryButton}
+              onClick={this.handleClose}
+              color="primary"
+            >
               Cancel
             </Button>
-            <Button onClick={this.handleCopy} color="primary" autoFocus>
+            <Button
+              className={localStyles.primaryButton}
+              onClick={this.handleCopy}
+              color="primary"
+              autoFocus
+            >
               Copy Link
             </Button>
           </DialogActions>

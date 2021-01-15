@@ -23,6 +23,7 @@ import {
   UnknownCircle,
   PausedCircle,
   GrayDisabled,
+  SmallLaunchIcon,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
@@ -46,20 +47,33 @@ const localStyles = stylesheet({
     width: '100%',
   },
   job: {
-    paddingTop: '15px',
-    paddingBottom: '15px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
     paddingRight: '20px',
-    paddingLeft: '15px',
+    paddingLeft: '20px',
     width: '100%',
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   },
+  jobName: {
+    width: '100%',
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    display: 'inline-block',
+    textOverflow: 'ellipsis',
+    fontSize: '15px',
+    fontWeight: 500,
+  },
   jobCaption: {
     fontSize: '12px',
-    paddingTop: '5px',
+    paddingTop: '4px',
     color: 'var(--jp-content-font-color2)',
   },
   align: {
-    marginTop: '-15px !important',
+    marginTop: '-12px !important',
+  },
+  topAlign: {
+    marginTop: '4px',
   },
   spacing: {
     marginTop: '5px',
@@ -86,17 +100,17 @@ export function JobListItem(props: Props) {
   return (
     <Grid className={localStyles.job} container spacing={1}>
       <Grid item xs={1}>
-        {' '}
-        {getIconForJobState(job.state)}
+        <div className={localStyles.topAlign}>
+          {getIconForJobState(job.state)}
+        </div>
       </Grid>
       <Grid item xs={10}>
-        <div className={css.bold}>
-          <LearnMoreLink
-            secondary={true}
-            noUnderline={true}
-            text={job.name}
-            href={job.link}
-          />
+        <div>
+          <span className={localStyles.jobName}>
+            <a href={job.link}>
+              {job.name} <SmallLaunchIcon />
+            </a>
+          </span>
         </div>
         <div>
           {!isSchedule && (
@@ -126,16 +140,12 @@ export function JobListItem(props: Props) {
             </React.Fragment>
           )}
           <div className={classes(css.bold, localStyles.spacing)}>
-            {((isSchedule && (job as Schedule).hasExecutions) ||
-              !isSchedule) && (
-              <LearnMoreLink
-                noUnderline={true}
-                href={job.viewerLink}
-                text={
-                  isSchedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'
-                }
-              />
-            )}
+            <LearnMoreLink
+              noUnderline={true}
+              href={job.viewerLink}
+              text={isSchedule ? 'VIEW LATEST EXECUTION RESULT' : 'VIEW RESULT'}
+              disabled={isSchedule && !(job as Schedule).hasExecutions}
+            />
           </div>
         </div>
       </Grid>

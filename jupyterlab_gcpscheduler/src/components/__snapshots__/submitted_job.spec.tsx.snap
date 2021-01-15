@@ -5,7 +5,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
   className="column_fghohlb"
 >
   <div
-    className="row_f17j33oz message_ftgw0r2"
+    className="row_f17j33oz message_f1tmi06c"
   >
     <WithStyles(CheckCircleIcon) />
     <span>
@@ -14,7 +14,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     </span>
   </div>
   <div
-    className="row_f17j33oz messageCaption_f1vvzhbx"
+    className="row_f17j33oz messageCaption_f1fmpzea"
   >
     <span>
       Execution has been started
@@ -30,106 +30,106 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
         <WithStyles(ForwardRef(TableRow))
           key="notebookLink"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Notebook
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             test_execution_1234.ipynb
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="region"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Region
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             us-east1 (South Carolina)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="scaleTier"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Scale tier
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Custom machine type configuration
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="masterType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Master type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             4 CPUs, 15 GB RAM
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             NVIDIA Tesla K80
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorCount"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator count
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             1
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="environment"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Environment
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             TensorFlow Enterprise 1.15 (GPU)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="type"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Execution
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
     </WithStyles(ForwardRef(Table))>
@@ -165,7 +165,7 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
   className="column_fghohlb"
 >
   <div
-    className="row_f17j33oz message_ftgw0r2"
+    className="row_f17j33oz message_f1tmi06c"
   >
     <WithStyles(CheckCircleIcon) />
     <span>
@@ -174,7 +174,7 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
     </span>
   </div>
   <div
-    className="row_f17j33oz messageCaption_f1vvzhbx"
+    className="row_f17j33oz messageCaption_f1fmpzea"
   >
     <span>
       Execution has been started
@@ -190,119 +190,119 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
         <WithStyles(ForwardRef(TableRow))
           key="notebookLink"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Notebook
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             test_execution_1234.ipynb
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="region"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Region
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             us-east1 (South Carolina)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="scaleTier"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Scale tier
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Custom machine type configuration
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="masterType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Master type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             4 CPUs, 15 GB RAM
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             NVIDIA Tesla K80
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorCount"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator count
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             1
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="environment"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Environment
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Custom container
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="customContainerImageUri"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Container image
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             gcr.io/test
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="type"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Execution
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
     </WithStyles(ForwardRef(Table))>
@@ -338,7 +338,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
   className="column_fghohlb"
 >
   <div
-    className="row_f17j33oz message_ftgw0r2"
+    className="row_f17j33oz message_f1tmi06c"
   >
     <WithStyles(CheckCircleIcon) />
     <span>
@@ -347,7 +347,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     </span>
   </div>
   <div
-    className="row_f17j33oz messageCaption_f1vvzhbx"
+    className="row_f17j33oz messageCaption_f1fmpzea"
   >
     <span>
       Executions will start on November 11, 2020, 3:00 PM UTC
@@ -363,119 +363,119 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
         <WithStyles(ForwardRef(TableRow))
           key="notebookLink"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Notebook
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             test_execution_1234.ipynb
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="region"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Region
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             us-east1 (South Carolina)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="scaleTier"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Scale tier
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Custom machine type configuration
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="masterType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Master type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             4 CPUs, 15 GB RAM
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorType"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             NVIDIA Tesla K80
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="acceleratorCount"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Accelerator count
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             1
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="environment"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Environment
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             TensorFlow Enterprise 1.15 (GPU)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="type"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Type
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Schedule (recurring executions)
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
         <WithStyles(ForwardRef(TableRow))
           key="schedule"
         >
-          <WithStyles(ForwardRef(TableCell))
+          <WithStyles(WithStyles(ForwardRef(TableCell)))
             className="tableHeader_f1oymmz1"
             variant="head"
           >
             Schedule
-          </WithStyles(ForwardRef(TableCell))>
-          <WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
+          <WithStyles(WithStyles(ForwardRef(TableCell)))>
             Every day at 3:00 PM UTC
-          </WithStyles(ForwardRef(TableCell))>
+          </WithStyles(WithStyles(ForwardRef(TableCell)))>
         </WithStyles(ForwardRef(TableRow))>
       </WithStyles(ForwardRef(TableBody))>
     </WithStyles(ForwardRef(Table))>

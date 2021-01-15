@@ -3,6 +3,10 @@
 exports[`CronScheduleBuilder Renders without error 1`] = `
 <div>
   <TextInput
+    formHelperLink="https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules"
+    formHelperText="Schedule is specified using unix-cron format. You can define a schedule
+        so that your execution runs multiple times a day, or runs on specific
+        days and months."
     hasError={true}
     label="Schedule"
     name="schedule"
@@ -12,21 +16,5 @@ exports[`CronScheduleBuilder Renders without error 1`] = `
   <FieldError
     message="Frequency is required"
   />
-  <WithStyles(ForwardRef(FormHelperText))
-    className="noTopMargin_felu21j"
-    style={
-      Object {
-        "color": "var(--jp-content-font-color2, #616161)",
-        "marginBottom": 15,
-        "marginLeft": 5,
-        "marginTop": -2,
-      }
-    }
-  >
-    Schedule is specified using unix-cron format. You can define a schedule so that your execution runs multiple times a day, or runs on specific days and months.
-    <LearnMoreLink
-      href="https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules"
-    />
-  </WithStyles(ForwardRef(FormHelperText))>
 </div>
 `;

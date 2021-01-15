@@ -21,7 +21,7 @@ import {
   CheckValidation,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-
+import { Grid } from '@material-ui/core';
 import { FREQUENCY_TYPES } from '../../data';
 import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
 
@@ -76,66 +76,71 @@ export class HourScheduleBuilder extends React.Component<
 
   render() {
     return (
-      <div>
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
+      <Grid container spacing={1} className={css.gridSpacing}>
+        <Grid item xs={3} className={css.gridTopRowSpacing}>
+          <p className={css.scheduleLabel}>
             <b>Repeat every</b>
-          </span>
-          <div className={css.flex1}>
-            <TextInput
-              name="frequency"
-              type="number"
-              min="1"
-              max="23"
-              value={this.state.frequency}
-              hasError={!this.state.frequency}
-              onChange={e => this.setState({ frequency: e.target.value })}
-            />
-          </div>
-          <div className={css.flex2}>
-            <SelectInput
-              name="frequencyType"
-              value={this.props.frequencyType}
-              options={FREQUENCY_TYPES}
-              onChange={e =>
-                this.props.onChangeFrequencyType(
-                  e.target.value as FrequencyType
-                )
-              }
-            />
-          </div>
-        </div>
-        <CheckValidation
-          min={1}
-          max={24}
-          fieldName={'Frequency'}
-          required={true}
-          value={this.state.frequency}
-        />
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
-            <b>Repeat (minute)</b>
-          </span>
-          <div className={css.flex3}>
-            <TextInput
-              name="specifiedMinute"
-              type="number"
-              min="0"
-              max="59"
-              value={this.state.specifiedMinute}
-              hasError={!this.state.specifiedMinute}
-              onChange={e => this.setState({ specifiedMinute: e.target.value })}
-            />
-          </div>
-        </div>
-        <CheckValidation
-          min={0}
-          max={59}
-          fieldName={'Repeat (minute)'}
-          required={true}
-          value={this.state.specifiedMinute}
-        />
-      </div>
+          </p>
+        </Grid>
+        <Grid item xs={2} className={css.gridTopRowSpacing}>
+          <TextInput
+            name="frequency"
+            type="number"
+            min="1"
+            max="23"
+            value={this.state.frequency}
+            hasError={!this.state.frequency}
+            onChange={e => this.setState({ frequency: e.target.value })}
+          />
+        </Grid>
+        <Grid item xs={7} className={css.gridTopRowSpacing}>
+          <SelectInput
+            name="frequencyType"
+            value={this.props.frequencyType}
+            options={FREQUENCY_TYPES}
+            onChange={e =>
+              this.props.onChangeFrequencyType(e.target.value as FrequencyType)
+            }
+          />
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          <CheckValidation
+            min={1}
+            max={24}
+            fieldName={'Frequency'}
+            required={true}
+            value={this.state.frequency}
+          />{' '}
+        </Grid>
+        <Grid item xs={3} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>
+            <b>Repeat at</b>
+          </p>
+        </Grid>
+        <Grid item xs={2} className={css.gridSpacing}>
+          <TextInput
+            name="specifiedMinute"
+            type="number"
+            min="0"
+            max="59"
+            value={this.state.specifiedMinute}
+            hasError={!this.state.specifiedMinute}
+            onChange={e => this.setState({ specifiedMinute: e.target.value })}
+          />
+        </Grid>
+        <Grid item xs={7} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>minute</p>
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          <CheckValidation
+            min={0}
+            max={59}
+            fieldName={'Repeat (minute)'}
+            required={true}
+            value={this.state.specifiedMinute}
+          />
+        </Grid>
+      </Grid>
     );
   }
 }

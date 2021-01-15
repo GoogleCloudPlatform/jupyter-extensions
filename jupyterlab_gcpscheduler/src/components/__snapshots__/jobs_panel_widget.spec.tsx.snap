@@ -5,10 +5,10 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -23,7 +23,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={0}
@@ -35,7 +35,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={false}
@@ -85,10 +85,10 @@ exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`]
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -103,7 +103,7 @@ exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`]
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={0}
@@ -115,7 +115,7 @@ exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`]
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={false}
@@ -143,10 +143,10 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -161,7 +161,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={0}
@@ -173,7 +173,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={false}
@@ -202,10 +202,10 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -220,7 +220,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={1}
@@ -232,7 +232,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={true}
@@ -258,10 +258,10 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -276,7 +276,7 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={0}
@@ -288,7 +288,7 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={false}
@@ -419,10 +419,10 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -437,7 +437,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={0}
@@ -449,7 +449,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={false}
@@ -497,10 +497,10 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f17cdueg"
+    className="headerContainer_f6tu7nw"
   >
     <header
-      className="header_f1vfuf16"
+      className="header_f17ermgq"
     >
       Notebook Executor
        
@@ -515,7 +515,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
       <WithStyles(RefreshIcon) />
     </WithStyles(ForwardRef(IconButton))>
   </div>
-  <WithStyles(ForwardRef(Tabs))
+  <WithStyles(WithStyles(ForwardRef(Tabs)))
     indicatorColor="primary"
     onChange={[Function]}
     value={1}
@@ -527,7 +527,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
     <WithStyles(WithStyles(ForwardRef(Tab)))
       label="Schedules"
     />
-  </WithStyles(ForwardRef(Tabs))>
+  </WithStyles(WithStyles(ForwardRef(Tabs)))>
   <div
     className="tab_fmo9343"
     hidden={true}

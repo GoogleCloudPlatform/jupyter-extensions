@@ -20,7 +20,7 @@ import {
   CheckValidation,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
-
+import { Grid } from '@material-ui/core';
 import { FREQUENCY_TYPES, MONTH_FREQUENCIES } from '../../data';
 import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
 
@@ -90,75 +90,80 @@ export class MonthScheduleBuilder extends React.Component<
 
   render() {
     return (
-      <div>
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
+      <Grid container spacing={1} className={css.gridSpacing}>
+        <Grid item xs={3} className={css.gridTopRowSpacing}>
+          <p className={css.scheduleLabel}>
             <b>Repeat every</b>
-          </span>
-          <div className={css.flex1}>
-            <SelectInput
-              name="frequency"
-              value={this.state.frequency}
-              onChange={e => this.setState({ frequency: e.target.value })}
-              options={MONTH_FREQUENCIES}
-            />
-          </div>
-          <div className={css.flex2}>
-            <SelectInput
-              name="frequencyType"
-              value={this.props.frequencyType}
-              options={FREQUENCY_TYPES}
-              onChange={e =>
-                this.props.onChangeFrequencyType(
-                  e.target.value as FrequencyType
-                )
-              }
-            />
-          </div>
-        </div>
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
+          </p>
+        </Grid>
+        <Grid item xs={2} className={css.gridTopRowSpacing}>
+          <SelectInput
+            name="frequency"
+            value={this.state.frequency}
+            onChange={e => this.setState({ frequency: e.target.value })}
+            options={MONTH_FREQUENCIES}
+          />
+        </Grid>
+        <Grid item xs={7} className={css.gridTopRowSpacing}>
+          <SelectInput
+            name="frequencyType"
+            value={this.props.frequencyType}
+            options={FREQUENCY_TYPES}
+            onChange={e =>
+              this.props.onChangeFrequencyType(e.target.value as FrequencyType)
+            }
+          />
+        </Grid>
+        <Grid item xs={3} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>
             <b>Repeat at</b>
-          </span>
-          <div className={css.flex3}>
-            <TextInput
-              name="specifiedTime"
-              type="time"
-              value={this.state.specifiedTime}
-              hasError={!this.state.specifiedTime}
-              onChange={e => this.setState({ specifiedTime: e.target.value })}
-            />
-          </div>
-        </div>
-        <CheckValidation
-          fieldName={'Repeat at'}
-          required={true}
-          value={this.state.specifiedTime}
-        />
-        <div className={css.scheduleBuilderRow}>
-          <span className={css.flexQuarter}>
-            <b>Repeat (day)</b>
-          </span>
-          <div className={css.flex3}>
-            <TextInput
-              name="specifiedDay"
-              type="number"
-              min="1"
-              max="31"
-              value={this.state.specifiedDay}
-              hasError={!this.state.specifiedDay}
-              onChange={e => this.setState({ specifiedDay: e.target.value })}
-            />
-          </div>
-        </div>
-        <CheckValidation
-          min={1}
-          max={31}
-          fieldName={'Repeat (day)'}
-          required={true}
-          value={this.state.specifiedDay}
-        />
-      </div>
+          </p>
+        </Grid>
+        <Grid item xs={9} className={css.gridSpacing}>
+          <TextInput
+            name="specifiedTime"
+            type="time"
+            value={this.state.specifiedTime}
+            hasError={!this.state.specifiedTime}
+            onChange={e => this.setState({ specifiedTime: e.target.value })}
+          />
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          <CheckValidation
+            fieldName={'Repeat at'}
+            required={true}
+            value={this.state.specifiedTime}
+          />
+        </Grid>
+        <Grid item xs={3} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>
+            <b>Repeat on</b>
+          </p>
+        </Grid>
+        <Grid item xs={1} className={css.gridSpacing}>
+          <p className={css.scheduleLabel}>day</p>
+        </Grid>
+        <Grid item xs={2} className={css.gridSpacing}>
+          <TextInput
+            name="specifiedDay"
+            type="number"
+            min="1"
+            max="31"
+            value={this.state.specifiedDay}
+            hasError={!this.state.specifiedDay}
+            onChange={e => this.setState({ specifiedDay: e.target.value })}
+          />
+        </Grid>
+        <Grid item xs={12} className={css.gridSpacing}>
+          <CheckValidation
+            min={1}
+            max={31}
+            fieldName={'Repeat (day)'}
+            required={true}
+            value={this.state.specifiedDay}
+          />
+        </Grid>
+      </Grid>
     );
   }
 }

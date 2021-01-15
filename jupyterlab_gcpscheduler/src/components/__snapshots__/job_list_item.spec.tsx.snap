@@ -2,7 +2,7 @@
 
 exports[`JobListItem Renders for failed execution 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -10,26 +10,32 @@ exports[`JobListItem Renders for failed execution 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           May 1, 2020, 7:09 PM
@@ -39,6 +45,7 @@ exports[`JobListItem Renders for failed execution 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
@@ -51,7 +58,7 @@ exports[`JobListItem Renders for failed execution 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
@@ -64,7 +71,7 @@ exports[`JobListItem Renders for failed execution 1`] = `
 
 exports[`JobListItem Renders for failed schedule 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -72,26 +79,32 @@ exports[`JobListItem Renders for failed schedule 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Frequency: 
@@ -99,7 +112,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         </span>
       </div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Latest execution:
@@ -111,6 +124,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW LATEST EXECUTION RESULT"
@@ -123,7 +137,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
@@ -136,7 +150,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
 
 exports[`JobListItem Renders for running execution 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -144,26 +158,32 @@ exports[`JobListItem Renders for running execution 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           May 1, 2020, 7:09 PM
@@ -173,6 +193,7 @@ exports[`JobListItem Renders for running execution 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
@@ -185,7 +206,7 @@ exports[`JobListItem Renders for running execution 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
@@ -198,7 +219,7 @@ exports[`JobListItem Renders for running execution 1`] = `
 
 exports[`JobListItem Renders for running schedule 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -206,26 +227,32 @@ exports[`JobListItem Renders for running schedule 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Frequency: 
@@ -233,7 +260,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
         </span>
       </div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Latest execution:
@@ -245,6 +272,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW LATEST EXECUTION RESULT"
@@ -257,7 +285,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
@@ -270,7 +298,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
 
 exports[`JobListItem Renders for successful execution 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -278,26 +306,32 @@ exports[`JobListItem Renders for successful execution 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           May 1, 2020, 7:09 PM
@@ -307,6 +341,7 @@ exports[`JobListItem Renders for successful execution 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW RESULT"
@@ -319,7 +354,7 @@ exports[`JobListItem Renders for successful execution 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
@@ -332,7 +367,7 @@ exports[`JobListItem Renders for successful execution 1`] = `
 
 exports[`JobListItem Renders for successful schedule 1`] = `
 <WithStyles(ForwardRef(Grid))
-  className="job_fxk0enj"
+  className="job_f1y41u1"
   container={true}
   spacing={1}
 >
@@ -340,26 +375,32 @@ exports[`JobListItem Renders for successful schedule 1`] = `
     item={true}
     xs={1}
   >
-     
-    <WithStyles(CheckCircleIcon) />
+    <div
+      className="topAlign_fhdg7rv"
+    >
+      <WithStyles(CheckCircleIcon) />
+    </div>
   </WithStyles(ForwardRef(Grid))>
   <WithStyles(ForwardRef(Grid))
     item={true}
     xs={10}
   >
-    <div
-      className="bold_f1wf24vo"
-    >
-      <LearnMoreLink
-        href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
-        noUnderline={true}
-        secondary={true}
-        text="notebook abcd"
-      />
+    <div>
+      <span
+        className="jobName_f1cjtqm0"
+      >
+        <a
+          href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+        >
+          notebook abcd
+           
+          <WithStyles(LaunchIcon) />
+        </a>
+      </span>
     </div>
     <div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Frequency: 
@@ -367,7 +408,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         </span>
       </div>
       <div
-        className="jobCaption_fbrfhdq"
+        className="jobCaption_f1nmk5cv"
       >
         <span>
           Latest execution:
@@ -379,6 +420,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         className="bold_f1wf24vo spacing_f1w4o4fu"
       >
         <LearnMoreLink
+          disabled={false}
           href="https://notebooks.cloud.google.com/view/test-project/notebook_abcd/abcd.ipynb"
           noUnderline={true}
           text="VIEW LATEST EXECUTION RESULT"
@@ -391,7 +433,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
     xs={1}
   >
     <div
-      className="align_fxwamzl"
+      className="align_fg6t5ae"
     >
       <IconButtonMenu
         icon={<WithStyles(MoreVertIcon) />}
