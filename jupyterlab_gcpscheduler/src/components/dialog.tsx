@@ -163,7 +163,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
         {this.state.showCreateForm && (
           <header className={localStyles.header}>
             <span className={localStyles.title}>
-              Submit notebooks to Executor
+              Submit notebook to Executor
               <Badge value="alpha" />
             </span>
           </header>

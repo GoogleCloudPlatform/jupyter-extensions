@@ -85,7 +85,7 @@ export function removeFromList<T>(list: T[], value: T) {
 export const CUSTOM_CONTAINER: Framework = {
   value: 'customContainer',
   text: 'Custom Container',
-  searchKeywords: [] as string[],
+  searchKeywords: [],
 };
 
 /**

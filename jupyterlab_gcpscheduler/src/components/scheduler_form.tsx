@@ -19,6 +19,7 @@ import { INotebookModel } from '@jupyterlab/notebook';
 import { FormikBag, FormikProps, withFormik } from 'formik';
 import {
   css,
+  COLORS,
   Message,
   SelectInput,
   SubmitButton,
@@ -129,8 +130,8 @@ const localStyles = stylesheet({
     maxHeight: '56vh',
     overflowY: 'scroll',
     overflowX: 'hidden',
-    borderTop: '1px solid #DADCE0',
-    borderBottom: '1px solid #DADCE0',
+    borderTop: '1px solid ' + COLORS.line,
+    borderBottom: '1px solid ' + COLORS.line,
   },
 });
 
@@ -186,11 +187,15 @@ export class InnerSchedulerForm extends React.Component<
         if (imageUri === CUSTOM_CONTAINER.value) {
           imageUri = this.props.values.customContainerImageUri;
         }
-        const matched = ENVIRONMENT_IMAGES.slice(1).find(env => {
-          return !env.searchKeywords.find(
-            keyword => !String(imageUri).includes(keyword)
-          );
-        });
+        let matched = undefined;
+        for (const env of ENVIRONMENT_IMAGES.slice(1)) {
+          //checking if all searchKeywords are in the current imageUri
+          //if any one is missing move on to the next environment image
+          if (env.searchKeywords.every(k => String(imageUri).includes(k))) {
+            matched = env;
+            break;
+          }
+        }
         if (matched) {
           this.updateImageUri(String(matched.value));
         } else {
