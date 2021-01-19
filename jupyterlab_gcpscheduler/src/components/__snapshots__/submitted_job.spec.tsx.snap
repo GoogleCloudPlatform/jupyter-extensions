@@ -350,7 +350,7 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     className="row_f17j33oz messageCaption_f1fmpzea"
   >
     <span>
-      Executions will start on November 11, 2020, 3:00 PM UTC
+      Execution are scheduled to start on November 11, 2020, 3:00 PM UTC
     </span>
   </div>
   <WithStyles(ForwardRef(TableContainer))>

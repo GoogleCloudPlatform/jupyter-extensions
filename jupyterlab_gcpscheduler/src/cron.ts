@@ -413,7 +413,7 @@ export function getNextExecutionAfterDate(
  */
 export function getNextExecutionDate(cronString: string) {
   try {
-    return `Executions will start on ${customDateFormat(
+    return `Execution are scheduled to start on ${customDateFormat(
       getNextExecutionAfterDate(cronString, new Date())
     )}`;
   } catch (err) {

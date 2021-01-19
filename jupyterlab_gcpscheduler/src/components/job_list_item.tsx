@@ -24,6 +24,7 @@ import {
   PausedCircle,
   GrayDisabled,
   SmallLaunchIcon,
+  GrayPending,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { classes, stylesheet } from 'typestyle';
@@ -89,6 +90,8 @@ function getIconForJobState(state: string): JSX.Element {
     return <PausedCircle />;
   } else if (state === 'CANCELLED' || state === 'DISABLED') {
     return <GrayDisabled />;
+  } else if (state === 'RUNNING' || state === 'PREPARING') {
+    return <GrayPending />;
   }
   return <UnknownCircle />;
 }
