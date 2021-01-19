@@ -79,7 +79,7 @@ export class HourScheduleBuilder extends React.Component<
       <Grid container spacing={1} className={css.gridSpacing}>
         <Grid item xs={3} className={css.gridTopRowSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat every</b>
+            <span className={css.bold}>Repeat every</span>
           </p>
         </Grid>
         <Grid item xs={2} className={css.gridTopRowSpacing}>
@@ -114,7 +114,7 @@ export class HourScheduleBuilder extends React.Component<
         </Grid>
         <Grid item xs={3} className={css.gridSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat at</b>
+            <span className={css.bold}>Repeat at</span>
           </p>
         </Grid>
         <Grid item xs={2} className={css.gridSpacing}>

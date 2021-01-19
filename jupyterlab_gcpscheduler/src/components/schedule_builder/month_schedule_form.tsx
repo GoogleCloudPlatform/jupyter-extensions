@@ -18,17 +18,31 @@ import {
   SelectInput,
   TextInput,
   CheckValidation,
+  COLORS,
 } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { Grid } from '@material-ui/core';
 import { FREQUENCY_TYPES, MONTH_FREQUENCIES } from '../../data';
 import { FrequencyType, SchedulerBuilderProps } from './schedule_builder';
+import { classes, stylesheet } from 'typestyle';
 
 interface SubFormState {
   frequency: string;
   specifiedTime: string;
   specifiedDay: string;
 }
+
+const localStyles = stylesheet({
+  hint: {
+    color: COLORS.caption,
+    marginTop: '-5px',
+    fontSize: '12px',
+    marginLeft: '5px',
+  },
+  hintSpacing: {
+    marginTop: '5px !important',
+  },
+});
 
 export class MonthScheduleBuilder extends React.Component<
   SchedulerBuilderProps,
@@ -93,7 +107,7 @@ export class MonthScheduleBuilder extends React.Component<
       <Grid container spacing={1} className={css.gridSpacing}>
         <Grid item xs={3} className={css.gridTopRowSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat every</b>
+            <span className={css.bold}>Repeat every</span>
           </p>
         </Grid>
         <Grid item xs={2} className={css.gridTopRowSpacing}>
@@ -116,7 +130,7 @@ export class MonthScheduleBuilder extends React.Component<
         </Grid>
         <Grid item xs={3} className={css.gridSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat at</b>
+            <span className={css.bold}>Repeat at</span>
           </p>
         </Grid>
         <Grid item xs={9} className={css.gridSpacing}>
@@ -137,7 +151,7 @@ export class MonthScheduleBuilder extends React.Component<
         </Grid>
         <Grid item xs={3} className={css.gridSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat on</b>
+            <span className={css.bold}>Repeat on</span>
           </p>
         </Grid>
         <Grid item xs={1} className={css.gridSpacing}>
@@ -154,7 +168,20 @@ export class MonthScheduleBuilder extends React.Component<
             onChange={e => this.setState({ specifiedDay: e.target.value })}
           />
         </Grid>
-        <Grid item xs={12} className={css.gridSpacing}>
+        <Grid item xs={6} className={css.gridSpacing}></Grid>
+        <Grid item xs={3} className={css.gridSpacing}></Grid>
+        <Grid item xs={9} className={css.gridSpacing}>
+          <div className={localStyles.hint}>
+            If it exceeds the range of a month, no executions will be triggered
+            for that month. E.g., February will be skipped if day 31 is
+            selected.
+          </div>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          className={classes(css.gridSpacing, localStyles.hintSpacing)}
+        >
           <CheckValidation
             min={1}
             max={31}

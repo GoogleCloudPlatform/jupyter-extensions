@@ -160,7 +160,7 @@ export class WeekScheduleBuilder extends React.Component<
       <Grid container spacing={1} className={css.gridSpacing}>
         <Grid item xs={3} className={css.gridTopRowSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat every</b>
+            <span className={css.bold}>Repeat every</span>
           </p>
         </Grid>
         <Grid item xs={9} className={css.gridTopRowSpacing}>
@@ -175,7 +175,7 @@ export class WeekScheduleBuilder extends React.Component<
         </Grid>
         <Grid item xs={3} className={css.gridSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat at</b>
+            <span className={css.bold}>Repeat at</span>
           </p>
         </Grid>
         <Grid item xs={9} className={css.gridSpacing}>
@@ -196,7 +196,7 @@ export class WeekScheduleBuilder extends React.Component<
         </Grid>
         <Grid item xs={3} className={css.gridSpacing}>
           <p className={css.scheduleLabel}>
-            <b>Repeat on</b>
+            <span className={css.bold}>Repeat on</span>
           </p>
         </Grid>
         <Grid item xs={9} className={css.gridSpacing}>
