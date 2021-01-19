@@ -43,6 +43,7 @@ export const COLORS = {
   secondary: 'var(--jp-layout-color2, #eeeeee)',
   error: 'var(--jp-error-color3, #ffcdd2)',
   focus: 'var(--jp-brand-color-1, #2196f3)',
+  line: 'var(--jp-border-color2, #DADCE0)',
 };
 
 export const FONT_SIZE = {
