@@ -26,6 +26,7 @@ exports[`JobListItem Renders for failed execution 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            
@@ -95,6 +96,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            
@@ -174,6 +176,7 @@ exports[`JobListItem Renders for running execution 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            
@@ -243,6 +246,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            
@@ -322,6 +326,7 @@ exports[`JobListItem Renders for successful execution 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/jobs/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            
@@ -391,6 +396,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
       >
         <a
           href="https://console.cloud.google.com/ai-platform/notebooks/schedule-details/notebook_abcd_abcxyz?project=test-project"
+          target="_blank"
         >
           notebook abcd
            

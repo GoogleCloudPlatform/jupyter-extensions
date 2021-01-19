@@ -3,6 +3,7 @@
 exports[`CronScheduleBuilder Renders without error 1`] = `
 <div>
   <TextInput
+    error="Frequency is required"
     formHelperLink="https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules"
     formHelperText="Schedule is specified using unix-cron format. You can define a schedule
         so that your execution runs multiple times a day, or runs on specific
@@ -12,9 +13,6 @@ exports[`CronScheduleBuilder Renders without error 1`] = `
     name="schedule"
     onChange={[Function]}
     value=""
-  />
-  <FieldError
-    message="Frequency is required"
   />
 </div>
 `;

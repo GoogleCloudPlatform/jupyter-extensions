@@ -55,8 +55,8 @@ describe('CronScheduleBuilder', () => {
       ''
     );
     expect(mockProps.onScheduleChange).toBeCalledTimes(1);
-    expect(cronScheduleBuilder.find('FieldError').props()).toEqual({
-      message: 'Frequency is required',
-    });
+    expect(cronScheduleBuilder.find('TextInput').prop('error')).toEqual(
+      'Frequency is required'
+    );
   });
 });

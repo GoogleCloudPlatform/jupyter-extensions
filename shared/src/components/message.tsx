@@ -54,7 +54,7 @@ export function Message(props: Props): JSX.Element {
         props.asError ? localStyles.error : localStyles.info
       )}
     >
-      <Grid item sm={1} style={{ display: "flex", alignItems: "center" }}>
+      <Grid item sm={1} style={{ display: 'flex', alignItems: 'center' }}>
         {props.asActivity ? (
           <Progress />
         ) : props.asError ? (
@@ -63,7 +63,7 @@ export function Message(props: Props): JSX.Element {
           <BlueInfo />
         )}
       </Grid>
-      <Grid item sm={10} style={{ display: "flex", alignItems: "center" }}>
+      <Grid item sm={10} style={{ display: 'flex', alignItems: 'center' }}>
         {props.children ? props.children : props.text}
       </Grid>
     </Grid>

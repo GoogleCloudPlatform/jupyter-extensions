@@ -42,13 +42,13 @@ export const COLORS = {
   inverse: 'var(--jp-ui-font-color3, #555555)',
   secondary: 'var(--jp-layout-color2, #eeeeee)',
   error: 'var(--jp-error-color3, #ffcdd2)',
-  focus: 'var(--jp-brand-color-1, #2196f3)'
+  focus: 'var(--jp-brand-color-1, #2196f3)',
 };
 
 export const FONT_SIZE = {
   text: 'var(--jp-ui-font-size1, 13px)',
   heading: 'var(--jp-ui-font-size2, 18px)',
-}
+};
 
 /** Base extension font style */
 export const BASE_FONT: types.CSSProperties = {
@@ -76,7 +76,7 @@ export const FORM_LABEL_STYLE = {
   backgroundColor: COLORS.white,
   alpha: 0.85,
   fontWeight: 500,
-  paddingRight:'4px',
+  paddingRight: '4px',
 };
 
 /** Global styles that are useful across components */
@@ -156,7 +156,7 @@ export const css = stylesheet({
       '&>*': { paddingRight: '4px' },
     },
   },
-  scheduleBuilderRow:{
+  scheduleBuilderRow: {
     $nest: {
       '&>*': {
         marginRight: '16px',
@@ -172,7 +172,7 @@ export const css = stylesheet({
     paddingTop: '24px',
     paddingBottom: '16px',
     paddingLeft: '5px',
-    fontSize: '13px'
+    fontSize: '13px',
   },
   gridTopRowSpacing: {
     paddingTop: '0px !important',

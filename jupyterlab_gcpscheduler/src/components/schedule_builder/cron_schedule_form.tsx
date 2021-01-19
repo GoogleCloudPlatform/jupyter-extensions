@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FieldError, TextInput } from 'gcp_jupyterlab_shared';
+import { TextInput } from 'gcp_jupyterlab_shared';
 import * as React from 'react';
 import { OnScheduleChange } from './schedule_builder';
 
@@ -38,9 +38,9 @@ export function CronScheduleBuilder(props: SubFormProps) {
         formHelperText="Schedule is specified using unix-cron format. You can define a schedule
         so that your execution runs multiple times a day, or runs on specific
         days and months."
+        error="Frequency is required"
         formHelperLink={SCHEDULE_LINK}
       />
-      {!props.schedule && <FieldError message="Frequency is required" />}
     </div>
   );
 }

@@ -107,7 +107,7 @@ export function JobListItem(props: Props) {
       <Grid item xs={10}>
         <div>
           <span className={localStyles.jobName}>
-            <a href={job.link}>
+            <a target="_blank" href={job.link}>
               {job.name} <SmallLaunchIcon />
             </a>
           </span>

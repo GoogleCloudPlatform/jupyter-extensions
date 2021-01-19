@@ -19,7 +19,6 @@ import { INotebookModel } from '@jupyterlab/notebook';
 import { FormikBag, FormikProps, withFormik } from 'formik';
 import {
   css,
-  FieldError,
   Message,
   SelectInput,
   SubmitButton,
@@ -231,9 +230,9 @@ export class InnerSchedulerForm extends React.Component<
             name="name"
             value={values.name}
             hasError={!!errors.name}
+            error={errors.name}
             onChange={handleChange}
           />
-          <FieldError message={errors.name} />
           <SelectInput
             label="Region"
             name="region"
@@ -306,9 +305,9 @@ export class InnerSchedulerForm extends React.Component<
                 value={values.customContainerImageUri}
                 placeholder="Docker container image uri"
                 hasError={!!errors.customContainerImageUri}
+                error={errors.customContainerImageUri}
                 onChange={handleChange}
               />
-              <FieldError message={errors.customContainerImageUri} />
             </span>
           )}
           <SelectInput

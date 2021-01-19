@@ -17,7 +17,7 @@ import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import MenuItem from '@material-ui/core/MenuItem';
 import { INPUT_TEXT_STYLE, ALIGN_HINT, FORM_LABEL_STYLE } from '../styles';
-import {CustomColorTextField} from './text_input';
+import { CustomColorTextField } from './text_input';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { LearnMoreLink } from './learn_more_link';

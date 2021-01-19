@@ -42,7 +42,7 @@ export const STYLES = stylesheet({
     ...csstips.endJustified,
   },
   actionBarContainer: {
-    paddingTop: '8px',
+    paddingTop: '16px',
   },
   actionBarDisplayMessage: {
     marginLeft: '5px',
