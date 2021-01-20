@@ -29,6 +29,7 @@ import {
   ClientTransportService,
   ServerProxyTransportService,
   TransportService,
+  IconButtonMenu,
 } from 'gcp_jupyterlab_shared';
 import { ProjectStateService } from '../service/project_state';
 import { ActionBar } from './action_bar';
@@ -192,6 +193,33 @@ describe('SchedulerDialog', () => {
       .find(Button)
       .simulate('click');
     expect(dialog.state('dialogClosedByUser')).toBe(true);
+  });
+
+  it('Clears settings when Reset is clicked', async () => {
+    const settings = getSettings({
+      projectId: TEST_PROJECT,
+      gcsBucket: 'gs://test-project/notebooks',
+      schedulerRegion: 'us-east1',
+    });
+    launchSchedulerRequest.notebookName = 'Foo.ipynb';
+    launchSchedulerRequest.notebook = fakeNotebook.model;
+
+    const dialog = shallow(
+      <SchedulerDialog
+        projectStateService={mockProjectStateService}
+        gcpService={mockGcpService}
+        request={launchSchedulerRequest}
+        settings={settings}
+      />
+    );
+
+    dialog
+      .find(IconButtonMenu)
+      .dive()
+      .findWhere(w => w.text() === 'Reset configuration')
+      .at(2)
+      .simulate('click');
+    expect(settings.save).toHaveBeenCalledWith('{}');
   });
 
   it('Reopens a closed dialog when request prop changes', async () => {

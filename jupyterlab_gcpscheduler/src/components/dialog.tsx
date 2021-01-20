@@ -18,7 +18,19 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { INotebookModel } from '@jupyterlab/notebook';
 import { Dialog } from '@material-ui/core';
 import * as csstips from 'csstips';
-import { BASE_FONT, COLORS, css, Message, Badge } from 'gcp_jupyterlab_shared';
+import {
+  BASE_FONT,
+  COLORS,
+  css,
+  MenuCloseHandler,
+  MenuIcon,
+  IconButtonMenu,
+  Message,
+  Badge,
+  ClientTransportService,
+  ServerProxyTransportService,
+} from 'gcp_jupyterlab_shared';
+import MenuItem from '@material-ui/core/MenuItem';
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
 import { GcpService } from '../service/gcp';
@@ -28,10 +40,6 @@ import {
 } from '../service/project_state';
 import { SchedulerForm } from './scheduler_form';
 import { ActionBar } from './action_bar';
-import {
-  ClientTransportService,
-  ServerProxyTransportService,
-} from 'gcp_jupyterlab_shared';
 
 /** Information provided to the GcpSchedulerWidget */
 export interface LaunchSchedulerRequest {
@@ -166,6 +174,18 @@ export class SchedulerDialog extends React.Component<Props, State> {
               Submit notebook to Executor
               <Badge value="alpha" />
             </span>
+            <IconButtonMenu
+              icon={<MenuIcon />}
+              menuItems={menuCloseHandler => [
+                <MenuItem
+                  key="reset"
+                  dense={true}
+                  onClick={() => this._onResetSettings(menuCloseHandler)}
+                >
+                  Reset configuration
+                </MenuItem>,
+              ]}
+            ></IconButtonMenu>
           </header>
         )}
         <main className={localStyles.main}>{this._getDialogContent()}</main>
@@ -225,6 +245,11 @@ export class SchedulerDialog extends React.Component<Props, State> {
       );
     }
     return null;
+  }
+
+  private _onResetSettings(closeHandler: MenuCloseHandler) {
+    this.props.settings.save('{}');
+    closeHandler();
   }
 
   // Casts to GcpSettings shape from JSONObject
