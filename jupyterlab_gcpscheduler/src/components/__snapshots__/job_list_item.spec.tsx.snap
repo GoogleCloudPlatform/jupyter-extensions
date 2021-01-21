@@ -43,7 +43,7 @@ exports[`JobListItem Renders for failed execution 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}
@@ -123,7 +123,7 @@ exports[`JobListItem Renders for failed schedule 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}
@@ -193,7 +193,7 @@ exports[`JobListItem Renders for running execution 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}
@@ -273,7 +273,7 @@ exports[`JobListItem Renders for running schedule 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}
@@ -343,7 +343,7 @@ exports[`JobListItem Renders for successful execution 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}
@@ -423,7 +423,7 @@ exports[`JobListItem Renders for successful schedule 1`] = `
         </span>
       </div>
       <div
-        className="bold_f1wf24vo spacing_f1w4o4fu"
+        className="bold_f1wf24vo spacing_f1mvy2br"
       >
         <LearnMoreLink
           disabled={false}

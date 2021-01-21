@@ -34,7 +34,7 @@ const localStyles = stylesheet({
     paddingBottom: '16px',
   },
   actionButtons: {
-    margin: '12px 24px 24px 24px',
+    margin: '0px 24px 8px 24px',
   },
   primaryButton: {
     color: COLORS.focus + '!important',

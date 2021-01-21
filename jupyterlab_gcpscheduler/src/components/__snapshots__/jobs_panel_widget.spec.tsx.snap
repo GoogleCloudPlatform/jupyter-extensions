@@ -5,10 +5,10 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -85,10 +85,10 @@ exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`]
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -143,10 +143,10 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -202,10 +202,10 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -258,10 +258,10 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -419,10 +419,10 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        
@@ -497,10 +497,10 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
   className="panel_f16v76lc"
 >
   <div
-    className="headerContainer_f6tu7nw"
+    className="headerContainer_f1tsf7lg"
   >
     <header
-      className="header_f17ermgq"
+      className="header_f18piyjt"
     >
       Notebook Executor
        

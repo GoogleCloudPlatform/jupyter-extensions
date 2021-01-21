@@ -77,7 +77,8 @@ const localStyles = stylesheet({
     marginTop: '4px',
   },
   spacing: {
-    marginTop: '5px',
+    marginTop: '6px',
+    marginLeft: '-2px',
   },
 });
 

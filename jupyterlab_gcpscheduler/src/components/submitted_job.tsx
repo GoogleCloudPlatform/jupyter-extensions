@@ -74,6 +74,12 @@ const localStyles = stylesheet({
     marginBottom: '20px',
     marginLeft: '37px',
   },
+  spacing: {
+    padding: '24px',
+  },
+  captionAlign: {
+    marginLeft: '-3px',
+  },
 });
 
 const GreenCheck = withStyles({
@@ -114,7 +120,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
       ? `${SCHEDULES_LINK}?${projectParam}`
       : `${EXECUTIONS_LINK}?${projectParam}`;
     return (
-      <div className={css.column}>
+      <div className={classes(css.column, localStyles.spacing)}>
         <div className={classes(css.row, localStyles.message)}>
           <GreenCheck />
           <span>
@@ -250,7 +256,7 @@ export class SubmittedJob extends React.Component<Props, {}> {
           closeOnRight={true}
           onDialogClose={onDialogClose}
           displayMessage={
-            <span>
+            <span className={localStyles.captionAlign}>
               View the {isRecurring ? 'schedule' : 'execution'} in the Executor
               extension or in{' '}
               <LearnMoreLink text="Google Cloud console" href={jobLink} />

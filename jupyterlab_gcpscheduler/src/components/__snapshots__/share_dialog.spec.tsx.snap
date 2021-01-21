@@ -58,7 +58,7 @@ exports[`ShareDialog Renders closed 1`] = `
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
     <WithStyles(ForwardRef(DialogActions))
-      className="actionButtons_f12nakbo"
+      className="actionButtons_ft2surt"
     >
       <WithStyles(ForwardRef(Button))
         className="primaryButton_f18dymgn"
@@ -143,7 +143,7 @@ exports[`ShareDialog Renders open 1`] = `
       </WithStyles(ForwardRef(DialogContentText))>
     </WithStyles(ForwardRef(DialogContent))>
     <WithStyles(ForwardRef(DialogActions))
-      className="actionButtons_f12nakbo"
+      className="actionButtons_ft2surt"
     >
       <WithStyles(ForwardRef(Button))
         className="primaryButton_f18dymgn"

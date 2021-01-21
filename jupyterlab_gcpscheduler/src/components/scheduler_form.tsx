@@ -132,6 +132,18 @@ const localStyles = stylesheet({
     overflowX: 'hidden',
     borderTop: '1px solid ' + COLORS.line,
     borderBottom: '1px solid ' + COLORS.line,
+    paddingLeft: '24px',
+    paddingRight: '24px',
+  },
+  topSpacing: {
+    paddingTop: '16px',
+    paddingLeft: '24px',
+    paddingRight: '24px',
+  },
+  bottomSpacing: {
+    paddingBottom: '16px',
+    paddingLeft: '24px',
+    paddingRight: '24px',
   },
 });
 
@@ -223,8 +235,10 @@ export class InnerSchedulerForm extends React.Component<
 
     return (
       <form>
-        <SchedulerDescription />
-        <p className={css.heading}>Notebook: {this.props.notebookName}</p>
+        <div className={localStyles.topSpacing}>
+          <SchedulerDescription />
+          <p className={css.heading}>Notebook: {this.props.notebookName}</p>
+        </div>
         <div className={localStyles.scroll}>
           <TextInput
             label={
@@ -345,43 +359,45 @@ export class InnerSchedulerForm extends React.Component<
             />
           )}
         </div>
-        <ActionBar
-          onDialogClose={this.props.onDialogClose}
-          closeLabel="Cancel"
-          displayMessage={
-            values.scheduleType === RECURRING
-              ? getNextExecutionDate(values.schedule)
-              : 'Execution will start immediately after being submitted'
-          }
-          error={
-            status && !status.lastSubmitted ? (
-              <Message
-                asActivity={isSubmitting}
-                asError={status.asError}
-                text={status.message}
+        <div className={localStyles.bottomSpacing}>
+          <ActionBar
+            onDialogClose={this.props.onDialogClose}
+            closeLabel="Cancel"
+            displayMessage={
+              values.scheduleType === RECURRING
+                ? getNextExecutionDate(values.schedule)
+                : 'Execution will start immediately after being submitted'
+            }
+            error={
+              status && !status.lastSubmitted ? (
+                <Message
+                  asActivity={isSubmitting}
+                  asError={status.asError}
+                  text={status.message}
+                />
+              ) : errors && errors.gcsBucket ? (
+                <Message
+                  asActivity={false}
+                  asError={true}
+                  text={errors.gcsBucket}
+                />
+              ) : this.missingPermissions.length > 0 ? (
+                <Message
+                  asError={true}
+                  text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
+                />
+              ) : null
+            }
+          >
+            {this.missingPermissions.length === 0 && (
+              <SubmitButton
+                actionPending={isSubmitting}
+                onClick={submitForm}
+                text="Submit"
               />
-            ) : errors && errors.gcsBucket ? (
-              <Message
-                asActivity={false}
-                asError={true}
-                text={errors.gcsBucket}
-              />
-            ) : this.missingPermissions.length > 0 ? (
-              <Message
-                asError={true}
-                text={`${IAM_MESSAGE}: ${this.missingPermissions.join(', ')}`}
-              />
-            ) : null
-          }
-        >
-          {this.missingPermissions.length === 0 && (
-            <SubmitButton
-              actionPending={isSubmitting}
-              onClick={submitForm}
-              text="Submit"
-            />
-          )}
-        </ActionBar>
+            )}
+          </ActionBar>
+        </div>
       </form>
     );
   }

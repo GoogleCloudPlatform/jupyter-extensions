@@ -63,13 +63,13 @@ interface State {
 const localStyles = stylesheet({
   headerContainer: {
     ...csstips.horizontal,
-    padding: '16px',
+    padding: '16px 16px 0px 16px',
   },
   header: {
     fontWeight: 500,
     fontSize: '16px',
     margin: 0,
-    padding: '8px 12px',
+    padding: '8px 12px 0px 12px',
     ...csstips.flex,
   },
   panel: {

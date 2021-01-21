@@ -37,7 +37,8 @@ const containerStyle = style({
 const StyledLabel = withStyles({
   label: {
     ...INPUT_TEXT_STYLE,
-    marginRight: '-6px',
+    marginRight: '-8px',
+    marginLeft: '-2px',
   },
 })(FormControlLabel);
 

@@ -2,7 +2,7 @@
 
 exports[`SubmittedJob Renders for immediate job 1`] = `
 <div
-  className="column_fghohlb"
+  className="column_fghohlb spacing_f1nee3fk"
 >
   <div
     className="row_f17j33oz message_f1tmi06c"
@@ -138,7 +138,9 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
     closeLabel="Done"
     closeOnRight={true}
     displayMessage={
-      <span>
+      <span
+        className="captionAlign_fqoayxt"
+      >
         View the 
         execution
          in the Executor extension or in
@@ -162,7 +164,7 @@ exports[`SubmittedJob Renders for immediate job 1`] = `
 
 exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
 <div
-  className="column_fghohlb"
+  className="column_fghohlb spacing_f1nee3fk"
 >
   <div
     className="row_f17j33oz message_f1tmi06c"
@@ -311,7 +313,9 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
     closeLabel="Done"
     closeOnRight={true}
     displayMessage={
-      <span>
+      <span
+        className="captionAlign_fqoayxt"
+      >
         View the 
         execution
          in the Executor extension or in
@@ -335,7 +339,7 @@ exports[`SubmittedJob Renders for immediate job with custom container 1`] = `
 
 exports[`SubmittedJob Renders for scheduled job 1`] = `
 <div
-  className="column_fghohlb"
+  className="column_fghohlb spacing_f1nee3fk"
 >
   <div
     className="row_f17j33oz message_f1tmi06c"
@@ -484,7 +488,9 @@ exports[`SubmittedJob Renders for scheduled job 1`] = `
     closeLabel="Done"
     closeOnRight={true}
     displayMessage={
-      <span>
+      <span
+        className="captionAlign_fqoayxt"
+      >
         View the 
         schedule
          in the Executor extension or in

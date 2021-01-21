@@ -22,10 +22,10 @@ exports[`SchedulerDialog Renders closed Dialog without Notebook: Dialog Closed 1
     />
   </header>
   <main
-    className="main_fmi2prb"
+    className="main_fm76rtl"
   >
     <div
-      className="column_fghohlb"
+      className="column_fghohlb spacing_f1nee3fk"
     >
       <Message
         asActivity={true}
@@ -61,10 +61,10 @@ exports[`SchedulerDialog Renders with Checking IAM Message: IamMessage 1`] = `
     />
   </header>
   <main
-    className="main_fmi2prb"
+    className="main_fm76rtl"
   >
     <div
-      className="column_fghohlb"
+      className="column_fghohlb spacing_f1nee3fk"
     >
       <Message
         asActivity={true}
@@ -100,10 +100,10 @@ exports[`SchedulerDialog Renders with Python2 warning: Python2Warning 1`] = `
     />
   </header>
   <main
-    className="main_fmi2prb"
+    className="main_fm76rtl"
   >
     <div
-      className="column_fghohlb"
+      className="column_fghohlb spacing_f1nee3fk"
     >
       <Message
         asError={true}
@@ -139,7 +139,7 @@ exports[`SchedulerDialog Renders with SchedulerForm: SchedulerForm 1`] = `
     />
   </header>
   <main
-    className="main_fmi2prb"
+    className="main_fm76rtl"
   >
     <WithFormik(InnerSchedulerForm)
       gcpService={

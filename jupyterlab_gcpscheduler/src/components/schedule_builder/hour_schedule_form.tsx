@@ -129,7 +129,7 @@ export class HourScheduleBuilder extends React.Component<
           />
         </Grid>
         <Grid item xs={7} className={css.gridSpacing}>
-          <p className={css.scheduleLabel}>minute</p>
+          <p className={css.scheduleLabel}>minute of hour</p>
         </Grid>
         <Grid item xs={12} className={css.gridSpacing}>
           <CheckValidation
