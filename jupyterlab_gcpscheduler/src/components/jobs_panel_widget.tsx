@@ -286,7 +286,7 @@ export class GcpScheduledJobsPanel extends React.Component<Props, State> {
       <div className={localStyles.panel}>
         <div className={localStyles.headerContainer}>
           <header className={localStyles.header}>
-            {TITLE_TEXT} <Badge value="alpha" />
+            {TITLE_TEXT} <Badge value="experimental" />
           </header>
           <IconButton title="Refresh" onClick={this.handleRefresh}>
             <RefreshIcon />

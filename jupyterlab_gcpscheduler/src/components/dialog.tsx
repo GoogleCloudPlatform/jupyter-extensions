@@ -174,7 +174,7 @@ export class SchedulerDialog extends React.Component<Props, State> {
           <header className={localStyles.header}>
             <span className={localStyles.title}>
               Submit notebook to Executor
-              <Badge value="alpha" />
+              <Badge value="experimental" />
             </span>
             <IconButtonMenu
               icon={<MenuIcon />}
