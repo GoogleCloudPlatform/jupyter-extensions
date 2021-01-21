@@ -13,7 +13,7 @@ exports[`GcpScheduledJobsPanel Renders when not visible 1`] = `
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -93,7 +93,7 @@ exports[`GcpScheduledJobsPanel Shows error if executions cannot be retrieved 1`]
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -151,7 +151,7 @@ exports[`GcpScheduledJobsPanel Shows error if project cannot be determined 1`] =
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -210,7 +210,7 @@ exports[`GcpScheduledJobsPanel Shows error if schedules cannot be retrieved 1`] 
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -266,7 +266,7 @@ exports[`GcpScheduledJobsPanel Shows executions 1`] = `
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -427,7 +427,7 @@ exports[`GcpScheduledJobsPanel Shows loading indicator 1`] = `
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
@@ -505,7 +505,7 @@ exports[`GcpScheduledJobsPanel Shows schedules 1`] = `
       Notebook Executor
        
       <Badge
-        value="alpha"
+        value="experimental"
       />
     </header>
     <WithStyles(ForwardRef(IconButton))
