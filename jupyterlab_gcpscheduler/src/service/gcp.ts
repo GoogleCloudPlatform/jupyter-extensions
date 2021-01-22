@@ -232,7 +232,7 @@ export class GcpService {
     try {
       const projectId = await this.projectId;
       const params: { [k: string]: string } = { filter };
-       //TODO: change to createTime when that works
+      //TODO: change to createTime when that works
       params['orderBy'] = 'name desc';
       if (pageSize) {
         params['pageSize'] = String(pageSize);
