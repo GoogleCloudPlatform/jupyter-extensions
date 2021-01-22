@@ -15,9 +15,11 @@
  */
 import * as React from 'react';
 import { stylesheet } from 'typestyle';
-import { FormHelperText, MenuItem, TextField } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import MenuItem from '@material-ui/core/MenuItem';
 import { INPUT_TEXT_STYLE, ALIGN_HINT, FORM_LABEL_STYLE } from '../styles';
+import { CustomColorTextField } from './text_input';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import { LearnMoreLink } from './learn_more_link';
 
 interface Option {
@@ -26,11 +28,11 @@ interface Option {
   disabled?: boolean;
 }
 
-export const STYLES = stylesheet({
+export const SELECT_STYLES = stylesheet({
   select: {
     display: 'block',
-    marginTop: '5px',
-    marginBottom: '5px',
+    marginTop: '8px',
+    marginBottom: '16px',
   },
   icon: {
     right: '14px',
@@ -40,8 +42,8 @@ export const STYLES = stylesheet({
   },
 });
 
-const ArrowIcon = () => {
-  return <ArrowDropDown className={STYLES.icon} />;
+const iconComponent = props => {
+  return <ArrowDropDownIcon className={SELECT_STYLES.icon} />;
 };
 
 interface Props {
@@ -67,8 +69,8 @@ export function SelectInput(props: Props) {
     onChange,
   } = props;
   return (
-    <div className={STYLES.select}>
-      <TextField
+    <div className={SELECT_STYLES.select}>
+      <CustomColorTextField
         variant="outlined"
         margin="dense"
         fullWidth={true}
@@ -84,7 +86,7 @@ export function SelectInput(props: Props) {
         }}
         InputLabelProps={{ shrink: true, style: { ...FORM_LABEL_STYLE } }}
         SelectProps={{
-          IconComponent: ArrowIcon,
+          IconComponent: iconComponent,
           displayEmpty: true,
         }}
         select
@@ -99,7 +101,7 @@ export function SelectInput(props: Props) {
               {option.text}
             </MenuItem>
           ))}
-      </TextField>
+      </CustomColorTextField>
       {formHelperText && (
         <FormHelperText style={ALIGN_HINT}>
           {formHelperText}
