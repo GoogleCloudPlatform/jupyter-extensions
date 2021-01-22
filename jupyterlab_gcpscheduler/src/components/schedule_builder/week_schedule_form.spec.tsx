@@ -149,8 +149,11 @@ describe('WeekScheduleBuilder', () => {
     );
     expect(mockProps.onScheduleChange).lastCalledWith('');
     expect(mockProps.onScheduleChange).toBeCalledTimes(2);
-    expect(weekScheduleBuilder.find('FieldError').prop('message')).toBe(
-      'Repeat (time) is required.'
-    );
+    expect(
+      weekScheduleBuilder
+        .find('FieldError')
+        .at(0)
+        .prop('message')
+    ).toBe('Repeat (time) is required.');
   });
 });
