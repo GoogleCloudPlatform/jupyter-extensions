@@ -152,7 +152,7 @@ describe('WeekScheduleBuilder', () => {
     expect(
       weekScheduleBuilder
         .find('FieldError')
-        .at(0)
+        .at(1)
         .prop('message')
     ).toBe('Repeat (time) is required.');
   });
