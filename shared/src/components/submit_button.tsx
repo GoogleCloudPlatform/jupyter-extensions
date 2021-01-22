@@ -27,8 +27,9 @@ interface Props {
 
 const localStyles = stylesheet({
   submit: {
-    backgroundColor: COLORS.blue,
-    color: COLORS.white,
+    backgroundColor: COLORS.white + '!important',
+    color: COLORS.focus + '!important',
+    border: 'none',
     $nest: {
       '&:disabled': {
         backgroundColor: 'var(--jp-layout-color3)',
@@ -40,7 +41,8 @@ const localStyles = stylesheet({
     },
   },
   disabled: {
-    backgroundColor: 'var(--jp-border-color2)',
+    backgroundColor: COLORS.white,
+    border: 'none',
     color: 'var(--jp-layout-color4)',
     cursor: 'not-allowed',
   },

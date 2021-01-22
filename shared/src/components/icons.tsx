@@ -26,6 +26,9 @@ import {
   Launch,
   MoreVert,
 } from '@material-ui/icons';
+import BlockIcon from '@material-ui/icons/Block';
+import PauseCircleFilledIcon from '@material-ui/icons/PauseCircleOutline';
+import HelpIcon from '@material-ui/icons/Help';
 import { COLORS } from '../styles';
 
 /** Green check icon */
@@ -43,6 +46,30 @@ export const GreenCheckCircle = withStyles({
     fontSize: '16px',
   },
 })(CheckCircle);
+
+/** Pause circle icon */
+export const PausedCircle = withStyles({
+  root: {
+    color: COLORS.base,
+    fontSize: '16px',
+  },
+})(PauseCircleFilledIcon);
+
+/** Unknown circle icon */
+export const UnknownCircle = withStyles({
+  root: {
+    color: COLORS.base,
+    fontSize: '16px',
+  },
+})(HelpIcon);
+
+/** Disable icon */
+export const GrayDisabled = withStyles({
+  root: {
+    color: COLORS.base,
+    fontSize: '16px',
+  },
+})(BlockIcon);
 
 /** Red 'X' icon */
 export const RedClose = withStyles({

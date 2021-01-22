@@ -48,13 +48,13 @@ export function Message(props: Props): JSX.Element {
   return (
     <Grid
       container
-      spacing={1}
+      spacing={2}
       className={classes(
         localStyles.message,
         props.asError ? localStyles.error : localStyles.info
       )}
     >
-      <Grid item sm={1}>
+      <Grid item sm={1} style={{ display: 'flex', alignItems: 'center' }}>
         {props.asActivity ? (
           <Progress />
         ) : props.asError ? (
@@ -63,7 +63,7 @@ export function Message(props: Props): JSX.Element {
           <BlueInfo />
         )}
       </Grid>
-      <Grid item sm={10}>
+      <Grid item sm={10} style={{ display: 'flex', alignItems: 'center' }}>
         {props.children ? props.children : props.text}
       </Grid>
     </Grid>

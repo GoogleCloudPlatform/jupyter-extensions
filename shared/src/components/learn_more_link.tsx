@@ -26,10 +26,12 @@ interface Props {
   href: string;
   text?: string;
   noUnderline?: boolean;
+  disabled?: boolean;
 }
 
 const localStyles = stylesheet({
   link: {
+    color: COLORS.focus,
     alignItems: 'center',
     display: 'inline-flex',
     flexDirection: 'row',
@@ -42,6 +44,12 @@ const localStyles = stylesheet({
   noUnderline: {
     textDecoration: 'none',
   },
+  disabled: {
+    color: COLORS.base,
+    pointerEvents: 'none',
+    cursor: 'default',
+    opacity: '0.6',
+  },
 });
 
 /** Functional Component for an external link */
@@ -53,7 +61,8 @@ export function LearnMoreLink(props: Props) {
         css.link,
         localStyles.link,
         props.noUnderline ? localStyles.noUnderline : null,
-        props.secondary ? localStyles.secondary : null
+        props.secondary ? localStyles.secondary : null,
+        props.disabled ? localStyles.disabled : null
       )}
       href={props.href}
       target="_blank"
