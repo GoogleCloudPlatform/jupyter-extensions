@@ -406,9 +406,7 @@ export class GcpService {
   ): Promise<Execution | undefined> {
     try {
       const latestExecutionResponse = await this.listExecutions(
-        `execution_template.labels.schedule_id="${scheduleId}"`,
-        undefined,
-        undefined
+        `execution_template.labels.schedule_id="${scheduleId}"`
       );
       if (latestExecutionResponse.executions.length !== 0) {
         return latestExecutionResponse.executions[0];

@@ -528,7 +528,6 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
         params: {
-          pageSize: '1',
           filter: 'execution_template.labels.schedule_id="schedule1"',
           orderBy: 'name desc',
         },
@@ -536,7 +535,6 @@ describe('GcpService', () => {
       expect(mockSubmit).toHaveBeenCalledWith({
         path: `${NOTEBOOKS_API_BASE}/projects/test-project/locations/-/executions`,
         params: {
-          pageSize: '1',
           filter: 'execution_template.labels.schedule_id="schedule2"',
           orderBy: 'name desc',
         },
