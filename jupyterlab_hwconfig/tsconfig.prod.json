@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "exclude": [
-    "src/e2e/**/*",
-    "src/**/*.spec.*",
-    "src/test_helpers.ts",
-    "src/setupTests.ts"
-  ]
-}
