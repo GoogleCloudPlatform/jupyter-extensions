@@ -1,14 +1,4 @@
 {
-  "packages": [
-    "shared/",
-    "jupyterlab_bigquery/",
-    "jupyterlab_comments/",
-    "jupyterlab_hwconfig/",
-    "jupyterlab_gcpscheduler/",
-    "jupyterlab_gcsfilebrowser/",
-    "jupyterlab_gitsync/",
-    "jupyterlab_ucaip/",
-    "jupyterlab_vizier/"
-  ],
+  "packages": ["shared/", "jupyterlab_comments/", "jupyterlab_gitsync/"],
   "version": "independent"
 }
