@@ -21,7 +21,7 @@ def get_gcloud_config(field):
   """Helper method that invokes the gcloud config helper."""
   p = subprocess.run(
     ['gcloud', 'config', 'config-helper', f'--format=value({field})'],
-    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8')
+    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
   return p.stdout.strip()
 
 
