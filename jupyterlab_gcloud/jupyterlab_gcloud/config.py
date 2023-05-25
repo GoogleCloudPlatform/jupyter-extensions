@@ -35,7 +35,7 @@ def gcp_project_number():
   project = gcp_project()
   p = subprocess.run(
       ['gcloud', 'projects', 'describe', project, '--format=value(projectNumber)'],
-    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8')
+    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
   return p.stdout.strip()
   
 
