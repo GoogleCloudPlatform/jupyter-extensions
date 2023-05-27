@@ -78,5 +78,6 @@ class CommandTokenRenewer(CachedTokenRenewerBase):
       stdin=subprocess.DEVNULL,
       capture_output=True,
       check=True,
+      shell=True,
       encoding='UTF-8')
     return p.stdout.strip()
