@@ -57,5 +57,3 @@ class MixingKernelSpecManager(KernelSpecManager):
             self.log.debug(f'Looking up remote kernel spec resource for {kernel_name}...')
             return await self.remote_manager.get_kernel_spec_resource(kernel_name, path)
         return None
-
-    
