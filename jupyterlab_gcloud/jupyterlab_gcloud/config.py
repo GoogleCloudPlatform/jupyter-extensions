@@ -20,7 +20,7 @@ from jupyterlab_gcloud.tokenrenewer import CommandTokenRenewer
 def get_gcloud_config(field):
   """Helper method that invokes the gcloud config helper."""
   p = subprocess.run(
-    ['gcloud', 'config', 'config-helper', f'--format=value({field})'],
+    f'gcloud config config-helper --format="value({field})"',
     stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
   return p.stdout.strip()
 
@@ -34,7 +34,7 @@ def gcp_project_number():
   """Helper method to get the project number for the project configured through gcloud"""
   project = gcp_project()
   p = subprocess.run(
-      ['gcloud', 'projects', 'describe', project, '--format=value(projectNumber)'],
+      f'gcloud projects describe {project} --format="value(projectNumber)"',
     stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
   return p.stdout.strip()
   
@@ -58,7 +58,7 @@ def configure_gateway_client(c):
   """Helper method for configuring the given Config object to use the GCP kernel gateway."""
   c.GatewayClient.url = gcp_kernel_gateway_url()
   c.GatewayClient.gateway_token_renewer_class = CommandTokenRenewer
-  c.CommandTokenRenewer.token_command = [
-    'gcloud', 'config', 'config-helper', '--format=value(credential.access_token)']
+  c.CommandTokenRenewer.token_command = (
+    'gcloud config config-helper --format="value(credential.access_token)"')
   c.GatewayClient.auth_scheme = 'Bearer'
   c.GatewayClient.headers = '{"Cookie": "_xsrf=XSRF", "X-XSRFToken": "XSRF"}'

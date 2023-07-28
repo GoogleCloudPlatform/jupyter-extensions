@@ -18,7 +18,7 @@ import typing
 
 
 from abc import abstractmethod
-from traitlets import Int, List
+from traitlets import Int, Unicode
 from jupyter_server.gateway.gateway_client import GatewayTokenRenewerBase
 
 
@@ -61,8 +61,8 @@ class CachedTokenRenewerBase(GatewayTokenRenewerBase):
 class CommandTokenRenewer(CachedTokenRenewerBase):
   """Token renewer that invokes an external command to generate the token."""
 
-  token_command = List(
-    default_value=[],
+  token_command = Unicode(
+    default_value="",
     config=True,
     help="""External command run to generate auth tokens.""",
   )
