@@ -48,6 +48,9 @@ jobs:
       - name: Instapp pytest
         run: |
           python -m pip install pytest
+      - name: Instapp traitlets
+        run: |
+          python -m pip install traitlets
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: Test gcloud config
