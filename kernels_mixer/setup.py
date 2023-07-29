@@ -29,6 +29,6 @@ setuptools.setup(
   install_requires=[
     "jupyter_server>=2.6.0",
     "traitlets",
-    "jupyterlab_gcloud @ git+https://github.com/GoogleCloudPlatform/jupyter-extensions@3eb3340c683f1ee8d474b7889ba686609a1179b5#subdirectory=jupyterlab_gcloud",
+    "jupyterlab_gcloud @ git+https://github.com/GoogleCloudPlatform/jupyter-extensions@bfcba73bdae9a3c13d029799697a5f0639a4c4b5#subdirectory=jupyterlab_gcloud",
   ],
 )
