@@ -21,18 +21,22 @@ from jupyterlab_gcloud.config import gcp_project, gcp_region
 class TestConfig(unittest.TestCase):
     def test_gcp_project(self):
         original_project_var = os.environ.get('CLOUDSDK_CORE_PROJECT', None)
+        os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN'] = 'example-token'
         os.environ['CLOUDSDK_CORE_PROJECT'] = 'example-project'
         project = gcp_project()
         self.assertEqual(project, 'example-project')
+        del os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN']
         del os.environ['CLOUDSDK_CORE_PROJECT']
         if original_project_var:
             os.environ['CLOUDSDK_CORE_PROJECT'] = original_project_var
 
     def test_gcp_region(self):
         original_region_var = os.environ.get('CLOUDSDK_COMPUTE_REGION', None)
+        os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN'] = 'example-token'
         os.environ['CLOUDSDK_COMPUTE_REGION'] = 'example-region'
         region = gcp_region()
         self.assertEqual(region, 'example-region')
+        del os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN']
         del os.environ['CLOUDSDK_COMPUTE_REGION']
         if original_region_var:
             os.environ['CLOUDSDK_COMPUTE_REGION'] = original_region_var
