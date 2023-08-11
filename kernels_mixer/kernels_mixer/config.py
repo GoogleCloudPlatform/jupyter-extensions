@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import jupyterlab_gcloud
+from google.cloud.jupyter_config import configure_gateway_client
 
 from kernels_mixer.kernelspecs import MixingKernelSpecManager
 from kernels_mixer.kernels import MixingMappingKernelManager
@@ -22,7 +22,7 @@ from jupyter_server.services.sessions.sessionmanager import SessionManager
 
 def configure_kernels_mixer(c):
   """Helper method for configuring the given Config object to use the GCP kernel gateway."""
-  jupyterlab_gcloud.configure_gateway_client(c)
+  configure_gateway_client(c)
   c.ServerApp.kernel_spec_manager_class = MixingKernelSpecManager
   c.ServerApp.kernel_manager_class = MixingMappingKernelManager
   c.ServerApp.session_manager_class = SessionManager

@@ -11,10 +11,10 @@ forwards any corresponding kernel requests accordingly.
 
 ## Installation
 
-Install the `kernels_mixer` Python package using `pip`:
+Install the `kernels-mixer` Python package using `pip`:
 
 ```sh
-pip install git+https://github.com/GoogleCloudPlatform/jupyter-extensions@master#subdirectory=kernels_mixer
+pip install kernels-mixer
 ```
 
 ## Setup
