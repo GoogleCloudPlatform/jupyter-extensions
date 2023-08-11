@@ -54,6 +54,6 @@ jupyter lab --generate-config
 The open your config file and add the following two lines to the end:
 
 ```py
-import jupyterlab_gcloud
-jupyterlab_gcloud.configure_gateway_client(c)
+import google.cloud.jupyter_config
+google.cloud.jupyter_config.configure_gateway_client(c)
 ```

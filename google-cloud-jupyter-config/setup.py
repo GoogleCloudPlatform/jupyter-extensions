@@ -17,14 +17,15 @@ with open("README.md", "r") as fh:
   long_description = fh.read()
 
 setuptools.setup(
-  name="jupyterlab-gcloud",
-  version="0.0.1",
+  name="google-cloud-jupyter-config",
+  author="Google, Inc.",
+  version="0.0.4",
   description="Jupyter configuration utilities using gcloud",
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url="https://github.com/GoogleCloudPlatform/jupyter-extensions/jupyterlab_gcloud",
+  url="https://github.com/GoogleCloudPlatform/jupyter-extensions/tree/master/google-cloud-jupyter-config",
   license="Apache License 2.0",
-  packages=setuptools.find_packages(),
+  packages=setuptools.find_namespace_packages(),
   python_requires=">=3.8",
   install_requires=[
     "jupyter_server>=2.4.0",

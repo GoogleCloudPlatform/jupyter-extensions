@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from jupyterlab_gcloud.config import get_gcloud_config
-from jupyterlab_gcloud.config import gcp_project
-from jupyterlab_gcloud.config import gcp_region
-from jupyterlab_gcloud.config import configure_gateway_client 
+from google.cloud.jupyter_config.config import get_gcloud_config
+from google.cloud.jupyter_config.config import gcp_project
+from google.cloud.jupyter_config.config import gcp_region
+from google.cloud.jupyter_config.config import configure_gateway_client 

@@ -15,7 +15,7 @@
 import os
 import unittest
 
-from jupyterlab_gcloud.config import gcp_project, gcp_region
+from google.cloud.jupyter_config.config import gcp_project, gcp_region
 
 
 class TestConfig(unittest.TestCase):

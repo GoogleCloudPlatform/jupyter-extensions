@@ -53,6 +53,9 @@ jobs:
           python -m pip install jupyter_server traitlets
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
+      - name: Install google-cloud-jupyter-config
+        run: |
+          python -m pip install ./google-cloud-jupyter-config
       - name: Test gcloud config
         run: |
-          pytest jupyterlab_gcloud
+          pytest ./google-cloud-jupyter-config

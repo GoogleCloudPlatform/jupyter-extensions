@@ -14,7 +14,7 @@
 
 import subprocess
 
-from jupyterlab_gcloud.tokenrenewer import CommandTokenRenewer
+from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
 
 def get_gcloud_config(field):
