@@ -19,7 +19,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
   name="google-cloud-jupyter-config",
   author="Google, Inc.",
-  version="0.0.3",
+  version="0.0.4",
   description="Jupyter configuration utilities using gcloud",
   long_description=long_description,
   long_description_content_type="text/markdown",
