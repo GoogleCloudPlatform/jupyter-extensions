@@ -13,16 +13,39 @@
 # limitations under the License.
 
 import subprocess
+import sys
+import tempfile
 
 from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
 
+def run_gcloud_subcommand(subcmd):
+  """Run a specified gcloud sub-command and return its output.
+
+  The supplied subcommand is the full command line invocation, *except* for
+  the leading `gcloud` being omitted.
+
+  e.g. `info` instead of `gcloud info`.
+
+  We reuse the system stderr for the command so that any prompts from gcloud
+  will be displayed to the user.
+  """
+  with tempfile.TemporaryFile() as t:
+    p = subprocess.run(
+      f'gcloud {subcmd}',
+      stdin=subprocess.DEVNULL,
+      stderr=sys.stderr,
+      stdout=t,
+      check=True,
+      encoding='UTF-8',
+      shell=True)
+    t.seek(0)
+    return t.read().decode('UTF-8').strip()
+
+
 def get_gcloud_config(field):
   """Helper method that invokes the gcloud config helper."""
-  p = subprocess.run(
-    f'gcloud config config-helper --format="value({field})"',
-    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
-  return p.stdout.strip()
+  return run_gcloud_subcommand(f'config config-helper --format="value({field})"')
 
 
 def gcp_project():
@@ -33,10 +56,8 @@ def gcp_project():
 def gcp_project_number():
   """Helper method to get the project number for the project configured through gcloud"""
   project = gcp_project()
-  p = subprocess.run(
-      f'gcloud projects describe {project} --format="value(projectNumber)"',
-    stdin=subprocess.DEVNULL, capture_output=True, check=True, encoding='UTF-8', shell=True)
-  return p.stdout.strip()
+  return run_gcloud_subcommand(
+      f'projects describe {project} --format="value(projectNumber)"')
   
 
 def gcp_region():

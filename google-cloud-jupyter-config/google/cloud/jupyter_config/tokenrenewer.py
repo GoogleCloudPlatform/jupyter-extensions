@@ -14,6 +14,8 @@
 
 import datetime
 import subprocess
+import sys
+import tempfile
 import typing
 
 
@@ -73,11 +75,19 @@ class CommandTokenRenewer(CachedTokenRenewerBase):
       auth_scheme: typing.Union[str, None],
       **kwargs: typing.Any,
   ):
-    p = subprocess.run(
-      self.token_command,
-      stdin=subprocess.DEVNULL,
-      capture_output=True,
-      check=True,
-      shell=True,
-      encoding='UTF-8')
-    return p.stdout.strip()
+    """Run the specified command to generate a new token, which is taken from its output.
+
+    We reuse the system stderr for the command so that any prompts from it
+    will be displayed to the user.
+    """
+    with tempfile.TemporaryFile() as t:
+      p = subprocess.run(
+        self.token_command,
+        stdin=subprocess.DEVNULL,
+        stderr=sys.stderr,
+        stdout=t,
+        check=True,
+        shell=True,
+        encoding='UTF-8')
+      t.seek(0)
+      return t.read().decode('UTF-8').strip()
