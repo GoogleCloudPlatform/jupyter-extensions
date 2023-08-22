@@ -528,6 +528,8 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
 class CombinedContentsManager(ContentsManager):
   root_dir = Unicode(config=True)
 
+  preferred_dir = Unicode("", config=True)
+
   @default('checkpoints')
   def _default_checkpoints(self):
     return CombinedCheckpointsManager(self._content_managers)
