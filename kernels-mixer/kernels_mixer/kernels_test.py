@@ -18,7 +18,7 @@ import uuid
 
 from jupyter_client.kernelspec import KernelSpec
 from jupyter_client.kernelspec import KernelSpecManager
-from jupyter_core.utils import run_sync
+from jupyter_core.utils import ensure_async, run_sync
 from jupyter_server.gateway.gateway_client import GatewayClient
 from jupyter_server.gateway.managers import GatewayMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import AsyncMappingKernelManager, ServerKernelManager
@@ -27,8 +27,9 @@ from kernels_mixer.kernels import MixingMappingKernelManager
 from kernels_mixer.kernelspecs import MixingKernelSpecManager
 
 remote_kernel = "remote-python3"
-remote_kernel_manager = KernelSpecManager(default_kernel_name=remote_kernel)
-local_kernel_manager = KernelSpecManager(default_kernel_name=remote_kernel)
+remote_kernel_manager = KernelSpecManager()
+remote_kernel_manager.default_kernel_name=remote_kernel
+local_kernel_manager = KernelSpecManager()
 
 
 def mock_kernel_spec(kernel_name):
@@ -72,7 +73,8 @@ class MockKernelManager(ServerKernelManager):
         self.kernel_name = kernel_name
         self.kernel_id = kernel_id
         self.last_activity = datetime.datetime.utcnow()
-        self.execution_state = "unknown"
+        self.execution_state = "idle"
+        self.ready.set_result(None)
         return kernel_id
 
     async def shutdown_kernel(self, *args, **kwargs):
@@ -92,10 +94,13 @@ class MockLocalMappingKernelManager(AsyncMappingKernelManager):
         self.kernel_manager_class = "kernels_mixer.kernels_test.MockKernelManager"
 
     async def start_kernel(self, *args, **kwargs):
-        km = self.kernel_manager_factory(parent=self, owns_kernel=False)
+        km = self.kernel_manager_factory(parent=self)
         kernel_id = await km.start_kernel(*args, **kwargs)
         self._kernels[kernel_id] = km
         return kernel_id
+
+    def _get_changed_ports(self, *args, **kwargs):
+        pass
 
 
 class MockRemoteMappingKernelManager(GatewayMappingKernelManager):
@@ -124,7 +129,6 @@ class MockMixingKernelSpecManager(MixingKernelSpecManager):
     def is_remote(self, kernel_name):
         return kernel_name == remote_kernel
 
-
 class TestKernelModel(unittest.TestCase):
     gwc = GatewayClient.instance()
     gwc.url = gwc.url or "https://example.com"
@@ -139,14 +143,19 @@ class TestKernelModel(unittest.TestCase):
     mkm.local_manager = local_multikernel_manager
     mkm.remote_manager = remote_multikernel_manager
 
+    async def interrupt_kernel(self, kernel_id):
+        await ensure_async(self.mkm.interrupt_kernel(kernel_id))
+
     def test_local_kernel_model(self):
         local_kernel_name = "python3"
         local_kernel_id = run_sync(self.mkm.start_kernel)(kernel_name=local_kernel_name)
         local_kernel_model = self.mkm.kernel_model(local_kernel_id)
         self.assertEqual(local_kernel_model["id"], local_kernel_id)
         self.assertEqual(local_kernel_model["name"], local_kernel_name)
-        self.assertEqual(local_kernel_model["execution_state"], "unknown")
+        self.assertEqual(local_kernel_model["execution_state"], "idle")
         self.assertNotIn("additional", local_kernel_model)
+        run_sync(self.interrupt_kernel)(local_kernel_id)
+        run_sync(self.mkm.restart_kernel)(local_kernel_id)
 
     def test_remote_kernel_model(self):
         remote_kernel_id = run_sync(self.mkm.start_kernel)(kernel_name=remote_kernel)
@@ -155,6 +164,8 @@ class TestKernelModel(unittest.TestCase):
         self.assertEqual(remote_kernel_model["name"], remote_kernel)
         self.assertEqual(remote_kernel_model["additional"]["foo"], "bar")
         self.assertNotIn("execution_state", remote_kernel_model)
+        run_sync(self.interrupt_kernel)(remote_kernel_id)
+        run_sync(self.mkm.restart_kernel)(remote_kernel_id)
 
 
 if __name__ == '__main__':

@@ -116,6 +116,10 @@ class MixingKernelManager(ServerKernelManager):
         await ensure_async(self.delegate_multi_kernel_manager.interrupt_kernel(
             self.delegate_kernel_id))
 
+    async def restart_kernel(self, *args, **kwargs):
+        await ensure_async(self.delegate_multi_kernel_manager.restart_kernel(
+            self.delegate_kernel_id, *args, **kwargs))
+
     async def model(self):
         delegate_model = await ensure_async(
             self.delegate_multi_kernel_manager.kernel_model(self.delegate_kernel_id))
