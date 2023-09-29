@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from jupyter_client.manager import in_pending_state
-from jupyter_core.utils import ensure_async
+from jupyter_core.utils import ensure_async, run_sync
 from jupyter_server.gateway.managers import GatewayMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import AsyncMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import ServerKernelManager
@@ -46,6 +48,11 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
             log=self.log,
             connection_dir=self.connection_dir,
             kernel_spec_manager=self.kernel_spec_manager.remote_manager)
+
+    def kernel_model(self, kernel_id):
+        self._check_kernel_id(kernel_id)
+        kernel = self._kernels[kernel_id]
+        return run_sync(kernel.model)()
 
 class MixingKernelManager(ServerKernelManager):
     _kernel_id_map = {}
@@ -108,3 +115,10 @@ class MixingKernelManager(ServerKernelManager):
     async def interrupt_kernel(self):
         await ensure_async(self.delegate_multi_kernel_manager.interrupt_kernel(
             self.delegate_kernel_id))
+
+    async def model(self):
+        delegate_model = await ensure_async(
+            self.delegate_multi_kernel_manager.kernel_model(self.delegate_kernel_id))
+        model = copy.deepcopy(delegate_model)
+        model["id"] = self.kernel_id
+        return model
