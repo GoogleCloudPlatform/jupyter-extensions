@@ -18,7 +18,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="kernels-mixer",
-  version="0.0.3",
+  version="0.0.4",
   author="Google, Inc.",
   description="Jupyter server extension that allows mixing local and remote kernels together",
   long_description=long_description,
@@ -28,7 +28,7 @@ setuptools.setup(
   packages=setuptools.find_packages(),
   python_requires=">=3.8",
   install_requires=[
-    "jupyter_server>=2.6.0",
+    "jupyter_server>=2.7.3",
     "traitlets",
     "google-cloud-jupyter-config",
   ],
