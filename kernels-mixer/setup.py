@@ -18,12 +18,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="kernels-mixer",
-  version="0.0.4",
+  version="0.0.5",
   author="Google, Inc.",
   description="Jupyter server extension that allows mixing local and remote kernels together",
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url="https://github.com/GoogleCloudPlatform/jupyter-extensions/tree/master/kernels_mixer",
+  url="https://github.com/GoogleCloudPlatform/jupyter-extensions/tree/master/kernels-mixer",
   license="Apache License 2.0",
   packages=setuptools.find_packages(),
   python_requires=">=3.8",
