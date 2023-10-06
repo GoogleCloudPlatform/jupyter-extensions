@@ -4,34 +4,6 @@ on:
     branches:
       - "*"
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: "10"
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.11"
-      - name: Install Pipenv
-        run: pip install pipenv && pipenv install -d
-      - name: Build TypeScript
-        run: npm ci &&
-          npm run bootstrap &&
-          npm run build
-      - name: Build JupyterLab
-        run: source $(pipenv --venv)/bin/activate &&
-          scripts/build_jupyterlab.sh
-      - name: Build Python
-        run: source $(pipenv --venv)/bin/activate &&
-          scripts/build_python_packages.sh
-      - name: Run Tests
-        run: source $(pipenv --venv)/bin/activate &&
-          scripts/run_all_tests.sh
   test_matrix:
     strategy:
       matrix:
