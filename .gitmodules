@@ -1,3 +1,0 @@
-[submodule "jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes"]
-	path = jupyterlab_gitsync/jupyterlab_gitsync/git-sync-changes
-	url = https://github.com/google/git-sync-changes.git
