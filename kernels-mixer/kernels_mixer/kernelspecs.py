@@ -16,7 +16,7 @@ from jupyter_client.kernelspec import KernelSpecManager
 from jupyter_core.utils import run_sync
 from jupyter_server.gateway.managers import GatewayKernelSpecManager
 
-from traitlets import Unicode, default
+from traitlets import Type, Unicode, default
 
 
 def append_display_name(spec, suffix):
@@ -49,9 +49,18 @@ class MixingKernelSpecManager(KernelSpecManager):
         help="Suffix added to the display names of remote kernels.",
     )
 
+    local_kernel_spec_manager_class = Type(
+        config=True,
+        default_value=KernelSpecManager,
+        help="""
+        The kernel spec manager class to use for local kernels.
+
+        Must be a subclass of `jupyter_client.kernelspec.KernelSpecManager`.""",
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.local_manager = KernelSpecManager(*args, **kwargs)
+        self.local_manager = self.local_kernel_spec_manager_class(*args, **kwargs)
         self.remote_manager= GatewayKernelSpecManager(*args, **kwargs)
         self._local_kernels = set()
         self._remote_kernels = set()
