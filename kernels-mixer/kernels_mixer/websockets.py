@@ -43,7 +43,7 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
     reported by the kernel as soon as the backend kernel connection is established.
 
     The only kernel statuses supported by the JupyterLab UI are "starting", "idle",
-    "busy","restarting", and "dead".
+    "busy", "restarting", and "dead".
 
     Of those, the "starting" message is the closest match to what is going on, so
     we use that one.
