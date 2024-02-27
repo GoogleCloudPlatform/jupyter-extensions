@@ -118,6 +118,9 @@ class MockRemoteMappingKernelManager(GatewayMappingKernelManager):
             },
         }
 
+    async def list_kernels(self, **kwargs):
+        pass
+
 
 class MockMixingKernelSpecManager(MixingKernelSpecManager):
     def __init__(self, local_km=None, remote_km=None, **kwargs):
