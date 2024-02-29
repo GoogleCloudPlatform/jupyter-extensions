@@ -75,10 +75,21 @@ class MockKernelManager(ServerKernelManager):
         self.last_activity = datetime.datetime.utcnow()
         self.execution_state = "idle"
         self.ready.set_result(None)
+        self.kernel = {
+            "id": kernel_id,
+            "name": kernel_name,
+            "execution_state": "starting",
+            "additional": {
+                "foo": "bar",
+            },
+        }
         return kernel_id
 
     async def shutdown_kernel(self, *args, **kwargs):
         self.kernel_id = None
+
+    async def refresh_model(self, model):
+        self.kernel = model
 
     async def restart_kernel(self, *args, **kwargs):
         pass
@@ -109,14 +120,12 @@ class MockRemoteMappingKernelManager(GatewayMappingKernelManager):
         self.kernel_spec_manager.default_kernel_name = remote_kernel
         self.kernel_manager_class = "kernels_mixer.kernels_test.MockKernelManager"
 
-    def kernel_model(self, kernel_id):
-        return {
-            "id": kernel_id,
-            "name": self.kernel_spec_manager.default_kernel_name,
-            "additional": {
-                "foo": "bar",
-            },
-        }
+    async def list_kernels(self, **kwargs):
+        for _, km in self._kernels.items():
+            model = km.kernel
+            model['execution_state'] = 'idle'
+            await km.refresh_model(model)
+        return [km.kernel for km in self._kernels.values()]
 
 
 class MockMixingKernelSpecManager(MixingKernelSpecManager):
@@ -163,7 +172,7 @@ class TestKernelModel(unittest.TestCase):
         self.assertEqual(remote_kernel_model["id"], remote_kernel_id)
         self.assertEqual(remote_kernel_model["name"], remote_kernel)
         self.assertEqual(remote_kernel_model["additional"]["foo"], "bar")
-        self.assertNotIn("execution_state", remote_kernel_model)
+        self.assertEqual(remote_kernel_model["execution_state"], "idle")
         run_sync(self.interrupt_kernel)(remote_kernel_id)
         run_sync(self.mkm.restart_kernel)(remote_kernel_id)
 

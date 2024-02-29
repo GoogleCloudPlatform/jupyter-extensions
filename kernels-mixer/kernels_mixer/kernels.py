@@ -121,6 +121,7 @@ class MixingKernelManager(ServerKernelManager):
             self.delegate_kernel_id, *args, **kwargs))
 
     async def model(self):
+        await ensure_async(self.delegate_multi_kernel_manager.list_kernels())
         delegate_model = await ensure_async(
             self.delegate_multi_kernel_manager.kernel_model(self.delegate_kernel_id))
         model = copy.deepcopy(delegate_model)
