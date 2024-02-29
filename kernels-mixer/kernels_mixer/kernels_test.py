@@ -173,7 +173,6 @@ class TestKernelModel(unittest.TestCase):
         self.assertEqual(remote_kernel_model["name"], remote_kernel)
         self.assertEqual(remote_kernel_model["additional"]["foo"], "bar")
         self.assertEqual(remote_kernel_model["execution_state"], "idle")
-        # self.assertNotIn("execution_state", remote_kernel_model)
         run_sync(self.interrupt_kernel)(remote_kernel_id)
         run_sync(self.mkm.restart_kernel)(remote_kernel_id)
 
