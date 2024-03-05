@@ -49,6 +49,10 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
             connection_dir=self.connection_dir,
             kernel_spec_manager=self.kernel_spec_manager.remote_manager)
 
+    def list_kernels(self):
+        run_sync(self.remote_manager.list_kernels)()
+        return super().list_kernels()
+
     def kernel_model(self, kernel_id):
         self._check_kernel_id(kernel_id)
         kernel = self._kernels[kernel_id]
@@ -121,7 +125,6 @@ class MixingKernelManager(ServerKernelManager):
             self.delegate_kernel_id, *args, **kwargs))
 
     async def model(self):
-        await ensure_async(self.delegate_multi_kernel_manager.list_kernels())
         delegate_model = await ensure_async(
             self.delegate_multi_kernel_manager.kernel_model(self.delegate_kernel_id))
         model = copy.deepcopy(delegate_model)
