@@ -50,7 +50,11 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
             kernel_spec_manager=self.kernel_spec_manager.remote_manager)
 
     def list_kernels(self):
-        run_sync(self.remote_manager.list_kernels)()
+        try:
+            run_sync(self.remote_manager.list_kernels)()
+        except Exception as ex:
+            self.log.exception('Failure listing remote kernels: %s', ex)
+            # Ignore the exception listing remote kernels, so that local kernels are still usable.
         return super().list_kernels()
 
     def kernel_model(self, kernel_id):
