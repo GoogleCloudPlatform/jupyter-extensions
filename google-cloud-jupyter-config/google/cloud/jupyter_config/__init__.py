@@ -15,4 +15,4 @@
 from google.cloud.jupyter_config.config import get_gcloud_config
 from google.cloud.jupyter_config.config import gcp_project
 from google.cloud.jupyter_config.config import gcp_region
-from google.cloud.jupyter_config.config import configure_gateway_client 
+from google.cloud.jupyter_config.config import configure_gateway_client

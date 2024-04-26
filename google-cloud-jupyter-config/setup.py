@@ -19,7 +19,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
   name="google-cloud-jupyter-config",
   author="Google, Inc.",
-  version="0.0.6",
+  version="0.0.7",
   description="Jupyter configuration utilities using gcloud",
   long_description=long_description,
   long_description_content_type="text/markdown",
@@ -28,6 +28,7 @@ setuptools.setup(
   packages=setuptools.find_namespace_packages(),
   python_requires=">=3.8",
   install_requires=[
+    "cachetools",
     "jupyter_server>=2.4.0",
     "traitlets",
   ],

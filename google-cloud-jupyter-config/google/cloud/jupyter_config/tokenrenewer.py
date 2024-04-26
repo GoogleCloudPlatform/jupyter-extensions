@@ -25,69 +25,70 @@ from jupyter_server.gateway.gateway_client import GatewayTokenRenewerBase
 
 
 class CachedTokenRenewerBase(GatewayTokenRenewerBase):
-  """Token renewer base class that only renews the token after a specified timeout."""
+    """Token renewer base class that only renews the token after a specified timeout."""
 
-  token_lifetime_seconds = Int(
-    default_value=300,
-    config=True,
-    help="""Time (in seconds) to wait between successive token renewals.""",
-  )
+    token_lifetime_seconds = Int(
+        default_value=300,
+        config=True,
+        help="""Time (in seconds) to wait between successive token renewals.""",
+    )
 
-  @abstractmethod
-  def force_new_token(
-      self,
-      auth_header_key: str,
-      auth_scheme: typing.Union[str, None],
-      **kwargs: typing.Any,
-  ):
-    pass
+    @abstractmethod
+    def force_new_token(
+        self,
+        auth_header_key: str,
+        auth_scheme: typing.Union[str, None],
+        **kwargs: typing.Any,
+    ):
+        pass
 
-  _created = datetime.datetime.min
+    _created = datetime.datetime.min
 
-  def get_token(
-      self,
-      auth_header_key: str,
-      auth_scheme: typing.Union[str, None],
-      auth_token: str,
-      **kwargs: typing.Any,
-  ):
-    current_time = datetime.datetime.now()
-    duration = (current_time - self._created).total_seconds()
-    if (not auth_token) or (duration > self.token_lifetime_seconds):
-      auth_token = self.force_new_token(auth_header_key, auth_scheme, **kwargs)
-      self._created = datetime.datetime.now()
+    def get_token(
+        self,
+        auth_header_key: str,
+        auth_scheme: typing.Union[str, None],
+        auth_token: str,
+        **kwargs: typing.Any,
+    ):
+        current_time = datetime.datetime.now()
+        duration = (current_time - self._created).total_seconds()
+        if (not auth_token) or (duration > self.token_lifetime_seconds):
+            auth_token = self.force_new_token(auth_header_key, auth_scheme, **kwargs)
+            self._created = datetime.datetime.now()
 
-    return auth_token
+        return auth_token
 
 
 class CommandTokenRenewer(CachedTokenRenewerBase):
-  """Token renewer that invokes an external command to generate the token."""
+    """Token renewer that invokes an external command to generate the token."""
 
-  token_command = Unicode(
-    default_value="",
-    config=True,
-    help="""External command run to generate auth tokens.""",
-  )
+    token_command = Unicode(
+        default_value="",
+        config=True,
+        help="""External command run to generate auth tokens.""",
+    )
 
-  def force_new_token(
-      self,
-      auth_header_key: str,
-      auth_scheme: typing.Union[str, None],
-      **kwargs: typing.Any,
-  ):
-    """Run the specified command to generate a new token, which is taken from its output.
+    def force_new_token(
+        self,
+        auth_header_key: str,
+        auth_scheme: typing.Union[str, None],
+        **kwargs: typing.Any,
+    ):
+        """Run the specified command to generate a new token, which is taken from its output.
 
-    We reuse the system stderr for the command so that any prompts from it
-    will be displayed to the user.
-    """
-    with tempfile.TemporaryFile() as t:
-      p = subprocess.run(
-        self.token_command,
-        stdin=subprocess.DEVNULL,
-        stderr=sys.stderr,
-        stdout=t,
-        check=True,
-        shell=True,
-        encoding='UTF-8')
-      t.seek(0)
-      return t.read().decode('UTF-8').strip()
+        We reuse the system stderr for the command so that any prompts from it
+        will be displayed to the user.
+        """
+        with tempfile.TemporaryFile() as t:
+            p = subprocess.run(
+                self.token_command,
+                stdin=subprocess.DEVNULL,
+                stderr=sys.stderr,
+                stdout=t,
+                check=True,
+                shell=True,
+                encoding="UTF-8",
+            )
+            t.seek(0)
+            return t.read().decode("UTF-8").strip()

@@ -15,32 +15,59 @@
 import os
 import unittest
 
-from google.cloud.jupyter_config.config import gcp_project, gcp_region
+from google.cloud.jupyter_config.config import (
+    gcp_account,
+    gcp_credentials,
+    gcp_project,
+    gcp_region,
+    clear_gcloud_cache,
+)
 
 
 class TestConfig(unittest.TestCase):
+    _mock_cloudsdk_variables = {
+        "CLOUDSDK_AUTH_ACCESS_TOKEN": "example-token",
+        "CLOUDSDK_CORE_ACCOUNT": "example-account",
+        "CLOUDSDK_CORE_PROJECT": "example-project",
+        "CLOUDSDK_DATAPROC_REGION": "example-region",
+    }
+
+    def setUp(self):
+        self.original_cloudsdk_variables = {}
+        for key in os.environ:
+            if key.startswith("CLOUDSDK_"):
+                self.original_cloudsdk_variables[key] = os.environ[key]
+        for key in self._mock_cloudsdk_variables:
+            os.environ[key] = self._mock_cloudsdk_variables[key]
+        clear_gcloud_cache()
+
+    def tearDown(self):
+        for key in self._mock_cloudsdk_variables:
+            del os.environ[key]
+        for key in self.original_cloudsdk_variables:
+            os.environ[key] = self.original_cloudsdk_variables[key]
+        clear_gcloud_cache()
+
+    def test_gcp_account(self):
+        self.assertEqual(gcp_account(), "example-account")
+        os.environ["CLOUDSDK_CORE_ACCOUNT"] = "should-not-be-used"
+        self.assertEqual(gcp_account(), "example-account")
+
+    def test_gcp_credentials(self):
+        self.assertEqual(gcp_credentials(), "example-token")
+        os.environ["CLOUDSDK_AUTH_ACCESS_TOKEN"] = "should-not-be-used"
+        self.assertEqual(gcp_credentials(), "example-token")
+
     def test_gcp_project(self):
-        original_project_var = os.environ.get('CLOUDSDK_CORE_PROJECT', None)
-        os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN'] = 'example-token'
-        os.environ['CLOUDSDK_CORE_PROJECT'] = 'example-project'
-        project = gcp_project()
-        self.assertEqual(project, 'example-project')
-        del os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN']
-        del os.environ['CLOUDSDK_CORE_PROJECT']
-        if original_project_var:
-            os.environ['CLOUDSDK_CORE_PROJECT'] = original_project_var
+        self.assertEqual(gcp_project(), "example-project")
+        os.environ["CLOUDSDK_CORE_PROJECT"] = "should-not-be-used"
+        self.assertEqual(gcp_project(), "example-project")
 
     def test_gcp_region(self):
-        original_region_var = os.environ.get('CLOUDSDK_COMPUTE_REGION', None)
-        os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN'] = 'example-token'
-        os.environ['CLOUDSDK_COMPUTE_REGION'] = 'example-region'
-        region = gcp_region()
-        self.assertEqual(region, 'example-region')
-        del os.environ['CLOUDSDK_AUTH_ACCESS_TOKEN']
-        del os.environ['CLOUDSDK_COMPUTE_REGION']
-        if original_region_var:
-            os.environ['CLOUDSDK_COMPUTE_REGION'] = original_region_var
+        self.assertEqual(gcp_region(), "example-region")
+        os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
+        self.assertEqual(gcp_region(), "example-region")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
