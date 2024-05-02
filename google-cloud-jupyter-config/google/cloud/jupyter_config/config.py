@@ -48,7 +48,7 @@ def run_gcloud_subcommand(subcmd):
         return t.read().decode("UTF-8").strip()
 
 
-@cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=60))
+@cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=(20 * 60)))
 def cached_gcloud_subcommand(subcmd):
     return run_gcloud_subcommand(subcmd)
 
@@ -62,7 +62,11 @@ def get_gcloud_config(field):
     """Helper method that invokes the gcloud config helper.
 
     Invoking gcloud commands is a very heavyweight process, so the config is
-    cached for up to 1 minute.
+    cached for up to 20 minutes.
+
+    The config is generated with a minimum credential expiry of 30 minutes, so
+    that we can ensure that the caller can use the cached credentials for at
+    least ~10 minutes even if the cache entry is about to expire.
 
     Args:
         field: A period-separated search path for the config value to return.
@@ -76,43 +80,9 @@ def get_gcloud_config(field):
         is `configuration.properties.core`, then the return value will be a
         dictionary containing a field named `project` with a string value.
     """
-
-    def validate_credentials(config):
-        """Validate that the credentials in the given config are still valid.
-
-        We require the credentials to have a remaining TTL greater than 60 seconds
-        in order to be considered still valid. This ensures that any caller has
-        a reasonable amount of time remaining to use those credentials.
-        """
-        creds = config.get("credential", None)
-        if not creds:
-            return False
-        access_token = creds.get("access_token", None)
-        if not access_token:
-            return False
-        token_expiry = creds.get("token_expiry", None)
-        if not token_expiry:
-            # If we do not know when the credential expires then just
-            # rely on the cache TTL to refresh the tokens.
-            return True
-        try:
-            expiry_datetime = datetime.datetime.strptime(
-                token_expiry, "%Y-%m-%dT%H:%M:%SZ"
-            )
-            remaining_seconds = (
-                expiry_datetime - datetime.datetime.utcnow()
-            ).total_seconds()
-            return remaining_seconds > 60
-        except ValueError:
-            return False
-
-    subcommand = "config config-helper --format=json"
+    subcommand = "config config-helper --min-expiry=30m --format=json"
     cached_config_str = cached_gcloud_subcommand(subcommand)
     cached_config = json.loads(cached_config_str)
-    if not validate_credentials(cached_config):
-        clear_gcloud_cache()
-        cached_config_str = cached_gcloud_subcommand(subcommand)
-        cached_config = json.loads(cached_config_str)
 
     subconfig = cached_config
     for path_part in field.split("."):
