@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import datetime
+import time
 import unittest
 import uuid
 
@@ -115,12 +116,15 @@ class MockLocalMappingKernelManager(AsyncMappingKernelManager):
 
 
 class MockRemoteMappingKernelManager(GatewayMappingKernelManager):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, list_delay=None, **kwargs):
         self.kernel_spec_manager = MockKernelSpecManager()
         self.kernel_spec_manager.default_kernel_name = remote_kernel
         self.kernel_manager_class = "kernels_mixer.kernels_test.MockKernelManager"
+        self._list_delay = list_delay
 
     async def list_kernels(self, **kwargs):
+        if self._list_delay:
+            time.sleep(self._list_delay)
         for _, km in self._kernels.items():
             model = km.kernel
             model['execution_state'] = 'idle'
@@ -145,37 +149,56 @@ class TestKernelModel(unittest.TestCase):
 
     local_multikernel_manager = MockLocalMappingKernelManager()
     remote_multikernel_manager =  MockRemoteMappingKernelManager()
+    slow_remote_multikernel_manager =  MockRemoteMappingKernelManager(list_delay=10)
+
     ksm = MockMixingKernelSpecManager(
         local_km=local_multikernel_manager,
         remote_km=remote_multikernel_manager)
+    slow_remote_listing_ksm = MockMixingKernelSpecManager(
+        local_km=local_multikernel_manager,
+        remote_km=slow_remote_multikernel_manager)
+
     mkm = MixingMappingKernelManager(kernel_spec_manager=ksm)
     mkm.local_manager = local_multikernel_manager
     mkm.remote_manager = remote_multikernel_manager
 
-    async def interrupt_kernel(self, kernel_id):
-        await ensure_async(self.mkm.interrupt_kernel(kernel_id))
+    slow_remote_mkm = MixingMappingKernelManager(kernel_spec_manager=slow_remote_listing_ksm)
+    slow_remote_mkm.local_manager = local_multikernel_manager
+    slow_remote_mkm.remote_manager = slow_remote_multikernel_manager
+
+    async def interrupt_kernel(self, mkm, kernel_id):
+        await ensure_async(mkm.interrupt_kernel(kernel_id))
 
     def test_local_kernel_model(self):
+        start_time = time.time()
         local_kernel_name = "python3"
-        local_kernel_id = run_sync(self.mkm.start_kernel)(kernel_name=local_kernel_name)
-        local_kernel_model = self.mkm.kernel_model(local_kernel_id)
+        local_kernel_id = run_sync(self.slow_remote_mkm.start_kernel)(kernel_name=local_kernel_name)
+        self.assertFalse(self.slow_remote_mkm.has_remote_kernels())
+        self.slow_remote_mkm.list_kernels()
+        local_kernel_model = self.slow_remote_mkm.kernel_model(local_kernel_id)
         self.assertEqual(local_kernel_model["id"], local_kernel_id)
         self.assertEqual(local_kernel_model["name"], local_kernel_name)
         self.assertEqual(local_kernel_model["execution_state"], "idle")
         self.assertNotIn("additional", local_kernel_model)
-        run_sync(self.interrupt_kernel)(local_kernel_id)
-        run_sync(self.mkm.restart_kernel)(local_kernel_id)
+        run_sync(self.interrupt_kernel)(self.slow_remote_mkm, local_kernel_id)
+        run_sync(self.slow_remote_mkm.restart_kernel)(local_kernel_id)
+        end_time = time.time()
+        self.assertLess(end_time - start_time, 1)
 
     def test_remote_kernel_model(self):
+        start_time = time.time()
         remote_kernel_id = run_sync(self.mkm.start_kernel)(kernel_name=remote_kernel)
+        self.assertTrue(self.mkm.has_remote_kernels())
         self.mkm.list_kernels()
         remote_kernel_model = self.mkm.kernel_model(remote_kernel_id)
         self.assertEqual(remote_kernel_model["id"], remote_kernel_id)
         self.assertEqual(remote_kernel_model["name"], remote_kernel)
         self.assertEqual(remote_kernel_model["additional"]["foo"], "bar")
         self.assertEqual(remote_kernel_model["execution_state"], "idle")
-        run_sync(self.interrupt_kernel)(remote_kernel_id)
+        run_sync(self.interrupt_kernel)(self.mkm, remote_kernel_id)
         run_sync(self.mkm.restart_kernel)(remote_kernel_id)
+        end_time = time.time()
+        self.assertLess(end_time - start_time, 1)
 
 
 if __name__ == '__main__':

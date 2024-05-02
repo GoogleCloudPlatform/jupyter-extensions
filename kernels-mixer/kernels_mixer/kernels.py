@@ -49,12 +49,21 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
             connection_dir=self.connection_dir,
             kernel_spec_manager=self.kernel_spec_manager.remote_manager)
 
+    def has_remote_kernels(self):
+        for kid in self._kernels:
+            if self._kernels[kid].is_remote:
+                return True
+        return False
+
     def list_kernels(self):
-        try:
-            run_sync(self.remote_manager.list_kernels)()
-        except Exception as ex:
-            self.log.exception('Failure listing remote kernels: %s', ex)
-            # Ignore the exception listing remote kernels, so that local kernels are still usable.
+        if self.has_remote_kernels():
+            # We have remote kernels, so we must call `list_kernels` on the
+            # Gateway kernel manager to update our kernel models.
+            try:
+                run_sync(self.remote_manager.list_kernels)()
+            except Exception as ex:
+                self.log.exception('Failure listing remote kernels: %s', ex)
+                # Ignore the exception listing remote kernels, so that local kernels are still usable.
         return super().list_kernels()
 
     def kernel_model(self, kernel_id):
