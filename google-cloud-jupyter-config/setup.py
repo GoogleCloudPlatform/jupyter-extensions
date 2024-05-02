@@ -14,22 +14,22 @@
 import setuptools
 
 with open("README.md", "r") as fh:
-  long_description = fh.read()
+    long_description = fh.read()
 
 setuptools.setup(
-  name="google-cloud-jupyter-config",
-  author="Google, Inc.",
-  version="0.0.7",
-  description="Jupyter configuration utilities using gcloud",
-  long_description=long_description,
-  long_description_content_type="text/markdown",
-  url="https://github.com/GoogleCloudPlatform/jupyter-extensions/tree/master/google-cloud-jupyter-config",
-  license="Apache License 2.0",
-  packages=setuptools.find_namespace_packages(),
-  python_requires=">=3.8",
-  install_requires=[
-    "cachetools",
-    "jupyter_server>=2.4.0",
-    "traitlets",
-  ],
+    name="google-cloud-jupyter-config",
+    author="Google, Inc.",
+    version="0.0.8",
+    description="Jupyter configuration utilities using gcloud",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/GoogleCloudPlatform/jupyter-extensions/tree/master/google-cloud-jupyter-config",
+    license="Apache License 2.0",
+    packages=setuptools.find_namespace_packages(),
+    python_requires=">=3.8",
+    install_requires=[
+        "cachetools",
+        "jupyter_server>=2.4.0",
+        "traitlets",
+    ],
 )
