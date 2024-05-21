@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.cloud.jupyter_config.config import async_get_gcloud_config
 from google.cloud.jupyter_config.config import get_gcloud_config
 from google.cloud.jupyter_config.config import gcp_project
 from google.cloud.jupyter_config.config import gcp_region
