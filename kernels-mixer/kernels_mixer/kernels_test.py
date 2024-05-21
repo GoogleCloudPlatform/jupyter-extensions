@@ -189,7 +189,7 @@ class TestKernelModel(unittest.TestCase):
         start_time = time.time()
         remote_kernel_id = run_sync(self.mkm.start_kernel)(kernel_name=remote_kernel)
         self.assertTrue(self.mkm.has_remote_kernels())
-        self.mkm.list_kernels()
+        run_sync(self.mkm.list_kernels)()
         remote_kernel_model = self.mkm.kernel_model(remote_kernel_id)
         self.assertEqual(remote_kernel_model["id"], remote_kernel_id)
         self.assertEqual(remote_kernel_model["name"], remote_kernel)

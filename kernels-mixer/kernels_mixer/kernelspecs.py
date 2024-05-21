@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from jupyter_client.kernelspec import KernelSpecManager
-from jupyter_core.utils import run_sync
+from jupyter_core.utils import ensure_async
 from jupyter_server.gateway.managers import GatewayKernelSpecManager
 
 from traitlets import Type, Unicode, default
@@ -68,7 +68,7 @@ class MixingKernelSpecManager(KernelSpecManager):
     def is_remote(self, kernel_name):
         return kernel_name in self._remote_kernels
 
-    def get_all_specs(self):
+    async def get_all_specs(self):
         """Get a list of all kernelspecs supported.
 
         This is a combination of the kernelspecs supported by both the local and remote
@@ -100,7 +100,7 @@ class MixingKernelSpecManager(KernelSpecManager):
             append_display_name(spec, self.local_display_name_suffix)
             self._local_kernels = self._local_kernels | {name}
         try:
-            remote_ks = run_sync(self.remote_manager.get_all_specs)()
+            remote_ks = await ensure_async(self.remote_manager.get_all_specs())
             for name, kernelspec in remote_ks.items():
                 if name not in self._local_kernels:
                     spec = kernelspec.get("spec", {})
@@ -115,15 +115,15 @@ class MixingKernelSpecManager(KernelSpecManager):
         self.log.debug(f'Found {len(self._remote_kernels)} remote kernels: {self._remote_kernels}')
         return ks
 
-    def get_original_kernel_spec(self, kernel_name, *args, **kwargs):
+    async def get_original_kernel_spec(self, kernel_name, *args, **kwargs):
         if self.is_remote(kernel_name):
             self.log.debug(f'Looking up remote kernel {kernel_name}...')
-            return run_sync(self.remote_manager.get_kernel_spec)(kernel_name, *args, **kwargs)
+            return await self.remote_manager.get_kernel_spec(kernel_name, *args, **kwargs)
         self.log.debug(f'Looking up local kernel {kernel_name}...')
         return self.local_manager.get_kernel_spec(kernel_name, *args, **kwargs)
 
-    def get_kernel_spec(self, kernel_name, *args, **kwargs):
-        spec = self.get_original_kernel_spec(kernel_name, *args, **kwargs)
+    async def get_kernel_spec(self, kernel_name, *args, **kwargs):
+        spec = await self.get_original_kernel_spec(kernel_name, *args, **kwargs)
         suffix = self.local_display_name_suffix
         if self.is_remote(kernel_name):
             suffix = self.remote_display_name_suffix
