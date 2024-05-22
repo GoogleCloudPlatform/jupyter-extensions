@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import datetime
 import json
 import subprocess
@@ -48,6 +49,30 @@ def run_gcloud_subcommand(subcmd):
         return t.read().decode("UTF-8").strip()
 
 
+async def async_run_gcloud_subcommand(subcmd):
+    """Run a specified gcloud sub-command and return its output.
+
+    The supplied subcommand is the full command line invocation, *except* for
+    the leading `gcloud` being omitted.
+
+    e.g. `info` instead of `gcloud info`.
+
+    We reuse the system stderr for the command so that any prompts from gcloud
+    will be displayed to the user.
+    """
+    with tempfile.TemporaryFile() as t:
+        p = await asyncio.create_subprocess_shell(
+            f"gcloud {subcmd}",
+            stdin=subprocess.DEVNULL,
+            stderr=sys.stderr,
+            stdout=t,
+            check=True,
+        )
+        await p.wait()
+        t.seek(0)
+        return t.read().decode("UTF-8").strip()
+
+
 @cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=(20 * 60)))
 def cached_gcloud_subcommand(subcmd):
     return run_gcloud_subcommand(subcmd)
@@ -56,6 +81,14 @@ def cached_gcloud_subcommand(subcmd):
 def clear_gcloud_cache():
     """Clear the TTL cache used to cache gcloud subcommand results."""
     cached_gcloud_subcommand.cache_clear()
+
+
+def _get_config_field(config, field):
+    subconfig = config
+    for path_part in field.split("."):
+        if path_part:
+            subconfig = subconfig.get(path_part, {})
+    return subconfig
 
 
 def get_gcloud_config(field):
@@ -83,13 +116,39 @@ def get_gcloud_config(field):
     subcommand = "config config-helper --min-expiry=30m --format=json"
     cached_config_str = cached_gcloud_subcommand(subcommand)
     cached_config = json.loads(cached_config_str)
+    return _get_config_field(cached_config, field)
 
-    subconfig = cached_config
-    for path_part in field.split("."):
-        if path_part:
-            subconfig = subconfig.get(path_part, {})
 
-    return subconfig
+async def async_get_gcloud_config(field):
+    """Async helper method that invokes the gcloud config helper.
+
+    This is like `get_gcloud_config` but does not block on the underlying
+    gcloud invocation when there is a cache miss.
+
+    Args:
+        field: A period-separated search path for the config value to return.
+               For example, 'configuration.properties.core.project'
+    Returns:
+        An awaitable that resolves to a JSON object with a type depending on
+        the search path for the field within the gcloud config.
+
+        For example, if the field is `configuration.properties.core.project`,
+        then the JSON object will be a string. In comparison, if the field
+        is `configuration.properties.core`, then it will be a dictionary
+        containing a field named `project` with a string value.
+    """
+    subcommand = "config config-helper --min-expiry=30m --format=json"
+    with cached_gcloud_subcommand.cache_lock:
+        if subcommand in cached_gcloud_subcommand.cache:
+            cached_config_str = cached_gcloud_subcommand.cache[subcommand]
+            cached_config = json.loads(cached_config_str)
+            return _get_config_field(cached_config, field)
+
+    out = await async_run_gcloud_subcommand(subcommand)
+    with cached_gcloud_subcommand.cache_lock:
+        cached_gcloud_subcommand.cache[subcommand] = out
+    config = json.loads(cached_config_str)
+    return _get_config_field(config, field)
 
 
 def gcp_account():

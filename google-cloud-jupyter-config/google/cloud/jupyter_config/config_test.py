@@ -16,12 +16,14 @@ import os
 import unittest
 
 from google.cloud.jupyter_config.config import (
+    async_get_gcloud_config,
     gcp_account,
     gcp_credentials,
     gcp_project,
     gcp_region,
     clear_gcloud_cache,
 )
+import pytest
 
 
 class TestConfig(unittest.TestCase):
@@ -67,6 +69,13 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(gcp_region(), "example-region")
         os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
         self.assertEqual(gcp_region(), "example-region")
+
+    @pytest.mark.asyncio
+    async def test_async_gcloud_config(self):
+        test_account = await async_get_gcloud_config(
+            "configuration.properties.core.account"
+        )
+        self.assertEqual(test_account, "example-account")
 
 
 if __name__ == "__main__":
