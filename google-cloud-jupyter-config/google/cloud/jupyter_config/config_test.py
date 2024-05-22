@@ -16,6 +16,7 @@ import os
 import unittest
 
 from google.cloud.jupyter_config.config import (
+    async_run_gcloud_subcommand,
     async_get_gcloud_config,
     gcp_account,
     gcp_credentials,
@@ -23,10 +24,9 @@ from google.cloud.jupyter_config.config import (
     gcp_region,
     clear_gcloud_cache,
 )
-import pytest
 
 
-class TestConfig(unittest.TestCase):
+class TestConfig(unittest.IsolatedAsyncioTestCase):
     _mock_cloudsdk_variables = {
         "CLOUDSDK_AUTH_ACCESS_TOKEN": "example-token",
         "CLOUDSDK_CORE_ACCOUNT": "example-account",
@@ -70,7 +70,10 @@ class TestConfig(unittest.TestCase):
         os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
         self.assertEqual(gcp_region(), "example-region")
 
-    @pytest.mark.asyncio
+    async def test_async_run_gcloud_subcommand(self):
+        test_project = await async_run_gcloud_subcommand("config get core/project")
+        self.assertEqual(test_project, "example-project")
+
     async def test_async_gcloud_config(self):
         test_account = await async_get_gcloud_config(
             "configuration.properties.core.account"
