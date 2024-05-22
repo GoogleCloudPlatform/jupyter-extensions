@@ -18,6 +18,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import threading
 
 import cachetools
 
@@ -66,14 +67,17 @@ async def async_run_gcloud_subcommand(subcmd):
             stdin=subprocess.DEVNULL,
             stderr=sys.stderr,
             stdout=t,
-            check=True,
         )
         await p.wait()
+        if p.returncode != 0:
+            raise subprocess.CalledProcessError(p.returncode, None, None, None)
         t.seek(0)
         return t.read().decode("UTF-8").strip()
 
 
-@cachetools.cached(cache=cachetools.TTLCache(maxsize=1024, ttl=(20 * 60)))
+@cachetools.cached(
+    cache=cachetools.TTLCache(maxsize=1024, ttl=(20 * 60)), lock=threading.Lock()
+)
 def cached_gcloud_subcommand(subcmd):
     return run_gcloud_subcommand(subcmd)
 
@@ -147,7 +151,7 @@ async def async_get_gcloud_config(field):
     out = await async_run_gcloud_subcommand(subcommand)
     with cached_gcloud_subcommand.cache_lock:
         cached_gcloud_subcommand.cache[subcommand] = out
-    config = json.loads(cached_config_str)
+    config = json.loads(out)
     return _get_config_field(config, field)
 
 
