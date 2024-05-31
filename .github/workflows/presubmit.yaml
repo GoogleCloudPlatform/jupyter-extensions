@@ -22,7 +22,7 @@ jobs:
           python -m pip install pytest
       - name: Install dependencies
         run: |
-          python -m pip install jupyter_server traitlets
+          python -m pip install ipykernel jupyter_server pytest-jupyter traitlets
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: Install google-cloud-jupyter-config
@@ -34,6 +34,11 @@ jobs:
       - name: Install kernels-mixer
         run: |
           python -m pip install ./kernels-mixer
+
+      - name: Setup the `python3` Jupyter kernel
+        run: |
+          python3 -m ipykernel install --user
+
       - name: Test kernels-mixer
         run: |
           pytest ./kernels-mixer
