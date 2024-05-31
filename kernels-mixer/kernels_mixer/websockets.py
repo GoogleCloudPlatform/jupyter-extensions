@@ -120,8 +120,8 @@ class DelegatingWebsocketConnection(BaseKernelWebsocketConnection):
     async def connect(self):
         return await self.delegate.connect()
 
-    async def disconnect(self):
-        return await self.delegate.disconnect()
+    def disconnect(self):
+        return self.delegate.disconnect()
 
     def handle_incoming_message(self, msg):
         return self.delegate.handle_incoming_message(msg)

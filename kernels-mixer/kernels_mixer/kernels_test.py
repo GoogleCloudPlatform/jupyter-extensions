@@ -174,7 +174,7 @@ class TestKernelModel(unittest.TestCase):
         local_kernel_name = "python3"
         local_kernel_id = run_sync(self.slow_remote_mkm.start_kernel)(kernel_name=local_kernel_name)
         self.assertFalse(self.slow_remote_mkm.has_remote_kernels())
-        self.slow_remote_mkm.list_kernels()
+        run_sync(self.slow_remote_mkm.list_kernels)()
         local_kernel_model = self.slow_remote_mkm.kernel_model(local_kernel_id)
         self.assertEqual(local_kernel_model["id"], local_kernel_id)
         self.assertEqual(local_kernel_model["name"], local_kernel_name)
