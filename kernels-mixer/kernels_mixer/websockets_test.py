@@ -35,9 +35,13 @@ async def close_and_drain_pending_messages(ws):
     raise AssertionError("failed to drain the pending messages after 10 attempts")
 
 
-async def test_websocket(jp_ws_fetch, test_kernel):
+async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     k = await test_kernel
     assert "id" in k
+
+    ksr = await jp_fetch("api", "kernelspecs", k.get("name"))
+    ks = json.loads(ksr.body.decode("utf-8"))
+    assert " (Local)" in ks.get("spec", {}).get("display_name", None)
 
     session_id = uuid.uuid1().hex
     message_id = uuid.uuid1().hex

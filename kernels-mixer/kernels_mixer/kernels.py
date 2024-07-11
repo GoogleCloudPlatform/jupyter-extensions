@@ -14,19 +14,33 @@
 
 import copy
 
+from jupyter_client.kernelspec import KernelSpecManager
 from jupyter_client.manager import in_pending_state
 from jupyter_core.utils import ensure_async, run_sync
 from jupyter_server.gateway.managers import GatewayMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import AsyncMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import ServerKernelManager
 
-from traitlets import Instance, default
+from traitlets import Instance, default, observe
 
 from .kernelspecs import MixingKernelSpecManager
 
 class MixingMappingKernelManager(AsyncMappingKernelManager):
 
-    kernel_spec_manager = Instance(MixingKernelSpecManager)
+    kernel_spec_manager = Instance(KernelSpecManager)
+
+    @default("kernel_spec_manager")
+    def _default_kernel_spec_manager(self):
+        return "kernels_mixer.kernelspecs.MixingKernelSpecManager"
+
+    @observe("kernel_spec_manager")
+    def _observe_kernel_spec_manager(self, change):
+        self.log.debug(f"Configured kernel spec manager: {change.new}")
+        if isinstance(change.new, MixingKernelSpecManager):
+            return
+        self.kernel_spec_manager = MixingKernelSpecManager()
+        self.kernel_spec_manager.local_manager = change.new
+        self.parent.kernel_spec_manager = self.kernel_spec_manager
 
     @default("kernel_manager_class")
     def _default_kernel_manager_class(self):
@@ -34,6 +48,7 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.log.debug(f"Kernel spec manager: {self.kernel_spec_manager}")
 
         # Set up the local kernel management.
         self.local_manager = AsyncMappingKernelManager(
