@@ -14,6 +14,7 @@
 
 import pytest
 
+from jupyter_client.kernelspec import KernelSpecManager
 from jupyter_server.services.sessions.sessionmanager import SessionManager
 
 from kernels_mixer.kernelspecs import MixingKernelSpecManager
@@ -28,7 +29,7 @@ pytest_plugins = ['pytest_jupyter.jupyter_server']
 def jp_server_config(jp_server_config):
     return {
         "ServerApp": {
-            "kernel_spec_manager_class": MixingKernelSpecManager,
+            "kernel_spec_manager_class": KernelSpecManager,
             "kernel_manager_class": MixingMappingKernelManager,
             "kernel_websocket_connection_class": DelegatingWebsocketConnection,
             "session_manager_class": SessionManager,
