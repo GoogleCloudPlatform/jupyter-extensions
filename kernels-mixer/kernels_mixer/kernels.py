@@ -38,7 +38,7 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
         self.log.debug(f"Configured kernel spec manager: {change.new}")
         if isinstance(change.new, MixingKernelSpecManager):
             return
-        self.kernel_spec_manager = MixingKernelSpecManager()
+        self.kernel_spec_manager = MixingKernelSpecManager(parent=change.new.parent)
         self.kernel_spec_manager.local_manager = change.new
         self.parent.kernel_spec_manager = self.kernel_spec_manager
 
