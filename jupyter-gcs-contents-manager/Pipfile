@@ -9,9 +9,9 @@ python_version = "3.7"
 [packages]
 google-cloud-storage = "~=1.28.1"
 nbformat = "~=5.0.6"
-notebook = "~=6.1.5"
+notebook = "~=6.4.12"
 traitlets = "~=4.3.3"
-tornado = "~=6.0.4"
+tornado = "~=6.5.0"
 
 [dev-packages]
 
