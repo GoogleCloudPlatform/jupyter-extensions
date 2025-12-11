@@ -7,12 +7,6 @@ for Jupyter that stores notebook files in [Google Cloud Storage](https://cloud.g
 
 This is not an officially supported Google product.
 
-## Development
-1. Install [pipenv](https://github.com/pypa/pipenv#installation).
-2. Run `pipenv install` in this folder.
-3. Run `pipenv shell` to activate the virtual Python environment with the
-   necessary dependencies installed.
-
 ## Prerequisites
 
 You must have the GCS Python client library installed. You can
