@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
-import unittest
+
+import pytest
+from tornado import httpclient
 
 from google.cloud.jupyter_config.config import (
     async_run_gcloud_subcommand,
@@ -22,64 +25,117 @@ from google.cloud.jupyter_config.config import (
     gcp_credentials,
     gcp_project,
     gcp_region,
-    clear_gcloud_cache,
 )
 
 
-class TestConfig(unittest.IsolatedAsyncioTestCase):
-    _mock_cloudsdk_variables = {
-        "CLOUDSDK_AUTH_ACCESS_TOKEN": "example-token",
-        "CLOUDSDK_CORE_ACCOUNT": "example-account",
-        "CLOUDSDK_CORE_PROJECT": "example-project",
-        "CLOUDSDK_DATAPROC_REGION": "example-region",
+def test_gcp_account(mock_gcloud_env):
+    assert gcp_account() == "example-account"
+
+    # Verify that changing the OS environment variable does not modify the cached property
+    os.environ["CLOUDSDK_CORE_ACCOUNT"] = "should-not-be-used"
+    assert gcp_account() == "example-account"
+
+
+def test_gcp_credentials(mock_gcloud_env):
+    assert gcp_credentials() == "example-token"
+
+    # Verify that changing the OS environment variable does not modify the cached property
+    os.environ["CLOUDSDK_AUTH_ACCESS_TOKEN"] = "should-not-be-used"
+    assert gcp_credentials() == "example-token"
+
+    
+def test_gcp_project(mock_gcloud_env):
+    assert gcp_project() == "example-project"
+
+    # Verify that changing the OS environment variable does not modify the cached property
+    os.environ["CLOUDSDK_CORE_PROJECT"] = "should-not-be-used"
+    assert gcp_project() == "example-project"
+
+
+def test_gcp_region(mock_gcloud_env):
+    assert gcp_region() == "example-region"
+
+    # Verify that changing the OS environment variable does not modify the cached property
+    os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
+    assert gcp_region() == "example-region"
+
+
+async def test_async_run_gcloud_subcommand(mock_gcloud_env):
+    test_project = await async_run_gcloud_subcommand("config get core/project")
+    assert test_project == "example-project"
+
+
+async def test_async_gcloud_config(mock_gcloud_env):
+    test_account = await async_get_gcloud_config(
+        "configuration.properties.core.account"
+    )
+    assert test_account == "example-account"
+
+
+async def test_get_properties(jp_fetch, mock_gcloud_env):
+    response = await jp_fetch("gcloud", "config", "properties")
+    assert response.code == 200
+
+    properties = json.loads(response.body)
+    assert properties["core"]["account"] == "example-account"
+    assert properties["core"]["project"] == "example-project"
+    assert properties["dataproc"]["region"] == "example-region"
+
+
+async def test_set_properties(jp_fetch, mock_gcloud_env):
+    updated_properties = {
+        "compute": {
+            "region": "updated-example-region",
+        },
     }
+    update_response = await jp_fetch(
+        "gcloud", "config", "properties", method="POST", body=json.dumps(updated_properties))
+    assert update_response.code == 200
 
-    def setUp(self):
-        self.original_cloudsdk_variables = {}
-        for key in os.environ:
-            if key.startswith("CLOUDSDK_"):
-                self.original_cloudsdk_variables[key] = os.environ[key]
-        for key in self._mock_cloudsdk_variables:
-            os.environ[key] = self._mock_cloudsdk_variables[key]
-        clear_gcloud_cache()
+    get_response = await jp_fetch("gcloud", "config", "properties")
+    assert get_response.code == 200
+    properties = json.loads(get_response.body)
 
-    def tearDown(self):
-        for key in self._mock_cloudsdk_variables:
-            del os.environ[key]
-        for key in self.original_cloudsdk_variables:
-            os.environ[key] = self.original_cloudsdk_variables[key]
-        clear_gcloud_cache()
-
-    def test_gcp_account(self):
-        self.assertEqual(gcp_account(), "example-account")
-        os.environ["CLOUDSDK_CORE_ACCOUNT"] = "should-not-be-used"
-        self.assertEqual(gcp_account(), "example-account")
-
-    def test_gcp_credentials(self):
-        self.assertEqual(gcp_credentials(), "example-token")
-        os.environ["CLOUDSDK_AUTH_ACCESS_TOKEN"] = "should-not-be-used"
-        self.assertEqual(gcp_credentials(), "example-token")
-
-    def test_gcp_project(self):
-        self.assertEqual(gcp_project(), "example-project")
-        os.environ["CLOUDSDK_CORE_PROJECT"] = "should-not-be-used"
-        self.assertEqual(gcp_project(), "example-project")
-
-    def test_gcp_region(self):
-        self.assertEqual(gcp_region(), "example-region")
-        os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
-        self.assertEqual(gcp_region(), "example-region")
-
-    async def test_async_run_gcloud_subcommand(self):
-        test_project = await async_run_gcloud_subcommand("config get core/project")
-        self.assertEqual(test_project, "example-project")
-
-    async def test_async_gcloud_config(self):
-        test_account = await async_get_gcloud_config(
-            "configuration.properties.core.account"
-        )
-        self.assertEqual(test_account, "example-account")
+    assert properties["compute"]["region"] == "updated-example-region"
 
 
-if __name__ == "__main__":
-    unittest.main()
+async def test_set_invalid_property(jp_fetch, mock_gcloud_env):
+    updated_properties = {
+        "compute; true": {
+            "region": "updated-example-region",
+        },
+    }
+    try:
+        response = await jp_fetch(
+            "gcloud", "config", "properties", method="POST", body=json.dumps(updated_properties))
+        pytest.fail(f"Request with bash shell escape should be rejected; got {response.body}")
+    except httpclient.HTTPClientError as err:
+        assert err.code == 400
+
+
+async def test_set_invalid_nested_property(jp_fetch, mock_gcloud_env):
+    updated_properties = {
+        "compute": {
+            "region; true": "updated-example-region",
+        },
+    }
+    try:
+        response = await jp_fetch(
+            "gcloud", "config", "properties", method="POST", body=json.dumps(updated_properties))
+        pytest.fail(f"Request with bash shell escape should be rejected; got {response.body}")
+    except httpclient.HTTPClientError as err:
+        assert err.code == 400
+
+
+async def test_set_invalid_property_value(jp_fetch, mock_gcloud_env):
+    updated_properties = {
+        "compute": {
+            "region": "updated-example-region; true",
+        },
+    }
+    try:
+        response = await jp_fetch(
+            "gcloud", "config", "properties", method="POST", body=json.dumps(updated_properties))
+        pytest.fail(f"Request with bash shell escape should be rejected; got {response.body}")
+    except httpclient.HTTPClientError as err:
+        assert err.code == 400
