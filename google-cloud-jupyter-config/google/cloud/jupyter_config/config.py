@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from concurrent import futures
 import datetime
 import json
 import re
@@ -53,6 +54,12 @@ def run_gcloud_subcommand(subcmd):
         return t.read().decode("UTF-8").strip()
 
 
+async def _run_gcloud_subcommand_via_process_pool_executor(subcmd):
+    loop = asyncio.get_running_loop()
+    with futures.ProcessPoolExecutor() as pool:
+        return await loop.run_in_executor(pool, run_gcloud_subcommand, subcmd)
+
+
 async def async_run_gcloud_subcommand(subcmd):
     """Run a specified gcloud sub-command and return its output.
 
@@ -64,6 +71,20 @@ async def async_run_gcloud_subcommand(subcmd):
     We reuse the system stderr for the command so that any prompts from gcloud
     will be displayed to the user.
     """
+
+    # Jupyter forces the use of a SelectorEventLoop on Windows, which does not
+    # support subprocesses. To work around that, on Windows (and *only* on
+    # Windows), we run the gcloud command synchronously inside of a separate
+    # process rather than asynchronously in the main process.
+    #
+    # This is a heavy-handed approach, but it ensures that our calls to gcloud
+    # do not block the Tornado request serving thread.
+    #
+    # See https://github.com/jupyter-server/jupyter_server/issues/1587 for
+    # more details.
+    if sys.platform.startswith("win"):
+        return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
+
     with tempfile.TemporaryFile() as t:
         p = await asyncio.create_subprocess_shell(
             f"gcloud {subcmd}",
