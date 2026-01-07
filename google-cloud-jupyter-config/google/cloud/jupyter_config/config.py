@@ -13,14 +13,18 @@
 # limitations under the License.
 
 import asyncio
+from concurrent import futures
 import datetime
 import json
+import re
 import subprocess
 import sys
 import tempfile
 import threading
 
 import cachetools
+from jupyter_server.base.handlers import APIHandler
+import tornado
 
 from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
@@ -50,6 +54,12 @@ def run_gcloud_subcommand(subcmd):
         return t.read().decode("UTF-8").strip()
 
 
+async def _run_gcloud_subcommand_via_process_pool_executor(subcmd):
+    loop = asyncio.get_running_loop()
+    with futures.ProcessPoolExecutor() as pool:
+        return await loop.run_in_executor(pool, run_gcloud_subcommand, subcmd)
+
+
 async def async_run_gcloud_subcommand(subcmd):
     """Run a specified gcloud sub-command and return its output.
 
@@ -61,6 +71,20 @@ async def async_run_gcloud_subcommand(subcmd):
     We reuse the system stderr for the command so that any prompts from gcloud
     will be displayed to the user.
     """
+
+    # Jupyter forces the use of a SelectorEventLoop on Windows, which does not
+    # support subprocesses. To work around that, on Windows (and *only* on
+    # Windows), we run the gcloud command synchronously inside of a separate
+    # process rather than asynchronously in the main process.
+    #
+    # This is a heavy-handed approach, but it ensures that our calls to gcloud
+    # do not block the Tornado request serving thread.
+    #
+    # See https://github.com/jupyter-server/jupyter_server/issues/1587 for
+    # more details.
+    if sys.platform.startswith("win"):
+        return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
+
     with tempfile.TemporaryFile() as t:
         p = await asyncio.create_subprocess_shell(
             f"gcloud {subcmd}",
@@ -212,3 +236,56 @@ def configure_gateway_client(c):
 
     c.GatewayClient.auth_scheme = "Bearer"
     c.GatewayClient.headers = '{"Cookie": "_xsrf=XSRF", "X-XSRFToken": "XSRF"}'
+
+
+# N.B. The two following regular expressions are used to prevent shell escape
+# injections when updating gcloud properties.
+#
+# This means that we do not support the full set of potential property names and values.
+#
+# This is an intentional restriction.
+_allowed_property_names = re.compile("^[a-zA-Z0-9_-]+$")
+_allowed_property_values = re.compile("^[a-zA-Z0-9.:_-]+$")
+
+
+class PropertiesHandler(APIHandler):
+    @tornado.web.authenticated
+    async def get(self):
+        properties = await async_get_gcloud_config("configuration.properties")
+        self.finish(json.dumps(properties))
+        return
+
+    @tornado.web.authenticated
+    async def post(self):
+        updated_properties = self.get_json_body()
+
+        def flatten_dictionary(name_prefix, properties_dict):
+            as_list = []
+            for k in properties_dict:
+                if not re.fullmatch(_allowed_property_names, k):
+                    raise ValueError(
+                        f"Property name {k} not supported. " +
+                        f"Only properties matching the regular expression " +
+                        f"{_allowed_property_names.pattern} are allowed.")
+                v = properties_dict[k]
+                if type(v) == str:
+                    if not re.fullmatch(_allowed_property_values, v):
+                        raise ValueError(
+                            f"Property value {v} (for the property {k}) not supported. " +
+                            f"Only property values matching the regular expression " +
+                            f"{_allowed_property_values.pattern} are allowed.")
+                    as_list.append((name_prefix + k, v))
+                elif type(v) == dict:
+                    as_list.extend(flatten_dictionary(name_prefix + k + "/", v))
+            return as_list
+
+        try:
+            updated_properties_list = flatten_dictionary("", updated_properties)
+            for k, v in updated_properties_list:
+                await async_run_gcloud_subcommand(f"config set {k} {v}")
+            clear_gcloud_cache()
+            self.finish(json.dumps(updated_properties_list))
+        except ValueError as ve:
+            self.set_status(400)
+            self.finish(str(ve))
+        return
