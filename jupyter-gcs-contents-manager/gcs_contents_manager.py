@@ -22,10 +22,10 @@
 #   set up by running: `gcloud auth application-default login`
 #
 # Usage: Add the following lines to your Jupyter config file
-# (e.g. jupyter_notebook_config.py):
+# (e.g. jupyter_server_config.py):
 #
-#   from gcs_contents_manager import CombinedContentsManager, GCSContentsManager
-#   c.NotebookApp.contents_manager_class = CombinedContentsManager
+#   from gcs_contents_manager_v2 import CombinedContentsManager, GCSContentsManager
+#   c.ServerApp.contents_manager_class = CombinedContentsManager
 #   c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
 #   c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
 #   c.GCSContentsManager.project = '${NOTEBOOK_BUCKET_PROJECT}'
@@ -61,10 +61,10 @@ import posixpath
 import re
 
 import nbformat
-from notebook.services.contents.filecheckpoints import GenericFileCheckpoints
-from notebook.services.contents.filemanager import FileContentsManager
-from notebook.services.contents.manager import ContentsManager
-from notebook.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin
+from jupyter_server.services.contents.filecheckpoints import GenericFileCheckpoints
+from jupyter_server.services.contents.filemanager import FileContentsManager
+from jupyter_server.services.contents.manager import ContentsManager
+from jupyter_server.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin
 from tornado.web import HTTPError
 from traitlets import Unicode, default
 
@@ -101,7 +101,7 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
     content_type = 'text/plain' if format == 'text' else 'application/octet-stream'
     # GCS doesn't allow specifying the key version, so drop it if present
     if blob.kms_key_name:
-      blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$',
+      blob._properties['kmsKeyName'] = re.split(r'/cryptoKeyVersions/\d+$',
                                                 blob.kms_key_name)[0]
     blob.upload_from_string(content, content_type=content_type)
     return {
@@ -410,7 +410,7 @@ class GCSContentsManager(ContentsManager):
 
       # GCS doesn't allow specifying the key version, so drop it if present
       if blob.kms_key_name:
-        blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$',
+        blob._properties['kmsKeyName'] = re.split(r'/cryptoKeyVersions/\d+$',
                                                   blob.kms_key_name)[0]
 
       blob.upload_from_string(contents, content_type=content_type)

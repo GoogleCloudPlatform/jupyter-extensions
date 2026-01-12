@@ -30,13 +30,21 @@ and then copy it into a directory in your PYTHONPATH.
 
 ## Usage
 
-Add the following lines to your Jupyter config file (e.g. jupyter_notebook_config.py):
+### Jupyter Notebook (version < 7)
 
-    from gcs_contents_manager import GCSContentsManager
-    c.NotebookApp.contents_manager_class = GCSContentsManager
+Note: Latest version may not support Jupyter-server 1.x.
+Please clone the previous versions and configure accordingly. 
+
+### Jupyter Server / JupyterLab (version >= 2 or Notebook >= 7)
+
+Add the following lines to your Jupyter config file (e.g. jupyter_server_config.py):
+
+    from gcs_contents_manager_v2 import CombinedContentsManager
+    c.ServerApp.contents_manager_class = CombinedContentsManager
     c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
     c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
     c.GCSContentsManager.project = '${NOTEBOOK_PROJECT}'
+    c.FileContentsManager.root_dir = '${LOCAL_DISK_NOTEBOOK_DIR}'
 
 For `${NOTEBOOK_BUCKET}` specify the name of the GCS bucket where
 you want to store your notebooks, and for `${NOTEBOOK_PATH}`,
