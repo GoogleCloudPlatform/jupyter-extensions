@@ -39,7 +39,7 @@ Please clone the previous versions and configure accordingly.
 
 Add the following lines to your Jupyter config file (e.g. jupyter_server_config.py):
 
-    from gcs_contents_manager_v2 import CombinedContentsManager
+    from gcs_contents_manager import CombinedContentsManager
     c.ServerApp.contents_manager_class = CombinedContentsManager
     c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
     c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
