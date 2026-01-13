@@ -53,6 +53,7 @@
 #   c.CombinedContentsManager.root_dir = '~/.jupyter/symlinks_for_jupyterlab_widgets'
 
 import base64
+import concurrent
 import errno
 import json
 import logging
@@ -61,10 +62,10 @@ import posixpath
 import re
 
 import nbformat
-from notebook.services.contents.filecheckpoints import GenericFileCheckpoints
-from notebook.services.contents.filemanager import FileContentsManager
-from notebook.services.contents.manager import ContentsManager
-from notebook.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin
+from jupyter_server.services.contents.filecheckpoints import AsyncGenericFileCheckpoints
+from jupyter_server.services.contents.filemanager import AsyncLargeFileContentsManager
+from jupyter_server.services.contents.manager import ContentsManager, AsyncContentsManager
+from jupyter_server.services.contents.checkpoints import Checkpoints, GenericCheckpointsMixin, AsyncGenericCheckpointsMixin
 from tornado.web import HTTPError
 from traitlets import Unicode, default
 
@@ -162,6 +163,50 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
     new_blob_name = self.checkpoint_path(checkpoint_id, new_path)
     self.bucket.rename_blob(blob, new_blob_name)
     return None
+
+
+class AsyncGCSCheckpointManager(AsyncGenericCheckpointsMixin, Checkpoints):
+  """Implement an AsyncCheckpoints by running the synchronous GCS checkpoints in a process pool."""
+
+  def __init__(self, *args, **kwargs):
+    self._wrapped = GCSCheckpointManager(*args, **kwargs)
+    self._executor = concurrent.futures.ProcessPoolExecutor()
+
+  async def create_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.create_checkpoint, *args)
+
+  async def restore_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.restore_checkpoint, *args)
+
+  async def rename_checkpoint(self, *args)
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.rename_checkpoint, *args)
+
+  async def delete_checkpoint(self, *args)
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.delete_checkpoint, *args)
+
+  async def list_checkpoints(self, *args)
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.list_checkpoints, *args)
+
+  async def create_file_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.create_file_checkpoint, *args)
+
+  async def create_notebook_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.create_notebook_checkpoint, *args)
+
+  async def get_file_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.get_file_checkpoint, *args)
+
+  async def get_notebook_checkpoint(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.get_notebook_checkpoint, *args)
 
 
 class GCSContentsManager(ContentsManager):
@@ -387,6 +432,9 @@ class GCSContentsManager(ContentsManager):
 
   def save(self, model, path):
     try:
+      if model.get("chunk", None):
+        raise HTTPError(400, "Chunked uploads to GCS are not supported. The maximum file size that can be uploaded to GCS from the JupyterLab UI is 15MB.")
+
       self.run_pre_save_hook(model=model, path=path)
 
       normalized_path = self._normalize_path(path)
@@ -462,7 +510,47 @@ class GCSContentsManager(ContentsManager):
       raise HTTPError(500, 'Internal server error: {}'.format(str(ex)))
 
 
-class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
+class AsyncGCSContentsManager(AsyncContentsManager):
+  """Implement an AsyncContentsManager by running the synchronous GCS contents manager in a process pool."""
+
+  def __init__(self, *args, **kwargs):
+    self._wrapped = GCSContentsManager(*args, **kwargs)
+    self._executor = concurrent.futures.ProcessPoolExecutor()
+
+  @default('checkpoints_class')
+  def _checkpoints_class_default(self):
+    return AsyncGCSCheckpointManager
+
+  async def dir_exists(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.dir_exists, *args)
+
+  async def is_hidden(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.is_hidden, *args)
+
+  async def file_exists(self, *args, **kwargs):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.file_exists, *args, **kwargs)
+
+  async def get(self, *args, **kwargs):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.get, *args, **kwargs)
+
+  async def save(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.save, *args)
+
+  async def delete_file(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.delete_file, *args)
+
+  async def rename_file(self, *args):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(self._executor, self._wrapped.rename_file, *args)
+
+
+class CombinedCheckpointsManager(AsyncGenericCheckpointsMixin, Checkpoints):
 
   def __init__(self, content_managers):
     self._content_managers = content_managers
@@ -476,42 +564,33 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
         return self._content_managers[path_prefix].checkpoints, relative_path
     raise HTTPError(400, 'Unsupported checkpoint path: {}'.format(path))
 
-  def checkpoint_path(self, checkpoint_id, path):
+  async def create_file_checkpoint(self, content, format, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.checkpoint_path(checkpoint_id, relative_path)
+    return await checkpoint_manager.create_file_checkpoint(content, format,
+                                                           relative_path)
 
-  def checkpoint_blob(self, checkpoint_id, path, create_if_missing=False):
+  async def create_notebook_checkpoint(self, nb, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.checkpoint_blob(
-        checkpoint_id, relative_path, create_if_missing=create_if_missing)
+    return await checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
 
-  def create_file_checkpoint(self, content, format, path):
+  async def get_file_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.create_file_checkpoint(content, format,
-                                                     relative_path)
+    return await checkpoint_manager.get_file_checkpoint(checkpoint_id, relative_path)
 
-  def create_notebook_checkpoint(self, nb, path):
+  async def get_notebook_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
+    return await checkpoint_manager.get_notebook_checkpoint(checkpoint_id,
+                                                            relative_path)
 
-  def get_file_checkpoint(self, checkpoint_id, path):
+  async def delete_checkpoint(self, checkpoint_id, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.get_file_checkpoint(checkpoint_id, relative_path)
+    return await checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
 
-  def get_notebook_checkpoint(self, checkpoint_id, path):
+  async def list_checkpoints(self, path):
     checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.get_notebook_checkpoint(checkpoint_id,
-                                                      relative_path)
+    return await checkpoint_manager.list_checkpoints(relative_path)
 
-  def delete_checkpoint(self, checkpoint_id, path):
-    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
-
-  def list_checkpoints(self, path):
-    checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-    return checkpoint_manager.list_checkpoints(relative_path)
-
-  def rename_checkpoint(self, checkpoint_id, old_path, new_path):
+  async def rename_checkpoint(self, checkpoint_id, old_path, new_path):
     checkpoint_manager, old_relative_path = self._checkpoint_manager_for_path(
         old_path)
     new_checkpoint_manager, new_relative_path = self._checkpoint_manager_for_path(
@@ -520,12 +599,12 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
       raise HTTPError(
           400, 'Unsupported rename across file systems: {}->{}'.format(
               old_path, new_path))
-    return checkpoint_manager.rename_checkpoint(checkpoint_id,
-                                                old_relative_path,
-                                                new_relative_path)
+    return await checkpoint_manager.rename_checkpoint(checkpoint_id,
+                                                      old_relative_path,
+                                                      new_relative_path)
 
 
-class CombinedContentsManager(ContentsManager):
+class CombinedContentsManager(AsyncContentsManager):
   root_dir = Unicode(config=True)
 
   preferred_dir = Unicode("", config=True)
@@ -538,9 +617,9 @@ class CombinedContentsManager(ContentsManager):
     print('Creating the combined contents manager...')
     super(CombinedContentsManager, self).__init__(**kwargs)
 
-    file_cm = FileContentsManager(**kwargs)
-    file_cm.checkpoints = GenericFileCheckpoints(**file_cm.checkpoints_kwargs)
-    gcs_cm = GCSContentsManager(**kwargs)
+    file_cm = AsyncLargeFileContentsManager(**kwargs)
+    file_cm.checkpoints = AsyncGenericFileCheckpoints(**file_cm.checkpoints_kwargs)
+    gcs_cm = AsyncGCSContentsManager(**kwargs)
     self._content_managers = {
         'Local Disk': file_cm,
         'GCS': gcs_cm,
@@ -558,33 +637,33 @@ class CombinedContentsManager(ContentsManager):
       return None, path_parts[1], path_parts[0]
     return None, path, ''
 
-  def is_hidden(self, path):
+  async def is_hidden(self, path):
     try:
       cm, relative_path, unused_path_prefix = self._content_manager_for_path(
           path)
       if not cm:
         return False
-      return cm.is_hidden(relative_path)
+      return await cm.is_hidden(relative_path)
     except HTTPError as err:
       raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
-  def file_exists(self, path):
+  async def file_exists(self, path):
     try:
       cm, relative_path, unused_path_prefix = self._content_manager_for_path(
           path)
       if not cm:
         return False
-      return cm.file_exists(relative_path)
+      return await cm.file_exists(relative_path)
     except HTTPError as err:
       raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
-  def dir_exists(self, path):
+  async def dir_exists(self, path):
     if path in ['', '/']:
       return True
     try:
@@ -592,26 +671,26 @@ class CombinedContentsManager(ContentsManager):
           path)
       if not cm:
         return False
-      return cm.dir_exists(relative_path)
+      return await cm.dir_exists(relative_path)
     except HTTPError as err:
       raise err
     except Exception as ex:
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
-  def _make_model_relative(self, model, path_prefix):
+  async def _make_model_relative(self, model, path_prefix):
     if 'path' in model:
       model['path'] = '{}/{}'.format(path_prefix, model['path'])
     if model.get('type', None) == 'directory':
-      self._make_children_relative(model, path_prefix)
+      await self._make_children_relative(model, path_prefix)
 
-  def _make_children_relative(self, model, path_prefix):
+  async def _make_children_relative(self, model, path_prefix):
     children = model.get('content', None)
     if children:
       for child in children:
-        self._make_model_relative(child, path_prefix)
+        await self._make_model_relative(child, path_prefix)
 
-  def get(self, path, content=True, type=None, format=None):
+  async def get(self, path, content=True, type=None, format=None):
     if path in ['', '/']:
       dir_obj = {}
       dir_obj['path'] = ''
@@ -637,8 +716,8 @@ class CombinedContentsManager(ContentsManager):
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if not cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
-      model = cm.get(relative_path, content=content, type=type, format=format)
-      self._make_model_relative(model, path_prefix)
+      model = await cm.get(relative_path, content=content, type=type, format=format)
+      await self._make_model_relative(model, path_prefix)
       return model
     except HTTPError as err:
       raise err
@@ -646,11 +725,15 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
-  def save(self, model, path):
+  async def save(self, model, path):
     if path in ['', '/']:
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
-      self.run_pre_save_hook(model=model, path=path)
+      chunk = model.get("chunk", None)
+      if chunk is None or chunk == 1:
+        # Follow the upstream pattern of only running the pre-save hooks for the first chunk
+        # (or for non-chunked uploads).
+        self.run_pre_save_hook(model=model, path=path)
 
       cm, relative_path, path_prefix = self._content_manager_for_path(path)
       if (relative_path in ['', '/']) or (path_prefix in ['', '/']):
@@ -661,7 +744,7 @@ class CombinedContentsManager(ContentsManager):
       if 'path' in model:
         model['path'] = relative_path
 
-      model = cm.save(model, relative_path)
+      model = await cm.save(model, relative_path)
       if 'path' in model:
         model['path'] = path
       return model
@@ -671,7 +754,7 @@ class CombinedContentsManager(ContentsManager):
       raise HTTPError(
           500, 'Internal server error: [{}] {}'.format(type(ex), str(ex)))
 
-  def delete_file(self, path):
+  async def delete_file(self, path):
     if path in ['', '/']:
       raise HTTPError(403, 'The top-level directory is read-only')
     try:
@@ -680,7 +763,7 @@ class CombinedContentsManager(ContentsManager):
         raise HTTPError(403, 'The top-level directory contents are read-only')
       if not cm:
         raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
-      return cm.delete_file(relative_path)
+      return await cm.delete_file(relative_path)
     except OSError as err:
       # The built-in file contents manager will not attempt to wrap permissions
       # errors when deleting files if they occur while trying to move the
@@ -722,7 +805,7 @@ class CombinedContentsManager(ContentsManager):
 
       if old_cm != new_cm:
         raise HTTPError(400, 'Unsupported rename across file systems')
-      return old_cm.rename_file(old_relative_path, new_relative_path)
+      return await old_cm.rename_file(old_relative_path, new_relative_path)
     except HTTPError as err:
       raise err
     except Exception as ex:
