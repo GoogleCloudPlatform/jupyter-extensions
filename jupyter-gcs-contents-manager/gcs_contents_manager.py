@@ -180,15 +180,15 @@ class AsyncGCSCheckpointManager(AsyncGenericCheckpointsMixin, Checkpoints):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(self._executor, self._wrapped.restore_checkpoint, *args)
 
-  async def rename_checkpoint(self, *args)
+  async def rename_checkpoint(self, *args):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(self._executor, self._wrapped.rename_checkpoint, *args)
 
-  async def delete_checkpoint(self, *args)
+  async def delete_checkpoint(self, *args):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(self._executor, self._wrapped.delete_checkpoint, *args)
 
-  async def list_checkpoints(self, *args)
+  async def list_checkpoints(self, *args):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(self._executor, self._wrapped.list_checkpoints, *args)
 
