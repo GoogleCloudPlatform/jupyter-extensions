@@ -22,10 +22,10 @@
 #   set up by running: `gcloud auth application-default login`
 #
 # Usage: Add the following lines to your Jupyter config file
-# (e.g. jupyter_notebook_config.py):
+# (e.g. jupyter_server_config.py):
 #
 #   from gcs_contents_manager import CombinedContentsManager, GCSContentsManager
-#   c.NotebookApp.contents_manager_class = CombinedContentsManager
+#   c.ServerApp.contents_manager_class = CombinedContentsManager
 #   c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
 #   c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
 #   c.GCSContentsManager.project = '${NOTEBOOK_BUCKET_PROJECT}'
@@ -102,7 +102,7 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
     content_type = 'text/plain' if format == 'text' else 'application/octet-stream'
     # GCS doesn't allow specifying the key version, so drop it if present
     if blob.kms_key_name:
-      blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$',
+      blob._properties['kmsKeyName'] = re.split(r'/cryptoKeyVersions/\d+$',
                                                 blob.kms_key_name)[0]
     blob.upload_from_string(content, content_type=content_type)
     return {
@@ -458,7 +458,7 @@ class GCSContentsManager(ContentsManager):
 
       # GCS doesn't allow specifying the key version, so drop it if present
       if blob.kms_key_name:
-        blob._properties['kmsKeyName'] = re.split('/cryptoKeyVersions/\d+$',
+        blob._properties['kmsKeyName'] = re.split(r'/cryptoKeyVersions/\d+$',
                                                   blob.kms_key_name)[0]
 
       blob.upload_from_string(contents, content_type=content_type)

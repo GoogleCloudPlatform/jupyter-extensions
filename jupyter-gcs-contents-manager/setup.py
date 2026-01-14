@@ -16,7 +16,7 @@ setuptools.setup(
     install_requires=[
         "google-cloud-storage",
         "nbformat",
-        "notebook",
+        "jupyter_server",
         "traitlets",
         "tornado",
     ],
