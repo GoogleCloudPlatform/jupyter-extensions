@@ -18,6 +18,7 @@ import uuid
 
 from jupyter_server.utils import url_path_join
 
+
 @pytest.fixture
 def http_server_client(http_server_client):
     http_server_client.max_clients = 500
@@ -272,31 +273,35 @@ async def test_file_handlers(jp_fetch, top_level_path):
     # create a backlog of requests
     notebook_count = 230
     create_callbacks = []
-    for i in range(1,notebook_count):
-        create_callbacks.append(jp_fetch(
-            "api",
-            "contents",
-            top_level_path,
-            created_dir["name"],
-            "test_dir",
-            f"Test Notebook {i}.ipynb",
-            method="PUT",
-            body=json.dumps({"type": "notebook", "content": nb_contents}),
-        ))
+    for i in range(1, notebook_count):
+        create_callbacks.append(
+            jp_fetch(
+                "api",
+                "contents",
+                top_level_path,
+                created_dir["name"],
+                "test_dir",
+                f"Test Notebook {i}.ipynb",
+                method="PUT",
+                body=json.dumps({"type": "notebook", "content": nb_contents}),
+            )
+        )
     for callback in create_callbacks:
         await callback
 
     delete_callbacks = []
-    for i in range(1,notebook_count):
-        delete_callbacks.append(jp_fetch(
-            "api",
-            "contents",
-            top_level_path,
-            created_dir["name"],
-            "test_dir",
-            f"Test Notebook {i}.ipynb",
-            method="DELETE",
-        ))
+    for i in range(1, notebook_count):
+        delete_callbacks.append(
+            jp_fetch(
+                "api",
+                "contents",
+                top_level_path,
+                created_dir["name"],
+                "test_dir",
+                f"Test Notebook {i}.ipynb",
+                method="DELETE",
+            )
+        )
     for callback in delete_callbacks:
         await callback
 
@@ -329,4 +334,3 @@ async def test_file_handlers(jp_fetch, top_level_path):
     assert "untitled" in remaining_files
     assert "untitled.txt" in remaining_files
     assert "Untitled Folder" not in remaining_files
-        
