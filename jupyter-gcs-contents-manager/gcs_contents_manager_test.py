@@ -18,6 +18,85 @@ import uuid
 
 from jupyter_server.utils import url_path_join
 
+from gcs_contents_manager import GCSBasedFileManager
+
+
+@pytest.fixture
+def gcs_file_manager(gcs_project, gcs_bucket_name, gcs_notebook_path):
+    return GCSBasedFileManager(gcs_project, gcs_bucket_name, gcs_notebook_path)
+
+
+@pytest.fixture(params=[True, False])
+def root_path(request):
+    if request.param:
+        return "/"
+    return ""
+
+
+@pytest.fixture(params=["", "sub-dir", "sub-dir/", "dir-1/dir-2", "dir-1/dir-2/"])
+def subpath(request):
+    return request.param
+
+
+@pytest.fixture
+def dir_path(root_path, subpath):
+    return root_path + subpath
+
+
+def test_root_file(gcs_file_manager):
+    empty_path_dir = gcs_file_manager.get_file("", None, True, True)
+    assert empty_path_dir is not None
+    assert empty_path_dir["type"] == "directory"
+
+    nonempty_path_dir = gcs_file_manager.get_file("/", None, True, True)
+    assert nonempty_path_dir is not None
+    assert nonempty_path_dir["type"] == "directory"
+
+
+@pytest.mark.parametrize("type", ["directory", "notebook", "file"])
+def test_get_file(gcs_file_manager, dir_path, type):
+    got_dir = gcs_file_manager.get_file(dir_path, "directory", True, True)
+    assert got_dir["path"] == dir_path
+
+    if dir_path:
+        created_dir = gcs_file_manager.mkdir(dir_path)
+        assert created_dir["path"] == got_dir["path"]
+        assert created_dir["name"] == got_dir["name"]
+        assert created_dir["type"] == "directory"
+
+    # The parent directory should start off empty
+    initial_dir = gcs_file_manager.get_file(dir_path, "directory", True, True)
+    assert initial_dir["path"] == dir_path
+    assert len(initial_dir["content"]) == 0
+
+    name = f"test-{type}"
+    if type == "notebook":
+        name = name + ".ipynb"
+    path = url_path_join(dir_path, name)
+    created_file = None
+    if type == "directory":
+        created_file = gcs_file_manager.mkdir(path)
+    elif type == "notebook":
+        created_file = gcs_file_manager.create_notebook({"cells": []}, path)
+    else:
+        created_file = gcs_file_manager.create_file("", "text/plain", path)
+    read_file = gcs_file_manager.get_file(path, None, True, True)
+    assert read_file["path"] == path
+    assert read_file["name"] == name
+    assert read_file["type"] == type
+
+    updated_dir = gcs_file_manager.get_file(dir_path, "directory", True, True)
+    assert updated_dir["path"] == dir_path
+    # The parent directory should have one element
+    assert len(updated_dir["content"]) == 1
+    assert updated_dir["content"][0]["path"] == path
+
+    gcs_file_manager.delete_file(path)
+    cleaned_dir = gcs_file_manager.get_file(dir_path, "directory", True, True)
+    assert cleaned_dir["path"] == dir_path
+    # The parent directory should be empty again
+    assert len(cleaned_dir["content"]) == 0
+
 
 @pytest.fixture
 def http_server_client(http_server_client):

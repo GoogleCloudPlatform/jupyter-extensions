@@ -76,57 +76,272 @@ from google.cloud import storage
 utf8_encoding = "utf-8"
 
 
-class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
-    checkpoints_dir = ".ipynb_checkpoints"
+def normalize_path(path):
+    path = path or ""
+    return path.strip("/")
 
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
-        self._parent = kwargs["parent"]
+
+class GCSBasedFileManager:
+    def __init__(self, project: str, bucket_name: str, bucket_path_prefix: str):
+        self.project = project
+        self.bucket_name = bucket_name
+        self.bucket_path_prefix = bucket_path_prefix
+        self._cached_bucket = None
 
     @property
     def bucket(self):
-        return self._parent.bucket
+        if not self._cached_bucket:
+            if self.project:
+                storage_client = storage.Client(project=self.project)
+            else:
+                storage_client = storage.Client()
+            self._cached_bucket = storage_client.get_bucket(self.bucket_name)
+        return self._cached_bucket
 
-    def checkpoint_path(self, checkpoint_id, path):
-        path = (path or "").strip("/")
-        return posixpath.join(self.checkpoints_dir, path, checkpoint_id)
+    def _gcs_path(self, path):
+        path = normalize_path(path)
+        if not self.bucket_path_prefix:
+            return path
+        if not path:
+            return self.bucket_path_prefix
+        return posixpath.join(self.bucket_path_prefix, path)
 
-    def checkpoint_blob(self, checkpoint_id, path, create_if_missing=False):
-        blob_name = self.checkpoint_path(checkpoint_id, path)
+    def _blob(self, path, create_if_missing=False):
+        blob_name = self._gcs_path(path)
         blob = self.bucket.get_blob(blob_name)
         if not blob and create_if_missing:
             blob = self.bucket.blob(blob_name)
         return blob
 
-    def create_file_checkpoint(self, content, format, path):
-        checkpoint_id = "checkpoint"
-        blob = self.checkpoint_blob(checkpoint_id, path, create_if_missing=True)
-        content_type = "text/plain" if format == "text" else "application/octet-stream"
+    def _list_blobs(self, path):
+        prefix = self._gcs_path(path)
+        return self.bucket.list_blobs(prefix=prefix)
+
+    def file_exists(self, path):
+        path = normalize_path(path)
+        if not path:
+            return False
+        blob = self._blob(path)
+        return blob is not None
+
+    def dir_exists(self, path):
+        path = normalize_path(path)
+        if not path:
+            return self.bucket.exists()
+        if self._blob(path):
+            # There is a regular file matching the specified directory.
+            #
+            # We could have both a blob matching a directory path
+            # and other blobs under that path. In that case, we cannot
+            # treat the path as both a directory and a regular file,
+            # so we treat the regular file as overriding the logical
+            # directory.
+            return False
+        dir_contents = self._list_blobs(path)
+        for _ in dir_contents:
+            return True
+        return False
+
+    def create_file(self, content: str, content_type: str, path: str) -> dict[str, str]:
+        blob = self._blob(path, create_if_missing=True)
         # GCS doesn't allow specifying the key version, so drop it if present
         if blob.kms_key_name:
             blob._properties["kmsKeyName"] = re.split(
                 r"/cryptoKeyVersions/\d+$", blob.kms_key_name
             )[0]
         blob.upload_from_string(content, content_type=content_type)
+        return self._file_metadata(path, blob)
+
+    def create_notebook(self, nb, path):
+        if type(nb) == dict:
+            nb = nbformat.from_dict(nb)
+        content = nbformat.writes(nb)
+        return self.create_file(content, "text/plain", path)
+
+    def file_contents(self, path: str, blob=None) -> tuple[bytes, str]:
+        blob = blob or self._blob(path)
+        if not blob:
+            return None, None
+        return blob.download_as_bytes(), blob.content_type
+
+    def notebook_contents(self, path: str, blob=None):
+        content_bytes, content_type = self.file_contents(path, blob=blob)
+        if content_bytes is None:
+            return None
+        return nbformat.reads(content_bytes.decode(utf8_encoding), as_version=4)
+
+    def delete_file(self, path):
+        blob = self._blob(path)
+        if blob:
+            # The path corresponds to a regular file; delete it.
+            blob.delete()
+
+        # The path (possibly) corresponds to a directory. Delete
+        # every file underneath it.
+        for blob in self._list_blobs(path):
+            blob.delete()
+        return None
+
+    def rename_file(self, old_path, new_path):
+        blob = self._blob(old_path)
+        if blob:
+            self.bucket.rename_blob(blob, self._gcs_path(new_path))
+            return None
+
+        # The path (possibly) corresponds to a directory. Rename
+        # every file underneath it.
+        for b in self._list_blobs(old_path):
+            self.bucket.rename_blob(b, b.name.replace(old_path, new_path))
+        return None
+
+    def _file_metadata(self, path, blob):
         return {
-            "id": checkpoint_id,
+            "path": path,
+            "name": posixpath.basename(path),
             "last_modified": blob.updated,
+            "created": blob.time_created,
+            "writable": True,
+            "type": "notebook" if path.endswith(".ipynb") else "file",
+            "content": None,
+            "format": None,
+            "mimetype": None,
         }
 
+    def _dir_metadata(self, path):
+        return {
+            "path": path,
+            "name": posixpath.basename(path),
+            "type": "directory",
+            "last_modified": self.bucket.time_created,
+            "created": self.bucket.time_created,
+            "content": None,
+            "format": None,
+            "mimetype": None,
+            "writable": True,
+        }
+
+    def mkdir(self, path):
+        blob_name = self._gcs_path(path) + "/"
+        blob = self.bucket.blob(blob_name)
+        blob.upload_from_string("", content_type="text/plain")
+        return self._dir_metadata(path)
+
+    def list_dir(self, path, include_content):
+        dir_obj = self._dir_metadata(path)
+        if not include_content:
+            return dir_obj
+
+        dir_obj["format"] = "json"
+        dir_obj["content"] = []
+
+        # We have to convert a list of GCS blobs, which may include multiple
+        # entries corresponding to a single sub-directory, into a list of immediate
+        # directory contents with no duplicates.
+        #
+        # To do that, we keep a dictionary of immediate children, and then convert
+        # that dictionary into a list once it is fully populated.
+        children = {}
+        blob_name_prefix = self._gcs_path(path)
+        blob_name_prefix_len = len(blob_name_prefix) + 1 if blob_name_prefix else 0
+        for b in self._list_blobs(path):
+            relative_path = b.name[blob_name_prefix_len:]
+            if relative_path:  # Ignore the place-holder blob for the directory itself
+                child_path = posixpath.join(path, relative_path)
+                first_slash = relative_path.find("/")
+                if first_slash < 0:
+                    children[relative_path] = self._file_metadata(child_path, b)
+                else:
+                    subdir = relative_path[0:first_slash]
+                    if subdir not in children:
+                        children[subdir] = self._dir_metadata(
+                            posixpath.join(path, subdir)
+                        )
+
+        for child in children:
+            dir_obj["content"].append(children[child])
+
+        return dir_obj
+
+    def get_file(self, path, type, include_content, require_hash):
+        if not type and self.dir_exists(path):
+            type = "directory"
+        if type == "directory":
+            return self.list_dir(path, include_content)
+
+        blob = self._blob(path)
+        if not blob:
+            return None
+
+        file_model = self._file_metadata(path, blob)
+        if require_hash:
+            file_model["hash"] = blob.crc32c
+            file_model["hash_algorithm"] = "crc32c"
+        if not include_content:
+            return file_model
+
+        if file_model["type"] == "notebook":
+            file_model["format"] = "json"
+            file_model["content"] = self.notebook_contents(path, blob=blob)
+        else:
+            content, _ = self.file_contents(path, blob=blob)
+            if blob.content_type.startswith("text/"):
+                file_model["mimetype"] = "text/plain"
+                file_model["format"] = "text"
+                file_model["content"] = content.decode(utf8_encoding)
+            else:
+                file_model["mimetype"] = "application/octet-stream"
+                file_model["format"] = "base64"
+                file_model["content"] = base64.b64encode(content)
+        return file_model
+
+
+class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
+    checkpoints_dir = ".ipynb_checkpoints"
+
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self._parent = kwargs["parent"]
+        self._file_manager = GCSBasedFileManager(
+            self._parent.project, self._parent.bucket_name, ""
+        )
+
+    def checkpoint_path(self, checkpoint_id, path):
+        path = normalize_path(path)
+        return posixpath.join(self.checkpoints_dir, path, checkpoint_id)
+
+    def create_file_checkpoint(self, content, format, path):
+        checkpoint_id = "checkpoint"
+        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        content_type = "text/plain" if format == "text" else "application/octet-stream"
+        file_model = self._file_manager.create_file(content, content_type, checkpoint_path)
+        if file_model:
+            file_model["id"] = checkpoint_id
+        return file_model
+
     def create_notebook_checkpoint(self, nb, path):
-        content = nbformat.writes(nb)
-        return self.create_file_checkpoint(content, "text", path)
+        checkpoint_id = "checkpoint"
+        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        nb_model = self._file_manager.create_notebook(nb, checkpoint_path)
+        if nb_model:
+            nb_model["id"] = checkpoint_id
+        return nb_model
 
     def _checkpoint_contents(self, checkpoint_id, path):
-        blob = self.checkpoint_blob(checkpoint_id, path)
-        if not blob:
+        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        contents, content_type = self._file_manager.file_contents(checkpoint_path)
+        if not contents:
             raise HTTPError(
                 404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
             )
-        return blob.download_as_string(), blob.content_type
+        return contents, content_type
 
     def get_file_checkpoint(self, checkpoint_id, path):
-        contents, content_type = self._checkpoint_contents(checkpoint_id, path)
+        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        contents, content_type = self._file_manager.file_contents(checkpoint_path)
+        if not contents:
+            raise HTTPError(
+                404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
+            )
         checkpoint_obj = {
             "type": "file",
             "content": contents.decode(utf8_encoding),
@@ -135,38 +350,41 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
         return checkpoint_obj
 
     def get_notebook_checkpoint(self, checkpoint_id, path):
-        contents, _ = self._checkpoint_contents(checkpoint_id, path)
+        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        nb = self._file_manager.notebook_contents(checkpoint_path)
+        if not nb:
+            raise HTTPError(
+                404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
+            )
         checkpoint_obj = {
             "type": "notebook",
-            "content": nbformat.reads(contents, as_version=4),
+            "content": nb,
         }
         return checkpoint_obj
 
     def delete_checkpoint(self, checkpoint_id, path):
-        blob = self.checkpoint_blob(checkpoint_id, path)
-        if blob:
-            blob.delete()
-        return None
+        old_checkpoint_path = self.checkpoint_path(checkpoint_id, path)
+        return self._file_manager.delete_file(old_checkpoint_path)
 
     def list_checkpoints(self, path):
+        dir_model = self._file_manager.list_dir(path, True)
         checkpoints = []
-        for b in self.bucket.list_blobs(
-            prefix=posixpath.join(self.checkpoints_dir, path)
-        ):
-            checkpoint = {
-                "id": posixpath.basename(b.name),
-                "last_modified": b.updated,
-            }
-            checkpoints.append(checkpoint)
+        for child in dir_model["content"]:
+            if child.get("type", None) != "directory":
+                checkpoint = {
+                    "id": child["name"],
+                    "last_modified": child["last_modified"],
+                }
+                checkpoints.append(checkpoint)
         return checkpoints
 
     def rename_checkpoint(self, checkpoint_id, old_path, new_path):
-        blob = self.checkpoint_blob(checkpoint_id, old_path)
-        if not blob:
-            return None
-        new_blob_name = self.checkpoint_path(checkpoint_id, new_path)
-        self.bucket.rename_blob(blob, new_blob_name)
-        return None
+        old_checkpoint_path = self.checkpoint_path(checkpoint_id, old_path)
+        new_checkpoint_path = self.checkpoint_path(checkpoint_id, new_path)
+        return self._file_manager.rename_file(
+            old_checkpoint_path,
+            new_checkpoint_path,
+        )
 
 
 class GCSContentsManager(ContentsManager):
@@ -187,32 +405,13 @@ class GCSContentsManager(ContentsManager):
 
     def __init__(self, **kwargs):
         super(GCSContentsManager, self).__init__(**kwargs)
-        self._bucket = None
-
-    @property
-    def bucket(self):
-        if not self._bucket:
-            if self.project:
-                storage_client = storage.Client(project=self.project)
-            else:
-                storage_client = storage.Client()
-            self._bucket = storage_client.get_bucket(self.bucket_name)
-        return self._bucket
-
-    def _normalize_path(self, path):
-        path = path or ""
-        return path.strip("/")
-
-    def _gcs_path(self, normalized_path):
-        if not self.bucket_notebooks_path:
-            return normalized_path
-        if not normalized_path:
-            return self.bucket_notebooks_path
-        return posixpath.join(self.bucket_notebooks_path, normalized_path)
+        self._file_manager = GCSBasedFileManager(
+            self.project, self.bucket_name, self.bucket_notebooks_path
+        )
 
     def is_hidden(self, path):
         try:
-            path = self._normalize_path(path)
+            path = normalize_path(path)
             return posixpath.basename(path).startswith(".")
         except HTTPError as err:
             raise err
@@ -221,12 +420,8 @@ class GCSContentsManager(ContentsManager):
 
     def file_exists(self, path):
         try:
-            path = self._normalize_path(path)
-            if not path:
-                return False
-            blob_name = self._gcs_path(path)
-            blob = self.bucket.get_blob(blob_name)
-            return blob is not None
+            path = normalize_path(path)
+            return self._file_manager.file_exists(path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -234,195 +429,61 @@ class GCSContentsManager(ContentsManager):
 
     def dir_exists(self, path):
         try:
-            path = self._normalize_path(path)
-            if not path:
-                return self.bucket.exists()
-
-            dir_gcs_path = self._gcs_path(path)
-            if self.bucket.get_blob(dir_gcs_path):
-                # There is a regular file matching the specified directory.
-                #
-                # Would could have both a blob matching a directory path
-                # and other blobs under that path. In that case, we cannot
-                # treat the path as both a directory and a regular file,
-                # so we treat the regular file as overriding the logical
-                # directory.
-                return False
-
-            dir_contents = self.bucket.list_blobs(prefix=dir_gcs_path)
-            for _ in dir_contents:
-                return True
-
-            return False
+            path = normalize_path(path)
+            return self._file_manager.dir_exists(path)
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def _blob_model(self, normalized_path, blob, content=True):
-        blob_obj = {}
-        blob_obj["path"] = normalized_path
-        blob_obj["name"] = posixpath.basename(normalized_path)
-        blob_obj["last_modified"] = blob.updated
-        blob_obj["created"] = blob.time_created
-        blob_obj["writable"] = True
-        blob_obj["type"] = "notebook" if blob_obj["name"].endswith(".ipynb") else "file"
-        if not content:
-            blob_obj["mimetype"] = None
-            blob_obj["format"] = None
-            blob_obj["content"] = None
-            return blob_obj
-
-        content_str = blob.download_as_string() if content else None
-        if blob_obj["type"] == "notebook":
-            blob_obj["mimetype"] = None
-            blob_obj["format"] = "json"
-            blob_obj["content"] = nbformat.reads(content_str, as_version=4)
-        elif blob.content_type.startswith("text/"):
-            blob_obj["mimetype"] = "text/plain"
-            blob_obj["format"] = "text"
-            blob_obj["content"] = content_str.decode(utf8_encoding)
-        else:
-            blob_obj["mimetype"] = "application/octet-stream"
-            blob_obj["format"] = "base64"
-            blob_obj["content"] = base64.b64encode(content_str)
-
-        return blob_obj
-
-    def _empty_dir_model(self, normalized_path, content=True):
-        dir_obj = {}
-        dir_obj["path"] = normalized_path
-        dir_obj["name"] = posixpath.basename(normalized_path)
-        dir_obj["type"] = "directory"
-        dir_obj["mimetype"] = None
-        dir_obj["writable"] = True
-        dir_obj["last_modified"] = self.bucket.time_created
-        dir_obj["created"] = self.bucket.time_created
-        dir_obj["format"] = None
-        dir_obj["content"] = None
-        if content:
-            dir_obj["format"] = "json"
-            dir_obj["content"] = []
-        return dir_obj
-
-    def _list_dir(self, normalized_path, content=True):
-        dir_obj = self._empty_dir_model(normalized_path, content=content)
-        if not content:
-            return dir_obj
-
-        # We have to convert a list of GCS blobs, which may include multiple
-        # entries corresponding to a single sub-directory, into a list of immediate
-        # directory contents with no duplicates.
-        #
-        # To do that, we keep a dictionary of immediate children, and then convert
-        # that dictionary into a list once it is fully populated.
-        children = {}
-
-        def add_child(name, model, override_existing=False):
-            """Add the given child model (for either a regular file or directory), to
-
-            the list of children for the current directory model being built.
-
-            It is possible that we will encounter a GCS blob corresponding to a
-            regular file after we encounter blobs indicating that name should be a
-            directory. For example, if we have the following blobs:
-                some/dir/path/
-                some/dir/path/with/child
-                some/dir/path
-            ... then the first two entries tell us that 'path' is a subdirectory of
-            'dir', but the third one tells us that it is a regular file.
-
-            In this case, we treat the regular file as shadowing the directory. The
-            'override_existing' keyword argument handles that by letting the caller
-            specify that the child being added should override (i.e. hide) any
-            pre-existing children with the same name.
-            """
-            if self.is_hidden(model["path"]) and not self.allow_hidden:
-                return
-            if (name in children) and not override_existing:
-                return
-            children[name] = model
-
-        dir_gcs_path = self._gcs_path(normalized_path)
-        for b in self.bucket.list_blobs(prefix=dir_gcs_path):
-            # For each nested blob, identify the corresponding immediate child
-            # of the directory, and then add that child to the directory model.
-            prefix_len = len(dir_gcs_path) + 1 if dir_gcs_path else 0
-            suffix = b.name[prefix_len:]
-            if suffix:  # Ignore the place-holder blob for the directory itself
-                first_slash = suffix.find("/")
-                if first_slash < 0:
-                    child_path = posixpath.join(normalized_path, suffix)
-                    add_child(
-                        suffix,
-                        self._blob_model(child_path, b, content=False),
-                        override_existing=True,
-                    )
-                else:
-                    subdir = suffix[0:first_slash]
-                    if subdir:
-                        child_path = posixpath.join(normalized_path, subdir)
-                        add_child(
-                            subdir, self._empty_dir_model(child_path, content=False)
-                        )
-
-        for child in children:
-            dir_obj["content"].append(children[child])
-
-        return dir_obj
-
-    def get(self, path, content=True, type=None, format=None):
+    def get(self, path, content=True, type=None, format=None, require_hash=False):
         try:
-            path = self._normalize_path(path)
-            if not type and self.dir_exists(path):
-                type = "directory"
-            if type == "directory":
-                return self._list_dir(path, content=content)
-
-            gcs_path = self._gcs_path(path)
-            blob = self.bucket.get_blob(gcs_path)
-            return self._blob_model(path, blob, content=content)
+            path = normalize_path(path)
+            model = self._file_manager.get_file(
+                path,
+                type,
+                content,
+                require_hash,
+            )
+            if not model:
+                self.log.debug(f"No such file found in the GCS bucket for {path}")
+                raise HTTPError(404, f"Not found: {path}")
+            if (
+                content
+                and model.get("type", None) == "directory"
+                and not self.allow_hidden
+            ):
+                # Filter out any hidden files if necessary.
+                model["content"] = [
+                    child
+                    for child in model.get("content", [])
+                    if not self.is_hidden(child.get("path", ""))
+                ]
+            return model
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
-
-    def _mkdir(self, normalized_path):
-        gcs_path = self._gcs_path(normalized_path) + "/"
-        blob = self.bucket.blob(gcs_path)
-        blob.upload_from_string("", content_type="text/plain")
-        return self._empty_dir_model(normalized_path, content=False)
 
     def save(self, model, path):
         try:
             self.run_pre_save_hook(model=model, path=path)
 
-            normalized_path = self._normalize_path(path)
+            normalized_path = normalize_path(path)
             if model["type"] == "directory":
-                return self._mkdir(normalized_path)
-
-            gcs_path = self._gcs_path(normalized_path)
-            blob = self.bucket.get_blob(gcs_path)
-            if not blob:
-                blob = self.bucket.blob(gcs_path)
+                return self._file_manager.mkdir(path)
 
             content_type = model.get("mimetype", None)
             if not content_type:
                 content_type, _ = mimetypes.guess_type(normalized_path)
             contents = model["content"]
             if model["type"] == "notebook":
-                contents = nbformat.writes(nbformat.from_dict(contents))
-            elif model["type"] == "file" and model["format"] == "base64":
-                b64_bytes = contents.encode("ascii")
-                contents = base64.decodebytes(b64_bytes)
-
-            # GCS doesn't allow specifying the key version, so drop it if present
-            if blob.kms_key_name:
-                blob._properties["kmsKeyName"] = re.split(
-                    r"/cryptoKeyVersions/\d+$", blob.kms_key_name
-                )[0]
-
-            blob.upload_from_string(contents, content_type=content_type)
+                self._file_manager.create_notebook(contents, path)
+            else:
+                if model["type"] == "file" and model["format"] == "base64":
+                    b64_bytes = contents.encode("ascii")
+                    contents = base64.decodebytes(b64_bytes)
+                self._file_manager.create_file(contents, content_type, path)
             return self.get(path, type=model["type"], content=False)
         except HTTPError as err:
             raise err
@@ -431,20 +492,8 @@ class GCSContentsManager(ContentsManager):
 
     def delete_file(self, path):
         try:
-            normalized_path = self._normalize_path(path)
-            gcs_path = self._gcs_path(normalized_path)
-            blob = self.bucket.get_blob(gcs_path)
-            if blob:
-                # The path corresponds to a regular file; just delete it.
-                blob.delete()
-                return None
-
-            # The path (possibly) corresponds to a directory. Delete
-            # every file underneath it.
-            for blob in self.bucket.list_blobs(prefix=gcs_path):
-                blob.delete()
-
-            return None
+            normalized_path = normalize_path(path)
+            return self._file_manager.delete_file(path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -452,19 +501,9 @@ class GCSContentsManager(ContentsManager):
 
     def rename_file(self, old_path, new_path):
         try:
-            old_gcs_path = self._gcs_path(self._normalize_path(old_path))
-            new_gcs_path = self._gcs_path(self._normalize_path(new_path))
-            blob = self.bucket.get_blob(old_gcs_path)
-            if blob:
-                # The path corresponds to a regular file.
-                self.bucket.rename_blob(blob, new_gcs_path)
-                return None
-
-            # The path (possibly) corresponds to a directory. Rename
-            # every file underneath it.
-            for b in self.bucket.list_blobs(prefix=old_gcs_path):
-                self.bucket.rename_blob(b, b.name.replace(old_gcs_path, new_gcs_path))
-            return None
+            old_path = normalize_path(old_path)
+            new_path = normalize_path(new_path)
+            return self._file_manager.rename_file(old_path, new_path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -477,8 +516,7 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
         self._content_managers = content_managers
 
     def _checkpoint_manager_for_path(self, path):
-        path = path or ""
-        path = path.strip("/")
+        path = normalize_path(path)
         for path_prefix in self._content_managers:
             if path == path_prefix or path.startswith(path_prefix + "/"):
                 relative_path = path[len(path_prefix) :]
@@ -560,8 +598,7 @@ class CombinedContentsManager(ContentsManager):
         }
 
     def _content_manager_for_path(self, path):
-        path = path or ""
-        path = path.strip("/")
+        path = normalize_path(path)
         for path_prefix in self._content_managers:
             if path == path_prefix or path.startswith(path_prefix + "/"):
                 relative_path = path[len(path_prefix) :]
@@ -624,7 +661,7 @@ class CombinedContentsManager(ContentsManager):
             for child in children:
                 self._make_model_relative(child, path_prefix)
 
-    def get(self, path, content=True, type=None, format=None):
+    def get(self, path, content=True, type=None, format=None, **kwargs):
         if path in ["", "/"]:
             dir_obj = {}
             dir_obj["path"] = ""
@@ -637,7 +674,7 @@ class CombinedContentsManager(ContentsManager):
             dir_obj["format"] = "json"
             contents = []
             for path_prefix in self._content_managers:
-                child_obj = self._content_managers[path_prefix].get("", content=False)
+                child_obj = self._content_managers[path_prefix].get("", content=False, **kwargs)
                 child_obj["path"] = path_prefix
                 child_obj["name"] = path_prefix
                 child_obj["writable"] = False
@@ -650,7 +687,8 @@ class CombinedContentsManager(ContentsManager):
             cm, relative_path, path_prefix = self._content_manager_for_path(path)
             if not cm:
                 raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
-            model = cm.get(relative_path, content=content, type=type, format=format)
+            model = cm.get(
+                relative_path, content=content, type=type, format=format, **kwargs)
             self._make_model_relative(model, path_prefix)
             return model
         except HTTPError as err:
