@@ -417,7 +417,7 @@ class GCSCheckpointManager(AsyncGenericCheckpointsMixin, AsyncCheckpoints):
         )
         checkpoints = []
         for child in dir_model["content"]:
-            if child.get("type") != "directory":
+            if child.get("type", None) != "directory":
                 checkpoint = {
                     "id": child["name"],
                     "last_modified": child["last_modified"],
