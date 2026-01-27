@@ -79,7 +79,7 @@ def test_get_file(gcs_file_manager, dir_path, type):
     elif type == "notebook":
         created_file = gcs_file_manager.create_notebook({"cells": []}, path)
     else:
-        created_file = gcs_file_manager.create_file("", "text/plain", path)
+        created_file = gcs_file_manager.create_file("", "text/plain", path, None)
     read_file = gcs_file_manager.get_file(path, None, True, True)
     assert read_file["path"] == path
     assert read_file["name"] == name
@@ -393,6 +393,45 @@ async def test_file_handlers(jp_fetch, top_level_path):
         method="DELETE",
     )
     assert response16.code == 204
+
+    for chunk_number in [1, 2, 3, -1]:
+        model = {
+            "path": f"{top_level_path}/test_chunked_upload.txt",
+            "name": "test_chunked_upload.txt",
+            "type": "file",
+            "format": "text",
+            "content": f"chunk#{chunk_number},",
+            "chunk": chunk_number,
+        }
+        chunk_upload_response = await jp_fetch(
+            "api",
+            "contents",
+            top_level_path,
+            "test_chunked_upload.txt",
+            method="PUT",
+            body=json.dumps(model),
+        )
+        assert chunk_upload_response.code in [200, 201], chunk_upload_response
+
+    # Confirm the chunked file was written correctly
+    read_chunked_response = await jp_fetch(
+        "api",
+        "contents",
+        top_level_path,
+        "test_chunked_upload.txt",
+        method="GET",
+    )
+    chunked_contents = json.loads(read_chunked_response.body.decode())["content"]
+    assert chunked_contents == "chunk#1,chunk#2,chunk#3,chunk#-1,"
+
+    delete_chunked_response = await jp_fetch(
+        "api",
+        "contents",
+        top_level_path,
+        "test_chunked_upload.txt",
+        method="DELETE",
+    )
+    assert delete_chunked_response.code == 204
 
     # Get the final contents of the directory
     final_response = await jp_fetch(

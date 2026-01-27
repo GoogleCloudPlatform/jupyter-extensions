@@ -54,6 +54,7 @@
 
 import base64
 import errno
+import hashlib
 import json
 import logging
 import mimetypes
@@ -62,7 +63,7 @@ import re
 
 import nbformat
 from jupyter_server.services.contents.filecheckpoints import GenericFileCheckpoints
-from jupyter_server.services.contents.filemanager import FileContentsManager
+from jupyter_server.services.contents.largefilemanager import LargeFileManager
 from jupyter_server.services.contents.manager import ContentsManager
 from jupyter_server.services.contents.checkpoints import (
     Checkpoints,
@@ -106,11 +107,33 @@ class GCSBasedFileManager:
             return self.bucket_path_prefix
         return posixpath.join(self.bucket_path_prefix, path)
 
-    def _blob(self, path, create_if_missing=False):
+    def _chunks_path(self, path):
+        path_hash = hashlib.sha256(path.encode("utf-8")).hexdigest()
+        return self._gcs_path(posixpath.join(".chunks/", path_hash, "chunk#"))
+
+    def _list_chunks(self, path):
+        return [blob for blob in self.bucket.list_blobs(prefix=self._chunks_path(path))]
+
+    def _blob(self, path, create_if_missing=False, chunk=None):
         blob_name = self._gcs_path(path)
+        if chunk:
+            blob_name = f"{self._chunks_path(path)}{chunk:09d}"
         blob = self.bucket.get_blob(blob_name)
         if not blob and create_if_missing:
             blob = self.bucket.blob(blob_name)
+        return blob
+
+    def _combine_chunks(self, path, content_type):
+        blob_name = self._gcs_path(path)
+        blob = self.bucket.blob(blob_name)
+        blob.content_type = content_type
+        chunk_blobs = self._list_chunks(path)
+        # The last chunk is -1, which lexicographically comes first; move it to the end.
+        chunk_blobs = chunk_blobs[1:] + chunk_blobs[0:1]
+        blob.compose(chunk_blobs, if_generation_match=0)
+        # Clean up the no-longer needed chunk blobs
+        for chunk in self._list_chunks(path):
+            chunk.delete()
         return blob
 
     def _list_blobs(self, path):
@@ -142,21 +165,25 @@ class GCSBasedFileManager:
             return True
         return False
 
-    def create_file(self, content: str, content_type: str, path: str) -> dict[str, str]:
-        blob = self._blob(path, create_if_missing=True)
+    def create_file(
+        self, content: str, content_type: str, path: str, chunk: int | None
+    ) -> dict[str, str]:
+        blob = self._blob(path, create_if_missing=True, chunk=chunk)
         # GCS doesn't allow specifying the key version, so drop it if present
         if blob.kms_key_name:
             blob._properties["kmsKeyName"] = re.split(
                 r"/cryptoKeyVersions/\d+$", blob.kms_key_name
             )[0]
         blob.upload_from_string(content, content_type=content_type)
+        if chunk == -1:
+            blob = self._combine_chunks(path, content_type)
         return self._file_metadata(path, blob)
 
     def create_notebook(self, nb, path):
         if type(nb) == dict:
             nb = nbformat.from_dict(nb)
         content = nbformat.writes(nb)
-        return self.create_file(content, "text/plain", path)
+        return self.create_file(content, "text/plain", path, None)
 
     def file_contents(self, path: str, blob=None) -> tuple[bytes, str]:
         blob = blob or self._blob(path)
@@ -313,7 +340,9 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
         checkpoint_id = "checkpoint"
         checkpoint_path = self.checkpoint_path(checkpoint_id, path)
         content_type = "text/plain" if format == "text" else "application/octet-stream"
-        file_model = self._file_manager.create_file(content, content_type, checkpoint_path)
+        file_model = self._file_manager.create_file(
+            content, content_type, checkpoint_path, None
+        )
         if file_model:
             file_model["id"] = checkpoint_id
         return file_model
@@ -467,7 +496,9 @@ class GCSContentsManager(ContentsManager):
 
     def save(self, model, path):
         try:
-            self.run_pre_save_hook(model=model, path=path)
+            chunk = model.get("chunk", None)
+            if chunk is None or chunk == 1:
+                self.run_pre_save_hooks(model=model, path=path)
 
             normalized_path = normalize_path(path)
             if model["type"] == "directory":
@@ -483,7 +514,16 @@ class GCSContentsManager(ContentsManager):
                 if model["type"] == "file" and model["format"] == "base64":
                     b64_bytes = contents.encode("ascii")
                     contents = base64.decodebytes(b64_bytes)
-                self._file_manager.create_file(contents, content_type, path)
+                created_model = self._file_manager.create_file(
+                    contents,
+                    content_type,
+                    path,
+                    chunk,
+                )
+                if chunk is not None and chunk != -1:
+                    return created_model
+
+            self.run_post_save_hooks(model=model, os_path=path)
             return self.get(path, type=model["type"], content=False)
         except HTTPError as err:
             raise err
@@ -589,7 +629,7 @@ class CombinedContentsManager(ContentsManager):
         print("Creating the combined contents manager...")
         super(CombinedContentsManager, self).__init__(**kwargs)
 
-        file_cm = FileContentsManager(**kwargs)
+        file_cm = LargeFileManager(**kwargs)
         file_cm.checkpoints = GenericFileCheckpoints(**file_cm.checkpoints_kwargs)
         gcs_cm = GCSContentsManager(**kwargs)
         self._content_managers = {
@@ -674,7 +714,9 @@ class CombinedContentsManager(ContentsManager):
             dir_obj["format"] = "json"
             contents = []
             for path_prefix in self._content_managers:
-                child_obj = self._content_managers[path_prefix].get("", content=False, **kwargs)
+                child_obj = self._content_managers[path_prefix].get(
+                    "", content=False, **kwargs
+                )
                 child_obj["path"] = path_prefix
                 child_obj["name"] = path_prefix
                 child_obj["writable"] = False
@@ -688,7 +730,8 @@ class CombinedContentsManager(ContentsManager):
             if not cm:
                 raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
             model = cm.get(
-                relative_path, content=content, type=type, format=format, **kwargs)
+                relative_path, content=content, type=type, format=format, **kwargs
+            )
             self._make_model_relative(model, path_prefix)
             return model
         except HTTPError as err:
@@ -702,7 +745,9 @@ class CombinedContentsManager(ContentsManager):
         if path in ["", "/"]:
             raise HTTPError(403, "The top-level directory is read-only")
         try:
-            self.run_pre_save_hook(model=model, path=path)
+            chunk = model.get("chunk", None)
+            if chunk is None or chunk == 1:
+                self.run_pre_save_hooks(model=model, path=path)
 
             cm, relative_path, path_prefix = self._content_manager_for_path(path)
             if (relative_path in ["", "/"]) or (path_prefix in ["", "/"]):
@@ -716,6 +761,8 @@ class CombinedContentsManager(ContentsManager):
             model = cm.save(model, relative_path)
             if "path" in model:
                 model["path"] = path
+            if chunk is None or chunk == -1:
+                self.run_post_save_hooks(model=model, os_path=path)
             return model
         except HTTPError as err:
             raise err
