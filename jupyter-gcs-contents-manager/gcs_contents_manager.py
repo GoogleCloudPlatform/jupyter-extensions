@@ -24,7 +24,7 @@
 # Usage: Add the following lines to your Jupyter config file
 # (e.g. jupyter_server_config.py):
 #
-#   from gcs_contents_manager import CombinedContentsManager, GCSContentsManager
+#   from gcs_contents_manager import CombinedContentsManager
 #   c.ServerApp.contents_manager_class = CombinedContentsManager
 #   c.GCSContentsManager.bucket_name = '${NOTEBOOK_BUCKET}'
 #   c.GCSContentsManager.bucket_notebooks_path = '${NOTEBOOK_PATH}'
@@ -52,29 +52,36 @@
 #
 #   c.CombinedContentsManager.root_dir = '~/.jupyter/symlinks_for_jupyterlab_widgets'
 
+import atexit
+import asyncio
 import base64
-import errno
+import concurrent
 import hashlib
-import json
-import logging
 import mimetypes
 import posixpath
 import re
 
 import nbformat
-from jupyter_server.services.contents.filecheckpoints import GenericFileCheckpoints
-from jupyter_server.services.contents.largefilemanager import LargeFileManager
-from jupyter_server.services.contents.manager import ContentsManager
+
+from jupyter_server.services.contents.filecheckpoints import AsyncGenericFileCheckpoints
+from jupyter_server.services.contents.largefilemanager import AsyncLargeFileManager
+from jupyter_server.services.contents.manager import AsyncContentsManager
 from jupyter_server.services.contents.checkpoints import (
-    Checkpoints,
-    GenericCheckpointsMixin,
+    AsyncCheckpoints,
+    AsyncGenericCheckpointsMixin,
 )
+from jupyter_server.utils import url_path_join
+
 from tornado.web import HTTPError
 from traitlets import Unicode, default
 
 from google.cloud import storage
 
 utf8_encoding = "utf-8"
+
+
+_executor_ = concurrent.futures.ThreadPoolExecutor()
+atexit.register(_executor_.shutdown)
 
 
 def normalize_path(path):
@@ -105,11 +112,11 @@ class GCSBasedFileManager:
             return path
         if not path:
             return self.bucket_path_prefix
-        return posixpath.join(self.bucket_path_prefix, path)
+        return url_path_join(self.bucket_path_prefix, path)
 
     def _chunks_path(self, path):
         path_hash = hashlib.sha256(path.encode("utf-8")).hexdigest()
-        return self._gcs_path(posixpath.join(".chunks/", path_hash, "chunk#"))
+        return self._gcs_path(url_path_join(".chunks/", path_hash, "chunk#"))
 
     def _list_chunks(self, path):
         return [blob for blob in self.bucket.list_blobs(prefix=self._chunks_path(path))]
@@ -273,7 +280,7 @@ class GCSBasedFileManager:
         for b in self._list_blobs(path):
             relative_path = b.name[blob_name_prefix_len:]
             if relative_path:  # Ignore the place-holder blob for the directory itself
-                child_path = posixpath.join(path, relative_path)
+                child_path = url_path_join(path, relative_path)
                 first_slash = relative_path.find("/")
                 if first_slash < 0:
                     children[relative_path] = self._file_metadata(child_path, b)
@@ -281,7 +288,7 @@ class GCSBasedFileManager:
                     subdir = relative_path[0:first_slash]
                     if subdir not in children:
                         children[subdir] = self._dir_metadata(
-                            posixpath.join(path, subdir)
+                            url_path_join(path, subdir)
                         )
 
         for child in children:
@@ -322,51 +329,54 @@ class GCSBasedFileManager:
         return file_model
 
 
-class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
+class GCSCheckpointManager(AsyncGenericCheckpointsMixin, AsyncCheckpoints):
     checkpoints_dir = ".ipynb_checkpoints"
 
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
+    def __init__(self, *args, **kwargs):
         self._parent = kwargs["parent"]
         self._file_manager = GCSBasedFileManager(
             self._parent.project, self._parent.bucket_name, ""
         )
+        self._executor = _executor_
 
     def checkpoint_path(self, checkpoint_id, path):
         path = normalize_path(path)
-        return posixpath.join(self.checkpoints_dir, path, checkpoint_id)
+        return url_path_join(self.checkpoints_dir, path, checkpoint_id)
 
-    def create_file_checkpoint(self, content, format, path):
+    async def create_file_checkpoint(self, content, format, path):
         checkpoint_id = "checkpoint"
         checkpoint_path = self.checkpoint_path(checkpoint_id, path)
         content_type = "text/plain" if format == "text" else "application/octet-stream"
-        file_model = self._file_manager.create_file(
-            content, content_type, checkpoint_path, None
+        loop = asyncio.get_running_loop()
+        file_model = await loop.run_in_executor(
+            self._executor,
+            self._file_manager.create_file,
+            content,
+            content_type,
+            checkpoint_path,
+            None,
         )
         if file_model:
             file_model["id"] = checkpoint_id
         return file_model
 
-    def create_notebook_checkpoint(self, nb, path):
+    async def create_notebook_checkpoint(self, nb, path):
         checkpoint_id = "checkpoint"
         checkpoint_path = self.checkpoint_path(checkpoint_id, path)
-        nb_model = self._file_manager.create_notebook(nb, checkpoint_path)
+        loop = asyncio.get_running_loop()
+        nb_model = await loop.run_in_executor(
+            self._executor, self._file_manager.create_notebook, nb, checkpoint_path
+        )
         if nb_model:
             nb_model["id"] = checkpoint_id
         return nb_model
 
-    def _checkpoint_contents(self, checkpoint_id, path):
+    async def get_file_checkpoint(self, checkpoint_id, path):
         checkpoint_path = self.checkpoint_path(checkpoint_id, path)
-        contents, content_type = self._file_manager.file_contents(checkpoint_path)
-        if not contents:
-            raise HTTPError(
-                404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
-            )
-        return contents, content_type
-
-    def get_file_checkpoint(self, checkpoint_id, path):
-        checkpoint_path = self.checkpoint_path(checkpoint_id, path)
-        contents, content_type = self._file_manager.file_contents(checkpoint_path)
+        loop = asyncio.get_running_loop()
+        contents, content_type = await loop.run_in_executor(
+            self._executor, self._file_manager.file_contents, checkpoint_path
+        )
         if not contents:
             raise HTTPError(
                 404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
@@ -374,32 +384,40 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
         checkpoint_obj = {
             "type": "file",
             "content": contents.decode(utf8_encoding),
+            "format": "text" if content_type == "text/plain" else "base64",
         }
-        checkpoint_obj["format"] = "text" if content_type == "text/plain" else "base64"
         return checkpoint_obj
 
-    def get_notebook_checkpoint(self, checkpoint_id, path):
+    async def get_notebook_checkpoint(self, checkpoint_id, path):
         checkpoint_path = self.checkpoint_path(checkpoint_id, path)
-        nb = self._file_manager.notebook_contents(checkpoint_path)
-        if not nb:
+        loop = asyncio.get_running_loop()
+        contents = await loop.run_in_executor(
+            self._executor, self._file_manager.notebook_contents, checkpoint_path
+        )
+        if not contents:
             raise HTTPError(
                 404, 'No such checkpoint for "{}": {}'.format(path, checkpoint_id)
             )
-        checkpoint_obj = {
+        return {
             "type": "notebook",
-            "content": nb,
+            "content": contents,
         }
-        return checkpoint_obj
 
-    def delete_checkpoint(self, checkpoint_id, path):
+    async def delete_checkpoint(self, checkpoint_id, path):
         old_checkpoint_path = self.checkpoint_path(checkpoint_id, path)
-        return self._file_manager.delete_file(old_checkpoint_path)
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            self._executor, self._file_manager.delete_file, old_checkpoint_path
+        )
 
-    def list_checkpoints(self, path):
-        dir_model = self._file_manager.list_dir(path, True)
+    async def list_checkpoints(self, path):
+        loop = asyncio.get_running_loop()
+        dir_model = await loop.run_in_executor(
+            self._executor, self._file_manager.list_dir, path, True
+        )
         checkpoints = []
         for child in dir_model["content"]:
-            if child.get("type", None) != "directory":
+            if child.get("type") != "directory":
                 checkpoint = {
                     "id": child["name"],
                     "last_modified": child["last_modified"],
@@ -407,16 +425,19 @@ class GCSCheckpointManager(GenericCheckpointsMixin, Checkpoints):
                 checkpoints.append(checkpoint)
         return checkpoints
 
-    def rename_checkpoint(self, checkpoint_id, old_path, new_path):
+    async def rename_checkpoint(self, checkpoint_id, old_path, new_path):
         old_checkpoint_path = self.checkpoint_path(checkpoint_id, old_path)
         new_checkpoint_path = self.checkpoint_path(checkpoint_id, new_path)
-        return self._file_manager.rename_file(
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            self._executor,
+            self._file_manager.rename_file,
             old_checkpoint_path,
             new_checkpoint_path,
         )
 
 
-class GCSContentsManager(ContentsManager):
+class GCSContentsManager(AsyncContentsManager):
 
     bucket_name = Unicode(config=True)
 
@@ -432,43 +453,55 @@ class GCSContentsManager(ContentsManager):
     def _bucket_notebooks_path_default(self):
         return ""
 
-    def __init__(self, **kwargs):
-        super(GCSContentsManager, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(GCSContentsManager, self).__init__(*args, **kwargs)
         self._file_manager = GCSBasedFileManager(
             self.project, self.bucket_name, self.bucket_notebooks_path
         )
+        self._executor = _executor_
 
-    def is_hidden(self, path):
+    def _is_hidden(self, path):
+        path = normalize_path(path)
+        return posixpath.basename(path).startswith(".")
+
+    async def is_hidden(self, path):
+        return self._is_hidden(path)
+
+    async def file_exists(self, path):
+        self.log.debug(f'Checking for the existence of the path "{path}" in GCS...')
         try:
-            path = normalize_path(path)
-            return posixpath.basename(path).startswith(".")
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                self._executor, self._file_manager.file_exists, path
+            )
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def file_exists(self, path):
+    async def dir_exists(self, path):
+        self.log.debug(
+            f'Checking for the existence of the directory "{path}" in GCS...'
+        )
         try:
-            path = normalize_path(path)
-            return self._file_manager.file_exists(path)
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                self._executor, self._file_manager.dir_exists, path
+            )
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def dir_exists(self, path):
+    async def get(
+        self, path, content=True, type=None, format=None, require_hash=False, **kwargs
+    ):
+        self.log.debug(f'Getting the file "{path}" from GCS...')
         try:
-            path = normalize_path(path)
-            return self._file_manager.dir_exists(path)
-        except HTTPError as err:
-            raise err
-        except Exception as ex:
-            raise HTTPError(500, "Internal server error: {}".format(str(ex)))
-
-    def get(self, path, content=True, type=None, format=None, require_hash=False):
-        try:
-            path = normalize_path(path)
-            model = self._file_manager.get_file(
+            loop = asyncio.get_running_loop()
+            model = await loop.run_in_executor(
+                self._executor,
+                self._file_manager.get_file,
                 path,
                 type,
                 content,
@@ -478,7 +511,8 @@ class GCSContentsManager(ContentsManager):
                 self.log.debug(f"No such file found in the GCS bucket for {path}")
                 raise HTTPError(404, f"Not found: {path}")
             if (
-                content
+                model
+                and content
                 and model.get("type", None) == "directory"
                 and not self.allow_hidden
             ):
@@ -486,7 +520,7 @@ class GCSContentsManager(ContentsManager):
                 model["content"] = [
                     child
                     for child in model.get("content", [])
-                    if not self.is_hidden(child.get("path", ""))
+                    if not self._is_hidden(child.get("path", ""))
                 ]
             return model
         except HTTPError as err:
@@ -494,27 +528,40 @@ class GCSContentsManager(ContentsManager):
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def save(self, model, path):
+    async def save(self, model, path):
+        self.log.debug(f'Saving the file "{model}" to the GCS path "{path}"...')
         try:
             chunk = model.get("chunk", None)
             if chunk is None or chunk == 1:
                 self.run_pre_save_hooks(model=model, path=path)
 
-            normalized_path = normalize_path(path)
+            if chunk and model["type"] != "file":
+                raise HTTPError(
+                    400, "Chunked uploads to GCS are only supported for plain files."
+                )
+
+            loop = asyncio.get_running_loop()
             if model["type"] == "directory":
-                return self._file_manager.mkdir(path)
+                return await loop.run_in_executor(
+                    self._executor, self._file_manager.mkdir, path
+                )
 
             content_type = model.get("mimetype", None)
             if not content_type:
-                content_type, _ = mimetypes.guess_type(normalized_path)
+                content_type, _ = mimetypes.guess_type(path or "")
             contents = model["content"]
             if model["type"] == "notebook":
-                self._file_manager.create_notebook(contents, path)
-            else:
-                if model["type"] == "file" and model["format"] == "base64":
+                nb = nbformat.from_dict(contents)
+                await loop.run_in_executor(
+                    self._executor, self._file_manager.create_notebook, nb, path
+                )
+            elif model["type"] == "file":
+                if model["format"] == "base64":
                     b64_bytes = contents.encode("ascii")
                     contents = base64.decodebytes(b64_bytes)
-                created_model = self._file_manager.create_file(
+                created_model = await loop.run_in_executor(
+                    self._executor,
+                    self._file_manager.create_file,
                     contents,
                     content_type,
                     path,
@@ -522,35 +569,41 @@ class GCSContentsManager(ContentsManager):
                 )
                 if chunk is not None and chunk != -1:
                     return created_model
-
+            # Follow the upstream pattern of only running the post-save hooks for the last chunk
+            # (or for non-chunked uploads).
             self.run_post_save_hooks(model=model, os_path=path)
-            return self.get(path, type=model["type"], content=False)
+            return await self.get(path, type=model["type"], content=False)
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def delete_file(self, path):
+    async def delete_file(self, path):
+        self.log.debug(f'Deleting the file "{path}" from GCS...')
         try:
-            normalized_path = normalize_path(path)
-            return self._file_manager.delete_file(path)
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                self._executor, self._file_manager.delete_file, path
+            )
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
-    def rename_file(self, old_path, new_path):
+    async def rename_file(self, old_path, new_path):
+        self.log.debug(f'Renaming the file "{old_path}" in GCS to {new_path}...')
         try:
-            old_path = normalize_path(old_path)
-            new_path = normalize_path(new_path)
-            return self._file_manager.rename_file(old_path, new_path)
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                self._executor, self._file_manager.rename_file, old_path, new_path
+            )
         except HTTPError as err:
             raise err
         except Exception as ex:
             raise HTTPError(500, "Internal server error: {}".format(str(ex)))
 
 
-class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
+class CombinedCheckpointsManager(AsyncGenericCheckpointsMixin, AsyncCheckpoints):
 
     def __init__(self, content_managers):
         self._content_managers = content_managers
@@ -563,41 +616,37 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
                 return self._content_managers[path_prefix].checkpoints, relative_path
         raise HTTPError(400, "Unsupported checkpoint path: {}".format(path))
 
-    def checkpoint_path(self, checkpoint_id, path):
+    async def create_file_checkpoint(self, content, format, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.checkpoint_path(checkpoint_id, relative_path)
-
-    def checkpoint_blob(self, checkpoint_id, path, create_if_missing=False):
-        checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.checkpoint_blob(
-            checkpoint_id, relative_path, create_if_missing=create_if_missing
+        return await checkpoint_manager.create_file_checkpoint(
+            content, format, relative_path
         )
 
-    def create_file_checkpoint(self, content, format, path):
+    async def create_notebook_checkpoint(self, nb, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.create_file_checkpoint(content, format, relative_path)
+        return await checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
 
-    def create_notebook_checkpoint(self, nb, path):
+    async def get_file_checkpoint(self, checkpoint_id, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.create_notebook_checkpoint(nb, relative_path)
+        return await checkpoint_manager.get_file_checkpoint(
+            checkpoint_id, relative_path
+        )
 
-    def get_file_checkpoint(self, checkpoint_id, path):
+    async def get_notebook_checkpoint(self, checkpoint_id, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.get_file_checkpoint(checkpoint_id, relative_path)
+        return await checkpoint_manager.get_notebook_checkpoint(
+            checkpoint_id, relative_path
+        )
 
-    def get_notebook_checkpoint(self, checkpoint_id, path):
+    async def delete_checkpoint(self, checkpoint_id, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.get_notebook_checkpoint(checkpoint_id, relative_path)
+        return await checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
 
-    def delete_checkpoint(self, checkpoint_id, path):
+    async def list_checkpoints(self, path):
         checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.delete_checkpoint(checkpoint_id, relative_path)
+        return await checkpoint_manager.list_checkpoints(relative_path)
 
-    def list_checkpoints(self, path):
-        checkpoint_manager, relative_path = self._checkpoint_manager_for_path(path)
-        return checkpoint_manager.list_checkpoints(relative_path)
-
-    def rename_checkpoint(self, checkpoint_id, old_path, new_path):
+    async def rename_checkpoint(self, checkpoint_id, old_path, new_path):
         checkpoint_manager, old_relative_path = self._checkpoint_manager_for_path(
             old_path
         )
@@ -611,12 +660,12 @@ class CombinedCheckpointsManager(GenericCheckpointsMixin, Checkpoints):
                     old_path, new_path
                 ),
             )
-        return checkpoint_manager.rename_checkpoint(
+        return await checkpoint_manager.rename_checkpoint(
             checkpoint_id, old_relative_path, new_relative_path
         )
 
 
-class CombinedContentsManager(ContentsManager):
+class CombinedContentsManager(AsyncContentsManager):
     root_dir = Unicode(config=True)
 
     preferred_dir = Unicode("", config=True)
@@ -625,13 +674,12 @@ class CombinedContentsManager(ContentsManager):
     def _default_checkpoints(self):
         return CombinedCheckpointsManager(self._content_managers)
 
-    def __init__(self, **kwargs):
-        print("Creating the combined contents manager...")
-        super(CombinedContentsManager, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(CombinedContentsManager, self).__init__(*args, **kwargs)
 
-        file_cm = LargeFileManager(**kwargs)
-        file_cm.checkpoints = GenericFileCheckpoints(**file_cm.checkpoints_kwargs)
-        gcs_cm = GCSContentsManager(**kwargs)
+        file_cm = AsyncLargeFileManager(*args, **kwargs)
+        file_cm.checkpoints = AsyncGenericFileCheckpoints(**file_cm.checkpoints_kwargs)
+        gcs_cm = GCSContentsManager(*args, **kwargs)
         self._content_managers = {
             "Local Disk": file_cm,
             "GCS": gcs_cm,
@@ -648,12 +696,12 @@ class CombinedContentsManager(ContentsManager):
             return None, path_parts[1], path_parts[0]
         return None, path, ""
 
-    def is_hidden(self, path):
+    async def is_hidden(self, path):
         try:
             cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
             if not cm:
                 return False
-            return cm.is_hidden(relative_path)
+            return await cm.is_hidden(relative_path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -661,12 +709,12 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def file_exists(self, path):
+    async def file_exists(self, path):
         try:
             cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
             if not cm:
                 return False
-            return cm.file_exists(relative_path)
+            return await cm.file_exists(relative_path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -674,14 +722,14 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def dir_exists(self, path):
+    async def dir_exists(self, path):
         if path in ["", "/"]:
             return True
         try:
             cm, relative_path, unused_path_prefix = self._content_manager_for_path(path)
             if not cm:
                 return False
-            return cm.dir_exists(relative_path)
+            return await cm.dir_exists(relative_path)
         except HTTPError as err:
             raise err
         except Exception as ex:
@@ -689,19 +737,19 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def _make_model_relative(self, model, path_prefix):
+    async def _make_model_relative(self, model, path_prefix):
         if "path" in model:
             model["path"] = "{}/{}".format(path_prefix, model["path"])
         if model.get("type", None) == "directory":
-            self._make_children_relative(model, path_prefix)
+            await self._make_children_relative(model, path_prefix)
 
-    def _make_children_relative(self, model, path_prefix):
+    async def _make_children_relative(self, model, path_prefix):
         children = model.get("content", None)
         if children:
             for child in children:
-                self._make_model_relative(child, path_prefix)
+                await self._make_model_relative(child, path_prefix)
 
-    def get(self, path, content=True, type=None, format=None, **kwargs):
+    async def get(self, path, content=True, type=None, format=None, **kwargs):
         if path in ["", "/"]:
             dir_obj = {}
             dir_obj["path"] = ""
@@ -711,17 +759,18 @@ class CombinedContentsManager(ContentsManager):
             dir_obj["writable"] = False
             dir_obj["format"] = None
             dir_obj["content"] = None
-            dir_obj["format"] = "json"
             contents = []
             for path_prefix in self._content_managers:
-                child_obj = self._content_managers[path_prefix].get(
-                    "", content=False, **kwargs
+                child_obj = await self._content_managers[path_prefix].get(
+                    "", content=False, type="directory", **kwargs
                 )
                 child_obj["path"] = path_prefix
                 child_obj["name"] = path_prefix
                 child_obj["writable"] = False
                 contents.append(child_obj)
-            dir_obj["content"] = contents
+            if content:
+                dir_obj["content"] = contents
+                dir_obj["format"] = "json"
             dir_obj["created"] = contents[0]["created"]
             dir_obj["last_modified"] = contents[0]["last_modified"]
             return dir_obj
@@ -729,10 +778,11 @@ class CombinedContentsManager(ContentsManager):
             cm, relative_path, path_prefix = self._content_manager_for_path(path)
             if not cm:
                 raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
-            model = cm.get(
+            model = await cm.get(
                 relative_path, content=content, type=type, format=format, **kwargs
             )
-            self._make_model_relative(model, path_prefix)
+            if model:
+                await self._make_model_relative(model, path_prefix)
             return model
         except HTTPError as err:
             raise err
@@ -741,12 +791,14 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def save(self, model, path):
+    async def save(self, model, path):
         if path in ["", "/"]:
             raise HTTPError(403, "The top-level directory is read-only")
         try:
             chunk = model.get("chunk", None)
             if chunk is None or chunk == 1:
+                # Follow the upstream pattern of only running the pre-save hooks for the first chunk
+                # (or for non-chunked uploads).
                 self.run_pre_save_hooks(model=model, path=path)
 
             cm, relative_path, path_prefix = self._content_manager_for_path(path)
@@ -758,11 +810,13 @@ class CombinedContentsManager(ContentsManager):
             if "path" in model:
                 model["path"] = relative_path
 
-            model = cm.save(model, relative_path)
+            model = await cm.save(model, relative_path)
             if "path" in model:
                 model["path"] = path
             if chunk is None or chunk == -1:
-                self.run_post_save_hooks(model=model, os_path=path)
+                # Follow the upstream pattern of only running the post-save hooks for the last chunk
+                # (or for non-chunked uploads).
+                self.run_post_save_hooks(model=model, os_path=relative_path)
             return model
         except HTTPError as err:
             raise err
@@ -771,7 +825,7 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def delete_file(self, path):
+    async def delete_file(self, path):
         if path in ["", "/"]:
             raise HTTPError(403, "The top-level directory is read-only")
         try:
@@ -780,7 +834,7 @@ class CombinedContentsManager(ContentsManager):
                 raise HTTPError(403, "The top-level directory contents are read-only")
             if not cm:
                 raise HTTPError(404, 'No content manager defined for "{}"'.format(path))
-            return cm.delete_file(relative_path)
+            return await cm.delete_file(relative_path)
         except OSError as err:
             # The built-in file contents manager will not attempt to wrap permissions
             # errors when deleting files if they occur while trying to move the
@@ -802,7 +856,7 @@ class CombinedContentsManager(ContentsManager):
                 500, "Internal server error: [{}] {}".format(type(ex), str(ex))
             )
 
-    def rename_file(self, old_path, new_path):
+    async def rename_file(self, old_path, new_path):
         if (old_path in ["", "/"]) or (new_path in ["", "/"]):
             raise HTTPError(403, "The top-level directory is read-only")
         try:
@@ -828,7 +882,7 @@ class CombinedContentsManager(ContentsManager):
 
             if old_cm != new_cm:
                 raise HTTPError(400, "Unsupported rename across file systems")
-            return old_cm.rename_file(old_relative_path, new_relative_path)
+            return await old_cm.rename_file(old_relative_path, new_relative_path)
         except HTTPError as err:
             raise err
         except Exception as ex:

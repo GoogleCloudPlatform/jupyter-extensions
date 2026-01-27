@@ -350,7 +350,7 @@ async def test_file_handlers(jp_fetch, top_level_path):
 
     # Create a bunch of notebooks in parallel and make sure they don't
     # create a backlog of requests
-    notebook_count = 230
+    notebook_count = 375
     create_callbacks = []
     for i in range(1, notebook_count):
         create_callbacks.append(
