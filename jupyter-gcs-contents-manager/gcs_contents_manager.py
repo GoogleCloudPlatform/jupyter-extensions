@@ -172,9 +172,7 @@ class GCSBasedFileManager:
             return True
         return False
 
-    def create_file(
-        self, content: str, content_type: str, path: str, chunk: int | None
-    ) -> dict[str, str]:
+    def create_file(self, content, content_type, path, chunk) -> dict[str, str]:
         blob = self._blob(path, create_if_missing=True, chunk=chunk)
         # GCS doesn't allow specifying the key version, so drop it if present
         if blob.kms_key_name:
