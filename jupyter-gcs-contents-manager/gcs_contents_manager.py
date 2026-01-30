@@ -172,7 +172,7 @@ class GCSBasedFileManager:
             return True
         return False
 
-    def create_file(self, content, content_type, path, chunk) -> dict[str, str]:
+    def create_file(self, content, content_type, path, chunk):
         blob = self._blob(path, create_if_missing=True, chunk=chunk)
         # GCS doesn't allow specifying the key version, so drop it if present
         if blob.kms_key_name:
@@ -190,7 +190,7 @@ class GCSBasedFileManager:
         content = nbformat.writes(nb)
         return self.create_file(content, "text/plain", path, None)
 
-    def file_contents(self, path: str, blob=None) -> tuple[bytes, str]:
+    def file_contents(self, path: str, blob=None):
         blob = blob or self._blob(path)
         if not blob:
             return None, None
