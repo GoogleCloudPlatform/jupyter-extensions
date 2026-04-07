@@ -1,0 +1,42 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'google-cloud-jupyter-config-v*'
+      - 'kernels-mixer-v*'
+      - 'jupyter-gcs-contents-manager-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Determine package directory
+        id: package
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # Strip the version suffix (-vN.N.N) to get the package name
+          PACKAGE=$(echo "$TAG" | sed 's/-v[0-9].*//')
+          echo "directory=$PACKAGE" >> "$GITHUB_OUTPUT"
+          echo "Publishing package: $PACKAGE"
+
+      - name: Build package
+        run: python -m build
+        working-directory: ${{ steps.package.outputs.directory }}
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ steps.package.outputs.directory }}/dist/
