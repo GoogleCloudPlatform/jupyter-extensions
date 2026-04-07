@@ -222,7 +222,7 @@ def configure_gateway_client(c):
     c.GatewayClient.url = gcp_kernel_gateway_url()
     c.GatewayClient.gateway_token_renewer_class = CommandTokenRenewer
     c.CommandTokenRenewer.token_command = (
-        'gcloud config config-helper --format="value(credential.access_token)"'
+        'gcloud config config-helper --min-expiry=30m --format="value(credential.access_token)"'
     )
 
     # Version 2.8.0 of the `jupyter_server` package requires the `auth_token`
