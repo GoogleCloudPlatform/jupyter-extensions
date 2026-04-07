@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -23,14 +24,28 @@ jobs:
       - name: Install build tools
         run: pip install build twine
 
-      - name: Determine package directory
+      - name: Determine package directory and verify version
         id: package
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           # Strip the version suffix (-vN.N.N) to get the package name
           PACKAGE=$(echo "$TAG" | sed 's/-v[0-9].*//')
+          TAG_VERSION=$(echo "$TAG" | sed 's/.*-v//')
           echo "directory=$PACKAGE" >> "$GITHUB_OUTPUT"
           echo "Publishing package: $PACKAGE"
+
+          # Verify tag version matches setup.py version
+          SETUP_VERSION=$(python -c "
+          import re
+          with open('${PACKAGE}/setup.py') as f:
+              m = re.search(r\"version=['\\\"]([^'\\\"]+)['\\\"]\", f.read())
+              print(m.group(1) if m else '')
+          ")
+          if [ "$TAG_VERSION" != "$SETUP_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match setup.py version ($SETUP_VERSION)"
+            exit 1
+          fi
+          echo "Version verified: $TAG_VERSION"
 
       - name: Build package
         run: python -m build
