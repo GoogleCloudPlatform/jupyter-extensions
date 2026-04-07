@@ -143,9 +143,9 @@ class GCSBasedFileManager:
             chunk.delete()
         return blob
 
-    def _list_blobs(self, path):
+    def _list_blobs(self, path, delimiter=None):
         prefix = self._gcs_path(path)
-        return self.bucket.list_blobs(prefix=prefix)
+        return self.bucket.list_blobs(prefix=prefix, delimiter=delimiter)
 
     def file_exists(self, path):
         path = normalize_path(path)
@@ -266,31 +266,24 @@ class GCSBasedFileManager:
         dir_obj["format"] = "json"
         dir_obj["content"] = []
 
-        # We have to convert a list of GCS blobs, which may include multiple
-        # entries corresponding to a single sub-directory, into a list of immediate
-        # directory contents with no duplicates.
-        #
-        # To do that, we keep a dictionary of immediate children, and then convert
-        # that dictionary into a list once it is fully populated.
-        children = {}
         blob_name_prefix = self._gcs_path(path)
-        blob_name_prefix_len = len(blob_name_prefix) + 1 if blob_name_prefix else 0
-        for b in self._list_blobs(path):
-            relative_path = b.name[blob_name_prefix_len:]
+        prefix_with_slash = blob_name_prefix + "/" if blob_name_prefix else ""
+
+        # Use delimiter="/" so GCS returns only immediate children, not all
+        # descendants recursively. Subdirectories appear as prefixes.
+        blobs_iterator = self._list_blobs(path, delimiter="/")
+        for b in blobs_iterator:
+            relative_path = b.name[len(prefix_with_slash):]
             if relative_path:  # Ignore the place-holder blob for the directory itself
                 child_path = url_path_join(path, relative_path)
-                first_slash = relative_path.find("/")
-                if first_slash < 0:
-                    children[relative_path] = self._file_metadata(child_path, b)
-                else:
-                    subdir = relative_path[0:first_slash]
-                    if subdir not in children:
-                        children[subdir] = self._dir_metadata(
-                            url_path_join(path, subdir)
-                        )
+                dir_obj["content"].append(self._file_metadata(child_path, b))
 
-        for child in children:
-            dir_obj["content"].append(children[child])
+        for subdir_prefix in blobs_iterator.prefixes:
+            subdir = subdir_prefix[len(prefix_with_slash):].rstrip("/")
+            if subdir:
+                dir_obj["content"].append(
+                    self._dir_metadata(url_path_join(path, subdir))
+                )
 
         return dir_obj
 
