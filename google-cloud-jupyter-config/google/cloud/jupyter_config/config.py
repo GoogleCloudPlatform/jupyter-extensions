@@ -13,217 +13,110 @@
 # limitations under the License.
 
 import asyncio
-from concurrent import futures
-import datetime
+import configparser
 import json
+import os
 import re
 import subprocess
 import sys
 import tempfile
-import threading
 
-import cachetools
+import google.auth
+import google.auth.transport.requests
+from google.cloud import resourcemanager_v3
 from jupyter_server.base.handlers import APIHandler
 import tornado
 
-from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
+from google.cloud.jupyter_config.tokenrenewer import GoogleAuthTokenRenewer
 
 
-def run_gcloud_subcommand(subcmd):
-    """Run a specified gcloud sub-command and return its output.
+def _get_gcloud_config_path():
+    """Return the path to the gcloud CLI properties file."""
+    config_dir = os.environ.get(
+        "CLOUDSDK_CONFIG", os.path.join(os.path.expanduser("~"), ".config", "gcloud")
+    )
+    active_config = "default"
+    active_config_file = os.path.join(config_dir, "active_config")
+    if os.path.exists(active_config_file):
+        with open(active_config_file, "r") as f:
+            active_config = f.read().strip() or "default"
+    return os.path.join(config_dir, "configurations", f"config_{active_config}")
 
-    The supplied subcommand is the full command line invocation, *except* for
-    the leading `gcloud` being omitted.
 
-    e.g. `info` instead of `gcloud info`.
+def _read_gcloud_properties():
+    """Read gcloud CLI properties from the config file.
 
-    We reuse the system stderr for the command so that any prompts from gcloud
-    will be displayed to the user.
+    Returns a nested dict like {"core": {"project": "...", "account": "..."}, ...}.
     """
-    with tempfile.TemporaryFile() as t:
-        p = subprocess.run(
-            f"gcloud {subcmd}",
-            stdin=subprocess.DEVNULL,
-            stderr=sys.stderr,
-            stdout=t,
-            check=True,
-            encoding="UTF-8",
-            shell=True,
-        )
-        t.seek(0)
-        return t.read().decode("UTF-8").strip()
+    config_path = _get_gcloud_config_path()
+    parser = configparser.ConfigParser()
+    parser.read(config_path)
+    result = {}
+    for section in parser.sections():
+        result[section] = dict(parser.items(section))
+    return result
 
 
-async def _run_gcloud_subcommand_via_process_pool_executor(subcmd):
-    loop = asyncio.get_running_loop()
-    with futures.ProcessPoolExecutor() as pool:
-        return await loop.run_in_executor(pool, run_gcloud_subcommand, subcmd)
-
-
-async def async_run_gcloud_subcommand(subcmd):
-    """Run a specified gcloud sub-command and return its output.
-
-    The supplied subcommand is the full command line invocation, *except* for
-    the leading `gcloud` being omitted.
-
-    e.g. `info` instead of `gcloud info`.
-
-    We reuse the system stderr for the command so that any prompts from gcloud
-    will be displayed to the user.
-    """
-
-    # Jupyter forces the use of a SelectorEventLoop on Windows, which does not
-    # support subprocesses. To work around that, on Windows (and *only* on
-    # Windows), we run the gcloud command synchronously inside of a separate
-    # process rather than asynchronously in the main process.
-    #
-    # This is a heavy-handed approach, but it ensures that our calls to gcloud
-    # do not block the Tornado request serving thread.
-    #
-    # See https://github.com/jupyter-server/jupyter_server/issues/1587 for
-    # more details.
-    if sys.platform.startswith("win"):
-        return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
-
-    with tempfile.TemporaryFile() as t:
-        p = await asyncio.create_subprocess_shell(
-            f"gcloud {subcmd}",
-            stdin=subprocess.DEVNULL,
-            stderr=sys.stderr,
-            stdout=t,
-        )
-        await p.wait()
-        if p.returncode != 0:
-            raise subprocess.CalledProcessError(p.returncode, None, None, None)
-        t.seek(0)
-        return t.read().decode("UTF-8").strip()
-
-
-@cachetools.cached(
-    cache=cachetools.TTLCache(maxsize=1024, ttl=(20 * 60)), lock=threading.Lock()
-)
-def cached_gcloud_subcommand(subcmd):
-    return run_gcloud_subcommand(subcmd)
-
-
-def clear_gcloud_cache():
-    """Clear the TTL cache used to cache gcloud subcommand results."""
-    cached_gcloud_subcommand.cache_clear()
-
-
-def _get_config_field(config, field):
-    subconfig = config
-    for path_part in field.split("."):
-        if path_part:
-            subconfig = subconfig.get(path_part, {})
-    return subconfig
-
-
-def get_gcloud_config(field):
-    """Helper method that invokes the gcloud config helper.
-
-    Invoking gcloud commands is a very heavyweight process, so the config is
-    cached for up to 20 minutes.
-
-    The config is generated with a minimum credential expiry of 30 minutes, so
-    that we can ensure that the caller can use the cached credentials for at
-    least ~10 minutes even if the cache entry is about to expire.
-
-    Args:
-        field: A period-separated search path for the config value to return.
-               For example, 'configuration.properties.core.project'
-    Returns:
-        A JSON object whose type depends on the search path for the field within
-        the gcloud config.
-
-        For example, if the field is `configuration.properties.core.project`,
-        then the return value will be a string. In comparison, if the field
-        is `configuration.properties.core`, then the return value will be a
-        dictionary containing a field named `project` with a string value.
-    """
-    subcommand = "config config-helper --min-expiry=30m --format=json"
-    cached_config_str = cached_gcloud_subcommand(subcommand)
-    cached_config = json.loads(cached_config_str)
-    return _get_config_field(cached_config, field)
-
-
-async def async_get_gcloud_config(field):
-    """Async helper method that invokes the gcloud config helper.
-
-    This is like `get_gcloud_config` but does not block on the underlying
-    gcloud invocation when there is a cache miss.
-
-    Args:
-        field: A period-separated search path for the config value to return.
-               For example, 'configuration.properties.core.project'
-    Returns:
-        An awaitable that resolves to a JSON object with a type depending on
-        the search path for the field within the gcloud config.
-
-        For example, if the field is `configuration.properties.core.project`,
-        then the JSON object will be a string. In comparison, if the field
-        is `configuration.properties.core`, then it will be a dictionary
-        containing a field named `project` with a string value.
-    """
-    subcommand = "config config-helper --min-expiry=30m --format=json"
-    with cached_gcloud_subcommand.cache_lock:
-        if subcommand in cached_gcloud_subcommand.cache:
-            cached_config_str = cached_gcloud_subcommand.cache[subcommand]
-            cached_config = json.loads(cached_config_str)
-            return _get_config_field(cached_config, field)
-
-    out = await async_run_gcloud_subcommand(subcommand)
-    with cached_gcloud_subcommand.cache_lock:
-        cached_gcloud_subcommand.cache[subcommand] = out
-    config = json.loads(out)
-    return _get_config_field(config, field)
+def _get_credentials():
+    """Get google-auth credentials with cloud-platform scope."""
+    credentials, project = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+    return credentials, project
 
 
 def gcp_account():
-    """Helper method to get the project configured through gcloud"""
-    return get_gcloud_config("configuration.properties.core.account")
+    """Get the account configured through gcloud properties."""
+    props = _read_gcloud_properties()
+    return props.get("core", {}).get("account", "")
 
 
 def gcp_credentials():
-    """Helper method to get the project configured through gcloud"""
-    return get_gcloud_config("credential.access_token")
+    """Get a valid access token using Application Default Credentials."""
+    credentials, _ = _get_credentials()
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return credentials.token
 
 
 def gcp_project():
-    """Helper method to get the project configured through gcloud"""
-    return get_gcloud_config("configuration.properties.core.project")
+    """Get the project, preferring ADC's project, falling back to gcloud properties."""
+    _, project = _get_credentials()
+    if project:
+        return project
+    props = _read_gcloud_properties()
+    return props.get("core", {}).get("project", "")
 
 
 def gcp_project_number():
-    """Helper method to get the project number for the project configured through gcloud"""
-    project = gcp_project()
-    return run_gcloud_subcommand(
-        f'projects describe {project} --format="value(projectNumber)"'
-    )
+    """Get the project number for the configured project using the Resource Manager API."""
+    project_id = gcp_project()
+    client = resourcemanager_v3.ProjectsClient()
+    project = client.get_project(name=f"projects/{project_id}")
+    # project.name is "projects/<number>"
+    return project.name.split("/")[1]
 
 
 def gcp_region():
-    """Helper method to get the project configured through gcloud"""
-    region = get_gcloud_config("configuration.properties.dataproc.region")
+    """Get the region from gcloud properties (dataproc.region or compute.region)."""
+    props = _read_gcloud_properties()
+    region = props.get("dataproc", {}).get("region", "")
     if not region:
-        region = get_gcloud_config("configuration.properties.compute.region")
+        region = props.get("compute", {}).get("region", "")
     return region
 
 
 def gcp_kernel_gateway_url():
-    """Helper method to return the kernel gateway URL for the configured project and region."""
+    """Return the kernel gateway URL for the configured project and region."""
     project = gcp_project_number()
     region = gcp_region()
     return f"https://{project}-dot-{region}.kernels.googleusercontent.com"
 
 
 def configure_gateway_client(c):
-    """Helper method for configuring the given Config object to use the GCP kernel gateway."""
+    """Configure the given Config object to use the GCP kernel gateway."""
     c.GatewayClient.url = gcp_kernel_gateway_url()
-    c.GatewayClient.gateway_token_renewer_class = CommandTokenRenewer
-    c.CommandTokenRenewer.token_command = (
-        'gcloud config config-helper --min-expiry=30m --format="value(credential.access_token)"'
-    )
+    c.GatewayClient.gateway_token_renewer_class = GoogleAuthTokenRenewer
 
     # Version 2.8.0 of the `jupyter_server` package requires the `auth_token`
     # value to be set to a non-empty value or else it will never invoke the
@@ -248,10 +141,54 @@ _allowed_property_names = re.compile("^[a-zA-Z0-9_-]+$")
 _allowed_property_values = re.compile("^[a-zA-Z0-9.:_-]+$")
 
 
+async def _async_run_gcloud_subcommand(subcmd):
+    """Run a gcloud sub-command asynchronously.
+
+    Only used for `gcloud config set` operations in PropertiesHandler.
+    """
+    if sys.platform.startswith("win"):
+        loop = asyncio.get_running_loop()
+        from concurrent import futures
+        with futures.ProcessPoolExecutor() as pool:
+            return await loop.run_in_executor(pool, _run_gcloud_subcommand, subcmd)
+
+    with tempfile.TemporaryFile() as t:
+        p = await asyncio.create_subprocess_shell(
+            f"gcloud {subcmd}",
+            stdin=subprocess.DEVNULL,
+            stderr=sys.stderr,
+            stdout=t,
+        )
+        await p.wait()
+        if p.returncode != 0:
+            raise subprocess.CalledProcessError(p.returncode, None, None, None)
+        t.seek(0)
+        return t.read().decode("UTF-8").strip()
+
+
+def _run_gcloud_subcommand(subcmd):
+    """Run a gcloud sub-command synchronously.
+
+    Only used for `gcloud config set` operations.
+    """
+    with tempfile.TemporaryFile() as t:
+        subprocess.run(
+            f"gcloud {subcmd}",
+            stdin=subprocess.DEVNULL,
+            stderr=sys.stderr,
+            stdout=t,
+            check=True,
+            encoding="UTF-8",
+            shell=True,
+        )
+        t.seek(0)
+        return t.read().decode("UTF-8").strip()
+
+
 class PropertiesHandler(APIHandler):
     @tornado.web.authenticated
     async def get(self):
-        properties = await async_get_gcloud_config("configuration.properties")
+        properties = _read_gcloud_properties()
         self.finish(json.dumps(properties))
         return
 
@@ -282,8 +219,7 @@ class PropertiesHandler(APIHandler):
         try:
             updated_properties_list = flatten_dictionary("", updated_properties)
             for k, v in updated_properties_list:
-                await async_run_gcloud_subcommand(f"config set {k} {v}")
-            clear_gcloud_cache()
+                await _async_run_gcloud_subcommand(f"config set {k} {v}")
             self.finish(json.dumps(updated_properties_list))
         except ValueError as ve:
             self.set_status(400)

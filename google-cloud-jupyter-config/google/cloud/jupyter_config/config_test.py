@@ -13,14 +13,12 @@
 # limitations under the License.
 
 import json
-import os
+from unittest import mock
 
 import pytest
 from tornado import httpclient
 
 from google.cloud.jupyter_config.config import (
-    async_run_gcloud_subcommand,
-    async_get_gcloud_config,
     gcp_account,
     gcp_credentials,
     gcp_project,
@@ -28,51 +26,44 @@ from google.cloud.jupyter_config.config import (
 )
 
 
-def test_gcp_account(mock_gcloud_env):
-    assert gcp_account() == "example-account"
-
-    # Verify that changing the OS environment variable does not modify the cached property
-    os.environ["CLOUDSDK_CORE_ACCOUNT"] = "should-not-be-used"
+def test_gcp_account(mock_gcloud_properties):
     assert gcp_account() == "example-account"
 
 
-def test_gcp_credentials(mock_gcloud_env):
-    assert gcp_credentials() == "example-token"
-
-    # Verify that changing the OS environment variable does not modify the cached property
-    os.environ["CLOUDSDK_AUTH_ACCESS_TOKEN"] = "should-not-be-used"
-    assert gcp_credentials() == "example-token"
-
-    
-def test_gcp_project(mock_gcloud_env):
-    assert gcp_project() == "example-project"
-
-    # Verify that changing the OS environment variable does not modify the cached property
-    os.environ["CLOUDSDK_CORE_PROJECT"] = "should-not-be-used"
+def test_gcp_project(mock_gcloud_properties):
     assert gcp_project() == "example-project"
 
 
-def test_gcp_region(mock_gcloud_env):
-    assert gcp_region() == "example-region"
-
-    # Verify that changing the OS environment variable does not modify the cached property
-    os.environ["CLOUDSDK_DATAPROC_REGION"] = "should-not-be-used"
+def test_gcp_region(mock_gcloud_properties):
     assert gcp_region() == "example-region"
 
 
-async def test_async_run_gcloud_subcommand(mock_gcloud_env):
-    test_project = await async_run_gcloud_subcommand("config get core/project")
-    assert test_project == "example-project"
+@mock.patch("google.cloud.jupyter_config.config._get_credentials")
+def test_gcp_credentials(mock_get_creds):
+    mock_creds = mock.MagicMock()
+    mock_creds.token = "test-access-token"
+    mock_get_creds.return_value = (mock_creds, "test-project")
+    assert gcp_credentials() == "test-access-token"
+    mock_creds.refresh.assert_called_once()
 
 
-async def test_async_gcloud_config(mock_gcloud_env):
-    test_account = await async_get_gcloud_config(
-        "configuration.properties.core.account"
-    )
-    assert test_account == "example-account"
+@mock.patch("google.cloud.jupyter_config.config._get_credentials")
+def test_gcp_project_from_adc(mock_get_creds):
+    """Project from ADC takes priority over gcloud properties."""
+    mock_creds = mock.MagicMock()
+    mock_get_creds.return_value = (mock_creds, "adc-project")
+    assert gcp_project() == "adc-project"
 
 
-async def test_get_properties(jp_fetch, mock_gcloud_env):
+@mock.patch("google.cloud.jupyter_config.config._get_credentials")
+def test_gcp_project_falls_back_to_gcloud(mock_get_creds, mock_gcloud_properties):
+    """Falls back to gcloud properties when ADC has no project."""
+    mock_creds = mock.MagicMock()
+    mock_get_creds.return_value = (mock_creds, None)
+    assert gcp_project() == "example-project"
+
+
+async def test_get_properties(jp_fetch, mock_gcloud_properties):
     response = await jp_fetch("gcloud", "config", "properties")
     assert response.code == 200
 
@@ -82,24 +73,25 @@ async def test_get_properties(jp_fetch, mock_gcloud_env):
     assert properties["dataproc"]["region"] == "example-region"
 
 
-async def test_set_properties(jp_fetch, mock_gcloud_env):
-    updated_properties = {
-        "compute": {
-            "region": "updated-example-region",
-        },
-    }
-    update_response = await jp_fetch(
-        "gcloud", "config", "properties", method="POST", body=json.dumps(updated_properties))
-    assert update_response.code == 200
+async def test_set_properties(jp_fetch, mock_gcloud_properties):
+    with mock.patch(
+        "google.cloud.jupyter_config.config._async_run_gcloud_subcommand"
+    ) as mock_gcloud:
+        mock_gcloud.return_value = ""
+        updated_properties = {
+            "compute": {
+                "region": "updated-example-region",
+            },
+        }
+        update_response = await jp_fetch(
+            "gcloud", "config", "properties",
+            method="POST", body=json.dumps(updated_properties),
+        )
+        assert update_response.code == 200
+        mock_gcloud.assert_called_once_with("config set compute/region updated-example-region")
 
-    get_response = await jp_fetch("gcloud", "config", "properties")
-    assert get_response.code == 200
-    properties = json.loads(get_response.body)
 
-    assert properties["compute"]["region"] == "updated-example-region"
-
-
-async def test_set_invalid_property(jp_fetch, mock_gcloud_env):
+async def test_set_invalid_property(jp_fetch, mock_gcloud_properties):
     updated_properties = {
         "compute; true": {
             "region": "updated-example-region",
@@ -113,7 +105,7 @@ async def test_set_invalid_property(jp_fetch, mock_gcloud_env):
         assert err.code == 400
 
 
-async def test_set_invalid_nested_property(jp_fetch, mock_gcloud_env):
+async def test_set_invalid_nested_property(jp_fetch, mock_gcloud_properties):
     updated_properties = {
         "compute": {
             "region; true": "updated-example-region",
@@ -127,7 +119,7 @@ async def test_set_invalid_nested_property(jp_fetch, mock_gcloud_env):
         assert err.code == 400
 
 
-async def test_set_invalid_property_value(jp_fetch, mock_gcloud_env):
+async def test_set_invalid_property_value(jp_fetch, mock_gcloud_properties):
     updated_properties = {
         "compute": {
             "region": "updated-example-region; true",

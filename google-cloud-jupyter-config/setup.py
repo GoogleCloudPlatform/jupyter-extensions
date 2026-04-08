@@ -28,9 +28,10 @@ setuptools.setup(
     packages=setuptools.find_namespace_packages(),
     python_requires=">=3.8",
     install_requires=[
-        "cachetools",
+        "google-auth",
+        "google-cloud-resource-manager",
         "jupyter_server>=2.4.0",
-        "traitlets",
+        "requests",
     ],
     include_package_data=True,
     data_files=[(

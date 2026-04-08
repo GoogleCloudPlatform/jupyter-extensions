@@ -1,4 +1,4 @@
-# Copyright 2026 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import configparser
 import os
-import sys
+import tempfile
 
 import pytest
-
-from google.cloud.jupyter_config.config import clear_gcloud_cache
 
 
 pytest_plugins = ['pytest_jupyter.jupyter_server']
@@ -35,31 +34,28 @@ def jp_server_config(jp_server_config):
 
 
 @pytest.fixture
-def mock_gcloud_env():
-    _mock_cloudsdk_variables = {
-        "CLOUDSDK_AUTH_ACCESS_TOKEN": "example-token",
-        "CLOUDSDK_CORE_ACCOUNT": "example-account",
-        "CLOUDSDK_CORE_PROJECT": "example-project",
-        "CLOUDSDK_DATAPROC_REGION": "example-region",
-        # Make sure that gcloud uses the same python environment as the test to
-        # avoid issues caused by conflicting versions.
-        "CLOUDSDK_PYTHON": sys.executable,
+def mock_gcloud_properties(monkeypatch, tmp_path):
+    """Create a fake gcloud config directory with properties."""
+    config_dir = tmp_path / "gcloud"
+    config_dir.mkdir()
+
+    # Write active_config
+    (config_dir / "active_config").write_text("default")
+
+    # Write config file
+    configs_dir = config_dir / "configurations"
+    configs_dir.mkdir()
+    config = configparser.ConfigParser()
+    config["core"] = {
+        "account": "example-account",
+        "project": "example-project",
     }
+    config["dataproc"] = {
+        "region": "example-region",
+    }
+    config_file = configs_dir / "config_default"
+    with open(config_file, "w") as f:
+        config.write(f)
 
-    # First override the existing environment with our mock variables
-    original_cloudsdk_variables = {}
-    for key in os.environ:
-        if key.startswith("CLOUDSDK_"):
-            original_cloudsdk_variables[key] = os.environ[key]
-    for key in _mock_cloudsdk_variables:
-        os.environ[key] = _mock_cloudsdk_variables[key]
-    clear_gcloud_cache()
-
-    # Yield the modified environment
-    yield os.environ
-
-    # Cleanup the environment by resetting any modified variables
-    for key in _mock_cloudsdk_variables:
-        del os.environ[key]
-    for key in original_cloudsdk_variables:
-        os.environ[key] = original_cloudsdk_variables[key]
+    monkeypatch.setenv("CLOUDSDK_CONFIG", str(config_dir))
+    return config_dir
