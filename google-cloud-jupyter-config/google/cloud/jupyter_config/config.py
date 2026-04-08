@@ -54,10 +54,14 @@ def run_gcloud_subcommand(subcmd):
         return t.read().decode("UTF-8").strip()
 
 
+_process_pool_executor = futures.ProcessPoolExecutor(max_workers=1)
+
+
 async def _run_gcloud_subcommand_via_process_pool_executor(subcmd):
     loop = asyncio.get_running_loop()
-    with futures.ProcessPoolExecutor() as pool:
-        return await loop.run_in_executor(pool, run_gcloud_subcommand, subcmd)
+    return await loop.run_in_executor(
+        _process_pool_executor, run_gcloud_subcommand, subcmd
+    )
 
 
 async def async_run_gcloud_subcommand(subcmd):
