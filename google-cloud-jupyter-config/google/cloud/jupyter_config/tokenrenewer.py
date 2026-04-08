@@ -16,6 +16,7 @@ import datetime
 import subprocess
 import sys
 import tempfile
+import threading
 import typing
 
 
@@ -25,7 +26,12 @@ from jupyter_server.gateway.gateway_client import GatewayTokenRenewerBase
 
 
 class CachedTokenRenewerBase(GatewayTokenRenewerBase):
-    """Token renewer base class that only renews the token after a specified timeout."""
+    """Token renewer base class that only renews the token after a specified timeout.
+
+    After the initial (blocking) token fetch, subsequent renewals are performed
+    proactively in a background thread so that get_token() returns immediately
+    from cache and never blocks the Tornado event loop.
+    """
 
     token_lifetime_seconds = Int(
         default_value=300,
@@ -42,7 +48,12 @@ class CachedTokenRenewerBase(GatewayTokenRenewerBase):
     ):
         pass
 
-    _created = datetime.datetime.min
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._created = datetime.datetime.min
+        self._lock = threading.Lock()
+        self._refresh_pending = False
+        self._cached_token = None
 
     def get_token(
         self,
@@ -51,13 +62,55 @@ class CachedTokenRenewerBase(GatewayTokenRenewerBase):
         auth_token: str,
         **kwargs: typing.Any,
     ):
+        with self._lock:
+            if self._cached_token:
+                auth_token = self._cached_token
+
         current_time = datetime.datetime.now()
         duration = (current_time - self._created).total_seconds()
         if (not auth_token) or (duration > self.token_lifetime_seconds):
-            auth_token = self.force_new_token(auth_header_key, auth_scheme, **kwargs)
-            self._created = datetime.datetime.now()
-
+            if auth_token:
+                # We have a stale but potentially still-valid token (gcloud
+                # tokens are generated with --min-expiry=30m, so a 5-minute-old
+                # token still has ~25 minutes of validity). Refresh in the
+                # background and return the current token immediately to avoid
+                # blocking the event loop.
+                self._schedule_background_refresh(
+                    auth_header_key, auth_scheme, **kwargs
+                )
+                return auth_token
+            # No token at all yet; must block for the initial fetch.
+            auth_token = self.force_new_token(
+                auth_header_key, auth_scheme, **kwargs
+            )
+            with self._lock:
+                self._created = datetime.datetime.now()
+                self._cached_token = auth_token
         return auth_token
+
+    def _schedule_background_refresh(
+        self, auth_header_key, auth_scheme, **kwargs
+    ):
+        with self._lock:
+            if self._refresh_pending:
+                return
+            self._refresh_pending = True
+
+        def _do_refresh():
+            try:
+                token = self.force_new_token(
+                    auth_header_key, auth_scheme, **kwargs
+                )
+                with self._lock:
+                    self._cached_token = token
+                    self._created = datetime.datetime.now()
+                    self._refresh_pending = False
+            except Exception:
+                with self._lock:
+                    self._refresh_pending = False
+
+        thread = threading.Thread(target=_do_refresh, daemon=True)
+        thread.start()
 
 
 class CommandTokenRenewer(CachedTokenRenewerBase):
