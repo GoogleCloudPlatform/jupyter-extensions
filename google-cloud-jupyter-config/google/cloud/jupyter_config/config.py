@@ -29,6 +29,21 @@ import tornado
 from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
 
+class _StderrTee(object):
+    """Tee output to both a given file and stderr.
+
+    This allows our subprocess invocations to prompt the user interactively
+    (by writing to stderr) while at the same time capturing stderr to report
+    in case the subprocess invocation returns a non-zero result.
+    """
+    def __init__(self, out_file):
+        self.out_file = out_file
+
+    def write(self, *args, **kwargs):
+        sys.stderr.write(*args, **kwargs)
+        self.out_file.write(*args, **kwargs)
+
+
 def run_gcloud_subcommand(subcmd):
     """Run a specified gcloud sub-command and return its output.
 
@@ -41,15 +56,24 @@ def run_gcloud_subcommand(subcmd):
     will be displayed to the user.
     """
     with tempfile.TemporaryFile() as t:
-        p = subprocess.run(
-            f"gcloud {subcmd}",
-            stdin=subprocess.DEVNULL,
-            stderr=sys.stderr,
-            stdout=t,
-            check=True,
-            encoding="UTF-8",
-            shell=True,
-        )
+        with tempfile.TemporaryFile() as errt:
+            stderr = _StderrTee(errt)
+            try:
+                p = subprocess.run(
+                    f"gcloud {subcmd}",
+                    stdin=subprocess.DEVNULL,
+                    stderr=stderr,
+                    stdout=t,
+                    check=True,
+                    encoding="UTF-8",
+                    shell=True,
+                )
+            except subprocess.CalledProcessError as err:
+                t.seek(0)
+                errt.seek(0)
+                stdout = t.read().decode("UTF-8").strip()
+                stderr = errt.read().decode("UTF-8").strip()
+                raise subprocess.CalledProcessError(err.returncode, err.cmd, None, stdout, stderr)
         t.seek(0)
         return t.read().decode("UTF-8").strip()
 
@@ -72,8 +96,8 @@ async def async_run_gcloud_subcommand(subcmd):
 
     e.g. `info` instead of `gcloud info`.
 
-    We reuse the system stderr for the command so that any prompts from gcloud
-    will be displayed to the user.
+    We tee stderr for the command to both a temp file and the system stderr
+    so that any prompts from gcloud will be displayed to the user.
     """
 
     # Jupyter forces the use of a SelectorEventLoop on Windows, which does not
@@ -90,17 +114,23 @@ async def async_run_gcloud_subcommand(subcmd):
         return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
 
     with tempfile.TemporaryFile() as t:
-        p = await asyncio.create_subprocess_shell(
-            f"gcloud {subcmd}",
-            stdin=subprocess.DEVNULL,
-            stderr=sys.stderr,
-            stdout=t,
-        )
-        await p.wait()
-        if p.returncode != 0:
-            raise subprocess.CalledProcessError(p.returncode, None, None, None)
-        t.seek(0)
-        return t.read().decode("UTF-8").strip()
+        with tempfile.TemporaryFile() as errt:
+            stderr = _StderrTee(errt)
+            cmd = f"gcloud {subcmd}"
+            p = await asyncio.create_subprocess_shell(
+                cmd,
+                stdin=subprocess.DEVNULL,
+                stderr=sys.stderr,
+                stdout=t,
+            )
+            await p.wait()
+            t.seek(0)
+            errt.seek(0)
+            stdout = t.read().decode("UTF-8").strip()
+            stderr = errt.read().decode("UTF-8").strip()
+            if p.returncode != 0:
+                raise subprocess.CalledProcessError(p.returncode, cmd, None, stdout, stderr)
+            return stdout
 
 
 @cachetools.cached(
