@@ -29,21 +29,6 @@ import tornado
 from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
 
-class _StderrTee(object):
-    """Tee output to both a given file and stderr.
-
-    This allows our subprocess invocations to prompt the user interactively
-    (by writing to stderr) while at the same time capturing stderr to report
-    in case the subprocess invocation returns a non-zero result.
-    """
-    def __init__(self, out_file):
-        self.out_file = out_file
-
-    def write(self, *args, **kwargs):
-        sys.stderr.write(*args, **kwargs)
-        self.out_file.write(*args, **kwargs)
-
-
 def run_gcloud_subcommand(subcmd):
     """Run a specified gcloud sub-command and return its output.
 
@@ -52,17 +37,16 @@ def run_gcloud_subcommand(subcmd):
 
     e.g. `info` instead of `gcloud info`.
 
-    We reuse the system stderr for the command so that any prompts from gcloud
-    will be displayed to the user.
+    We capture the stderr for the command so a consequence of that is that
+    any prompts from gcloud will be not be displayed to the user.
     """
     with tempfile.TemporaryFile() as t:
         with tempfile.TemporaryFile() as errt:
-            stderr = _StderrTee(errt)
             try:
                 p = subprocess.run(
                     f"gcloud {subcmd}",
                     stdin=subprocess.DEVNULL,
-                    stderr=stderr,
+                    stderr=errt,
                     stdout=t,
                     check=True,
                     encoding="UTF-8",
@@ -96,8 +80,8 @@ async def async_run_gcloud_subcommand(subcmd):
 
     e.g. `info` instead of `gcloud info`.
 
-    We tee stderr for the command to both a temp file and the system stderr
-    so that any prompts from gcloud will be displayed to the user.
+    We capture the stderr for the command so a consequence of that is that
+    any prompts from gcloud will be not be displayed to the user.
     """
 
     # Jupyter forces the use of a SelectorEventLoop on Windows, which does not
@@ -115,12 +99,11 @@ async def async_run_gcloud_subcommand(subcmd):
 
     with tempfile.TemporaryFile() as t:
         with tempfile.TemporaryFile() as errt:
-            stderr = _StderrTee(errt)
             cmd = f"gcloud {subcmd}"
             p = await asyncio.create_subprocess_shell(
                 cmd,
                 stdin=subprocess.DEVNULL,
-                stderr=sys.stderr,
+                stderr=errt,
                 stdout=t,
             )
             await p.wait()
