@@ -14,6 +14,7 @@
 
 import datetime
 import json
+import logging
 import uuid
 
 import pytest
@@ -89,6 +90,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
 
             await close_and_drain_pending_messages(ws)
             return
+        logging.getLogger().info(f"Received unrelated websocket message: {resp_json}")
 
     await close_and_drain_pending_messages(ws)
     raise AssertionError("Never got a response to the code execution")
