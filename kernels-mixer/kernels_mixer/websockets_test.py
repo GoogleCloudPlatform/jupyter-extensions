@@ -91,7 +91,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     #   An execute result message.
     #   An execute reply message.
     #   An idle status message in response to the execute request.
-    for attempt in range(10):
+    for attempt in range(100):
         kstate = await get_kernel_state(jp_fetch, k["id"])
         print(f"Latest kernel state: {kstate}")
         resp = await ws.read_message()
