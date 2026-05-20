@@ -89,18 +89,24 @@ async def async_run_gcloud_subcommand(subcmd):
     if sys.platform.startswith("win"):
         return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
 
-    with tempfile.TemporaryFile() as t:
-        p = await asyncio.create_subprocess_shell(
-            f"gcloud {subcmd}",
-            stdin=subprocess.DEVNULL,
-            stderr=sys.stderr,
-            stdout=t,
-        )
-        await p.wait()
-        if p.returncode != 0:
-            raise subprocess.CalledProcessError(p.returncode, None, None, None)
-        t.seek(0)
-        return t.read().decode("UTF-8").strip()
+    with tempfile.TemporaryFile() as stdout_t:
+        with tempfile.TemporaryFile() as stderr_t:
+            p = await asyncio.create_subprocess_shell(
+                f"gcloud {subcmd}",
+                stdin=subprocess.DEVNULL,
+                stderr=stderr_t,
+                stdout=stdout_t,
+            )
+            await p.wait()
+            stdout_t.seek(0)
+            stdout_str = stdout_t.read().decode("UTF-8").strip()
+            if p.returncode != 0:
+                stderr_t.seek(0)
+                stderr_str = stdout_t.read().decode("UTF-8").strip()
+                print(stderr_str, file=sys.stderr)
+                raise subprocess.CalledProcessError(
+                    p.returncode, f"gcloud {subcmd}", stdout_str, stderr_str)
+            return stdout_str
 
 
 @cachetools.cached(
