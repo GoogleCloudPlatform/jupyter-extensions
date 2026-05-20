@@ -15,6 +15,7 @@
 import datetime
 import json
 import logging
+import time
 import uuid
 
 import pytest
@@ -27,6 +28,12 @@ def test_kernel(jp_fetch):
         k = json.loads(kr.body.decode("utf-8"))
         return k
     return test_kernel
+
+
+async def get_kernel_state(jp_fetch, kernel_id):
+    ks = await jp_fetch("api", "kernels", kernel_id)
+    k = json.loads(ks.body.decode("utf-8"))
+    return k.get("execution_state", None)
 
 
 async def close_and_drain_pending_messages(ws):
@@ -42,6 +49,9 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     k = await test_kernel()
     assert "id" in k
 
+    kstate = await get_kernel_state(jp_fetch, k["id"])
+    logging.getLogger().info(f"Initial kernel state: {kstate}")
+    
     ksr = await jp_fetch("api", "kernelspecs", k.get("name"))
     ks = json.loads(ksr.body.decode("utf-8"))
     assert " (Local)" in ks.get("spec", {}).get("display_name", None)
@@ -70,7 +80,10 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
         "buffers": [],
     }))
 
-    # We expect multiple response messages, including at least (but possiblye more):
+    kstate = await get_kernel_state(jp_fetch, k["id"])
+    logging.getLogger().info(f"Updated kernel state: {kstate}")
+
+    # We expect multiple response messages, including at least (but possibly more):
     #
     #   An initial  "busy" status message in response to a kernel info request.
     #   A subsequent "idle" status messages in response to a kernel info request.
@@ -80,6 +93,8 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     #   An execute reply message.
     #   An idle status message in response to the execute request.
     for attempt in range(10):
+        kstate = await get_kernel_state(jp_fetch, k["id"])
+        logging.getLogger().info(f"Latest kernel state: {kstate}")
         resp = await ws.read_message()
         resp_json = json.loads(resp)
         response_type = resp_json.get("header", {}).get("msg_type", None)
