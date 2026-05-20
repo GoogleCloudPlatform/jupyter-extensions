@@ -1,7 +1,7 @@
 import setuptools
 
 with open("README.md", "r") as fh:
-  long_description = fh.read()
+    long_description = fh.read()
 
 setuptools.setup(
     name="jupyter-gcs-contents-manager",
@@ -16,7 +16,7 @@ setuptools.setup(
     install_requires=[
         "google-cloud-storage",
         "nbformat",
-        "notebook",
+        "jupyter_server",
         "traitlets",
         "tornado",
     ],

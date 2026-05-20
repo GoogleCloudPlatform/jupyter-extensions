@@ -20,10 +20,12 @@ import pytest
 
 
 @pytest.fixture
-async def test_kernel(jp_fetch):
-    kr = await jp_fetch("api", "kernels", method="POST", body=json.dumps({"name": "python3"}))
-    k = json.loads(kr.body.decode("utf-8"))
-    return k
+def test_kernel(jp_fetch):
+    async def test_kernel():
+        kr = await jp_fetch("api", "kernels", method="POST", body=json.dumps({"name": "python3"}))
+        k = json.loads(kr.body.decode("utf-8"))
+        return k
+    return test_kernel
 
 
 async def close_and_drain_pending_messages(ws):
@@ -36,7 +38,7 @@ async def close_and_drain_pending_messages(ws):
 
 
 async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
-    k = await test_kernel
+    k = await test_kernel()
     assert "id" in k
 
     ksr = await jp_fetch("api", "kernelspecs", k.get("name"))
