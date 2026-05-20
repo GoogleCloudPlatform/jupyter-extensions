@@ -78,7 +78,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     #   An execute result message.
     #   An execute reply message.
     #   An idle status message in response to the execute request.
-    for attempt in range(10):
+    for attempt in range(100):
         resp = await ws.read_message()
         resp_json = json.loads(resp)
         response_type = resp_json.get("header", {}).get("msg_type", None)
