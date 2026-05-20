@@ -14,7 +14,6 @@
 
 import datetime
 import json
-import logging
 import time
 import uuid
 
@@ -50,7 +49,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     assert "id" in k
 
     kstate = await get_kernel_state(jp_fetch, k["id"])
-    logging.getLogger().info(f"Initial kernel state: {kstate}")
+    print(f"Initial kernel state: {kstate}")
     
     ksr = await jp_fetch("api", "kernelspecs", k.get("name"))
     ks = json.loads(ksr.body.decode("utf-8"))
@@ -81,7 +80,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     }))
 
     kstate = await get_kernel_state(jp_fetch, k["id"])
-    logging.getLogger().info(f"Updated kernel state: {kstate}")
+    print(f"Updated kernel state: {kstate}")
 
     # We expect multiple response messages, including at least (but possibly more):
     #
@@ -94,7 +93,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
     #   An idle status message in response to the execute request.
     for attempt in range(10):
         kstate = await get_kernel_state(jp_fetch, k["id"])
-        logging.getLogger().info(f"Latest kernel state: {kstate}")
+        print(f"Latest kernel state: {kstate}")
         resp = await ws.read_message()
         resp_json = json.loads(resp)
         response_type = resp_json.get("header", {}).get("msg_type", None)
@@ -105,7 +104,7 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
 
             await close_and_drain_pending_messages(ws)
             return
-        logging.getLogger().info(f"Received unrelated websocket message: {resp_json}")
+        print(f"Received unrelated websocket message: {resp_json}")
 
     await close_and_drain_pending_messages(ws)
     raise AssertionError("Never got a response to the code execution")
