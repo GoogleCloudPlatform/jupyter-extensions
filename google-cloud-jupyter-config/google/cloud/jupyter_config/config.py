@@ -57,7 +57,7 @@ def run_gcloud_subcommand(subcmd):
                 errt.seek(0)
                 stdout = t.read().decode("UTF-8").strip()
                 stderr = errt.read().decode("UTF-8").strip()
-                raise subprocess.CalledProcessError(err.returncode, err.cmd, None, stdout, stderr)
+                raise subprocess.CalledProcessError(err.returncode, err.cmd, stdout, stderr)
         t.seek(0)
         return t.read().decode("UTF-8").strip()
 
@@ -112,7 +112,7 @@ async def async_run_gcloud_subcommand(subcmd):
             stdout = t.read().decode("UTF-8").strip()
             stderr = errt.read().decode("UTF-8").strip()
             if p.returncode != 0:
-                raise subprocess.CalledProcessError(p.returncode, cmd, None, stdout, stderr)
+                raise subprocess.CalledProcessError(p.returncode, cmd, stdout, stderr)
             return stdout
 
 
