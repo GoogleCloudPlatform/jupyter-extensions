@@ -253,6 +253,12 @@ def configure_gateway_client(c):
 
     c.GatewayClient.auth_scheme = "Bearer"
     c.GatewayClient.headers = '{"Cookie": "_xsrf=XSRF", "X-XSRFToken": "XSRF"}'
+    c.ServerApp.kernel_websocket_connection_class = (
+        "google.cloud.jupyter_config.websockets.DataprocGatewayWebSocketConnection"
+    )
+    c.DelegatingWebsocketConnection.remote_websocket_connection_class = (
+        "google.cloud.jupyter_config.websockets.DataprocGatewayWebSocketConnection"
+    )
 
 
 # N.B. The two following regular expressions are used to prevent shell escape
