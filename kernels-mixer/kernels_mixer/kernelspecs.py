@@ -58,10 +58,19 @@ class MixingKernelSpecManager(KernelSpecManager):
         Must be a subclass of `jupyter_client.kernelspec.KernelSpecManager`.""",
     )
 
+    remote_kernel_spec_manager_class = Type(
+        config=True,
+        default_value=GatewayKernelSpecManager,
+        help="""
+        The kernel spec manager class to use for remote kernels.
+
+        Must be a subclass of `jupyter_server.gateway.managers.GatewayKernelSpecManager`.""",
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.local_manager = self.local_kernel_spec_manager_class(*args, **kwargs)
-        self.remote_manager= GatewayKernelSpecManager(*args, **kwargs)
+        self.remote_manager = self.remote_kernel_spec_manager_class(*args, **kwargs)
         self._local_kernels = set()
         self._remote_kernels = set()
 

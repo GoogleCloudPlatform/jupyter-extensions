@@ -21,9 +21,10 @@ import tornado.gen as tornado_gen
 from tornado.escape import json_decode, utf8
 import tornado.websocket as tornado_websocket
 
+from traitlets import Type
+
 import jupyter_server.gateway.connections
 from jupyter_server.gateway.connections import GatewayWebSocketConnection
-from jupyter_server.gateway.managers import GatewayKernelManager
 from jupyter_server.services.kernels.connection.base import BaseKernelWebsocketConnection
 from jupyter_server.services.kernels.connection.channels import ZMQChannelsWebsocketConnection
 
@@ -215,11 +216,18 @@ class DelegatingWebsocketConnection(BaseKernelWebsocketConnection):
     Otherwise, it is an instance of ZMQChannelsWebsocketConnection.
     """
 
+    remote_websocket_connection_class = Type(
+        default_value=StartingReportingWebsocketConnection,
+        klass=GatewayWebSocketConnection,
+        config=True,
+        help="Class to use for remote Gateway WebSocket connections.",
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         delegate_class = ZMQChannelsWebsocketConnection
         if self.kernel_manager.is_remote:
-            delegate_class = StartingReportingWebsocketConnection
+            delegate_class = self.remote_websocket_connection_class
         self.delegate = delegate_class(
             parent=self.kernel_manager.delegate,
             websocket_handler=self.websocket_handler,
