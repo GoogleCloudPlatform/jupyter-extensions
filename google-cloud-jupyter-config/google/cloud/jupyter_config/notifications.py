@@ -58,7 +58,7 @@ class DataprocNotificationHandler:
 
   def __init__(self, event_logger):
     self.event_logger = event_logger
-    self.seen_ids = set()
+    self.seen_ids = {}
 
   def __call__(self, notifications):
     """Handle intercepted notifications from REST API polls."""
@@ -67,12 +67,12 @@ class DataprocNotificationHandler:
       if not notification_id or notification_id in self.seen_ids:
         continue
 
-      self.seen_ids.add(notification_id)
+      self.seen_ids[notification_id] = None
 
       # Prevent unbounded memory growth for extremely long-running servers
       if len(self.seen_ids) > 1000:
         to_remove = len(self.seen_ids) // 2
-        self.seen_ids = set(list(self.seen_ids)[to_remove:])
+        self.seen_ids = dict(list(self.seen_ids.items())[to_remove:])
 
       try:
         self.event_logger.emit(
