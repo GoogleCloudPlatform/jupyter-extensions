@@ -256,8 +256,20 @@ def configure_gateway_client(c):
     c.ServerApp.kernel_websocket_connection_class = (
         "google.cloud.jupyter_config.websockets.DataprocGatewayWebSocketConnection"
     )
+    c.ServerApp.kernel_spec_manager_class = (
+        "google.cloud.jupyter_config.managers.DataprocGatewayKernelSpecManager"
+    )
+    c.ServerApp.kernel_manager_class = (
+        "google.cloud.jupyter_config.managers.DataprocGatewayMappingKernelManager"
+    )
     c.DelegatingWebsocketConnection.remote_websocket_connection_class = (
         "google.cloud.jupyter_config.websockets.DataprocGatewayWebSocketConnection"
+    )
+    c.MixingKernelSpecManager.remote_kernel_spec_manager_class = (
+        "google.cloud.jupyter_config.managers.DataprocGatewayKernelSpecManager"
+    )
+    c.MixingMappingKernelManager.remote_kernel_manager_class = (
+        "google.cloud.jupyter_config.managers.DataprocGatewayMappingKernelManager"
     )
 
 

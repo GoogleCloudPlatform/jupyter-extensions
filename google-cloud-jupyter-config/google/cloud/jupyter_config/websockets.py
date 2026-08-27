@@ -27,7 +27,7 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
   def _connection_done(self, fut):
     """Handle finished WebSocket connection future."""
     super()._connection_done(fut)
-    if not self.disconnected: # we mostly expect client disconnects
+    if not self.disconnected and not fut.cancelled():  # we mostly expect client disconnects
       exc = fut.exception()
       if exc is not None:
         self._report_websocket_event(
@@ -42,7 +42,7 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
       try:
         sink([
             {
-                "id": f"ws-{self.kernel_id}",
+                "id": f"ws-{self.kernel_id}-{abs(hash(message))}",
                 "created": datetime.now(timezone.utc).isoformat(),
                 "message": message,
                 "sticky": False,
