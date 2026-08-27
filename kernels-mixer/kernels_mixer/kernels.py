@@ -21,7 +21,7 @@ from jupyter_server.gateway.managers import GatewayMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import AsyncMappingKernelManager
 from jupyter_server.services.kernels.kernelmanager import ServerKernelManager
 
-from traitlets import Instance, default, observe
+from traitlets import Instance, Type, default, observe
 
 from .kernelspecs import MixingKernelSpecManager
 
@@ -45,6 +45,15 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
     @default("kernel_manager_class")
     def _default_kernel_manager_class(self):
         return "kernels_mixer.kernels.MixingKernelManager"
+
+    remote_kernel_manager_class = Type(
+        config=True,
+        default_value=GatewayMappingKernelManager,
+        help="""
+        The kernel manager class to use for remote kernels.
+
+        Must be a subclass of `jupyter_server.gateway.managers.GatewayMappingKernelManager`.""",
+    )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,7 +67,7 @@ class MixingMappingKernelManager(AsyncMappingKernelManager):
             kernel_spec_manager=self.kernel_spec_manager.local_manager)
 
         # Set up the remote kernel management.
-        self.remote_manager = GatewayMappingKernelManager(
+        self.remote_manager = self.remote_kernel_manager_class(
             parent=self.parent,
             log=self.log,
             connection_dir=self.connection_dir,
