@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
-from tornado.web import HTTPError
 
 from google.cloud.jupyter_config.managers import (
     DataprocGatewayKernelSpecManager,
@@ -51,7 +49,7 @@ async def test_dataproc_gateway_kernel_spec_manager_no_notifications():
         result = await manager.list_kernel_specs()
         
         assert result == mock_super_specs
-        assert received_notifications == []
+        assert received_notifications is None
 
 
 @pytest.mark.asyncio
@@ -103,7 +101,7 @@ async def test_dataproc_gateway_mapping_kernel_manager_no_dead_kernels():
         result = await manager.list_kernels()
         
         assert result == mock_kernels
-        assert received_notifications == []
+        assert received_notifications is None
 
 
 @pytest.mark.asyncio

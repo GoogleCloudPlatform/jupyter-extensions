@@ -53,7 +53,7 @@ class DataprocGatewayKernelSpecManager(GatewayKernelSpecManager):
             "sticky": warning.get("sticky", False),
         })
 
-    if self.notifications_sink:
+    if notifications and self.notifications_sink:
       self.notifications_sink(notifications)
     return kernel_specs
 
@@ -80,14 +80,18 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
       return kernels
 
     for kernel in kernels:
-      if kernel.get("status") == "dead":
+      if isinstance(kernel, dict) and (
+          kernel.get("execution_state") == "dead" or kernel.get("status") == "dead"
+      ):
+        kernel_id = kernel.get("id", "unknown")
         reason = kernel.get("message", "Unknown")
         notifications.append({
-            "id": kernel["id"],
+            "id": kernel_id,
             "created": datetime.now(timezone.utc).isoformat(),
-            "message": f"Kernel {kernel['id']} is not responsive: {reason}",
+            "message": f"Kernel {kernel_id} is not responsive: {reason}",
             "sticky": False,
         })
 
-    self.notifications_sink(notifications)
+    if notifications and self.notifications_sink:
+      self.notifications_sink(notifications)
     return kernels

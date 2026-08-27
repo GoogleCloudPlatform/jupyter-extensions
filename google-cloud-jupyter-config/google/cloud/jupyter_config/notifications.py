@@ -67,17 +67,17 @@ class DataprocNotificationHandler:
       if not notification_id or notification_id in self.seen_ids:
         continue
 
-      self.seen_ids[notification_id] = None
-
-      # Prevent unbounded memory growth for extremely long-running servers
-      if len(self.seen_ids) > 1000:
-        to_remove = len(self.seen_ids) // 2
-        self.seen_ids = dict(list(self.seen_ids.items())[to_remove:])
-
       try:
         self.event_logger.emit(
             schema_id=NOTIFICATION_SCHEMA_ID,
             data=notification,
         )
+        self.seen_ids[notification_id] = None
+
+        # Prevent unbounded memory growth for extremely long-running servers
+        if len(self.seen_ids) > 1000:
+          to_remove = len(self.seen_ids) // 2
+          for key in list(self.seen_ids.keys())[:to_remove]:
+            del self.seen_ids[key]
       except Exception as e:
         logger.error("Failed to emit notification event: %s", e)
