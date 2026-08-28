@@ -15,6 +15,7 @@
 """Custom Gateway WebSocket connection for Dataproc kernels."""
 
 from datetime import datetime, timezone
+from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
 try:
   from kernels_mixer.websockets import StartingReportingWebsocketConnection as _BaseWebSocketConnection
 except ImportError:
@@ -27,7 +28,7 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
   def _connection_done(self, fut):
     """Handle finished WebSocket connection future."""
     super()._connection_done(fut)
-    if not self.disconnected and not fut.cancelled():  # we mostly expect client disconnects
+    if not self.disconnected and not fut.cancelled():
       exc = fut.exception()
       if exc is not None:
         self._report_websocket_event(
@@ -36,35 +37,20 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
 
   def _report_websocket_event(self, message):
     """Find the notifications_sink in the manager hierarchy and report WebSocket event."""
-    sink = self._get_notifications_sink()
+    if not DataprocNotificationHandler.initialized():
+      return
 
-    if sink:
-      try:
-        sink([
-            {
-                "id": f"ws-{self.kernel_id}-{abs(hash(message))}",
-                "created": datetime.now(timezone.utc).isoformat(),
-                "message": message,
-                "sticky": False,
-            }
-        ])
-      except Exception as sink_ex:  # pylint: disable=broad-exception-caught
-        self.log.error(
-            f"Failed to push WebSocket error to notification sink: {sink_ex}"
-        )
-
-  def _get_notifications_sink(self):
-    """Find the notifications_sink in the manager hierarchy."""
-    mgr = getattr(self, "multi_kernel_manager", None)
-    if not mgr and hasattr(self, "parent"):
-      mgr = (
-          getattr(self.parent, "parent", None)
-          or getattr(self.parent, "multi_kernel_manager", None)
-          or self.parent
+    sink = DataprocNotificationHandler.instance()
+    try:
+      sink([
+          {
+              "id": f"ws-{self.kernel_id}-{abs(hash(message))}",
+              "created": datetime.now(timezone.utc).isoformat(),
+              "message": message,
+              "sticky": False,
+          }
+      ])
+    except Exception as sink_ex:  # pylint: disable=broad-exception-caught
+      self.log.error(
+          f"Failed to push WebSocket error to notification sink: {sink_ex}"
       )
-
-    # If wrapped in a mixer, unpack the remote manager
-    if hasattr(mgr, "remote_manager"):
-      mgr = mgr.remote_manager
-    
-    return getattr(mgr, "notifications_sink", None)
