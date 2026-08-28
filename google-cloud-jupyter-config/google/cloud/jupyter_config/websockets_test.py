@@ -16,18 +16,19 @@
 
 import asyncio
 from unittest.mock import MagicMock, patch
-import pytest
-from traitlets.config import Configurable
-
+from google.cloud.jupyter_config.notifications import (
+    NOTIFICATION_SCHEMA_ID,
+    DataprocNotificationHandler,
+)
 from google.cloud.jupyter_config.websockets import DataprocGatewayWebSocketConnection
 
 
 def test_websocket_connection_failure_reports_to_sink():
   """Verify WebSocket connection errors are caught and reported to notifications sink."""
-  mock_sink = MagicMock()
-  parent = Configurable()
-  parent.remote_manager = MagicMock(notifications_sink=mock_sink)
-  conn = DataprocGatewayWebSocketConnection(parent=parent)
+  DataprocNotificationHandler.clear_instance()
+  mock_logger = MagicMock()
+  DataprocNotificationHandler.instance(event_logger=mock_logger)
+  conn = DataprocGatewayWebSocketConnection()
 
   with patch.object(DataprocGatewayWebSocketConnection, "kernel_id", "k-123"), \
        patch("google.cloud.jupyter_config.websockets._BaseWebSocketConnection._connection_done"):
@@ -35,18 +36,20 @@ def test_websocket_connection_failure_reports_to_sink():
     fut.set_exception(RuntimeError("HTTP 500: Internal Server Error"))
     conn._connection_done(fut)
 
-  mock_sink.assert_called_once()
-  assert mock_sink.call_args[0][0][0]["id"].startswith("ws-k-123-")
-  assert "Failed to connect to kernel k-123 via WebSocket: HTTP 500: Internal Server Error" == mock_sink.call_args[0][0][0]["message"]
-  assert mock_sink.call_args[0][0][0]["sticky"] is False
+  mock_logger.emit.assert_called_once()
+  assert mock_logger.emit.call_args[1]["schema_id"] == NOTIFICATION_SCHEMA_ID
+  assert mock_logger.emit.call_args[1]["data"]["id"].startswith("ws-k-123-")
+  assert "Failed to connect to kernel k-123 via WebSocket: HTTP 500: Internal Server Error" == mock_logger.emit.call_args[1]["data"]["message"]
+  assert mock_logger.emit.call_args[1]["data"]["sticky"] is False
+  DataprocNotificationHandler.clear_instance()
 
 
 def test_websocket_connection_success_does_not_report_to_sink():
   """Verify WebSocket connection success is silent and does not report to notifications sink."""
-  mock_sink = MagicMock()
-  parent = Configurable()
-  parent.remote_manager = MagicMock(notifications_sink=mock_sink)
-  conn = DataprocGatewayWebSocketConnection(parent=parent)
+  DataprocNotificationHandler.clear_instance()
+  mock_logger = MagicMock()
+  DataprocNotificationHandler.instance(event_logger=mock_logger)
+  conn = DataprocGatewayWebSocketConnection()
 
   with patch.object(DataprocGatewayWebSocketConnection, "kernel_id", "k-456"), \
        patch("google.cloud.jupyter_config.websockets._BaseWebSocketConnection._connection_done"):
@@ -54,4 +57,5 @@ def test_websocket_connection_success_does_not_report_to_sink():
     fut.set_result(None)
     conn._connection_done(fut)
 
-  mock_sink.assert_not_called()
+  mock_logger.emit.assert_not_called()
+  DataprocNotificationHandler.clear_instance()

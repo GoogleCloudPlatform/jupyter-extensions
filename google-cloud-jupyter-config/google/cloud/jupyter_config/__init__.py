@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from traitlets.config import Configurable
 from jupyter_server.utils import url_path_join
 
 from google.cloud.jupyter_config.config import async_get_gcloud_config
@@ -29,21 +30,6 @@ from google.cloud.jupyter_config.notifications import (
     DataprocNotificationHandler,
 )
 
-__all__ = [
-    "NOTIFICATION_SCHEMA_ID",
-    "DATAPROC_NOTIFICATION_SCHEMA",
-    "DataprocNotificationHandler",
-    "async_get_gcloud_config",
-    "get_gcloud_config",
-    "gcp_project",
-    "gcp_region",
-    "configure_gateway_client",
-    "PropertiesHandler",
-    "DataprocGatewayKernelSpecManager",
-    "DataprocGatewayMappingKernelManager",
-    "DataprocGatewayWebSocketConnection",
-]
-
 
 def _load_jupyter_server_extension(server_app):
     host_pattern = ".*$"
@@ -53,22 +39,11 @@ def _load_jupyter_server_extension(server_app):
 
     try:
         server_app.event_logger.register_event_schema(DATAPROC_NOTIFICATION_SCHEMA)
-
-        handler = DataprocNotificationHandler(server_app.event_logger)
-
-        # Wire the sink directly, unpacking mixing managers if present
-        spec_mgr = server_app.kernel_spec_manager
-        if hasattr(spec_mgr, "remote_manager"):
-            spec_mgr = spec_mgr.remote_manager
-        if hasattr(spec_mgr, "notifications_sink"):
-            spec_mgr.notifications_sink = handler
-
-        mapping_mgr = server_app.kernel_manager
-        if hasattr(mapping_mgr, "remote_manager"):
-            mapping_mgr = mapping_mgr.remote_manager
-        if hasattr(mapping_mgr, "notifications_sink"):
-            mapping_mgr.notifications_sink = handler
-
+        parent = server_app if isinstance(server_app, Configurable) else None
+        DataprocNotificationHandler.instance(
+            parent=parent,
+            event_logger=getattr(server_app, "event_logger", None),
+        )
         server_app.log.info("Initialized Dataproc Notification System backend")
     except Exception as e:
         server_app.log.error(f"Failed to initialize Dataproc Notification System: {e}")

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -131,3 +131,23 @@ async def test_dataproc_gateway_mapping_kernel_manager_with_dead_kernel():
         assert "is not responsive" in received_notifications[0]["message"]
         assert "Out of memory" in received_notifications[0]["message"]
         assert received_notifications[0]["sticky"] is False
+
+
+@pytest.mark.asyncio
+async def test_dataproc_gateway_managers_use_singleton_sink():
+    from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
+    DataprocNotificationHandler.clear_instance()
+
+    received_notifications = None
+    mock_logger = MagicMock()
+    handler = DataprocNotificationHandler.instance(event_logger=mock_logger)
+
+    manager = DataprocGatewayKernelSpecManager()
+    assert manager.notifications_sink is None
+    assert manager._get_notifications_sink() is handler
+
+    mapping_manager = DataprocGatewayMappingKernelManager()
+    assert mapping_manager.notifications_sink is None
+    assert mapping_manager._get_notifications_sink() is handler
+
+    DataprocNotificationHandler.clear_instance()

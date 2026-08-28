@@ -15,6 +15,7 @@
 """Custom Gateway managers for intercepting Dataproc notifications."""
 
 from datetime import datetime, timezone
+from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
 from jupyter_server.gateway.managers import (
     GatewayKernelSpecManager,
     GatewayMappingKernelManager,
@@ -30,31 +31,44 @@ class DataprocGatewayKernelSpecManager(GatewayKernelSpecManager):
       config=True,
       help=(
           "Callback sink for intercepted notifications. "
-          "Receives a list of notification dicts."
+          "Receives a list of notification dicts. Defaults to DataprocNotificationHandler.instance()."
       ),
   )
+
+  def _get_notifications_sink(self):
+    if self.notifications_sink is not None:
+      return self.notifications_sink
+    if DataprocNotificationHandler.initialized():
+      return DataprocNotificationHandler.instance()
+    return None
 
   async def list_kernel_specs(self):
     """Get a list of kernel specs and intercept warnings."""
     kernel_specs = await super().list_kernel_specs()
 
-    if not isinstance(kernel_specs, dict) or not self.notifications_sink:
+    sink = self._get_notifications_sink()
+    if not isinstance(kernel_specs, dict) or not sink:
       return kernel_specs
 
     warnings = kernel_specs.get("warnings", [])
     notifications = []
 
-    for warning in warnings:
-      if warning.get("id") and warning.get("message"):
-        notifications.append({
-            "id": warning.get("id"),
-            "created": datetime.now(timezone.utc).isoformat(),
-            "message": warning.get("message"),
-            "sticky": warning.get("sticky", False),
-        })
+    if isinstance(warnings, list):
+      for warning in warnings:
+        if (
+            isinstance(warning, dict)
+            and warning.get("id")
+            and warning.get("message")
+        ):
+          notifications.append({
+              "id": warning.get("id"),
+              "created": datetime.now(timezone.utc).isoformat(),
+              "message": warning.get("message"),
+              "sticky": warning.get("sticky", False),
+          })
 
-    if notifications and self.notifications_sink:
-      self.notifications_sink(notifications)
+    if notifications and sink:
+      sink(notifications)
     return kernel_specs
 
 
@@ -66,9 +80,16 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
       config=True,
       help=(
           "Callback sink for intercepted notifications. "
-          "Receives a list of notification dicts."
+          "Receives a list of notification dicts. Defaults to DataprocNotificationHandler.instance()."
       ),
   )
+
+  def _get_notifications_sink(self):
+    if self.notifications_sink is not None:
+      return self.notifications_sink
+    if DataprocNotificationHandler.initialized():
+      return DataprocNotificationHandler.instance()
+    return None
 
   async def list_kernels(self, **kwargs):
     """Get running kernels and extract notifications for dead kernels."""
@@ -76,7 +97,8 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
     kernels = await super().list_kernels(**kwargs)
     notifications = []
 
-    if not isinstance(kernels, list) or not self.notifications_sink:
+    sink = self._get_notifications_sink()
+    if not isinstance(kernels, list) or not sink:
       return kernels
 
     for kernel in kernels:
@@ -92,6 +114,6 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
             "sticky": False,
         })
 
-    if notifications and self.notifications_sink:
-      self.notifications_sink(notifications)
+    if notifications and sink:
+      sink(notifications)
     return kernels

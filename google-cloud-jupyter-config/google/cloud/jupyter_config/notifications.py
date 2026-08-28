@@ -16,6 +16,9 @@
 
 import logging
 
+from traitlets import Any
+from traitlets.config import SingletonConfigurable
+
 logger = logging.getLogger(__name__)
 
 # --- Event Schemas ---
@@ -50,19 +53,35 @@ required:
 # --- Handler ---
 
 
-class DataprocNotificationHandler:
+class DataprocNotificationHandler(SingletonConfigurable):
   """Callback handler for intercepted notifications.
 
   Accounts for duplicate messages and emits notification events.
   """
 
-  def __init__(self, event_logger):
-    self.event_logger = event_logger
+  event_logger = Any(
+      allow_none=True,
+      config=True,
+      help="Jupyter EventLogger instance used to emit notification events.",
+  )
+
+  def __init__(self, *args, **kwargs):
+    if args and not kwargs.get("event_logger"):
+      kwargs["event_logger"] = args[0]
+      args = args[1:]
+    super().__init__(*args, **kwargs)
     self.seen_ids = {}
+    if self.event_logger is None and hasattr(self.parent, "event_logger"):
+      self.event_logger = self.parent.event_logger
 
   def __call__(self, notifications):
     """Handle intercepted notifications from REST API polls."""
+    if not notifications or not self.event_logger:
+      return
+
     for notification in notifications:
+      if not isinstance(notification, dict):
+        continue
       notification_id = notification.get("id")
       if not notification_id or notification_id in self.seen_ids:
         continue

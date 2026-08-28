@@ -113,44 +113,33 @@ def jp_server_config():
 
 
 async def test_extension_initialization_direct(jp_serverapp):
-  # When using Dataproc managers directly, they are wired directly
-  assert hasattr(jp_serverapp.kernel_spec_manager, "notifications_sink")
-  assert jp_serverapp.kernel_spec_manager.notifications_sink is not None
-  assert isinstance(
-      jp_serverapp.kernel_spec_manager.notifications_sink,
-      DataprocNotificationHandler,
-  )
+  # When server extension loads, the singleton is initialized and managers resolve it
+  assert DataprocNotificationHandler.initialized()
+  sink = jp_serverapp.kernel_spec_manager._get_notifications_sink()
+  assert isinstance(sink, DataprocNotificationHandler)
 
-  assert hasattr(jp_serverapp.kernel_manager, "notifications_sink")
-  assert jp_serverapp.kernel_manager.notifications_sink is not None
-  assert isinstance(
-      jp_serverapp.kernel_manager.notifications_sink,
-      DataprocNotificationHandler,
-  )
+  mapping_sink = jp_serverapp.kernel_manager._get_notifications_sink()
+  assert isinstance(mapping_sink, DataprocNotificationHandler)
 
 
-def test_extension_initialization_with_mixer():
-  from google.cloud.jupyter_config import _load_jupyter_server_extension
+def test_extension_initialization_registers_schema_and_singleton():
+  from google.cloud.jupyter_config import _load_jupyter_server_extension, DATAPROC_NOTIFICATION_SCHEMA
+  DataprocNotificationHandler.clear_instance()
 
   mock_server_app = MagicMock()
   mock_server_app.web_app.settings = {"base_url": "/"}
 
-  # Simulate a mixer wrapping the remote manager
-  remote_spec_mgr = MagicMock(spec=["notifications_sink"])
-  mixer_spec_mgr = MagicMock()
-  mixer_spec_mgr.remote_manager = remote_spec_mgr
-  mock_server_app.kernel_spec_manager = mixer_spec_mgr
-
-  remote_mapping_mgr = MagicMock(spec=["notifications_sink"])
-  mixer_mapping_mgr = MagicMock()
-  mixer_mapping_mgr.remote_manager = remote_mapping_mgr
-  mock_server_app.kernel_manager = mixer_mapping_mgr
-
   _load_jupyter_server_extension(mock_server_app)
 
-  assert isinstance(
-      remote_spec_mgr.notifications_sink, DataprocNotificationHandler
-  )
-  assert isinstance(
-      remote_mapping_mgr.notifications_sink, DataprocNotificationHandler
-  )
+  mock_server_app.event_logger.register_event_schema.assert_called_once_with(DATAPROC_NOTIFICATION_SCHEMA)
+  assert DataprocNotificationHandler.initialized()
+  DataprocNotificationHandler.clear_instance()
+
+
+def test_singleton_instance_resolution():
+  DataprocNotificationHandler.clear_instance()
+  mock_logger = MagicMock()
+  handler = DataprocNotificationHandler.instance(event_logger=mock_logger)
+  assert DataprocNotificationHandler.instance() is handler
+  assert DataprocNotificationHandler.initialized()
+  DataprocNotificationHandler.clear_instance()
