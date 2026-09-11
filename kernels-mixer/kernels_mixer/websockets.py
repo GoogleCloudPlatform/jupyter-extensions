@@ -41,7 +41,7 @@ class _BufferedConnection(tornado_websocket.WebSocketClientConnection):
 
     @property
     def selected_subprotocol(self):
-        return conn.selected_subprotocol
+        return self._conn.selected_subprotocol
 
     def close(self, *args, **kwargs):
         return self._conn.close(*args, **kwargs)
@@ -59,7 +59,7 @@ class _BufferedConnection(tornado_websocket.WebSocketClientConnection):
                 callback(msg)
                 return None
             return msg
-        return await self._conn.read_message()
+        return await self._conn.read_message(callback=callback)
 
 
 class _InterceptedTornadoWebsocket:
@@ -198,8 +198,10 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
     """
 
     patched_websocket_connect = False
-    seen_kernels_lock = threading.Lock()
-    seen_kernels = []
+    _seen_kernels_lock = threading.Lock()
+    _seen_kernels = {}
+    _seen_kernels_upper_bound = 1000
+    _seen_kernels_cull_limit = 500
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -209,17 +211,19 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
             StartingReportingWebsocketConnection.patched_websocket_connect = True
 
     def has_seen_kernel_activity(self):
-        with StartingReportingWebsocketConnection.seen_kernels_lock:
-            return self.kernel_id in StartingReportingWebsocketConnection.seen_kernels
+        with StartingReportingWebsocketConnection._seen_kernels_lock:
+            return self.kernel_id in StartingReportingWebsocketConnection._seen_kernels
 
     def record_kernel_activity(self):
-        with StartingReportingWebsocketConnection.seen_kernels_lock:
-            seen_kernels = [
-                k for k in StartingReportingWebsocketConnection.seen_kernels
-                if k != self.kernel_id]
-            seen_kernels.append(self.kernel_id)
-            seen_kernels = seen_kernels[max(0, len(seen_kernels)-1000):]
-            StartingReportingWebsocketConnection.seen_kernels = seen_kernels
+        with StartingReportingWebsocketConnection._seen_kernels_lock:
+            seen_kernels = StartingReportingWebsocketConnection._seen_kernels
+            seen_kernels[self.kernel_id] = datetime.datetime.utcnow()
+            if len(seen_kernels) > StartingReportingWebsocketConnection._seen_kernels_upper_bound:
+                timestamps = sorted([(t, k) for k, t in seen_kernels.items()])
+                kernels_to_drop = len(seen_kernels)-StartingReportingWebsocketConnection._seen_kernels_cull_limit
+                seen_kernels = dict([(k, t) for t, k in timestamps[max(0, kernels_to_drop):]])
+
+            StartingReportingWebsocketConnection._seen_kernels = seen_kernels
             return
 
     async def connect(self):
