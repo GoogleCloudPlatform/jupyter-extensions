@@ -15,6 +15,9 @@
 import asyncio
 import datetime
 import json
+import queue
+import threading
+import time
 import uuid
 
 import tornado.gen as tornado_gen
@@ -27,6 +30,36 @@ import jupyter_server.gateway.connections
 from jupyter_server.gateway.connections import GatewayWebSocketConnection
 from jupyter_server.services.kernels.connection.base import BaseKernelWebsocketConnection
 from jupyter_server.services.kernels.connection.channels import ZMQChannelsWebsocketConnection
+
+
+class _BufferedConnection(tornado_websocket.WebSocketClientConnection):
+    """Object that wraps a WebSocketClientConnection and adds a buffer of previous messages to replay.
+    """
+    def __init__(self, conn: tornado_websocket.WebSocketClientConnection, buffered_messages: queue.Queue):
+        self._conn = conn
+        self._buffered_messages = buffered_messages
+
+    @property
+    def selected_subprotocol(self):
+        return self._conn.selected_subprotocol
+
+    def close(self, *args, **kwargs):
+        return self._conn.close(*args, **kwargs)
+
+    def ping(self, *args, **kwargs):
+        return self._conn.ping(*args, **kwargs)
+
+    def write_message(self, *args, **kwargs):
+        return self._conn.write_message(*args, **kwargs)
+
+    async def read_message(self, callback=None):
+        if not self._buffered_messages.empty():
+            msg = self._buffered_messages.get()
+            if callback:
+                callback(msg)
+                return None
+            return msg
+        return await self._conn.read_message(callback=callback)
 
 
 class _InterceptedTornadoWebsocket:
@@ -78,13 +111,14 @@ class _InterceptedTornadoWebsocket:
     async def _websocket_connect(self, *args, **kwargs):
         """Connect websocket and wait for kernel info response."""
         conn = await tornado_websocket.websocket_connect(*args, **kwargs)
+        buffered_messages = []
 
         self.log.debug('Verifying that the created connection is responsive...')
         session_id = uuid.uuid4().hex
         message_id = uuid.uuid4().hex
         conn.write_message(
             json.dumps({
-                'channel': 'shell',
+                'channel': 'control',
                 'header': {
                     'date': datetime.datetime.now().isoformat(),
                     'session': session_id,
@@ -99,7 +133,8 @@ class _InterceptedTornadoWebsocket:
                 'buffers': [],
             })
         )
-        for _ in range(30):
+        time_limit = time.time() + 30  # Give up to 30 seconds for a message to come back.
+        while time.time() < time_limit:
             try:
                 msg = await tornado_gen.with_timeout(
                     datetime.timedelta(seconds=1), conn.read_message()
@@ -115,9 +150,16 @@ class _InterceptedTornadoWebsocket:
                 raise RuntimeError('Kernel connection closed on the backend')
             resp = json.loads(msg)
             response_type = resp.get('header', {}).get('msg_type', None)
-            if response_type == 'kernel_info_reply':
+            parent_id = resp.get('parent_header', {}).get('msg_id', '')
+            if response_type == 'kernel_info_reply' and parent_id == message_id:
                 self.log.debug('Kernel info reply received... returning connection')
-                return conn
+                msg_queue = queue.Queue(len(buffered_messages))
+                for msg in buffered_messages:
+                    msg_queue.put(msg)
+                return _BufferedConnection(conn, msg_queue)
+            else:
+                self.log.debug(f'Buffering non-status message {msg}')
+                buffered_messages.append(msg)
         self.log.error('Kernel connection did not respond to info requests')
         raise RuntimeError('Kernel connection did not respond to info requests')
 
@@ -156,6 +198,10 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
     """
 
     patched_websocket_connect = False
+    _seen_kernels_lock = threading.Lock()
+    _seen_kernels = {}
+    _seen_kernels_upper_bound = 1000
+    _seen_kernels_cull_limit = 500
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -164,30 +210,47 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
             jupyter_server.gateway.connections.tornado_websocket = _InterceptedTornadoWebsocket(self.log)
             StartingReportingWebsocketConnection.patched_websocket_connect = True
 
+    def has_seen_kernel_activity(self):
+        with StartingReportingWebsocketConnection._seen_kernels_lock:
+            return self.kernel_id in StartingReportingWebsocketConnection._seen_kernels
+
+    def record_kernel_activity(self):
+        with StartingReportingWebsocketConnection._seen_kernels_lock:
+            seen_kernels = StartingReportingWebsocketConnection._seen_kernels
+            seen_kernels[self.kernel_id] = datetime.datetime.utcnow()
+            if len(seen_kernels) > StartingReportingWebsocketConnection._seen_kernels_upper_bound:
+                timestamps = sorted([(t, k) for k, t in seen_kernels.items()])
+                kernels_to_drop = len(seen_kernels)-StartingReportingWebsocketConnection._seen_kernels_cull_limit
+                seen_kernels = dict([(k, t) for t, k in timestamps[max(0, kernels_to_drop):]])
+
+            StartingReportingWebsocketConnection._seen_kernels = seen_kernels
+            return
+
     async def connect(self):
         # The kernel message format is defined
         # [here](https://jupyter-client.readthedocs.io/en/latest/messaging.html#general-message-format).
-        status_message_id = str(uuid.uuid4())
-        status_message = {
-            "header": {
+        if not self.has_seen_kernel_activity():
+            status_message_id = str(uuid.uuid4())
+            status_message = {
+                "header": {
+                    "msg_id": status_message_id,
+                    "session": self.kernel_id,
+                    "username": "username",
+                    "date": datetime.datetime.utcnow().isoformat(),
+                    "msg_type": "status",
+                    "version": "5.3",
+                },
+                "parent_header": {},
+                "metadata": {},
                 "msg_id": status_message_id,
-                "session": self.kernel_id,
-                "username": "username",
-                "date": datetime.datetime.utcnow().isoformat(),
                 "msg_type": "status",
-                "version": "5.3",
-            },
-            "parent_header": {},
-            "metadata": {},
-            "msg_id": status_message_id,
-            "msg_type": "status",
-            "channel": "iopub",
-            "content": {
-                "execution_state": "starting",
-            },
-            "buffers": [],
-        }
-        super().handle_outgoing_message(json.dumps(status_message))
+                "channel": "iopub",
+                "content": {
+                    "execution_state": "starting",
+                },
+                "buffers": [],
+            }
+            super().handle_outgoing_message(json.dumps(status_message))
         return await super().connect()
 
     def is_starting_message(self, incoming_msg):
@@ -200,6 +263,7 @@ class StartingReportingWebsocketConnection(GatewayWebSocketConnection):
         return False
 
     def handle_outgoing_message(self, incoming_msg, *args, **kwargs):
+        self.record_kernel_activity()
         if self.is_starting_message(incoming_msg):
             # We already sent a starting message, so drop this one.
             return

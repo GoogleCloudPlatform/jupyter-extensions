@@ -18,6 +18,8 @@ import uuid
 
 import pytest
 
+from kernels_mixer.websockets import StartingReportingWebsocketConnection
+
 
 @pytest.fixture
 def test_kernel(jp_fetch):
@@ -92,3 +94,46 @@ async def test_websocket(jp_fetch, jp_ws_fetch, test_kernel):
 
     await close_and_drain_pending_messages(ws)
     raise AssertionError("Never got a response to the code execution")
+
+
+async def test_record_kernel_activity(jp_serverapp, test_kernel):
+    original_upper_bound = StartingReportingWebsocketConnection._seen_kernels_upper_bound
+    original_cull_limit = StartingReportingWebsocketConnection._seen_kernels_cull_limit
+    test_upper_bound = 10
+    test_cull_limit = 5
+    StartingReportingWebsocketConnection._seen_kernels_upper_bound = test_upper_bound
+    StartingReportingWebsocketConnection._seen_kernels_cull_limit = test_cull_limit
+    connections = {}
+    created_kernels = []
+
+    # Fill up the set of seen kernels as much as supported.
+    for _ in range(test_upper_bound):
+        k = await test_kernel()
+        kid = k["id"]
+        km = jp_serverapp.kernel_manager.get_kernel(kid)
+        conn = StartingReportingWebsocketConnection(parent=km)
+        conn.record_kernel_activity()
+        connections[kid] = conn
+        created_kernels.append(kid)
+    for (_, conn) in connections.items():
+        assert conn.has_seen_kernel_activity()
+
+    # Overfill the set of seen kernels.
+    expected_kernels = created_kernels[(len(created_kernels)-test_cull_limit)+1:]
+    for _ in range(test_cull_limit):
+        k = await test_kernel()
+        kid = k["id"]
+        km = jp_serverapp.kernel_manager.get_kernel(kid)
+        conn = StartingReportingWebsocketConnection(parent=km)
+        conn.record_kernel_activity()
+        connections[kid] = conn
+        expected_kernels.append(kid)
+
+    for (kid, conn) in connections.items():
+        if kid in expected_kernels:
+            assert conn.has_seen_kernel_activity()
+        else:
+            assert not conn.has_seen_kernel_activity()
+
+    StartingReportingWebsocketConnection._seen_kernels_upper_bound = original_upper_bound
+    StartingReportingWebsocketConnection._seen_kernels_cull_limit = original_cull_limit
