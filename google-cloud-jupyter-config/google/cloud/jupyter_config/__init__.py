@@ -38,11 +38,13 @@ def _load_jupyter_server_extension(server_app):
     server_app.web_app.add_handlers(host_pattern, [(config_url, PropertiesHandler)])
 
     try:
-        server_app.event_logger.register_event_schema(DATAPROC_NOTIFICATION_SCHEMA)
+        event_logger = getattr(server_app, "event_logger", None)
+        if event_logger:
+            event_logger.register_event_schema(DATAPROC_NOTIFICATION_SCHEMA)
         parent = server_app if isinstance(server_app, Configurable) else None
         DataprocNotificationHandler.instance(
             parent=parent,
-            event_logger=getattr(server_app, "event_logger", None),
+            event_logger=event_logger,
         )
         server_app.log.info("Initialized Dataproc Notification System backend")
     except Exception as e:

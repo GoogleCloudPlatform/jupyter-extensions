@@ -20,13 +20,13 @@ from jupyter_server.gateway.managers import (
     GatewayKernelSpecManager,
     GatewayMappingKernelManager,
 )
-from traitlets import Any
+from traitlets import Callable, default
 
 
 class DataprocGatewayKernelSpecManager(GatewayKernelSpecManager):
   """A GatewayKernelSpecManager that intercepts kernelspec notifications."""
 
-  notifications_sink = Any(
+  notifications_sink = Callable(
       allow_none=True,
       config=True,
       help=(
@@ -35,18 +35,15 @@ class DataprocGatewayKernelSpecManager(GatewayKernelSpecManager):
       ),
   )
 
-  def _get_notifications_sink(self):
-    if self.notifications_sink is not None:
-      return self.notifications_sink
-    if DataprocNotificationHandler.initialized():
-      return DataprocNotificationHandler.instance()
-    return None
+  @default("notifications_sink")
+  def _default_notifications_sink(self):
+    return DataprocNotificationHandler.instance()
 
   async def list_kernel_specs(self):
     """Get a list of kernel specs and intercept warnings."""
     kernel_specs = await super().list_kernel_specs()
 
-    sink = self._get_notifications_sink()
+    sink = self.notifications_sink
     if not isinstance(kernel_specs, dict) or not sink:
       return kernel_specs
 
@@ -75,7 +72,7 @@ class DataprocGatewayKernelSpecManager(GatewayKernelSpecManager):
 class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
   """A GatewayMappingKernelManager that intercepts kernel notifications."""
 
-  notifications_sink = Any(
+  notifications_sink = Callable(
       allow_none=True,
       config=True,
       help=(
@@ -84,12 +81,9 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
       ),
   )
 
-  def _get_notifications_sink(self):
-    if self.notifications_sink is not None:
-      return self.notifications_sink
-    if DataprocNotificationHandler.initialized():
-      return DataprocNotificationHandler.instance()
-    return None
+  @default("notifications_sink")
+  def _default_notifications_sink(self):
+    return DataprocNotificationHandler.instance()
 
   async def list_kernels(self, **kwargs):
     """Get running kernels and extract notifications for dead kernels."""
@@ -97,7 +91,7 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
     kernels = await super().list_kernels(**kwargs)
     notifications = []
 
-    sink = self._get_notifications_sink()
+    sink = self.notifications_sink
     if not isinstance(kernels, list) or not sink:
       return kernels
 

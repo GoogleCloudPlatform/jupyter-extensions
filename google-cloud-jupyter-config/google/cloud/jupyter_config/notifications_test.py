@@ -115,10 +115,10 @@ def jp_server_config():
 async def test_extension_initialization_direct(jp_serverapp):
   # When server extension loads, the singleton is initialized and managers resolve it
   assert DataprocNotificationHandler.initialized()
-  sink = jp_serverapp.kernel_spec_manager._get_notifications_sink()
+  sink = jp_serverapp.kernel_spec_manager.notifications_sink
   assert isinstance(sink, DataprocNotificationHandler)
 
-  mapping_sink = jp_serverapp.kernel_manager._get_notifications_sink()
+  mapping_sink = jp_serverapp.kernel_manager.notifications_sink
   assert isinstance(mapping_sink, DataprocNotificationHandler)
 
 

@@ -143,11 +143,9 @@ async def test_dataproc_gateway_managers_use_singleton_sink():
     handler = DataprocNotificationHandler.instance(event_logger=mock_logger)
 
     manager = DataprocGatewayKernelSpecManager()
-    assert manager.notifications_sink is None
-    assert manager._get_notifications_sink() is handler
+    assert manager.notifications_sink is handler
 
     mapping_manager = DataprocGatewayMappingKernelManager()
-    assert mapping_manager.notifications_sink is None
-    assert mapping_manager._get_notifications_sink() is handler
+    assert mapping_manager.notifications_sink is handler
 
     DataprocNotificationHandler.clear_instance()
