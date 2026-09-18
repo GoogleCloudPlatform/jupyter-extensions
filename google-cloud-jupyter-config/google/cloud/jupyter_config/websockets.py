@@ -16,6 +16,7 @@
 
 from datetime import datetime, timezone
 from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
+from jupyter_server.gateway.gateway_client import GatewayClient
 try:
   from kernels_mixer.websockets import StartingReportingWebsocketConnection as _BaseWebSocketConnection
 except ImportError:
@@ -30,8 +31,12 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
     super()._connection_done(fut)
     if not self.disconnected and not fut.cancelled():
       exc = fut.exception()
-      if exc is not None:
-        self._report_websocket_event(
+      if exc is None:
+        return
+      if self.retry < GatewayClient.instance().gateway_retry_max:
+        self.log.debug("WebSocket connect attempt %s failed: %s", self.retry, exc)
+        return
+      self._report_websocket_event(
             f"Failed to connect to kernel {self.kernel_id} via WebSocket: {exc}"
         )
 
