@@ -33,12 +33,15 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
       exc = fut.exception()
       if exc is None:
         return
+      # The base class silently retries up to `gateway_retry_max` times. Report
+      # only once the budget is spent, so a single failure does not produce one
+      # notification per intermediate attempt.
       if self.retry < GatewayClient.instance().gateway_retry_max:
         self.log.debug("WebSocket connect attempt %s failed: %s", self.retry, exc)
         return
       self._report_websocket_event(
-            f"Failed to connect to kernel {self.kernel_id} via WebSocket: {exc}"
-        )
+          f"Failed to connect to kernel {self.kernel_id} via WebSocket: {exc}"
+      )
 
   def _report_websocket_event(self, message):
     """Find the notifications_sink in the manager hierarchy and report WebSocket event."""
