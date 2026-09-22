@@ -16,6 +16,7 @@
 
 from datetime import datetime, timezone
 from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
+import hashlib
 from jupyter_server.gateway.gateway_client import GatewayClient
 try:
   from kernels_mixer.websockets import StartingReportingWebsocketConnection as _BaseWebSocketConnection
@@ -49,10 +50,11 @@ class DataprocGatewayWebSocketConnection(_BaseWebSocketConnection):
       return
 
     sink = DataprocNotificationHandler.instance()
+    digest = hashlib.sha256(message.encode("utf-8")).hexdigest()
     try:
       sink([
           {
-              "id": f"ws-{self.kernel_id}-{abs(hash(message))}",
+              "id": f"ws-{self.kernel_id}-{digest}",
               "created": datetime.now(timezone.utc).isoformat(),
               "message": message,
               "sticky": False,

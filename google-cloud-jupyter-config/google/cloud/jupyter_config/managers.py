@@ -16,6 +16,8 @@
 
 from datetime import datetime, timezone
 from google.cloud.jupyter_config.notifications import DataprocNotificationHandler
+import hashlib
+import json
 from jupyter_server.gateway.managers import (
     GatewayKernelSpecManager,
     GatewayMappingKernelManager,
@@ -99,7 +101,7 @@ class DataprocGatewayMappingKernelManager(GatewayMappingKernelManager):
       if isinstance(kernel, dict) and (
           kernel.get("execution_state") == "dead" or kernel.get("status") == "dead"
       ):
-        kernel_id = kernel.get("id", "unknown")
+        kernel_id = kernel.get("id") or hashlib.sha256(json.dumps(kernel).encode("utf-8")).hexdigest()
         reason = kernel.get("message", "Unknown")
         notifications.append({
             "id": kernel_id,
