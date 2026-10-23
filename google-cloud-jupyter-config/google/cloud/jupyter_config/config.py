@@ -17,10 +17,13 @@ from concurrent import futures
 import datetime
 import json
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
 import threading
+from typing import List, Sequence, Union
 
 import cachetools
 from jupyter_server.base.handlers import APIHandler
@@ -29,7 +32,27 @@ import tornado
 from google.cloud.jupyter_config.tokenrenewer import CommandTokenRenewer
 
 
-def run_gcloud_subcommand(subcmd):
+# Characters that cmd.exe treats specially.
+_WINDOWS_UNSAFE = re.compile(r'[&|<>^%!"\r\n]')
+
+
+def _gcloud_argv(subcmd: Union[str, Sequence[str]]) -> List[str]:
+    gcloud = shutil.which("gcloud")
+    if not gcloud:
+        raise subprocess.CalledProcessError(127, "gcloud", "", "gcloud not found")
+    if isinstance(subcmd, str):
+        try:
+            args = shlex.split(subcmd)
+        except ValueError as e:
+            raise subprocess.CalledProcessError(2, subcmd, "", str(e)) from e
+    else:
+        args = list(subcmd)
+    if sys.platform.startswith("win") and any(_WINDOWS_UNSAFE.search(a) for a in args):
+        raise subprocess.CalledProcessError(2, args, "", "unsupported character in argument")
+    return [gcloud, *args]
+
+
+def run_gcloud_subcommand(subcmd: Union[str, Sequence[str]]) -> str:
     """Run a specified gcloud sub-command and return its output.
 
     The supplied subcommand is the full command line invocation, *except* for
@@ -37,20 +60,22 @@ def run_gcloud_subcommand(subcmd):
 
     e.g. `info` instead of `gcloud info`.
 
+    The subcommand can also be a list, one element per argument. Strings are
+    split with `shlex.split`. No shell is used.
+
     We capture the stderr for the command so a consequence of that is that
     any prompts from gcloud will be not be displayed to the user.
     """
+    argv = _gcloud_argv(subcmd)
     with tempfile.TemporaryFile() as t:
         with tempfile.TemporaryFile() as errt:
             try:
                 p = subprocess.run(
-                    f"gcloud {subcmd}",
+                    argv,
                     stdin=subprocess.DEVNULL,
                     stderr=errt,
                     stdout=t,
                     check=True,
-                    encoding="UTF-8",
-                    shell=True,
                 )
             except subprocess.CalledProcessError as err:
                 t.seek(0)
@@ -65,20 +90,25 @@ def run_gcloud_subcommand(subcmd):
 _process_pool_executor = futures.ProcessPoolExecutor(max_workers=1)
 
 
-async def _run_gcloud_subcommand_via_process_pool_executor(subcmd):
+async def _run_gcloud_subcommand_via_process_pool_executor(
+    subcmd: Union[str, Sequence[str]],
+) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
         _process_pool_executor, run_gcloud_subcommand, subcmd
     )
 
 
-async def async_run_gcloud_subcommand(subcmd):
+async def async_run_gcloud_subcommand(subcmd: Union[str, Sequence[str]]) -> str:
     """Run a specified gcloud sub-command and return its output.
 
     The supplied subcommand is the full command line invocation, *except* for
     the leading `gcloud` being omitted.
 
     e.g. `info` instead of `gcloud info`.
+
+    The subcommand can also be a list, one element per argument. Strings are
+    split with `shlex.split`. No shell is used.
 
     We capture the stderr for the command so a consequence of that is that
     any prompts from gcloud will be not be displayed to the user.
@@ -97,11 +127,11 @@ async def async_run_gcloud_subcommand(subcmd):
     if sys.platform.startswith("win"):
         return await _run_gcloud_subcommand_via_process_pool_executor(subcmd)
 
+    argv = _gcloud_argv(subcmd)
     with tempfile.TemporaryFile() as t:
         with tempfile.TemporaryFile() as errt:
-            cmd = f"gcloud {subcmd}"
-            p = await asyncio.create_subprocess_shell(
-                cmd,
+            p = await asyncio.create_subprocess_exec(
+                *argv,
                 stdin=subprocess.DEVNULL,
                 stderr=errt,
                 stdout=t,
@@ -112,7 +142,7 @@ async def async_run_gcloud_subcommand(subcmd):
             stdout = t.read().decode("UTF-8").strip()
             stderr = errt.read().decode("UTF-8").strip()
             if p.returncode != 0:
-                raise subprocess.CalledProcessError(p.returncode, cmd, stdout, stderr)
+                raise subprocess.CalledProcessError(p.returncode, argv, stdout, stderr)
             return stdout
 
 
@@ -211,11 +241,11 @@ def gcp_project():
     return get_gcloud_config("configuration.properties.core.project")
 
 
-def gcp_project_number():
+def gcp_project_number() -> str:
     """Helper method to get the project number for the project configured through gcloud"""
     project = gcp_project()
     return run_gcloud_subcommand(
-        f'projects describe {project} --format="value(projectNumber)"'
+        ["projects", "describe", str(project), "--format=value(projectNumber)"]
     )
 
 
@@ -291,7 +321,7 @@ class PropertiesHandler(APIHandler):
         return
 
     @tornado.web.authenticated
-    async def post(self):
+    async def post(self) -> None:
         updated_properties = self.get_json_body()
 
         def flatten_dictionary(name_prefix, properties_dict):
@@ -317,7 +347,7 @@ class PropertiesHandler(APIHandler):
         try:
             updated_properties_list = flatten_dictionary("", updated_properties)
             for k, v in updated_properties_list:
-                await async_run_gcloud_subcommand(f"config set {k} {v}")
+                await async_run_gcloud_subcommand(["config", "set", k, v])
             clear_gcloud_cache()
             self.finish(json.dumps(updated_properties_list))
         except ValueError as ve:

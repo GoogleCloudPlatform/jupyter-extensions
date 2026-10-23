@@ -73,6 +73,7 @@ yarn.lock
 .vscode/
 
 # python virtual env
+.venv/
 venv/
 
 # Plugin binary
